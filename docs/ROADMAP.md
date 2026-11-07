@@ -314,6 +314,30 @@ Araştırma bitti; Windows 11 build 26200'de deneme programıyla doğrulandı. K
 - Listeye iğnelenmiş öğeler belgesiz DestList akışında; bu ilk sürümün dışında.
 - AUMID'siz klasik uygulamalar için exe yolundan AppID türetme doğrulanmadı.
 
+## İş sırası (proje sahibi kararı, 2026-11-07)
+Burhan aşağıdakilerin hepsinin yapılmasına karar verdi. Sıra önerilendir; her iş kendi dalında, sonunda test ve gerekirse bellek ölçümü (AGENTS #1). Ayrıntısı olan işler kendi bölümüne bağlanır.
+
+**Kısa işler (önce):**
+1. [ ] **Sağ alt menüden aç/kapa kaydedilsin:** menüdeki Çentik / Dock anahtarları (`SagAltMenuWindow` → `App.UpdateNotchState` / `UpdateDockState`) yalnız çalışan durumu değiştiriyor, `settings.json`'a yazmıyor; Koy yeniden başlayınca seçim kayboluyor. Ctrl+Alt+D kısayolu (`ToggleDockEnabled`) kaydediyor. İkisi aynı davransın: menü de `DockEnabled` / `NotchEnabled` kaydetsin (Koy penceresindeki anahtarlar da aynı kaynağa baksın). Görülen durum: dosyada ikisi de `false` iken menüden açılmış çentik ve dock çalışıyordu.
+2. [ ] **v0.1.2:** main'i push et, sürüm hazırla (CHANGELOG `[Unreleased]` → 0.1.2: tepsi düğmesinin dock kapatılıp açılınca kaybolması, Bluetooth log gürültüsü, menü kaydı). Kurulu v0.1.1'de tepsi hatası duruyor.
+3. [ ] **#9 ve #11 PR'ları:** #9 `main`'de başka yapıyla (Ekranlar sayfası, D2) çözüldü, açıklamayla kapatılır. #11 (dock sistem tepsisi) `main`'e entegre edildi (aşağıda "Dock sistem tepsisi"); GitHub'daki PR'ın durumu kontrol edilip açıklamayla kapatılır, kalan kapsam (taşma simgeleri, balon bildirimleri) "Sonraya kalanlar"da.
+
+**Özellikler:**
+4. [ ] **Dock klasörleri:** aşağıdaki bölüm (başka ajana devredildi).
+5. [ ] **Atlama listesi:** "Dock'ta uygulama bazlı sağ tık menüsü" bölümü, araştırma hazır.
+6. [ ] **UWP (Store) uygulama sabitleme:** kimlik AUMID, simge `shell:AppsFolder`, pencere eşleme `SHGetPropertyStoreForWindow` (ayrıntı "Sonraya kalanlar"daki maddede). Windows'un sabitleri arasındaki Spotify, WhatsApp gibi uygulamalar dock'ta görünsün.
+7. [ ] **Hızlı başlata klasör ekleme:** "Dördüncü test düzeltmeleri"ndeki açık madde (klasör seçici + klasör öğesi başlatma).
+8. [ ] **RAM: radyo servisi:** "Sıradaki"deki madde; radyo izlemesi açılışta değil ilk ihtiyaçta kurulsun, önce ve sonra ölç.
+
+**E paketi (çentik göstergeleri):**
+9. [ ] **Pil uyarıları:** düşük pil ve şarj tamamlandı (mevcut `PowerService` olayları).
+10. [ ] **Bluetooth HUD:** kulaklık bağlanınca çentikte kısa gösterge (ad + pil); mevcut `BluetoothService`, yalnız olay tabanlı.
+11. [ ] **Mikrofon / kamera noktası:** kullanımdayken çentikte nokta (önce olay tabanlı yol araştırılır; yoklama yapılmaz).
+
+**Planda (büyük, sonra):** README güzelleştirme + GitHub Pages tanıtım sayfası (gerçek ekran görüntüleriyle); bildirimleri çentikte gösterme + kod imzası (SignPath; SmartScreen uyarısını da kaldırır); düzenlenebilir çentik arayüzü; Google / Outlook takvim.
+
+**Sonraya bırakıldı:** çentik açık ve müzik çalarken bellek/CPU ölçümü (görselleştirici maliyeti).
+
 ## Dock klasörleri (iOS/macOS tarzı) — AÇIK, sıradaki iş
 Proje sahibi istedi (2026-11-07). Sabitli uygulamalar dock'ta klasörlere toplanır. Kod yazılmadı. Tahmini iş ~1–1,5 gün.
 
