@@ -1485,6 +1485,9 @@
   <data name="BluetoothConnected" xml:space="preserve">
     <value>Bağlı</value>
   </data>
+  <data name="BluetoothDisconnected" xml:space="preserve">
+    <value>Bağlantı kesildi</value>
+  </data>
   <data name="BluetoothNotConnected" xml:space="preserve">
     <value>Bağlı değil</value>
   </data>

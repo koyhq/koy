@@ -16,6 +16,7 @@ using Koy.App.Features.Shelf;
 using Koy.App.Features.Status;
 using Koy.App.Features.SystemInfo;
 using Koy.Core.Notch;
+using Koy.Core.Power;
 using Koy.Core.Settings;
 using Koy.Core.Visibility;
 
@@ -458,6 +459,8 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     public void ShowVolume(float volume, bool isMuted) => Osd.ShowVolume(volume, isMuted);
     public void ShowBrightness(int brightness) => Osd.ShowBrightness(brightness);
+    public void ShowBattery(BatteryAlertKind kind, int percent) => Osd.ShowBattery(kind, percent);
+    public void ShowBluetoothDevice(string name, bool connected, int? battery) => Osd.ShowBluetoothDevice(name, connected, battery);
 
     public void ExpandToShelf()
     {

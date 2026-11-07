@@ -10,6 +10,7 @@ using Koy.App.Features.Music;
 using Koy.App.Features.Shelf;
 using Koy.App.Features.Status;
 using Koy.App.Features.SystemInfo;
+using Koy.Core.Bluetooth;
 using Koy.Core.Clipboard;
 using Koy.Core.Diagnostics;
 using Koy.Core.Display;
@@ -21,6 +22,7 @@ using Koy.Core.Shell;
 using Koy.Core.Visibility;
 using Koy.Core.Weather;
 using Koy.Platform.Audio;
+using Koy.Platform.Bluetooth;
 using Koy.Platform.Display;
 using Koy.Platform.Media;
 using Koy.Platform.Network;
@@ -72,6 +74,8 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     private MediaService? _mediaService;
     private IPowerService? _powerService;
     private readonly BatteryNotificationPolicy _batteryPolicy = new();
+    private BluetoothService? _bluetoothService;
+    private readonly BluetoothHudPolicy _bluetoothPolicy = new();
     private NetworkService? _networkService;
     private WeatherService? _weatherService;
     // Cihaz konumunun yer adı: bütün ekranların çentikleri tek servisi paylaşır (koordinat başına tek istek).
@@ -102,6 +106,9 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
 
         _powerService = services.AcquirePowerService();
         _powerService.PowerChanged += OnPowerChanged;
+        _bluetoothService = services.AcquireBluetoothService();
+        _bluetoothService.DevicesChanged += OnBluetoothDevicesChanged;
+        _bluetoothPolicy.Update(_bluetoothService.Devices);
         _networkService = services.AcquireNetworkService();
         if (settings.ClipboardHistoryEnabled)
             _clipboardHistory = services.AcquireClipboardHistory();
@@ -522,6 +529,27 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         });
     }
 
+    private void OnBluetoothDevicesChanged(object? sender, EventArgs e)
+    {
+        if (_bluetoothService is null)
+            return;
+
+        var events = _bluetoothPolicy.Update(_bluetoothService.Devices);
+        if (events.Count == 0)
+            return;
+
+        Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            foreach (var evt in events)
+            {
+                foreach (var (_, state) in _windowStates)
+                {
+                    state.ViewModel.Osd.ShowBluetoothDevice(evt.Name, evt.Connected, evt.BatteryPercent);
+                }
+            }
+        });
+    }
+
     public void Stop()
     {
         _stopped = true;
@@ -573,6 +601,13 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             _powerService.PowerChanged -= OnPowerChanged;
             _powerService = null;
             services.ReleasePowerService();
+        }
+
+        if (_bluetoothService is not null)
+        {
+            _bluetoothService.DevicesChanged -= OnBluetoothDevicesChanged;
+            _bluetoothService = null;
+            services.ReleaseBluetoothService();
         }
 
         if (_networkService is not null)

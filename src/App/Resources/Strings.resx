@@ -1485,6 +1485,9 @@
   <data name="BluetoothConnected" xml:space="preserve">
     <value>Connected</value>
   </data>
+  <data name="BluetoothDisconnected" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
   <data name="BluetoothNotConnected" xml:space="preserve">
     <value>Not connected</value>
   </data>

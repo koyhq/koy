@@ -46,6 +46,15 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
     [ObservableProperty]
     private string _batteryStatusText = "";
 
+    [ObservableProperty]
+    private string _bluetoothDeviceName = "";
+
+    [ObservableProperty]
+    private bool _bluetoothConnected;
+
+    [ObservableProperty]
+    private string _bluetoothStatusText = "";
+
     public GridLength FillStarWidth => new(Math.Clamp(Percent, 0, 100), GridUnitType.Star);
     public GridLength RemainingStarWidth => new(Math.Max(0, 100 - Math.Clamp(Percent, 0, 100)), GridUnitType.Star);
 
@@ -133,6 +142,33 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
     }
 
     /// <summary>
+    /// Bluetooth ses cihazı bağlantı/bağlantı kesilme HUD göstergesini açar.
+    /// 2.0 saniye sonra otomatik kapanır.
+    /// </summary>
+    public void ShowBluetoothDevice(string name, bool connected, int? battery)
+    {
+        RunOnUi(() =>
+        {
+            Type = OsdType.Bluetooth;
+            BluetoothDeviceName = name;
+            BluetoothConnected = connected;
+            Percent = battery ?? 0;
+            PercentText = battery is >= 0 and <= 100 ? $"%{battery.Value}" : "";
+            BluetoothStatusText = connected
+                ? Strings.Get("BluetoothConnected")
+                : Strings.Get("BluetoothDisconnected");
+            IsMuted = false;
+            IsActive = true;
+
+            OnPropertyChanged(nameof(FillStarWidth));
+            OnPropertyChanged(nameof(RemainingStarWidth));
+
+            ResetTimer(TimeSpan.FromSeconds(2.0));
+            Activated?.Invoke(this, EventArgs.Empty);
+        });
+    }
+
+    /// <summary>
     /// İsteğe bağlı olarak harici IAudioService dinlemesi bağlar.
     /// </summary>
     public void Attach(IAudioService audioService)
@@ -203,6 +239,9 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
         Type = OsdType.None;
         BatteryKind = BatteryAlertKind.None;
         BatteryStatusText = "";
+        BluetoothDeviceName = "";
+        BluetoothConnected = false;
+        BluetoothStatusText = "";
         Dismissed?.Invoke(this, EventArgs.Empty);
     }
 

@@ -359,7 +359,7 @@ Proje sahibi aşağıdakilerin hepsinin yapılmasına karar verdi. Sıra öneril
      2. **`SharedServices.cs`:** `AcquirePowerService` / `ReleasePowerService` ekle; `NotchFeature` ve `DockFeature` kendi `new PowerService()` örnekleri yerine bunu paylaşsın (WinRT olay aboneliği tek örneğe iner).
      3. **`App/Features/Notch/OSD/`:** `OsdType` enum'una `Battery` ekle; `OsdIndicatorViewModel`'e `ShowBattery(BatteryAlertKind kind, int percent)` ekle. `NotchFeature` (veya `NotchViewModel`) güç değişimini `BatteryNotificationPolicy`'den geçirip `Osd.ShowBattery` çağırsın.
      4. **`Strings.resx` + `Strings.tr.resx`:** `BatteryCharging`, `BatteryOnBattery`, `BatteryLow`, `BatteryFull` metinlerini ekle.
-10. [ ] **Bluetooth HUD:**
+10. [x] **Bluetooth HUD:**
    - **Hedef:** Eşleşmiş bir Bluetooth ses cihazı bağlandığında veya bağlantısı kesildiğinde çentikte kısa OSD göstergesi (cihaz adı + varsa pil yüzdesi).
    - **Yapılacak:**
      1. **`Core/Bluetooth/BluetoothHudPolicy.cs` (saf C#, testli):** İlk cihaz listesi yüklemesinde (tohum) bildirim üretmez; sonrasında bir cihazın `IsConnected` durumu `false → true` veya `true → false` olduğunda `BluetoothHudEvent(string Name, bool Connected, int? BatteryPercent)` üretir. Aynı cihaz için 3 sn içindeki tekrarları (titreşim) bastırır. Testleri: `tests/Core.Tests/BluetoothHudPolicyTests.cs`.

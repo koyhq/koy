@@ -90,6 +90,26 @@
           </Style>
         </Path.Style>
       </Path>
+
+      <!-- Bluetooth İkonu -->
+      <Path x:Name="BluetoothIcon" Width="18" Height="18" Stretch="Uniform"
+            StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+            Data="{StaticResource IconBluetooth}">
+        <Path.Style>
+          <Style TargetType="Path">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Setter Property="Stroke" Value="#3B82F6" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Type}" Value="{x:Static local:OsdType.Bluetooth}">
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+              <DataTrigger Binding="{Binding BluetoothConnected}" Value="False">
+                <Setter Property="Stroke" Value="#71717A" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Path.Style>
+      </Path>
     </Grid>
 
     <!-- Orta Alan: Volume/Brightness için seviye çubuğu; Battery için durum metni ve seviye çubuğu -->
@@ -101,6 +121,9 @@
             <Setter Property="Visibility" Value="Visible" />
             <Style.Triggers>
               <DataTrigger Binding="{Binding Type}" Value="{x:Static local:OsdType.Battery}">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+              <DataTrigger Binding="{Binding Type}" Value="{x:Static local:OsdType.Bluetooth}">
                 <Setter Property="Visibility" Value="Collapsed" />
               </DataTrigger>
             </Style.Triggers>
@@ -183,6 +206,37 @@
           </Grid>
         </Border>
       </Grid>
+
+      <!-- Bluetooth Alanı: Cihaz adı ve durum metni -->
+      <Grid>
+        <Grid.Style>
+          <Style TargetType="Grid">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Type}" Value="{x:Static local:OsdType.Bluetooth}">
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Grid.Style>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0"
+                   Text="{Binding BluetoothDeviceName}"
+                   FontSize="12"
+                   FontWeight="SemiBold"
+                   Foreground="#F4F4F5"
+                   TextTrimming="CharacterEllipsis"
+                   Margin="0,0,0,1" />
+        <TextBlock Grid.Row="1"
+                   Text="{Binding BluetoothStatusText}"
+                   FontSize="10"
+                   FontWeight="Normal"
+                   Foreground="#A1A1AA"
+                   TextTrimming="CharacterEllipsis" />
+      </Grid>
     </Grid>
 
     <!-- Sağ: Yüzde Metni (12px, font-weight 600, sağa dayalı, #F4F4F5) -->
@@ -193,6 +247,17 @@
                MinWidth="26"
                TextAlignment="Right"
                Foreground="#F4F4F5"
-               VerticalAlignment="Center" />
+               VerticalAlignment="Center">
+      <TextBlock.Style>
+        <Style TargetType="TextBlock">
+          <Setter Property="Visibility" Value="Visible" />
+          <Style.Triggers>
+            <Trigger Property="Text" Value="">
+              <Setter Property="Visibility" Value="Collapsed" />
+            </Trigger>
+          </Style.Triggers>
+        </Style>
+      </TextBlock.Style>
+    </TextBlock>
   </Grid>
 </UserControl>
