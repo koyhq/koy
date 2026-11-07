@@ -314,6 +314,34 @@ Araştırma bitti; Windows 11 build 26200'de deneme programıyla doğrulandı. K
 - Listeye iğnelenmiş öğeler belgesiz DestList akışında; bu ilk sürümün dışında.
 - AUMID'siz klasik uygulamalar için exe yolundan AppID türetme doğrulanmadı.
 
+## Dock klasörleri (iOS/macOS tarzı) — AÇIK, sıradaki iş
+Proje sahibi istedi (2026-11-07). Sabitli uygulamalar dock'ta klasörlere toplanır. Kod yazılmadı. Tahmini iş ~1–1,5 gün.
+
+**Davranış:**
+- **Dock'ta görünüm:** klasör tek bir cam kutudur (dock simgesiyle aynı boy, köşe yarıçapı tasarım token'ından). İçinde 2×2 küçük simge olarak en fazla ilk 4 uygulama görünür; daha fazlası panelde.
+- **Tıklayınca:** dock'un üstünde cam panel açılır (`Material` ayarına uyar; katı modda opak yüzey). Yay animasyonuyla (`Spring`, `Motion`; hareket azaltma ayarına uyar) klasör kutusundan büyür. İçinde bütün uygulamalar ızgara (4 sütun) olarak durur. Başlıkta klasör adı; tıklayınca düzenlenir (Enter kaydeder, Esc vazgeçer). Uygulamaya tıklayınca başlatılır ve panel kapanır; dışarı tıklayınca ya da Esc ile kapanır. Odak çalma kuralları dock'la aynı (`WS_EX_NOACTIVATE`; ad düzenlerken geçici etkinleştirme, hızlı başlattaki "tutma" mantığı gibi).
+- **Sürükleyerek klasör yapma:** sabitli bir uygulama basılı tutulup sürüklenir; başka bir sabitli uygulamanın **ortasında** ~400 ms durursa hedef büyür ve parlar, bırakınca ikisi yeni klasör olur (hedefin yerinde). Simgenin **kenar** bölgesine bırakmak bugünkü gibi sıralamayı değiştirir (`DockReorderHelper`, `Core/Dock/DockReorderMath`). Orta/kenar ayrımı ve bekleme süresi Core'da saf mantık, testli.
+- **Ekleme / çıkarma:** uygulamayı klasör kutusunun üstüne bırakınca klasöre girer. Panelden dock'a (panel dışına) sürükleyince klasörden çıkar ve bırakıldığı yere sabitlenir. Panel içinde sürükleyerek sıralama. Klasörde tek uygulama kalırsa klasör dağılır, uygulama klasörün yerine geçer.
+- **Sağ tık (klasör):** "Adını değiştir", "Klasörü dağıt" (uygulamalar klasörün yerine sırayla dizilir). Klasör içindeki uygulamanın sağ tık menüsü dock'taki uygulama menüsüyle aynı.
+- **Yeni klasör adı:** "Klasör" (TR) / "Folder" (EN), aynı ad varsa "Klasör 2"… (`Strings.resx` + `Strings.tr.resx`).
+- **Çalışan uygulama klasördeyse (önerilen varsayılan, proje sahibi onayı bekliyor):** uygulama klasörün içinde kalır, klasör kutusunun altında çalışma noktası yanar; panelde o uygulamanın altında da nokta. Klasördeki uygulamanın pencerelerine tıklama / önizleme panelden yapılır. Alternatif (macOS gibi çalışırken dock'ta ayrıca göstermek) seçilmedi.
+- **Sabitli olmayan açık uygulamalar** klasöre konmaz (yalnız sabitliler). Windows'un sabit klasörü (`User Pinned\TaskBar\*.lnk`) değiştirilmez; klasörler yalnız Koy'un ayarında.
+
+**Veri ve kurallar (Core, testli; AGENTS #11):**
+- [ ] `AppSettings.DockFolders`: `List<DockFolder>`; `DockFolder { Id (kısa guid), Name, Items: List<string> (.lnk adları, DockPinnedOrder'daki gibi) }`. `SettingsJsonContext`'e ekle; eski dosyada alan yoksa boş liste (göç testli). `Equals`/kopyalama (`AppSettings.cs` 219 / 300 civarı) güncellenir.
+- [ ] `DockPinnedOrder` öğesi ya `.lnk` adı ya `folder:<Id>`. `Core/Dock/PinnedOrder.cs` klasör öğelerini tanır: klasördeki uygulama dock'ta ayrıca görünmez; kaldırılmış `.lnk` klasörden de düşer; boş kalan klasör silinir, tek kalan dağılır.
+- [ ] `Core/Dock/DockFolders.cs` (saf): `CreateFromDrop(order, folders, dragged, target)`, `AddToFolder`, `RemoveFromFolder(…, insertIndex)`, `Dissolve`, `Rename`, `ReorderInFolder`, `NextDefaultName`. Her biri yeni sıra + klasör listesi döndürür. `Core/Dock/DockDropZone.cs` (saf): simge dikdörtgeni + imleç konumu → `Before / Merge / After` (orta bölge ~%50 genişlik) ve bekleme süresi dolunca `Merge` geçerli.
+- [ ] Testler: `tests/Core.Tests/DockFoldersTests.cs`, `DockDropZoneTests.cs` (oluştur, ekle, çıkar, tek kalınca dağıt, aynı ad, kaldırılmış lnk, eski ayar dosyası).
+
+**App:**
+- [ ] `DockItemViewModel` yanında `DockFolderViewModel` (ilk 4 simge, çalışma noktası = içerdekilerden biri çalışıyor mu). Dock öğe listesi karışık tür (uygulama / klasör); `DockCapsule.xaml` ve `DockFullWidth.xaml` için ayrı `DataTemplate` (2×2 ızgara).
+- [ ] `Features/Dock/Folder/FolderPanel.xaml(.cs)` (cam panel, ızgara, ad düzenleme, sürükleyerek çıkarma). Tepsi penceresindeki açma/kapama kalıbı örnek alınabilir (`TrayButton`: yay animasyonu, dış tıklamada kapanma, yalnız açıkken zamanlayıcı).
+- [ ] `DockReorderHelper`: sürüklerken `DockDropZone` ile orta/kenar ayrımı; birleştirme önizlemesi (hedef büyür + parlar); bırakınca `DockFolders` çağrılır, `SavePinnedOrder` gibi ayara yazılır (`DockFeature.SavePinnedOrder` genişler: sıra + klasörler birlikte, tek `Save`).
+- [ ] Sağ tık menüsü (`DockContextMenuManager`): klasör için "Adını değiştir", "Klasörü dağıt".
+- [ ] Boşta %0 CPU: panel kapalıyken zamanlayıcı/olay yok; simgeler mevcut önbellekten (`IconHelper`). Bellek ölçümü (AGENTS #1, `docs/MEMORY.md`).
+- [ ] Görsel kanıt: `tools/Koy.UiSnapshots` sahnesi (klasör kutusu 2, 4, 6 uygulamayla; açık panel; birleştirme önizlemesi; koyu ve açık tema).
+- [ ] Elle sınama (proje sahibi, Claude ile): sürükle-birleştir, ekle, panelden çıkar, tek kalınca dağılma, ad değiştirme, yeniden başlatınca korunma, çalışma noktası, iki ekranda aynı klasörler, tam genişlik ve kapsül dock.
+
 ## Sonraya kalanlar
 - Bildirimleri çentikte gösterme: Windows bildirimleri gelince çentik kısa süre gösterir (Claude Code gibi ajanların "iş bitti" bildirimleri de bu yoldan gelir). `UserNotificationListener` paket kimliği ister; Velopack kurulumu için seyrek (sparse) paket ve imza gerekir. Ara çözüm: Claude Code kancasının çağırdığı yerel komutla doğrudan bildirim.
 - Kullanıcının düzenleyebildiği çentik arayüzü: sayfaların ve kartların sırası, hangilerinin görüneceği kullanıcı tarafından seçilir.
