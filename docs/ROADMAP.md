@@ -448,6 +448,21 @@ Proje sahibi istedi. Kod yazılmadı; önce bu plan onaylanır.
 
 5. [ ] **Doğrulama:** Core testleri (pencere kuralı, AppBar yüksekliği, taşma ölçüsü), UiSnapshots sahnesi (tam genişlik açık/koyu, küçük tepsi), bellek ölçümü, elle sınama (büyütülmüş pencere ile boşluk yok, otomatik gizle, iki ekran, tepsi paneli).
 
+## Güncelleme akışı yeniden: sor, güncelle, "neler geldi" — AÇIK, yapılacak (2026-11-07)
+Proje sahibi istedi. Kod yazılmadı.
+
+**Bugün:** `AutoUpdater` açılıştan 45 sn sonra sessizce denetler, indirir ve Koy kapanınca uygular (`WaitExitThenApplyUpdates(silent: true)`). Ayarlar › Genel › "Şimdi denetle" de aynı yolu çalıştırır. Kullanıcı neyin geldiğini görmez.
+
+**Yeni akış:**
+1. **Açılışta yalnız denetim:** Koy açılınca (mevcut 45 sn gecikme ve `AutoCheckUpdates` ayarı korunur) yalnız yeni sürüm var mı diye bakılır; indirme ve kurma yapılmaz. Ağ yoksa ya da hata olursa sessiz geçilir (`UpdateStatus`'a yazılır).
+2. **"Yeni güncelleme var" düğmesi:** güncelleme varsa "Koy'dan çık" düğmesinin hemen üstüne vurgu renginde bir düğme eklenir ("Yeni sürüm: 0.x.y"). Yer: Koy penceresinin sol alt köşesindeki "Koy'dan çık"ın üstü ve sağ alt menüdeki çıkış düğmesinin üstü. Güncelleme yoksa düğme hiç görünmez.
+3. **Onay penceresi:** düğmeye basınca Koy tasarımında küçük bir pencere: "Koy 0.x.y sürümüne güncellemek istiyor musunuz?" + kısa özet (sürüm notunun "Öne çıkanlar" bölümü) + **Evet** / **Hayır**. Hayır pencereyi kapatır, düğme yerinde kalır.
+4. **Güncelleme:** Evet'e basınca aynı pencerede ilerleme çubuğuyla indirme (Velopack `DownloadUpdatesAsync` ilerleme geri çağrısı), sonra Koy kapanıp güncellemeyi uygular ve yeniden açılır (`ApplyUpdatesAndRestart`). Görev çubuğu güvenlik kuralı geçerli: kapanmadan önce Windows görev çubuğu geri getirilir.
+5. **"Güncellendi" ekranı:** yeni sürüm ilk açılışta (önceki sürüm ayarda tutulur, ilk açılışta karşılaştırılır) "Koy 0.x.y'ye güncellendi" ekranı çıkar, ardından **"Neler geldi"** ekranı: sürüm notu afilli bir tasarımla (başlıklar, öne çıkanlar kartları, Koy renkleri ve yay animasyonları; hareket azaltmaya uyar). En sonda **Bitti** düğmesi.
+6. **Sürüm notunun kaynağı:** pakete gömülü `CHANGELOG.md`'nin o sürüm bölümü (çevrimdışı da çalışır) ya da GitHub release gövdesi; tercih paket içi.
+7. **"Şimdi denetle":** Ayarlar › Genel'deki düğme yalnız denetler; varsa aynı "Yeni güncelleme var" düğmesini ve onay penceresini gösterir, kendiliğinden indirmez.
+8. **Doğrulama:** Core testleri (sürüm karşılaştırma, "ilk açılış mı" kararı, sürüm notu bölümü ayıklama), UiSnapshots sahneleri (düğme, onay, ilerleme, güncellendi, neler geldi; açık ve koyu), elle sınama: 0.2.0 kuruluyken yeni sürüme güncelleme.
+
 ## Sonraya kalanlar
 - Bildirimleri çentikte gösterme: Windows bildirimleri gelince çentik kısa süre gösterir (Claude Code gibi ajanların "iş bitti" bildirimleri de bu yoldan gelir). `UserNotificationListener` paket kimliği ister; Velopack kurulumu için seyrek (sparse) paket ve imza gerekir. Ara çözüm: Claude Code kancasının çağırdığı yerel komutla doğrudan bildirim.
 - Kullanıcının düzenleyebildiği çentik arayüzü: sayfaların ve kartların sırası, hangilerinin görüneceği kullanıcı tarafından seçilir.
