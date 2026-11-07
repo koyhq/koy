@@ -71,6 +71,60 @@ public class DockSettingsDiffTests
     }
 
     [Fact]
+    public void Tray_only_change_reconciles_tray_and_rebuilds_without_touching_taskbar_or_appbar()
+    {
+        var d = DockSettingsDiff.Compare(new AppSettings { DockShowTray = true }, new AppSettings { DockShowTray = false });
+
+        Assert.True(d.ReconcileTray);
+        Assert.True(d.RebuildViewModels);
+        Assert.False(d.ReconcileTaskbar);
+        Assert.False(d.ReconcileAppBar);
+    }
+
+    [Theory]
+    [InlineData("Material")]
+    [InlineData("AccentColor")]
+    [InlineData("AnimationSpeed")]
+    public void Appearance_changes_only_rebuild_view_models(string field)
+    {
+        var after = new AppSettings();
+        switch (field)
+        {
+            case "Material": after.Material = "Yarı saydam"; break;
+            case "AccentColor": after.AccentColor = "#FF0000"; break;
+            default: after.AnimationSpeed = "Hızlı"; break;
+        }
+
+        var d = DockSettingsDiff.Compare(new AppSettings(), after);
+
+        Assert.True(d.RebuildViewModels);
+        Assert.False(d.ReconcileAppBar);
+        Assert.False(d.ReconcileMonitors);
+        Assert.False(d.ReconcileTaskbar);
+    }
+
+    [Fact]
+    public void Monitor_target_change_reconciles_monitors_only()
+    {
+        var d = DockSettingsDiff.Compare(new AppSettings { MonitorTarget = "Primary" }, new AppSettings { MonitorTarget = "All" });
+
+        Assert.True(d.ReconcileMonitors);
+        Assert.False(d.RebuildViewModels);
+        Assert.False(d.ReconcileAppBar);
+    }
+
+    [Fact]
+    public void Reserve_to_dodge_removes_the_appbar()
+    {
+        var d = DockSettingsDiff.Compare(
+            new AppSettings { DockProximity = DockProximityMode.ReserveSpace },
+            new AppSettings { DockProximity = DockProximityMode.Dodge });
+
+        Assert.True(d.ReconcileAppBar);
+        Assert.True(d.RebuildViewModels);
+    }
+
+    [Fact]
     public void Battery_saver_toggle_reconciles_power_and_rebuilds()
     {
         var d = DockSettingsDiff.Compare(new AppSettings { BatterySaverReduceMotion = true }, new AppSettings { BatterySaverReduceMotion = false });

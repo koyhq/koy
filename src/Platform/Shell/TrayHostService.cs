@@ -69,10 +69,14 @@ public sealed class TrayHostService : ITrayService
     private uint _taskbarCreatedMessage;
     // Son kendi yayınımız (UTC ticks). Statik: Koy'un öteki pencereleri (TrayIconManager) yankıyı Gezgin yeniden başladı sanmasın.
     private static long s_lastBroadcastTicks = DateTime.MinValue.Ticks;
+    // Yayın anında Gezgin'in Shell_TrayWnd tutamacı: Gezgin gerçekten yeniden başladıysa tutamaç değişir.
+    private static long s_broadcastExplorerTray;
     private static DateTime LastBroadcastUtc => new(Interlocked.Read(ref s_lastBroadcastTicks), DateTimeKind.Utc);
 
     /// <summary>Az önce gelen "TaskbarCreated" bizim kendi yayınımızın yankısı mı (Gezgin'in yeniden başlaması değil).</summary>
-    public static bool IsOwnTaskbarCreatedBroadcast() => TaskbarCreatedPolicy.IsOwnBroadcast(LastBroadcastUtc, DateTime.UtcNow);
+    public static bool IsOwnTaskbarCreatedBroadcast() =>
+        TaskbarCreatedPolicy.IsOwnBroadcast(
+            LastBroadcastUtc, DateTime.UtcNow, (nint)Interlocked.Read(ref s_broadcastExplorerTray), ShellTrayLocator.FindExplorerTray().Value);
     private bool _disposed;
 
     public event EventHandler? IconsChanged;
@@ -534,6 +538,7 @@ public sealed class TrayHostService : ITrayService
         if (_taskbarCreatedMessage == 0)
             return;
 
+        Interlocked.Exchange(ref s_broadcastExplorerTray, ShellTrayLocator.FindExplorerTray().Value);
         Interlocked.Exchange(ref s_lastBroadcastTicks, DateTime.UtcNow.Ticks);
         PInvoke.SendNotifyMessage(new HWND(0xFFFF), _taskbarCreatedMessage, default, default); // HWND_BROADCAST
     }

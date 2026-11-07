@@ -475,11 +475,18 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     /// </summary>
     public void ApplySettings(AppSettings next)
     {
-        if (_stopping || _windowStates.Count == 0 && _windows.Count == 0)
+        // Başlamamış ya da durmuş dock'a uygulanmaz. Pencere sayısı sıfır olabilir (bütün ekranlar seçimden çıkarılmış):
+        // yine de yeni ayar benimsenir ve monitör kümesi uzlaştırılır, yoksa ekran yeniden seçilince dock geri gelmezdi.
+        if (_stopping || _controller is null)
             return;
 
         var diff = DockSettingsDiff.Compare(settings, next);
         settings = next;
+
+        // Tek canlı ayar nesnesi: yeniden kurulmayan ViewModel'ler de yenisini alır (aksi halde sabit sırası eski nesneye yazılır).
+        foreach (var state in _windowStates.Values)
+            state.ViewModel.AdoptSettings(next);
+
         if (diff.IsEmpty)
             return;
 

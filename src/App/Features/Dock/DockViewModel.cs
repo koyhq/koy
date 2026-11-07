@@ -30,7 +30,8 @@ namespace Koy.App.Features.Dock;
 /// </summary>
 public sealed partial class DockViewModel : ObservableObject, IDisposable
 {
-    private readonly AppSettings _settings;
+    // Tek canlı ayar nesnesi: DockFeature.ApplySettings her uygulamada bütün ViewModel'lere aynı örneği verir (AdoptSettings).
+    private AppSettings _settings;
     private readonly DockController _controller;
     private readonly IShellActionService _shellActionService;
     private readonly VisibilityController? _visibilityController;
@@ -283,6 +284,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     public DockController Controller => _controller;
     public AppSettings Settings => _settings;
+
+    /// <summary>Ayar nesnesini değiştirir (yerinde ayar uygulaması): sabit sırası/klasör yazımları ile okuyucular aynı nesneyi görür.</summary>
+    public void AdoptSettings(AppSettings settings) => _settings = settings;
     public DockStatusViewModel? Status { get; }
 
     public DockViewModel(
