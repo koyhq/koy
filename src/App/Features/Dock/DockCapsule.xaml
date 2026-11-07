@@ -26,308 +26,18 @@
 
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
             <!-- 1. Windows Başlat Düğmesi -->
-            <Button Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+            <Button Style="{StaticResource DockFlatButtonStyle}"
                     Command="{Binding StartMenuCommand}"
                     ToolTip="{x:Static res:Strings.StartMenu}"
                     Width="{Binding ItemSize}"
                     Height="{Binding ItemSize}"
                     Margin="1,0"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Cursor="Hand"
                     Visibility="{Binding ShowStartButton, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Background="Transparent"
-                                CornerRadius="10">
-                            <Image Source="{StaticResource WindowsLogoImage}" Width="18" Height="18"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#1AFFFFFF"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#33FFFFFF"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
+                <Image Source="{StaticResource WindowsLogoImage}" Width="18" Height="18"/>
             </Button>
 
-            <!-- 2. Dock Uygulama Öğeleri Listesi -->
-            <ItemsControl x:Name="DockItemsList"
-                          ItemsSource="{Binding Items}">
-                <ItemsControl.Resources>
-                    <!-- Uygulama Kapsayıcısı Şablonu -->
-                    <DataTemplate DataType="{x:Type local:DockItemViewModel}">
-                        <!-- Uygulama Kapsayıcısı: Dinamik ItemSize (varsayılan 38 px), 10 px köşe yuvarlama -->
-                        <Border x:Name="ItemContainer"
-                                Width="{Binding ItemSize}"
-                                Height="{Binding ItemSize}"
-                                Margin="1,0"
-                                CornerRadius="10"
-                                Cursor="Hand"
-                                ToolTip="{Binding Title}"
-                                ToolTipService.IsEnabled="{Binding HasOpenWindows, Converter={x:Static local:DockConverters.InverseBoolConverter}}"
-                                MouseLeftButtonDown="OnItemLeftDown"
-                                MouseMove="OnItemMouseMove"
-                                LostMouseCapture="OnItemLostCapture"
-                                MouseLeftButtonUp="OnItemLeftClick"
-                                MouseRightButtonUp="OnItemRightClick"
-                                MouseDown="OnItemMouseDown"
-                                MouseEnter="OnItemMouseEnter"
-                                MouseLeave="OnItemMouseLeave"
-                                ContextMenuOpening="OnItemContextMenuOpening">
-                            <!-- Durum Arka Planı (Aktifse hafif aydınlık, dikkat bekliyorsa turuncu, hedef parıltısı mavi) -->
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Setter Property="Background" Value="Transparent"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsTargetGlow}" Value="True">
-                                            <Setter Property="Background" Value="#333B82F6"/>
-                                            <Setter Property="BorderBrush" Value="#3B82F6"/>
-                                            <Setter Property="BorderThickness" Value="1.5"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                            <Setter Property="Background" Value="#1AFFFFFF"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding IsAttention}" Value="True">
-                                            <Setter Property="Background" Value="#2EF97316"/>
-                                        </DataTrigger>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#22FFFFFF"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-
-                            <Border.RenderTransform>
-                                <TranslateTransform X="{Binding OffsetX}"/>
-                            </Border.RenderTransform>
-
-                            <Border.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="{x:Static res:Strings.LaunchNewInstance}"
-                                              Command="{Binding MiddleClickCommand}"/>
-                                    <Separator/>
-                                    <MenuItem Header="{x:Static res:Strings.Close}"
-                                              Command="{Binding CloseCommand}"/>
-                                    <MenuItem Header="{x:Static res:Strings.EndTask}"
-                                              Command="{Binding TerminateCommand}"/>
-                                </ContextMenu>
-                            </Border.ContextMenu>
-
-                            <Grid>
-                                <!-- Simge: Dinamik IconSize (varsayılan 28 px, büyütme ölçeği ile) -->
-                                <Grid Width="{Binding IconSize}"
-                                      Height="{Binding IconSize}"
-                                      HorizontalAlignment="Center"
-                                      VerticalAlignment="Center"
-                                      RenderTransformOrigin="0.5, 0.5">
-                                    <Grid.RenderTransform>
-                                        <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}"/>
-                                    </Grid.RenderTransform>
-
-                                    <Image Source="{Binding Icon}"
-                                           RenderOptions.BitmapScalingMode="HighQuality"
-                                           Width="{Binding IconSize}"
-                                           Height="{Binding IconSize}"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"/>
-
-                                    <!-- Simge Yoksa Yedek Şablon -->
-                                    <Border Width="{Binding IconSize}"
-                                            Height="{Binding IconSize}"
-                                            Background="#33FFFFFF"
-                                            CornerRadius="6"
-                                            Visibility="{Binding Icon, Converter={x:Static local:DockConverters.NullToVisibleConverter}}">
-                                        <Path HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"
-                                              Fill="#CCCCCC"
-                                              Data="M 2,2 H 14 V 14 H 2 Z"/>
-                                    </Border>
-                                </Grid>
-
-                                <!-- Okunmamış Bildirim Rozeti: Sağ üst kırmızı hap #EF4444, 11px beyaz kalın yazı -->
-                                <Border HorizontalAlignment="Right"
-                                        VerticalAlignment="Top"
-                                        Margin="0,2,2,0"
-                                        MinHeight="18"
-                                        MinWidth="18"
-                                        CornerRadius="9"
-                                        Background="#EF4444"
-                                        Padding="4,1"
-                                        Visibility="{Binding HasBadge, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
-                                    <TextBlock Text="{Binding BadgeCount}"
-                                               FontSize="11"
-                                               FontWeight="Bold"
-                                               Foreground="#FFFFFF"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"/>
-                                </Border>
-
-                                <!-- Çoklu Pencere Göstergesi: 3 küçük nokta #60A5FA (Birden fazla pencere varsa) -->
-                                <StackPanel Orientation="Horizontal"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Bottom"
-                                            Margin="0,0,0,2"
-                                            Visibility="{Binding IsMultiWindow, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
-                                    <Border Width="4" Height="3" CornerRadius="1.5" Background="#60A5FA" Margin="1,0"/>
-                                    <Border Width="4" Height="3" CornerRadius="1.5" Background="#60A5FA" Margin="1,0"/>
-                                    <Border Width="4" Height="3" CornerRadius="1.5" Background="#60A5FA" Margin="1,0"/>
-                                </StackPanel>
-
-                                <!-- Tekil Pencere / Çalışan Göstergesi (Tek pencere veya odak) -->
-                                <Border HorizontalAlignment="Center"
-                                        VerticalAlignment="Bottom"
-                                        Margin="0,0,0,2">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <!-- Varsayılan: Çalışmıyorsa gizli -->
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <!-- Çalışıyor ama inaktif: 6×3 px nokta #A1A1AA -->
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsRunning}" Value="True"/>
-                                                        <Condition Binding="{Binding IsActive}" Value="False"/>
-                                                        <Condition Binding="{Binding IsAttention}" Value="False"/>
-                                                        <Condition Binding="{Binding IsMultiWindow}" Value="False"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                    <Setter Property="Width" Value="6"/>
-                                                    <Setter Property="Height" Value="3"/>
-                                                    <Setter Property="CornerRadius" Value="1.5"/>
-                                                    <Setter Property="Background" Value="#A1A1AA"/>
-                                                </MultiDataTrigger>
-                                                <!-- Gösterge stili "Çizgi": çalışan uygulama da 16×3 px çizgi alır -->
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsRunning}" Value="True"/>
-                                                        <Condition Binding="{Binding IsActive}" Value="False"/>
-                                                        <Condition Binding="{Binding IsAttention}" Value="False"/>
-                                                        <Condition Binding="{Binding IsMultiWindow}" Value="False"/>
-                                                        <Condition Binding="{Binding UseLineIndicator}" Value="True"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Width" Value="16"/>
-                                                </MultiDataTrigger>
-                                                <!-- Aktif: 16×3 px çizgi #60A5FA -->
-                                                <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                    <Setter Property="Width" Value="16"/>
-                                                    <Setter Property="Height" Value="3"/>
-                                                    <Setter Property="CornerRadius" Value="1.5"/>
-                                                    <Setter Property="Background" Value="#60A5FA"/>
-                                                </DataTrigger>
-                                                <!-- Dikkat İstiyor: 16×3 px çizgi #F97316 -->
-                                                <DataTrigger Binding="{Binding IsAttention}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                    <Setter Property="Width" Value="16"/>
-                                                    <Setter Property="Height" Value="3"/>
-                                                    <Setter Property="CornerRadius" Value="1.5"/>
-                                                    <Setter Property="Background" Value="#F97316"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                </Border>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-
-                    <!-- Klasör Kapsayıcısı Şablonu -->
-                    <DataTemplate DataType="{x:Type local:DockFolderViewModel}">
-                        <Grid>
-                            <Border x:Name="FolderContainer"
-                                    Width="{Binding ItemSize}"
-                                    Height="{Binding ItemSize}"
-                                    Margin="1,0"
-                                    CornerRadius="10"
-                                    Cursor="Hand"
-                                    ToolTip="{Binding Title}"
-                                    MouseLeftButtonDown="OnItemLeftDown"
-                                    MouseMove="OnItemMouseMove"
-                                    LostMouseCapture="OnItemLostCapture"
-                                    MouseLeftButtonUp="OnFolderLeftClick"
-                                    MouseRightButtonUp="OnFolderRightClick"
-                                    MouseDown="OnItemMouseDown"
-                                    MouseEnter="OnItemMouseEnter"
-                                    MouseLeave="OnItemMouseLeave"
-                                    ContextMenuOpening="OnItemContextMenuOpening">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Background" Value="#1AFFFFFF"/>
-                                        <Setter Property="BorderBrush" Value="#2E2E33"/>
-                                        <Setter Property="BorderThickness" Value="1"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsTargetGlow}" Value="True">
-                                                <Setter Property="Background" Value="#333B82F6"/>
-                                                <Setter Property="BorderBrush" Value="#3B82F6"/>
-                                                <Setter Property="BorderThickness" Value="1.5"/>
-                                            </DataTrigger>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#2AFFFFFF"/>
-                                                <Setter Property="BorderBrush" Value="#44FFFFFF"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-
-                                <Border.RenderTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}" CenterX="19" CenterY="19"/>
-                                        <TranslateTransform X="{Binding OffsetX}"/>
-                                    </TransformGroup>
-                                </Border.RenderTransform>
-
-                                <Grid>
-                                    <!-- 2x2 Mini Simge Izgarası -->
-                                    <ItemsControl ItemsSource="{Binding PreviewIcons}"
-                                                  Width="{Binding IconSize}"
-                                                  Height="{Binding IconSize}"
-                                                  HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"
-                                                  Margin="2">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <UniformGrid Rows="2" Columns="2"/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Image Source="{Binding}"
-                                                       Width="11" Height="11"
-                                                       Margin="1"
-                                                       RenderOptions.BitmapScalingMode="HighQuality"
-                                                       Stretch="Uniform"/>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-
-                                    <!-- Klasör Çalışan Göstergesi (içindeki herhangi bir uygulama çalışıyorsa) -->
-                                    <Border HorizontalAlignment="Center"
-                                            VerticalAlignment="Bottom"
-                                            Margin="0,0,0,2"
-                                            Width="6" Height="3"
-                                            CornerRadius="1.5"
-                                            Background="{DynamicResource KoyAccent}"
-                                            Visibility="{Binding IsRunning, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
-                                </Grid>
-                            </Border>
-
-                            <!-- FolderPanel Kayan Cam Panel -->
-                            <folder:FolderPanel PlacementTarget="{Binding ElementName=FolderContainer}"/>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.Resources>
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-            </ItemsControl>
+            <!-- 2. Dock Uygulama Öğeleri Listesi (ortak şerit) -->
+            <local:DockItemsStrip/>
 
             <!-- 3. Dikey Ayırıcı 1: 1×24 px, rgba(255,255,255,0.16) -->
             <Rectangle Width="1"
@@ -340,35 +50,18 @@
             <StackPanel Orientation="Horizontal"
                         Visibility="{Binding ShowFolders, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
                 <!-- İndirilenler Klasörü Düğmesi -->
-                <Button Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+                <Button Style="{StaticResource DockFlatButtonStyle}"
                         Command="{Binding OpenDownloadsCommand}"
-                        ToolTip="İndirilenler Klasörü"
+                        ToolTip="{Binding [DockDownloads], Source={x:Static res:Loc.Instance}}"
+                        AutomationProperties.Name="{Binding [DockDownloads], Source={x:Static res:Loc.Instance}}"
                         Width="{Binding ItemSize}"
                         Height="{Binding ItemSize}"
-                        Margin="1,0"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Cursor="Hand">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="border"
-                                    Background="Transparent"
-                                    CornerRadius="10">
-                                <Canvas Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Path Fill="#3B82F6" Data="M 3,8 C 3,6.8 3.8,6 5,6 H 10 L 12,8 H 23 C 24.1,8 25,8.8 25,10 V 21 C 25,22.1 24.1,23 23,23 H 5 C 3.8,23 3,22.1 3,21 Z"/>
-                                    <Path Stroke="#FFFFFF" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M 14,11 V 17 M 11,14 L 14,17 L 17,14"/>
-                                </Canvas>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="#1AFFFFFF"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="#33FFFFFF"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
+                        Margin="1,0">
+                    <!-- Klasör çizimi 3..25 x 6..23 aralığında: tuval merkezi buna göre -->
+                    <Canvas Width="28" Height="29">
+                        <Path Fill="#3B82F6" Data="M 3,8 C 3,6.8 3.8,6 5,6 H 10 L 12,8 H 23 C 24.1,8 25,8.8 25,10 V 21 C 25,22.1 24.1,23 23,23 H 5 C 3.8,23 3,22.1 3,21 Z"/>
+                        <Path Stroke="#FFFFFF" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M 14,11 V 17 M 11,14 L 14,17 L 17,14"/>
+                    </Canvas>
                 </Button>
 
             </StackPanel>
@@ -384,34 +77,19 @@
                        Margin="4,0"/>
 
             <!-- 6. Koy Sistem Menüsü Düğmesi -->
-            <Button Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+            <Button Style="{StaticResource DockFlatButtonStyle}"
                     Command="{Binding OpenKoyMenuCommand}"
-                    ToolTip="Koy Menüsü"
+                    ToolTip="{Binding [DockKoyMenu], Source={x:Static res:Loc.Instance}}"
+                    AutomationProperties.Name="{Binding [DockKoyMenu], Source={x:Static res:Loc.Instance}}"
                     Width="{Binding ItemSize}"
                     Height="{Binding ItemSize}"
-                    Margin="1,0"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Cursor="Hand">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Background="Transparent"
-                                CornerRadius="10">
-                            <!-- Koy Marka Logosu: Windows 11 Fluent Squircle + Çentik + K -->
-                            <Path Fill="#3B82F6" Data="{StaticResource KoyLogoGeometry}" Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#1AFFFFFF"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#33FFFFFF"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
+                    Margin="1,0">
+                <!-- Koy Marka Logosu: Windows 11 Fluent Squircle + Çentik + K -->
+                <Path Fill="{DynamicResource KoyAccent}" Data="{StaticResource KoyLogoGeometry}" Width="18" Height="18" Stretch="Uniform"/>
             </Button>
+
+            <!-- 7. Küçük tepsi: Koy menüsü düğmesinin sağında dar ok -->
+            <tray:TrayButton IsCompact="True"/>
         </StackPanel>
     </Border>
 </UserControl>

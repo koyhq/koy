@@ -23,13 +23,17 @@
                 <DataTemplate>
                     <Border Style="{StaticResource SettingRowStyle}">
                         <Grid>
-                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                                 <TextBlock Text="{Binding Title}" Style="{StaticResource SettingTitleStyle}" />
                                 <TextBlock Text="{Binding ErrorText}" Foreground="{DynamicResource KoyDangerText}" FontSize="12" Margin="0,4,0,0"
                                            TextWrapping="Wrap" MaxWidth="360"
                                            Visibility="{Binding HasError, Converter={StaticResource BoolToVis}}" />
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                 <Button Style="{StaticResource SettingButtonStyle}" MinWidth="190"
                                         AutomationProperties.Name="{Binding Title}"
                                         Click="OnCaptureClick"
@@ -128,10 +132,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [WheelActionTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <Border Style="{StaticResource SegmentContainerStyle}">
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [WheelSwitchPanel], Source={x:Static res:Loc.Instance}}" GroupName="WheelAction"
                                      IsChecked="{Binding WheelAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=0}"
@@ -146,10 +154,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [MiddleClickTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <Border Style="{StaticResource SegmentContainerStyle}">
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [MidClickNewWindow], Source={x:Static res:Loc.Instance}}" GroupName="MidClickAction"
                                      IsChecked="{Binding MiddleClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=0}"

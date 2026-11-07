@@ -4,116 +4,21 @@ using System.Windows.Input;
 
 namespace Koy.App.Features.Dock;
 
+/// <summary>Tam genişlik (Windows görev çubuğu tarzı) dock yüzeyi. Öğe şeridi ve etkileşimi <see cref="DockItemsStrip"/>'tedir.</summary>
 public partial class DockFullWidth : UserControl
 {
     private DockViewModel? ViewModel => DataContext as DockViewModel;
 
-    private readonly DockReorderHelper _reorder;
-
     public DockFullWidth()
     {
-        _reorder = new DockReorderHelper(() => ViewModel);
         InitializeComponent();
     }
+
+    // Orta sütunun gerçek genişliği ViewModel'e bildirilir: simgeler yan sütunlara taşmadan sığacak biçimde küçülür.
+    private void OnCenterSizeChanged(object sender, SizeChangedEventArgs e) => ViewModel?.ReportCenterWidth(e.NewSize.Width);
 
     private void OnNowPlayingClick(object sender, MouseButtonEventArgs e)
     {
         ViewModel?.OpenNotchMusicCommand.Execute(null);
-    }
-
-    private void OnItemLeftDown(object sender, MouseButtonEventArgs e) => _reorder.OnMouseDown(sender, e);
-
-    private void OnItemMouseMove(object sender, MouseEventArgs e) => _reorder.OnMouseMove(sender, e);
-
-    private void OnItemLostCapture(object sender, MouseEventArgs e) => _reorder.OnLostCapture();
-
-    private void OnItemLeftClick(object sender, MouseButtonEventArgs e)
-    {
-        // Sürükleyerek sıralama bittiyse bu bırakma tıklama sayılmaz.
-        if (_reorder.TryFinish())
-        {
-            e.Handled = true;
-            return;
-        }
-
-        if (sender is FrameworkElement { DataContext: DockItemViewModel item })
-        {
-            ViewModel?.ClosePreviewNow();
-            item.ClickCommand.Execute(null);
-        }
-    }
-
-    private void OnFolderLeftClick(object sender, MouseButtonEventArgs e)
-    {
-        if (_reorder.TryFinish())
-        {
-            e.Handled = true;
-            return;
-        }
-
-        if (sender is FrameworkElement { DataContext: DockFolderViewModel folder })
-        {
-            ViewModel?.ClosePreviewNow();
-            folder.ClickCommand.Execute(null);
-            e.Handled = true;
-        }
-    }
-
-    private void OnFolderRightClick(object sender, MouseButtonEventArgs e)
-    {
-        if (sender is FrameworkElement { DataContext: DockFolderViewModel folder } element)
-        {
-            ViewModel?.ClosePreviewNow();
-            DockContextMenuManager.OpenFolderContextMenu(folder, element);
-            e.Handled = true;
-        }
-    }
-
-    private void OnItemMouseDown(object sender, MouseButtonEventArgs e)
-    {
-        if (e.ChangedButton == MouseButton.Middle &&
-            sender is FrameworkElement { DataContext: DockItemViewModel item })
-        {
-            ViewModel?.ClosePreviewNow();
-            // Ayar: 0 = yeni pencere, 1 = kapat
-            if (ViewModel?.Settings.MiddleClickAction == 1)
-                item.CloseCommand.Execute(null);
-            else
-                item.MiddleClickCommand.Execute(null);
-            e.Handled = true;
-        }
-    }
-
-    private void OnItemContextMenuOpening(object sender, ContextMenuEventArgs e)
-    {
-        e.Handled = true; // Menü açılışını OnItemRightClick ve DockContextMenuManager yönetir
-    }
-
-    private void OnItemRightClick(object sender, MouseButtonEventArgs e)
-    {
-        if (sender is FrameworkElement element && element.ContextMenu is not null)
-        {
-            ViewModel?.ClosePreviewNow();
-            DockContextMenuManager.Open(element.ContextMenu, element);
-            e.Handled = true;
-        }
-    }
-
-    private void OnItemMouseEnter(object sender, MouseEventArgs e)
-    {
-        if (sender is FrameworkElement element &&
-            element.DataContext is DockEntryViewModel entry &&
-            ViewModel is not null)
-        {
-            if (entry is DockItemViewModel item)
-            {
-                ViewModel.OnItemMouseEnter(item, element);
-            }
-        }
-    }
-
-    private void OnItemMouseLeave(object sender, MouseEventArgs e)
-    {
-        ViewModel?.OnItemMouseLeave();
     }
 }

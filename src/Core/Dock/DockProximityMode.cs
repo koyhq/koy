@@ -41,7 +41,7 @@ public enum DockStyleMode
     FloatingCapsule,
 
     /// <summary>
-    /// Tam Genişlik Modu: Ekranın en altına yapışık 44 px yükseklik. Solda müzik, ortada uygulamalar, sağda Koy butonu.
+    /// Tam Genişlik Modu: Ekranın en altına yapışık 48 px (DockPositionResolver.FullWidthHeightDip) yükseklik. Solda müzik, ortada uygulamalar, sağda Koy butonu.
     /// </summary>
     FullWidth
 }

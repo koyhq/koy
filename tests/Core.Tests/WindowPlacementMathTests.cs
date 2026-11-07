@@ -63,11 +63,36 @@ public class WindowPlacementMathTests
     [Fact]
     public void Full_width_dock_spans_the_monitor_and_hugs_the_bottom()
     {
-        var rect = WindowPlacementMath.BottomFullWidth(Side, 44);
+        var rect = WindowPlacementMath.BottomFullWidth(Side, Koy.Core.Dock.DockPositionResolver.FullWidthHeightDip);
 
         Assert.Equal(1920, rect.Left);
         Assert.Equal(5760, rect.Right);
         Assert.Equal(1960, rect.Bottom);
-        Assert.Equal(66, rect.Height);
+        Assert.Equal(72, rect.Height);   // 48 DIP * 1.5
     }
+
+    [Theory]
+    [InlineData(1.0, 48)]
+    [InlineData(1.25, 60)]
+    [InlineData(1.5, 72)]
+    [InlineData(1.75, 84)]
+    [InlineData(2.0, 96)]
+    [InlineData(1.1, 53)]     // 52.8 -> 53
+    [InlineData(1.05, 50)]    // 50.4 -> 50
+    public void Reserved_pixels_equal_the_window_height_at_every_scale(double scale, int expected)
+    {
+        var monitor = new DisplayMonitor("m", "M", new WindowRect(0, 0, 2560, 1440), new WindowRect(0, 0, 2560, 1440), true, scale, scale);
+        var window = WindowPlacementMath.BottomFullWidth(monitor, Koy.Core.Dock.DockPositionResolver.FullWidthHeightDip);
+
+        Assert.Equal(expected, window.Height);
+        // AppBar aynı fonksiyondan geçer: ayrılan pay pencere yüksekliğine tam eşittir.
+        Assert.Equal(window.Height, WindowPlacementMath.ToPixels(Koy.Core.Dock.DockPositionResolver.FullWidthHeightDip, scale));
+    }
+
+    [Theory]
+    [InlineData(46, 1.75, 81)]   // 80.5 yukarı yuvarlanır (eski kesme 80, banker 80 verirdi)
+    [InlineData(46, 1.25, 58)]   // 57.5
+    [InlineData(48, 0, 48)]      // geçersiz ölçek 1 sayılır
+    public void ToPixels_rounds_half_up_and_guards_invalid_scale(double dip, double scale, int expected)
+        => Assert.Equal(expected, WindowPlacementMath.ToPixels(dip, scale));
 }

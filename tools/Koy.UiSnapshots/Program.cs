@@ -12,7 +12,7 @@ namespace Koy.UiSnapshots;
 /// <summary>
 /// Koy'un pencerelerini ekrana çıkarmadan PNG'ye çevirir. Hiçbir Win32 kancası, AppBar ya da görev çubuğu
 /// servisi başlatılmaz; pencereler gösterilmez, yalnız ölçülüp çizilir.
-/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall]
+/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall|centik|dock|dockbar]
 /// <c>--scene uninstall</c>: yalnız Hakkında sayfası ve kaldırma onay görünümü (kaldırıcı hiçbir zaman çalıştırılmaz).
 /// </summary>
 public static class Program
@@ -42,6 +42,8 @@ public static class Program
                 RenderUninstall(outDir, prefix, theme);
             else if (scene == "centik")
                 RenderCentik(outDir, prefix, theme);
+            else if (scene is "dockbar" or "dockbars")
+                DockBarSnapshots.Render(outDir, prefix, theme, RenderElement);
             else if (scene is "dock" or "folder" or "folders")
                 RenderDockFolders(outDir, prefix, theme);
             else

@@ -49,7 +49,6 @@ public sealed class TrayHostService : ITrayService
     private static readonly TimeSpan StopWait = TimeSpan.FromMilliseconds(250);
 
     // Kendi "TaskbarCreated" yayınımız bize de gelir; bu süre içindekiler yok sayılır.
-    private static readonly TimeSpan SelfBroadcastWindow = TimeSpan.FromSeconds(3);
     // Yayın bütün uygulamalara simgelerini yeniden ekletir; Gezgin'le sıra kavgasında art arda yayın yapılmasın.
     private static readonly TimeSpan MinResyncInterval = TimeSpan.FromSeconds(5);
 
@@ -68,7 +67,16 @@ public sealed class TrayHostService : ITrayService
     // Pencere tanıtıcısını tepsi iş parçacığı yazar, arayüz iş parçacığı okur (IsRunning, EnsureFirst, Stop).
     private nint _hwndValue;
     private uint _taskbarCreatedMessage;
-    private DateTime _lastBroadcastUtc = DateTime.MinValue;
+    // Son kendi yayınımız (UTC ticks). Statik: Koy'un öteki pencereleri (TrayIconManager) yankıyı Gezgin yeniden başladı sanmasın.
+    private static long s_lastBroadcastTicks = DateTime.MinValue.Ticks;
+    // Yayın anında Gezgin'in Shell_TrayWnd tutamacı: Gezgin gerçekten yeniden başladıysa tutamaç değişir.
+    private static long s_broadcastExplorerTray;
+    private static DateTime LastBroadcastUtc => new(Interlocked.Read(ref s_lastBroadcastTicks), DateTimeKind.Utc);
+
+    /// <summary>Az önce gelen "TaskbarCreated" bizim kendi yayınımızın yankısı mı (Gezgin'in yeniden başlaması değil).</summary>
+    public static bool IsOwnTaskbarCreatedBroadcast() =>
+        TaskbarCreatedPolicy.IsOwnBroadcast(
+            LastBroadcastUtc, DateTime.UtcNow, (nint)Interlocked.Read(ref s_broadcastExplorerTray), ShellTrayLocator.FindExplorerTray().Value);
     private bool _disposed;
 
     public event EventHandler? IconsChanged;
@@ -402,7 +410,7 @@ public sealed class TrayHostService : ITrayService
             {
                 // Bizim yayınımız değilse Gezgin yeniden başlamıştır: kendi tepsisi yeniden öne geçti.
                 // Gezgin hazır olsun diye kısa bir süre sonra öne geçip uygulamalardan simgeleri yeniden isteriz.
-                if (DateTime.UtcNow - _lastBroadcastUtc > SelfBroadcastWindow)
+                if (!IsOwnTaskbarCreatedBroadcast())
                     PInvoke.SetTimer(hwnd, ResyncTimerId, ResyncDelayMs, null);
                 return default;
             }
@@ -489,7 +497,7 @@ public sealed class TrayHostService : ITrayService
     {
         MakeTopmost();
 
-        var sinceLast = DateTime.UtcNow - _lastBroadcastUtc;
+        var sinceLast = DateTime.UtcNow - LastBroadcastUtc;
         if (sinceLast >= MinResyncInterval)
         {
             BroadcastTaskbarCreated();
@@ -530,7 +538,8 @@ public sealed class TrayHostService : ITrayService
         if (_taskbarCreatedMessage == 0)
             return;
 
-        _lastBroadcastUtc = DateTime.UtcNow;
+        Interlocked.Exchange(ref s_broadcastExplorerTray, ShellTrayLocator.FindExplorerTray().Value);
+        Interlocked.Exchange(ref s_lastBroadcastTicks, DateTime.UtcNow.Ticks);
         PInvoke.SendNotifyMessage(new HWND(0xFFFF), _taskbarCreatedMessage, default, default); // HWND_BROADCAST
     }
 

@@ -43,7 +43,11 @@ public static class DockPositionResolver
     public const double SnappedHeightDip = 46.0;
     public const double SnappedCornerRadiusDip = 14.0;
 
-    public const double FullWidthHeightDip = 44.0;
+    /// <summary>
+    /// Tam genişlik çubuğun yüksekliği: Windows 11 görev çubuğu ölçüsü. Dock penceresi, AppBar payı, XAML ve gizlenme
+    /// kayması hep bu sabitten okur; başka yerde 48 yazılmaz.
+    /// </summary>
+    public const double FullWidthHeightDip = 48.0;
     public const double DodgeHandleWidthDip = 120.0;
     public const double DodgeHandleHeightDip = 4.0;
     public const double DodgeHandleBottomMarginDip = 4.0;
@@ -245,7 +249,10 @@ public static class DockPositionResolver
                 AppBarReservedHeightDip: 0);
         }
 
-        if (isWindowMaximized && hideInFullscreen && proximityMode != DockProximityMode.ReserveSpace)
+        // Aşağı yapış'ta büyütülmüş pencere dock'u gizlemez: dock alta yapışık kalır (aşağıdaki DockDown kolu), yer ayırmaz.
+        // Yalnız gerçek tam ekran (yukarıdaki dal) gizler. Çekil ve Hep gizli büyütülmüş pencerede gizlemeyi sürdürür.
+        if (isWindowMaximized && hideInFullscreen
+            && proximityMode is not (DockProximityMode.ReserveSpace or DockProximityMode.DockDown))
         {
             var top = monitorBottom - FloatingHeightDip - FloatingBottomMarginDip;
             var isHovered = (edgeRevealEnabled && isMouseAtBottomEdge) || isMouseOverDock;

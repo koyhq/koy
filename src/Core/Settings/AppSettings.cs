@@ -24,7 +24,12 @@ public sealed record AppSettings
     public bool DockEnabled { get; set; } = true;
 
     public VisibilityMode NotchVisibility { get; set; } = VisibilityMode.Fixed;
-    /// <summary>Fixed: Windows görev çubuğu gibi ekranın altında yer ayırır, büyütülmüş pencereler dock'un altında kalmaz.</summary>
+    /// <summary>
+    /// Eski görünürlük kipi (Fixed / Smart / Peek). Ayarlar'da ARAYÜZÜ YOK, DockProximity yerine geçmedi: yakınlık modu "Yer ayır"
+    /// dışındayken VisibilityController.IsVisible ile birlikte kararı daraltır ve kenar izlemeyi açar (DockViewModel,
+    /// DockFeature.UpdateEdgeTimer). Varsayılan Fixed'ta etkisizdir; yalnız ayar dosyası elle düzenlenirse görünür bir fark yaratır.
+    /// Uyumluluk için silinmez.
+    /// </summary>
     public VisibilityMode DockVisibility { get; set; } = VisibilityMode.Fixed;
     public bool DockHoverMagnify { get; set; } = true;
 
@@ -51,6 +56,9 @@ public sealed record AppSettings
 
     /// <summary>Dock'ta sistem tepsisi düğmesi. Açıkken Koy uygulamaların tepsi simgelerini kendisi toplar.</summary>
     public bool DockShowTray { get; set; } = true;
+
+    /// <summary>Küçük tepsi: tepsi düğmesi tam boy simge yerine dar bir ok olarak Koy menüsü düğmesinin sağına geçer.</summary>
+    public bool DockSmallTray { get; set; } = true;
     public bool DockShowBadges { get; set; } = true;
 
     /// <summary>
@@ -174,6 +182,7 @@ public sealed record AppSettings
                DockShowFolders == other.DockShowFolders &&
                DockShowRecents == other.DockShowRecents &&
                DockShowTray == other.DockShowTray &&
+               DockSmallTray == other.DockSmallTray &&
                DockShowBadges == other.DockShowBadges &&
                DockThumbnailPreview == other.DockThumbnailPreview &&
                DockThumbnailDelayMs == other.DockThumbnailDelayMs &&
@@ -244,6 +253,7 @@ public sealed record AppSettings
         hash.Add(DockShowFolders);
         hash.Add(DockShowRecents);
         hash.Add(DockShowTray);
+        hash.Add(DockSmallTray);
         hash.Add(DockShowBadges);
         hash.Add(DockThumbnailPreview);
         hash.Add(DockThumbnailDelayMs);

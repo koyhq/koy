@@ -415,7 +415,7 @@
     <value>The dock is always visible; windows end above it, like the Windows taskbar.</value>
   </data>
   <data name="ProxDockDownDesc" xml:space="preserve">
-    <value>The dock floats; when a window gets close it snaps to the screen bottom and thins out.</value>
+    <value>The dock floats; when a window gets close it snaps to the screen bottom and thins out. It stays visible over maximized windows and reserves no space.</value>
   </data>
   <data name="ProxDodgeDesc" xml:space="preserve">
     <value>The dock hides when a window gets close; it returns when the mouse reaches the bottom edge.</value>
@@ -742,10 +742,10 @@
     <value>Hide window (Koy keeps running)</value>
   </data>
   <data name="ThemeDesc" xml:space="preserve">
-    <value>System follows the Windows app theme and updates as soon as it changes.</value>
+    <value>System follows the Windows app theme and updates as soon as it changes. The Koy window follows it; the notch and dock keep their own dark look.</value>
   </data>
   <data name="AccentColorDesc2" xml:space="preserve">
-    <value>Used on switches, selected items and primary buttons.</value>
+    <value>Used on switches, selected items and primary buttons. Also used for the dock and notch accents (active indicator, Koy button, switches, sliders).</value>
   </data>
   <data name="UseWindowsAccentDesc" xml:space="preserve">
     <value>Uses the Windows accent color; the color choice above is disabled.</value>
@@ -1085,6 +1085,30 @@
   </data>
   <data name="DockShowTrayDesc" xml:space="preserve">
     <value>While the Windows taskbar is hidden, background apps’ icons (Discord, OneDrive…) open from a button on the dock</value>
+  </data>
+  <data name="DockSmallTrayTitle" xml:space="preserve">
+    <value>Small tray</value>
+  </data>
+  <data name="DockSmallTrayDesc" xml:space="preserve">
+    <value>The tray button becomes a narrow arrow to the right of the Koy menu button. The same tray panel opens from it.</value>
+  </data>
+  <data name="DockDownloads" xml:space="preserve">
+    <value>Downloads folder</value>
+  </data>
+  <data name="DockKoyMenu" xml:space="preserve">
+    <value>Koy menu</value>
+  </data>
+  <data name="ProxFullAlwaysShow" xml:space="preserve">
+    <value>Always show</value>
+  </data>
+  <data name="ProxFullAutoHide" xml:space="preserve">
+    <value>Auto-hide</value>
+  </data>
+  <data name="ProxFullAlwaysShowDesc" xml:space="preserve">
+    <value>The bar is always visible; windows end right above it, like the Windows taskbar.</value>
+  </data>
+  <data name="ProxFullAutoHideDesc" xml:space="preserve">
+    <value>The bar appears when the pointer reaches the bottom edge. No screen space is reserved.</value>
   </data>
   <data name="SystemTray" xml:space="preserve">
     <value>System tray</value>

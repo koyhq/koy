@@ -45,11 +45,8 @@ public sealed class MonitorService : IMonitorService
         MonitorsChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    /// <summary>Kimlik, sınırlar, çalışma alanı, DPI ve ana ekran bilgisinden bir imza: bunlardan biri değişince düzen değişmiştir.</summary>
-    private static string Signature(IReadOnlyList<DisplayMonitor> monitors) =>
-        string.Join("|", monitors
-            .OrderBy(m => m.Id, StringComparer.OrdinalIgnoreCase)
-            .Select(m => $"{m.Id};{m.Bounds};{m.WorkArea};{m.DpiScaleX:F2};{m.IsPrimary}"));
+    /// <summary>Kimlik, sınırlar, DPI ve ana ekran imzası (çalışma alanı hariç: Core/MonitorLayoutSignature).</summary>
+    private static string Signature(IReadOnlyList<DisplayMonitor> monitors) => MonitorLayoutSignature.Compute(monitors);
 
     public unsafe IReadOnlyList<DisplayMonitor> GetMonitors()
     {

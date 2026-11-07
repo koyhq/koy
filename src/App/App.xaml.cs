@@ -345,20 +345,29 @@ public partial class App : Application
         }
     }
 
-    /// <summary>Çalışan dock'u durdurur, ayarlar açıksa yeni ayarlarla yeniden başlatır.</summary>
+    /// <summary>
+    /// Ayarlar değişince dock'u günceller. Çalışan dock yerinde güncellenir (görev çubuğu ve çalışma alanı oynamaz);
+    /// yalnız dock yoksa kurulur. Dock'u gerçekten kapatan yol <see cref="UpdateDockState"/>'tir.
+    /// </summary>
     public void ReloadDock()
     {
         if (IsPaused)
             return;
 
         var existingDock = _features.OfType<DockFeature>().FirstOrDefault();
+        var settings = new SettingsStore(SettingsStore.DefaultPath).Load();
+        if (existingDock is not null && settings.DockEnabled)
+        {
+            existingDock.ApplySettings(settings);
+            return;
+        }
+
         if (existingDock is not null)
         {
             existingDock.Stop();
             _features.Remove(existingDock);
         }
 
-        var settings = new SettingsStore(SettingsStore.DefaultPath).Load();
         if (settings.DockEnabled)
         {
             var dock = CreateDockFeature(settings);

@@ -21,16 +21,17 @@ public partial class DockWindow : Window
 
     /// <summary>
     /// Çalışma alanından ayrılacak yükseklik:
-    /// Yüzen dock için 60 px + 10 px alt boşluk; Tam genişlik için 44 px; Yer ayır (ReserveSpace) için 46 px.
+    /// Yüzen dock için 60 px + 10 px alt boşluk; Tam genişlik için FullWidthHeightDip (48); Yer ayır için 46 px.
+    /// DIP olarak döner; piksele çevirme tek kuralla (WindowPlacementMath.ToPixels) AppBar'da yapılır.
     /// </summary>
     public double ReservedHeight
     {
         get
         {
             if (ViewModel?.IsFullWidthMode == true)
-                return 44;
-            if (ViewModel?.Settings.DockProximity == DockProximityMode.ReserveSpace)
-                return 46;
+                return DockPositionResolver.FullWidthHeightDip;
+            if (ViewModel?.EffectiveProximity == DockProximityMode.ReserveSpace)
+                return DockPositionResolver.SnappedHeightDip;
             return ActualHeight > 0 ? ActualHeight : 70;
         }
     }
@@ -38,6 +39,9 @@ public partial class DockWindow : Window
     public uint WmShellHook { get; set; }
     public Action<nint, nint>? ShellHookHandler { get; set; }
     public Action? DisplayChangeHandler { get; set; }
+
+    /// <summary>AppBar bildirimi (ABN_POSCHANGED): Gezgin ya da başka bir çubuk çalışma alanını yeniden düzenledi.</summary>
+    public Action? AppBarPosChangedHandler { get; set; }
 
     public DockWindow()
     {
@@ -63,6 +67,8 @@ public partial class DockWindow : Window
     }
 
     private const int WmDisplayChange = 0x007E;
+    private const int WmAppBarCallback = 0x0400 + 100;   // AppBarService.Register'daki uCallbackMessage (WM_USER + 100)
+    private const int AbnPosChanged = 0x0001;
 
     protected override void OnSourceInitialized(EventArgs e)
     {
@@ -88,6 +94,10 @@ public partial class DockWindow : Window
                 DisplayChangeHandler?.Invoke();
                 Reposition(_targetMonitor);
             }
+            else if (msg == WmAppBarCallback && wParam == AbnPosChanged)
+            {
+                AppBarPosChangedHandler?.Invoke();
+            }
             else if (WmShellHook != 0 && msg == WmShellHook)
             {
                 ShellHookHandler?.Invoke(wParam, lParam);
@@ -98,6 +108,29 @@ public partial class DockWindow : Window
             CrashLog.Write("DockWindow.WndProc", ex);
         }
         return 0;
+    }
+
+    /// <summary>
+    /// Pencereyi yeniden oluşturmadan ViewModel'i değiştirir (ayar değişimi). Pencere tutamacı aynı kaldığı için AppBar
+    /// kaydı ve çalışma alanı bozulmaz.
+    /// </summary>
+    public void SetViewModel(DockViewModel viewModel)
+    {
+        if (ViewModel is { } old)
+        {
+            old.AnimationNeeded -= OnAnimationNeeded;
+            old.AnimationStopped -= OnAnimationStopped;
+            old.RequestReposition -= OnRequestReposition;
+        }
+
+        StopRendering();
+        DataContext = viewModel;
+        viewModel.AnimationNeeded += OnAnimationNeeded;
+        viewModel.AnimationStopped += OnAnimationStopped;
+        viewModel.RequestReposition += OnRequestReposition;
+        viewModel.SetMonitor(_targetMonitor);
+        viewModel.EvaluatePosition(ActualWidth);
+        Reposition(_targetMonitor);
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -144,7 +177,7 @@ public partial class DockWindow : Window
             if (ViewModel?.IsFullWidthMode == true)
             {
                 SizeToContent = SizeToContent.Manual;
-                WindowStyles.SetBounds(hwnd, WindowPlacementMath.BottomFullWidth(monitor, 44.0), resize: sameDpi);
+                WindowStyles.SetBounds(hwnd, WindowPlacementMath.BottomFullWidth(monitor, DockPositionResolver.FullWidthHeightDip), resize: sameDpi);
             }
             else
             {
@@ -164,9 +197,9 @@ public partial class DockWindow : Window
             var screenTop = _targetMonitor?.TopDip ?? 0.0;
 
             Width = screenWidth;
-            Height = 44.0;
+            Height = DockPositionResolver.FullWidthHeightDip;
             Left = screenLeft;
-            Top = screenTop + screenHeight - 44.0;
+            Top = screenTop + screenHeight - DockPositionResolver.FullWidthHeightDip;
             return;
         }
 

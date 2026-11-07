@@ -4,7 +4,7 @@
              xmlns:res="clr-namespace:Koy.App.Resources"
              xmlns:dock="clr-namespace:Koy.App.Features.Dock"
              xmlns:tray="clr-namespace:Koy.App.Features.Dock.Tray"
-             Visibility="{Binding HasTray, Converter={x:Static dock:DockConverters.BoolToVisibilityConverter}}">
+             Visibility="{Binding ShowFullTray, Converter={x:Static dock:DockConverters.BoolToVisibilityConverter}}">
 
     <Grid>
         <!-- Tepsi düğmesi: yukarı ok. Pencere açıkken tıklanamaz; dışarı tıklama pencereyi kapatır ve aynı tıklama yeniden açmaz. -->
@@ -25,7 +25,8 @@
                     <Border x:Name="border"
                             Background="Transparent"
                             CornerRadius="10">
-                        <res:KoyIcon Data="{DynamicResource IconChevronUp}"
+                        <res:KoyIcon x:Name="chevron"
+                                     Data="{DynamicResource IconChevronUp}"
                                      Size="16"
                                      StrokeWidth="2.2"
                                      Foreground="{DynamicResource KoyNotchTextSecondary}"
@@ -33,6 +34,11 @@
                                      VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
+                        <!-- Küçük tepsi: dar ok, simge de küçülür -->
+                        <Trigger Property="Tag" Value="compact">
+                            <Setter TargetName="chevron" Property="Size" Value="12"/>
+                            <Setter TargetName="border" Property="CornerRadius" Value="6"/>
+                        </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource KoyNotchHover}"/>
                         </Trigger>

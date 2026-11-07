@@ -94,6 +94,11 @@ public sealed class TrayIconManager : IDisposable
     {
         if (_taskbarCreatedMessage != 0 && (uint)msg == _taskbarCreatedMessage)
         {
+            // Koy'un tepsi penceresi simgeleri yeniden eklettirmek için kendisi yayınlar; yankısı Gezgin'in yeniden
+            // başlaması değildir. Sanılırsa dock AppBar'ı silip yeniden kurar ve çalışma alanı 5 sn'de bir oynardı.
+            if (Koy.Platform.Shell.TrayHostService.IsOwnTaskbarCreatedBroadcast())
+                return 0;
+
             // Simge gizliyse (dock açık) yeniden eklenmez; yalnız dock görev çubuğu gizlemesini yeniden uygular.
             if (_iconVisible)
                 _trayService?.Recreate();

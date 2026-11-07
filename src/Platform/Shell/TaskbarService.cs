@@ -48,8 +48,13 @@ public static partial class TaskbarService
             var current = (int)PInvoke.SHAppBarMessage(ABM_GETSTATE, ref data);
             prevState = TaskbarStatePolicy.ChoosePreviousState(saved, current);
 
-            data.lParam = new LPARAM((nint)ABS_AUTOHIDE);
-            PInvoke.SHAppBarMessage(ABM_SETSTATE, ref data);
+            // Zaten otomatik gizlemedeyse yeniden SETSTATE gönderilmez: Gezgin her SETSTATE'te çalışma alanını yeniden
+            // hesaplar ve dock'un AppBar payını bir an düşürür (büyütülmüş pencereler sıçrar).
+            if ((current & ABS_AUTOHIDE) == 0)
+            {
+                data.lParam = new LPARAM((nint)ABS_AUTOHIDE);
+                PInvoke.SHAppBarMessage(ABM_SETSTATE, ref data);
+            }
         }
 
         SaveState(new TaskbarSavedState(true, prevState));

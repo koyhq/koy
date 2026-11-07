@@ -415,7 +415,7 @@
     <value>Dock hep görünür; pencereler onun üstünde biter, Windows görev çubuğu gibi.</value>
   </data>
   <data name="ProxDockDownDesc" xml:space="preserve">
-    <value>Dock yüzer; bir pencere yaklaşınca ekranın altına yapışır ve incelir.</value>
+    <value>Dock yüzer; bir pencere yaklaşınca ekranın altına yapışır ve incelir. Büyütülmüş pencerede de görünür kalır, yer ayırmaz.</value>
   </data>
   <data name="ProxDodgeDesc" xml:space="preserve">
     <value>Bir pencere yaklaşınca dock gizlenir; fare alt kenara gelince geri çıkar.</value>
@@ -742,10 +742,10 @@
     <value>Pencereyi gizle (Koy çalışmaya devam eder)</value>
   </data>
   <data name="ThemeDesc" xml:space="preserve">
-    <value>Sistem seçilirse Windows uygulama temasını izler ve değişince hemen uyar.</value>
+    <value>Sistem seçilirse Windows uygulama temasını izler ve değişince hemen uyar. Yalnız Koy penceresine uygulanır; çentik ve dock etkilenmez.</value>
   </data>
   <data name="AccentColorDesc2" xml:space="preserve">
-    <value>Anahtarlarda, seçili öğelerde ve birincil düğmelerde kullanılır.</value>
+    <value>Anahtarlarda, seçili öğelerde ve birincil düğmelerde kullanılır. Dock ve çentik vurgularında da kullanılır (etkin gösterge, Koy düğmesi, anahtarlar, kaydırıcılar).</value>
   </data>
   <data name="UseWindowsAccentDesc" xml:space="preserve">
     <value>Windows'un vurgu rengini kullanır; yandaki renk seçimi devre dışı kalır.</value>
@@ -1085,6 +1085,30 @@
   </data>
   <data name="DockShowTrayDesc" xml:space="preserve">
     <value>Windows görev çubuğu gizliyken arka plan uygulamalarının simgeleri (Discord, OneDrive…) dock'taki düğmeden açılır</value>
+  </data>
+  <data name="DockSmallTrayTitle" xml:space="preserve">
+    <value>Küçük tepsi</value>
+  </data>
+  <data name="DockSmallTrayDesc" xml:space="preserve">
+    <value>Tepsi düğmesi dar bir ok olur ve Koy menüsü düğmesinin sağına geçer. Tepsi paneli aynı yerden açılır.</value>
+  </data>
+  <data name="DockDownloads" xml:space="preserve">
+    <value>İndirilenler klasörü</value>
+  </data>
+  <data name="DockKoyMenu" xml:space="preserve">
+    <value>Koy menüsü</value>
+  </data>
+  <data name="ProxFullAlwaysShow" xml:space="preserve">
+    <value>Her zaman göster</value>
+  </data>
+  <data name="ProxFullAutoHide" xml:space="preserve">
+    <value>Otomatik gizle</value>
+  </data>
+  <data name="ProxFullAlwaysShowDesc" xml:space="preserve">
+    <value>Çubuk hep görünür; pencereler Windows görev çubuğu gibi onun hemen üstünde biter.</value>
+  </data>
+  <data name="ProxFullAutoHideDesc" xml:space="preserve">
+    <value>Çubuk fare ekranın en altına değince çıkar. Ekranda yer ayrılmaz.</value>
   </data>
   <data name="SystemTray" xml:space="preserve">
     <value>Sistem tepsisi</value>

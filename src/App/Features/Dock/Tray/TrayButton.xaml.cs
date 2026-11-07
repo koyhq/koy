@@ -38,6 +38,34 @@ public partial class TrayButton : UserControl
     private readonly TrayPopupDismissPolicy _dismiss = new();
     private bool _prevPointerDown;
 
+    /// <summary>
+    /// Küçük tepsi biçimi: dar ok olarak Koy menüsü düğmesinin sağında durur. Değişince görünürlük ve genişlik
+    /// ViewModel'deki ilgili özelliklere bağlanır (aynı düğmenin tam boy ve küçük örneği dock'ta birlikte bulunur).
+    /// </summary>
+    public static readonly DependencyProperty IsCompactProperty = DependencyProperty.Register(
+        nameof(IsCompact), typeof(bool), typeof(TrayButton),
+        new PropertyMetadata(false, (d, e) => ((TrayButton)d).ApplyCompact((bool)e.NewValue)));
+
+    public bool IsCompact
+    {
+        get => (bool)GetValue(IsCompactProperty);
+        set => SetValue(IsCompactProperty, value);
+    }
+
+    private void ApplyCompact(bool compact)
+    {
+        if (!compact)
+            return;
+
+        SetBinding(VisibilityProperty, new System.Windows.Data.Binding(nameof(DockViewModel.ShowSmallTray))
+        {
+            Converter = DockConverters.BoolToVisibilityConverter
+        });
+        TrayToggle.SetBinding(WidthProperty, new System.Windows.Data.Binding(nameof(DockViewModel.SmallTrayWidth)));
+        TrayToggle.Margin = new Thickness(1, 0, 0, 0);
+        TrayToggle.Tag = "compact";
+    }
+
     public TrayButton()
     {
         InitializeComponent();

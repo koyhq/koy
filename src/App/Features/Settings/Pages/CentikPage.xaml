@@ -21,21 +21,29 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [NotchEnabledTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <CheckBox AutomationProperties.Name="{Binding [NotchEnabledTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding NotchEnabled}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [NotchEnabledTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding NotchEnabled}" HorizontalAlignment="Right" VerticalAlignment="Center"
                           Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [VisibilityTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [VisibilityDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" MaxWidth="420" HorizontalAlignment="Left" />
+                    <TextBlock Text="{Binding [VisibilityDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
-                <Border Style="{StaticResource SegmentContainerStyle}">
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [VisFixed], Source={x:Static res:Loc.Instance}}" GroupName="NotchVis"
                                      IsChecked="{Binding NotchVisibility, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Fixed}"
@@ -53,10 +61,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [HideInFullscreenTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <CheckBox AutomationProperties.Name="{Binding [HideInFullscreenTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding NotchHideInFullscreen}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [HideInFullscreenTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding NotchHideInFullscreen}" HorizontalAlignment="Right" VerticalAlignment="Center"
                           Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
@@ -66,10 +78,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [IdleDisplayRowTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <Border Style="{StaticResource SegmentContainerStyle}">
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [IdleClockBattery], Source={x:Static res:Loc.Instance}}" GroupName="IdleMode"
                                      IsChecked="{Binding IdleDisplayMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=0}"
@@ -87,10 +103,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [MusicWaveformTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <CheckBox AutomationProperties.Name="{Binding [MusicWaveformTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding MusicShowWaveform}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [MusicWaveformTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding MusicShowWaveform}" HorizontalAlignment="Right" VerticalAlignment="Center"
                           Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
@@ -100,21 +120,29 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [VolumeOsdTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding [VolumeOsdDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
-                <CheckBox AutomationProperties.Name="{Binding [VolumeOsdTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding ShowVolumeOsd}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [VolumeOsdTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding ShowVolumeOsd}" HorizontalAlignment="Right" VerticalAlignment="Center"
                           Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [BrightnessOsdTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <CheckBox AutomationProperties.Name="{Binding [BrightnessOsdTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding ShowBrightnessOsd}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [BrightnessOsdTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding ShowBrightnessOsd}" HorizontalAlignment="Right" VerticalAlignment="Center"
                           Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
@@ -164,22 +192,30 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [PanelClipboardTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding [PanelClipboardDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
-                <CheckBox AutomationProperties.Name="{Binding [PanelClipboardTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding PanelClipboard}" IsEnabled="{Binding ClipboardHistoryEnabled}"
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [PanelClipboardTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding PanelClipboard}" IsEnabled="{Binding ClipboardHistoryEnabled}"
                           HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [ClipboardHistoryTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding [ClipboardHistoryDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
-                <CheckBox AutomationProperties.Name="{Binding [ClipboardHistoryTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding ClipboardHistoryEnabled}"
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [ClipboardHistoryTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding ClipboardHistoryEnabled}"
                           HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
@@ -199,10 +235,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [OpenBehaviorRowTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <Border Style="{StaticResource SegmentContainerStyle}">
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [OpenOnHover], Source={x:Static res:Loc.Instance}}" GroupName="OpenBeh"
                                      IsChecked="{Binding NotchOpenBehavior, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=0}"
@@ -220,11 +260,15 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" MaxWidth="440">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [WeatherUseLocationTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding [WeatherUseLocationDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
-                <CheckBox AutomationProperties.Name="{Binding [WeatherUseLocationTitle], Source={x:Static res:Loc.Instance}}"
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [WeatherUseLocationTitle], Source={x:Static res:Loc.Instance}}"
                           IsChecked="{Binding Weather.UseLocation}" HorizontalAlignment="Right" VerticalAlignment="Center"
                           Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
@@ -279,7 +323,11 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" MaxWidth="400">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding Weather.StatusText}" Style="{StaticResource SettingDescStyle}" TextWrapping="Wrap" />
                     <Button Margin="0,8,0,0" HorizontalAlignment="Left" Style="{StaticResource SettingButtonStyle}" Command="{Binding Weather.OpenLocationSettingsCommand}"
                             Visibility="{Binding Weather.ShowLocationSettingsLink, Converter={StaticResource BoolToVis}}">
@@ -289,7 +337,7 @@
                         </StackPanel>
                     </Button>
                 </StackPanel>
-                <Button HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource SettingButtonStyle}" Command="{Binding Weather.ClearLocationCommand}"
+                <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource SettingButtonStyle}" Command="{Binding Weather.ClearLocationCommand}"
                         Visibility="{Binding Weather.HasLocation, Converter={StaticResource BoolToVis}}">
                     <TextBlock Text="{Binding [WeatherClear], Source={x:Static res:Loc.Instance}}" />
                 </Button>
@@ -301,10 +349,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [PomodoroWorkTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <ComboBox AutomationProperties.Name="{Binding [PomodoroWorkTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="100" Height="32"
+                <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [PomodoroWorkTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="100" Height="32"
                           ItemsSource="{Binding PomodoroWorkOptions}" SelectedItem="{Binding PomodoroWorkMinutes}"
                           Style="{StaticResource SettingComboBoxStyle}" />
             </Grid>
@@ -312,10 +364,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [PomodoroShortBreakTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <ComboBox AutomationProperties.Name="{Binding [PomodoroShortBreakTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="100" Height="32"
+                <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [PomodoroShortBreakTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="100" Height="32"
                           ItemsSource="{Binding PomodoroShortBreakOptions}" SelectedItem="{Binding PomodoroShortBreakMinutes}"
                           Style="{StaticResource SettingComboBoxStyle}" />
             </Grid>
@@ -323,10 +379,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [PomodoroLongBreakTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <ComboBox AutomationProperties.Name="{Binding [PomodoroLongBreakTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="100" Height="32"
+                <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [PomodoroLongBreakTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="100" Height="32"
                           ItemsSource="{Binding PomodoroLongBreakOptions}" SelectedItem="{Binding PomodoroLongBreakMinutes}"
                           Style="{StaticResource SettingComboBoxStyle}" />
             </Grid>

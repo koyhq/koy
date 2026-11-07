@@ -26,6 +26,31 @@
     <!-- Koy Marka Logosu Vektör Geometrisi (Windows 11 Fluent Squircle + Çentik + K Monogramı) -->
     <Geometry x:Key="KoyLogoGeometry">M 80,32 H 176 C 202,32 224,54 224,80 V 176 C 224,202 202,224 176,224 H 80 C 54,224 32,202 32,176 V 80 C 32,54 54,32 80,32 Z M 88,32 C 94,44 104,54 116,54 H 140 C 152,54 162,44 168,32 H 88 Z M 76,96 C 76,88 83,82 91,82 C 99,82 106,88 106,96 V 176 C 106,184 99,190 91,190 C 83,190 76,184 76,176 Z M 106,136 L 148,88 C 154,82 164,81 170,87 C 176,93 176,102 170,107 L 134,143 L 170,179 C 176,184 176,193 170,199 C 164,205 154,204 148,198 L 106,148 Z</Geometry>
 
+    <!-- Dock düz düğmesi (Başlat, İndirilenler, Koy menüsü): kapsül ve tam genişlik dock aynı stili kullanır.
+         Dock temadan bağımsız koyu yüzeydir, bu yüzden üst katmanlar beyazın yüzdesidir. İçerik düğmeden gelir. -->
+    <Style x:Key="DockFlatButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border" Background="Transparent" CornerRadius="10">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#1AFFFFFF"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#33FFFFFF"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- Klavye odağı: yalnız klavyeyle gezerken görünür, 2 px vurgu halkası -->
     <Style x:Key="KoyFocusVisual">
         <Setter Property="Control.Template">

@@ -13,12 +13,12 @@ namespace Koy.UiSnapshots;
 
 internal static class DockFolderSnapshots
 {
-    private sealed class FakePinnedAppsService : IPinnedAppsService
+    internal sealed class FakePinnedAppsService : IPinnedAppsService
     {
         public IReadOnlyList<PinnedApp> GetPinnedApps() => [];
     }
 
-    private sealed class FakeWindowTracker : IWindowTracker
+    internal sealed class FakeWindowTracker : IWindowTracker
     {
         public event EventHandler<WindowInfo>? ForegroundWindowChanged { add { } remove { } }
         public event EventHandler? WindowsChanged { add { } remove { } }
@@ -36,7 +36,7 @@ internal static class DockFolderSnapshots
         public void Dispose() { }
     }
 
-    private sealed class FakeShellActionService : IShellActionService
+    internal sealed class FakeShellActionService : IShellActionService
     {
         public void SendWinKey() { }
         public void ToggleSystemTray() { }
@@ -45,7 +45,7 @@ internal static class DockFolderSnapshots
         public void Launch(string path, string? arguments = null) { }
     }
 
-    private static readonly DockController SharedController = new(
+    internal static readonly DockController SharedController = new(
         new FakePinnedAppsService(),
         new FakeWindowTracker(),
         new FakeShellActionService());
