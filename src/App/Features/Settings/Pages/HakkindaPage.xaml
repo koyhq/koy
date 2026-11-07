@@ -31,10 +31,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" MaxWidth="470">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [DiagnosticInfoTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <Button Command="{Binding CopyDiagnosticsCommand}" HorizontalAlignment="Right" Style="{StaticResource SettingButtonStyle}">
+                <Button Grid.Column="1" Command="{Binding CopyDiagnosticsCommand}" HorizontalAlignment="Right" Style="{StaticResource SettingButtonStyle}">
                     <StackPanel Orientation="Horizontal">
                         <res:KoyIcon Data="{StaticResource IconCopy}" Size="14" Margin="0,0,8,0" />
                         <TextBlock Text="{Binding [CopyDiagnosticsAction], Source={x:Static res:Loc.Instance}}" />
@@ -45,11 +49,15 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" MaxWidth="470">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [RestoreTaskbarTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding [RestoreTaskbarDesc2], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
-                <Button Command="{Binding RestoreTaskbarCommand}" HorizontalAlignment="Right" Style="{StaticResource SettingButtonStyle}">
+                <Button Grid.Column="1" Command="{Binding RestoreTaskbarCommand}" HorizontalAlignment="Right" Style="{StaticResource SettingButtonStyle}">
                     <StackPanel Orientation="Horizontal">
                         <res:KoyIcon Data="{StaticResource IconRotateCcw}" Size="14" Margin="0,0,8,0" />
                         <TextBlock Text="{Binding [RestoreButton], Source={x:Static res:Loc.Instance}}" />
@@ -113,11 +121,15 @@
         <!-- Veri atfı: Open-Meteo CC BY 4.0 koşulu -->
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [AboutWeatherTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding [AboutWeatherLicense], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
-                <Button Command="{Binding OpenOpenMeteoCommand}" HorizontalAlignment="Right" Style="{StaticResource SettingButtonStyle}">
+                <Button Grid.Column="1" Command="{Binding OpenOpenMeteoCommand}" HorizontalAlignment="Right" Style="{StaticResource SettingButtonStyle}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding [AboutWeatherLink], Source={x:Static res:Loc.Instance}}" />
                         <res:KoyIcon Data="{StaticResource IconExternalLink}" Size="14" Margin="8,0,0,0" />
@@ -129,11 +141,15 @@
         <!-- Veri atfı: cihaz konumunun yer adı OpenStreetMap Nominatim'den (ODbL koşulu) -->
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [AboutPlaceTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding [AboutPlaceLicense], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
-                <Button Command="{Binding OpenOpenStreetMapCommand}" HorizontalAlignment="Right" Style="{StaticResource SettingButtonStyle}">
+                <Button Grid.Column="1" Command="{Binding OpenOpenStreetMapCommand}" HorizontalAlignment="Right" Style="{StaticResource SettingButtonStyle}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding [AboutPlaceLink], Source={x:Static res:Loc.Instance}}" />
                         <res:KoyIcon Data="{StaticResource IconExternalLink}" Size="14" Margin="8,0,0,0" />
@@ -145,11 +161,15 @@
         <!-- KALDIRMA: yalnız kurulu sürümde etkin -->
         <Border Style="{StaticResource SettingRowStyle}" Margin="0,24,0,0">
             <Grid>
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" MaxWidth="400">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [UninstallTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding UninstallRowDescription}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
-                <Button Command="{Binding RequestUninstallCommand}" HorizontalAlignment="Right" Style="{StaticResource DangerButtonStyle}"
+                <Button Grid.Column="1" Command="{Binding RequestUninstallCommand}" HorizontalAlignment="Right" Style="{StaticResource DangerButtonStyle}"
                         AutomationProperties.Name="{Binding [UninstallAction], Source={x:Static res:Loc.Instance}}">
                     <StackPanel Orientation="Horizontal">
                         <res:KoyIcon Data="{StaticResource IconPower}" Size="14" Margin="0,0,8,0" />

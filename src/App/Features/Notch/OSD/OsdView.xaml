@@ -98,7 +98,7 @@
         <Path.Style>
           <Style TargetType="Path">
             <Setter Property="Visibility" Value="Collapsed" />
-            <Setter Property="Stroke" Value="#3B82F6" />
+            <Setter Property="Stroke" Value="{DynamicResource KoyAccent}" />
             <Style.Triggers>
               <DataTrigger Binding="{Binding Type}" Value="{x:Static local:OsdType.Bluetooth}">
                 <Setter Property="Visibility" Value="Visible" />

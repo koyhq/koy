@@ -155,7 +155,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private int _dockDodgeDelayMs = 150;
 
     [ObservableProperty]
-    private double _dockIconSize = 40.0;
+    private double _dockIconSize = 28.0;
 
     [ObservableProperty]
     private bool _dockHoverMagnify = true;

@@ -742,10 +742,10 @@
     <value>Pencereyi gizle (Koy çalışmaya devam eder)</value>
   </data>
   <data name="ThemeDesc" xml:space="preserve">
-    <value>Sistem seçilirse Windows uygulama temasını izler ve değişince hemen uyar.</value>
+    <value>Sistem seçilirse Windows uygulama temasını izler ve değişince hemen uyar. Yalnız Koy penceresine uygulanır; çentik ve dock etkilenmez.</value>
   </data>
   <data name="AccentColorDesc2" xml:space="preserve">
-    <value>Anahtarlarda, seçili öğelerde ve birincil düğmelerde kullanılır.</value>
+    <value>Anahtarlarda, seçili öğelerde ve birincil düğmelerde kullanılır. Dock ve çentik vurgularında da kullanılır (etkin gösterge, Koy düğmesi, anahtarlar, kaydırıcılar).</value>
   </data>
   <data name="UseWindowsAccentDesc" xml:space="preserve">
     <value>Windows'un vurgu rengini kullanır; yandaki renk seçimi devre dışı kalır.</value>

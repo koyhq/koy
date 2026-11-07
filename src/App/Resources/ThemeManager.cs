@@ -96,6 +96,9 @@ public static class ThemeManager
             o["KoyAccentText"] = Brush(p.Text);
             o["KoyFocusRing"] = Brush(p.Focus);
             var c = (Color)ColorConverter.ConvertFromString(p.Base);
+            // Çentik de aynı vurguyu kullanır (Kontrol sekmesi, anahtarlar, kaydırıcılar); çentik zemini siyah kalır.
+            o["KoyNotchAccentControl"] = Brush(p.Base);
+            o["KoyNotchControlIconBg"] = new SolidColorBrush(Color.FromArgb(0x38, c.R, c.G, c.B));
             o["KoyAccentSubtle"] = new SolidColorBrush(Color.FromArgb(theme == ResolvedTheme.Dark ? (byte)0x26 : (byte)0x22, c.R, c.G, c.B));
         }
 

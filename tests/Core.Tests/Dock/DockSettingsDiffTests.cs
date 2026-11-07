@@ -83,7 +83,6 @@ public class DockSettingsDiffTests
 
     [Theory]
     [InlineData("Material")]
-    [InlineData("AccentColor")]
     [InlineData("AnimationSpeed")]
     public void Appearance_changes_only_rebuild_view_models(string field)
     {
@@ -91,7 +90,6 @@ public class DockSettingsDiffTests
         switch (field)
         {
             case "Material": after.Material = "Yarı saydam"; break;
-            case "AccentColor": after.AccentColor = "#FF0000"; break;
             default: after.AnimationSpeed = "Hızlı"; break;
         }
 
@@ -102,6 +100,10 @@ public class DockSettingsDiffTests
         Assert.False(d.ReconcileMonitors);
         Assert.False(d.ReconcileTaskbar);
     }
+
+    [Fact]
+    public void Accent_color_does_not_touch_the_dock_it_updates_live_through_dynamic_resources()
+        => Assert.True(DockSettingsDiff.Compare(new AppSettings(), new AppSettings { AccentColor = "#FF0000", UseWindowsAccent = true }).IsEmpty);
 
     [Fact]
     public void Monitor_target_change_reconciles_monitors_only()

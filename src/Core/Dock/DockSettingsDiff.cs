@@ -55,7 +55,6 @@ public readonly record struct DockSettingsDiff(
                       || before.Material != after.Material
                       || before.AnimationSpeed != after.AnimationSpeed
                       || before.RespectReduceMotion != after.RespectReduceMotion
-                      || before.AccentColor != after.AccentColor
                       || power;
 
         return new DockSettingsDiff(rebuild, monitors, appBar, taskbar, tray, power);

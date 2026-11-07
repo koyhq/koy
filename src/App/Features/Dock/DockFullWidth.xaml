@@ -113,7 +113,7 @@
                         Width="36"
                         Height="34"
                         Margin="1,0">
-                    <Path Fill="#3B82F6" Data="{StaticResource KoyLogoGeometry}" Width="16" Height="16" Stretch="Uniform"/>
+                    <Path Fill="{DynamicResource KoyAccent}" Data="{StaticResource KoyLogoGeometry}" Width="16" Height="16" Stretch="Uniform"/>
                 </Button>
                 <tray:TrayButton IsCompact="True"/>
             </StackPanel>

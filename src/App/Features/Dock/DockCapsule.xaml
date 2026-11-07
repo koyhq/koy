@@ -85,7 +85,7 @@
                     Height="{Binding ItemSize}"
                     Margin="1,0">
                 <!-- Koy Marka Logosu: Windows 11 Fluent Squircle + Çentik + K -->
-                <Path Fill="#3B82F6" Data="{StaticResource KoyLogoGeometry}" Width="18" Height="18" Stretch="Uniform"/>
+                <Path Fill="{DynamicResource KoyAccent}" Data="{StaticResource KoyLogoGeometry}" Width="18" Height="18" Stretch="Uniform"/>
             </Button>
 
             <!-- 7. Küçük tepsi: Koy menüsü düğmesinin sağında dar ok -->

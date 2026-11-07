@@ -742,10 +742,10 @@
     <value>Hide window (Koy keeps running)</value>
   </data>
   <data name="ThemeDesc" xml:space="preserve">
-    <value>System follows the Windows app theme and updates as soon as it changes.</value>
+    <value>System follows the Windows app theme and updates as soon as it changes. The Koy window follows it; the notch and dock keep their own dark look.</value>
   </data>
   <data name="AccentColorDesc2" xml:space="preserve">
-    <value>Used on switches, selected items and primary buttons.</value>
+    <value>Used on switches, selected items and primary buttons. Also used for the dock and notch accents (active indicator, Koy button, switches, sliders).</value>
   </data>
   <data name="UseWindowsAccentDesc" xml:space="preserve">
     <value>Uses the Windows accent color; the color choice above is disabled.</value>

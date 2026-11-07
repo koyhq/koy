@@ -24,7 +24,12 @@ public sealed record AppSettings
     public bool DockEnabled { get; set; } = true;
 
     public VisibilityMode NotchVisibility { get; set; } = VisibilityMode.Fixed;
-    /// <summary>Fixed: Windows görev çubuğu gibi ekranın altında yer ayırır, büyütülmüş pencereler dock'un altında kalmaz.</summary>
+    /// <summary>
+    /// Eski görünürlük kipi (Fixed / Smart / Peek). Ayarlar'da ARAYÜZÜ YOK, DockProximity yerine geçmedi: yakınlık modu "Yer ayır"
+    /// dışındayken VisibilityController.IsVisible ile birlikte kararı daraltır ve kenar izlemeyi açar (DockViewModel,
+    /// DockFeature.UpdateEdgeTimer). Varsayılan Fixed'ta etkisizdir; yalnız ayar dosyası elle düzenlenirse görünür bir fark yaratır.
+    /// Uyumluluk için silinmez.
+    /// </summary>
     public VisibilityMode DockVisibility { get; set; } = VisibilityMode.Fixed;
     public bool DockHoverMagnify { get; set; } = true;
 

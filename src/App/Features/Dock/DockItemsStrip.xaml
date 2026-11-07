@@ -37,8 +37,8 @@
                             <Setter Property="Background" Value="Transparent"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsTargetGlow}" Value="True">
-                                    <Setter Property="Background" Value="#333B82F6"/>
-                                    <Setter Property="BorderBrush" Value="#3B82F6"/>
+                                    <Setter Property="Background" Value="{DynamicResource KoyAccentSubtle}"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource KoyAccent}"/>
                                     <Setter Property="BorderThickness" Value="1.5"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding IsActive}" Value="True">
@@ -124,15 +124,15 @@
                                        VerticalAlignment="Center"/>
                         </Border>
 
-                        <!-- Çoklu Pencere Göstergesi: 3 küçük nokta #60A5FA (Birden fazla pencere varsa) -->
+                        <!-- Çoklu Pencere Göstergesi: 3 küçük nokta vurgu rengi (Birden fazla pencere varsa) -->
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Bottom"
                                     Margin="0,0,0,2"
                                     Visibility="{Binding IsMultiWindow, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
-                            <Border Width="4" Height="3" CornerRadius="1.5" Background="#60A5FA" Margin="1,0"/>
-                            <Border Width="4" Height="3" CornerRadius="1.5" Background="#60A5FA" Margin="1,0"/>
-                            <Border Width="4" Height="3" CornerRadius="1.5" Background="#60A5FA" Margin="1,0"/>
+                            <Border Width="4" Height="3" CornerRadius="1.5" Background="{DynamicResource KoyAccent}" Margin="1,0"/>
+                            <Border Width="4" Height="3" CornerRadius="1.5" Background="{DynamicResource KoyAccent}" Margin="1,0"/>
+                            <Border Width="4" Height="3" CornerRadius="1.5" Background="{DynamicResource KoyAccent}" Margin="1,0"/>
                         </StackPanel>
 
                         <!-- Tekil Pencere / Çalışan Göstergesi (Tek pencere veya odak) -->
@@ -169,13 +169,13 @@
                                             </MultiDataTrigger.Conditions>
                                             <Setter Property="Width" Value="16"/>
                                         </MultiDataTrigger>
-                                        <!-- Aktif: 16×3 px çizgi #60A5FA -->
+                                        <!-- Aktif: 16×3 px çizgi vurgu rengi -->
                                         <DataTrigger Binding="{Binding IsActive}" Value="True">
                                             <Setter Property="Visibility" Value="Visible"/>
                                             <Setter Property="Width" Value="16"/>
                                             <Setter Property="Height" Value="3"/>
                                             <Setter Property="CornerRadius" Value="1.5"/>
-                                            <Setter Property="Background" Value="#60A5FA"/>
+                                            <Setter Property="Background" Value="{DynamicResource KoyAccent}"/>
                                         </DataTrigger>
                                         <!-- Dikkat İstiyor: 16×3 px çizgi #F97316 -->
                                         <DataTrigger Binding="{Binding IsAttention}" Value="True">
@@ -220,8 +220,8 @@
                                 <Setter Property="BorderThickness" Value="1"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsTargetGlow}" Value="True">
-                                        <Setter Property="Background" Value="#333B82F6"/>
-                                        <Setter Property="BorderBrush" Value="#3B82F6"/>
+                                        <Setter Property="Background" Value="{DynamicResource KoyAccentSubtle}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource KoyAccent}"/>
                                         <Setter Property="BorderThickness" Value="1.5"/>
                                     </DataTrigger>
                                     <Trigger Property="IsMouseOver" Value="True">

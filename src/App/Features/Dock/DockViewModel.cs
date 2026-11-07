@@ -91,9 +91,6 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private bool _magnificationEnabled;
 
-    [ObservableProperty]
-    private string _accentColor;
-
     // Düzen ve yakınlık modu durumu
     [ObservableProperty]
     private bool _isFullWidthMode;
@@ -313,7 +310,6 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _itemSize = DockFitMath.ItemSizeFor(_iconSize);
 
         _magnificationEnabled = settings.DockHoverMagnify;
-        _accentColor = settings.AccentColor ?? "#0078D4";
 
         _isFullWidthMode = settings.DockStyle == DockStyleMode.FullWidth;
         _showStartButton = settings.DockShowStartButton;
