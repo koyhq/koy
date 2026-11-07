@@ -29,7 +29,7 @@ public sealed class PinnedAppsService : IPinnedAppsService
             foreach (var file in files)
             {
                 var title = Path.GetFileNameWithoutExtension(file);
-                var targetPath = ResolveShortcutTarget(file);
+                var (targetPath, aumid) = ResolveShortcut(file);
                 var iconData = IconHelper.GetIconBytes(file) ??
                                (!string.IsNullOrEmpty(targetPath) ? IconHelper.GetIconBytes(targetPath) : null);
 
@@ -37,7 +37,8 @@ public sealed class PinnedAppsService : IPinnedAppsService
                     Title: title,
                     ShortcutPath: file,
                     TargetPath: targetPath,
-                    IconData: iconData));
+                    IconData: iconData,
+                    AppUserModelId: aumid));
             }
         }
         catch
@@ -48,14 +49,15 @@ public sealed class PinnedAppsService : IPinnedAppsService
         return result;
     }
 
-    private static unsafe string? ResolveShortcutTarget(string shortcutPath)
+    /// <summary>Kısayolun hedef yolu ve AppUserModelID'si. File Explorer gibi kabuk öğesi kısayollarında hedef boştur, AUMID dolu gelir.</summary>
+    private static unsafe (string? Target, string? Aumid) ResolveShortcut(string shortcutPath)
     {
         object? link = null;
         try
         {
             var shellLinkType = Type.GetTypeFromCLSID(new Guid("00021401-0000-0000-C000-000000000046"));
             if (shellLinkType is null)
-                return null;
+                return (null, null);
 
             link = Activator.CreateInstance(shellLinkType);
             if (link is IPersistFile persistFile && link is IShellLinkW shellLink)
@@ -70,13 +72,13 @@ public sealed class PinnedAppsService : IPinnedAppsService
                 {
                     shellLink.GetPath(pBuf, 260, null, 0);
                     var str = new string(pBuf);
-                    return !string.IsNullOrWhiteSpace(str) ? str : null;
+                    return (!string.IsNullOrWhiteSpace(str) ? str : null, AppUserModelIdReader.ForShellLink(link));
                 }
             }
         }
         catch
         {
-            // Kısayol bozuksa veya çözümlenemiyorsa null döner
+            // Kısayol bozuksa veya çözümlenemiyorsa boş döner
         }
         finally
         {
@@ -85,6 +87,6 @@ public sealed class PinnedAppsService : IPinnedAppsService
                 Marshal.FinalReleaseComObject(link);
         }
 
-        return null;
+        return (null, null);
     }
 }

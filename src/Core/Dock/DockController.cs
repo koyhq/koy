@@ -76,7 +76,7 @@ public sealed class DockController : IDisposable
         // 1. Sabitli uygulamaları işle ve eşleşen pencereleri bul
         foreach (var pin in pinnedApps)
         {
-            var matchingWindows = remainingWindows.FindAll(w => IsMatch(pin, w));
+            var matchingWindows = remainingWindows.FindAll(w => PinnedAppMatcher.IsMatch(pin, w));
             var isRunning = matchingWindows.Count > 0;
             var isActive = matchingWindows.Any(w => currentForeground is not null && w.Handle == currentForeground.Handle);
             var handles = matchingWindows.ConvertAll(w => w.Handle);
@@ -277,37 +277,6 @@ public sealed class DockController : IDisposable
             _isHiddenByFullscreen = isFullscreen;
             FullscreenStateChanged?.Invoke(this, isFullscreen);
         }
-    }
-
-    private static bool IsMatch(PinnedApp pin, OpenWindowInfo win)
-    {
-        // 1. Hedef yürütülebilir dosya yolu eşleşmesi
-        if (!string.IsNullOrEmpty(pin.TargetPath) && !string.IsNullOrEmpty(win.ProcessPath))
-        {
-            if (string.Equals(pin.TargetPath, win.ProcessPath, StringComparison.OrdinalIgnoreCase))
-                return true;
-
-            var pinExe = Path.GetFileName(pin.TargetPath);
-            var winExe = Path.GetFileName(win.ProcessPath);
-            if (!string.IsNullOrEmpty(pinExe) && string.Equals(pinExe, winExe, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-
-        // 2. Başlık / kısayol adı eşleşmesi
-        var shortcutName = Path.GetFileNameWithoutExtension(pin.ShortcutPath);
-        if (!string.IsNullOrEmpty(shortcutName) && !string.IsNullOrEmpty(win.Title))
-        {
-            if (win.Title.Contains(shortcutName, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-
-        if (!string.IsNullOrEmpty(pin.Title) && !string.IsNullOrEmpty(win.Title))
-        {
-            if (win.Title.Contains(pin.Title, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-
-        return false;
     }
 
     private void RequestRefresh()

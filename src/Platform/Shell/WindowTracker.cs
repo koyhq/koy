@@ -266,16 +266,19 @@ public sealed class WindowTracker : IWindowTracker
             if (isFrameWindow)
                 pid = ResolveUwpProcessId(hwnd, pid);
 
+            // AUMID: Windows görev çubuğu düğmeleri bununla gruplar; sabitli kısayolla eşleşmede önce o kullanılır.
+            var aumid = GetAppUserModelId(hwnd);
+
             var procPath = GetProcessPath(pid);
 
             // Mağaza uygulamaları ApplicationFrameHost.exe içinde çalışır; hepsi aynı exe'ye düşüp genel simgeyle
             // tek öğede toplanmasın diye uygulama kimliğinden (AUMID) kabuk yolu üretilir. Bu yol hem simge hem başlatma için geçerli.
-            if (isFrameWindow && GetAppUserModelId(hwnd) is { Length: > 0 } aumid)
+            if (isFrameWindow && aumid is { Length: > 0 })
                 procPath = @"shell:AppsFolder\" + aumid;
 
             var iconData = !string.IsNullOrEmpty(procPath) ? IconHelper.GetIconBytes(procPath) : null;
             var bounds = new WindowRect(wr.left, wr.top, wr.right, wr.bottom);
-            windows.Add(new OpenWindowInfo(hwnd.Value, title, procPath, (int)pid, bounds, iconData));
+            windows.Add(new OpenWindowInfo(hwnd.Value, title, procPath, (int)pid, bounds, iconData, aumid));
 
             return true;
         }, 0);
@@ -504,51 +507,7 @@ public sealed class WindowTracker : IWindowTracker
         }
     }
 
-    // PKEY_AppUserModel_ID
-    private static readonly PROPERTYKEY AppUserModelIdKey = new()
-    {
-        fmtid = new Guid("9F4C2855-9F79-4B39-A8D0-E1D42DE1D5F3"),
-        pid = 5
-    };
-
-    private static unsafe string? GetAppUserModelId(HWND hwnd)
-    {
-        try
-        {
-            PInvoke.SHGetPropertyStoreForWindow(hwnd, typeof(IPropertyStore).GUID, out var obj).ThrowOnFailure();
-            if (obj is not IPropertyStore store)
-                return null;
-
-            try
-            {
-                store.GetValue(AppUserModelIdKey, out var value);
-                try
-                {
-                    PInvoke.PropVariantToStringAlloc(value, out var str).ThrowOnFailure();
-                    try
-                    {
-                        return str.ToString();
-                    }
-                    finally
-                    {
-                        PInvoke.CoTaskMemFree(str.Value);
-                    }
-                }
-                finally
-                {
-                    PInvoke.PropVariantClear(ref value);
-                }
-            }
-            finally
-            {
-                Marshal.ReleaseComObject(store);
-            }
-        }
-        catch
-        {
-            return null;
-        }
-    }
+    private static string? GetAppUserModelId(HWND hwnd) => AppUserModelIdReader.ForWindow(hwnd);
 
     private static bool IsShellOrDesktop(HWND hwnd)
     {

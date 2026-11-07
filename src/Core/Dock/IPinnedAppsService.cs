@@ -7,7 +7,8 @@ public sealed record PinnedApp(
     string Title,
     string ShortcutPath,
     string? TargetPath,
-    byte[]? IconData);
+    byte[]? IconData,
+    string? AppUserModelId = null);
 
 /// <summary>
 /// Kullanıcının görev çubuğuna sabitlediği uygulamaları okuma sözleşmesi.
