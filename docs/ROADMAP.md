@@ -475,5 +475,9 @@ Proje sahibi istedi. Kod yazılmadı.
 ## Tanıtım sayfası (2026-11-07)
 - [x] `site/` (düz HTML/CSS/JS, derleme yok): hero (çentik sayfanın tepesinden sarkar, yayla açılır), çentik sekmeleri (gerçek ekran görüntüleri), dock, hafiflik, ayrıntılar, kurulum (SmartScreen uyarısı ve SHA256 doğrulama dahil). Koyu/açık tema sistemi izler. Son sürüm numarası GitHub API'den gelir, gelmezse rozet görünmez.
 - [x] `.github/workflows/pages.yml`: `main`'e `site/**` girince koyhq.github.io/koy adresinde yayınlar (SHA'ya sabit action'lar). Pages kaynağı "GitHub Actions" olarak açıldı.
-- [ ] İlk yayından sonra: depo ve org "Website" alanı, README rozetleri ve Hakkında'daki GitHub düğmesi site adresine bağlanır (güncelleme akışı GitHub Releases'ta kalır). Alan adı alınırsa `canonical` ve `og:url` güncellenir.
+- [x] Depo ve org "Website" alanı siteye bağlandı; sosyal medya görseli (mavi, yalnız yazı, `scripts/generate-og-banner.py`) ve `og`/Twitter etiketleri yayında; hero başlığı "Masaüstünü hafifçe değiştir."; org avatarı ve social preview yüklendi.
+- [x] Hero çentiği her masaüstü genişliğinde (900 px ve üstü) sayfanın en tepesinden sarkar; dar masaüstünde (900–1359 px) üst çubukta yalnız logo ve İndir kalır.
+- [ ] README rozetleri ve uygulamadaki Hakkında düğmesi site adresine bağlanır (güncelleme akışı GitHub Releases'ta kalır). Alan adı alınırsa `canonical` ve `og:url` güncellenir.
+- [ ] Hero'daki çentik fareyle açılır olsun (Dock bölümündeki demo gibi: üst kenara gelince yayla açılır, çıkınca 400 ms sonra kapanır; dokunmatikte dokununca).
 - [ ] İngilizce sürüm (şimdilik yalnız Türkçe).
+- [ ] Uygulamadaki Hakkında sayfasına teşekkür ve tanıtım kartı (Nectar ve Seelen UI esinlenmesi, site bağlantısı; TR ve EN).
