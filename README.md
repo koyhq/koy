@@ -1,9 +1,9 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/branding/dist/koy-horizontal-white-800.png">
-  <source media="(prefers-color-scheme: light)" srcset="assets/branding/dist/koy-horizontal-color-800.png">
-  <img alt="Koy Logo" src="assets/branding/dist/koy-horizontal-color-800.png" width="320">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/branding/koy-horizontal-white.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/branding/koy-horizontal-color.svg">
+  <img alt="Koy Logo" src="assets/branding/koy-horizontal-color.svg" width="320">
 </picture>
 
 <br />
@@ -20,7 +20,25 @@
 
 [İndir (Releases)](https://github.com/koyhq/koy/releases/latest) · [Mimari & Plan](docs/PLAN.md) · [Arayüz Tasarımı](docs/DESIGN.md) · [Katkıda Bulun](CONTRIBUTING.md) · [English Summary](#-english-overview)
 
+<br />
+
+<img alt="Çentik: Ana panel" src="docs/screenshots/centik-ana.png" width="720">
+
+<sub>Çentik açıkken Ana panel: çalan müzik, kulaklık pili, sistem ve ağ, hızlı başlat.</sub>
+
 </div>
+
+---
+
+## Ekran Görüntüleri
+
+| | |
+| :---: | :---: |
+| <img alt="Kapalı çentik, müzik çalarken" src="docs/screenshots/centik-kapali.png" width="360"><br><sub>Kapalı çentik: müzik çalarken kapak ve dalga</sub> | <img alt="Dock" src="docs/screenshots/dock.png" width="420"><br><sub>Dock: Windows görev çubuğunun yerine</sub> |
+| <img alt="Kontrol Merkezi" src="docs/screenshots/centik-kontrol.png" width="420"><br><sub>Kontrol Merkezi: Wi-Fi, Bluetooth, ses, parlaklık</sub> | <img alt="Takvim" src="docs/screenshots/centik-takvim.png" width="420"><br><sub>Takvim: ay, hafta ve gün görünümü, etkinlikler</sub> |
+| <img alt="Wi-Fi listesi" src="docs/screenshots/centik-wifi.png" width="420"><br><sub>Wi-Fi listesi: Windows'taki gibi ağ seçimi</sub> | |
+
+<sub>Çentik görüntüleri örnek verilerle çizildi (`tools/Koy.UiSnapshots`); dock görüntüsü gerçek ekrandan.</sub>
 
 ---
 
@@ -46,7 +64,8 @@ Masaüstü özelleştirme araçlarının çoğu (Electron, Tauri veya WebView2 t
 Ekranın üst ortasında (`Top = 0`), içbükey (*concave*) üst kulaklara sahip özel `NotchShape` vektör geometrisiyle konumlanır:
 - **Boşta Durum (236×34 px):** Solda saat, sağda pil yüzdesi; Kontrol paneli açıksa ortada Wi-Fi ve Bluetooth durum simgeleri (kapalıyken soluk ve üstü çizili, üzerine gelince durum yazar, tıklayınca Kontrol sekmesi açılır; radyo yoksa simge çıkmaz). Müzik çalarken solda albüm kapağı (22×22 px), sağda **%0 CPU** harcayan 4 çubuklu dalga ikonu.
 - **OSD HUD Göstergeleri (260×40 px):** Sistem sesi veya ekran parlaklığı değiştiğinde 1,5 saniye boyunca çentikte beliren akıcı gösterge (ses için beyaz `#F4F4F5`, parlaklık için sarı `#FACC15`). Sistem sesi (CoreAudio) ve parlaklık (WMI / DDC-CI) değişimlerine bağlıdır; Koy penceresinden ayrı ayrı kapatılır. Parlaklık göstergesi yalnız parlaklığı okunabilen ekranlarda çalışır.
-- **Genişleyen 5 Sekmeli Panel (640 px):** Üstteki sekme çubuğundan (Müzik, Kontrol, Durum, Takvim, Raf; ayarlarda açık olanlar, ayardaki sırayla) ya da fare tekerleğiyle paneller arasında geçilir.
+- **Pil ve Bluetooth Bildirimleri:** şarja takma/çıkarma, %20 ve %10 altı, dolu pil; eşleşmiş Bluetooth cihazı bağlanınca ya da ayrılınca adı ve pili çentikte kısa süre görünür.
+- **Genişleyen 7 Sekmeli Panel:** Alttaki sekme çubuğundan (Ana, Odak, Takvim, Raf, Pano, Sistem, Kontrol; ayarlarda açık olanlar, ayardaki sırayla) ya da fare tekerleğiyle paneller arasında geçilir.
   - **Müzik:** `GlobalSystemMediaTransportControls` ile Spotify, YouTube (Edge/Chrome/Firefox) ve medya oynatıcılar için kapak resmi, şarkı/sanatçı bilgisi, interaktif zaman çubuğu (`Seek`) ve çoklu oturum geçişi.
   - **Takvim & Pomodoro:** Pazartesi başlangıçlı ay görünümü ve çalışma/kısa mola/uzun mola durum makineli **Pomodoro** sayacı (süre bitiminde yay titreşimli Peek bildirimi).
   - **Raf (Shelf):** Dosya veya metinleri çentiğe sürükleyip bırakma (`%AppData%\Koy\shelf.json`). Bir dosyayı çentiğin üzerine sürüklediğinizde çentik kendiliğinden açılır ve Raf sekmesine geçer.
@@ -57,14 +76,16 @@ Ekranın üst ortasında (`Top = 0`), içbükey (*concave*) üst kulaklara sahip
 Windows görev çubuğunun sıradan bir kopyası değildir; saat, pil ve ağ göstergelerini çentiğe devrederek yalnızca uygulama ve pencere yönetimine odaklanır:
 - **İki Yerleşim Stili:**
   - **Yüzen Kapsül (Floating Capsule — Varsayılan):** 60 px yükseklik, alttan 10 px yukarıda, 18 px köşe yuvarlaklığı. Düzen: *Başlat → Uygulamalar (nokta/çizgi göstergeli) → Ayırıcı → Klasörler (İndirilenler) & Küçültülmüş Pencereler → Ayırıcı → Koy Menüsü*.
-  - **Tam Genişlik Cam (Full-Width Glass):** 44 px yükseklik. Solda çalan medya hapı, ortada uygulamalar (aktif pencere adıyla hap biçiminde), sağda Koy simgesi.
+  - **Tam Genişlik (Windows tarzı):** 48 px, ekran kenarına boşluksuz yapışık. Solda Başlat ve çalan medya, ortada uygulamalar (kapsülle aynı çalışma göstergeleri), sağda Koy menüsü ve küçük tepsi. Yalnız iki mod: "Her zaman göster" (tam 48 px yer ayırır) ve "Otomatik gizle".
+- **Dock Klasörleri:** sabitli bir uygulamayı başka birinin ortasına sürükleyip bekleyince ikisi klasör olur; klasör 2×2 önizlemeyle durur, tıklayınca cam panelde açılır. Ad değiştirme, klasörden çıkarma, dağıtma.
+- **Küçük Tepsi ve Basma Hissi:** tepsi Koy düğmesinin yanında dar bir ok; simgeye basınca hafifçe çöker, bırakınca yayla geri gelir.
 - **Pencere Yaklaşma Davranışları (`DockProximityMode`):**
   - **Aşağı Yapış (`DockDown` — Varsayılan):** Normal boy bir pencere yaklaşınca dock alt kenara iner (60 px'ten 46 px'e incelir, yalnız üst köşeleri yuvarlak kalır); pencere uzaklaşınca yeniden yüzer.
   - **Çekil / Akıllı Gizlenme (`Dodge`):** Pencere yaklaştığında veya büyütüldüğünde dock ekranın altına çekilir; fare alt kenara indiğinde geri gelir.
-  - **Yer Ayır (`ReserveSpace`):** `SHAppBarMessage` ile çalışma alanından 46 px yer ayırır; büyütülmüş pencereler tam dock'un üstünde biter.
+  - **Yer Ayır (`ReserveSpace`):** `SHAppBarMessage` ile çalışma alanından 46 px yer ayırır; büyütülmüş pencereler tam dock'un üstünde biter (ayrılan şerit tam genişliktir, kapsülün iki yanı boş kalır).
   - **Hep Gizli (`AlwaysHidden`):** Yalnızca fare ekranın alt kenarına geldiğinde görünür.
 - **Canlı DWM Pencere Önizlemesi:** Simgenin üzerinde 400 ms durulduğunda `DwmRegisterThumbnail` ile gerçek zamanlı pencere önizlemesi (üst düzey pencereye kaydedilir; kayıt başarısız olursa bir sonraki düzende yeniden denenir).
-- **Sistem Tepsisi:** Windows görev çubuğu gizliyken arka plan uygulamalarının (Discord, OneDrive vb.) simgeleri dock'taki yukarı ok düğmesinden açılan pencerede durur; sol/sağ tık uygulamaya iletilir. Koy bu sırada kendi `Shell_TrayWnd` penceresini kurar ve her kaydı Windows'a da iletir, yani Koy kapanır, çöker ya da duraklatılırsa Windows tepsisinin eksiksiz geri gelmesi hedeflenir (henüz elle sınanmadı). Görev çubuğu görünürken (ya da Dock sayfasında "Sistem tepsisini dock'ta göster" kapalıyken) Windows'un tepsisine dokunulmaz. Katkı: xdaxer (#11).
+- **Sistem Tepsisi:** Windows görev çubuğu gizliyken arka plan uygulamalarının (Discord, OneDrive vb.) simgeleri dock'taki yukarı ok düğmesinden açılan pencerede durur; sol/sağ tık uygulamaya iletilir. Koy bu sırada kendi `Shell_TrayWnd` penceresini kurar ve her kaydı Windows'a da iletir, yani Koy kapanır, çöker ya da duraklatılırsa Windows tepsisi eksiksiz geri gelir. Görev çubuğu görünürken (ya da Dock sayfasında "Sistem tepsisini dock'ta göster" kapalıyken) Windows'un tepsisine dokunulmaz. Katkı: xdaxer (#11).
 - **Alt Kenardan Açılma ve Tam Ekran:** Büyütülmüş pencere dock'u gizlediğinde fare alt kenarda ~300 ms durunca (tuş basılı değilken) dock çıkar; ayardan kapatılabilir. Oyunda, F11 tarayıcıda ve tam ekran videoda dock hiçbir koşulda çıkmaz. Tam ekran; Windows'un bildirimi, başlık çubuğunun olmayışı ve monitörü kaplama işaretlerinin birleşimiyle, monitör başına belirlenir.
 - **Sabitli Uygulama Sırası:** Sıra Koy'un ayarlarında tutulur; ilk açılışta Windows'un sırası tohum alınır, sonra simgeler dock'ta sürüklenerek sıralanır. Yeni sabitlenen sona eklenir.
 - **Son Kullanılanlar:** Dock'taki yığın simgesi Windows'un Son Kullanılanlar klasöründen en çok 10 dosyayı listeler (yalnız tıklanınca okunur); Dock sayfasından kapatılır.
@@ -89,10 +110,10 @@ Windows görev çubuğunun sıradan bir kopyası değildir; saat, pil ve ağ gö
 ### 5. Bilinen Eksikler
 Dürüst durum: aşağıdakiler henüz yok ya da doğrulanmadı.
 - **Bellek:** boşta hedefimiz 100–150 MB private (çok ekran ya da açık panellerle 200 MB'a kadar kabul). Son ölçüm (2026-11-06, tek monitör, çentik + dock + tepsi açık) 63,9 MB private; dock/tepsi paketi (gözcü süreç, son kullanılanlar, sabitli sıra, kenardan açma) sonrası yeniden ölçülmedi. Ayrıntılar [`docs/MEMORY.md`](docs/MEMORY.md) içinde.
-- **Dock tepsisi (#11):** gerçek donanımda elle denenmedi (Discord, Steam, Tailscale gibi uygulamalarda tıklama ve menü, sağ tıkta pencerenin açık kalıp seçimle kapanması, Explorer yeniden başlayınca simgelerin dönüşü, Koy'u Görev Yöneticisi'nden öldürünce Windows tepsisi) ve bellek etkisi ölçülmedi.
-- **Gözcü süreç ve dock paketi:** `Koy.Watchdog.exe` (Native AOT) henüz gerçek paketten elle denenmedi; sabitli uygulama sürükleme sırası, alt kenardan açılma, tam ekran ayrımı ve son kullanılanlar yığını da elle sınanmadı. Windows'un UWP sabitlemeleri (Spotify, WhatsApp gibi) dock'ta henüz gösterilmiyor.
-- **Çoklu ekran:** gerçek çok monitörlü ve karışık DPI'lı donanımda ve ikincil görev çubuğu AppBar'ında elle denenmedi.
-- **Henüz yok:** pano geçmişi, mikrofon/kamera kullanım göstergesi, Bluetooth cihaz bildirimi, ayrıntılı pil göstergesi. Sıra için [`docs/ROADMAP.md`](docs/ROADMAP.md).
+- **Dock klasörleri:** 0.2.0 ile geldi, elle sınaması sürüyor.
+- **Windows'un UWP sabitlemeleri** (Spotify, WhatsApp gibi) dock'ta henüz gösterilmiyor; dock'ta uygulama bazlı sağ tık menüsü (atlama listesi) yok.
+- **Çoklu ekran:** karışık DPI'lı donanımda ve ikincil görev çubuğu AppBar'ında elle denenmedi.
+- **Henüz yok:** mikrofon/kamera kullanım göstergesi, Windows bildirimlerini çentikte gösterme, kod imzası (SmartScreen uyarısı). Sıra için [`docs/ROADMAP.md`](docs/ROADMAP.md).
 - **Doğrulanmadı:** hareket (animasyon) akıcılığı, yarı saydam malzemenin gerçek cihazda görünümü, sistem teması değişince canlı güncelleme, uygulama içi kaldırma akışının gerçek bir kurulumda uçtan uca denenmesi.
 
 ---
