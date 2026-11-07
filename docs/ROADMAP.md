@@ -425,7 +425,7 @@ Proje sahibi istedi. Kod yazılmadı; önce bu plan onaylanır.
    - Süzgeç Windows'un kuralına çekilir (Core'da saf, testli `TaskbarWindowRule`): görünür + cloak değil + (`WS_EX_APPWINDOW` ise her zaman göster; değilse sahipsiz ve `WS_EX_TOOLWINDOW`/`WS_EX_NOACTIVATE` değil). Boş başlık tek başına eleme sebebi olmaz.
    - Olay kapsamı denetlenir: `EVENT_OBJECT_UNCLOAKED`, `EVENT_OBJECT_SHOW`, başlık değişimi, sanal masaüstü değişimi; kaçan olay için yoklama eklenmez.
    - **Taşma:** çok uygulama açıkken kapsül ekran genişliğini geçmez; önce simgeler küçülür (en küçük 24 px), yetmezse kapsül ekran kenarına kadar genişler. Tam genişlikte orta bölüm sağ/sol bölümlere taşmaz (sabit 260 px sütunlar yerine içerik kadar).
-3. [ ] **Windows tarzı tam genişlik (cam):**
+3. [x] **Windows tarzı tam genişlik (cam):** (kod 2026-11-07, `feat/dock-fullwidth-tray`; elle denenmedi, uygulama notları aşağıda)
    - Ayarlar > Dock > Stil: "Yüzen kapsül" / "Tam genişlik". Tam genişlik Windows 11 görev çubuğu ölçüsünde: **48 px**, ekran kenarına sıfır boşlukla yapışık, köşe yuvarlaması yok, üst kenarda ince parıltı çizgisi. Başlat solda veya ortada (Windows'taki "Görev çubuğu hizalaması" gibi), uygulamalar ortada, sağda Koy menüsü + küçük tepsi + saat/tarih (isteğe bağlı).
    - Cam: `Material` ayarına uyar (akrilik/mika; katı modda opak). Koy renkleri ve yazı tipleri.
    - **Çalışma alanı:** tam genişlikte "Her zaman göster" seçiliyse AppBar ile tam 48 px ayrılır (piksel/DPI yuvarlaması testli) → büyütülmüş pencere çubuğun hemen üstünde biter, arada boşluk kalmaz. "Otomatik gizle" seçiliyse yer ayrılmaz; fare ekranın en altına değince çubuk çıkar (bugünkü kenardan açma, `EdgeRevealTracker`).

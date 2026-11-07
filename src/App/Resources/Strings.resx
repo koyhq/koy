@@ -1098,6 +1098,18 @@
   <data name="DockKoyMenu" xml:space="preserve">
     <value>Koy menu</value>
   </data>
+  <data name="ProxFullAlwaysShow" xml:space="preserve">
+    <value>Always show</value>
+  </data>
+  <data name="ProxFullAutoHide" xml:space="preserve">
+    <value>Auto-hide</value>
+  </data>
+  <data name="ProxFullAlwaysShowDesc" xml:space="preserve">
+    <value>The bar is always visible; windows end right above it, like the Windows taskbar.</value>
+  </data>
+  <data name="ProxFullAutoHideDesc" xml:space="preserve">
+    <value>The bar appears when the pointer reaches the bottom edge. No screen space is reserved.</value>
+  </data>
   <data name="SystemTray" xml:space="preserve">
     <value>System tray</value>
   </data>

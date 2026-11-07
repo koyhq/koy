@@ -58,6 +58,14 @@ public class DockFitMathTests
         Assert.Equal(40, DockFitMath.SlotWidth(28));
     }
 
+    [Theory]
+    [InlineData(60, 38, 1.30)]   // kapsül: tepe sınırı
+    [InlineData(48, 38, 1.2105263157894737)] // tam genişlik: (48-2)/38
+    [InlineData(48, 60, 1.0)]    // kutu çubuğa zaten sığmıyorsa büyütme yok
+    [InlineData(0, 38, 1.0)]
+    public void Hover_peak_scale_never_overflows_the_bar(double bar, double item, double expected)
+        => Assert.Equal(expected, DockFitMath.HoverPeakScale(bar, item), 6);
+
     [Fact]
     public void Strip_max_width_never_negative()
     {

@@ -38,7 +38,7 @@
             <!-- 1. Yüzen Kapsül Modu (Varsayılan Seelen Modeli) -->
             <local:DockCapsule Visibility="{Binding IsFullWidthMode, Converter={x:Static local:DockConverters.InverseBoolToVisibilityConverter}}"/>
 
-            <!-- 2. Tam Genişlik Modu (44 px, Müzik Hapı + Uygulama Metin Hapı + Koy) -->
+            <!-- 2. Tam Genişlik Modu (48 px, Windows görev çubuğu tarzı: Başlat, uygulamalar, sağ bölüm) -->
             <local:DockFullWidth Visibility="{Binding IsFullWidthMode, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
         </Grid>
 

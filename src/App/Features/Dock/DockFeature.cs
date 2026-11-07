@@ -92,8 +92,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             refreshDebounce: TimeSpan.FromMilliseconds(120),
             post: action => Application.Current?.Dispatcher.InvokeAsync(action));
 
-        // Yalnızca ReserveSpace (Yer ayır) yakınlık modunda masaüstü çalışma alanından (AppBar) yer ayır
-        if (settings.DockProximity == DockProximityMode.ReserveSpace)
+        // Yalnızca ReserveSpace (Yer ayır / tam genişlikte "Her zaman göster") modunda masaüstü çalışma alanından (AppBar) yer ayır
+        if (EffectiveProximity == DockProximityMode.ReserveSpace)
         {
             _appBarService = new AppBarService();
         }
@@ -199,11 +199,14 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
                 continue;
 
             var dpiScale = state.Monitor.DpiScaleY;
-            _appBarService.Reregister(state.Hwnd, (int)Math.Ceiling(state.Window.ReservedHeight), dpiScale);
+            _appBarService.Reregister(state.Hwnd, state.Window.ReservedHeight, dpiScale);
         }
     }
 
     private bool _taskbarHidden;
+
+    /// <summary>Stile göre geçerli yakınlık modu (tam genişlikte Aşağı yapış/Çekil sadeleşir; bkz. DockProximityMapping).</summary>
+    private DockProximityMode EffectiveProximity => DockProximityMapping.Effective(settings.DockStyle, settings.DockProximity);
 
     private void EnsureTaskbarHidden()
     {
@@ -373,7 +376,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             VisibilityController = visibilityController,
             // Çekil modunun kendi gecikmesi (DockDodgeDelayMs) ViewModel'de işler; çifte beklemesin.
             EdgeTracker = new EdgeRevealTracker(
-                settings.DockProximity == DockProximityMode.Dodge ? TimeSpan.Zero : EdgeRevealTracker.DefaultDelay)
+                EffectiveProximity == DockProximityMode.Dodge ? TimeSpan.Zero : EdgeRevealTracker.DefaultDelay)
         };
 
         // Dock gizlenince / görününce kenar zamanlayıcısı açılıp kapanır (gizli değilken fare izlenmez).
@@ -400,7 +403,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             if (_appBarService is not null)
             {
                 var dpiScale = state.Monitor.DpiScaleY;
-                var height = window.ActualHeight > 0 ? (int)Math.Ceiling(window.ReservedHeight) : 46;
+                var height = window.ActualHeight > 0 ? window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
                 _appBarService.Register(hwnd, height, dpiScale);
             }
 
@@ -414,7 +417,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             if (_appBarService is not null && state.Hwnd != 0 && e.NewSize.Height > 0)
             {
                 var dpiScale = state.Monitor.DpiScaleY;
-                _appBarService.UpdatePosition(state.Hwnd, (int)Math.Ceiling(window.ReservedHeight), dpiScale);
+                _appBarService.UpdatePosition(state.Hwnd, window.ReservedHeight, dpiScale);
             }
         };
 
@@ -428,7 +431,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         {
             UpdateDockBounds(window, visibilityController);
             if (_appBarService is not null && state.Hwnd != 0 && window.ActualHeight > 0)
-                _appBarService.UpdatePosition(state.Hwnd, (int)Math.Ceiling(window.ReservedHeight), state.Monitor.DpiScaleY);
+                _appBarService.UpdatePosition(state.Hwnd, window.ReservedHeight, state.Monitor.DpiScaleY);
         };
 
         window.DisplayChangeHandler = () =>
@@ -672,9 +675,9 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         // Dodge/AlwaysHidden/akıllı görünürlük kenarı hep izler; büyütülmüş pencere dock'u gizlediyse
         // (NeedsEdgeWatch) ve kenardan açma açıksa yalnız o sürede izlenir.
         var shouldRun = _windowStates.Values.Any(s =>
-            ((settings.DockProximity is DockProximityMode.Dodge or DockProximityMode.AlwaysHidden ||
+            ((EffectiveProximity is DockProximityMode.Dodge or DockProximityMode.AlwaysHidden ||
               settings.DockVisibility != VisibilityMode.Fixed) &&
-             settings.DockProximity != DockProximityMode.ReserveSpace) ||
+             EffectiveProximity != DockProximityMode.ReserveSpace) ||
             (settings.DockEdgeReveal && s.ViewModel.NeedsEdgeWatch));
 
         if (shouldRun)

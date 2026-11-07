@@ -38,6 +38,18 @@ public static class DockFitMath
         return Math.Clamp(fit, MinIconSizeDip, preferredIconSize);
     }
 
+    /// <summary>
+    /// Fare üstünde öğenin en çok büyüyeceği ölçek: çubuk yüksekliğine (1 px üst çizgi + 1 px pay) sığacak kadar,
+    /// en fazla <paramref name="maxScale"/>. 48 px çubukta 38 px'lik kutu ~1,21 kata çıkar, 60 px kapsülde 1,30.
+    /// </summary>
+    public static double HoverPeakScale(double barHeight, double itemSize, double maxScale = 1.30)
+    {
+        if (itemSize <= 0 || barHeight <= 0)
+            return 1.0;
+
+        return Math.Clamp((barHeight - 2.0) / itemSize, 1.0, maxScale);
+    }
+
     /// <summary>Uygulama şeridine kalan en çok genişlik; 0'ın altına inmez.</summary>
     public static double StripMaxWidth(double availableWidth, double otherWidth)
         => Math.Max(0.0, availableWidth - otherWidth);

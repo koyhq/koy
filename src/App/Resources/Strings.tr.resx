@@ -1098,6 +1098,18 @@
   <data name="DockKoyMenu" xml:space="preserve">
     <value>Koy menüsü</value>
   </data>
+  <data name="ProxFullAlwaysShow" xml:space="preserve">
+    <value>Her zaman göster</value>
+  </data>
+  <data name="ProxFullAutoHide" xml:space="preserve">
+    <value>Otomatik gizle</value>
+  </data>
+  <data name="ProxFullAlwaysShowDesc" xml:space="preserve">
+    <value>Çubuk hep görünür; pencereler Windows görev çubuğu gibi onun hemen üstünde biter.</value>
+  </data>
+  <data name="ProxFullAutoHideDesc" xml:space="preserve">
+    <value>Çubuk fare ekranın en altına değince çıkar. Ekranda yer ayrılmaz.</value>
+  </data>
   <data name="SystemTray" xml:space="preserve">
     <value>Sistem tepsisi</value>
   </data>

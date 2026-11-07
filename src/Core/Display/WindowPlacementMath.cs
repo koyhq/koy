@@ -46,5 +46,11 @@ public static class WindowPlacementMath
         return new WindowRect(monitor.Bounds.Left, monitor.Bounds.Bottom - height, monitor.Bounds.Right, monitor.Bounds.Bottom);
     }
 
-    private static int ToPixels(double dip, double scale) => (int)Math.Round(dip * (scale > 0 ? scale : 1.0));
+    /// <summary>
+    /// DIP'ten fiziksel piksele TEK dönüşüm kuralı: yarım değerler yukarı yuvarlanır. Dock penceresinin yüksekliği ve
+    /// AppBar'ın ayırdığı pay aynı fonksiyondan geçer; böylece büyütülmüş pencere ile çubuk arasında 1 piksellik boşluk
+    /// ya da çakışma kalmaz (125 %, 150 % gibi kesirli ölçeklerde kesme/yuvarlama farkı bunu üretiyordu).
+    /// </summary>
+    public static int ToPixels(double dip, double scale) =>
+        (int)Math.Round(dip * (scale > 0 ? scale : 1.0), MidpointRounding.AwayFromZero);
 }

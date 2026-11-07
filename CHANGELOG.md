@@ -11,6 +11,10 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 - **Dock: küçük tepsi.** Ayarlar › Dock › "Küçük tepsi" (varsayılan açık): tepsi düğmesi tam boy simge yerine dar bir ok olur ve Koy menüsü düğmesinin sağına geçer; tepsi paneli aynı yerden açılır.
 - **Dock sağ bölümü iki modda aynı:** tam genişlik dock'ta da İndirilenler düğmesi var; Başlat, İndirilenler, Son kullanılanlar ve Tepsi anahtarları her iki modda çalışır. Kapalı düğmelerin ayırıcısı gizlenir.
 
+- **Dock: Windows tarzı tam genişlik.** Çubuk Windows 11 görev çubuğu ölçüsünde 48 px, ekran kenarına sıfır boşlukla yapışık, köşesiz, üstte ince parıltı çizgisi. Yüzey Ayarlar › Görünüm › Malzeme'ye uyar (Katı: opak, Yarı saydam: %88). Çalışma göstergeleri (nokta/çizgi, çoklu pencere, dikkat, rozet) kapsülle aynı şablondan gelir; etkin uygulamanın adı artık çubukta yazmıyor (Windows gibi yalnız simge ve gösterge).
+- **Tam genişlikte yakınlık modları sadeleşti:** "Her zaman göster" (çalışma alanından tam 48 px ayırır, büyütülmüş pencere çubuğun hemen üstünde biter) ve "Otomatik gizle" (yer ayırmaz, fare alt kenara gelince çıkar). "Aşağı yapış" ve "Çekil" yalnız kapsülde; tam genişliğe geçince Aşağı yapış → Her zaman göster, Çekil → Otomatik gizle olur.
+- **Dock hareketi tek kaynaktan:** dock yayları (kayma, solma, simge büyümesi) Windows "animasyonları azalt", Animasyon hızı ayarı ve pil tasarrufuna uyar.
+
 ### Düzeltmeler (Fixed)
 - **Dock'ta açık uygulamalar bazen görünmüyordu:** açık pencere süzgeci Windows görev çubuğunun kuralına çekildi (`WS_EX_APPWINDOW` pencereler sahipli olsa da gösterilir; `WS_EX_NOACTIVATE` ve araç pencereleri gizli kalır; başlığı boş pencere tek başına elenmez). Pencere gizlilikten çıkınca (`UNCLOAKED`), gizlenince ve başlığı değişince dock tazelenir (yoklama yok, olaylar birleştirilir).
 - **Çok uygulama açıkken dock ekrandan taşmıyor:** kapsülde simgeler en küçük 24 px'e kadar küçülür; tam genişlikte orta bölüm yan bölümlere binmez.

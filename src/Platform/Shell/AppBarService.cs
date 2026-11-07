@@ -1,3 +1,4 @@
+using Koy.Core.Display;
 using Koy.Core.Dock;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -22,7 +23,7 @@ public sealed class AppBarService : IAppBarService
     private readonly HashSet<nint> _registeredHandles = [];
     private bool _disposed;
 
-    public unsafe void Register(nint windowHandle, int heightDip, double dpiScale = 1.0)
+    public unsafe void Register(nint windowHandle, double heightDip, double dpiScale = 1.0)
     {
         if (windowHandle == 0 || _registeredHandles.Contains(windowHandle))
             return;
@@ -47,7 +48,7 @@ public sealed class AppBarService : IAppBarService
         }
     }
 
-    public unsafe void UpdatePosition(nint windowHandle, int heightDip, double dpiScale = 1.0)
+    public unsafe void UpdatePosition(nint windowHandle, double heightDip, double dpiScale = 1.0)
     {
         if (windowHandle == 0 || !_registeredHandles.Contains(windowHandle))
             return;
@@ -55,7 +56,7 @@ public sealed class AppBarService : IAppBarService
         UpdatePositionInternal(new HWND(windowHandle), heightDip, dpiScale);
     }
 
-    public void Reregister(nint windowHandle, int heightDip, double dpiScale = 1.0)
+    public void Reregister(nint windowHandle, double heightDip, double dpiScale = 1.0)
     {
         if (windowHandle == 0)
             return;
@@ -80,7 +81,7 @@ public sealed class AppBarService : IAppBarService
         PInvoke.SHAppBarMessage(ABM_REMOVE, ref data);
     }
 
-    private static unsafe void UpdatePositionInternal(HWND hwnd, int heightDip, double dpiScale)
+    private static unsafe void UpdatePositionInternal(HWND hwnd, double heightDip, double dpiScale)
     {
         if (heightDip <= 0)
             heightDip = 46;
@@ -104,7 +105,8 @@ public sealed class AppBarService : IAppBarService
             }
         }
 
-        var heightPx = (int)(heightDip * dpiScale);
+        // Pencere yüksekliğiyle aynı piksel kuralı (WindowPlacementMath.ToPixels): çubuk ile çalışma alanı arasında boşluk kalmaz.
+        var heightPx = WindowPlacementMath.ToPixels(heightDip, dpiScale);
 
         var data = new APPBARDATA
         {

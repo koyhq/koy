@@ -200,7 +200,7 @@ public class DockPositionResolverTests
     }
 
     [Fact]
-    public void FullWidth_SnapsToBottomWith44PxHeightAndFullScreenWidth()
+    public void FullWidth_SnapsToBottomWith48PxHeightAndFullScreenWidth()
     {
         var result = DockPositionResolver.Resolve(
             monitor: Primary1080p,
@@ -213,9 +213,10 @@ public class DockPositionResolverTests
         Assert.True(result.IsSnapped);
         Assert.Equal(0.0, result.LeftDip);
         Assert.Equal(1920.0, result.WidthDip);
-        Assert.Equal(44.0, result.HeightDip);
-        // Top = 1080 - 44 = 1036
-        Assert.Equal(1036.0, result.TopDip);
+        Assert.Equal(48.0, result.HeightDip);
+        Assert.Equal(DockPositionResolver.FullWidthHeightDip, result.HeightDip);
+        // Top = 1080 - 48 = 1032
+        Assert.Equal(1032.0, result.TopDip);
         Assert.Equal(0.0, result.CornerRadiusTopLeft);
         Assert.Equal(0.0, result.CornerRadiusTopRight);
         Assert.Equal(0.0, result.CornerRadiusBottomRight);
@@ -241,7 +242,7 @@ public class DockPositionResolverTests
     }
 
     [Fact]
-    public void FullWidth_WhenReserveSpace_Reserves44PxWorkArea()
+    public void FullWidth_WhenReserveSpace_Reserves48PxWorkArea()
     {
         var result = DockPositionResolver.Resolve(
             monitor: Primary1080p,
@@ -251,8 +252,8 @@ public class DockPositionResolverTests
             foregroundWindowBoundsDip: WindowRect.Empty);
 
         Assert.True(result.IsFullWidth);
-        Assert.Equal(44, result.AppBarReservedHeightDip);
-        Assert.Equal(44.0, result.HeightDip);
+        Assert.Equal(48, result.AppBarReservedHeightDip);
+        Assert.Equal(48.0, result.HeightDip);
     }
 
     [Fact]

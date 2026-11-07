@@ -135,6 +135,16 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private DockProximityMode _dockProximity = DockProximityMode.ReserveSpace;
 
+    // Tam genişlikte Aşağı yapış / Çekil sunulmaz: seçiliyse geçerli karşılığına (Yer ayır / Hep gizli) çekilir.
+    // Kapsüle dönünce yeni seçim yapılır; ayar dosyası yüklenirken değer bozulmaz.
+    partial void OnDockStyleChanged(DockStyleMode value)
+    {
+        if (_isLoading)
+            return;
+
+        DockProximity = DockProximityMapping.Effective(value, DockProximity);
+    }
+
     [ObservableProperty]
     private bool _dockHideInFullscreen = true;
 
@@ -324,6 +334,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             DockDodgeDelayMs = s.DockDodgeDelayMs;
             DockIconSize = s.DockIconSize > 0 ? s.DockIconSize : 28.0;
             DockIndicatorStyle = s.DockIndicatorStyle;
+            // Tam genişlikte seçilemeyen mod ayar ekranında geçerli karşılığıyla görünür (çalışma anındaki eşlemeyle aynı).
+            DockProximity = DockProximityMapping.Effective(DockStyle, DockProximity);
 
             NotchHideInFullscreen = s.NotchHideInFullscreen;
             ShowVolumeOsd = s.ShowVolumeOsd;
@@ -477,7 +489,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private static bool AffectsDock(string? name) =>
         name is not null && name != nameof(DockEnabled) &&
         (name.StartsWith("Dock", StringComparison.Ordinal) ||
-         name is nameof(HideWindowsTaskbar) or nameof(BatterySaverReduceMotion) or nameof(MiddleClickAction));
+         name is nameof(HideWindowsTaskbar) or nameof(BatterySaverReduceMotion) or nameof(MiddleClickAction) or nameof(Material)
+             or nameof(AnimationSpeed) or nameof(RespectReduceMotion));
 
     private static bool AffectsNotch(string? name) =>
         name is nameof(NotchVisibility) or nameof(NotchHideInFullscreen) or nameof(MusicShowWaveform)

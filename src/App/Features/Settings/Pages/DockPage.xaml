@@ -52,7 +52,25 @@
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="{Binding [DockProximityTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
+                <!-- Tam genişlikte yalnız Windows görev çubuğunun iki hâli: hep göster (yer ayırır) ve otomatik gizle.
+                     Aşağı yapış ve Çekil kapsüle özgüdür (DockProximityMapping). -->
                 <Border Style="{StaticResource SegmentContainerStyle}">
+                    <Border.Visibility>
+                        <Binding Path="DockStyle" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="FullWidth" />
+                    </Border.Visibility>
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [ProxFullAlwaysShow], Source={x:Static res:Loc.Instance}}" GroupName="DockProximityFull"
+                                     IsChecked="{Binding DockProximity, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=ReserveSpace}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [ProxFullAutoHide], Source={x:Static res:Loc.Instance}}" GroupName="DockProximityFull"
+                                     IsChecked="{Binding DockProximity, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=AlwaysHidden}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource SegmentContainerStyle}">
+                    <Border.Visibility>
+                        <Binding Path="DockStyle" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="FloatingCapsule" />
+                    </Border.Visibility>
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [ProxReserve], Source={x:Static res:Loc.Instance}}" GroupName="DockProximity"
                                      IsChecked="{Binding DockProximity, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=ReserveSpace}"
@@ -70,6 +88,24 @@
                 </Border>
             </Grid>
             <Grid>
+                <Grid.Visibility>
+                    <Binding Path="DockStyle" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="FullWidth" />
+                </Grid.Visibility>
+                <TextBlock Text="{Binding [ProxFullAlwaysShowDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,8,0,0">
+                    <TextBlock.Visibility>
+                        <Binding Path="DockProximity" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="ReserveSpace" />
+                    </TextBlock.Visibility>
+                </TextBlock>
+                <TextBlock Text="{Binding [ProxFullAutoHideDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,8,0,0">
+                    <TextBlock.Visibility>
+                        <Binding Path="DockProximity" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="AlwaysHidden" />
+                    </TextBlock.Visibility>
+                </TextBlock>
+            </Grid>
+            <Grid>
+                <Grid.Visibility>
+                    <Binding Path="DockStyle" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="FloatingCapsule" />
+                </Grid.Visibility>
                 <TextBlock Text="{Binding [ProxReserveDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,8,0,0">
                     <TextBlock.Visibility>
                         <Binding Path="DockProximity" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="ReserveSpace" />

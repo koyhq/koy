@@ -9,7 +9,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Koy.App.Features.Dock.Tray;
 using Koy.App.Features.Settings;
+using Koy.App.Resources;
 using Koy.Core.Animation;
+using Koy.Core.Appearance;
 using Koy.Core.Display;
 using Koy.Core.Dock;
 using Koy.Core.Media;
@@ -44,8 +46,21 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     private bool _isAnimating;
     private bool _disposed;
 
-    /// <summary>Pil tasarrufu: true iken dock kayma ve solma animasyonu olmadan anında konum/görünürlük değiştirir.</summary>
-    public bool ReduceMotion { get; set; }
+    // Pil tasarrufu politikası hareketi azaltmak istiyor mu (DockFeature güç servisinden besler).
+    private bool _batteryReduceMotion;
+
+    /// <summary>
+    /// true iken dock kayma, solma ve büyüme yayları anında değer alır. Tek kaynak Motion: Animasyon hızı "Kapalı",
+    /// Windows "animasyonları azalt" (Hareketi azalt ayarına uy açıksa) ve pil tasarrufu; bir de bu dock'un güç servisi.
+    /// </summary>
+    public bool ReduceMotion
+    {
+        get => _batteryReduceMotion || !Motion.Enabled;
+        set => _batteryReduceMotion = value;
+    }
+
+    // Animasyon hızı ayarı (Sakin 1,5 / Hızlı 0,65): yay zamanı bununla bölünür. 0 ise ReduceMotion zaten anında atlar.
+    private static double TimeScale => Motion.Scale > 0 ? 1.0 / Motion.Scale : 1.0;
 
     private DisplayMonitor? _currentMonitor;
     private WindowRect _foregroundWindowBounds = WindowRect.Empty;
@@ -216,6 +231,17 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private double _itemSize = 38.0;
 
+    /// <summary>
+    /// Tam genişlik çubuğun yüzeyi. Material "Yarı saydam" ise %88 opak (ThemeManager'ın pencere yüzeyleriyle aynı değer),
+    /// "Katı" ise opak. Dock penceresi katmanlı (AllowsTransparency) olduğundan DWM arka plan malzemesi (akrilik/mika)
+    /// uygulanamaz; bulanıklık yerine yarı saydam yüzey kullanılır.
+    /// </summary>
+    public Brush FullWidthSurface { get; }
+
+    /// <summary>Simgeler en küçük boyutta bile sığmıyor: şerit sınırında kırpılır (aksi halde yan bölümlere taşardı).</summary>
+    [ObservableProperty]
+    private bool _isStripClipped;
+
     /// <summary>Uygulama şeridinin en çok genişliği: simgeler en küçük boyutta bile sığmazsa şerit bu sınırda kırpılır.</summary>
     [ObservableProperty]
     private double _itemsMaxWidth = double.PositiveInfinity;
@@ -251,6 +277,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     public event EventHandler? AnimationStopped;
     public event Action? RequestReposition;
 
+    /// <summary>Stile göre geçerli yakınlık modu: tam genişlikte yalnız Yer ayır (hep göster) ve Hep gizli (otomatik gizle).</summary>
+    public DockProximityMode EffectiveProximity =>
+        DockProximityMapping.Effective(_settings.DockStyle, _settings.DockProximity);
+
     public DockController Controller => _controller;
     public AppSettings Settings => _settings;
     public DockStatusViewModel? Status { get; }
@@ -285,6 +315,13 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _showStartButton = settings.DockShowStartButton;
         _showFolders = settings.DockShowFolders;
         _showBadges = settings.DockShowBadges;
+
+        var surfaceAlpha = MaterialSetting.IsTranslucent(settings.Material)
+            ? (byte)Math.Round(255 * MaterialSetting.TranslucentSurfaceOpacity)
+            : (byte)255;
+        var surface = new SolidColorBrush(Color.FromArgb(surfaceAlpha, 0x12, 0x12, 0x16));
+        surface.Freeze();
+        FullWidthSurface = surface;
 
         _translateSpring = new Spring(0) { Stiffness = 280, Damping = 25 };
         _opacitySpring = new Spring(1.0) { Stiffness = 200, Damping = 24 };
@@ -629,6 +666,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
 
         ItemsMaxWidth = maxWidth;
+        IsStripClipped = Items.Count * DockFitMath.SlotWidth(icon) > maxWidth + 0.5;
 
         if (Math.Abs(icon - IconSize) < 0.01)
             return;
@@ -657,7 +695,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
         _isMouseAtBottomEdge = atBottom;
 
-        if (atBottom && _settings.DockProximity == DockProximityMode.Dodge)
+        if (atBottom && EffectiveProximity == DockProximityMode.Dodge)
         {
             _dodgeHoverTimer.Start();
         }
@@ -700,7 +738,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         var resolved = DockPositionResolver.Resolve(
             _currentMonitor,
             _settings.DockStyle,
-            _settings.DockProximity,
+            EffectiveProximity,
             _lastContentWidth,
             _foregroundWindowBounds,
             _isForegroundWindowMaximized,
@@ -739,7 +777,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         // sistem geneli bayrağı bilerek kullanılmaz).
         var isBlockedByFullscreen = _settings.DockHideInFullscreen && _isForegroundWindowFullscreen;
         var shouldShow = !resolved.IsHidden && !isBlockedByFullscreen;
-        if (_visibilityController is not null && _settings.DockProximity != DockProximityMode.ReserveSpace)
+        if (_visibilityController is not null && EffectiveProximity != DockProximityMode.ReserveSpace)
         {
             shouldShow = shouldShow && _visibilityController.IsVisible;
         }
@@ -871,16 +909,20 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     public void OnItemHover(int hoveredIndex)
     {
-        if (!MagnificationEnabled)
+        if (!MagnificationEnabled || ReduceMotion)
             return;
+
+        // Tepe büyüme çubuğun yüksekliğine göre sınırlanır (48 px çubukta öğe taşmaz); komşu yarısı kadar büyür.
+        var peak = DockFitMath.HoverPeakScale(DockHeight, ItemSize);
+        var neighbor = 1.0 + (peak - 1.0) * 0.5;
 
         for (var i = 0; i < Items.Count; i++)
         {
             var dist = Math.Abs(i - hoveredIndex);
             var targetScale = dist switch
             {
-                0 => 1.30,
-                1 => 1.15,
+                0 => peak,
+                1 => neighbor,
                 _ => 1.0
             };
             Items[i].SetTargetScale(targetScale);
@@ -989,7 +1031,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     {
         for (var i = 0; i < Items.Count; i++)
         {
-            Items[i].SetTargetScale(1.0);
+            if (ReduceMotion)
+                Items[i].SnapScale(1.0);
+            else
+                Items[i].SetTargetScale(1.0);
         }
 
         _isAnimating = true;
@@ -1000,6 +1045,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     {
         if (!_isAnimating)
             return;
+
+        deltaSeconds *= TimeScale;
 
         var tMoving = _translateSpring.Step(deltaSeconds);
         var oMoving = _opacitySpring.Step(deltaSeconds);

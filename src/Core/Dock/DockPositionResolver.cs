@@ -43,7 +43,11 @@ public static class DockPositionResolver
     public const double SnappedHeightDip = 46.0;
     public const double SnappedCornerRadiusDip = 14.0;
 
-    public const double FullWidthHeightDip = 44.0;
+    /// <summary>
+    /// Tam genişlik çubuğun yüksekliği: Windows 11 görev çubuğu ölçüsü. Dock penceresi, AppBar payı, XAML ve gizlenme
+    /// kayması hep bu sabitten okur; başka yerde 48 yazılmaz.
+    /// </summary>
+    public const double FullWidthHeightDip = 48.0;
     public const double DodgeHandleWidthDip = 120.0;
     public const double DodgeHandleHeightDip = 4.0;
     public const double DodgeHandleBottomMarginDip = 4.0;

@@ -21,16 +21,17 @@ public partial class DockWindow : Window
 
     /// <summary>
     /// Çalışma alanından ayrılacak yükseklik:
-    /// Yüzen dock için 60 px + 10 px alt boşluk; Tam genişlik için 44 px; Yer ayır (ReserveSpace) için 46 px.
+    /// Yüzen dock için 60 px + 10 px alt boşluk; Tam genişlik için FullWidthHeightDip (48); Yer ayır için 46 px.
+    /// DIP olarak döner; piksele çevirme tek kuralla (WindowPlacementMath.ToPixels) AppBar'da yapılır.
     /// </summary>
     public double ReservedHeight
     {
         get
         {
             if (ViewModel?.IsFullWidthMode == true)
-                return 44;
-            if (ViewModel?.Settings.DockProximity == DockProximityMode.ReserveSpace)
-                return 46;
+                return DockPositionResolver.FullWidthHeightDip;
+            if (ViewModel?.EffectiveProximity == DockProximityMode.ReserveSpace)
+                return DockPositionResolver.SnappedHeightDip;
             return ActualHeight > 0 ? ActualHeight : 70;
         }
     }
@@ -144,7 +145,7 @@ public partial class DockWindow : Window
             if (ViewModel?.IsFullWidthMode == true)
             {
                 SizeToContent = SizeToContent.Manual;
-                WindowStyles.SetBounds(hwnd, WindowPlacementMath.BottomFullWidth(monitor, 44.0), resize: sameDpi);
+                WindowStyles.SetBounds(hwnd, WindowPlacementMath.BottomFullWidth(monitor, DockPositionResolver.FullWidthHeightDip), resize: sameDpi);
             }
             else
             {
@@ -164,9 +165,9 @@ public partial class DockWindow : Window
             var screenTop = _targetMonitor?.TopDip ?? 0.0;
 
             Width = screenWidth;
-            Height = 44.0;
+            Height = DockPositionResolver.FullWidthHeightDip;
             Left = screenLeft;
-            Top = screenTop + screenHeight - 44.0;
+            Top = screenTop + screenHeight - DockPositionResolver.FullWidthHeightDip;
             return;
         }
 
