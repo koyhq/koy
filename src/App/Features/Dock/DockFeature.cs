@@ -96,7 +96,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         // Yalnızca ReserveSpace (Yer ayır / tam genişlikte "Her zaman göster") modunda masaüstü çalışma alanından (AppBar) yer ayır
         if (EffectiveProximity == DockProximityMode.ReserveSpace)
         {
-            _appBarService = new AppBarService();
+            _appBarService = new AppBarService { OwnsBottomEdge = settings.HideWindowsTaskbar };
         }
 
         // Medya servisi (Tam genişlik Now Playing hapı için); Notch ile paylaşılan tek örnek
@@ -257,6 +257,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     public void OnTaskbarRestoredManually()
     {
         _trayReleasedByUser = true;
+        if (_appBarService is not null)
+            _appBarService.OwnsBottomEdge = false;   // görev çubuğu geri geldi: AppBar onun üstüne yığılır
         if (_trayService is not null)
             ReleaseTray();
     }
@@ -275,6 +277,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         {
             TaskbarService.Hide();
             _taskbarHidden = true;
+            if (_appBarService is not null)
+                _appBarService.OwnsBottomEdge = true;
             _trayService?.EnsureFirst();
 
             // Gezgin görev çubuğu durumunu işleyince çalışma alanını yeniden hesaplar: AppBar payı hemen yeniden iddia edilir.
@@ -551,6 +555,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         if (EffectiveProximity == DockProximityMode.ReserveSpace)
         {
             _appBarService ??= new AppBarService();
+            _appBarService.OwnsBottomEdge = settings.HideWindowsTaskbar && !_trayReleasedByUser;
             foreach (var state in _windowStates.Values)
             {
                 if (state.Hwnd == 0)

@@ -1,5 +1,6 @@
 using Koy.Core.Display;
 using Koy.Core.Dock;
+using Koy.Core.Shell;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
@@ -25,6 +26,12 @@ public sealed class AppBarService : IAppBarService
     // Her pencere için en son uygulanan alan: aynı alan için SETPOS tekrarlanmaz (yerleşim fırtınasında ~20 çağrı oluyordu).
     private readonly Dictionary<nint, RECT> _lastApplied = [];
     private bool _disposed;
+
+    /// <summary>
+    /// Windows görev çubuğu gizliyken true: alt kenar Koy'undur ve ABM_QUERYPOS'un Gezgin yüzünden yukarı itmesi kabul
+    /// edilmez (AppBarMath). Aksi halde görev çubuğu hâlâ sayılırken kayıt yapılınca pay 94 px olup boşluk bırakıyordu.
+    /// </summary>
+    public bool OwnsBottomEdge { get; set; }
 
     public unsafe void Register(nint windowHandle, double heightDip, double dpiScale = 1.0)
     {
@@ -139,12 +146,17 @@ public sealed class AppBarService : IAppBarService
         };
 
         var requested = data.rc;
-        if (!force && _lastApplied.TryGetValue(hwnd.Value, out var last)
+
+        // Alt kenar bizimken sonuç Gezgin'den bağımsızdır: aynı alan için tekrar SETPOS gerekmez. Değilse (görev çubuğu
+        // görünür) Gezgin'in durumu değişmiş olabilir; her seferinde sorulur.
+        if (!force && OwnsBottomEdge && _lastApplied.TryGetValue(hwnd.Value, out var last)
             && last.left == requested.left && last.top == requested.top && last.right == requested.right && last.bottom == requested.bottom)
             return;
 
         PInvoke.SHAppBarMessage(ABM_QUERYPOS, ref data);
-        data.rc.top = data.rc.bottom - heightPx;
+        var queried = new WindowRect(data.rc.left, data.rc.top, data.rc.right, data.rc.bottom);
+        var final = AppBarMath.FinalRect(new WindowRect(screenLeft, 0, screenRight, screenBottom), heightPx, queried, OwnsBottomEdge);
+        data.rc = new RECT { left = final.Left, top = final.Top, right = final.Right, bottom = final.Bottom };
         PInvoke.SHAppBarMessage(ABM_SETPOS, ref data);
         _lastApplied[hwnd.Value] = requested;
     }
