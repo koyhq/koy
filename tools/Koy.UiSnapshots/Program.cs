@@ -42,12 +42,22 @@ public static class Program
                 RenderUninstall(outDir, prefix, theme);
             else if (scene == "centik")
                 RenderCentik(outDir, prefix, theme);
+            else if (scene is "dock" or "folder" or "folders")
+                RenderDockFolders(outDir, prefix, theme);
             else
+            {
                 RenderAll(outDir, prefix, theme);
+                RenderDockFolders(outDir, prefix, theme);
+            }
         }
 
         Console.WriteLine($"Bitti: {outDir}");
         return 0;
+    }
+
+    private static void RenderDockFolders(string outDir, string prefix, string theme)
+    {
+        DockFolderSnapshots.Render(outDir, prefix, theme, RenderElement);
     }
 
     private static void RenderAll(string outDir, string prefix, string theme)

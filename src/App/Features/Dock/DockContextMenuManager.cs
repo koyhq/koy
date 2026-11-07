@@ -74,4 +74,47 @@ public static class DockContextMenuManager
             ActiveMenuChanged?.Invoke(null, EventArgs.Empty);
         }
     }
+
+    /// <summary>
+    /// Klasör için sağ tık menüsü oluşturur: "Adını değiştir", "Klasörü dağıt".
+    /// </summary>
+    public static ContextMenu CreateFolderContextMenu(DockFolderViewModel folderVm)
+    {
+        var menu = new ContextMenu();
+
+        var renameItem = new MenuItem
+        {
+            Header = Resources.Strings.Get("DockFolderRename")
+        };
+        renameItem.Click += (_, _) =>
+        {
+            CloseActive();
+            folderVm.StartRename();
+        };
+        menu.Items.Add(renameItem);
+
+        menu.Items.Add(new Separator());
+
+        var dissolveItem = new MenuItem
+        {
+            Header = Resources.Strings.Get("DockFolderDissolve")
+        };
+        dissolveItem.Click += (_, _) =>
+        {
+            CloseActive();
+            folderVm.DissolveCommand.Execute(null);
+        };
+        menu.Items.Add(dissolveItem);
+
+        return menu;
+    }
+
+    /// <summary>
+    /// Klasörün sağ tık menüsünü açar.
+    /// </summary>
+    public static void OpenFolderContextMenu(DockFolderViewModel folderVm, FrameworkElement target)
+    {
+        var menu = CreateFolderContextMenu(folderVm);
+        Open(menu, target);
+    }
 }

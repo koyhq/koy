@@ -213,7 +213,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private UIElement? _previewPlacementTarget;
 
-    public ObservableCollection<DockItemViewModel> Items { get; } = [];
+    public ObservableCollection<DockEntryViewModel> Items { get; } = [];
 
     /// <summary>Dock gizli ve kenardan açılabilir: kenar zamanlayıcısı çalışmalı.</summary>
     public bool NeedsEdgeWatch { get; private set; }
@@ -604,7 +604,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         if (contentWidth > 0)
             _lastContentWidth = contentWidth;
 
-        var effectiveMouseOver = _isMouseOverDock || _isMouseOverPopup || _isShellFlyoutOpen || IsPreviewPopupOpen || IsTrayPopupOpen || IsRecentsOpen || DockContextMenuManager.HasActiveMenu;
+        var hasOpenFolder = Items.OfType<DockFolderViewModel>().Any(f => f.IsFolderPanelOpen);
+        var effectiveMouseOver = _isMouseOverDock || _isMouseOverPopup || _isShellFlyoutOpen || IsPreviewPopupOpen || IsTrayPopupOpen || IsRecentsOpen || DockContextMenuManager.HasActiveMenu || hasOpenFolder;
 
         var resolved = DockPositionResolver.Resolve(
             _currentMonitor,
@@ -806,10 +807,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     public bool IsReordering => _isReordering;
 
     /// <summary>Öğe sürüklenebilir mi: sabitli, sıralama destekleniyor ve en az iki sabitli var.</summary>
-    public bool CanStartReorder(DockItemViewModel item)
-        => item.Model.IsPinned && _controller.CanReorderPinned && Items.Count(i => i.Model.IsPinned) > 1;
+    public bool CanStartReorder(DockEntryViewModel item)
+        => item.IsPinned && _controller.CanReorderPinned && Items.Count(i => i.IsPinned) > 1;
 
-    public int PinnedCount => Items.Count(i => i.Model.IsPinned);
+    public int PinnedCount => Items.Count(i => i.IsPinned);
 
     public void BeginReorder()
     {
@@ -819,7 +820,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>Sürükleme sırasında: öğe imleci izler, aradakiler hedef yuvaya göre bir yuva kayar.</summary>
-    public void UpdateReorder(DockItemViewModel dragged, int originalIndex, double dragOffset, double slotWidth)
+    public void UpdateReorder(DockEntryViewModel dragged, int originalIndex, double dragOffset, double slotWidth)
     {
         var count = PinnedCount;
         var target = DockReorderMath.TargetIndex(count, originalIndex, dragOffset, slotWidth);
@@ -839,7 +840,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     /// Bırakıldı. Sıra değiştiyse koleksiyon hemen yeni sıraya taşınır ve her öğenin ekrandaki konumu korunacak biçimde
     /// kayması ayarlanır; sonra yay sıfıra çeker (zıplama olmaz). Sıra kalıcı yazılır.
     /// </summary>
-    public void CommitReorder(DockItemViewModel dragged, int originalIndex, double dragOffset, double slotWidth)
+    public void CommitReorder(DockEntryViewModel dragged, int originalIndex, double dragOffset, double slotWidth)
     {
         _isReordering = false;
         var count = PinnedCount;
@@ -853,7 +854,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         else
         {
             // Bırakma anındaki ekran konumları: yuva dizini × genişlik + o anki kayma.
-            var visual = new Dictionary<DockItemViewModel, double>();
+            var visual = new Dictionary<DockEntryViewModel, double>();
             for (var i = 0; i < Items.Count; i++)
                 visual[Items[i]] = i * slotWidth + Items[i].OffsetX;
 
@@ -865,7 +866,15 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                 Items[i].SetTargetOffset(0);
             }
 
-            _controller.MovePinned(dragged.Model.Id, target);
+            if (dragged is DockItemViewModel itemVm)
+            {
+                _controller.MovePinned(itemVm.Model.Id, target);
+            }
+            else if (dragged is DockFolderViewModel folderVm)
+            {
+                var newOrder = PinnedOrder.Move(_settings.DockPinnedOrder, folderVm.Id, target);
+                DockFeature.SavePinnedOrder(newOrder, _settings.DockFolders, _settings);
+            }
         }
 
         _isAnimating = true;
@@ -924,30 +933,207 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
     }
 
+    #region Dock Klasörleri İşlemleri
+
+    public void DissolveFolder(DockFolderViewModel folderVm)
+    {
+        var (order, folders) = DockFolders.Dissolve(_settings.DockPinnedOrder, _settings.DockFolders, folderVm.Folder.Id);
+        DockFeature.SavePinnedOrder(order, folders, _settings);
+        UpdateItems();
+    }
+
+    public void RenameFolder(DockFolderViewModel folderVm, string newName)
+    {
+        var folders = DockFolders.Rename(_settings.DockFolders, folderVm.Folder.Id, newName);
+        DockFeature.SavePinnedOrder(_settings.DockPinnedOrder, folders, _settings);
+        folderVm.Title = newName;
+    }
+
+    public void RemoveAppFromFolder(string folderId, string itemId, int insertIndex)
+    {
+        if (insertIndex < 0)
+        {
+            var folderToken = PinnedOrder.ToFolderToken(PinnedOrder.ExtractFolderId(folderId));
+            var fIdx = _settings.DockPinnedOrder.FindIndex(x => string.Equals(x, folderToken, StringComparison.OrdinalIgnoreCase));
+            insertIndex = fIdx >= 0 ? fIdx + 1 : _settings.DockPinnedOrder.Count;
+        }
+
+        var (order, folders) = DockFolders.RemoveFromFolder(_settings.DockPinnedOrder, _settings.DockFolders, folderId, itemId, insertIndex);
+        DockFeature.SavePinnedOrder(order, folders, _settings);
+        UpdateItems();
+    }
+
+    public void CreateFolderFromDrop(string draggedId, string targetId)
+    {
+        var defaultName = DockFolders.NextDefaultName(_settings.DockFolders, Resources.Strings.Get("DockFolder"));
+        var (order, folders) = DockFolders.CreateFromDrop(_settings.DockPinnedOrder, _settings.DockFolders, draggedId, targetId, defaultName);
+        DockFeature.SavePinnedOrder(order, folders, _settings);
+        UpdateItems();
+    }
+
+    public void AddAppToFolder(string draggedId, string folderId)
+    {
+        var (order, folders) = DockFolders.AddToFolder(_settings.DockPinnedOrder, _settings.DockFolders, draggedId, folderId);
+        DockFeature.SavePinnedOrder(order, folders, _settings);
+        UpdateItems();
+    }
+
+    #endregion
+
     private void UpdateItems()
     {
         Application.Current?.Dispatcher.InvokeAsync(() =>
         {
             var models = _controller.Items;
+            var folders = _settings.DockFolders ?? [];
+            var pinnedOrder = _settings.DockPinnedOrder ?? [];
 
-            // 1. Artık açık veya sabitli olmayan öğeleri kaldır
-            var modelIds = new HashSet<string>(models.Select(m => m.Id), StringComparer.OrdinalIgnoreCase);
+            // 1. Klasörlerdeki uygulamaları tespit et (bunlar ana dock sırasında ayrıca görünmez)
+            var folderAppMap = new Dictionary<string, DockFolder>(StringComparer.OrdinalIgnoreCase);
+            foreach (var folder in folders)
+            {
+                foreach (var app in folder.Items)
+                {
+                    folderAppMap[app] = folder;
+                }
+            }
+
+            // 2. DockItemViewModel'leri model kimliği veya kısayol adına göre eşle
+            var itemVmCache = new Dictionary<string, DockItemViewModel>(StringComparer.OrdinalIgnoreCase);
+            foreach (var m in models)
+            {
+                var vm = new DockItemViewModel(m, _controller)
+                {
+                    IconSize = IconSize,
+                    ItemSize = ItemSize,
+                    UseLineIndicator = _settings.DockIndicatorStyle == 1
+                };
+                itemVmCache[m.Id] = vm;
+                itemVmCache[PinnedOrder.IdOf(m.Id)] = vm;
+            }
+
+            // 3. Hedef dock sırasını belirle
+            var availableLnkIds = models.Where(m => m.IsPinned).Select(m => PinnedOrder.IdOf(m.Id)).ToList();
+            var (effectiveOrder, reconciledFolders) = PinnedOrder.Reconcile(pinnedOrder, availableLnkIds, folders);
+
+            var folderDict = reconciledFolders.ToDictionary(f => f.Id, StringComparer.OrdinalIgnoreCase);
+            var desiredEntries = new List<DockEntryViewModel>();
+
+            // Sabitli öğeleri ve klasörleri sırayla ekle
+            foreach (var token in effectiveOrder)
+            {
+                if (PinnedOrder.IsFolderId(token))
+                {
+                    var fId = PinnedOrder.ExtractFolderId(token);
+                    if (folderDict.TryGetValue(fId, out var folder))
+                    {
+                        var folderItems = new List<DockItemViewModel>();
+                        foreach (var itemId in folder.Items)
+                        {
+                            if (itemVmCache.TryGetValue(itemId, out var itemVm))
+                            {
+                                folderItems.Add(itemVm);
+                            }
+                            else
+                            {
+                                var fallbackModel = new DockItem(
+                                    Id: itemId,
+                                    Title: Path.GetFileNameWithoutExtension(itemId),
+                                    FilePath: itemId,
+                                    TargetPath: null,
+                                    IconData: null,
+                                    IsPinned: true,
+                                    IsRunning: false,
+                                    IsActive: false,
+                                    WindowHandles: []);
+                                var fallbackVm = new DockItemViewModel(fallbackModel, _controller)
+                                {
+                                    IconSize = IconSize,
+                                    ItemSize = ItemSize,
+                                    UseLineIndicator = _settings.DockIndicatorStyle == 1
+                                };
+                                folderItems.Add(fallbackVm);
+                            }
+                        }
+
+                        var existingFolder = Items.OfType<DockFolderViewModel>().FirstOrDefault(f => string.Equals(f.Folder.Id, folder.Id, StringComparison.OrdinalIgnoreCase));
+                        if (existingFolder is not null)
+                        {
+                            existingFolder.IconSize = IconSize;
+                            existingFolder.ItemSize = ItemSize;
+                            existingFolder.OwnerViewModel = this;
+                            existingFolder.UpdateFolder(folder, folderItems);
+                            desiredEntries.Add(existingFolder);
+                        }
+                        else
+                        {
+                            var newFolderVm = new DockFolderViewModel(folder, folderItems, this)
+                            {
+                                IconSize = IconSize,
+                                ItemSize = ItemSize,
+                                UseLineIndicator = _settings.DockIndicatorStyle == 1
+                            };
+                            desiredEntries.Add(newFolderVm);
+                        }
+                    }
+                }
+                else
+                {
+                    if (!folderAppMap.ContainsKey(token) && itemVmCache.TryGetValue(token, out var itemVm))
+                    {
+                        var existingItem = Items.OfType<DockItemViewModel>().FirstOrDefault(i => string.Equals(i.Model.Id, itemVm.Model.Id, StringComparison.OrdinalIgnoreCase));
+                        if (existingItem is not null)
+                        {
+                            existingItem.IconSize = IconSize;
+                            existingItem.ItemSize = ItemSize;
+                            existingItem.Update(itemVm.Model);
+                            desiredEntries.Add(existingItem);
+                        }
+                        else
+                        {
+                            desiredEntries.Add(itemVm);
+                        }
+                    }
+                }
+            }
+
+            // Sabitli olmayan açık (çalışan) pencereleri ekle
+            foreach (var m in models.Where(m => !m.IsPinned))
+            {
+                if (!folderAppMap.ContainsKey(PinnedOrder.IdOf(m.Id)) && !folderAppMap.ContainsKey(m.Id))
+                {
+                    var existingItem = Items.OfType<DockItemViewModel>().FirstOrDefault(i => string.Equals(i.Model.Id, m.Id, StringComparison.OrdinalIgnoreCase));
+                    if (existingItem is not null)
+                    {
+                        existingItem.IconSize = IconSize;
+                        existingItem.ItemSize = ItemSize;
+                        existingItem.Update(m);
+                        desiredEntries.Add(existingItem);
+                    }
+                    else if (itemVmCache.TryGetValue(m.Id, out var itemVm))
+                    {
+                        desiredEntries.Add(itemVm);
+                    }
+                }
+            }
+
+            // 4. Koleksiyonu yerinde güncelle
+            var desiredIds = new HashSet<string>(desiredEntries.Select(e => e.Id), StringComparer.OrdinalIgnoreCase);
             for (var i = Items.Count - 1; i >= 0; i--)
             {
-                if (!modelIds.Contains(Items[i].Model.Id))
+                if (!desiredIds.Contains(Items[i].Id))
                 {
                     Items.RemoveAt(i);
                 }
             }
 
-            // 2. Sıralamayı ve öğeleri yerinde güncelle (Items.Clear yapılmaz, görsel zıplama ve titreme olmaz)
-            for (var targetIndex = 0; targetIndex < models.Count; targetIndex++)
+            for (var targetIndex = 0; targetIndex < desiredEntries.Count; targetIndex++)
             {
-                var model = models[targetIndex];
+                var entry = desiredEntries[targetIndex];
                 var existingIndex = -1;
                 for (var j = 0; j < Items.Count; j++)
                 {
-                    if (string.Equals(Items[j].Model.Id, model.Id, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(Items[j].Id, entry.Id, StringComparison.OrdinalIgnoreCase))
                     {
                         existingIndex = j;
                         break;
@@ -956,9 +1142,6 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
                 if (existingIndex >= 0)
                 {
-                    Items[existingIndex].IconSize = IconSize;
-                    Items[existingIndex].ItemSize = ItemSize;
-                    Items[existingIndex].Update(model);
                     if (existingIndex != targetIndex && existingIndex < Items.Count && targetIndex < Items.Count)
                     {
                         Items.Move(existingIndex, targetIndex);
@@ -966,16 +1149,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                 }
                 else
                 {
-                    var newVm = new DockItemViewModel(model, _controller)
-                    {
-                        IconSize = IconSize,
-                        ItemSize = ItemSize,
-                        UseLineIndicator = _settings.DockIndicatorStyle == 1
-                    };
                     if (targetIndex < Items.Count)
-                        Items.Insert(targetIndex, newVm);
+                        Items.Insert(targetIndex, entry);
                     else
-                        Items.Add(newVm);
+                        Items.Add(entry);
                 }
             }
 

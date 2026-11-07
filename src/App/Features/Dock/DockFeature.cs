@@ -148,15 +148,30 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     }
 
     /// <summary>
-    /// Sabitli uygulama sırasını ayar dosyasına yazar. Dosya baştan okunup yalnız bu alan değiştirilir; Koy penceresinin
-    /// kaydettiği öteki ayarlar ezilmez. SettingsSaved tetiklenmez (özellikler yeniden başlamasın).
+    /// Sabitli uygulama sırasını ve klasör tanımlarını ayar dosyasına yazar.
+    /// Sıra ve klasörler birlikte tek Save çağrısıyla kaydedilir; Koy penceresinin kaydettiği öteki ayarlar ezilmez.
     /// </summary>
-    private void SavePinnedOrder(IReadOnlyList<string> order)
+    public static void SavePinnedOrder(
+        IReadOnlyList<string> order,
+        IReadOnlyList<DockFolder>? folders = null,
+        AppSettings? inMemorySettings = null)
     {
         var store = new SettingsStore(SettingsStore.DefaultPath);
-        store.Save(store.Load() with { DockPinnedOrder = [.. order] });
-        settings.DockPinnedOrder = [.. order];
+        var current = store.Load();
+        var updated = current with { DockPinnedOrder = [.. order] };
+        if (folders is not null)
+        {
+            updated = updated with { DockFolders = [.. folders] };
+            if (inMemorySettings is not null)
+                inMemorySettings.DockFolders = [.. folders];
+        }
+        store.Save(updated);
+        if (inMemorySettings is not null)
+            inMemorySettings.DockPinnedOrder = [.. order];
     }
+
+    private void SavePinnedOrder(IReadOnlyList<string> order) =>
+        SavePinnedOrder(order, null, settings);
 
     /// <summary>
     /// Explorer yeniden başlayınca yeni görev çubuğu görünür ve varsayılan durumda gelir; gizlemeyi yeniden uygular.

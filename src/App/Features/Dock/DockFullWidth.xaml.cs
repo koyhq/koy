@@ -43,6 +43,32 @@ public partial class DockFullWidth : UserControl
         }
     }
 
+    private void OnFolderLeftClick(object sender, MouseButtonEventArgs e)
+    {
+        if (_reorder.TryFinish())
+        {
+            e.Handled = true;
+            return;
+        }
+
+        if (sender is FrameworkElement { DataContext: DockFolderViewModel folder })
+        {
+            ViewModel?.ClosePreviewNow();
+            folder.ClickCommand.Execute(null);
+            e.Handled = true;
+        }
+    }
+
+    private void OnFolderRightClick(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: DockFolderViewModel folder } element)
+        {
+            ViewModel?.ClosePreviewNow();
+            DockContextMenuManager.OpenFolderContextMenu(folder, element);
+            e.Handled = true;
+        }
+    }
+
     private void OnItemMouseDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton == MouseButton.Middle &&
@@ -76,10 +102,13 @@ public partial class DockFullWidth : UserControl
     private void OnItemMouseEnter(object sender, MouseEventArgs e)
     {
         if (sender is FrameworkElement element &&
-            element.DataContext is DockItemViewModel item &&
+            element.DataContext is DockEntryViewModel entry &&
             ViewModel is not null)
         {
-            ViewModel.OnItemMouseEnter(item, element);
+            if (entry is DockItemViewModel item)
+            {
+                ViewModel.OnItemMouseEnter(item, element);
+            }
         }
     }
 

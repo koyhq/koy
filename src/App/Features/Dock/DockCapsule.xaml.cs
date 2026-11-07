@@ -38,6 +38,32 @@ public partial class DockCapsule : UserControl
         }
     }
 
+    private void OnFolderLeftClick(object sender, MouseButtonEventArgs e)
+    {
+        if (_reorder.TryFinish())
+        {
+            e.Handled = true;
+            return;
+        }
+
+        if (sender is FrameworkElement { DataContext: DockFolderViewModel folder })
+        {
+            ViewModel?.ClosePreviewNow();
+            folder.ClickCommand.Execute(null);
+            e.Handled = true;
+        }
+    }
+
+    private void OnFolderRightClick(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: DockFolderViewModel folder } element)
+        {
+            ViewModel?.ClosePreviewNow();
+            DockContextMenuManager.OpenFolderContextMenu(folder, element);
+            e.Handled = true;
+        }
+    }
+
     private void OnItemMouseDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton == MouseButton.Middle &&
@@ -71,16 +97,19 @@ public partial class DockCapsule : UserControl
     private void OnItemMouseEnter(object sender, MouseEventArgs e)
     {
         if (sender is FrameworkElement element &&
-            element.DataContext is DockItemViewModel item &&
+            element.DataContext is DockEntryViewModel entry &&
             ViewModel is not null)
         {
-            var index = ViewModel.Items.IndexOf(item);
+            var index = ViewModel.Items.IndexOf(entry);
             if (index >= 0)
             {
                 ViewModel.OnItemHover(index);
             }
 
-            ViewModel.OnItemMouseEnter(item, element);
+            if (entry is DockItemViewModel item)
+            {
+                ViewModel.OnItemMouseEnter(item, element);
+            }
         }
     }
 

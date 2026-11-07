@@ -1554,4 +1554,13 @@
   <data name="UpdateStateReady" xml:space="preserve">
     <value>update ready</value>
   </data>
+  <data name="DockFolder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="DockFolderRename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="DockFolderDissolve" xml:space="preserve">
+    <value>Dissolve folder</value>
+  </data>
 </root>

@@ -4,7 +4,8 @@
              xmlns:res="clr-namespace:Koy.App.Resources"
              xmlns:local="clr-namespace:Koy.App.Features.Dock"
              xmlns:tray="clr-namespace:Koy.App.Features.Dock.Tray"
-             xmlns:recents="clr-namespace:Koy.App.Features.Dock.Recents">
+             xmlns:recents="clr-namespace:Koy.App.Features.Dock.Recents"
+             xmlns:folder="clr-namespace:Koy.App.Features.Dock.Folder">
 
     <!-- Seelen UI Yüzen Kapsül Tabanı: 60 px yükseklik (aşağı yapışınca 46 px), 18 px köşe yuvarlama (yapışınca 14,14,0,0) -->
     <Border Background="#E618181B"
@@ -58,12 +59,8 @@
             <!-- 2. Dock Uygulama Öğeleri Listesi -->
             <ItemsControl x:Name="DockItemsList"
                           ItemsSource="{Binding Items}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
+                <ItemsControl.Resources>
+                    <!-- Uygulama Kapsayıcısı Şablonu -->
                     <DataTemplate DataType="{x:Type local:DockItemViewModel}">
                         <!-- Uygulama Kapsayıcısı: Dinamik ItemSize (varsayılan 38 px), 10 px köşe yuvarlama -->
                         <Border x:Name="ItemContainer"
@@ -83,11 +80,16 @@
                                 MouseEnter="OnItemMouseEnter"
                                 MouseLeave="OnItemMouseLeave"
                                 ContextMenuOpening="OnItemContextMenuOpening">
-                            <!-- Durum Arka Planı (Aktifse hafif aydınlık, dikkat bekliyorsa turuncu) -->
+                            <!-- Durum Arka Planı (Aktifse hafif aydınlık, dikkat bekliyorsa turuncu, hedef parıltısı mavi) -->
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Setter Property="Background" Value="Transparent"/>
                                     <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsTargetGlow}" Value="True">
+                                            <Setter Property="Background" Value="#333B82F6"/>
+                                            <Setter Property="BorderBrush" Value="#3B82F6"/>
+                                            <Setter Property="BorderThickness" Value="1.5"/>
+                                        </DataTrigger>
                                         <DataTrigger Binding="{Binding IsActive}" Value="True">
                                             <Setter Property="Background" Value="#1AFFFFFF"/>
                                         </DataTrigger>
@@ -234,7 +236,97 @@
                             </Grid>
                         </Border>
                     </DataTemplate>
-                </ItemsControl.ItemTemplate>
+
+                    <!-- Klasör Kapsayıcısı Şablonu -->
+                    <DataTemplate DataType="{x:Type local:DockFolderViewModel}">
+                        <Grid>
+                            <Border x:Name="FolderContainer"
+                                    Width="{Binding ItemSize}"
+                                    Height="{Binding ItemSize}"
+                                    Margin="1,0"
+                                    CornerRadius="10"
+                                    Cursor="Hand"
+                                    ToolTip="{Binding Title}"
+                                    MouseLeftButtonDown="OnItemLeftDown"
+                                    MouseMove="OnItemMouseMove"
+                                    LostMouseCapture="OnItemLostCapture"
+                                    MouseLeftButtonUp="OnFolderLeftClick"
+                                    MouseRightButtonUp="OnFolderRightClick"
+                                    MouseDown="OnItemMouseDown"
+                                    MouseEnter="OnItemMouseEnter"
+                                    MouseLeave="OnItemMouseLeave"
+                                    ContextMenuOpening="OnItemContextMenuOpening">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="#1AFFFFFF"/>
+                                        <Setter Property="BorderBrush" Value="#2E2E33"/>
+                                        <Setter Property="BorderThickness" Value="1"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsTargetGlow}" Value="True">
+                                                <Setter Property="Background" Value="#333B82F6"/>
+                                                <Setter Property="BorderBrush" Value="#3B82F6"/>
+                                                <Setter Property="BorderThickness" Value="1.5"/>
+                                            </DataTrigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#2AFFFFFF"/>
+                                                <Setter Property="BorderBrush" Value="#44FFFFFF"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
+                                <Border.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}" CenterX="19" CenterY="19"/>
+                                        <TranslateTransform X="{Binding OffsetX}"/>
+                                    </TransformGroup>
+                                </Border.RenderTransform>
+
+                                <Grid>
+                                    <!-- 2x2 Mini Simge Izgarası -->
+                                    <ItemsControl ItemsSource="{Binding PreviewIcons}"
+                                                  Width="{Binding IconSize}"
+                                                  Height="{Binding IconSize}"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Margin="2">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <UniformGrid Rows="2" Columns="2"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Image Source="{Binding}"
+                                                       Width="11" Height="11"
+                                                       Margin="1"
+                                                       RenderOptions.BitmapScalingMode="HighQuality"
+                                                       Stretch="Uniform"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <!-- Klasör Çalışan Göstergesi (içindeki herhangi bir uygulama çalışıyorsa) -->
+                                    <Border HorizontalAlignment="Center"
+                                            VerticalAlignment="Bottom"
+                                            Margin="0,0,0,2"
+                                            Width="6" Height="3"
+                                            CornerRadius="1.5"
+                                            Background="{DynamicResource KoyAccent}"
+                                            Visibility="{Binding IsRunning, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- FolderPanel Kayan Cam Panel -->
+                            <folder:FolderPanel PlacementTarget="{Binding ElementName=FolderContainer}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.Resources>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
             </ItemsControl>
 
             <!-- 3. Dikey Ayırıcı 1: 1×24 px, rgba(255,255,255,0.16) -->

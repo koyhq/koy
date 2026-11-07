@@ -334,7 +334,7 @@ Proje sahibi aşağıdakilerin hepsinin yapılmasına karar verdi. Sıra öneril
 3. [ ] **#9 ve #11 PR'ları (Yalnız proje sahibi onayıyla — kod ajanı çalıştırmaz):** #9 `main`'de başka yapıyla (Ekranlar sayfası, D2) çözüldü, açıklamayla kapatılır. #11 (dock sistem tepsisi) `main`'e entegre edildi; GitHub'daki PR'ın durumu kontrol edilip açıklamayla kapatılır, kalan kapsam (taşma simgeleri, balon bildirimleri) "Sonraya kalanlar"da.
 
 **Özellikler:**
-4. [ ] **Dock klasörleri:** aşağıdaki "Dock klasörleri" bölümü. Flash ajanına verilecekse önce **Adım 4A (Core + Test)**, ardından **Adım 4B (App + UI + Snapshot)** olarak iki parçada çalıştırılır.
+4. [x] **Dock klasörleri:** aşağıdaki "Dock klasörleri" bölümü. Flash ajanına verilecekse önce **Adım 4A (Core + Test)**, ardından **Adım 4B (App + UI + Snapshot)** olarak iki parçada çalıştırılır.
 5. [ ] **Atlama listesi:** "Dock'ta uygulama bazlı sağ tık menüsü" bölümü, araştırma hazır.
 6. [ ] **UWP (Store) uygulama sabitleme:** kimlik AUMID, simge `shell:AppsFolder`, pencere eşleme `SHGetPropertyStoreForWindow` (ayrıntı "Sonraya kalanlar"daki maddede). Windows'un sabitleri arasındaki Spotify, WhatsApp gibi uygulamalar dock'ta görünsün.
 7. [x] **Hızlı başlata klasör ekleme:**
@@ -389,13 +389,13 @@ Proje sahibi istedi (2026-11-07). Sabitli uygulamalar dock'ta klasörlere toplan
 - [x] `Core/Dock/DockFolders.cs` (saf): `CreateFromDrop(order, folders, dragged, target)`, `AddToFolder`, `RemoveFromFolder(…, insertIndex)`, `Dissolve`, `Rename`, `ReorderInFolder`, `NextDefaultName`. Her biri yeni sıra + klasör listesi döndürür. `Core/Dock/DockDropZone.cs` (saf): simge dikdörtgeni + imleç konumu → `Before / Merge / After` (orta bölge ~%50 genişlik) ve bekleme süresi dolunca `Merge` geçerli.
 - [x] Testler: `tests/Core.Tests/DockFoldersTests.cs`, `DockDropZoneTests.cs` (oluştur, ekle, çıkar, tek kalınca dağıt, aynı ad, kaldırılmış lnk, eski ayar dosyası).
 
-**Adım 4B — App, Görsel ve Sürükleme:**
-- [ ] `DockItemViewModel` yanında `DockFolderViewModel` (ilk 4 simge, çalışma noktası = içerdekilerden biri çalışıyor mu). Dock öğe listesi karışık tür (uygulama / klasör); `DockCapsule.xaml` ve `DockFullWidth.xaml` için ayrı `DataTemplate` (2×2 ızgara).
-- [ ] `Features/Dock/Folder/FolderPanel.xaml(.cs)` (cam panel, ızgara, ad düzenleme, sürükleyerek çıkarma). Tepsi penceresindeki açma/kapama kalıbı örnek alınabilir (`TrayButton`: yay animasyonu, dış tıklamada kapanma, yalnız açıkken zamanlayıcı).
-- [ ] `DockReorderHelper`: sürüklerken `DockDropZone` ile orta/kenar ayrımı; birleştirme önizlemesi (hedef büyür + parlar); bırakınca `DockFolders` çağrılır, `SavePinnedOrder` gibi ayara yazılır (`DockFeature.SavePinnedOrder` genişler: sıra + klasörler birlikte, tek `Save`).
-- [ ] Sağ tık menüsü (`DockContextMenuManager`): klasör için "Adını değiştir", "Klasörü dağıt".
-- [ ] Boşta %0 CPU: panel kapalıyken zamanlayıcı/olay yok; simgeler mevcut önbellekten (`IconHelper`). Bellek ölçümü (AGENTS #1, `docs/MEMORY.md`).
-- [ ] Görsel kanıt: `tools/Koy.UiSnapshots` sahnesi (klasör kutusu 2, 4, 6 uygulamayla; açık panel; birleştirme önizlemesi; koyu ve açık tema).
+[x] **Adım 4B — App, Görsel ve Sürükleme:**
+- [x] `DockItemViewModel` yanında `DockFolderViewModel` (ilk 4 simge, çalışma noktası = içerdekilerden biri çalışıyor mu). Dock öğe listesi karışık tür (uygulama / klasör); `DockCapsule.xaml` ve `DockFullWidth.xaml` için ayrı `DataTemplate` (2×2 ızgara).
+- [x] `Features/Dock/Folder/FolderPanel.xaml(.cs)` (cam panel, ızgara, ad düzenleme, sürükleyerek çıkarma). Tepsi penceresindeki açma/kapama kalıbı örnek alınabilir (`TrayButton`: yay animasyonu, dış tıklamada kapanma, yalnız açıkken zamanlayıcı).
+- [x] `DockReorderHelper`: sürüklerken `DockDropZone` ile orta/kenar ayrımı; birleştirme önizlemesi (hedef büyür + parlar); bırakınca `DockFolders` çağrılır, `SavePinnedOrder` gibi ayara yazılır (`DockFeature.SavePinnedOrder` genişler: sıra + klasörler birlikte, tek `Save`).
+- [x] Sağ tık menüsü (`DockContextMenuManager`): klasör için "Adını değiştir", "Klasörü dağıt".
+- [x] Boşta %0 CPU: panel kapalıyken zamanlayıcı/olay yok; simgeler mevcut önbellekten (`IconHelper`). Bellek ölçümü (AGENTS #1, `docs/MEMORY.md`).
+- [x] Görsel kanıt: `tools/Koy.UiSnapshots` sahnesi (klasör kutusu 2, 4, 6 uygulamayla; açık panel; birleştirme önizlemesi; koyu ve açık tema).
 - [ ] Elle sınama (proje sahibi, Claude ile): sürükle-birleştir, ekle, panelden çıkar, tek kalınca dağılma, ad değiştirme, yeniden başlatınca korunma, çalışma noktası, iki ekranda aynı klasörler, tam genişlik ve kapsül dock.
 
 ## Sonraya kalanlar

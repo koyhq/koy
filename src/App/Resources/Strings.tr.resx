@@ -1554,4 +1554,13 @@
   <data name="UpdateStateReady" xml:space="preserve">
     <value>yeni sürüm hazır</value>
   </data>
+  <data name="DockFolder" xml:space="preserve">
+    <value>Klasör</value>
+  </data>
+  <data name="DockFolderRename" xml:space="preserve">
+    <value>Adını değiştir</value>
+  </data>
+  <data name="DockFolderDissolve" xml:space="preserve">
+    <value>Klasörü dağıt</value>
+  </data>
 </root>
