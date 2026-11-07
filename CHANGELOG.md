@@ -5,6 +5,12 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [Unreleased]
+
+### Düzeltmeler (Fixed)
+- Dock kapatılıp yeniden açılınca sistem tepsisi düğmesi (gizli simgeler) kayboluyordu. Kapanan dock tepsi penceresini yeniden kuruyor, yeni dock aynı pencereyi kuramıyordu.
+- Bağlı olmayan Bluetooth cihazları için her seferinde hata kaydı yazılıyordu; günlük dosyası dolup gerçek hata kayıtları siliniyordu.
+
 ## [0.1.1](https://github.com/brhnshn/koy/compare/v0.1.0...v0.1.1) (2026-11-06)
 
 0.1.0'dan sonraki ilk büyük sürüm. Öne çıkanlar:

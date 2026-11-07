@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Koy.Core.Bluetooth;
 using Koy.Core.Diagnostics;
 using Koy.Platform.Wireless;
@@ -146,6 +147,9 @@ public sealed class BluetoothService : IBluetoothService
             entry.Battery = BluetoothList.ParseBattery(battery);
     }
 
+    // HRESULT_FROM_WIN32(ERROR_DEVICE_NOT_AVAILABLE): "Cihaz kullanıma hazır değil".
+    private const int DeviceNotAvailable = unchecked((int)0x800710DF);
+
     // Cihaz türü yalnız FromIdAsync ile okunur (ClassOfDevice / Appearance); bir kez, sırayla, sonra nesne bırakılır.
     private void QueueKindLookup(Entry entry)
     {
@@ -168,6 +172,12 @@ public sealed class BluetoothService : IBluetoothService
                 lock (_gate)
                     entry.Kind = kind;
                 Notify();
+            }
+            catch (COMException ex) when (ex.HResult == DeviceNotAvailable)
+            {
+                // Eşleşmiş ama erişilemeyen cihaz (kapalı, menzil dışı): olağan durum, tür "diğer" kalır.
+                // Eskiden her cihaz ve her izleyici başlangıcında crash.log'a yazılıyor, dosyayı (2000 satır sınırı)
+                // dolduruyor ve gerçek hata kayıtlarını siliyordu.
             }
             catch (Exception ex)
             {

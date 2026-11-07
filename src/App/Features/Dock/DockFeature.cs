@@ -192,6 +192,9 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
     private void EnsureTaskbarHidden()
     {
+        if (_stopping)
+            return;
+
         if (settings.HideWindowsTaskbar && _windowStates.Count > 0)
         {
             // Görev çubuğu yeniden göründüyse gizlendi: tepsi sahipliği (elle geri getirmede bırakılmıştı) geri alınır.
@@ -250,6 +253,12 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     /// </summary>
     private void ApplyTrayPolicy()
     {
+        // Durdurulan dock tepsiyi bir daha almaz. Stop sırasında tepsi bırakılırken arayüz iş parçacığı mesaj
+        // işler (tepsi iş parçacığı beklenir); pencere olayları buraya gelip pencereleri henüz silinmemiş dock'a
+        // yeni bir tepsi penceresi kurduruyordu.
+        if (_stopping)
+            return;
+
         var shouldHost = !_trayReleasedByUser
             && TrayHostPolicy.ShouldHost(settings.HideWindowsTaskbar, settings.DockShowTray, _windowStates.Count);
 
@@ -716,8 +725,12 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         }
     }
 
+    // Stop başladı: tepsi ve görev çubuğu kararları artık uygulanmaz (yeniden giriş korunması).
+    private bool _stopping;
+
     private void StopCore()
     {
+        _stopping = true;
         _edgePeekTimer?.Stop();
         _edgePeekTimer = null;
         _trayRetryTimer?.Stop();

@@ -248,8 +248,13 @@ public sealed class SharedServices : IDisposable
     {
         if (_trayHostLease.Release())
         {
-            _trayHost?.Dispose();
+            // Önce alan boşaltılır, sonra kapatılır: Dispose tepsi iş parçacığını beklerken arayüz iş parçacığı
+            // mesaj işler ve bir olay yeniden AcquireTrayHost çağırabilir. Eski sırada (Dispose, sonra null) o anda
+            // kurulan yeni pencere burada unutuluyor, Shell_TrayWnd sınıfını tutmaya devam ediyor ve sonraki
+            // her kurulum başarısız oluyordu (dock kapatılıp açılınca tepsi düğmesi kayboluyordu).
+            var host = _trayHost;
             _trayHost = null;
+            host?.Dispose();
         }
     }
 
