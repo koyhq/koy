@@ -116,8 +116,21 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     /// <summary>Tepsi düğmesi yalnız tepsi penceresi gerçekten çalışıyorsa görünür (başlatma başarısızsa gizli).</summary>
     public bool HasTray => _trayService is { IsRunning: true };
 
-    /// <summary>Ayırıcının sağında bir şey varsa (klasörler ya da tepsi) ayırıcı görünür.</summary>
-    public bool ShowRightSection => ShowFolders || HasTray || ShowRecents;
+    // Sağ bölümün neyi göstereceği Core'daki kuraldan gelir (kapsül ve tam genişlik aynısını kullanır).
+    private DockRightSection RightSection =>
+        DockRightSection.Resolve(ShowFolders, ShowRecents, HasTray, _settings.DockSmallTray);
+
+    /// <summary>Uygulamalarla Koy menüsü arasındaki ilk ayırıcı: yalnız ortada gösterilecek bir düğme varsa görünür.</summary>
+    public bool ShowRightSection => RightSection.ShowFirstSeparator;
+
+    /// <summary>Tam boy tepsi düğmesi (Küçük tepsi kapalıyken, ayırıcıların arasında).</summary>
+    public bool ShowFullTray => RightSection.ShowFullTray;
+
+    /// <summary>Dar ok biçimindeki tepsi düğmesi (Küçük tepsi açıkken, Koy menüsü düğmesinin sağında).</summary>
+    public bool ShowSmallTray => RightSection.ShowSmallTray;
+
+    /// <summary>Küçük tepsi okunun genişliği (DIP).</summary>
+    public double SmallTrayWidth => DockRightSection.SmallTrayWidthDip;
 
     // Son kullanılanlar: yığın düğmesi; liste yalnız düğmeye tıklanınca okunur (sürekli izleme yok), kapanınca bırakılır.
     private readonly IRecentFilesService? _recentFiles;
@@ -324,6 +337,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         HasTrayIcons = false;
         OnPropertyChanged(nameof(HasTray));
         OnPropertyChanged(nameof(ShowRightSection));
+        OnPropertyChanged(nameof(ShowFullTray));
+        OnPropertyChanged(nameof(ShowSmallTray));
     }
 
     [RelayCommand]

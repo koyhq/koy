@@ -1086,6 +1086,18 @@
   <data name="DockShowTrayDesc" xml:space="preserve">
     <value>Windows görev çubuğu gizliyken arka plan uygulamalarının simgeleri (Discord, OneDrive…) dock'taki düğmeden açılır</value>
   </data>
+  <data name="DockSmallTrayTitle" xml:space="preserve">
+    <value>Küçük tepsi</value>
+  </data>
+  <data name="DockSmallTrayDesc" xml:space="preserve">
+    <value>Tepsi düğmesi dar bir ok olur ve Koy menüsü düğmesinin sağına geçer. Tepsi paneli aynı yerden açılır.</value>
+  </data>
+  <data name="DockDownloads" xml:space="preserve">
+    <value>İndirilenler klasörü</value>
+  </data>
+  <data name="DockKoyMenu" xml:space="preserve">
+    <value>Koy menüsü</value>
+  </data>
   <data name="SystemTray" xml:space="preserve">
     <value>Sistem tepsisi</value>
   </data>

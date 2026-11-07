@@ -51,6 +51,9 @@ public sealed record AppSettings
 
     /// <summary>Dock'ta sistem tepsisi düğmesi. Açıkken Koy uygulamaların tepsi simgelerini kendisi toplar.</summary>
     public bool DockShowTray { get; set; } = true;
+
+    /// <summary>Küçük tepsi: tepsi düğmesi tam boy simge yerine dar bir ok olarak Koy menüsü düğmesinin sağına geçer.</summary>
+    public bool DockSmallTray { get; set; } = true;
     public bool DockShowBadges { get; set; } = true;
 
     /// <summary>
@@ -174,6 +177,7 @@ public sealed record AppSettings
                DockShowFolders == other.DockShowFolders &&
                DockShowRecents == other.DockShowRecents &&
                DockShowTray == other.DockShowTray &&
+               DockSmallTray == other.DockSmallTray &&
                DockShowBadges == other.DockShowBadges &&
                DockThumbnailPreview == other.DockThumbnailPreview &&
                DockThumbnailDelayMs == other.DockThumbnailDelayMs &&
@@ -244,6 +248,7 @@ public sealed record AppSettings
         hash.Add(DockShowFolders);
         hash.Add(DockShowRecents);
         hash.Add(DockShowTray);
+        hash.Add(DockSmallTray);
         hash.Add(DockShowBadges);
         hash.Add(DockThumbnailPreview);
         hash.Add(DockThumbnailDelayMs);

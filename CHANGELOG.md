@@ -7,6 +7,10 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ## [Unreleased]
 
+### Eklenenler (Added)
+- **Dock: küçük tepsi.** Ayarlar › Dock › "Küçük tepsi" (varsayılan açık): tepsi düğmesi tam boy simge yerine dar bir ok olur ve Koy menüsü düğmesinin sağına geçer; tepsi paneli aynı yerden açılır.
+- **Dock sağ bölümü iki modda aynı:** tam genişlik dock'ta da İndirilenler düğmesi var; Başlat, İndirilenler, Son kullanılanlar ve Tepsi anahtarları her iki modda çalışır. Kapalı düğmelerin ayırıcısı gizlenir.
+
 ### Düzeltmeler (Fixed)
 - Dock kapatılıp yeniden açılınca sistem tepsisi düğmesi (gizli simgeler) kayboluyordu. Kapanan dock tepsi penceresini yeniden kuruyor, yeni dock aynı pencereyi kuramıyordu.
 - Bağlı olmayan Bluetooth cihazları için her seferinde hata kaydı yazılıyordu; günlük dosyası dolup gerçek hata kayıtları siliniyordu.

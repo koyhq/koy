@@ -417,7 +417,7 @@ Proje sahibi istedi. Kod yazılmadı; önce bu plan onaylanır.
 - Açık uygulama süzgeci (`Platform/Shell/WindowTracker.GetOpenWindows`) Windows görev çubuğunun kuralından ayrılıyor: sahibi olan pencereleri (`GW_OWNER`) `WS_EX_APPWINDOW` olsa bile atıyor, başlığı boş pencereleri atıyor, `WS_EX_NOACTIVATE`/`WS_EX_APPWINDOW` ayrımı yok.
 
 **İşler:**
-1. [ ] **Sağ bölüm sadeleşmesi:**
+1. [x] **Sağ bölüm sadeleşmesi:** (kod 2026-11-07, `feat/dock-fullwidth-tray`; elle denenmedi)
    - Üç anahtar tam genişlik modunda da geçerli olsun (İndirilenler düğmesi eklenir, `ShowFolders` bağlanır); kapalı düğmelerin ayırıcısı da gizlenir.
    - **Yeni seçenek "Küçük tepsi"** (proje sahibi onayladı 2026-11-07, varsayılan açık): tepsi düğmesi tam boy simge yerine dar bir ok (`^`, ~18 px genişlik) olarak Koy menüsü düğmesinin **sağına** geçer; tepsi paneli aynı yerden açılır. Son kullanılanlar ve İndirilenler kendi anahtarlarıyla kalır.
 2. [ ] **Açık uygulamaların bazen görünmemesi:**

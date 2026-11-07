@@ -26,34 +26,14 @@
 
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
             <!-- 1. Windows Başlat Düğmesi -->
-            <Button Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+            <Button Style="{StaticResource DockFlatButtonStyle}"
                     Command="{Binding StartMenuCommand}"
                     ToolTip="{x:Static res:Strings.StartMenu}"
                     Width="{Binding ItemSize}"
                     Height="{Binding ItemSize}"
                     Margin="1,0"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Cursor="Hand"
                     Visibility="{Binding ShowStartButton, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Background="Transparent"
-                                CornerRadius="10">
-                            <Image Source="{StaticResource WindowsLogoImage}" Width="18" Height="18"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#1AFFFFFF"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#33FFFFFF"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
+                <Image Source="{StaticResource WindowsLogoImage}" Width="18" Height="18"/>
             </Button>
 
             <!-- 2. Dock Uygulama Öğeleri Listesi -->
@@ -340,35 +320,17 @@
             <StackPanel Orientation="Horizontal"
                         Visibility="{Binding ShowFolders, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
                 <!-- İndirilenler Klasörü Düğmesi -->
-                <Button Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+                <Button Style="{StaticResource DockFlatButtonStyle}"
                         Command="{Binding OpenDownloadsCommand}"
-                        ToolTip="İndirilenler Klasörü"
+                        ToolTip="{Binding [DockDownloads], Source={x:Static res:Loc.Instance}}"
+                        AutomationProperties.Name="{Binding [DockDownloads], Source={x:Static res:Loc.Instance}}"
                         Width="{Binding ItemSize}"
                         Height="{Binding ItemSize}"
-                        Margin="1,0"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Cursor="Hand">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="border"
-                                    Background="Transparent"
-                                    CornerRadius="10">
-                                <Canvas Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Path Fill="#3B82F6" Data="M 3,8 C 3,6.8 3.8,6 5,6 H 10 L 12,8 H 23 C 24.1,8 25,8.8 25,10 V 21 C 25,22.1 24.1,23 23,23 H 5 C 3.8,23 3,22.1 3,21 Z"/>
-                                    <Path Stroke="#FFFFFF" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M 14,11 V 17 M 11,14 L 14,17 L 17,14"/>
-                                </Canvas>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="#1AFFFFFF"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="#33FFFFFF"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
+                        Margin="1,0">
+                    <Canvas Width="22" Height="22">
+                        <Path Fill="#3B82F6" Data="M 3,8 C 3,6.8 3.8,6 5,6 H 10 L 12,8 H 23 C 24.1,8 25,8.8 25,10 V 21 C 25,22.1 24.1,23 23,23 H 5 C 3.8,23 3,22.1 3,21 Z"/>
+                        <Path Stroke="#FFFFFF" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M 14,11 V 17 M 11,14 L 14,17 L 17,14"/>
+                    </Canvas>
                 </Button>
 
             </StackPanel>
@@ -384,34 +346,19 @@
                        Margin="4,0"/>
 
             <!-- 6. Koy Sistem Menüsü Düğmesi -->
-            <Button Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+            <Button Style="{StaticResource DockFlatButtonStyle}"
                     Command="{Binding OpenKoyMenuCommand}"
-                    ToolTip="Koy Menüsü"
+                    ToolTip="{Binding [DockKoyMenu], Source={x:Static res:Loc.Instance}}"
+                    AutomationProperties.Name="{Binding [DockKoyMenu], Source={x:Static res:Loc.Instance}}"
                     Width="{Binding ItemSize}"
                     Height="{Binding ItemSize}"
-                    Margin="1,0"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Cursor="Hand">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Background="Transparent"
-                                CornerRadius="10">
-                            <!-- Koy Marka Logosu: Windows 11 Fluent Squircle + Çentik + K -->
-                            <Path Fill="#3B82F6" Data="{StaticResource KoyLogoGeometry}" Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#1AFFFFFF"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#33FFFFFF"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
+                    Margin="1,0">
+                <!-- Koy Marka Logosu: Windows 11 Fluent Squircle + Çentik + K -->
+                <Path Fill="#3B82F6" Data="{StaticResource KoyLogoGeometry}" Width="18" Height="18" Stretch="Uniform"/>
             </Button>
+
+            <!-- 7. Küçük tepsi: Koy menüsü düğmesinin sağında dar ok -->
+            <tray:TrayButton IsCompact="True"/>
         </StackPanel>
     </Border>
 </UserControl>

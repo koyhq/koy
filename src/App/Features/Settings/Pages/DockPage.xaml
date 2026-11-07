@@ -212,6 +212,17 @@
             </Grid>
         </Border>
 
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <StackPanel VerticalAlignment="Center" Margin="0,0,60,0">
+                    <TextBlock Text="{Binding [DockSmallTrayTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DockSmallTrayDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox AutomationProperties.Name="{Binding [DockSmallTrayTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockSmallTray}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
         <!-- GÖREV ÇUBUĞU KURTARMA -->
         <TextBlock Text="{Binding [TaskbarRecoveryHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 
