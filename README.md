@@ -18,7 +18,7 @@
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-22C55E.svg)](LICENSE)
 
-[İndir (Releases)](https://github.com/koyhq/koy/releases/latest) · [Mimari & Plan](docs/PLAN.md) · [Arayüz Tasarımı](docs/DESIGN.md) · [Katkıda Bulun](CONTRIBUTING.md) · [English Summary](#-english-overview)
+[İndir (Releases)](https://github.com/koyhq/koy/releases/latest) · [Web Sitesi](https://koyhq.github.io/koy) · [Mimari & Plan](docs/PLAN.md) · [Arayüz Tasarımı](docs/DESIGN.md) · [Katkıda Bulun](CONTRIBUTING.md) · [English Summary](#-english-overview)
 
 <br />
 
@@ -234,7 +234,12 @@ koy/
 
 ## Esinlenmeler & Teşekkür (Acknowledgements)
 
-Koy; modern masaüstü deneyimi, ada/çentik konsepti ve pencere etkileşimleri konusunda [Nectar](https://github.com/kua8/Nectar) ve [Seelen UI](https://github.com/seelen-game/aurora) gibi harika açık kaynak projelerinden ilham almıştır. Koy, Windows 11 ekosistemi için sıfır tarayıcı bağımlılığı (WebView2/Electron içermeyen), minimum bellek ve doğrudan yerel C# (.NET 10) / WPF mimarisiyle bağımsız olarak sıfırdan geliştirilmiştir.
+Koy iki projenin fikrinden doğdu; ikisinden de kod, görsel ya da metin alınmadı, her şey sıfırdan yazıldı:
+
+- [**Nectar**](https://github.com/kua8/Nectar): ekranın üstünde yay animasyonlu çentik fikri.
+- [**Seelen UI**](https://github.com/eythaann/Seelen-UI): görev çubuğunun yerini alan yüzen dock ve pencereye yaklaşınca davranan akıllı yerleşim.
+
+Fark şu: ikisi de tarayıcı motoruyla (WebView2/Tauri) çalışıyor, Koy çalışmıyor. Tek süreç, doğrudan yerel C# (.NET 10) / WPF, boşta %0 CPU ve 100–150 MB bellek hedefi.
 
 ---
 
