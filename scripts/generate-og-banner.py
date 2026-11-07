@@ -1,68 +1,63 @@
-"""Sosyal medya önizleme görselini (1200x630) üretir: site/img/og-koy.png ve assets/branding/org/koy-sosyal-onizleme.png.
+"""Sosyal medya önizleme görselini (1200x630) üretir: site/img/og-koy-mavi.png ve assets/branding/org/koy-sosyal-onizleme.png.
 
-Kaynaklar: docs/screenshots'tan işlenmiş site/img/centik-ana.webp ve assets/branding/dist/koy-horizontal-color-800.png.
-Yazı tipi Segoe UI (Windows'ta hazır). Çalıştır: python scripts/generate-og-banner.py
+Tasarım: logonun mavi gradyanı (#3B82F6 -> #1D4ED8) zemin, beyaz logo, büyük başlık, adres hapı. Görsel yok, yalnız yazı.
+Başlık sitenin hero'sundakiyle aynı olmalı (site/index.html).
+Kaynak: assets/branding/dist/koy-horizontal-white-800.png. Yazı tipi Segoe UI (Windows'ta hazır).
+Çalıştır: python scripts/generate-og-banner.py
 """
 from pathlib import Path
 
+import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
 FONTS = Path("C:/Windows/Fonts")
 W, H, S = 1200, 630, 2  # S: önce 2 kat büyük çizilir, sonra küçültülür (pürüzsüz kenar)
 
-BG = (245, 245, 248)
-INK = (11, 11, 15)
-MUTED = (98, 98, 106)
+BLUE_TOP = np.array([59, 130, 246], dtype=np.float32)   # #3B82F6
+BLUE_BOTTOM = np.array([29, 78, 216], dtype=np.float32)  # #1D4ED8
+WHITE = (255, 255, 255)
+SOFT = (191, 219, 254)  # #BFDBFE: ikinci satır, beyazdan bir kademe geri
+SUB = (219, 234, 254)   # #DBEAFE
 
 
 def font(name: str, size: int) -> ImageFont.FreeTypeFont:
     return ImageFont.truetype(str(FONTS / name), size * S)
 
 
-def centered(draw: ImageDraw.ImageDraw, parts: list[tuple[str, tuple, ImageFont.FreeTypeFont]], y: int) -> None:
-    widths = [draw.textlength(t, font=f) for t, _, f in parts]
-    x = (W * S - sum(widths)) / 2
-    for (text, color, f), w in zip(parts, widths):
-        draw.text((x, y * S), text, font=f, fill=color)
-        x += w
+def gradient(w: int, h: int) -> Image.Image:
+    t = np.linspace(0, 1, h, dtype=np.float32)[:, None, None]
+    row = BLUE_TOP * (1 - t) + BLUE_BOTTOM * t
+    return Image.fromarray(np.repeat(row, w, axis=1).astype(np.uint8), "RGB")
 
 
 def main() -> None:
-    img = Image.new("RGB", (W * S, H * S), BG)
+    img = gradient(W * S, H * S).convert("RGBA")
     draw = ImageDraw.Draw(img)
 
-    # Çentik, gerçekte olduğu gibi sayfanın tepesinden sarkar (sitedeki hero ile aynı kompozisyon).
-    shot = Image.open(ROOT / "site/img/centik-ana.webp").convert("RGB")
-    fw = 560 * S
-    fh = round(fw * shot.height / shot.width)
-    shot = shot.resize((fw, fh), Image.LANCZOS)
-    mask = Image.new("L", (fw, fh), 0)
-    ImageDraw.Draw(mask).rounded_rectangle((0, -60 * S, fw, fh), radius=28 * S, fill=255)
-    img.paste(shot, ((W * S - fw) // 2, 0), mask)
-
-    logo = Image.open(ROOT / "assets/branding/dist/koy-horizontal-color-800.png").convert("RGBA")
-    lh = 46 * S
+    logo = Image.open(ROOT / "assets/branding/dist/koy-horizontal-white-800.png").convert("RGBA")
+    lh = 56 * S
     logo = logo.resize((round(logo.width * lh / logo.height), lh), Image.LANCZOS)
-    img.paste(logo, (56 * S, 40 * S), logo)
+    img.alpha_composite(logo, (72 * S, 56 * S))
 
-    bold = font("seguisb.ttf", 68)
-    centered(draw, [("Çentik yukarıda. ", INK, bold), ("Dock aşağıda.", MUTED, bold)], 352)
-    centered(draw, [("Windows 11 için hafif çentik ve dock. Tarayıcı yok, ücretsiz ve açık kaynak.", MUTED, font("segoeui.ttf", 27))], 462)
+    big = font("seguisb.ttf", 112)
+    draw.text((72 * S, 150 * S), "Masaüstünü", font=big, fill=WHITE)
+    draw.text((72 * S, 274 * S), "hafifçe değiştir.", font=big, fill=SOFT)
+    draw.text((76 * S, 448 * S), "Windows 11 için çentik ve dock. Tarayıcı yok, ücretsiz ve açık kaynak.", font=font("segoeui.ttf", 30), fill=SUB)
 
-    # Adres hapı
+    # Adres hapı: beyaz zemin, mavi yazı
     label = "koyhq.github.io/koy"
-    f = font("seguisb.ttf", 25)
+    f = font("seguisb.ttf", 26)
     tw = draw.textlength(label, font=f)
-    pw, ph = tw + 56 * S, 52 * S
-    x0, y0 = (W * S - pw) / 2, 538 * S
-    draw.rounded_rectangle((x0, y0, x0 + pw, y0 + ph), radius=ph / 2, fill=INK)
-    draw.text((x0 + 28 * S, y0 + 9 * S), label, font=f, fill=(245, 245, 248))
+    pw, ph = tw + 60 * S, 56 * S
+    x0, y0 = 72 * S, 520 * S
+    draw.rounded_rectangle((x0, y0, x0 + pw, y0 + ph), radius=ph / 2, fill=WHITE)
+    draw.text((x0 + 30 * S, y0 + 10 * S), label, font=f, fill=(29, 78, 216))
 
-    out = img.resize((W, H), Image.LANCZOS)
-    for rel in ("site/img/og-koy.png", "assets/branding/org/koy-sosyal-onizleme.png"):
+    out = img.convert("RGB").resize((W, H), Image.LANCZOS)
+    for rel in ("site/img/og-koy-mavi.png", "assets/branding/org/koy-sosyal-onizleme.png"):
         out.save(ROOT / rel, optimize=True)
-        print("yazıldı:", rel, (ROOT / rel).stat().st_size // 1024, "KB")
+        print("yazildi:", rel, (ROOT / rel).stat().st_size // 1024, "KB")
 
 
 if __name__ == "__main__":
