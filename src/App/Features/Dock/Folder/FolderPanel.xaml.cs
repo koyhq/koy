@@ -35,11 +35,14 @@ public partial class FolderPanel : UserControl
 
     /// <summary>UiSnapshots için görsel kutu gövdesi erişimi.</summary>
     public Border PanelBody => PopupBody;
+    public ItemsControl AppsList => AppsItemsControl;
 
     /// <summary>UiSnapshots için bağımsız görsel gövde üretir (Popup'tan ayırır).</summary>
     public Border DetachBodyForSnapshot()
     {
         FolderPopup.Child = null;
+        if (ViewModel is not null)
+            AppsItemsControl.ItemsSource = ViewModel.Items;
         return PopupBody;
     }
 
