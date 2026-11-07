@@ -216,6 +216,21 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private double _itemSize = 38.0;
 
+    /// <summary>Uygulama şeridinin en çok genişliği: simgeler en küçük boyutta bile sığmazsa şerit bu sınırda kırpılır.</summary>
+    [ObservableProperty]
+    private double _itemsMaxWidth = double.PositiveInfinity;
+
+    // Ayardaki simge boyutu; ekrana sığmayınca IconSize bundan küçülür, yer açılınca geri büyür.
+    private double _preferredIconSize = 28.0;
+
+    // Tam genişlikte orta sütunun gerçek genişliği (görünüm bildirir); kapsülde kullanılmaz.
+    private double _centerWidth;
+
+    // Kapsülün ölçülmüş sabit payları (DIP): sol/sağ pencere kenar boşluğu, iç dolgu + çerçeve, ayırıcı (1 + 4 + 4).
+    private const double CapsuleWindowSideMargins = 24.0;
+    private const double CapsulePaddingAndBorder = 18.0;
+    private const double CapsuleSeparatorWidth = 9.0;
+
     // DWM Canlı Önizleme Açılır Penceresi
     [ObservableProperty]
     private bool _isPreviewPopupOpen;
@@ -260,7 +275,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _trayService = trayService;
 
         _iconSize = settings.DockIconSize > 0 ? settings.DockIconSize : 28.0;
-        _itemSize = _iconSize + 10.0;
+        _preferredIconSize = _iconSize;
+        _itemSize = DockFitMath.ItemSizeFor(_iconSize);
 
         _magnificationEnabled = settings.DockHoverMagnify;
         _accentColor = settings.AccentColor ?? "#0078D4";
@@ -339,6 +355,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(ShowRightSection));
         OnPropertyChanged(nameof(ShowFullTray));
         OnPropertyChanged(nameof(ShowSmallTray));
+        RecomputeFit();
     }
 
     [RelayCommand]
@@ -564,7 +581,65 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     public void SetMonitor(DisplayMonitor? monitor)
     {
         _currentMonitor = monitor;
+        RecomputeFit();
         EvaluatePosition(_lastContentWidth);
+    }
+
+    /// <summary>Tam genişlikte orta sütunun genişliği değişti (görünüm bildirir): simgeler sığacak biçimde yeniden boyutlanır.</summary>
+    public void ReportCenterWidth(double width)
+    {
+        if (Math.Abs(width - _centerWidth) < 0.5)
+            return;
+
+        _centerWidth = width;
+        RecomputeFit();
+    }
+
+    /// <summary>
+    /// Çok uygulama açıkken simgeleri ekrana sığdırır (Core: DockFitMath). Kapsülde bütün yuvalar (Başlat, sağ düğmeler dahil)
+    /// ItemSize ile ölçeklendiğinden hepsi hesaba girer; tam genişlikte yalnız orta sütundaki uygulamalar.
+    /// En küçük simge 24 px; ondan sonra şerit kırpılır.
+    /// </summary>
+    private void RecomputeFit()
+    {
+        double icon;
+        double maxWidth;
+
+        if (_settings.DockStyle == DockStyleMode.FullWidth)
+        {
+            if (_centerWidth <= 0)
+                return;
+
+            icon = DockFitMath.FitIconSize(_preferredIconSize, Items.Count, 0, _centerWidth);
+            maxWidth = _centerWidth;
+        }
+        else
+        {
+            var monitorWidth = _currentMonitor?.WidthDip > 0 ? _currentMonitor.WidthDip : 1920.0;
+            var available = monitorWidth - CapsuleWindowSideMargins;
+            var right = RightSection;
+            var otherSlots = (ShowStartButton ? 1 : 0) + (ShowFolders ? 1 : 0) + (ShowRecents ? 1 : 0)
+                             + (right.ShowFullTray ? 1 : 0) + 1; // +1: Koy menüsü
+            var fixedWidth = CapsulePaddingAndBorder + CapsuleSeparatorWidth
+                             + (right.ShowFirstSeparator ? CapsuleSeparatorWidth : 0.0)
+                             + (right.ShowSmallTray ? DockRightSection.SmallTrayWidthDip + 1.0 : 0.0);
+
+            icon = DockFitMath.FitIconSize(_preferredIconSize, Items.Count + otherSlots, fixedWidth, available);
+            maxWidth = DockFitMath.StripMaxWidth(available, fixedWidth + otherSlots * DockFitMath.SlotWidth(icon));
+        }
+
+        ItemsMaxWidth = maxWidth;
+
+        if (Math.Abs(icon - IconSize) < 0.01)
+            return;
+
+        IconSize = icon;
+        ItemSize = DockFitMath.ItemSizeFor(icon);
+        foreach (var entry in Items)
+        {
+            entry.IconSize = IconSize;
+            entry.ItemSize = ItemSize;
+        }
     }
 
     public void UpdateForegroundWindow(WindowRect bounds, bool isMaximized, bool isFullscreen = false)
@@ -1171,6 +1246,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                 }
             }
 
+            RecomputeFit();
             EvaluatePosition(_lastContentWidth);
         });
     }

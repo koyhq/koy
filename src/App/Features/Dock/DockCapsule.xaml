@@ -38,7 +38,9 @@
 
             <!-- 2. Dock Uygulama Öğeleri Listesi -->
             <ItemsControl x:Name="DockItemsList"
-                          ItemsSource="{Binding Items}">
+                          ItemsSource="{Binding Items}"
+                          MaxWidth="{Binding ItemsMaxWidth}"
+                          ClipToBounds="True">
                 <ItemsControl.Resources>
                     <!-- Uygulama Kapsayıcısı Şablonu -->
                     <DataTemplate DataType="{x:Type local:DockItemViewModel}">

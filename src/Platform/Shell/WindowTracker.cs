@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Koy.Core.Dock;
 using Koy.Core.Shell;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -21,6 +22,9 @@ public sealed class WindowTracker : IWindowTracker
     private HWINEVENTHOOK _foregroundHook;
     private HWINEVENTHOOK _locationHook;
     private HWINEVENTHOOK _lifecycleHook;
+    private HWINEVENTHOOK _uncloakHook;
+    private HWINEVENTHOOK _nameHook;
+    private RefreshDebouncer? _nameChangeDebouncer;
     private bool _started;
     private bool _disposed;
 
@@ -79,8 +83,37 @@ public sealed class WindowTracker : IWindowTracker
             0,
             PInvoke.WINEVENT_OUTOFCONTEXT);
 
+        // Pencere gizlendi / gizlilikten çıktı (sanal masaüstü geçişi, Mağaza uygulaması): SHOW/HIDE olayı gelmez, bunlar gelir.
+        _uncloakHook = PInvoke.SetWinEventHook(
+            PInvoke.EVENT_OBJECT_CLOAKED,
+            PInvoke.EVENT_OBJECT_UNCLOAKED,
+            default(HMODULE),
+            _hookProc,
+            0,
+            0,
+            PInvoke.WINEVENT_OUTOFCONTEXT);
+
+        // Başlık değişimi: sık gelebilir (tarayıcı sekmesi, terminal). Yalnız görev çubuğu penceresi olanlar sayılır ve
+        // olaylar tek bir bildirimde birleşir (tek atımlık erteleme; boşta zamanlayıcı yok, yoklama yok).
+        // Bildirim, Start'ın çağrıldığı iş parçacığına (arayüz) taşınır: WindowsChanged'e abone kod arayüze dokunur.
+        var context = SynchronizationContext.Current;
+        _nameChangeDebouncer = new RefreshDebouncer(
+            () => WindowsChanged?.Invoke(this, EventArgs.Empty),
+            NameChangeDelay,
+            post: action => { if (context is not null) context.Post(_ => action(), null); else action(); });
+        _nameHook = PInvoke.SetWinEventHook(
+            PInvoke.EVENT_OBJECT_NAMECHANGE,
+            PInvoke.EVENT_OBJECT_NAMECHANGE,
+            default(HMODULE),
+            _hookProc,
+            0,
+            0,
+            PInvoke.WINEVENT_OUTOFCONTEXT);
+
         UpdateForegroundWindow();
     }
+
+    private static readonly TimeSpan NameChangeDelay = TimeSpan.FromMilliseconds(500);
 
     public void RegisterShellHook(nint windowHandle)
     {
@@ -162,6 +195,21 @@ public sealed class WindowTracker : IWindowTracker
             PInvoke.UnhookWinEvent(_lifecycleHook);
             _lifecycleHook = default;
         }
+
+        if (_uncloakHook.Value != 0)
+        {
+            PInvoke.UnhookWinEvent(_uncloakHook);
+            _uncloakHook = default;
+        }
+
+        if (_nameHook.Value != 0)
+        {
+            PInvoke.UnhookWinEvent(_nameHook);
+            _nameHook = default;
+        }
+
+        _nameChangeDebouncer?.Dispose();
+        _nameChangeDebouncer = null;
     }
 
     public bool GetCursorPosition(out int x, out int y)
@@ -184,27 +232,16 @@ public sealed class WindowTracker : IWindowTracker
 
         PInvoke.EnumWindows((HWND hwnd, LPARAM _) =>
         {
-            if (hwnd.IsNull || !PInvoke.IsWindowVisible(hwnd))
+            if (hwnd.IsNull)
                 return true;
 
-            // Sahip penceresi olanları (diyaloglar, alt pencereler) filtrele
-            var owner = PInvoke.GetWindow(hwnd, GET_WINDOW_CMD.GW_OWNER);
-            if (!owner.IsNull)
+            // Görev çubuğu kuralı Core'da (TaskbarWindowRule): APPWINDOW her zaman girer; aksi halde sahipsiz ve
+            // araç/etkinleşmeyen pencere olmamalı. Gizlenmiş (cloaked) pencereler ekranda yok.
+            if (!TaskbarWindowRule.ShouldShow(ReadTaskbarFacts(hwnd)))
                 return true;
 
-            // Araç çubuğu pencerelerini (WS_EX_TOOLWINDOW) filtrele
-            var exStyle = (WINDOW_EX_STYLE)PInvoke.GetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
-            if ((exStyle & WINDOW_EX_STYLE.WS_EX_TOOLWINDOW) != 0)
-                return true;
-
-            if (IsShellOrDesktop(hwnd))
-                return true;
-
-            // Gizlenmiş (cloaked) pencereler ekranda yok: arka plandaki mağaza uygulamaları, "Windows Giriş Deneyimi" gibi.
-            if (IsCloaked(hwnd))
-                return true;
-
-            // Pencere başlığı oku
+            // Pencere başlığı oku. Boş başlık eleme sebebi değil (başlığı sonradan konan pencereler kaybolmasın);
+            // boşsa dock süreç adını gösterir.
             Span<char> titleBuffer = stackalloc char[256];
             int titleLen;
             fixed (char* pTitle = titleBuffer)
@@ -212,10 +249,7 @@ public sealed class WindowTracker : IWindowTracker
                 titleLen = PInvoke.GetWindowText(hwnd, pTitle, 256);
             }
 
-            if (titleLen == 0)
-                return true;
-
-            var title = titleBuffer[..titleLen].ToString();
+            var title = titleLen > 0 ? titleBuffer[..titleLen].ToString() : string.Empty;
 
             // Boyut kontrolü
             if (!PInvoke.GetWindowRect(hwnd, out var wr) || wr.right <= wr.left || wr.bottom <= wr.top)
@@ -334,6 +368,24 @@ public sealed class WindowTracker : IWindowTracker
             return;
         }
 
+        // Gizlilikten çıkış: yalnız üst düzey pencere (idObject 0, idChild 0) ve görev çubuğu penceresi ise.
+        // Gizlenme (CLOAKED) pencereyi listeden düşürür; o an kural artık sağlanmadığından yalnız üst düzey olması aranır.
+        if (@event is PInvoke.EVENT_OBJECT_UNCLOAKED or PInvoke.EVENT_OBJECT_CLOAKED)
+        {
+            if (idObject == 0 && idChild == 0 && PInvoke.GetAncestor(hwnd, GET_ANCESTOR_FLAGS.GA_ROOT) == hwnd
+                && (@event == PInvoke.EVENT_OBJECT_CLOAKED || IsTopLevelTaskbarWindow(hwnd)))
+                WindowsChanged?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
+        // Başlık değişimi: görev çubuğu penceresi değilse (alt pencere, araç penceresi, kabuk) hiç ilgilenilmez.
+        if (@event == PInvoke.EVENT_OBJECT_NAMECHANGE)
+        {
+            if (idObject == 0 && idChild == 0 && IsTopLevelTaskbarWindow(hwnd))
+                _nameChangeDebouncer?.Request();
+            return;
+        }
+
         // Konum değişiminde yalnızca ana pencere (idObject == 0) seviyesindeki hareketleri dikkate al
         if (@event == PInvoke.EVENT_OBJECT_LOCATIONCHANGE)
         {
@@ -395,6 +447,26 @@ public sealed class WindowTracker : IWindowTracker
 
         return buffer[..(int)size].ToString();
     }
+
+    /// <summary>Pencerenin görev çubuğu olgularını okur (kural Core'daki TaskbarWindowRule'da).</summary>
+    private static TaskbarWindowFacts ReadTaskbarFacts(HWND hwnd)
+    {
+        var exStyle = (WINDOW_EX_STYLE)PInvoke.GetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+        var visible = PInvoke.IsWindowVisible(hwnd);
+        return new TaskbarWindowFacts(
+            IsVisible: visible,
+            IsCloaked: visible && IsCloaked(hwnd),
+            IsShellWindow: IsShellOrDesktop(hwnd),
+            HasOwner: !PInvoke.GetWindow(hwnd, GET_WINDOW_CMD.GW_OWNER).IsNull,
+            IsAppWindow: (exStyle & WINDOW_EX_STYLE.WS_EX_APPWINDOW) != 0,
+            IsToolWindow: (exStyle & WINDOW_EX_STYLE.WS_EX_TOOLWINDOW) != 0,
+            IsNoActivate: (exStyle & WINDOW_EX_STYLE.WS_EX_NOACTIVATE) != 0);
+    }
+
+    /// <summary>Üst düzey (kökü kendisi olan) ve görev çubuğuna girecek bir pencere mi.</summary>
+    private static bool IsTopLevelTaskbarWindow(HWND hwnd)
+        => PInvoke.GetAncestor(hwnd, GET_ANCESTOR_FLAGS.GA_ROOT) == hwnd
+           && TaskbarWindowRule.ShouldShow(ReadTaskbarFacts(hwnd));
 
     private static unsafe bool IsCloaked(HWND hwnd)
     {

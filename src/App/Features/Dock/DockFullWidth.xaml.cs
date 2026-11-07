@@ -16,6 +16,9 @@ public partial class DockFullWidth : UserControl
         InitializeComponent();
     }
 
+    // Orta sütunun gerçek genişliği ViewModel'e bildirilir: simgeler yan sütunlara taşmadan sığacak biçimde küçülür.
+    private void OnCenterSizeChanged(object sender, SizeChangedEventArgs e) => ViewModel?.ReportCenterWidth(e.NewSize.Width);
+
     private void OnNowPlayingClick(object sender, MouseButtonEventArgs e)
     {
         ViewModel?.OpenNotchMusicCommand.Execute(null);

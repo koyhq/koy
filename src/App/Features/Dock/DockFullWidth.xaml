@@ -14,11 +14,12 @@
             Height="44"
             Padding="12,0"
             SnapsToDevicePixels="True">
-        <Grid>
+        <!-- Yan sütunlar içerik kadar ve birbirine eşit (ortak boyut grubu): orta bölüm ekranın ortasında kalır, yanlara taşmaz. -->
+        <Grid Grid.IsSharedSizeScope="True">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="260"/>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="DockSide"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="260"/>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="DockSide"/>
             </Grid.ColumnDefinitions>
 
             <!-- Sol Bölüm: Windows Başlat Düğmesi + Çalan Müzik Hapı -->
@@ -74,10 +75,12 @@
             </StackPanel>
 
             <!-- Orta Bölüm: Uygulamalar, aktif olan hap şeklinde adıyla birlikte vurgulu -->
-            <ItemsControl Grid.Column="1"
-                          HorizontalAlignment="Center"
+            <Grid Grid.Column="1" SizeChanged="OnCenterSizeChanged">
+            <ItemsControl HorizontalAlignment="Center"
                           VerticalAlignment="Center"
-                          ItemsSource="{Binding Items}">
+                          ItemsSource="{Binding Items}"
+                          MaxWidth="{Binding ItemsMaxWidth}"
+                          ClipToBounds="True">
                 <ItemsControl.Resources>
                     <DataTemplate DataType="{x:Type local:DockItemViewModel}">
                         <Border x:Name="ItemContainer"
@@ -252,6 +255,7 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
+            </Grid>
 
             <!-- Sağ Bölüm: İndirilenler, Son kullanılanlar, Tepsi | Koy menüsü, küçük tepsi (ayarlar kapsülle aynı) -->
             <StackPanel Grid.Column="2"

@@ -420,7 +420,7 @@ Proje sahibi istedi. Kod yazılmadı; önce bu plan onaylanır.
 1. [x] **Sağ bölüm sadeleşmesi:** (kod 2026-11-07, `feat/dock-fullwidth-tray`; elle denenmedi)
    - Üç anahtar tam genişlik modunda da geçerli olsun (İndirilenler düğmesi eklenir, `ShowFolders` bağlanır); kapalı düğmelerin ayırıcısı da gizlenir.
    - **Yeni seçenek "Küçük tepsi"** (proje sahibi onayladı 2026-11-07, varsayılan açık): tepsi düğmesi tam boy simge yerine dar bir ok (`^`, ~18 px genişlik) olarak Koy menüsü düğmesinin **sağına** geçer; tepsi paneli aynı yerden açılır. Son kullanılanlar ve İndirilenler kendi anahtarlarıyla kalır.
-2. [ ] **Açık uygulamaların bazen görünmemesi:**
+2. [x] **Açık uygulamaların bazen görünmemesi:** (kod 2026-11-07, `feat/dock-fullwidth-tray`; yeniden üretme ve elle sınama açık, aşağıya bak)
    - Önce yeniden üretme: görünmeyen uygulama yakalanınca `EnumWindows` dökümüyle (sınıf, stil, sahip, cloak, başlık) hangi süzgece takıldığı bulunur.
    - Süzgeç Windows'un kuralına çekilir (Core'da saf, testli `TaskbarWindowRule`): görünür + cloak değil + (`WS_EX_APPWINDOW` ise her zaman göster; değilse sahipsiz ve `WS_EX_TOOLWINDOW`/`WS_EX_NOACTIVATE` değil). Boş başlık tek başına eleme sebebi olmaz.
    - Olay kapsamı denetlenir: `EVENT_OBJECT_UNCLOAKED`, `EVENT_OBJECT_SHOW`, başlık değişimi, sanal masaüstü değişimi; kaçan olay için yoklama eklenmez.
