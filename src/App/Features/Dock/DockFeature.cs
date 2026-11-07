@@ -206,6 +206,25 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
     private bool _taskbarHidden;
 
+    // Art arda iddiaları sınırlamak için son iddia zamanı.
+    private static readonly TimeSpan AppBarReassertQuietPeriod = TimeSpan.FromMilliseconds(500);
+    private readonly Dictionary<nint, DateTime> _lastAppBarReassert = [];
+
+    /// <summary>AppBar payını (aynı alan olsa da) yeniden iddia eder; en çok 500 ms'de bir.</summary>
+    private void ReassertAppBar(DockWindowState state)
+    {
+        if (_appBarService is null || state.Hwnd == 0 || _stopping)
+            return;
+
+        var now = DateTime.UtcNow;
+        if (_lastAppBarReassert.TryGetValue(state.Hwnd, out var last) && now - last < AppBarReassertQuietPeriod)
+            return;
+
+        _lastAppBarReassert[state.Hwnd] = now;
+        var height = state.Window.ActualHeight > 0 ? state.Window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
+        _appBarService.Reassert(state.Hwnd, height, state.Monitor.DpiScaleY);
+    }
+
     /// <summary>Stile göre geçerli yakınlık modu (tam genişlikte Aşağı yapış/Çekil sadeleşir; bkz. DockProximityMapping).</summary>
     private DockProximityMode EffectiveProximity => DockProximityMapping.Effective(settings.DockStyle, settings.DockProximity);
 
@@ -257,6 +276,10 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             TaskbarService.Hide();
             _taskbarHidden = true;
             _trayService?.EnsureFirst();
+
+            // Gezgin görev çubuğu durumunu işleyince çalışma alanını yeniden hesaplar: AppBar payı hemen yeniden iddia edilir.
+            foreach (var state in _windowStates.Values)
+                ReassertAppBar(state);
         }
         else if (_taskbarHidden)
         {

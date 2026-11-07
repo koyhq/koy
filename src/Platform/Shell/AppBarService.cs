@@ -21,6 +21,9 @@ public sealed class AppBarService : IAppBarService
     private const uint ABE_BOTTOM = 3;
 
     private readonly HashSet<nint> _registeredHandles = [];
+
+    // Her pencere için en son uygulanan alan: aynı alan için SETPOS tekrarlanmaz (yerleşim fırtınasında ~20 çağrı oluyordu).
+    private readonly Dictionary<nint, RECT> _lastApplied = [];
     private bool _disposed;
 
     public unsafe void Register(nint windowHandle, double heightDip, double dpiScale = 1.0)
@@ -44,7 +47,7 @@ public sealed class AppBarService : IAppBarService
         if (registered != 0)
         {
             _registeredHandles.Add(windowHandle);
-            UpdatePositionInternal(hwnd, heightDip, dpiScale);
+            UpdatePositionInternal(hwnd, heightDip, dpiScale, force: true);
         }
     }
 
@@ -53,7 +56,19 @@ public sealed class AppBarService : IAppBarService
         if (windowHandle == 0 || !_registeredHandles.Contains(windowHandle))
             return;
 
-        UpdatePositionInternal(new HWND(windowHandle), heightDip, dpiScale);
+        UpdatePositionInternal(new HWND(windowHandle), heightDip, dpiScale, force: false);
+    }
+
+    /// <summary>
+    /// Alan aynı olsa da yeniden iddia eder: Gezgin çalışma alanını yeniden hesapladıysa (ABN_POSCHANGED, görev çubuğu
+    /// gösterildi/gizlendi) dock'un payı o an düşmüş olabilir.
+    /// </summary>
+    public unsafe void Reassert(nint windowHandle, double heightDip, double dpiScale = 1.0)
+    {
+        if (windowHandle == 0 || !_registeredHandles.Contains(windowHandle))
+            return;
+
+        UpdatePositionInternal(new HWND(windowHandle), heightDip, dpiScale, force: true);
     }
 
     public void Reregister(nint windowHandle, double heightDip, double dpiScale = 1.0)
@@ -72,6 +87,7 @@ public sealed class AppBarService : IAppBarService
             return;
 
         var hwnd = new HWND(windowHandle);
+        _lastApplied.Remove(windowHandle);
         var data = new APPBARDATA
         {
             cbSize = (uint)sizeof(APPBARDATA),
@@ -81,7 +97,7 @@ public sealed class AppBarService : IAppBarService
         PInvoke.SHAppBarMessage(ABM_REMOVE, ref data);
     }
 
-    private static unsafe void UpdatePositionInternal(HWND hwnd, double heightDip, double dpiScale)
+    private unsafe void UpdatePositionInternal(HWND hwnd, double heightDip, double dpiScale, bool force)
     {
         if (heightDip <= 0)
             heightDip = 46;
@@ -122,9 +138,15 @@ public sealed class AppBarService : IAppBarService
             }
         };
 
+        var requested = data.rc;
+        if (!force && _lastApplied.TryGetValue(hwnd.Value, out var last)
+            && last.left == requested.left && last.top == requested.top && last.right == requested.right && last.bottom == requested.bottom)
+            return;
+
         PInvoke.SHAppBarMessage(ABM_QUERYPOS, ref data);
         data.rc.top = data.rc.bottom - heightPx;
         PInvoke.SHAppBarMessage(ABM_SETPOS, ref data);
+        _lastApplied[hwnd.Value] = requested;
     }
 
     public void Dispose()
