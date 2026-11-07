@@ -27,9 +27,10 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     {
         public required DisplayMonitor Monitor { get; set; }
         public required DockWindow Window { get; init; }
-        public required DockViewModel ViewModel { get; init; }
-        public required VisibilityController VisibilityController { get; init; }
-        public required EdgeRevealTracker EdgeTracker { get; init; }
+        // Ayar değişince yerinde yeniden kurulabilir (pencere ve AppBar kaydı aynı kalır): bkz. ApplySettings.
+        public required DockViewModel ViewModel { get; set; }
+        public required VisibilityController VisibilityController { get; set; }
+        public required EdgeRevealTracker EdgeTracker { get; set; }
         public nint Hwnd { get; set; }
 
         public void Dispose()
@@ -353,17 +354,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     private void CreateDockWindow(DisplayMonitor monitor)
     {
         var visibilityController = new VisibilityController(settings.DockVisibility);
-        var viewModel = new DockViewModel(
-            settings,
-            _controller!,
-            _shellActionService!,
-            visibilityController,
-            status: null,
-            mediaService: _mediaService,
-            trayService: _trayService,
-            recentFiles: _recentFiles);
-
-        viewModel.ReduceMotion = _reduceMotion;
+        var viewModel = CreateViewModel(visibilityController);
 
         var window = new DockWindow { DataContext = viewModel };
         window.SetTargetMonitor(monitor);
@@ -374,9 +365,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             Window = window,
             ViewModel = viewModel,
             VisibilityController = visibilityController,
-            // Çekil modunun kendi gecikmesi (DockDodgeDelayMs) ViewModel'de işler; çifte beklemesin.
-            EdgeTracker = new EdgeRevealTracker(
-                EffectiveProximity == DockProximityMode.Dodge ? TimeSpan.Zero : EdgeRevealTracker.DefaultDelay)
+            EdgeTracker = NewEdgeTracker()
         };
 
         // Dock gizlenince / görününce kenar zamanlayıcısı açılıp kapanır (gizli değilken fare izlenmez).
@@ -386,7 +375,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         {
             var hwnd = new WindowInteropHelper(window).Handle;
             state.Hwnd = hwnd;
-            visibilityController.NotchHandle = hwnd;
+            state.VisibilityController.NotchHandle = hwnd;
 
             if (_fullscreenDetector is not null)
             {
@@ -407,12 +396,12 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
                 _appBarService.Register(hwnd, height, dpiScale);
             }
 
-            UpdateDockBounds(window, visibilityController);
+            UpdateDockBounds(window, state.VisibilityController);
         };
 
         window.SizeChanged += (s, e) =>
         {
-            UpdateDockBounds(window, visibilityController);
+            UpdateDockBounds(window, state.VisibilityController);
 
             if (_appBarService is not null && state.Hwnd != 0 && e.NewSize.Height > 0)
             {
@@ -423,13 +412,13 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
         window.LocationChanged += (s, e) =>
         {
-            UpdateDockBounds(window, visibilityController);
+            UpdateDockBounds(window, state.VisibilityController);
         };
 
         // DPI değişince DIP yükseklik aynı kalır (SizeChanged gelmez) ama piksel karşılığı değişir: AppBar payı yenilenir.
         window.DpiChanged += (s, e) =>
         {
-            UpdateDockBounds(window, visibilityController);
+            UpdateDockBounds(window, state.VisibilityController);
             if (_appBarService is not null && state.Hwnd != 0 && window.ActualHeight > 0)
                 _appBarService.UpdatePosition(state.Hwnd, window.ReservedHeight, state.Monitor.DpiScaleY);
         };
@@ -443,6 +432,135 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         _windows[monitor.Id] = window;
 
         window.Show();
+    }
+
+    private DockViewModel CreateViewModel(VisibilityController visibilityController) =>
+        new(settings, _controller!, _shellActionService!, visibilityController, status: null,
+            mediaService: _mediaService, trayService: _trayService, recentFiles: _recentFiles)
+        {
+            ReduceMotion = _reduceMotion
+        };
+
+    // Çekil modunun kendi gecikmesi (DockDodgeDelayMs) ViewModel'de işler; çifte beklemesin.
+    private EdgeRevealTracker NewEdgeTracker() => new(
+        EffectiveProximity == DockProximityMode.Dodge ? TimeSpan.Zero : EdgeRevealTracker.DefaultDelay);
+
+    /// <summary>
+    /// Ayarlar değişti: çalışan dock'a YERİNDE uygulanır. Dock'u durdurup başlatmak Windows görev çubuğunu geri getirir,
+    /// AppBar kaydını siler ve çalışma alanını oynatırdı (büyütülmüş pencereler sıçrıyordu). Burada pencereler, AppBar
+    /// kaydı ve görev çubuğunun gizli durumu korunur; yalnız değişenler (Core: <see cref="DockSettingsDiff"/>) yeniden kurulur.
+    /// </summary>
+    public void ApplySettings(AppSettings next)
+    {
+        if (_stopping || _windowStates.Count == 0 && _windows.Count == 0)
+            return;
+
+        var diff = DockSettingsDiff.Compare(settings, next);
+        settings = next;
+        if (diff.IsEmpty)
+            return;
+
+        if (diff.ReconcileMonitors && _monitorService is not null)
+            OnMonitorsChanged(this, EventArgs.Empty);
+
+        if (diff.ReconcilePower)
+            ReconcilePower();
+
+        if (diff.RebuildViewModels)
+        {
+            foreach (var state in _windowStates.Values)
+                RebuildViewModel(state);
+        }
+
+        if (diff.ReconcileAppBar)
+            ReconcileAppBar();
+
+        if (diff.ReconcileTray || diff.ReconcileTaskbar)
+        {
+            // Görev çubuğu geri getirilmeden önce Koy'un tepsi penceresi bırakılır; gizlenirken önce tepsi kurulur.
+            ApplyTrayPolicy();
+            if (settings.HideWindowsTaskbar)
+            {
+                ApplyTaskbarPolicy();
+            }
+            else if (_taskbarHidden)
+            {
+                TaskbarService.Restore();
+                _taskbarHidden = false;
+            }
+        }
+
+        UpdateEdgeTimer();
+
+        if (_windowTracker?.CurrentForeground is { } fg && fg.Handle != 0)
+            RecheckForegroundState(fg);
+    }
+
+    private void RebuildViewModel(DockWindowState state)
+    {
+        var oldViewModel = state.ViewModel;
+        var oldVisibility = state.VisibilityController;
+
+        var visibility = new VisibilityController(settings.DockVisibility) { NotchHandle = state.Hwnd };
+        var viewModel = CreateViewModel(visibility);
+        viewModel.EdgeWatchChanged += (_, _) => UpdateEdgeTimer();
+
+        state.VisibilityController = visibility;
+        state.ViewModel = viewModel;
+        state.EdgeTracker = NewEdgeTracker();
+
+        state.Window.SetViewModel(viewModel);
+
+        oldViewModel.Dispose();
+        oldVisibility.Dispose();
+    }
+
+    /// <summary>AppBar kaydı yalnız etkin mod "Yer ayır" iken vardır; var olan kayıt silinip yeniden kurulmaz, yalnız payı güncellenir.</summary>
+    private void ReconcileAppBar()
+    {
+        if (EffectiveProximity == DockProximityMode.ReserveSpace)
+        {
+            _appBarService ??= new AppBarService();
+            foreach (var state in _windowStates.Values)
+            {
+                if (state.Hwnd == 0)
+                    continue;
+
+                var height = state.Window.ActualHeight > 0 ? state.Window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
+                _appBarService.Register(state.Hwnd, height, state.Monitor.DpiScaleY);   // kayıtlıysa dokunmaz
+                _appBarService.UpdatePosition(state.Hwnd, height, state.Monitor.DpiScaleY);
+            }
+        }
+        else if (_appBarService is not null)
+        {
+            foreach (var state in _windowStates.Values)
+            {
+                if (state.Hwnd != 0)
+                    _appBarService.Unregister(state.Hwnd);
+            }
+
+            _appBarService.Dispose();
+            _appBarService = null;
+        }
+    }
+
+    private void ReconcilePower()
+    {
+        if (settings.BatterySaverReduceMotion && _powerService is null)
+        {
+            _powerService = services.AcquirePowerService();
+            _powerService.PowerChanged += OnPowerChanged;
+            ApplyReduceMotion();
+        }
+        else if (!settings.BatterySaverReduceMotion && _powerService is not null)
+        {
+            _powerService.PowerChanged -= OnPowerChanged;
+            _powerService = null;
+            services.ReleasePowerService();
+            _reduceMotion = false;
+            foreach (var state in _windowStates.Values)
+                state.ViewModel.ReduceMotion = false;
+        }
     }
 
     private bool _reduceMotion;

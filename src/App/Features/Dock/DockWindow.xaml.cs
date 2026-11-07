@@ -101,6 +101,29 @@ public partial class DockWindow : Window
         return 0;
     }
 
+    /// <summary>
+    /// Pencereyi yeniden oluşturmadan ViewModel'i değiştirir (ayar değişimi). Pencere tutamacı aynı kaldığı için AppBar
+    /// kaydı ve çalışma alanı bozulmaz.
+    /// </summary>
+    public void SetViewModel(DockViewModel viewModel)
+    {
+        if (ViewModel is { } old)
+        {
+            old.AnimationNeeded -= OnAnimationNeeded;
+            old.AnimationStopped -= OnAnimationStopped;
+            old.RequestReposition -= OnRequestReposition;
+        }
+
+        StopRendering();
+        DataContext = viewModel;
+        viewModel.AnimationNeeded += OnAnimationNeeded;
+        viewModel.AnimationStopped += OnAnimationStopped;
+        viewModel.RequestReposition += OnRequestReposition;
+        viewModel.SetMonitor(_targetMonitor);
+        viewModel.EvaluatePosition(ActualWidth);
+        Reposition(_targetMonitor);
+    }
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         if (ViewModel is not null)
