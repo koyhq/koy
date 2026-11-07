@@ -13,7 +13,7 @@ namespace Koy.UiSnapshots;
 
 /// <summary>
 /// Dock çubuklarının gerçek XAML'ini (DockFullWidth, DockCapsule) sahte verilerle çizer: tam genişlik, taşma (simge
-/// küçülmesi), küçük tepsi oku, tam boy tepsi. Dock yüzeyi temadan bağımsız koyudur; sahne iki temada
+/// küçülmesi), küçük tepsi oku, tam boy tepsi, basma durumu. Dock yüzeyi temadan bağımsız koyudur; sahne iki temada
 /// da çalışır, görüntüler aynı çıkmalıdır (temaya bağımlılık sızdıysa fark görünür).
 /// </summary>
 internal static class DockBarSnapshots
@@ -51,12 +51,16 @@ internal static class DockBarSnapshots
         // 5. Kapsül taşma
         Shoot(outDir, prefix, theme, "dockbar-kapsul-tasma", renderElement, fullWidth: false, smallTray: true, appCount: 60);
 
+        // 6. Basma durumu (tam genişlik ve kapsül): ikinci öğe basılı, simge %92'ye çöker ve koyulaşır
+        Shoot(outDir, prefix, theme, "dockbar-tam-genislik-basili", renderElement, fullWidth: true, smallTray: true, appCount: 8, pressedIndex: 1);
+        Shoot(outDir, prefix, theme, "dockbar-kapsul-basili", renderElement, fullWidth: false, smallTray: true, appCount: 8, pressedIndex: 1);
+
     }
 
     private static void Shoot(
         string outDir, string prefix, string theme, string name,
         Action<FrameworkElement, double, double, string> renderElement,
-        bool fullWidth, bool smallTray, int appCount)
+        bool fullWidth, bool smallTray, int appCount, int pressedIndex = -1)
     {
         var settings = new AppSettings
         {
@@ -88,6 +92,12 @@ internal static class DockBarSnapshots
             host.Arrange(new Rect(0, 0, host.DesiredSize.Width, host.DesiredSize.Height));
             host.UpdateLayout();
             Pump();
+        }
+
+        if (pressedIndex >= 0 && pressedIndex < vm.Items.Count)
+        {
+            vm.Items[pressedIndex].SnapPress(true);
+            host.UpdateLayout();
         }
 
         renderElement(host, Monitor.WidthDip, fullWidth ? DockPositionResolver.FullWidthHeightDip : 80, Path.Combine(outDir, $"{prefix}-{theme}-{name}.png"));

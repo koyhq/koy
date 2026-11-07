@@ -119,6 +119,7 @@ public partial class DockItemsStrip : UserControl
 
     private void OnItemMouseLeave(object sender, MouseEventArgs e)
     {
+        _reorder.OnMouseLeave();
         ViewModel?.OnItemMouseLeave();
         ViewModel?.OnHoverEnded();
     }

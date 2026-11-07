@@ -42,7 +42,15 @@ internal sealed class DockReorderHelper
     {
         if (e.ChangedButton != MouseButton.Left ||
             sender is not FrameworkElement { DataContext: DockEntryViewModel item } element ||
-            _viewModel() is not { } vm || !vm.CanStartReorder(item))
+            _viewModel() is not { } vm)
+            return;
+
+        // Basma geri bildirimi sıralanabilir olmasa da (tek sabitli, sabitsiz çalışan uygulama) çalışır.
+        ReleasePress();
+        _pressedEntry = item;
+        vm.SetEntryPressed(item, true);
+
+        if (!vm.CanStartReorder(item))
             return;
 
         _element = element;
@@ -78,6 +86,8 @@ internal sealed class DockReorderHelper
 
             _slotWidth = _element.ActualWidth + _element.Margin.Left + _element.Margin.Right;
             _dragging = true;
+            // Sürükleme başladı: basma geri bildirimi iptal (öğe imleci izlerken içe çökük kalmaz).
+            ReleasePress();
             _element.CaptureMouse();
             vm.BeginReorder();
         }
@@ -181,6 +191,7 @@ internal sealed class DockReorderHelper
     public bool TryFinish()
     {
         _mergeHoverTimer.Stop();
+        ReleasePress();
 
         if (_item is null)
             return false;
@@ -225,13 +236,34 @@ internal sealed class DockReorderHelper
     /// <summary>Fare yakalaması başka yere geçtiyse sürükleme iptal edilir.</summary>
     public void OnLostCapture()
     {
+        ReleasePress();
         if (_dragging && _viewModel() is { } vm)
             Reset(vm, cancel: true);
+    }
+
+    /// <summary>Fare öğeden ayrıldı (sürükleme yokken): basılı kalmış görünüm bırakılır, tıklama da zaten gerçekleşmez.</summary>
+    public void OnMouseLeave()
+    {
+        if (!_dragging)
+            ReleasePress();
+    }
+
+    private DockEntryViewModel? _pressedEntry;
+
+    private void ReleasePress()
+    {
+        if (_pressedEntry is null)
+            return;
+
+        var entry = _pressedEntry;
+        _pressedEntry = null;
+        _viewModel()?.SetEntryPressed(entry, false);
     }
 
     private void Reset(DockViewModel vm, bool cancel)
     {
         _mergeHoverTimer.Stop();
+        ReleasePress();
         var element = _element;
         ClearGlow();
         Clear();

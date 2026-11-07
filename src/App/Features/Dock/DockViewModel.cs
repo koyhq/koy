@@ -1027,6 +1027,17 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         AnimationNeeded?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>Öğeye basıldı / bırakıldı: simge içe çöker ve koyulaşır, bırakınca yayla geri gelir.</summary>
+    public void SetEntryPressed(DockEntryViewModel entry, bool pressed)
+    {
+        if (entry.IsPressed == pressed)
+            return;
+
+        entry.SetPressed(pressed, animate: !ReduceMotion);
+        _isAnimating = true;
+        AnimationNeeded?.Invoke(this, EventArgs.Empty);
+    }
+
     public void OnHoverEnded()
     {
         for (var i = 0; i < Items.Count; i++)
@@ -1060,6 +1071,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             if (item.StepScale(deltaSeconds))
                 scaleMoving = true;
             if (item.StepOffset(deltaSeconds))
+                scaleMoving = true;
+            if (item.StepPress(deltaSeconds))
                 scaleMoving = true;
         }
 

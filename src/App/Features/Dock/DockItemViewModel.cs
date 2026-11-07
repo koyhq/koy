@@ -32,6 +32,59 @@ public abstract partial class DockEntryViewModel : ObservableObject
     private bool _isTargetGlow;
 
     protected readonly Spring ScaleSpring = new(1.0) { Stiffness = 320, Damping = 26 };
+
+    // Basma ilerlemesi (0 bırakılmış, 1 basılı): hover ölçeğinden ayrı yay. Hafif sönümlü: bırakınca küçük bir geri sıçrama.
+    protected readonly Spring PressSpring = new(0) { Stiffness = 520, Damping = 24 };
+    private bool _pressMotion = true;
+
+    /// <summary>Farenin sol tuşu bu öğenin üzerinde basılı (basma geri bildirimi).</summary>
+    public bool IsPressed { get; private set; }
+
+    /// <summary>Basma çarpanı (hover büyütmesinden ayrı ölçek dönüşümüyle uygulanır). Hareket azaltmada hep 1.</summary>
+    public double PressScale => DockPress.Scale(PressSpring.Value, _pressMotion);
+
+    /// <summary>Simgenin basılıyken koyulaşması (opaklık).</summary>
+    public double PressOpacity => DockPress.Opacity(PressSpring.Value);
+
+    /// <summary>
+    /// Basıldı / bırakıldı. <paramref name="animate"/> false ise (hareket azaltma) ölçek değişmez ve renk anında geçer.
+    /// </summary>
+    public void SetPressed(bool pressed, bool animate)
+    {
+        IsPressed = pressed;
+        _pressMotion = animate;
+        if (animate)
+            PressSpring.Target = pressed ? 1.0 : 0.0;
+        else
+            PressSpring.SnapTo(pressed ? 1.0 : 0.0);
+
+        NotifyPress();
+    }
+
+    /// <summary>Animasyonsuz anında basılı / bırakılmış duruma geçer (UiSnapshots sahnesi için).</summary>
+    public void SnapPress(bool pressed)
+    {
+        IsPressed = pressed;
+        _pressMotion = true;
+        PressSpring.SnapTo(pressed ? 1.0 : 0.0);
+        NotifyPress();
+    }
+
+    public bool StepPress(double dt)
+    {
+        if (PressSpring.IsAtRest)
+            return false;
+
+        var moving = PressSpring.Step(dt);
+        NotifyPress();
+        return moving;
+    }
+
+    private void NotifyPress()
+    {
+        OnPropertyChanged(nameof(PressScale));
+        OnPropertyChanged(nameof(PressOpacity));
+    }
     protected readonly Spring OffsetSpring = new(0) { Stiffness = 380, Damping = 30 };
 
     public double OffsetX => OffsetSpring.Value;

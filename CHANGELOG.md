@@ -13,6 +13,7 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 - **Dock: Windows tarzı tam genişlik.** Çubuk Windows 11 görev çubuğu ölçüsünde 48 px, ekran kenarına sıfır boşlukla yapışık, köşesiz, üstte ince parıltı çizgisi. Yüzey Ayarlar › Görünüm › Malzeme'ye uyar (Katı: opak, Yarı saydam: %88). Çalışma göstergeleri (nokta/çizgi, çoklu pencere, dikkat, rozet) kapsülle aynı şablondan gelir; etkin uygulamanın adı artık çubukta yazmıyor (Windows gibi yalnız simge ve gösterge).
 - **Tam genişlikte yakınlık modları sadeleşti:** "Her zaman göster" (çalışma alanından tam 48 px ayırır, büyütülmüş pencere çubuğun hemen üstünde biter) ve "Otomatik gizle" (yer ayırmaz, fare alt kenara gelince çıkar). "Aşağı yapış" ve "Çekil" yalnız kapsülde; tam genişliğe geçince Aşağı yapış → Her zaman göster, Çekil → Otomatik gizle olur.
+- **Dock'ta basma hissi (iki modda):** uygulamaya ya da klasöre basınca simge %92'ye çöker ve hafifçe koyulaşır, bırakınca yayla geri gelir. Sürükleme başlarsa ya da fare öğeden ayrılırsa iptal olur. Hareket azaltmada yalnız renk değişir. Hover büyütmesinden bağımsız çarpandır.
 - **Dock hareketi tek kaynaktan:** dock yayları (kayma, solma, simge büyümesi) Windows "animasyonları azalt", Animasyon hızı ayarı ve pil tasarrufuna uyar.
 
 ### Düzeltmeler (Fixed)

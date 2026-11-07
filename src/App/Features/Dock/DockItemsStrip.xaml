@@ -77,11 +77,16 @@
                               HorizontalAlignment="Center"
                               VerticalAlignment="Center"
                               RenderTransformOrigin="0.5, 0.5">
+                            <!-- İki ayrı çarpan: hover büyütmesi (Scale) ve basma (PressScale). Biri öbürünün yay hedefini ezmez. -->
                             <Grid.RenderTransform>
-                                <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}"/>
+                                <TransformGroup>
+                                    <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}"/>
+                                    <ScaleTransform ScaleX="{Binding PressScale}" ScaleY="{Binding PressScale}"/>
+                                </TransformGroup>
                             </Grid.RenderTransform>
 
                             <Image Source="{Binding Icon}"
+                                   Opacity="{Binding PressOpacity}"
                                    RenderOptions.BitmapScalingMode="HighQuality"
                                    Width="{Binding IconSize}"
                                    Height="{Binding IconSize}"
@@ -192,6 +197,7 @@
             <DataTemplate DataType="{x:Type local:DockFolderViewModel}">
                 <Grid>
                     <Border x:Name="FolderContainer"
+                            RenderTransformOrigin="0.5,0.5"
                             Width="{Binding ItemSize}"
                             Height="{Binding ItemSize}"
                             Margin="1,0"
@@ -226,14 +232,16 @@
                             </Style>
                         </Border.Style>
 
+                        <!-- Orijin ortada (ItemSize küçülünce de doğru): hover ve basma ayrı çarpan -->
                         <Border.RenderTransform>
                             <TransformGroup>
-                                <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}" CenterX="19" CenterY="19"/>
+                                <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}"/>
+                                <ScaleTransform ScaleX="{Binding PressScale}" ScaleY="{Binding PressScale}"/>
                                 <TranslateTransform X="{Binding OffsetX}"/>
                             </TransformGroup>
                         </Border.RenderTransform>
 
-                        <Grid>
+                        <Grid Opacity="{Binding PressOpacity}">
                             <!-- 2x2 Mini Simge Izgarası -->
                             <ItemsControl ItemsSource="{Binding PreviewIcons}"
                                           Width="{Binding IconSize}"
