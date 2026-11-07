@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 256" width="680" height="256" role="img" aria-labelledby="title-horiz-color">
+  <title id="title-horiz-color">Koy Marka Logosu (Yatay Renkli Lockup)</title>
+  
+  <defs>
+    <linearGradient id="koy-h-tile" x1="128" y1="48" x2="128" y2="208" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sol Sembol: Koy Rozeti (160×160) -->
+  <g id="symbol">
+    <rect x="48" y="48" width="160" height="160" rx="40" fill="url(#koy-h-tile)"/>
+    <!-- Üst Çentik -->
+    <path fill="#93C5FD" d="
+      M 95 48
+      C 100 58 108 66 118 66
+      H 138
+      C 148 66 156 58 161 48
+      H 95
+      Z
+    "/>
+    <!-- Merkez K Glifi -->
+    <rect x="85" y="89" width="25" height="90" rx="12.5" fill="#FFFFFF"/>
+    <path fill="#FFFFFF" d="
+      M 110 134
+      L 145 94
+      C 150 89 158 88 163 93
+      C 168 98 168 106 163 110
+      L 133 140
+      L 163 170
+      C 168 174 168 182 163 187
+      C 158 192 150 191 145 186
+      L 110 144
+      Z
+    "/>
+  </g>
+
+  <!-- Sağ Wordmark: "Koy" Tipografisi -->
+  <g id="wordmark" fill="#0F172A">
+    <!-- K: Dikey omurga ve dengeli kollar -->
+    <rect x="264" y="68" width="24" height="120" rx="12"/>
+    <path d="M 280 134 L 340 74 C 345 69 353 69 358 74 C 363 79 363 87 358 92 L 312 138 L 362 188 C 367 193 367 201 362 206 C 357 211 349 211 344 206 L 280 144 Z"/>
+
+    <!-- o: Yumuşak kavisli, korunaklı yuvarlak gövde -->
+    <path fill-rule="evenodd" d="
+      M 426 96
+      C 452 96 474 118 474 144
+      C 474 170 452 192 426 192
+      C 400 192 378 170 378 144
+      C 378 118 400 96 426 96 Z
+      M 426 120
+      C 413 120 402 131 402 144
+      C 402 157 413 168 426 168
+      C 439 168 450 157 450 144
+      C 450 131 439 120 426 120 Z
+    "/>
+
+    <!-- y: Aşağı doğru zarifçe kavislenen akıcı kuyruk -->
+    <path d="
+      M 500 96
+      C 507 96 513 101 513 108
+      L 524 140
+      L 552 102
+      C 556 96 564 95 570 99
+      C 575 103 576 111 572 116
+      L 534 168
+      C 525 180 514 190 500 190
+      H 494
+      C 487 190 482 185 482 178
+      C 482 171 487 166 494 166
+      H 500
+      C 506 166 511 161 515 155
+      L 489 110
+      C 486 104 489 97 495 96
+      C 497 96 498 96 500 96 Z
+    "/>
+  </g>
+</svg>

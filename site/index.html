@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Koy: Windows 11 için çentik ve dock</title>
+  <meta name="description" content="Koy, Windows 11 için yay fiziğiyle açılan bir çentik ve görev çubuğunun yerine geçen bir dock. Tek süreç, tarayıcı motoru yok, boşta işlemciyi yormaz. Ücretsiz ve açık kaynak.">
+  <meta name="theme-color" content="#f5f5f8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0a0a0b" media="(prefers-color-scheme: dark)">
+  <link rel="canonical" href="https://koyhq.github.io/koy/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Koy: Windows 11 için çentik ve dock">
+  <meta property="og:description" content="Yay fiziğiyle açılan çentik, görev çubuğunun yerine geçen dock. Tarayıcı motoru yok, ücretsiz ve açık kaynak.">
+  <meta property="og:url" content="https://koyhq.github.io/koy/">
+  <meta property="og:image" content="https://koyhq.github.io/koy/img/og.png">
+  <meta property="og:locale" content="tr_TR">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="img/favicon.ico" sizes="48x48">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+  <a class="skip" href="#icerik">İçeriğe geç</a>
+
+  <header class="nav">
+    <a class="brand" href="./" aria-label="Koy, ana sayfa">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="img/koy-horizontal-white.svg">
+        <img src="img/koy-horizontal-color.svg" alt="Koy" width="106" height="40">
+      </picture>
+    </a>
+    <nav class="nav__links" aria-label="Bölümler">
+      <a href="#centik">Çentik</a>
+      <a href="#dock">Dock</a>
+      <a href="#kurulum">Kurulum</a>
+      <a class="btn btn--primary btn--sm" href="https://github.com/koyhq/koy/releases/latest">İndir</a>
+    </nav>
+  </header>
+
+  <main id="icerik">
+    <!-- HERO -->
+    <section class="hero" data-hero>
+      <div class="screen screen--hero">
+        <img class="screen__img" src="img/centik-ana.webp" width="1008" height="570" fetchpriority="high"
+             alt="Açık Koy çentiği: çalan müzik, kulaklık pili, işlemci ve bellek, ağ hızı ve hızlı başlat">
+      </div>
+
+      <a class="badge" id="surum" href="https://github.com/koyhq/koy/releases/latest" hidden>
+        <span class="badge__chip" id="surum-no"></span>
+        <span>Sürüm notlarına bak</span>
+      </a>
+
+      <h1 class="hero__title">
+        <span class="line"><span>Çentik yukarıda.</span></span>
+        <span class="line line--muted"><span>Dock aşağıda.</span></span>
+      </h1>
+      <p class="hero__sub">Yay fiziğiyle açılan bir çentik ve görev çubuğunun yerine geçen bir dock. Tek süreç, tarayıcı motoru yok, boşta işlemciyi yormaz.</p>
+
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="https://github.com/koyhq/koy/releases/latest">
+          Koy'u indir
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="link" href="https://github.com/koyhq/koy">
+          Kaynak kodu
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
+        </a>
+      </div>
+      <p class="hero__facts">Windows 11 · Ücretsiz ve açık kaynak (GPLv3)</p>
+    </section>
+
+    <!-- ÇENTİK -->
+    <section class="section" id="centik">
+      <div class="wrap">
+        <div class="section__head" data-reveal>
+          <h2>Ekranın üstü boşa durmasın.</h2>
+          <p class="lead">Fareyi üst kenara götür, çentik yayla açılsın. Müzik, takvim, Wi-Fi ve sistem durumu hep aynı yerde.</p>
+        </div>
+
+        <div class="showcase" data-tabs data-reveal style="--d:.1s">
+          <div class="tablist" role="tablist" aria-label="Çentik sayfaları">
+            <button class="tab" role="tab" id="tab-ana" aria-controls="panel-ana" aria-selected="true" data-key="ana">Ana</button>
+            <button class="tab" role="tab" id="tab-takvim" aria-controls="panel-takvim" aria-selected="false" tabindex="-1" data-key="takvim">Takvim</button>
+            <button class="tab" role="tab" id="tab-kontrol" aria-controls="panel-kontrol" aria-selected="false" tabindex="-1" data-key="kontrol">Kontrol Merkezi</button>
+            <button class="tab" role="tab" id="tab-wifi" aria-controls="panel-wifi" aria-selected="false" tabindex="-1" data-key="wifi">Wi-Fi</button>
+            <button class="tab" role="tab" id="tab-kapali" aria-controls="panel-kapali" aria-selected="false" tabindex="-1" data-key="kapali">Kapalıyken</button>
+          </div>
+
+          <div class="panels">
+            <p class="panel" role="tabpanel" id="panel-ana" aria-labelledby="tab-ana" data-key="ana">Çalan müzik, kulaklık pili, işlemci ve bellek, ağ hızı ve hızlı başlat tek bakışta. Müzik Spotify'dan, tarayıcıdan ya da Windows Medya Oynatıcı'dan gelir.</p>
+            <p class="panel" role="tabpanel" id="panel-takvim" aria-labelledby="tab-takvim" data-key="takvim" hidden>Ay, hafta ve gün görünümü, zamanlayıcı, kronometre ve Pomodoro. Etkinlikler bilgisayarında kalır. Süre bitince çentik titreyerek haber verir.</p>
+            <p class="panel" role="tabpanel" id="panel-kontrol" aria-labelledby="tab-kontrol" data-key="kontrol" hidden>Wi-Fi, Bluetooth, Rahatsız Etme, ses ve parlaklık. Döşemeleri sürükleyerek istediğin sıraya koy.</p>
+            <p class="panel" role="tabpanel" id="panel-wifi" aria-labelledby="tab-wifi" data-key="wifi" hidden>Ağları çentikten seç, Windows'taki gibi. Bluetooth cihazlarına da buradan bağlan.</p>
+            <p class="panel" role="tabpanel" id="panel-kapali" aria-labelledby="tab-kapali" data-key="kapali" hidden>Kapalıyken çentik küçük kalır: müzik çalıyorsa kapak ve dalga, çalmıyorsa saat ve pil. Ses ya da parlaklık değişince kısa bir gösterge çıkar.</p>
+            <p class="panels__note">Ayrıca Odak, Raf (dosya ve metin sürükle-bırak), Pano ve Sistem sayfaları var.</p>
+          </div>
+
+          <div class="screen screen--tabs">
+            <img class="shot is-active" data-key="ana" src="img/centik-ana.webp" width="1008" height="570" loading="lazy" alt="Çentik Ana sayfası: müzik, kulaklık, sistem ve hızlı başlat">
+            <img class="shot" data-key="takvim" src="img/centik-takvim.webp" width="1008" height="570" loading="lazy" alt="Çentik Takvim sayfası: ay görünümü, zamanlayıcı ve etkinlikler">
+            <img class="shot" data-key="kontrol" src="img/centik-kontrol.webp" width="1008" height="570" loading="lazy" alt="Kontrol Merkezi: Wi-Fi, Bluetooth, ses ve parlaklık">
+            <img class="shot" data-key="wifi" src="img/centik-wifi.webp" width="1008" height="570" loading="lazy" alt="Çentikte Wi-Fi ağ listesi">
+            <img class="shot shot--closed" data-key="kapali" src="img/centik-kapali.webp" width="418" height="57" loading="lazy" alt="Kapalı çentik: müzik çalarken kapak ve dalga">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOCK -->
+    <section class="section section--tint" id="dock">
+      <div class="wrap split">
+        <div data-reveal>
+          <h2>Görev çubuğunun yerine. Aynısı değil.</h2>
+          <p class="lead">Yüzen bir kapsül ya da ekran genişliğinde bir çubuk. Windows görev çubuğu gizlenir, işi dock devralır.</p>
+          <ul class="features">
+            <li><strong>Pencereye göre davranır.</strong> Yer ayır, aşağı yapış, çekil ya da hep gizli. Tam ekranda ve oyunda asla çıkmaz.</li>
+            <li><strong>Simgenin üstünde önizleme.</strong> Fareyle üzerine gel, açık pencerenin canlı küçük görüntüsünü gör.</li>
+            <li><strong>Sistem tepsisi dock'ta.</strong> Discord, Steam gibi uygulamaların tepsi simgeleri ve menüleri dock'tan çalışır.</li>
+            <li><strong>Sürükleyerek sırala.</strong> Sabitli uygulamaların sırası senin düzenin, yeniden başlatınca korunur.</li>
+          </ul>
+        </div>
+        <div data-reveal style="--d:.12s">
+          <div class="screen screen--desktop" data-notch-demo>
+            <img class="desktop__notch" src="img/centik-kapali.webp" width="418" height="57" loading="lazy" alt="">
+            <img class="desktop__open" id="desktop-open" src="img/centik-ana.webp" width="1008" height="570" loading="lazy" alt="Açılmış çentik: müzik, kulaklık pili, sistem ve hızlı başlat">
+            <img class="desktop__dock" src="img/dock.webp" width="494" height="48" loading="lazy" alt="Ekranın altında Koy dock'u: sabitli uygulamalar ve açık pencereler">
+            <button class="desktop__zone" type="button" aria-expanded="false" aria-controls="desktop-open" aria-label="Çentiği aç ya da kapat"></button>
+          </div>
+          <p class="hint">Fareyi çentiğin üstüne götür, yayla açılsın. Dokunmatikte dokun.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- HAFİFLİK -->
+    <section class="section section--dark" id="hafiflik">
+      <span class="ghost" aria-hidden="true" data-parallax>0</span>
+      <div class="wrap">
+        <div class="section__head" data-reveal>
+          <h2>Tarayıcı yok. Bu yüzden hafif.</h2>
+          <p class="lead">Rakipler web motoruyla çalışıyor. Koy doğrudan yerel C# ve WPF, ve bunu ölçerek tutuyor.</p>
+        </div>
+        <dl class="stats">
+          <div class="stat" data-reveal>
+            <dt>0</dt>
+            <dd>tarayıcı motoru. WebView2, Electron ya da Tauri yok.</dd>
+          </div>
+          <div class="stat" data-reveal style="--d:.1s">
+            <dt>1</dt>
+            <dd>süreç. Çentik, dock ve ayarlar aynı süreçte; dock açıkken yalnız küçük bir gözcü eşlik eder.</dd>
+          </div>
+          <div class="stat" data-reveal style="--d:.2s">
+            <dt>~%0</dt>
+            <dd>boşta işlemci. Animasyon yalnız hareket varken kare çizer, görünmeyen panel hiçbir şey çalıştırmaz.</dd>
+          </div>
+          <div class="stat" data-reveal style="--d:.3s">
+            <dt>100–150<small>MB</small></dt>
+            <dd>bellek hedefi. v0.1.1'de iki monitörle ölçülen 99–100 MB. <a href="https://github.com/koyhq/koy/blob/main/docs/MEMORY.md">Ölçüm kayıtları</a></dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- DETAYLAR -->
+    <section class="section section--tint" id="detay">
+      <div class="wrap">
+        <div class="section__head" data-reveal>
+          <h2>Küçük şeyler hesaba katıldı.</h2>
+        </div>
+        <div class="details">
+          <article data-reveal>
+            <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+            <h3>Çoklu ekran</h3>
+            <p>Her monitörde ayrı çentik ve dock, her biri kendi DPI'ında. Yan ekranda tam ekran video, ana ekrandaki Koy'u gizlemez.</p>
+          </article>
+          <article data-reveal style="--d:.08s">
+            <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <h3>Görev çubuğu güvencesi</h3>
+            <p>Koy kapansa ya da çökse bile Windows görev çubuğu birkaç saniyede geri gelir.</p>
+          </article>
+          <article data-reveal style="--d:.16s">
+            <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 8h.01M12 12h.01M14 8h.01M16 12h.01M18 8h.01M6 8h.01M7 16h10M8 12h.01"/><rect width="20" height="16" x="2" y="4" rx="2"/></svg></span>
+            <h3>Kısayollar</h3>
+            <p>Genel kısayolların hepsi özelleştirilebilir. İki kısayol çakışırsa Koy söyler.</p>
+          </article>
+          <article data-reveal>
+            <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></span>
+            <h3>Koyu ve açık tema</h3>
+            <p>Windows temasını izler ya da elle seçersin. Vurgu rengi de senin.</p>
+          </article>
+          <article data-reveal style="--d:.08s">
+            <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg></span>
+            <h3>Türkçe ve İngilizce</h3>
+            <p>Dil, uygulamayı yeniden başlatmadan anında değişir.</p>
+          </article>
+          <article data-reveal style="--d:.16s">
+            <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/></svg></span>
+            <h3>Temiz kaldırma</h3>
+            <p>Koy'dan tek adımda kaldırılır. İstersen ayarların korunur, görev çubuğun yerine döner.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- KURULUM -->
+    <section class="section" id="kurulum">
+      <div class="wrap">
+        <div class="section__head" data-reveal>
+          <h2>Kurulum bir dakika.</h2>
+          <p class="lead">Windows 11 (22H2 ve üstü) gerekir. Koy ücretsizdir ve her sürüm GitHub Actions'ta, testler geçtikten sonra üretilir.</p>
+        </div>
+        <ol class="steps">
+          <li data-reveal>
+            <h3>İndir</h3>
+            <p>Setup tek tıkla kurar ve kendini günceller. Kurulum istemezsen taşınabilir zip var.</p>
+            <div class="steps__actions">
+              <a class="btn btn--primary" href="https://github.com/koyhq/koy/releases/latest/download/Koy-win-Setup.exe">
+                Koy-win-Setup.exe
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
+              </a>
+              <a class="link" href="https://github.com/koyhq/koy/releases/latest/download/Koy-win-Portable.zip">Taşınabilir zip</a>
+            </div>
+          </li>
+          <li data-reveal style="--d:.1s">
+            <h3>SmartScreen uyarırsa</h3>
+            <p>Koy henüz kod imzalı değil. Dosyayı yalnız GitHub Releases'tan indirdiysen <em>Ek bilgi</em>, sonra <em>Yine de çalıştır</em> de. Başka bir yerden gelen Koy dosyasını çalıştırma.</p>
+          </li>
+          <li data-reveal style="--d:.2s">
+            <h3>İstersen doğrula</h3>
+            <p>Çıkan özeti sürümdeki <a href="https://github.com/koyhq/koy/releases/latest/download/SHA256SUMS.txt">SHA256SUMS.txt</a> ile karşılaştır.</p>
+            <div class="code">
+              <code id="kod">Get-FileHash .\Koy-win-Setup.exe -Algorithm SHA256</code>
+              <button class="code__copy" type="button" data-copy="#kod" aria-label="Komutu kopyala">
+                <span data-copy-label>Kopyala</span>
+              </button>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer section--dark">
+    <span class="ghost ghost--word" aria-hidden="true">Koy</span>
+    <div class="wrap footer__cta" data-reveal>
+      <h2>Masaüstünü hafifçe değiştir.</h2>
+      <p class="lead">Ücretsiz, açık kaynak, Windows 11 için. Kurulum bir dakika, kaldırmak da öyle.</p>
+      <div class="hero__cta footer__buttons">
+        <a class="btn btn--primary" href="https://github.com/koyhq/koy/releases/latest">
+          Koy'u indir
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="link" href="https://github.com/koyhq/koy">Kaynak kodu</a>
+      </div>
+    </div>
+    <div class="wrap footer__grid">
+      <div>
+        <a class="brand" href="./" aria-label="Koy, ana sayfa">
+          <img src="img/koy-horizontal-white.svg" alt="Koy" width="80" height="30" loading="lazy">
+        </a>
+        <p class="footer__note">GPLv3 ile yayımlanan açık kaynak bir proje.</p>
+      </div>
+      <nav class="footer__links" aria-label="Bağlantılar">
+        <a href="https://github.com/koyhq/koy">Kaynak kodu</a>
+        <a href="https://github.com/koyhq/koy/releases">Sürümler</a>
+        <a href="https://github.com/koyhq/koy/blob/main/CHANGELOG.md">Değişiklik günlüğü</a>
+        <a href="https://github.com/koyhq/koy/issues/new/choose">Hata bildir</a>
+        <a href="https://github.com/koyhq/koy/discussions">Tartışmalar</a>
+        <a href="https://github.com/koyhq/koy/blob/main/SECURITY.md">Güvenlik</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
