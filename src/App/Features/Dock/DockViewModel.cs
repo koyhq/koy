@@ -727,6 +727,60 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         EvaluatePosition(_lastContentWidth);
     }
 
+    // Aşağı yapış'ta yüzen ↔ yapışık geçişi 150 ms'den kısa sürerse uygulanmaz (Alt+Tab ara durakları dock'u zıplatıyordu).
+    private readonly SnapDebounce _snapDebounce = new(TimeSpan.FromMilliseconds(150));
+    private DockResolvedState? _stableResolved;
+    private DispatcherTimer? _snapTimer;
+
+    private static TimeSpan SnapClock => TimeSpan.FromSeconds(Stopwatch.GetTimestamp() / (double)Stopwatch.Frequency);
+
+    private DockResolvedState StabilizeSnap(DockResolvedState resolved)
+    {
+        if (resolved.IsFullWidth || resolved.IsHidden || EffectiveProximity != DockProximityMode.DockDown || _stableResolved is null)
+        {
+            _snapDebounce.Reset(resolved.IsSnapped);
+            _snapTimer?.Stop();
+            if (!resolved.IsHidden)
+                _stableResolved = resolved;
+            return resolved;
+        }
+
+        var effective = _snapDebounce.Update(resolved.IsSnapped, SnapClock);
+        if (effective == resolved.IsSnapped)
+        {
+            _snapTimer?.Stop();
+            _stableResolved = resolved;
+            return resolved;
+        }
+
+        // Değişim bekliyor: önceki geometri korunur; kalan süre sonra tek atımlık zamanlayıcı yeniden değerlendirir.
+        _snapTimer ??= new DispatcherTimer();
+        _snapTimer.Stop();
+        _snapTimer.Interval = _snapDebounce.Remaining(SnapClock) + TimeSpan.FromMilliseconds(10);
+        _snapTimer.Tick -= OnSnapTimerTick;
+        _snapTimer.Tick += OnSnapTimerTick;
+        _snapTimer.Start();
+
+        var s = _stableResolved;
+        return resolved with
+        {
+            IsSnapped = s.IsSnapped,
+            HeightDip = s.HeightDip,
+            TopDip = s.TopDip,
+            CornerRadiusTopLeft = s.CornerRadiusTopLeft,
+            CornerRadiusTopRight = s.CornerRadiusTopRight,
+            CornerRadiusBottomRight = s.CornerRadiusBottomRight,
+            CornerRadiusBottomLeft = s.CornerRadiusBottomLeft
+        };
+    }
+
+    private void OnSnapTimerTick(object? sender, EventArgs e)
+    {
+        _snapTimer?.Stop();
+        if (!_disposed)
+            EvaluatePosition(_lastContentWidth);
+    }
+
     public void EvaluatePosition(double contentWidth)
     {
         if (contentWidth > 0)
@@ -747,6 +801,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             _isForegroundWindowFullscreen,
             _settings.DockHideInFullscreen,
             _settings.DockEdgeReveal);
+
+        resolved = StabilizeSnap(resolved);
 
         IsFullWidthMode = resolved.IsFullWidth;
         IsSnapped = resolved.IsSnapped;
@@ -1384,6 +1440,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _thumbnailHoverTimer.Stop();
         _previewCloseTimer.Stop();
         _dodgeHoverTimer.Stop();
+        _snapTimer?.Stop();
 
         DockContextMenuManager.ActiveMenuChanged -= OnActiveMenuChanged;
 
