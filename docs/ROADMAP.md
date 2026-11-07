@@ -344,7 +344,7 @@ Proje sahibi aşağıdakilerin hepsinin yapılmasına karar verdi. Sıra öneril
      2. `HomePanel.xaml` içindeki hızlı başlat `+` düğmesine: sol tık mevcut `AddCommand` (dosya/uygulama seçer) olarak kalsın, sağ tık bağlam menüsü (`ContextMenu`) veya `+` yanında/menüsünde iki seçenek ("Uygulama / dosya ekle…" → `AddCommand`, "Klasör ekle…" → `AddFolderCommand`) bağla; menü açıkken de `HoldOpen` ile çentik kapanmasın.
      3. `Strings.resx` ve `Strings.tr.resx` dosyalarına `QuickLaunchPickFolderTitle`, `QuickLaunchAddFile`, `QuickLaunchAddFolder` anahtarlarını ekle.
      4. `tests/Core.Tests/QuickLaunchTests.cs` içinde klasör yolu ekleme ve görüntüleme testinin bulunduğunu doğrula.
-8. [ ] **RAM: radyo servisi açılışta yalnız gerektiğinde kurulsun:**
+8. [x] **RAM: radyo servisi açılışta yalnız gerektiğinde kurulsun:**
    - **Kök neden:** `NotchViewModel.cs:216` içinde `ShowRadioStatus = _controller.EnabledPanels.Contains(NotchPanel.ControlCenter);` yazılı ve hemen `StartRadioStatus()` çağrılıyor. Oysa kapalı çentikte Wi-Fi/BT simgesi yalnız `IdleDisplay.ShowRadio(Settings.IdleDisplayMode)` doğruysa gösteriliyor (`IdleDisplayMode == 0` yani "Saat, pil ve bağlantılar"). Kullanıcı "Yalnız saat" veya "Hiçbiri" seçtiyse (veya `ShowIdleRadio` false ise) radyo servisinin açılışta kurulmasına hiç gerek yok; Kontrol Merkezi ilk açıldığında (`ControlCenterViewModel.SetActive(true)`) zaten `EnsureRadioService()` ile kuruluyor.
    - **Yapılacak (`src/App/Features/Notch/NotchViewModel.cs`):**
      1. `NotchViewModel` kurucusunda `if (ShowRadioStatus)` yerine `if (ShowRadioStatus && IdleDisplay.ShowRadio(Settings.IdleDisplayMode))` koşuluyla `_controlCenter.StartRadioStatus()` çağır.

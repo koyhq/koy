@@ -214,7 +214,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
         // Windows tepsisi gizli olduğu için Wi-Fi ve Bluetooth'un durumunu gösteren tek yer çentik.
         ShowRadioStatus = _controller.EnabledPanels.Contains(NotchPanel.ControlCenter);
-        if (ShowRadioStatus)
+        if (ShowRadioStatus && IdleDisplay.ShowRadio(Settings.IdleDisplayMode))
             _controlCenter.StartRadioStatus();
 
         UpdateClock();
