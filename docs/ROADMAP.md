@@ -464,6 +464,7 @@ Proje sahibi istedi. Kod yazılmadı.
 8. **Doğrulama:** Core testleri (sürüm karşılaştırma, "ilk açılış mı" kararı, sürüm notu bölümü ayıklama), UiSnapshots sahneleri (düğme, onay, ilerleme, güncellendi, neler geldi; açık ve koyu), elle sınama: 0.2.0 kuruluyken yeni sürüme güncelleme.
 
 ## Sonraya kalanlar
+- CsWin32 0.3.106 → güncel sürüme geçiş: 0.3.369'da üretilen türler değişti (Platform'da 70 derleme hatası: HWND/işaretçi imzaları, `unsafe` gereken yerler). Platform ve Watchdog birlikte, aynı sürüme geçirilir; Watchdog'un görev çubuğu geri getirme yolu elle sınanır. O zamana dek Dependabot bu paketi yoksayar (`.github/dependabot.yml`).
 - Bildirimleri çentikte gösterme: Windows bildirimleri gelince çentik kısa süre gösterir (Claude Code gibi ajanların "iş bitti" bildirimleri de bu yoldan gelir). `UserNotificationListener` paket kimliği ister; Velopack kurulumu için seyrek (sparse) paket ve imza gerekir. Ara çözüm: Claude Code kancasının çağırdığı yerel komutla doğrudan bildirim.
 - Kullanıcının düzenleyebildiği çentik arayüzü: sayfaların ve kartların sırası, hangilerinin görüneceği kullanıcı tarafından seçilir.
 - Google / Outlook takvim (OAuth).
