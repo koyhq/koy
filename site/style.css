@@ -255,10 +255,14 @@ h3 { margin: 0; font: 600 18px/1.3 var(--font-display); letter-spacing: -.015em;
 .js [data-reveal].is-in { opacity: 1; transform: none; transition: opacity .8s var(--ease-out) var(--d, 0s), transform .8s var(--ease-out) var(--d, 0s); }
 
 /* ---------- Duyarlı ---------- */
-@media (min-width: 1360px) {
-  /* Çentik gerçekte olduğu gibi sayfanın tepesinden sarkar; üst çubuk iki yanına yaslanır. */
+@media (min-width: 900px) {
+  /* Çentik gerçekte olduğu gibi sayfanın tepesinden sarkar; üst çubuk iki yanına yaslanır.
+     Dar masaüstünde (900–1359 px) çerçevenin iki yanındaki yer bağlantılara yetmez, yalnız logo ve İndir kalır. */
   .nav { position: absolute; inset: 0 0 auto 0; }
   .screen--hero { margin-top: 0; border-radius: 0 0 var(--radius) var(--radius); }
+}
+@media (min-width: 900px) and (max-width: 1359px) {
+  .nav__links a:not(.btn) { display: none; }
 }
 
 @media (max-width: 960px) {
