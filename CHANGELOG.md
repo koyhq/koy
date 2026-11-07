@@ -5,7 +5,7 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
-## [Unreleased]
+## [0.2.0](https://github.com/koyhq/koy/compare/v0.1.1...v0.2.0) (2026-11-07)
 
 Öne çıkanlar:
 - **Dock klasörleri:** sabitli bir uygulamayı başka birinin üstüne sürükleyip bırakınca klasör olur; klasör dock'ta 2×2 önizlemeyle durur, tıklayınca cam panelde açılır.
