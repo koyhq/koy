@@ -12,13 +12,13 @@
 **Windows 11 için hafif, yay fiziği animasyonlu Çentik (Notch) ve akıllı masaüstü Dock'u.**  
 *Lightweight, zero-browser, spring-animated Notch & smart desktop Dock for Windows 11.*
 
-[![CI](https://github.com/brhnshn/koy/actions/workflows/ci.yml/badge.svg)](https://github.com/brhnshn/koy/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/brhnshn/koy?color=3B82F6&label=Release)](https://github.com/brhnshn/koy/releases/latest)
-[![Platform](https://img.shields.io/badge/Platform-Windows%2011%20(x64)-0078D4)](https://github.com/brhnshn/koy)
+[![CI](https://github.com/koyhq/koy/actions/workflows/ci.yml/badge.svg)](https://github.com/koyhq/koy/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/koyhq/koy?color=3B82F6&label=Release)](https://github.com/koyhq/koy/releases/latest)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2011%20(x64)-0078D4)](https://github.com/koyhq/koy)
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-22C55E.svg)](LICENSE)
 
-[İndir (Releases)](https://github.com/brhnshn/koy/releases/latest) · [Mimari & Plan](docs/PLAN.md) · [Arayüz Tasarımı](docs/DESIGN.md) · [Katkıda Bulun](CONTRIBUTING.md) · [English Summary](#-english-overview)
+[İndir (Releases)](https://github.com/koyhq/koy/releases/latest) · [Mimari & Plan](docs/PLAN.md) · [Arayüz Tasarımı](docs/DESIGN.md) · [Katkıda Bulun](CONTRIBUTING.md) · [English Summary](#-english-overview)
 
 </div>
 
@@ -100,7 +100,7 @@ Dürüst durum: aşağıdakiler henüz yok ya da doğrulanmadı.
 ## Kurulum ve Doğrulama
 
 ### Hazır Kurulum Paketi (Önerilen)
-1. [**GitHub Releases**](https://github.com/brhnshn/koy/releases/latest) sayfasından en son sürümü indirin:
+1. [**GitHub Releases**](https://github.com/koyhq/koy/releases/latest) sayfasından en son sürümü indirin:
    - **`Koy-win-Setup.exe`**: Velopack tek tıkla kurulum paketi (otomatik güncelleme destekli).
    - **`Koy-win-Portable.zip`**: Kurulum gerektirmeyen taşınabilir arşiv.
 2. İndirdiğiniz dosyanın bütünlüğünü `SHA256SUMS.txt` ile doğrulayabilirsiniz:
@@ -112,7 +112,7 @@ Dürüst durum: aşağıdakiler henüz yok ya da doğrulanmadı.
 
 Koy'un kurulum dosyası ve güncellemeleri henüz **kod imzalı değil**. Bu yüzden:
 
-- **SmartScreen uyarısı:** İlk çalıştırmada Windows "Windows bilgisayarınızı korudu" diyebilir. Dosyayı yalnız [GitHub Releases](https://github.com/brhnshn/koy/releases) sayfasından indirdiyseniz **"Ek bilgi" → "Yine de çalıştır"** ile devam edebilirsiniz. Başka bir siteden, aynadan ya da paylaşılan bir bağlantıdan gelen Koy dosyasını çalıştırmayın.
+- **SmartScreen uyarısı:** İlk çalıştırmada Windows "Windows bilgisayarınızı korudu" diyebilir. Dosyayı yalnız [GitHub Releases](https://github.com/koyhq/koy/releases) sayfasından indirdiyseniz **"Ek bilgi" → "Yine de çalıştır"** ile devam edebilirsiniz. Başka bir siteden, aynadan ya da paylaşılan bir bağlantıdan gelen Koy dosyasını çalıştırmayın.
 - **`SHA256SUMS.txt` neyi kanıtlar:** İndirmenin bozulmadan, eksiksiz geldiğini. Dosyayla aynı sürüm sayfasında durduğu için dosyayı kimin yayınladığını kanıtlamaz; o güvence GitHub deposunun kendisinden gelir.
 - **Otomatik güncellemeler:** Kurulu Koy yalnız bu deponun GitHub Releases sayfasındaki sürümleri HTTPS ile indirir. Velopack her paketi sürüm listesindeki SHA özetiyle karşılaştırır; uymayan paket kurulmaz. Güncelleme Koy kapanınca uygulanır. İstemezseniz Ayarlar → Genel'den otomatik denetimi kapatabilirsiniz.
 - **Yayın hattı:** Sürümler yalnız GitHub Actions'ta, testler geçtikten sonra üretilir. Kullanılan eylemler commit özetine sabitlidir; `main` dalına zorla push ve dal silme, yayınlanmış `v*` etiketlerinin taşınması ve silinmesi depo kurallarıyla engellidir.
@@ -124,7 +124,7 @@ Koy'un kurulum dosyası ve güncellemeleri henüz **kod imzalı değil**. Bu yü
 
 ```powershell
 # 1. Depoyu klonlayın
-git clone https://github.com/brhnshn/koy.git
+git clone https://github.com/koyhq/koy.git
 cd koy
 
 # 2. Derleyin ve birim testlerini çalıştırın (550 test)
@@ -207,7 +207,7 @@ koy/
 - **Multi-Monitor Support:** A Displays page lets you choose a notch and dock per monitor, with per-monitor DPI and per-monitor fullscreen isolation (not yet verified on real mixed-DPI hardware).
 - **Customizable global shortcuts, dark/light theme, and an in-app uninstall flow** (settings are kept by default).
 - **Bilingual UI:** Instant runtime switching between **English** and **Turkish**.
-- **Not code-signed yet:** Windows SmartScreen may warn on first run. Only download Koy from [GitHub Releases](https://github.com/brhnshn/koy/releases), then choose **More info → Run anyway**. `SHA256SUMS.txt` proves the download is intact, not who published it. Auto-updates come only from this repository's releases over HTTPS and each package is checked against the release feed's SHA hash. Free code signing for open source (SignPath Foundation) is planned.
+- **Not code-signed yet:** Windows SmartScreen may warn on first run. Only download Koy from [GitHub Releases](https://github.com/koyhq/koy/releases), then choose **More info → Run anyway**. `SHA256SUMS.txt` proves the download is intact, not who published it. Auto-updates come only from this repository's releases over HTTPS and each package is checked against the release feed's SHA hash. Free code signing for open source (SignPath Foundation) is planned.
 
 ---
 

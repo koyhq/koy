@@ -16,7 +16,7 @@ Koy, Windows 11 masaüstü ortamında çalışırken kullanıcı güvenliğini v
 2. **Yerel Veri Saklama:** Ayarlar (`%AppData%\Koy\settings.json`) ve Raf öğeleri (`%AppData%\Koy\shelf.json`) yalnızca kullanıcının yerel diskinde tutulur.
 3. **Minimale İndirgenmiş Ağ İstekleri:** Ağ erişimi yalnızca iki amaçla yapılır:
    - Hava durumu paneli açıldığında **Open-Meteo** API'sinden (`api.open-meteo.com`) anahtarsız hava durumu verisi çekmek (cihaz konum izni istenmez, yalnız ayardaki şehir adı kullanılır).
-   - **Velopack** aracılığıyla resmi GitHub Releases (`github.com/brhnshn/koy`) üzerinden sürüm denetimi yapmak.
+   - **Velopack** aracılığıyla resmi GitHub Releases (`github.com/koyhq/koy`) üzerinden sürüm denetimi yapmak.
 4. **SHA256 Bütünlük Doğrulaması:** Her GitHub Release sürümü, kurulum ve taşınabilir paketlerin bütünlüğünü doğrulamak için `SHA256SUMS.txt` dosyası ile birlikte yayınlanır.
 
 ## Güvenlik Açığı Bildirimi (Reporting a Vulnerability)
@@ -24,7 +24,7 @@ Koy, Windows 11 masaüstü ortamında çalışırken kullanıcı güvenliğini v
 Koy'da bir güvenlik açığı (ör. ayrıcalık yükselmesi, güvensiz dosya işlemi, P/Invoke bellek hatası) tespit ederseniz:
 
 1. **Lütfen açığı herkese açık bir GitHub Issue olarak paylaşmayın.**
-2. Bunun yerine GitHub deposundaki **[Security Advisories -> Report a vulnerability](https://github.com/brhnshn/koy/security/advisories/new)** sekmesini kullanarak özel bildirim oluşturun.
+2. Bunun yerine GitHub deposundaki **[Security Advisories -> Report a vulnerability](https://github.com/koyhq/koy/security/advisories/new)** sekmesini kullanarak özel bildirim oluşturun.
 3. Bildiriminize hatanın nasıl tetiklendiğini, etkilenen bileşeni (`Core`, `Platform`, `App`) ve varsa çözüm önerinizi ekleyin.
 
 Bildiriminiz en geç **72 saat** içinde incelenecek ve doğrulanan açıklar için yama sürümü yayınlanacaktır.

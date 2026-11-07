@@ -13,7 +13,7 @@ public static class AppHttp
     private static HttpClient Create()
     {
         var client = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("Koy (+https://github.com/brhnshn/koy)");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("Koy (+https://github.com/koyhq/koy)");
         return client;
     }
 }

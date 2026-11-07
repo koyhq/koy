@@ -10,7 +10,7 @@
     <Authors>Burhan Şahin</Authors>
     <Copyright>Copyright (c) 2026 Burhan Şahin</Copyright>
     <Description>Lightweight spring-animated notch and smart desktop dock for Windows 11</Description>
-    <RepositoryUrl>https://github.com/brhnshn/koy</RepositoryUrl>
+    <RepositoryUrl>https://github.com/koyhq/koy</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
   </PropertyGroup>

@@ -694,7 +694,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         IsCheckingUpdates = true;
         try
         {
-            var mgr = new Velopack.UpdateManager(new Velopack.Sources.GithubSource("https://github.com/brhnshn/koy", null, UpdateChannel == "Önizleme"));
+            var mgr = new Velopack.UpdateManager(new Velopack.Sources.GithubSource("https://github.com/koyhq/koy", null, UpdateChannel == "Önizleme"));
             if (!mgr.IsInstalled)
             {
                 // Geliştirme çalıştırmasında denetim yapılamaz; başarı gibi gösterilmez.
@@ -733,7 +733,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName = "https://github.com/brhnshn/koy",
+                FileName = "https://github.com/koyhq/koy",
                 UseShellExecute = true
             });
         }

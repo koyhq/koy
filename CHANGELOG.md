@@ -7,7 +7,20 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ## [Unreleased]
 
+Öne çıkanlar:
+- **Dock klasörleri:** sabitli bir uygulamayı başka birinin üstüne sürükleyip bırakınca klasör olur; klasör dock'ta 2×2 önizlemeyle durur, tıklayınca cam panelde açılır.
+- **Windows tarzı tam genişlik dock:** 48 px, ekrana boşluksuz yapışık, "Her zaman göster" ya da "Otomatik gizle".
+- **Küçük tepsi, basma hissi, vurgu rengi:** tepsi Koy düğmesinin yanında dar bir ok; simgeye basınca hafifçe çöker; seçtiğin vurgu rengi dock'a ve çentiğe de uygulanır.
+- **Çentikte bildirimler:** şarja takma/çıkarma, düşük pil ve dolu pil; Bluetooth kulaklık bağlanınca adı ve pili.
+- **Daha kararlı dock:** büyütülmüş pencereler artık kendi kendine yeniden boyutlanmıyor, ayar değiştirince dock zıplamıyor, açık uygulamalar kaybolmuyor, Dosya Gezgini ikinci simge açmıyor.
+- **Depo taşındı:** Koy artık [github.com/koyhq/koy](https://github.com/koyhq/koy) adresinde. Eski adres yönlendirir; otomatik güncelleme kendiliğinden yeni adrese geçer.
+
 ### Eklenenler (Added)
+- **Dock klasörleri:** sabitli uygulamayı başka bir sabitli uygulamanın ortasına sürükleyip bekleyince ikisi klasör olur; kenara bırakmak sıralamayı değiştirir. Klasörü tıklayınca cam panel açılır; ad tıklanarak değiştirilir; panelden dışarı sürüklenen uygulama klasörden çıkar; tek uygulama kalınca klasör dağılır. Sağ tık: "Adını değiştir", "Klasörü dağıt".
+- **Pil bildirimleri:** şarja takılınca, çıkarılınca, pil %20 ve %10'un altına inince ve dolunca çentikte kısa gösterge.
+- **Bluetooth bildirimi:** eşleşmiş bir cihaz bağlanınca ya da bağlantısı kesilince çentikte cihaz adı ve varsa pil yüzdesi.
+- **Hızlı başlata klasör eklenebiliyor** (`+` düğmesinin menüsünden).
+- **Vurgu rengi dock ve çentikte:** Ayarlar › Görünüm'de seçilen vurgu, dock'taki etkin uygulama çizgisinde, Koy düğmesinde, çentikteki Kontrol Merkezi ve Bluetooth göstergesinde de kullanılır.
 - **Dock: küçük tepsi.** Ayarlar › Dock › "Küçük tepsi" (varsayılan açık): tepsi düğmesi tam boy simge yerine dar bir ok olur ve Koy menüsü düğmesinin sağına geçer; tepsi paneli aynı yerden açılır.
 - **Dock sağ bölümü iki modda aynı:** tam genişlik dock'ta da İndirilenler düğmesi var; Başlat, İndirilenler, Son kullanılanlar ve Tepsi anahtarları her iki modda çalışır. Kapalı düğmelerin ayırıcısı gizlenir.
 
@@ -22,10 +35,17 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 - **Kapsül "Aşağı yapış" büyütülmüş pencerede gizlenmiyor:** dock alta yapışık (46 px) görünür kalır, pencerenin alt şeridine biner, yer ayırmaz. Yalnız gerçek tam ekran gizler. Çekil ve Hep gizli eskisi gibi.
 - **Dock'ta açık uygulamalar bazen görünmüyordu:** açık pencere süzgeci Windows görev çubuğunun kuralına çekildi (`WS_EX_APPWINDOW` pencereler sahipli olsa da gösterilir; `WS_EX_NOACTIVATE` ve araç pencereleri gizli kalır; başlığı boş pencere tek başına elenmez). Pencere gizlilikten çıkınca (`UNCLOAKED`), gizlenince ve başlığı değişince dock tazelenir (yoklama yok, olaylar birleştirilir).
 - **Çok uygulama açıkken dock ekrandan taşmıyor:** kapsülde simgeler en küçük 24 px'e kadar küçülür; tam genişlikte orta bölüm yan bölümlere binmez.
+- **Dosya Gezgini dock'ta ikinci simge açıyordu:** açık pencereler sabitli uygulamalarla Windows'un yaptığı gibi uygulama kimliğine (AUMID) göre eşleşir.
+- **"Yer ayır"da büyütülmüş pencere ile dock arasında boşluk kalıyordu:** açılışta ayrılan alan görev çubuğunun payı kadar fazlaydı (94 px); artık birkaç saniye içinde tam dock yüksekliğine iner.
+- **Ayar sayfalarında açıklama yazısı sağdaki düğmelerin altına giriyordu:** satırlar yazı ve denetim için ayrı sütunla dizildi.
+- **Alt+Tab'da kapsül zıplıyordu:** çok kısa süren pencere geçişlerinde dock yüksekliği değişmez.
+- **Boşta işlemci kullanımı:** pencere başlığı sık değişen uygulamalar (tarayıcı sekmesi, müzik) dock'u sürekli yeniden kurduruyordu.
+- Sağ alt menüden ya da kısayoldan açılıp kapatılan çentik ve dock, Koy penceresi kapanınca eski haline dönüyordu.
+- Kontrol Merkezi kapalıyken radyo (Wi-Fi/Bluetooth) servisi açılışta gereksiz yere kuruluyordu.
 - Dock kapatılıp yeniden açılınca sistem tepsisi düğmesi (gizli simgeler) kayboluyordu. Kapanan dock tepsi penceresini yeniden kuruyor, yeni dock aynı pencereyi kuramıyordu.
 - Bağlı olmayan Bluetooth cihazları için her seferinde hata kaydı yazılıyordu; günlük dosyası dolup gerçek hata kayıtları siliniyordu.
 
-## [0.1.1](https://github.com/brhnshn/koy/compare/v0.1.0...v0.1.1) (2026-11-06)
+## [0.1.1](https://github.com/koyhq/koy/compare/v0.1.0...v0.1.1) (2026-11-06)
 
 0.1.0'dan sonraki ilk büyük sürüm. Öne çıkanlar:
 - Yeni çentik tasarımı: 7 sekme (Ana, Odak, Takvim, Raf, Pano, Sistem, Kontrol).
@@ -173,5 +193,5 @@ Ayrıntı: [`docs/ROADMAP.md`](docs/ROADMAP.md).
   - **Marka Kimliği:** Konsept C "Koy Rozeti" (Windows 11 Fluent Squircle + Oyulmuş Çentik + K Monogramı) vektör logosu ve çok katmanlı `.ico` varlık kiti.
   - **Dağıtım & CI/CD:** Velopack kurulum paketi (`Koy-win-Setup.exe`), taşınabilir paket (`Koy-win-Portable.zip`), `SHA256SUMS.txt` doğrulaması ve GitHub Actions otomatik derleme/yayın iş akışları.
 
-[0.1.1]: https://github.com/brhnshn/koy/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/brhnshn/koy/releases/tag/v0.1.0
+[0.1.1]: https://github.com/koyhq/koy/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/koyhq/koy/releases/tag/v0.1.0
