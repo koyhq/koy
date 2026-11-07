@@ -276,12 +276,16 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         foreach (var state in _windowStates.Values)
             ReassertAppBar(state, onlyIfNeeded: true);
 
-        if (_appBarSettleStage++ == 0 && _appBarSettleTimer is not null)
+        // Aşamalar Hide'dan sonra ~0,7 / 2,2 / 5,2 / 10,2 sn. Açılışta Gezgin gizlenen görev çubuğunu birkaç saniye
+        // hâlâ yer kaplıyor sayar (canlı: 8 sn sonra tek SETPOS 986'yı 1034'e düzeltti). Sınırlı sayıda tek atım; yoklama değil.
+        if (_appBarSettleStage < AppBarSettleDelaysMs.Length && _appBarSettleTimer is not null)
         {
-            _appBarSettleTimer.Interval = TimeSpan.FromMilliseconds(1500);
+            _appBarSettleTimer.Interval = TimeSpan.FromMilliseconds(AppBarSettleDelaysMs[_appBarSettleStage++]);
             _appBarSettleTimer.Start();
         }
     }
+
+    private static readonly int[] AppBarSettleDelaysMs = [1500, 3000, 5000];
 
     /// <summary>Stile göre geçerli yakınlık modu (tam genişlikte Aşağı yapış/Çekil sadeleşir; bkz. DockProximityMapping).</summary>
     private DockProximityMode EffectiveProximity => DockProximityMapping.Effective(settings.DockStyle, settings.DockProximity);

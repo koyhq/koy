@@ -26,8 +26,12 @@ public sealed class AppBarService : IAppBarService
     // Her pencere için en son uygulanan alan: aynı alan için SETPOS tekrarlanmaz (yerleşim fırtınasında ~20 çağrı oluyordu).
     private readonly AppBarPlacementCache _placements = new();
 
-    // Yeniden iddiadan sonra da uyuşmayan çalışma alanı alt sınırı (başka çubuk): aynı değer için tekrar denenmez.
-    private readonly Dictionary<nint, int> _unresolvedWorkBottom = [];
+    // Yeniden iddiadan sonra da uyuşmayan çalışma alanı alt sınırı (başka çubuk): aynı değer için kısa süre tekrar denenmez.
+    // Kalıcı değildir: açılışta Gezgin gizlenen görev çubuğunu birkaç saniye hâlâ yer kaplıyor sayar ve o anki SETPOS
+    // payı onun üstüne yığar (canlı: 986). Aynı SETPOS birkaç saniye sonra doğru sonucu verir (1034); kalıcı kayıt bunu
+    // engelliyordu.
+    private readonly Dictionary<nint, (int Bottom, long Ticks)> _unresolvedWorkBottom = [];
+    private static readonly TimeSpan UnresolvedRetryAfter = TimeSpan.FromSeconds(2);
     private bool _disposed;
 
     /// <summary>
@@ -105,10 +109,14 @@ public sealed class AppBarService : IAppBarService
                 var work = mi.monitorInfo.rcWork;
                 var monitorRect = new WindowRect(bounds.left, bounds.top, bounds.right, bounds.bottom);
                 var heightPx = WindowPlacementMath.ToPixels(heightDip <= 0 ? 46 : heightDip, dpiScale);
-                _unresolvedWorkBottom.TryGetValue(windowHandle, out var unresolved);
+                int? unresolvedBottom = null;
+                if (_unresolvedWorkBottom.TryGetValue(windowHandle, out var unresolved)
+                    && TimeSpan.FromTicks(Environment.TickCount64 * TimeSpan.TicksPerMillisecond - unresolved.Ticks) < UnresolvedRetryAfter)
+                    unresolvedBottom = unresolved.Bottom;
+
                 var needed = AppBarOwnership.NeedsReassert(
                     monitorRect, new WindowRect(work.left, work.top, work.right, work.bottom), heightPx, OwnsBottomEdge,
-                    _unresolvedWorkBottom.ContainsKey(windowHandle) ? unresolved : null);
+                    unresolvedBottom);
                 if (!needed)
                     return false;
 
@@ -123,7 +131,7 @@ public sealed class AppBarService : IAppBarService
                         new WindowRect(after.monitorInfo.rcWork.left, after.monitorInfo.rcWork.top, after.monitorInfo.rcWork.right, after.monitorInfo.rcWork.bottom),
                         heightPx, OwnsBottomEdge);
                     if (stillWrong)
-                        _unresolvedWorkBottom[windowHandle] = after.monitorInfo.rcWork.bottom;
+                        _unresolvedWorkBottom[windowHandle] = (after.monitorInfo.rcWork.bottom, Environment.TickCount64 * TimeSpan.TicksPerMillisecond);
                     else
                         _unresolvedWorkBottom.Remove(windowHandle);
                 }

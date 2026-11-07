@@ -287,8 +287,20 @@ public sealed class WindowTracker : IWindowTracker
         }, 0);
 
         PruneAumidCache(seenHandles);
+
+        var known = new HashSet<nint>(windows.Count);
+        foreach (var w in windows)
+            known.Add(w.Handle);
+        Volatile.Write(ref _knownWindows, known);
+
         return windows;
     }
+
+    // Son taramada dock listesine giren pencereler (başlık değişimi süzgeci için). Tarama ile WinEvent geri çağrısı
+    // ayrı anlarda çalışır; küme her taramada yenisiyle değiştirilir, okuma kilitsizdir.
+    private HashSet<nint> _knownWindows = [];
+
+    private bool IsKnownWindow(nint hwnd) => Volatile.Read(ref _knownWindows).Contains(hwnd);
 
     public void ActivateWindow(nint handle)
     {
@@ -394,7 +406,10 @@ public sealed class WindowTracker : IWindowTracker
         // Başlık değişimi: görev çubuğu penceresi değilse (alt pencere, araç penceresi, kabuk) hiç ilgilenilmez.
         if (@event == PInvoke.EVENT_OBJECT_NAMECHANGE)
         {
-            if (idObject == 0 && idChild == 0 && IsTopLevelTaskbarWindow(hwnd))
+            // Dock'ta zaten olan pencerenin başlığı (tarayıcı sekmesi, akan sohbet, çalan şarkı) saniyede birkaç kez
+            // değişebilir; her seferinde tam yenileme (kısayol çözme, pencere taraması) boşta CPU yakıyordu. Yalnız
+            // listede olmayan pencere (başlığı sonradan konup görünür olan) yenileme ister.
+            if (idObject == 0 && idChild == 0 && !IsKnownWindow(hwnd.Value) && IsTopLevelTaskbarWindow(hwnd))
                 _nameChangeDebouncer?.Request();
             return;
         }
