@@ -24,14 +24,27 @@ public sealed class AppBarService : IAppBarService
     private readonly HashSet<nint> _registeredHandles = [];
 
     // Her pencere için en son uygulanan alan: aynı alan için SETPOS tekrarlanmaz (yerleşim fırtınasında ~20 çağrı oluyordu).
-    private readonly Dictionary<nint, RECT> _lastApplied = [];
+    private readonly AppBarPlacementCache _placements = new();
     private bool _disposed;
 
     /// <summary>
     /// Windows görev çubuğu gizliyken true: alt kenar Koy'undur ve ABM_QUERYPOS'un Gezgin yüzünden yukarı itmesi kabul
     /// edilmez (AppBarMath). Aksi halde görev çubuğu hâlâ sayılırken kayıt yapılınca pay 94 px olup boşluk bırakıyordu.
     /// </summary>
-    public bool OwnsBottomEdge { get; set; }
+    public bool OwnsBottomEdge
+    {
+        get => _ownsBottomEdge;
+        set
+        {
+            if (_ownsBottomEdge == value)
+                return;
+
+            _ownsBottomEdge = value;
+            _placements.Clear();   // sahiplik değişince eski alan geçersiz: sıradaki güncelleme mutlaka SETPOS gönderir
+        }
+    }
+
+    private bool _ownsBottomEdge;
 
     public unsafe void Register(nint windowHandle, double heightDip, double dpiScale = 1.0)
     {
@@ -70,12 +83,33 @@ public sealed class AppBarService : IAppBarService
     /// Alan aynı olsa da yeniden iddia eder: Gezgin çalışma alanını yeniden hesapladıysa (ABN_POSCHANGED, görev çubuğu
     /// gösterildi/gizlendi) dock'un payı o an düşmüş olabilir.
     /// </summary>
-    public unsafe void Reassert(nint windowHandle, double heightDip, double dpiScale = 1.0)
+    /// <param name="onlyIfNeeded">true ise monitörün çalışma alanı payı zaten karşılıyorsa SETPOS gönderilmez (bildirim yolu).</param>
+    /// <returns>SETPOS gönderildi mi.</returns>
+    public unsafe bool Reassert(nint windowHandle, double heightDip, double dpiScale = 1.0, bool onlyIfNeeded = false)
     {
         if (windowHandle == 0 || !_registeredHandles.Contains(windowHandle))
-            return;
+            return false;
 
-        UpdatePositionInternal(new HWND(windowHandle), heightDip, dpiScale, force: true);
+        var hwnd = new HWND(windowHandle);
+        if (onlyIfNeeded)
+        {
+            var hMonitor = PInvoke.MonitorFromWindow(hwnd, MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST);
+            var mi = new MONITORINFOEXW { monitorInfo = new MONITORINFO { cbSize = (uint)sizeof(MONITORINFOEXW) } };
+            if (hMonitor != 0 && PInvoke.GetMonitorInfo(hMonitor, (MONITORINFO*)&mi))
+            {
+                var bounds = mi.monitorInfo.rcMonitor;
+                var work = mi.monitorInfo.rcWork;
+                var needed = AppBarOwnership.NeedsReassert(
+                    new WindowRect(bounds.left, bounds.top, bounds.right, bounds.bottom),
+                    new WindowRect(work.left, work.top, work.right, work.bottom),
+                    WindowPlacementMath.ToPixels(heightDip <= 0 ? 46 : heightDip, dpiScale));
+                if (!needed)
+                    return false;
+            }
+        }
+
+        UpdatePositionInternal(hwnd, heightDip, dpiScale, force: true);
+        return true;
     }
 
     public void Reregister(nint windowHandle, double heightDip, double dpiScale = 1.0)
@@ -94,7 +128,7 @@ public sealed class AppBarService : IAppBarService
             return;
 
         var hwnd = new HWND(windowHandle);
-        _lastApplied.Remove(windowHandle);
+        _placements.Forget(windowHandle);
         var data = new APPBARDATA
         {
             cbSize = (uint)sizeof(APPBARDATA),
@@ -145,12 +179,10 @@ public sealed class AppBarService : IAppBarService
             }
         };
 
-        var requested = data.rc;
+        var requested = new WindowRect(data.rc.left, data.rc.top, data.rc.right, data.rc.bottom);
 
-        // Alt kenar bizimken sonuç Gezgin'den bağımsızdır: aynı alan için tekrar SETPOS gerekmez. Değilse (görev çubuğu
-        // görünür) Gezgin'in durumu değişmiş olabilir; her seferinde sorulur.
-        if (!force && OwnsBottomEdge && _lastApplied.TryGetValue(hwnd.Value, out var last)
-            && last.left == requested.left && last.top == requested.top && last.right == requested.right && last.bottom == requested.bottom)
+        // Alt kenar bizimken sonuç Gezgin'den bağımsızdır: aynı alan için tekrar SETPOS gerekmez (kurallar: AppBarPlacementCache).
+        if (!_placements.ShouldSend(hwnd.Value, requested, OwnsBottomEdge, force))
             return;
 
         PInvoke.SHAppBarMessage(ABM_QUERYPOS, ref data);
@@ -158,7 +190,7 @@ public sealed class AppBarService : IAppBarService
         var final = AppBarMath.FinalRect(new WindowRect(screenLeft, 0, screenRight, screenBottom), heightPx, queried, OwnsBottomEdge);
         data.rc = new RECT { left = final.Left, top = final.Top, right = final.Right, bottom = final.Bottom };
         PInvoke.SHAppBarMessage(ABM_SETPOS, ref data);
-        _lastApplied[hwnd.Value] = requested;
+        _placements.Record(hwnd.Value, requested);
     }
 
     public void Dispose()

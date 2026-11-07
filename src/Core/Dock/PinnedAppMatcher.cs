@@ -15,7 +15,7 @@ public static class PinnedAppMatcher
     {
         // 1. Kimlik: ikisinde de AUMID varsa karar onundur. Aynı exe'nin farklı AUMID'li pencereleri (Chrome profilleri,
         //    PWA'lar) Windows'ta ayrı düğmedir, burada da ayrı kalır.
-        var winAumid = string.IsNullOrEmpty(win.AppUserModelId) ? KnownAppUserModelIds.ForProcessPath(win.ProcessPath) : win.AppUserModelId;
+        var winAumid = string.IsNullOrEmpty(win.AppUserModelId) ? KnownAppUserModelIds.ForWindow(win.ProcessPath, win.ClassName) : win.AppUserModelId;
         if (!string.IsNullOrEmpty(pin.AppUserModelId) && !string.IsNullOrEmpty(winAumid))
             return string.Equals(pin.AppUserModelId, winAumid, StringComparison.OrdinalIgnoreCase);
 

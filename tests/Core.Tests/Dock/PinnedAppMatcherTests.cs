@@ -8,7 +8,7 @@ public class PinnedAppMatcherTests
     private static readonly WindowRect Bounds = new(0, 0, 800, 600);
 
     private static OpenWindowInfo Win(string title, string? path, string? aumid = null) =>
-        new(1, title, path, 10, Bounds, null, aumid);
+        new(1, title, path, 10, Bounds, null, aumid, path is not null && path.EndsWith("explorer.exe", StringComparison.OrdinalIgnoreCase) ? "CabinetWClass" : null);
 
     [Fact]
     public void Explorer_pin_without_target_matches_explorer_window_by_aumid()
@@ -33,9 +33,22 @@ public class PinnedAppMatcherTests
     public void Known_table_only_knows_the_system_explorer()
     {
         var systemRoot = Environment.GetEnvironmentVariable("SystemRoot")!;
-        Assert.Equal(KnownAppUserModelIds.Explorer, KnownAppUserModelIds.ForProcessPath(Path.Combine(systemRoot, "explorer.exe")));
-        Assert.Null(KnownAppUserModelIds.ForProcessPath(@"C:\Tools\explorer.exe"));
-        Assert.Null(KnownAppUserModelIds.ForProcessPath(null));
+        var explorer = Path.Combine(systemRoot, "explorer.exe");
+        Assert.Equal(KnownAppUserModelIds.Explorer, KnownAppUserModelIds.ForWindow(explorer, "CabinetWClass"));
+        Assert.Equal(KnownAppUserModelIds.Explorer, KnownAppUserModelIds.ForWindow(explorer, "ExploreWClass"));
+        Assert.Null(KnownAppUserModelIds.ForWindow(@"C:\Tools\explorer.exe", "CabinetWClass"));
+        Assert.Null(KnownAppUserModelIds.ForWindow(null, "CabinetWClass"));
+    }
+
+    [Theory]
+    [InlineData("Progman")]
+    [InlineData("Shell_TrayWnd")]
+    [InlineData("#32770")]
+    [InlineData(null)]
+    public void Other_explorer_process_windows_are_not_folder_windows(string? cls)
+    {
+        var systemRoot = Environment.GetEnvironmentVariable("SystemRoot")!;
+        Assert.Null(KnownAppUserModelIds.ForWindow(Path.Combine(systemRoot, "explorer.exe"), cls));
     }
 
     [Fact]

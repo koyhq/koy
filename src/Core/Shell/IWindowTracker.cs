@@ -15,7 +15,8 @@ public sealed record OpenWindowInfo(
     int ProcessId,
     WindowRect Bounds,
     byte[]? IconData = null,
-    string? AppUserModelId = null);
+    string? AppUserModelId = null,
+    string? ClassName = null);
 
 /// <summary>
 /// Ön plan penceresi, konum değişiklikleri ve açık pencereleri izleyen sözleşme.

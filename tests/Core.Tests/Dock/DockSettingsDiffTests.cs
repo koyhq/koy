@@ -59,6 +59,7 @@ public class DockSettingsDiffTests
 
         Assert.True(d.ReconcileTaskbar);
         Assert.True(d.ReconcileTray);
+        Assert.True(d.ReconcileAppBar);   // alt kenar sahipliği değişir: AppBar yeniden iddia edilmeli
     }
 
     [Fact]

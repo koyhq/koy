@@ -281,7 +281,7 @@ public sealed class WindowTracker : IWindowTracker
 
             var iconData = !string.IsNullOrEmpty(procPath) ? IconHelper.GetIconBytes(procPath) : null;
             var bounds = new WindowRect(wr.left, wr.top, wr.right, wr.bottom);
-            windows.Add(new OpenWindowInfo(hwnd.Value, title, procPath, (int)pid, bounds, iconData, aumid));
+            windows.Add(new OpenWindowInfo(hwnd.Value, title, procPath, (int)pid, bounds, iconData, aumid, GetClassNameString(hwnd)));
 
             return true;
         }, 0);
@@ -519,21 +519,34 @@ public sealed class WindowTracker : IWindowTracker
 
     // AUMID pencere ömrü boyunca değişmez sayılır: HWND başına bir kez okunur (her yenilemede COM çağrısı yapılmaz).
     // Pencere yok olunca (EVENT_OBJECT_DESTROY) ve her sayımda görülmeyen tutamaçlar için temizlenir.
-    private readonly Dictionary<nint, string?> _aumidCache = [];
+    // Dolu değer kalıcı önbelleğe girer; boş sonuç kısa süre tutulur (uygulamalar AUMID'i pencere açıldıktan sonra koyabilir).
+    private readonly Dictionary<nint, (string? Value, DateTime ReadUtc)> _aumidCache = [];
     private readonly object _aumidGate = new();
+    private static readonly TimeSpan EmptyAumidRetry = TimeSpan.FromSeconds(10);
 
     private string? GetAppUserModelId(HWND hwnd)
     {
         lock (_aumidGate)
         {
-            if (_aumidCache.TryGetValue(hwnd.Value, out var cached))
-                return cached;
+            if (_aumidCache.TryGetValue(hwnd.Value, out var cached) &&
+                (cached.Value is not null || DateTime.UtcNow - cached.ReadUtc < EmptyAumidRetry))
+                return cached.Value;
         }
 
         var value = AppUserModelIdReader.ForWindow(hwnd);
         lock (_aumidGate)
-            _aumidCache[hwnd.Value] = value;
+            _aumidCache[hwnd.Value] = (value, DateTime.UtcNow);
         return value;
+    }
+
+    private static unsafe string? GetClassNameString(HWND hwnd)
+    {
+        Span<char> buffer = stackalloc char[128];
+        fixed (char* ptr = buffer)
+        {
+            var len = PInvoke.GetClassName(hwnd, ptr, buffer.Length);
+            return len > 0 ? buffer[..len].ToString() : null;
+        }
     }
 
     private void PruneAumidCache(HashSet<nint> seen)

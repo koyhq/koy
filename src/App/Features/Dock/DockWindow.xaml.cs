@@ -40,6 +40,9 @@ public partial class DockWindow : Window
     public Action<nint, nint>? ShellHookHandler { get; set; }
     public Action? DisplayChangeHandler { get; set; }
 
+    /// <summary>AppBar bildirimi (ABN_POSCHANGED): Gezgin ya da başka bir çubuk çalışma alanını yeniden düzenledi.</summary>
+    public Action? AppBarPosChangedHandler { get; set; }
+
     public DockWindow()
     {
         InitializeComponent();
@@ -64,6 +67,8 @@ public partial class DockWindow : Window
     }
 
     private const int WmDisplayChange = 0x007E;
+    private const int WmAppBarCallback = 0x0400 + 100;   // AppBarService.Register'daki uCallbackMessage (WM_USER + 100)
+    private const int AbnPosChanged = 0x0001;
 
     protected override void OnSourceInitialized(EventArgs e)
     {
@@ -88,6 +93,10 @@ public partial class DockWindow : Window
             {
                 DisplayChangeHandler?.Invoke();
                 Reposition(_targetMonitor);
+            }
+            else if (msg == WmAppBarCallback && wParam == AbnPosChanged)
+            {
+                AppBarPosChangedHandler?.Invoke();
             }
             else if (WmShellHook != 0 && msg == WmShellHook)
             {

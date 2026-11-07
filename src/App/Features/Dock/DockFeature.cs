@@ -96,7 +96,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         // Yalnızca ReserveSpace (Yer ayır / tam genişlikte "Her zaman göster") modunda masaüstü çalışma alanından (AppBar) yer ayır
         if (EffectiveProximity == DockProximityMode.ReserveSpace)
         {
-            _appBarService = new AppBarService { OwnsBottomEdge = settings.HideWindowsTaskbar };
+            _appBarService = new AppBarService();   // sahiplik görev çubuğu gerçekten gizlenince (UpdateAppBarOwnership) verilir
         }
 
         // Medya servisi (Tam genişlik Now Playing hapı için); Notch ile paylaşılan tek örnek
@@ -210,19 +210,66 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     private static readonly TimeSpan AppBarReassertQuietPeriod = TimeSpan.FromMilliseconds(500);
     private readonly Dictionary<nint, DateTime> _lastAppBarReassert = [];
 
-    /// <summary>AppBar payını (aynı alan olsa da) yeniden iddia eder; en çok 500 ms'de bir.</summary>
-    private void ReassertAppBar(DockWindowState state)
+    /// <summary>
+    /// AppBar payını yeniden iddia eder. <paramref name="onlyIfNeeded"/> (bildirim yolu): çalışma alanı payı zaten
+    /// karşılıyorsa dokunulmaz ve en çok 500 ms'de bir çalışır; kendi SETPOS'umuzla döngüye girilmez.
+    /// </summary>
+    private void ReassertAppBar(DockWindowState state, bool onlyIfNeeded = false)
     {
         if (_appBarService is null || state.Hwnd == 0 || _stopping)
             return;
 
-        var now = DateTime.UtcNow;
-        if (_lastAppBarReassert.TryGetValue(state.Hwnd, out var last) && now - last < AppBarReassertQuietPeriod)
+        if (onlyIfNeeded)
+        {
+            var now = DateTime.UtcNow;
+            if (_lastAppBarReassert.TryGetValue(state.Hwnd, out var last) && now - last < AppBarReassertQuietPeriod)
+                return;
+            _lastAppBarReassert[state.Hwnd] = now;
+        }
+
+        var height = state.Window.ActualHeight > 0 ? state.Window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
+        _appBarService.Reassert(state.Hwnd, height, state.Monitor.DpiScaleY, onlyIfNeeded);
+    }
+
+    /// <summary>
+    /// AppBar alt kenarın sahibi mi: TEK yerden hesaplanır (Core: AppBarOwnership). Görev çubuğunun gizli durumu her
+    /// değiştiğinde çağrılır; sahiplik değişirse bütün AppBar'lar hemen yeniden iddia edilir (eski alan geçersiz sayılır).
+    /// </summary>
+    private void UpdateAppBarOwnership()
+    {
+        if (_appBarService is null)
             return;
 
-        _lastAppBarReassert[state.Hwnd] = now;
-        var height = state.Window.ActualHeight > 0 ? state.Window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
-        _appBarService.Reassert(state.Hwnd, height, state.Monitor.DpiScaleY);
+        var owns = AppBarOwnership.OwnsBottomEdge(settings.HideWindowsTaskbar, _taskbarHidden, _trayReleasedByUser);
+        if (_appBarService.OwnsBottomEdge == owns)
+            return;
+
+        _appBarService.OwnsBottomEdge = owns;
+        foreach (var state in _windowStates.Values)
+            ReassertAppBar(state);
+    }
+
+    // Gezgin otomatik gizleme durumunu işleyince çalışma alanını birkaç yüz ms sonra yeniden hesaplar ve payı düşürebilir.
+    // Hide'dan sonra tek atımlık bir zamanlayıcıyla (yoklama değil) yalnız gerekirse yeniden iddia edilir.
+    private DispatcherTimer? _appBarSettleTimer;
+
+    private void ScheduleAppBarSettle()
+    {
+        if (_appBarService is null || _stopping)
+            return;
+
+        _appBarSettleTimer ??= new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(700) };
+        _appBarSettleTimer.Tick -= OnAppBarSettleTick;
+        _appBarSettleTimer.Tick += OnAppBarSettleTick;
+        _appBarSettleTimer.Stop();
+        _appBarSettleTimer.Start();
+    }
+
+    private void OnAppBarSettleTick(object? sender, EventArgs e)
+    {
+        _appBarSettleTimer?.Stop();
+        foreach (var state in _windowStates.Values)
+            ReassertAppBar(state, onlyIfNeeded: true);
     }
 
     /// <summary>Stile göre geçerli yakınlık modu (tam genişlikte Aşağı yapış/Çekil sadeleşir; bkz. DockProximityMapping).</summary>
@@ -237,7 +284,13 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         {
             // Görev çubuğu yeniden göründüyse gizlendi: tepsi sahipliği (elle geri getirmede bırakılmıştı) geri alınır.
             if (TaskbarService.EnsureHidden() && _trayReleasedByUser)
+            {
+                // Elle geri getirilen görev çubuğu yeniden gizlendi: tepsi ve alt kenar sahipliği geri alınır.
                 _trayReleasedByUser = false;
+                _taskbarHidden = true;
+                UpdateAppBarOwnership();
+                ScheduleAppBarSettle();
+            }
 
             ApplyTrayPolicy();
 
@@ -257,8 +310,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     public void OnTaskbarRestoredManually()
     {
         _trayReleasedByUser = true;
-        if (_appBarService is not null)
-            _appBarService.OwnsBottomEdge = false;   // görev çubuğu geri geldi: AppBar onun üstüne yığılır
+        UpdateAppBarOwnership();   // görev çubuğu geri geldi: AppBar onun üstüne yığılır
         if (_trayService is not null)
             ReleaseTray();
     }
@@ -277,18 +329,18 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         {
             TaskbarService.Hide();
             _taskbarHidden = true;
-            if (_appBarService is not null)
-                _appBarService.OwnsBottomEdge = true;
             _trayService?.EnsureFirst();
 
-            // Gezgin görev çubuğu durumunu işleyince çalışma alanını yeniden hesaplar: AppBar payı hemen yeniden iddia edilir.
-            foreach (var state in _windowStates.Values)
-                ReassertAppBar(state);
+            // Görev çubuğu artık gizli: alt kenar Koy'un (sahiplik değişirse hemen yeniden iddia); Gezgin durumu işleyince
+            // çalışma alanını yeniden hesaplayabilir, bu yüzden bir kez daha gecikmeli (yalnız gerekirse).
+            UpdateAppBarOwnership();
+            ScheduleAppBarSettle();
         }
         else if (_taskbarHidden)
         {
             TaskbarService.Restore();
             _taskbarHidden = false;
+            UpdateAppBarOwnership();
         }
     }
 
@@ -455,6 +507,9 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             _monitorService?.NotifyDisplayChanged();
         };
 
+        // Gezgin çalışma alanını yeniden düzenledi (ABN_POSCHANGED): pay düştüyse yeniden iddia edilir.
+        window.AppBarPosChangedHandler = () => ReassertAppBar(state, onlyIfNeeded: true);
+
         _windowStates[monitor.Id] = state;
         _windows[monitor.Id] = window;
 
@@ -524,6 +579,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             }
         }
 
+        // Görev çubuğu durumu (ayar, gizli/geri) değişmiş olabilir: alt kenar sahipliği tek yerden yeniden hesaplanır.
+        UpdateAppBarOwnership();
         UpdateEdgeTimer();
 
         if (_windowTracker?.CurrentForeground is { } fg && fg.Handle != 0)
@@ -555,7 +612,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         if (EffectiveProximity == DockProximityMode.ReserveSpace)
         {
             _appBarService ??= new AppBarService();
-            _appBarService.OwnsBottomEdge = settings.HideWindowsTaskbar && !_trayReleasedByUser;
+            UpdateAppBarOwnership();
             foreach (var state in _windowStates.Values)
             {
                 if (state.Hwnd == 0)
@@ -902,6 +959,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     private void StopCore()
     {
         _stopping = true;
+        _appBarSettleTimer?.Stop();
         _edgePeekTimer?.Stop();
         _edgePeekTimer = null;
         _trayRetryTimer?.Stop();

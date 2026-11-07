@@ -26,7 +26,8 @@ public readonly record struct DockSettingsDiff(
 
         var appBar = DockProximityMapping.Effective(before.DockStyle, before.DockProximity) == DockProximityMode.ReserveSpace
                      != (DockProximityMapping.Effective(after.DockStyle, after.DockProximity) == DockProximityMode.ReserveSpace)
-                     || before.DockStyle != after.DockStyle;
+                     || before.DockStyle != after.DockStyle
+                     || before.HideWindowsTaskbar != after.HideWindowsTaskbar;
 
         var taskbar = before.HideWindowsTaskbar != after.HideWindowsTaskbar;
         var tray = before.DockShowTray != after.DockShowTray || taskbar;
