@@ -100,7 +100,7 @@ p a, dd a { text-underline-offset: 3px; }
 
 .hero__title {
   margin: clamp(16px, 2.4vw, 24px) auto 0;
-  font: 500 clamp(44px, 7.4vw, 104px)/.98 var(--font-display);
+  font: 500 clamp(38px, 7.4vw, 104px)/.98 var(--font-display);
   letter-spacing: -.045em;
 }
 .line { display: block; }
