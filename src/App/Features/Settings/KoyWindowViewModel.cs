@@ -16,6 +16,7 @@ namespace Koy.App.Features.Settings;
 public sealed partial class KoyWindowViewModel : ObservableObject
 {
     private readonly SettingsStore _store;
+    public SettingsStore Store => _store;
 
     /// <summary>Kısayollar sayfası: tuş yakalama, kayıt ve hata durumu.</summary>
     public ShortcutsViewModel Shortcuts { get; }
@@ -362,6 +363,38 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         {
             _isLoading = false;
         }
+    }
+
+    /// <summary>
+    /// Dışarıdan (sağ alt menü veya kısayol) değiştirilen durumları ViewModel'e senkronize eder.
+    /// <c>_isLoading = true</c> koruması sayesinde ayarları diske tekrar yazmaz ve döngüsel
+    /// özellik tetiklemelerini engeller.
+    /// </summary>
+    public void SyncExternalState(bool? notchEnabled = null, bool? dockEnabled = null)
+    {
+        _isLoading = true;
+        try
+        {
+            if (notchEnabled.HasValue)
+                NotchEnabled = notchEnabled.Value;
+            if (dockEnabled.HasValue)
+                DockEnabled = dockEnabled.Value;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// Diskteki güncel durumları okuyup <see cref="FeatureStateSyncPolicy.Reconcile"/> ile uzlaştırarak
+    /// ViewModel'e aktarır. Kapanışta eski bellek durumunun diski ezmesini önlemek için kullanılır.
+    /// </summary>
+    public void SyncFromDisk()
+    {
+        var disk = _store.Load();
+        var reconciled = FeatureStateSyncPolicy.Reconcile(disk, disk.NotchEnabled, disk.DockEnabled);
+        SyncExternalState(reconciled.NotchEnabled, reconciled.DockEnabled);
     }
 
     public void RefreshMemory()

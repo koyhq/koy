@@ -12,6 +12,27 @@ public partial class KoyWindow : Window
 
     public static KoyWindow Instance => _instance ??= new KoyWindow();
 
+    /// <summary>KoyWindow örneğinin bellekte oluşturulup oluşturulmadığını belirtir.</summary>
+    public static bool IsCreated => _instance is not null;
+
+    /// <summary>
+    /// Sağ alt menü veya kısayol üzerinden değişen özellikleri açık/gizli KoyWindow örneğine iletir.
+    /// Pencere henüz oluşturulmamışsa hiçbir şey yapmaz.
+    /// </summary>
+    public static void SyncFeatureStates(bool? notchEnabled = null, bool? dockEnabled = null)
+    {
+        if (_instance is null)
+            return;
+
+        if (!_instance.Dispatcher.CheckAccess())
+        {
+            _instance.Dispatcher.BeginInvoke(() => SyncFeatureStates(notchEnabled, dockEnabled));
+            return;
+        }
+
+        _instance.ViewModel.SyncExternalState(notchEnabled, dockEnabled);
+    }
+
     public KoyWindowViewModel ViewModel => (KoyWindowViewModel)DataContext;
 
     public KoyWindow(KoyWindowViewModel? viewModel = null)
@@ -112,7 +133,7 @@ public partial class KoyWindow : Window
 
     private void Close_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.SaveSettingsCommand.Execute(null);
+        SyncAndSaveOnClose();
         Hide();
     }
 
@@ -120,8 +141,17 @@ public partial class KoyWindow : Window
     {
         // Pencereyi kapatmak Koy'u kapatmaz; gizler
         e.Cancel = true;
-        ViewModel.SaveSettingsCommand.Execute(null);
+        SyncAndSaveOnClose();
         Hide();
+    }
+
+    private void SyncAndSaveOnClose()
+    {
+        if (AppUninstaller.InProgress)
+            return;
+
+        ViewModel.SyncFromDisk();
+        ViewModel.SaveSettingsCommand.Execute(null);
     }
 
     private void NavGenel_Click(object sender, RoutedEventArgs e) => Navigate(0);

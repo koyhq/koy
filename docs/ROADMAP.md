@@ -137,7 +137,7 @@ Kutuları iş bittikçe işaretle. Dosya yolları önerilir; daha iyi bir ad var
 - [x] "Pencere yaklaşınca" davranışı ayardan seçilir: **Yer ayır** (dock alt kenara oturur, çalışma alanı ayrılır), **Aşağı yapış** (normal boy pencere yaklaşınca dock alt kenara iner, incelir, pencereyi örtmez; varsayılan), **Çekil** (büyütülmüş pencerede gizlenir, fare alt kenara inince gelir), **Hep gizli**. Tam ekranda her modda gizli. Büyütülmüş pencere ile dock arasında boşluk kalmamalı. Paket C'de varsayılan `DockDown` oldu ve her yüklemede `Dodge`'a çeviren göç kaldırıldı. Not: eski bir kurulumda `settings.json`'da `Dodge` yazılı kalmış olabilir; Dock sayfasından Aşağı yapış seçilir.
 - [x] Simgenin üzerine gelince pencere önizlemesi (DWM thumbnail, `DwmRegisterThumbnail`). Yalnız üzerine gelindiğinde kurulur, bellek ölçülür.
 - [x] İsteğe bağlı ayırıcı: solda uygulamalar, sağda klasörler, son kullanılanlar ve küçültülmüş pencereler. Ayırıcı, İndirilenler klasörü, küçültülmüş pencereler ve son kullanılanlar yığını var (Windows Son Kullanılanlar klasörü, en çok 10 öğe, yalnız tıklanınca okunur); hepsi Dock sayfasından kapatılır.
-- [ ] Saat, pil, ses ve ağ dock'tan çentiğe taşınır (tasarıma göre). **Kısmi:** dock'ta durum alanı yok; saat ve pil çentikte, ses kontrol merkezinde. `INetworkService` / `NetworkService` artık çentik durum verisine bağlı (olay tabanlı, Wi-Fi adı dahil); çentikte görünür gösterimi iki sütunlu ana görünümle gelecek (tasarım bekliyor), bu yüzden kutu açık.
+- [x] Saat, pil, ses ve ağ dock'tan çentiğe taşınır (tasarıma göre). Dock'ta durum alanı yok; saat, pil ve ağ durumu çentik H arayüzünde (üst durum satırı + Ana sağ sütunu), ses kontrol merkezinde.
 
 ### 6.4 Çentik genişler
 - [x] Ses ve parlaklık değişince çentikte gösterge: Paket C'de `AudioService` ve `BrightnessService` olaylarına bağlandı, ayrı ayrı kapatılır. Windows'un kendi göstergesini gizleme hâlâ deneysel.
@@ -169,12 +169,12 @@ Kod incelemesinden çıkan işler paketlere bölündü.
 
 ## Sıradaki
 **E paketi adayları** (bütçe kararı verildi: 100–150 MB hedef, 200 MB'a kadar kabul; her biri yeni servis demek, önce ölç):
-- [ ] Pano geçmişi (yalnız metin, sınırlı ve silinebilir).
+- [x] Pano geçmişi (yalnız metin, sınırlı ve silinebilir) — H servisleri ve Çentik H arayüzü altında tamamlandı.
 - [ ] Mikrofon / kamera kullanım göstergesi (çentikte nokta).
 - [ ] Bluetooth cihaz HUD'u (kulaklık bağlandı / pil seviyesi).
 - [ ] Pil HUD'u tamamlama (düşük pil, şarj tamamlandı uyarıları).
-- [ ] **RAM optimizasyonu:** #14 radyo servisini açılışta kuruyor (önceden Kontrol paneli ilk açılınca); boşta bellek farkını ölç, gerekirse radyo izlemesini ilk ihtiyaca ertele ya da simge işi için yükü azalt.
-- [x] **Bellek bütçesi kararı (2026-11-06):** boşta 100–150 MB private hedef, çok ekran / açık panellerle 200 MB'a kadar kabul. Son ölçüm 63,9 MB (`docs/MEMORY.md`); dock/tepsi paketi sonrası yeniden ölçülecek.
+- [ ] **RAM optimizasyonu:** #14 radyo servisini açılışta kuruyor; yalnız boşta bağlantı simgesi (`IdleDisplay.ShowRadio`) açıkken açılışta kurulsun, aksi halde Kontrol Merkezi ilk açılana kadar ertelensin.
+- [x] **Bellek bütçesi kararı (2026-11-06):** boşta 100–150 MB private hedef, çok ekran / açık panellerle 200 MB'a kadar kabul. Kurulu v0.1.1 ölçümü: 99–100 MB private, Görev Yöneticisi "Bellek" 73,6 MB (`docs/MEMORY.md`).
 
 **Katkıcı PR'ları (xdaxer):**
 - [x] #8 pilsiz makinede pil gizleme, #10 dock pencere önizlemesi, #12 Kontrol Merkezi Wi-Fi/Bluetooth yönetimi, #13 açılış zemini: `main`'e alındı (bizim düzeltmelerimizle).
@@ -315,23 +315,55 @@ Araştırma bitti; Windows 11 build 26200'de deneme programıyla doğrulandı. K
 - AUMID'siz klasik uygulamalar için exe yolundan AppID türetme doğrulanmadı.
 
 ## İş sırası (proje sahibi kararı, 2026-11-07)
-Burhan aşağıdakilerin hepsinin yapılmasına karar verdi. Sıra önerilendir; her iş kendi dalında, sonunda test ve gerekirse bellek ölçümü (AGENTS #1). Ayrıntısı olan işler kendi bölümüne bağlanır.
+Proje sahibi aşağıdakilerin hepsinin yapılmasına karar verdi. Sıra önerilendir; her iş kendi dalında, sonunda test ve gerekirse bellek ölçümü (AGENTS #1). Ayrıntısı olan işler kendi bölümüne bağlanır.
+
+> **Ajan dağılımı notu:**
+> - **Flash ajanına uygun işler:** **1** (Menü/KoyWindow senkronu), **7** (Hızlı başlata klasör ekleme), **8** (RAM: radyo servisi erteleme), **9** (Pil uyarıları OSD), **10** (Bluetooth HUD), **4** (Dock klasörleri — önce *4A Core*, sonra *4B App* olarak iki adımda).
+> - **Proje sahibi onayıyla yapılacak git/yayın işleri (kod ajanı dokunmaz):** **2** (`v0.1.2` push/release), **3** (`#9` ve `#11` PR kapatma).
+> - **Derin Win32/COM gerektiren işler (Sonnet / Pro ajanına uygun):** **5** (Atlama listesi), **6** (UWP sabitleme), **11** (Mikrofon/kamera noktası).
 
 **Kısa işler (önce):**
-1. [ ] **Sağ alt menüden aç/kapa kaydedilsin:** menüdeki Çentik / Dock anahtarları (`SagAltMenuWindow` → `App.UpdateNotchState` / `UpdateDockState`) yalnız çalışan durumu değiştiriyor, `settings.json`'a yazmıyor; Koy yeniden başlayınca seçim kayboluyor. Ctrl+Alt+D kısayolu (`ToggleDockEnabled`) kaydediyor. İkisi aynı davransın: menü de `DockEnabled` / `NotchEnabled` kaydetsin (Koy penceresindeki anahtarlar da aynı kaynağa baksın). Görülen durum: dosyada ikisi de `false` iken menüden açılmış çentik ve dock çalışıyordu.
-2. [ ] **v0.1.2:** main'i push et, sürüm hazırla (CHANGELOG `[Unreleased]` → 0.1.2: tepsi düğmesinin dock kapatılıp açılınca kaybolması, Bluetooth log gürültüsü, menü kaydı). Kurulu v0.1.1'de tepsi hatası duruyor.
-3. [ ] **#9 ve #11 PR'ları:** #9 `main`'de başka yapıyla (Ekranlar sayfası, D2) çözüldü, açıklamayla kapatılır. #11 (dock sistem tepsisi) `main`'e entegre edildi (aşağıda "Dock sistem tepsisi"); GitHub'daki PR'ın durumu kontrol edilip açıklamayla kapatılır, kalan kapsam (taşma simgeleri, balon bildirimleri) "Sonraya kalanlar"da.
+1. [x] **Sağ alt menü ve kısayol aç/kapa senkronu (`KoyWindow` ezmesini önle):**
+   - **Kök neden:** `SagAltMenuViewModel.ToggleNotch` / `ToggleDock` ve `App.ToggleDockEnabled` zaten `settings.json`'a yazıyor; ancak `KoyWindow` (ayarlar penceresi) daha önce açılmışsa belleğindeki eski `ViewModel.NotchEnabled` / `DockEnabled` değerlerinden haberdar olmuyor ve `KoyWindow` kapatılırken (`Close_Click` / `OnClosing` → `SaveSettingsCommand`) kendi eski değerini diske geri yazıp menünün/kısayolun kaydını **eziyor**.
+   - **Yapılacak (`src/App/`):**
+     1. `KoyWindow.cs`'e `public static bool IsCreated => _instance is not null;` (veya `SyncFeatureStates(bool? notchEnabled = null, bool? dockEnabled = null)`) ekle; `KoyWindowViewModel`'de `_isLoading = true` koruması altında `NotchEnabled` / `DockEnabled` alanlarını diske yeniden yazmadan güncelleyen `SyncExternalState(bool notchEnabled, bool dockEnabled)` metodu tanımla.
+     2. `App.xaml.cs` içinde `UpdateNotchState(bool enabled)` ve `UpdateDockState(bool enabled)` çağrıldığında (hem sağ alt menüden hem `ToggleDockEnabled` kısayolundan gelir), `settings.json`'da ilgili alanın güncel olduğundan emin ol ve `KoyWindow` örneği varsa `SyncExternalState` ile ViewModel'ini güncelle.
+     3. `KoyWindow.xaml.cs` içinde `Close_Click` ve `OnClosing` zaten her özellik değişiminde `OnPropertyChanged` ile anında kaydedildiği için, kapanırken `SaveSettingsCommand.Execute(null)` çağırmadan önce ya dış durumu senkronize et ya da yalnız bekleyen değişiklik varsa kaydet.
+   - **Doğrulama:** `dotnet build Koy.slnx` ve `dotnet test Koy.slnx` yeşil.
+2. [ ] **v0.1.2 (Yalnız proje sahibi onayıyla — kod ajanı çalıştırmaz):** `main`'i push et, sürüm hazırla (CHANGELOG `[Unreleased]` → 0.1.2: tepsi düğmesinin dock kapatılıp açılınca kaybolması, Bluetooth log gürültüsü, menü kaydı). Kurulu v0.1.1'de tepsi hatası duruyor.
+3. [ ] **#9 ve #11 PR'ları (Yalnız proje sahibi onayıyla — kod ajanı çalıştırmaz):** #9 `main`'de başka yapıyla (Ekranlar sayfası, D2) çözüldü, açıklamayla kapatılır. #11 (dock sistem tepsisi) `main`'e entegre edildi; GitHub'daki PR'ın durumu kontrol edilip açıklamayla kapatılır, kalan kapsam (taşma simgeleri, balon bildirimleri) "Sonraya kalanlar"da.
 
 **Özellikler:**
-4. [ ] **Dock klasörleri:** aşağıdaki bölüm (başka ajana devredildi).
+4. [ ] **Dock klasörleri:** aşağıdaki "Dock klasörleri" bölümü. Flash ajanına verilecekse önce **Adım 4A (Core + Test)**, ardından **Adım 4B (App + UI + Snapshot)** olarak iki parçada çalıştırılır.
 5. [ ] **Atlama listesi:** "Dock'ta uygulama bazlı sağ tık menüsü" bölümü, araştırma hazır.
 6. [ ] **UWP (Store) uygulama sabitleme:** kimlik AUMID, simge `shell:AppsFolder`, pencere eşleme `SHGetPropertyStoreForWindow` (ayrıntı "Sonraya kalanlar"daki maddede). Windows'un sabitleri arasındaki Spotify, WhatsApp gibi uygulamalar dock'ta görünsün.
-7. [ ] **Hızlı başlata klasör ekleme:** "Dördüncü test düzeltmeleri"ndeki açık madde (klasör seçici + klasör öğesi başlatma).
-8. [ ] **RAM: radyo servisi:** "Sıradaki"deki madde; radyo izlemesi açılışta değil ilk ihtiyaçta kurulsun, önce ve sonra ölç.
+7. [ ] **Hızlı başlata klasör ekleme:**
+   - **Mevcut durum:** `Core/QuickLaunch/QuickLaunchService.cs` zaten `Directory.Exists(p)` ve klasör adı gösterimini (`DisplayName`) destekliyor; `IconHelper.GetIconBytes` da klasör simgesi çözebiliyor. Eksik olan yalnız UI'daki seçici.
+   - **Yapılacak (`src/App/Features/Home/` + `Resources/`):**
+     1. `QuickLaunchViewModel.cs` içine `PickFolderPath` (`Func<string?>`, varsayılanı `DefaultPickFolder`) ve `[RelayCommand] private void AddFolder()` ekle. `DefaultPickFolder` içinde WPF `.NET 10` yerleşik `Microsoft.Win32.OpenFolderDialog` kullan (`Title = Strings.Get("QuickLaunchPickFolderTitle")`, `ResolveDialogOwner` ve `HoldOpen` koruması `Add()` ile birebir aynı).
+     2. `HomePanel.xaml` içindeki hızlı başlat `+` düğmesine: sol tık mevcut `AddCommand` (dosya/uygulama seçer) olarak kalsın, sağ tık bağlam menüsü (`ContextMenu`) veya `+` yanında/menüsünde iki seçenek ("Uygulama / dosya ekle…" → `AddCommand`, "Klasör ekle…" → `AddFolderCommand`) bağla; menü açıkken de `HoldOpen` ile çentik kapanmasın.
+     3. `Strings.resx` ve `Strings.tr.resx` dosyalarına `QuickLaunchPickFolderTitle`, `QuickLaunchAddFile`, `QuickLaunchAddFolder` anahtarlarını ekle.
+     4. `tests/Core.Tests/QuickLaunchTests.cs` içinde klasör yolu ekleme ve görüntüleme testinin bulunduğunu doğrula.
+8. [ ] **RAM: radyo servisi açılışta yalnız gerektiğinde kurulsun:**
+   - **Kök neden:** `NotchViewModel.cs:216` içinde `ShowRadioStatus = _controller.EnabledPanels.Contains(NotchPanel.ControlCenter);` yazılı ve hemen `StartRadioStatus()` çağrılıyor. Oysa kapalı çentikte Wi-Fi/BT simgesi yalnız `IdleDisplay.ShowRadio(Settings.IdleDisplayMode)` doğruysa gösteriliyor (`IdleDisplayMode == 0` yani "Saat, pil ve bağlantılar"). Kullanıcı "Yalnız saat" veya "Hiçbiri" seçtiyse (veya `ShowIdleRadio` false ise) radyo servisinin açılışta kurulmasına hiç gerek yok; Kontrol Merkezi ilk açıldığında (`ControlCenterViewModel.SetActive(true)`) zaten `EnsureRadioService()` ile kuruluyor.
+   - **Yapılacak (`src/App/Features/Notch/NotchViewModel.cs`):**
+     1. `NotchViewModel` kurucusunda `if (ShowRadioStatus)` yerine `if (ShowRadioStatus && IdleDisplay.ShowRadio(Settings.IdleDisplayMode))` koşuluyla `_controlCenter.StartRadioStatus()` çağır.
+     2. Böylece boşta radyo simgeleri kapalıyken `RadioService` (WinRT `Windows.Devices.Radios`) çentik açılışında hiç belleğe yüklenmez, yalnız Kontrol Merkezi sekmesi açılırsa yüklenir.
+     3. `tests/Core.Tests` altında `IdleDisplay` testlerini doğrula, `dotnet build` ve `dotnet test` çalıştır.
 
 **E paketi (çentik göstergeleri):**
-9. [ ] **Pil uyarıları:** düşük pil ve şarj tamamlandı (mevcut `PowerService` olayları).
-10. [ ] **Bluetooth HUD:** kulaklık bağlanınca çentikte kısa gösterge (ad + pil); mevcut `BluetoothService`, yalnız olay tabanlı.
+9. [ ] **Pil uyarıları (OSD):**
+   - **Hedef:** Şarja takıldı, şarjdan çıkarıldı, düşük pil (%20 ve %10 eşikleri) ve şarj tamamlandı (%100) durumlarında çentikte 1,5 sn OSD göstergesi.
+   - **Yapılacak:**
+     1. **`Core/Power/BatteryNotificationPolicy.cs` (saf C#, testli):** Önceki ve yeni `PowerChangedEventArgs` durumunu karşılaştırıp `BatteryAlertKind { None, PluggedIn, Unplugged, LowBattery, FullyCharged }` ve yüzde döndüren durum sınıfı yaz. İlk okumada (açılışta) bildirim üretmez; yalnız gerçek geçişte üretir. Düşük pil uyarısı %20 ve %10 altına ilk düşüşte birer kez tetiklenir, şarja takılınca veya %25 üstüne çıkınca sıfırlanır (histerezis). Masaüstünde (`HasBattery == false`) her zaman `None`. Testleri: `tests/Core.Tests/BatteryNotificationPolicyTests.cs`.
+     2. **`SharedServices.cs`:** `AcquirePowerService` / `ReleasePowerService` ekle; `NotchFeature` ve `DockFeature` kendi `new PowerService()` örnekleri yerine bunu paylaşsın (WinRT olay aboneliği tek örneğe iner).
+     3. **`App/Features/Notch/OSD/`:** `OsdType` enum'una `Battery` ekle; `OsdIndicatorViewModel`'e `ShowBattery(BatteryAlertKind kind, int percent)` ekle. `NotchFeature` (veya `NotchViewModel`) güç değişimini `BatteryNotificationPolicy`'den geçirip `Osd.ShowBattery` çağırsın.
+     4. **`Strings.resx` + `Strings.tr.resx`:** `BatteryCharging`, `BatteryOnBattery`, `BatteryLow`, `BatteryFull` metinlerini ekle.
+10. [ ] **Bluetooth HUD:**
+   - **Hedef:** Eşleşmiş bir Bluetooth ses cihazı bağlandığında veya bağlantısı kesildiğinde çentikte kısa OSD göstergesi (cihaz adı + varsa pil yüzdesi).
+   - **Yapılacak:**
+     1. **`Core/Bluetooth/BluetoothHudPolicy.cs` (saf C#, testli):** İlk cihaz listesi yüklemesinde (tohum) bildirim üretmez; sonrasında bir cihazın `IsConnected` durumu `false → true` veya `true → false` olduğunda `BluetoothHudEvent(string Name, bool Connected, int? BatteryPercent)` üretir. Aynı cihaz için 3 sn içindeki tekrarları (titreşim) bastırır. Testleri: `tests/Core.Tests/BluetoothHudPolicyTests.cs`.
+     2. **`App/Features/Notch/OSD/`:** `OsdType.Bluetooth` ve `ShowBluetoothDevice(string name, bool connected, int? battery)` ekle; çentik kapalıyken veya Peek durumundayken 2 sn gösterilir.
 11. [ ] **Mikrofon / kamera noktası:** kullanımdayken çentikte nokta (önce olay tabanlı yol araştırılır; yoklama yapılmaz).
 
 **Planda (büyük, sonra):** README güzelleştirme + GitHub Pages tanıtım sayfası (gerçek ekran görüntüleriyle); bildirimleri çentikte gösterme + kod imzası (SignPath; SmartScreen uyarısını da kaldırır); düzenlenebilir çentik arayüzü; Google / Outlook takvim.
@@ -347,17 +379,17 @@ Proje sahibi istedi (2026-11-07). Sabitli uygulamalar dock'ta klasörlere toplan
 - **Sürükleyerek klasör yapma:** sabitli bir uygulama basılı tutulup sürüklenir; başka bir sabitli uygulamanın **ortasında** ~400 ms durursa hedef büyür ve parlar, bırakınca ikisi yeni klasör olur (hedefin yerinde). Simgenin **kenar** bölgesine bırakmak bugünkü gibi sıralamayı değiştirir (`DockReorderHelper`, `Core/Dock/DockReorderMath`). Orta/kenar ayrımı ve bekleme süresi Core'da saf mantık, testli.
 - **Ekleme / çıkarma:** uygulamayı klasör kutusunun üstüne bırakınca klasöre girer. Panelden dock'a (panel dışına) sürükleyince klasörden çıkar ve bırakıldığı yere sabitlenir. Panel içinde sürükleyerek sıralama. Klasörde tek uygulama kalırsa klasör dağılır, uygulama klasörün yerine geçer.
 - **Sağ tık (klasör):** "Adını değiştir", "Klasörü dağıt" (uygulamalar klasörün yerine sırayla dizilir). Klasör içindeki uygulamanın sağ tık menüsü dock'taki uygulama menüsüyle aynı.
-- **Yeni klasör adı:** "Klasör" (TR) / "Folder" (EN), aynı ad varsa "Klasör 2"… (`Strings.resx` + `Strings.tr.resx`).
-- **Çalışan uygulama klasördeyse (önerilen varsayılan, proje sahibi onayı bekliyor):** uygulama klasörün içinde kalır, klasör kutusunun altında çalışma noktası yanar; panelde o uygulamanın altında da nokta. Klasördeki uygulamanın pencerelerine tıklama / önizleme panelden yapılır. Alternatif (macOS gibi çalışırken dock'ta ayrıca göstermek) seçilmedi.
+- **Yeni klasör adı (onaylandı):** "Klasör" (TR) / "Folder" (EN), aynı ad varsa "Klasör 2"… (`Strings.resx` + `Strings.tr.resx`).
+- **Çalışan uygulama klasördeyse (onaylandı):** uygulama klasörün içinde kalır, klasör kutusunun altında çalışma noktası yanar; panelde o uygulamanın altında da nokta. Klasördeki uygulamanın pencerelerine tıklama / önizleme panelden yapılır.
 - **Sabitli olmayan açık uygulamalar** klasöre konmaz (yalnız sabitliler). Windows'un sabit klasörü (`User Pinned\TaskBar\*.lnk`) değiştirilmez; klasörler yalnız Koy'un ayarında.
 
-**Veri ve kurallar (Core, testli; AGENTS #11):**
-- [ ] `AppSettings.DockFolders`: `List<DockFolder>`; `DockFolder { Id (kısa guid), Name, Items: List<string> (.lnk adları, DockPinnedOrder'daki gibi) }`. `SettingsJsonContext`'e ekle; eski dosyada alan yoksa boş liste (göç testli). `Equals`/kopyalama (`AppSettings.cs` 219 / 300 civarı) güncellenir.
+**Adım 4A — Veri ve kurallar (Core, testli; AGENTS #11):**
+- [ ] `AppSettings.DockFolders`: `List<DockFolder>`; `DockFolder { Id (kısa guid), Name, Items: List<string> (.lnk adları, DockPinnedOrder'daki gibi) }`. `SettingsJsonContext`'e ekle (`[JsonSerializable(typeof(DockFolder))]`, `[JsonSerializable(typeof(List<DockFolder>))]`); eski dosyada alan yoksa boş liste (göç testli). `Equals`/`GetHashCode` (`AppSettings.cs` 219 / 300 civarı) güncellenir.
 - [ ] `DockPinnedOrder` öğesi ya `.lnk` adı ya `folder:<Id>`. `Core/Dock/PinnedOrder.cs` klasör öğelerini tanır: klasördeki uygulama dock'ta ayrıca görünmez; kaldırılmış `.lnk` klasörden de düşer; boş kalan klasör silinir, tek kalan dağılır.
 - [ ] `Core/Dock/DockFolders.cs` (saf): `CreateFromDrop(order, folders, dragged, target)`, `AddToFolder`, `RemoveFromFolder(…, insertIndex)`, `Dissolve`, `Rename`, `ReorderInFolder`, `NextDefaultName`. Her biri yeni sıra + klasör listesi döndürür. `Core/Dock/DockDropZone.cs` (saf): simge dikdörtgeni + imleç konumu → `Before / Merge / After` (orta bölge ~%50 genişlik) ve bekleme süresi dolunca `Merge` geçerli.
 - [ ] Testler: `tests/Core.Tests/DockFoldersTests.cs`, `DockDropZoneTests.cs` (oluştur, ekle, çıkar, tek kalınca dağıt, aynı ad, kaldırılmış lnk, eski ayar dosyası).
 
-**App:**
+**Adım 4B — App, Görsel ve Sürükleme:**
 - [ ] `DockItemViewModel` yanında `DockFolderViewModel` (ilk 4 simge, çalışma noktası = içerdekilerden biri çalışıyor mu). Dock öğe listesi karışık tür (uygulama / klasör); `DockCapsule.xaml` ve `DockFullWidth.xaml` için ayrı `DataTemplate` (2×2 ızgara).
 - [ ] `Features/Dock/Folder/FolderPanel.xaml(.cs)` (cam panel, ızgara, ad düzenleme, sürükleyerek çıkarma). Tepsi penceresindeki açma/kapama kalıbı örnek alınabilir (`TrayButton`: yay animasyonu, dış tıklamada kapanma, yalnız açıkken zamanlayıcı).
 - [ ] `DockReorderHelper`: sürüklerken `DockDropZone` ile orta/kenar ayrımı; birleştirme önizlemesi (hedef büyür + parlar); bırakınca `DockFolders` çağrılır, `SavePinnedOrder` gibi ayara yazılır (`DockFeature.SavePinnedOrder` genişler: sıra + klasörler birlikte, tek `Save`).

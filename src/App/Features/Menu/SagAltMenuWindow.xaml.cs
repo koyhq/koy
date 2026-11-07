@@ -13,6 +13,29 @@ public partial class SagAltMenuWindow : Window
 
     public static SagAltMenuWindow Instance => _instance ??= new SagAltMenuWindow();
 
+    /// <summary>SagAltMenuWindow örneğinin bellekte oluşturulup oluşturulmadığını belirtir.</summary>
+    public static bool IsCreated => _instance is not null;
+
+    /// <summary>
+    /// Harici kaynaklardan (kısayollar vb.) değişen durumları açık/gizli SagAltMenuWindow örneğine iletir.
+    /// </summary>
+    public static void SyncFeatureStates(bool? notchEnabled = null, bool? dockEnabled = null)
+    {
+        if (_instance is null)
+            return;
+
+        if (!_instance.Dispatcher.CheckAccess())
+        {
+            _instance.Dispatcher.BeginInvoke(() => SyncFeatureStates(notchEnabled, dockEnabled));
+            return;
+        }
+
+        if (notchEnabled.HasValue)
+            _instance.ViewModel.NotchEnabled = notchEnabled.Value;
+        if (dockEnabled.HasValue)
+            _instance.ViewModel.DockEnabled = dockEnabled.Value;
+    }
+
     public SagAltMenuViewModel ViewModel => (SagAltMenuViewModel)DataContext;
 
     public SagAltMenuWindow(SagAltMenuViewModel? viewModel = null)

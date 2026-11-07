@@ -77,8 +77,8 @@ public sealed partial class SagAltMenuViewModel : ObservableObject
     [RelayCommand]
     private void ToggleNotch()
     {
-        NotchEnabled = !NotchEnabled;
         var settings = _store.Load();
+        NotchEnabled = !settings.NotchEnabled;
         _store.Save(settings with { NotchEnabled = NotchEnabled });
         NotchToggled?.Invoke(NotchEnabled);
     }
@@ -86,8 +86,8 @@ public sealed partial class SagAltMenuViewModel : ObservableObject
     [RelayCommand]
     private void ToggleDock()
     {
-        DockEnabled = !DockEnabled;
         var settings = _store.Load();
+        DockEnabled = !settings.DockEnabled;
         _store.Save(settings with { DockEnabled = DockEnabled });
         DockToggled?.Invoke(DockEnabled);
     }

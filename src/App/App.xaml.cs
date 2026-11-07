@@ -186,9 +186,7 @@ public partial class App : Application
     {
         var store = new SettingsStore(SettingsStore.DefaultPath);
         var current = store.Load();
-        var enabled = !current.DockEnabled;
-        store.Save(current with { DockEnabled = enabled });
-        UpdateDockState(enabled);
+        UpdateDockState(!current.DockEnabled);
     }
 
     private async Task PlayPauseAsync()
@@ -282,10 +280,21 @@ public partial class App : Application
         if (IsPaused)
             return;
 
+        var store = new SettingsStore(SettingsStore.DefaultPath);
+        var current = store.Load();
+        if (current.NotchEnabled != enabled)
+            store.Save(current with { NotchEnabled = enabled });
+
+        if (KoyWindow.IsCreated)
+            KoyWindow.SyncFeatureStates(notchEnabled: enabled);
+
+        if (SagAltMenuWindow.IsCreated)
+            SagAltMenuWindow.SyncFeatureStates(notchEnabled: enabled);
+
         var existingNotch = _features.OfType<NotchFeature>().FirstOrDefault();
         if (enabled && existingNotch is null)
         {
-            var settings = new SettingsStore(SettingsStore.DefaultPath).Load();
+            var settings = store.Load();
             var notch = new NotchFeature(settings, _services);
             _features.Add(notch);
             notch.Start();
@@ -309,10 +318,21 @@ public partial class App : Application
         if (IsPaused)
             return;
 
+        var store = new SettingsStore(SettingsStore.DefaultPath);
+        var current = store.Load();
+        if (current.DockEnabled != enabled)
+            store.Save(current with { DockEnabled = enabled });
+
+        if (KoyWindow.IsCreated)
+            KoyWindow.SyncFeatureStates(dockEnabled: enabled);
+
+        if (SagAltMenuWindow.IsCreated)
+            SagAltMenuWindow.SyncFeatureStates(dockEnabled: enabled);
+
         var existingDock = _features.OfType<DockFeature>().FirstOrDefault();
         if (enabled && existingDock is null)
         {
-            var settings = new SettingsStore(SettingsStore.DefaultPath).Load();
+            var settings = store.Load();
             var dock = CreateDockFeature(settings);
             _features.Add(dock);
             dock.Start();
