@@ -249,7 +249,10 @@ public static class DockPositionResolver
                 AppBarReservedHeightDip: 0);
         }
 
-        if (isWindowMaximized && hideInFullscreen && proximityMode != DockProximityMode.ReserveSpace)
+        // Aşağı yapış'ta büyütülmüş pencere dock'u gizlemez: dock alta yapışık kalır (aşağıdaki DockDown kolu), yer ayırmaz.
+        // Yalnız gerçek tam ekran (yukarıdaki dal) gizler. Çekil ve Hep gizli büyütülmüş pencerede gizlemeyi sürdürür.
+        if (isWindowMaximized && hideInFullscreen
+            && proximityMode is not (DockProximityMode.ReserveSpace or DockProximityMode.DockDown))
         {
             var top = monitorBottom - FloatingHeightDip - FloatingBottomMarginDip;
             var isHovered = (edgeRevealEnabled && isMouseAtBottomEdge) || isMouseOverDock;

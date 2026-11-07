@@ -408,7 +408,7 @@ public class DockPositionResolverTests
         var result = DockPositionResolver.Resolve(
             monitor: Primary1080p,
             dockStyle: DockStyleMode.FloatingCapsule,
-            proximityMode: DockProximityMode.DockDown, // even in DockDown, hideInFullscreen hides it
+            proximityMode: DockProximityMode.Dodge, // Çekil büyütülmüş pencerede gizler (Aşağı yapış gizlemez)
             contentWidthDip: 520.0,
             foregroundWindowBoundsDip: new WindowRect(0, 0, 1920, 1080),
             isWindowMaximized: true,

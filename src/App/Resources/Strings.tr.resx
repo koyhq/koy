@@ -415,7 +415,7 @@
     <value>Dock hep görünür; pencereler onun üstünde biter, Windows görev çubuğu gibi.</value>
   </data>
   <data name="ProxDockDownDesc" xml:space="preserve">
-    <value>Dock yüzer; bir pencere yaklaşınca ekranın altına yapışır ve incelir.</value>
+    <value>Dock yüzer; bir pencere yaklaşınca ekranın altına yapışır ve incelir. Büyütülmüş pencerede de görünür kalır, yer ayırmaz.</value>
   </data>
   <data name="ProxDodgeDesc" xml:space="preserve">
     <value>Bir pencere yaklaşınca dock gizlenir; fare alt kenara gelince geri çıkar.</value>

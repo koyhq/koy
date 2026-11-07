@@ -415,7 +415,7 @@
     <value>The dock is always visible; windows end above it, like the Windows taskbar.</value>
   </data>
   <data name="ProxDockDownDesc" xml:space="preserve">
-    <value>The dock floats; when a window gets close it snaps to the screen bottom and thins out.</value>
+    <value>The dock floats; when a window gets close it snaps to the screen bottom and thins out. It stays visible over maximized windows and reserves no space.</value>
   </data>
   <data name="ProxDodgeDesc" xml:space="preserve">
     <value>The dock hides when a window gets close; it returns when the mouse reaches the bottom edge.</value>

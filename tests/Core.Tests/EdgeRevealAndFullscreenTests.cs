@@ -173,9 +173,9 @@ public class DockEdgeRevealResolverTests
     [Fact]
     public void BuyutulmusPencere_DockGizli_KenardaAcilir()
     {
-        var hidden = DockPositionResolver.Resolve(Monitor(), DockStyleMode.FloatingCapsule, DockProximityMode.DockDown, 500,
+        var hidden = DockPositionResolver.Resolve(Monitor(), DockStyleMode.FloatingCapsule, DockProximityMode.Dodge, 500,
             WindowRect.Empty, isWindowMaximized: true, isMouseAtBottomEdge: false, edgeRevealEnabled: true);
-        var revealed = DockPositionResolver.Resolve(Monitor(), DockStyleMode.FloatingCapsule, DockProximityMode.DockDown, 500,
+        var revealed = DockPositionResolver.Resolve(Monitor(), DockStyleMode.FloatingCapsule, DockProximityMode.Dodge, 500,
             WindowRect.Empty, isWindowMaximized: true, isMouseAtBottomEdge: true, edgeRevealEnabled: true);
 
         Assert.True(hidden.IsHidden);
@@ -185,8 +185,46 @@ public class DockEdgeRevealResolverTests
     [Fact]
     public void KenardanAcmaKapaliysa_BuyutulmusPencerede_FareKenardaOlsaDaGizliKalir()
     {
-        var state = DockPositionResolver.Resolve(Monitor(), DockStyleMode.FloatingCapsule, DockProximityMode.DockDown, 500,
+        var state = DockPositionResolver.Resolve(Monitor(), DockStyleMode.FloatingCapsule, DockProximityMode.Dodge, 500,
             WindowRect.Empty, isWindowMaximized: true, isMouseAtBottomEdge: true, edgeRevealEnabled: false);
+
+        Assert.True(state.IsHidden);
+    }
+
+    [Fact]
+    public void Kapsul_AsagiYapis_BuyutulmusPencerede_GizlenmezAltaYapisirYerAyirmaz()
+    {
+        var state = DockPositionResolver.Resolve(Monitor(), DockStyleMode.FloatingCapsule, DockProximityMode.DockDown, 500,
+            WindowRect.Empty, isWindowMaximized: true, isMouseAtBottomEdge: false, edgeRevealEnabled: true);
+
+        Assert.False(state.IsHidden);
+        Assert.Equal(1.0, state.Opacity);
+        Assert.Equal(0.0, state.TranslationY);
+        Assert.True(state.IsSnapped);
+        Assert.False(state.IsHandleVisible);
+        Assert.Equal(DockPositionResolver.SnappedHeightDip, state.HeightDip);
+        Assert.Equal(DockPositionResolver.SnappedCornerRadiusDip, state.CornerRadiusTopLeft);
+        Assert.Equal(0.0, state.CornerRadiusBottomLeft);
+        Assert.Equal(1080 - DockPositionResolver.SnappedHeightDip, state.TopDip);
+        Assert.Equal(0, state.AppBarReservedHeightDip);
+    }
+
+    [Fact]
+    public void Kapsul_AsagiYapis_TamEkranda_YineGizlenir()
+    {
+        var state = DockPositionResolver.Resolve(Monitor(), DockStyleMode.FloatingCapsule, DockProximityMode.DockDown, 500,
+            WindowRect.Empty, isWindowMaximized: true, isWindowFullscreen: true, hideInFullscreen: true);
+
+        Assert.True(state.IsHidden);
+    }
+
+    [Theory]
+    [InlineData(DockProximityMode.Dodge)]
+    [InlineData(DockProximityMode.AlwaysHidden)]
+    public void Kapsul_CekilVeHepGizli_BuyutulmusPencerede_GizliKalir(DockProximityMode mode)
+    {
+        var state = DockPositionResolver.Resolve(Monitor(), DockStyleMode.FloatingCapsule, mode, 500,
+            WindowRect.Empty, isWindowMaximized: true, isMouseAtBottomEdge: false, edgeRevealEnabled: true);
 
         Assert.True(state.IsHidden);
     }

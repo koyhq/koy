@@ -17,6 +17,7 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 - **Dock hareketi tek kaynaktan:** dock yayları (kayma, solma, simge büyümesi) Windows "animasyonları azalt", Animasyon hızı ayarı ve pil tasarrufuna uyar.
 
 ### Düzeltmeler (Fixed)
+- **Kapsül "Aşağı yapış" büyütülmüş pencerede gizlenmiyor:** dock alta yapışık (46 px) görünür kalır, pencerenin alt şeridine biner, yer ayırmaz. Yalnız gerçek tam ekran gizler. Çekil ve Hep gizli eskisi gibi.
 - **Dock'ta açık uygulamalar bazen görünmüyordu:** açık pencere süzgeci Windows görev çubuğunun kuralına çekildi (`WS_EX_APPWINDOW` pencereler sahipli olsa da gösterilir; `WS_EX_NOACTIVATE` ve araç pencereleri gizli kalır; başlığı boş pencere tek başına elenmez). Pencere gizlilikten çıkınca (`UNCLOAKED`), gizlenince ve başlığı değişince dock tazelenir (yoklama yok, olaylar birleştirilir).
 - **Çok uygulama açıkken dock ekrandan taşmıyor:** kapsülde simgeler en küçük 24 px'e kadar küçülür; tam genişlikte orta bölüm yan bölümlere binmez.
 - Dock kapatılıp yeniden açılınca sistem tepsisi düğmesi (gizli simgeler) kayboluyordu. Kapanan dock tepsi penceresini yeniden kuruyor, yeni dock aynı pencereyi kuramıyordu.
