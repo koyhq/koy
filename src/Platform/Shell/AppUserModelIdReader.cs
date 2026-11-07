@@ -21,7 +21,11 @@ internal static class AppUserModelIdReader
         {
             PInvoke.SHGetPropertyStoreForWindow(hwnd, typeof(IPropertyStore).GUID, out var obj).ThrowOnFailure();
             if (obj is not IPropertyStore store)
+            {
+                if (obj is not null && Marshal.IsComObject(obj))
+                    Marshal.ReleaseComObject(obj);
                 return null;
+            }
 
             try
             {
@@ -56,6 +60,10 @@ internal static class AppUserModelIdReader
         store.GetValue(Key, out var value);
         try
         {
+            // AUMID'siz pencerelerde değer VT_EMPTY gelir; dönüştürmeye çalışmak her seferinde istisna fırlatırdı.
+            if (value.Anonymous.Anonymous.vt != Windows.Win32.System.Variant.VARENUM.VT_LPWSTR)
+                return null;
+
             PInvoke.PropVariantToStringAlloc(value, out var str).ThrowOnFailure();
             try
             {

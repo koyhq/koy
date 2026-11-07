@@ -230,10 +230,13 @@ public sealed class WindowTracker : IWindowTracker
     {
         var windows = new List<OpenWindowInfo>();
 
+        var seenHandles = new HashSet<nint>();
         PInvoke.EnumWindows((HWND hwnd, LPARAM _) =>
         {
             if (hwnd.IsNull)
                 return true;
+
+            seenHandles.Add(hwnd.Value);
 
             // Görev çubuğu kuralı Core'da (TaskbarWindowRule): APPWINDOW her zaman girer; aksi halde sahipsiz ve
             // araç/etkinleşmeyen pencere olmamalı. Gizlenmiş (cloaked) pencereler ekranda yok.
@@ -283,6 +286,7 @@ public sealed class WindowTracker : IWindowTracker
             return true;
         }, 0);
 
+        PruneAumidCache(seenHandles);
         return windows;
     }
 
@@ -359,6 +363,12 @@ public sealed class WindowTracker : IWindowTracker
         unsafe { PInvoke.GetWindowThreadProcessId(hwnd, &pid); }
         if (pid == (uint)Environment.ProcessId)
             return;
+
+        if (@event == PInvoke.EVENT_OBJECT_DESTROY && idObject == 0 && idChild == 0)
+        {
+            lock (_aumidGate)
+                _aumidCache.Remove(hwnd.Value);
+        }
 
         // Yaşam döngüsü olayları (pencere açılma / kapanma)
         if (@event is PInvoke.EVENT_OBJECT_CREATE or PInvoke.EVENT_OBJECT_DESTROY
@@ -507,7 +517,36 @@ public sealed class WindowTracker : IWindowTracker
         }
     }
 
-    private static string? GetAppUserModelId(HWND hwnd) => AppUserModelIdReader.ForWindow(hwnd);
+    // AUMID pencere ömrü boyunca değişmez sayılır: HWND başına bir kez okunur (her yenilemede COM çağrısı yapılmaz).
+    // Pencere yok olunca (EVENT_OBJECT_DESTROY) ve her sayımda görülmeyen tutamaçlar için temizlenir.
+    private readonly Dictionary<nint, string?> _aumidCache = [];
+    private readonly object _aumidGate = new();
+
+    private string? GetAppUserModelId(HWND hwnd)
+    {
+        lock (_aumidGate)
+        {
+            if (_aumidCache.TryGetValue(hwnd.Value, out var cached))
+                return cached;
+        }
+
+        var value = AppUserModelIdReader.ForWindow(hwnd);
+        lock (_aumidGate)
+            _aumidCache[hwnd.Value] = value;
+        return value;
+    }
+
+    private void PruneAumidCache(HashSet<nint> seen)
+    {
+        lock (_aumidGate)
+        {
+            if (_aumidCache.Count <= seen.Count)
+                return;
+
+            foreach (var key in _aumidCache.Keys.Where(k => !seen.Contains(k)).ToList())
+                _aumidCache.Remove(key);
+        }
+    }
 
     private static bool IsShellOrDesktop(HWND hwnd)
     {

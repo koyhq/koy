@@ -5,8 +5,9 @@ namespace Koy.Core.Dock;
 /// <summary>
 /// Açık bir pencerenin hangi sabitli uygulamaya ait olduğu. Windows görev çubuğu düğmeleri AppUserModelID (AUMID) ile
 /// gruplar; Koy da önce onu kullanır. AUMID yoksa tam yol, en sonda dosya adı ve başlık gelir.
-/// File Explorer kısayolunun hedef yolu boştur (kabuk öğesi): yalnız AUMID ("Microsoft.Windows.Explorer") eşler;
-/// eskiden başlık eşleşmesine düşüp Gezgin penceresi için ikinci bir simge çıkarıyordu.
+/// File Explorer kısayolunun hedef yolu boştur (kabuk öğesi) ve Gezgin pencereleri pencere başına AUMID taşımaz; bu yüzden
+/// pencerede AUMID yoksa bilinen sistem uygulamaları tablosuna (explorer.exe → "Microsoft.Windows.Explorer") bakılır.
+/// Tablo olmasaydı eşleme başlığa düşüp Gezgin penceresi için ikinci bir simge çıkarırdı.
 /// </summary>
 public static class PinnedAppMatcher
 {
@@ -14,8 +15,9 @@ public static class PinnedAppMatcher
     {
         // 1. Kimlik: ikisinde de AUMID varsa karar onundur. Aynı exe'nin farklı AUMID'li pencereleri (Chrome profilleri,
         //    PWA'lar) Windows'ta ayrı düğmedir, burada da ayrı kalır.
-        if (!string.IsNullOrEmpty(pin.AppUserModelId) && !string.IsNullOrEmpty(win.AppUserModelId))
-            return string.Equals(pin.AppUserModelId, win.AppUserModelId, StringComparison.OrdinalIgnoreCase);
+        var winAumid = string.IsNullOrEmpty(win.AppUserModelId) ? KnownAppUserModelIds.ForProcessPath(win.ProcessPath) : win.AppUserModelId;
+        if (!string.IsNullOrEmpty(pin.AppUserModelId) && !string.IsNullOrEmpty(winAumid))
+            return string.Equals(pin.AppUserModelId, winAumid, StringComparison.OrdinalIgnoreCase);
 
         // 2. Hedef yürütülebilir dosya: normalleştirilmiş tam yol, sonra dosya adı.
         if (!string.IsNullOrEmpty(pin.TargetPath) && !string.IsNullOrEmpty(win.ProcessPath))

@@ -19,6 +19,26 @@ public class PinnedAppMatcherTests
     }
 
     [Fact]
+    public void Explorer_window_without_own_aumid_matches_pin_via_known_table()
+    {
+        var systemRoot = Environment.GetEnvironmentVariable("SystemRoot")!;
+        // Gerçek durum: kısayol AUMID'i dolu, hedef yerel ad ("Dosya Gezgini") yol değil, pencerenin AUMID'i yok.
+        var pin = new PinnedApp("Dosya Gezgini", @"C:\Pins\File Explorer.lnk", "Dosya Gezgini", null, "Microsoft.Windows.Explorer");
+
+        Assert.True(PinnedAppMatcher.IsMatch(pin, Win("İndirilenler - Dosya Gezgini", Path.Combine(systemRoot, "Explorer.EXE"))));
+        Assert.False(PinnedAppMatcher.IsMatch(pin, Win("Notlar", @"C:\Windows\notepad.exe")));
+    }
+
+    [Fact]
+    public void Known_table_only_knows_the_system_explorer()
+    {
+        var systemRoot = Environment.GetEnvironmentVariable("SystemRoot")!;
+        Assert.Equal(KnownAppUserModelIds.Explorer, KnownAppUserModelIds.ForProcessPath(Path.Combine(systemRoot, "explorer.exe")));
+        Assert.Null(KnownAppUserModelIds.ForProcessPath(@"C:\Tools\explorer.exe"));
+        Assert.Null(KnownAppUserModelIds.ForProcessPath(null));
+    }
+
+    [Fact]
     public void Explorer_pin_does_not_swallow_other_windows()
     {
         var pin = new PinnedApp("File Explorer", @"C:\Pins\File Explorer.lnk", null, null, "Microsoft.Windows.Explorer");
