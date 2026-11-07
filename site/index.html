@@ -127,34 +127,40 @@
             <li><strong>Sürükleyerek sırala.</strong> Sabitli uygulamaların sırası senin düzenin, yeniden başlatınca korunur.</li>
           </ul>
         </div>
-        <div class="screen screen--desktop" data-reveal style="--d:.12s">
-          <img class="desktop__notch" src="img/centik-kapali.webp" width="418" height="57" loading="lazy" alt="Ekranın üstünde kapalı çentik">
-          <img class="desktop__dock" src="img/dock.webp" width="494" height="48" loading="lazy" alt="Ekranın altında Koy dock'u: sabitli uygulamalar ve açık pencereler">
+        <div data-reveal style="--d:.12s">
+          <div class="screen screen--desktop" data-notch-demo>
+            <img class="desktop__notch" src="img/centik-kapali.webp" width="418" height="57" loading="lazy" alt="">
+            <img class="desktop__open" id="desktop-open" src="img/centik-ana.webp" width="1008" height="570" loading="lazy" alt="Açılmış çentik: müzik, kulaklık pili, sistem ve hızlı başlat">
+            <img class="desktop__dock" src="img/dock.webp" width="494" height="48" loading="lazy" alt="Ekranın altında Koy dock'u: sabitli uygulamalar ve açık pencereler">
+            <button class="desktop__zone" type="button" aria-expanded="false" aria-controls="desktop-open" aria-label="Çentiği aç ya da kapat"></button>
+          </div>
+          <p class="hint">Fareyi çentiğin üstüne götür, yayla açılsın. Dokunmatikte dokun.</p>
         </div>
       </div>
     </section>
 
     <!-- HAFİFLİK -->
-    <section class="section" id="hafiflik">
+    <section class="section section--dark" id="hafiflik">
+      <span class="ghost" aria-hidden="true" data-parallax>0</span>
       <div class="wrap">
         <div class="section__head" data-reveal>
           <h2>Tarayıcı yok. Bu yüzden hafif.</h2>
           <p class="lead">Rakipler web motoruyla çalışıyor. Koy doğrudan yerel C# ve WPF, ve bunu ölçerek tutuyor.</p>
         </div>
-        <dl class="stats" data-reveal style="--d:.1s">
-          <div class="stat">
+        <dl class="stats">
+          <div class="stat" data-reveal>
             <dt>0</dt>
             <dd>tarayıcı motoru. WebView2, Electron ya da Tauri yok.</dd>
           </div>
-          <div class="stat">
+          <div class="stat" data-reveal style="--d:.1s">
             <dt>1</dt>
             <dd>süreç. Çentik, dock ve ayarlar aynı süreçte; dock açıkken yalnız küçük bir gözcü eşlik eder.</dd>
           </div>
-          <div class="stat">
+          <div class="stat" data-reveal style="--d:.2s">
             <dt>~%0</dt>
             <dd>boşta işlemci. Animasyon yalnız hareket varken kare çizer, görünmeyen panel hiçbir şey çalıştırmaz.</dd>
           </div>
-          <div class="stat">
+          <div class="stat" data-reveal style="--d:.3s">
             <dt>100–150<small>MB</small></dt>
             <dd>bellek hedefi. v0.1.1'de iki monitörle ölçülen 99–100 MB. <a href="https://github.com/koyhq/koy/blob/main/docs/MEMORY.md">Ölçüm kayıtları</a></dd>
           </div>
@@ -168,28 +174,34 @@
         <div class="section__head" data-reveal>
           <h2>Küçük şeyler hesaba katıldı.</h2>
         </div>
-        <div class="details" data-reveal style="--d:.1s">
-          <article>
+        <div class="details">
+          <article data-reveal>
+            <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
             <h3>Çoklu ekran</h3>
             <p>Her monitörde ayrı çentik ve dock, her biri kendi DPI'ında. Yan ekranda tam ekran video, ana ekrandaki Koy'u gizlemez.</p>
           </article>
-          <article>
+          <article data-reveal style="--d:.08s">
+            <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
             <h3>Görev çubuğu güvencesi</h3>
             <p>Koy kapansa ya da çökse bile Windows görev çubuğu birkaç saniyede geri gelir.</p>
           </article>
-          <article>
+          <article data-reveal style="--d:.16s">
+            <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 8h.01M12 12h.01M14 8h.01M16 12h.01M18 8h.01M6 8h.01M7 16h10M8 12h.01"/><rect width="20" height="16" x="2" y="4" rx="2"/></svg></span>
             <h3>Kısayollar</h3>
             <p>Genel kısayolların hepsi özelleştirilebilir. İki kısayol çakışırsa Koy söyler.</p>
           </article>
-          <article>
+          <article data-reveal>
+            <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></span>
             <h3>Koyu ve açık tema</h3>
             <p>Windows temasını izler ya da elle seçersin. Vurgu rengi de senin.</p>
           </article>
-          <article>
+          <article data-reveal style="--d:.08s">
+            <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg></span>
             <h3>Türkçe ve İngilizce</h3>
             <p>Dil, uygulamayı yeniden başlatmadan anında değişir.</p>
           </article>
-          <article>
+          <article data-reveal style="--d:.16s">
+            <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/></svg></span>
             <h3>Temiz kaldırma</h3>
             <p>Koy'dan tek adımda kaldırılır. İstersen ayarların korunur, görev çubuğun yerine döner.</p>
           </article>
@@ -204,8 +216,8 @@
           <h2>Kurulum bir dakika.</h2>
           <p class="lead">Windows 11 (22H2 ve üstü) gerekir. Koy ücretsizdir ve her sürüm GitHub Actions'ta, testler geçtikten sonra üretilir.</p>
         </div>
-        <ol class="steps" data-reveal style="--d:.1s">
-          <li>
+        <ol class="steps">
+          <li data-reveal>
             <h3>İndir</h3>
             <p>Setup tek tıkla kurar ve kendini günceller. Kurulum istemezsen taşınabilir zip var.</p>
             <div class="steps__actions">
@@ -216,11 +228,11 @@
               <a class="link" href="https://github.com/koyhq/koy/releases/latest/download/Koy-win-Portable.zip">Taşınabilir zip</a>
             </div>
           </li>
-          <li>
+          <li data-reveal style="--d:.1s">
             <h3>SmartScreen uyarırsa</h3>
             <p>Koy henüz kod imzalı değil. Dosyayı yalnız GitHub Releases'tan indirdiysen <em>Ek bilgi</em>, sonra <em>Yine de çalıştır</em> de. Başka bir yerden gelen Koy dosyasını çalıştırma.</p>
           </li>
-          <li>
+          <li data-reveal style="--d:.2s">
             <h3>İstersen doğrula</h3>
             <p>Çıkan özeti sürümdeki <a href="https://github.com/koyhq/koy/releases/latest/download/SHA256SUMS.txt">SHA256SUMS.txt</a> ile karşılaştır.</p>
             <div class="code">
@@ -235,14 +247,23 @@
     </section>
   </main>
 
-  <footer class="footer">
+  <footer class="footer section--dark">
+    <span class="ghost ghost--word" aria-hidden="true">Koy</span>
+    <div class="wrap footer__cta" data-reveal>
+      <h2>Masaüstünü hafifçe değiştir.</h2>
+      <p class="lead">Ücretsiz, açık kaynak, Windows 11 için. Kurulum bir dakika, kaldırmak da öyle.</p>
+      <div class="hero__cta footer__buttons">
+        <a class="btn btn--primary" href="https://github.com/koyhq/koy/releases/latest">
+          Koy'u indir
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="link" href="https://github.com/koyhq/koy">Kaynak kodu</a>
+      </div>
+    </div>
     <div class="wrap footer__grid">
       <div>
         <a class="brand" href="./" aria-label="Koy, ana sayfa">
-          <picture>
-            <source media="(prefers-color-scheme: dark)" srcset="img/koy-horizontal-white.svg">
-            <img src="img/koy-horizontal-color.svg" alt="Koy" width="80" height="30" loading="lazy">
-          </picture>
+          <img src="img/koy-horizontal-white.svg" alt="Koy" width="80" height="30" loading="lazy">
         </a>
         <p class="footer__note">GPLv3 ile yayımlanan açık kaynak bir proje.</p>
       </div>
@@ -254,9 +275,6 @@
         <a href="https://github.com/koyhq/koy/discussions">Tartışmalar</a>
         <a href="https://github.com/koyhq/koy/blob/main/SECURITY.md">Güvenlik</a>
       </nav>
-    </div>
-    <div class="wrap footer__credit">
-      <p>Koy, <a href="https://github.com/kua8/Nectar">Nectar</a>'ın çentik fikrinden ve <a href="https://github.com/eythaann/Seelen-UI">Seelen UI</a>'ın dock yaklaşımından esinlendi. İkisinden de kod, görsel ya da metin alınmadı.</p>
     </div>
   </footer>
 
