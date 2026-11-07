@@ -46,6 +46,7 @@ public sealed partial class QuickLaunchViewModel : ObservableObject, IDisposable
         _service = service;
         _dispatcher = dispatcher ?? Dispatcher.CurrentDispatcher;
         PickPath = DefaultPick;
+        PickFolderPath = DefaultPickFolder;
     }
 
     public ObservableCollection<QuickLaunchItemViewModel> Items { get; } = [];
@@ -56,6 +57,9 @@ public sealed partial class QuickLaunchViewModel : ObservableObject, IDisposable
 
     /// <summary>Dosya seçici (kabuk iletişim kutusu); iptalde null. Testte ve araçta değiştirilebilir.</summary>
     public Func<string?> PickPath { get; set; }
+
+    /// <summary>Klasör seçici (kabuk iletişim kutusu); iptalde null. Testte ve araçta değiştirilebilir.</summary>
+    public Func<string?> PickFolderPath { get; set; }
 
     /// <summary>Seçici açılırken true, kapanınca false: çentik fare ayrılınca kapanmasın diye.</summary>
     public Action<bool>? HoldOpen { get; set; }
@@ -197,6 +201,22 @@ public sealed partial class QuickLaunchViewModel : ObservableObject, IDisposable
         }
     }
 
+    [RelayCommand]
+    private void AddFolder()
+    {
+        HoldOpen?.Invoke(true);
+        try
+        {
+            var path = PickFolderPath();
+            if (!string.IsNullOrWhiteSpace(path))
+                _service.Add(path);
+        }
+        finally
+        {
+            HoldOpen?.Invoke(false);
+        }
+    }
+
     private string? DefaultPick()
     {
         var dialog = new Microsoft.Win32.OpenFileDialog
@@ -210,6 +230,19 @@ public sealed partial class QuickLaunchViewModel : ObservableObject, IDisposable
         var owner = ResolveDialogOwner?.Invoke();
         var accepted = owner is not null ? dialog.ShowDialog(owner) : dialog.ShowDialog();
         return accepted == true ? dialog.FileName : null;
+    }
+
+    private string? DefaultPickFolder()
+    {
+        var dialog = new Microsoft.Win32.OpenFolderDialog
+        {
+            Title = Strings.Get("QuickLaunchPickFolderTitle"),
+            Multiselect = false
+        };
+
+        var owner = ResolveDialogOwner?.Invoke();
+        var accepted = owner is not null ? dialog.ShowDialog(owner) : dialog.ShowDialog();
+        return accepted == true ? dialog.FolderName : null;
     }
 
     public void Dispose()

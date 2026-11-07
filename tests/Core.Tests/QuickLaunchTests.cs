@@ -134,9 +134,80 @@ public class QuickLaunchTests
         Assert.Equal(1, changed);
     }
 
+    [Fact]
+    public void Add_folder_is_saved_and_displayed()
+    {
+        var (s, saves, shell) = New();
+        var changed = 0;
+        s.Changed += (_, _) => changed++;
+
+        const string folder = @"C:\Users\User\Projects";
+
+        Assert.True(s.Add(folder));
+        Assert.Single(s.Items);
+        Assert.Equal(folder, s.Items[0]);
+        Assert.Equal([folder], saves[^1]);
+        Assert.Equal(1, changed);
+        Assert.Equal("Projects", QuickLaunchService.DisplayName(folder));
+
+        Assert.True(s.Launch(folder));
+        Assert.Equal([folder], shell.Launched);
+    }
+
+    [Fact]
+    public void Add_folder_with_trailing_slash_is_normalized_and_prevents_duplicate()
+    {
+        var (s, saves, _) = New();
+        Assert.True(s.Add(@"C:\Projects\"));
+
+        // Tekrar eden yollar (kuyruk çizgisi ve harf büyüklüğü fark etmeksizin) reddedilir
+        Assert.False(s.Add(@"c:\projects"));
+        Assert.False(s.Add(@"C:\Projects\"));
+        Assert.Single(s.Items);
+
+        // Kuyruk çizgisi olmadan silme işlemi de aynı klasörü bulup siler
+        Assert.True(s.Remove(@"c:\projects"));
+        Assert.Empty(s.Items);
+        Assert.Empty(saves[^1]);
+    }
+
+    [Fact]
+    public void Add_folder_respects_directory_exists_predicate()
+    {
+        var existsMap = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase)
+        {
+            [@"C:\ExistingFolder"] = true,
+            [@"C:\MissingFolder"] = false
+        };
+        var s = new QuickLaunchService([], _ => { }, new FakeShell(), p => existsMap.GetValueOrDefault(p, false));
+
+        Assert.True(s.Add(@"C:\ExistingFolder"));
+        Assert.False(s.Add(@"C:\MissingFolder"));
+        Assert.Single(s.Items);
+    }
+
+    [Fact]
+    public void Add_network_share_folder_and_deduplicates()
+    {
+        var (s, _, _) = New();
+        Assert.True(s.Add(@"\\server\share"));
+
+        // Büyük/küçük harf ve kuyruk çizgisi farkı olan ağ paylaşımları reddedilir
+        Assert.False(s.Add(@"\\SERVER\share\"));
+        Assert.Single(s.Items);
+    }
+
     [Theory]
     [InlineData(@"C:\Program Files\App\App.exe", "App")]
     [InlineData(@"C:\Users\x\Belgeler\", "Belgeler")]
+    [InlineData(@"C:\Users\x\Belgeler", "Belgeler")]
     [InlineData(@"C:\", @"C:")]
+    [InlineData(@"C:", @"C:")]
+    [InlineData(@"D:\Projects\Koy", "Koy")]
+    [InlineData(@"D:\Projects\Koy\", "Koy")]
+    [InlineData(@"\\server\share", @"\\server\share")]
+    [InlineData(@"\\server\share\", @"\\server\share")]
+    [InlineData(@"\\server\share\belgeler", "belgeler")]
+    [InlineData(@"\\server\share\belgeler\", "belgeler")]
     public void DisplayName(string path, string expected) => Assert.Equal(expected, QuickLaunchService.DisplayName(path));
 }

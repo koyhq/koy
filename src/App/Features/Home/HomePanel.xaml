@@ -535,6 +535,17 @@
                   Visibility="{Binding QuickLaunch.CanAdd, Converter={StaticResource BoolToVis}}"
                   ToolTip="{Binding [QuickLaunchAdd], Source={x:Static res:Loc.Instance}}"
                   AutomationProperties.Name="{Binding [QuickLaunchAdd], Source={x:Static res:Loc.Instance}}">
+            <Button.ContextMenu>
+              <ContextMenu Opened="AddButton_ContextMenuOpened" Closed="AddButton_ContextMenuClosed">
+                <MenuItem Header="{Binding [QuickLaunchAddFile], Source={x:Static res:Loc.Instance}}"
+                          Command="{Binding PlacementTarget.Tag.QuickLaunch.AddCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                <MenuItem Header="{Binding [QuickLaunchAddFolder], Source={x:Static res:Loc.Instance}}"
+                          Command="{Binding PlacementTarget.Tag.QuickLaunch.AddFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+              </ContextMenu>
+            </Button.ContextMenu>
+            <Button.Tag>
+              <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=local:HomePanel}" />
+            </Button.Tag>
             <Grid Width="27" Height="27">
               <Rectangle RadiusX="9" RadiusY="9" Stroke="{DynamicResource KoyNotchDash}" StrokeThickness="1.5" StrokeDashArray="3 3" />
               <res:KoyIcon Data="{DynamicResource IconPlus}" Size="13" StrokeWidth="2.2" Foreground="{DynamicResource KoyNotchMuted}"

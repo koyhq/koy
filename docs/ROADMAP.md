@@ -337,7 +337,7 @@ Proje sahibi aşağıdakilerin hepsinin yapılmasına karar verdi. Sıra öneril
 4. [ ] **Dock klasörleri:** aşağıdaki "Dock klasörleri" bölümü. Flash ajanına verilecekse önce **Adım 4A (Core + Test)**, ardından **Adım 4B (App + UI + Snapshot)** olarak iki parçada çalıştırılır.
 5. [ ] **Atlama listesi:** "Dock'ta uygulama bazlı sağ tık menüsü" bölümü, araştırma hazır.
 6. [ ] **UWP (Store) uygulama sabitleme:** kimlik AUMID, simge `shell:AppsFolder`, pencere eşleme `SHGetPropertyStoreForWindow` (ayrıntı "Sonraya kalanlar"daki maddede). Windows'un sabitleri arasındaki Spotify, WhatsApp gibi uygulamalar dock'ta görünsün.
-7. [ ] **Hızlı başlata klasör ekleme:**
+7. [x] **Hızlı başlata klasör ekleme:**
    - **Mevcut durum:** `Core/QuickLaunch/QuickLaunchService.cs` zaten `Directory.Exists(p)` ve klasör adı gösterimini (`DisplayName`) destekliyor; `IconHelper.GetIconBytes` da klasör simgesi çözebiliyor. Eksik olan yalnız UI'daki seçici.
    - **Yapılacak (`src/App/Features/Home/` + `Resources/`):**
      1. `QuickLaunchViewModel.cs` içine `PickFolderPath` (`Func<string?>`, varsayılanı `DefaultPickFolder`) ve `[RelayCommand] private void AddFolder()` ekle. `DefaultPickFolder` içinde WPF `.NET 10` yerleşik `Microsoft.Win32.OpenFolderDialog` kullan (`Title = Strings.Get("QuickLaunchPickFolderTitle")`, `ResolveDialogOwner` ve `HoldOpen` koruması `Add()` ile birebir aynı).
