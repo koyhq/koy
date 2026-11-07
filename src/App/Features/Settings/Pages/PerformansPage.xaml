@@ -40,11 +40,15 @@
         <!-- Bellek Durumu -->
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [MemoryUsageTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding [BudgetDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
-                <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Width="220">
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Width="220">
                     <TextBlock Text="{Binding MemoryUsageText}" HorizontalAlignment="Right" Foreground="{DynamicResource KoyTextSecondary}" FontSize="13" Margin="0,0,0,6" />
                     <ProgressBar Value="{Binding MemoryPct}" Maximum="100" Height="6" Style="{StaticResource MemoryBarStyle}"
                                  AutomationProperties.Name="{Binding [MemoryUsageTitle], Source={x:Static res:Loc.Instance}}" />
@@ -57,10 +61,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [BatteryReduceMotion], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <CheckBox AutomationProperties.Name="{Binding [BatteryReduceMotion], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding BatterySaverReduceMotion}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [BatteryReduceMotion], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding BatterySaverReduceMotion}" HorizontalAlignment="Right" VerticalAlignment="Center"
                           Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
@@ -70,10 +78,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [WeatherRefreshTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <ComboBox AutomationProperties.Name="{Binding [WeatherRefreshTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="180" SelectedValuePath="Tag"
+                <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [WeatherRefreshTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="180" SelectedValuePath="Tag"
                           SelectedValue="{Binding WeatherRefreshInterval}" Style="{StaticResource SettingComboBoxStyle}">
                     <ComboBoxItem Content="{Binding [Interval30m], Source={x:Static res:Loc.Instance}}" Tag="30m" />
                     <ComboBoxItem Content="{Binding [Interval1h], Source={x:Static res:Loc.Instance}}" Tag="1h" />

@@ -128,10 +128,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [WheelActionTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <Border Style="{StaticResource SegmentContainerStyle}">
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [WheelSwitchPanel], Source={x:Static res:Loc.Instance}}" GroupName="WheelAction"
                                      IsChecked="{Binding WheelAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=0}"
@@ -146,10 +150,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [MiddleClickTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <Border Style="{StaticResource SegmentContainerStyle}">
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [MidClickNewWindow], Source={x:Static res:Loc.Instance}}" GroupName="MidClickAction"
                                      IsChecked="{Binding MiddleClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=0}"

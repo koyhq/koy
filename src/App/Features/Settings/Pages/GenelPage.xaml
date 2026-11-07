@@ -18,21 +18,29 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [RunAtStartupTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <CheckBox AutomationProperties.Name="{Binding [RunAtStartupTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding RunAtStartup}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [RunAtStartupTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding RunAtStartup}" HorizontalAlignment="Right" VerticalAlignment="Center"
                           Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [HideWindowsTaskbarTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding [HideWindowsTaskbarDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
-                <CheckBox AutomationProperties.Name="{Binding [HideWindowsTaskbarTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding HideWindowsTaskbar}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [HideWindowsTaskbarTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding HideWindowsTaskbar}" HorizontalAlignment="Right" VerticalAlignment="Center"
                           Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
@@ -42,10 +50,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [InterfaceLanguageTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <ComboBox AutomationProperties.Name="{Binding [InterfaceLanguageTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="180" SelectedValuePath="Tag"
+                <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [InterfaceLanguageTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="180" SelectedValuePath="Tag"
                           SelectedValue="{Binding Language}" Style="{StaticResource SettingComboBoxStyle}">
                     <ComboBoxItem Content="Türkçe (TR)" Tag="tr" />
                     <ComboBoxItem Content="English (EN)" Tag="en" />
@@ -58,20 +70,28 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [AutoCheckUpdatesTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <CheckBox AutomationProperties.Name="{Binding [AutoCheckUpdatesTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding AutoCheckUpdates}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [AutoCheckUpdatesTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding AutoCheckUpdates}" HorizontalAlignment="Right" VerticalAlignment="Center"
                           Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [ChannelTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <Border Style="{StaticResource SegmentContainerStyle}">
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [ChannelStable], Source={x:Static res:Loc.Instance}}" GroupName="UpdateChan"
                                      IsChecked="{Binding UpdateChannel, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Kararlı}"
@@ -86,11 +106,15 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [LastCheckTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding LastCheckText}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
-                <Button Content="{Binding CheckButtonText}" Command="{Binding CheckUpdatesCommand}" HorizontalAlignment="Right" Style="{StaticResource SettingButtonStyle}" />
+                <Button Grid.Column="1" Content="{Binding CheckButtonText}" Command="{Binding CheckUpdatesCommand}" HorizontalAlignment="Right" Style="{StaticResource SettingButtonStyle}" />
             </Grid>
         </Border>
 

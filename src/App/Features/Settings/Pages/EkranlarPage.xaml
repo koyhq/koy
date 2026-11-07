@@ -119,20 +119,28 @@
 
             <Border Style="{StaticResource SettingRowStyle}">
                 <Grid>
-                    <StackPanel VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                         <TextBlock Text="{Binding [ScreenNotchTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     </StackPanel>
-                    <CheckBox AutomationProperties.Name="{Binding [ScreenNotchTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding NotchOn}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [ScreenNotchTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding NotchOn}" HorizontalAlignment="Right" VerticalAlignment="Center"
                               Style="{StaticResource ToggleSwitchStyle}" />
                 </Grid>
             </Border>
 
             <Border Style="{StaticResource SettingRowStyle}">
                 <Grid>
-                    <StackPanel VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                         <TextBlock Text="{Binding [ScreenDockTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     </StackPanel>
-                    <CheckBox AutomationProperties.Name="{Binding [ScreenDockTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockOn}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [ScreenDockTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockOn}" HorizontalAlignment="Right" VerticalAlignment="Center"
                               Style="{StaticResource ToggleSwitchStyle}" />
                 </Grid>
             </Border>
@@ -143,10 +151,14 @@
 
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <StackPanel VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [NewDisplayActionTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <Border Style="{StaticResource SegmentContainerStyle}">
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [NewDisplayBoth], Source={x:Static res:Loc.Instance}}" GroupName="NewScreenMode"
                                      IsChecked="{Binding NewScreenBoth, Mode=TwoWay}" Style="{StaticResource SegRadioStyle}" />
