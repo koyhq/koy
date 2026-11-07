@@ -471,3 +471,9 @@ Proje sahibi istedi. Kod yazılmadı.
 - Tepsi: gizli (taşma) simgeleri ayrı gösterme, balon bildirimleri (`NIF_INFO`), animasyonlu simgelerin ölçümü.
 - UWP (Store) uygulamalarının dock'ta sabitlenmesi: kimlik AUMID, simge `shell:AppsFolder`, pencere eşleme `SHGetPropertyStoreForWindow`. Windows'un sabitleri arasında Spotify, WhatsApp gibi UWP uygulamalar var; Koy bugün yalnız `.lnk` sabitlerini gösteriyor.
 - Kod imzalama.
+
+## Tanıtım sayfası (2026-11-07)
+- [x] `site/` (düz HTML/CSS/JS, derleme yok): hero (çentik sayfanın tepesinden sarkar, yayla açılır), çentik sekmeleri (gerçek ekran görüntüleri), dock, hafiflik, ayrıntılar, kurulum (SmartScreen uyarısı ve SHA256 doğrulama dahil). Koyu/açık tema sistemi izler. Son sürüm numarası GitHub API'den gelir, gelmezse rozet görünmez.
+- [x] `.github/workflows/pages.yml`: `main`'e `site/**` girince koyhq.github.io/koy adresinde yayınlar (SHA'ya sabit action'lar). Pages kaynağı "GitHub Actions" olarak açıldı.
+- [ ] İlk yayından sonra: depo ve org "Website" alanı, README rozetleri ve Hakkında'daki GitHub düğmesi site adresine bağlanır (güncelleme akışı GitHub Releases'ta kalır). Alan adı alınırsa `canonical` ve `og:url` güncellenir.
+- [ ] İngilizce sürüm (şimdilik yalnız Türkçe).
