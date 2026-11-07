@@ -25,6 +25,9 @@ public sealed class AppBarService : IAppBarService
 
     // Her pencere için en son uygulanan alan: aynı alan için SETPOS tekrarlanmaz (yerleşim fırtınasında ~20 çağrı oluyordu).
     private readonly AppBarPlacementCache _placements = new();
+
+    // Yeniden iddiadan sonra da uyuşmayan çalışma alanı alt sınırı (başka çubuk): aynı değer için tekrar denenmez.
+    private readonly Dictionary<nint, int> _unresolvedWorkBottom = [];
     private bool _disposed;
 
     /// <summary>
@@ -40,6 +43,7 @@ public sealed class AppBarService : IAppBarService
                 return;
 
             _ownsBottomEdge = value;
+            _unresolvedWorkBottom.Clear();
             _placements.Clear();   // sahiplik değişince eski alan geçersiz: sıradaki güncelleme mutlaka SETPOS gönderir
         }
     }
@@ -99,12 +103,32 @@ public sealed class AppBarService : IAppBarService
             {
                 var bounds = mi.monitorInfo.rcMonitor;
                 var work = mi.monitorInfo.rcWork;
+                var monitorRect = new WindowRect(bounds.left, bounds.top, bounds.right, bounds.bottom);
+                var heightPx = WindowPlacementMath.ToPixels(heightDip <= 0 ? 46 : heightDip, dpiScale);
+                _unresolvedWorkBottom.TryGetValue(windowHandle, out var unresolved);
                 var needed = AppBarOwnership.NeedsReassert(
-                    new WindowRect(bounds.left, bounds.top, bounds.right, bounds.bottom),
-                    new WindowRect(work.left, work.top, work.right, work.bottom),
-                    WindowPlacementMath.ToPixels(heightDip <= 0 ? 46 : heightDip, dpiScale));
+                    monitorRect, new WindowRect(work.left, work.top, work.right, work.bottom), heightPx, OwnsBottomEdge,
+                    _unresolvedWorkBottom.ContainsKey(windowHandle) ? unresolved : null);
                 if (!needed)
                     return false;
+
+                UpdatePositionInternal(hwnd, heightDip, dpiScale, force: true);
+
+                // Düzelmediyse (başka bir çubuk payı etkiliyor) aynı çalışma alanı için tekrar denenmez.
+                var after = new MONITORINFOEXW { monitorInfo = new MONITORINFO { cbSize = (uint)sizeof(MONITORINFOEXW) } };
+                if (PInvoke.GetMonitorInfo(hMonitor, (MONITORINFO*)&after))
+                {
+                    var stillWrong = AppBarOwnership.NeedsReassert(
+                        monitorRect,
+                        new WindowRect(after.monitorInfo.rcWork.left, after.monitorInfo.rcWork.top, after.monitorInfo.rcWork.right, after.monitorInfo.rcWork.bottom),
+                        heightPx, OwnsBottomEdge);
+                    if (stillWrong)
+                        _unresolvedWorkBottom[windowHandle] = after.monitorInfo.rcWork.bottom;
+                    else
+                        _unresolvedWorkBottom.Remove(windowHandle);
+                }
+
+                return true;
             }
         }
 
@@ -129,6 +153,7 @@ public sealed class AppBarService : IAppBarService
 
         var hwnd = new HWND(windowHandle);
         _placements.Forget(windowHandle);
+        _unresolvedWorkBottom.Remove(windowHandle);
         var data = new APPBARDATA
         {
             cbSize = (uint)sizeof(APPBARDATA),

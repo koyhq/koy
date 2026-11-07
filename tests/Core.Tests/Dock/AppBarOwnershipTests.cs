@@ -31,9 +31,27 @@ public class AppBarOwnershipTests
     [Theory]
     [InlineData(1080, 46, true)]    // hiçbir şey ayrılmamış
     [InlineData(1034, 46, false)]   // tam pay
-    [InlineData(1010, 46, false)]   // daha fazlası ayrılmış (başka çubuk)
+    [InlineData(986, 46, true)]     // FAZLA ayrılmış: kayıt anında Gezgin'in 48 px'i de sayılmış (94 px) - canlıda kalan hata
     [InlineData(1032, 48, false)]
     [InlineData(1080, 48, true)]
-    public void Reassert_only_when_work_area_is_missing_the_reservation(int workBottom, int heightPx, bool expected)
-        => Assert.Equal(expected, AppBarOwnership.NeedsReassert(Monitor, new WindowRect(0, 0, 1920, workBottom), heightPx));
+    [InlineData(986, 48, true)]
+    public void Owned_edge_requires_the_exact_reservation_in_both_directions(int workBottom, int heightPx, bool expected)
+        => Assert.Equal(expected, AppBarOwnership.NeedsReassert(Monitor, new WindowRect(0, 0, 1920, workBottom), heightPx, ownsBottomEdge: true));
+
+    [Theory]
+    [InlineData(1080, 46, true)]
+    [InlineData(1034, 46, false)]
+    [InlineData(1010, 46, false)]   // başka çubuklar da yığılmış: fazlası normal
+    public void Shared_edge_only_fixes_a_missing_reservation(int workBottom, int heightPx, bool expected)
+        => Assert.Equal(expected, AppBarOwnership.NeedsReassert(Monitor, new WindowRect(0, 0, 1920, workBottom), heightPx, ownsBottomEdge: false));
+
+    [Fact]
+    public void An_unresolved_mismatch_is_not_retried_for_the_same_work_area()
+    {
+        var work = new WindowRect(0, 0, 1920, 986);
+
+        Assert.True(AppBarOwnership.NeedsReassert(Monitor, work, 46, true, unresolvedWorkBottom: null));
+        Assert.False(AppBarOwnership.NeedsReassert(Monitor, work, 46, true, unresolvedWorkBottom: 986));
+        Assert.True(AppBarOwnership.NeedsReassert(Monitor, new WindowRect(0, 0, 1920, 1080), 46, true, unresolvedWorkBottom: 986));
+    }
 }

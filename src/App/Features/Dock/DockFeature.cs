@@ -258,18 +258,29 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         if (_appBarService is null || _stopping)
             return;
 
-        _appBarSettleTimer ??= new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(700) };
+        // İki aşama: Gezgin yeniden hesabı bazen 1-2 sn sürer (canlı ölçüm: 0,7 sn'de 1032, 1,6 sn'de 986).
+        _appBarSettleStage = 0;
+        _appBarSettleTimer ??= new DispatcherTimer(DispatcherPriority.Background);
+        _appBarSettleTimer.Interval = TimeSpan.FromMilliseconds(700);
         _appBarSettleTimer.Tick -= OnAppBarSettleTick;
         _appBarSettleTimer.Tick += OnAppBarSettleTick;
         _appBarSettleTimer.Stop();
         _appBarSettleTimer.Start();
     }
 
+    private int _appBarSettleStage;
+
     private void OnAppBarSettleTick(object? sender, EventArgs e)
     {
         _appBarSettleTimer?.Stop();
         foreach (var state in _windowStates.Values)
             ReassertAppBar(state, onlyIfNeeded: true);
+
+        if (_appBarSettleStage++ == 0 && _appBarSettleTimer is not null)
+        {
+            _appBarSettleTimer.Interval = TimeSpan.FromMilliseconds(1500);
+            _appBarSettleTimer.Start();
+        }
     }
 
     /// <summary>Stile göre geçerli yakınlık modu (tam genişlikte Aşağı yapış/Çekil sadeleşir; bkz. DockProximityMapping).</summary>

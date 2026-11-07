@@ -15,9 +15,16 @@ public static class AppBarOwnership
         hideTaskbarSetting && taskbarHidden && !restoredManually;
 
     /// <summary>
-    /// Monitörün çalışma alanı AppBar'ın istediği payı karşılamıyorsa true (Gezgin çalışma alanını yeniden hesaplayıp
-    /// payı düşürmüş). Karşılanıyorsa yeniden iddia gereksizdir; bildirim fırtınasında kendi SETPOS'umuzla döngüye girmeyi önler.
+    /// Monitörün çalışma alanı AppBar'ın istediği payla uyuşmuyorsa true. Alt kenar Koy'undayken pay TAM olmalıdır:
+    /// eksik ayrılmış (Gezgin sıfırlamış) da fazla ayrılmış (kayıt anında Gezgin'in 48 px'i de sayılmış, 94 px) da düzeltilir.
+    /// Alt kenar Koy'un değilken (görev çubuğu görünür, başka çubuklar yığılır) yalnız eksik pay düzeltilir.
+    /// Uyuşmazlık bir önceki yeniden iddiadan sonra da aynı kaldıysa (<paramref name="unresolvedWorkBottom"/>, ör. başka bir
+    /// uygulamanın çubuğu) tekrar denenmez: kendi SETPOS'umuzla döngüye girilmez.
     /// </summary>
-    public static bool NeedsReassert(WindowRect monitor, WindowRect work, int heightPx) =>
-        work.Bottom > monitor.Bottom - heightPx;
+    public static bool NeedsReassert(WindowRect monitor, WindowRect work, int heightPx, bool ownsBottomEdge, int? unresolvedWorkBottom = null)
+    {
+        var expected = monitor.Bottom - heightPx;
+        var mismatch = ownsBottomEdge ? work.Bottom != expected : work.Bottom > expected;
+        return mismatch && unresolvedWorkBottom != work.Bottom;
+    }
 }
