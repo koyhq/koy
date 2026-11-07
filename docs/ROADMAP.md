@@ -398,6 +398,44 @@ Proje sahibi istedi (2026-11-07). Sabitli uygulamalar dock'ta klasörlere toplan
 - [x] Görsel kanıt: `tools/Koy.UiSnapshots` sahnesi (klasör kutusu 2, 4, 6 uygulamayla; açık panel; birleştirme önizlemesi; koyu ve açık tema).
 - [ ] Elle sınama (proje sahibi, Claude ile): sürükle-birleştir, ekle, panelden çıkar, tek kalınca dağılma, ad değiştirme, yeniden başlatınca korunma, çalışma noktası, iki ekranda aynı klasörler, tam genişlik ve kapsül dock.
 
+## Dock: sağ bölüm, kayıp açık uygulamalar, Windows tarzı tam genişlik — AÇIK (2026-11-07)
+Proje sahibi istedi. Kod yazılmadı; önce bu plan onaylanır.
+
+**Bugünkü durum (kodda bakıldı):**
+- Sağ bölümdeki üç düğme (İndirilenler klasörü, Son kullanılanlar, Sistem tepsisi) Ayarlar > Dock'ta zaten ayrı ayrı kapatılabiliyor (`DockShowFolders`, `DockShowRecents`, `DockShowTray`). Eksik: tam genişlik modunda İndirilenler düğmesi hiç yok ve `ShowFolders` bağlanmamış; kapsülde ayırıcılar düğmeler kapalıyken de kalabiliyor.
+- Tam genişlik modu var (`DockFullWidth.xaml`, 44 px, `DockStyle = FullWidth`) ama AppBar ile çalışma alanı yalnız "Yer ayır" yakınlık modunda ayrılıyor (`DockFeature.cs:96`). Diğer modlarda büyütülmüş pencere çubuğun altına giriyor ya da çubuk gizleniyor.
+- Proje sahibinin makinesinde: kapsül + "Aşağı yapış", çalışma alanı 1080 değil 1036 px (44 px ayrılmış), yapışmış kapsül ise 46 px ve üstünde 12 px şeffaf pay (`DockMargin 12,12,12,0`). Koda göre bu modda Koy AppBar kaydetmiyor; 44 px'i büyük olasılıkla gizlenen Windows görev çubuğu tutuyor. Ekran görüntüsündeki "boşluk" bu uyumsuzluk olabilir; işe başlarken yerinde ölçülür.
+
+**Haiku iki mod raporu (2026-11-07, kod okuması, çalıştırılmadı):**
+- Çalışma göstergesi: kapsülde nokta / çizgi (`DockIndicatorStyle`) / çoklu pencere üç noktası / dikkat turuncusu var (`DockCapsule.xaml:171-236`); tam genişlikte hiçbiri yok, yalnız aktif öğenin adı yazılı hap. Klasör çalışma çubuğu iki modda var.
+- Animasyonlar ortak ViewModel'de (gösterme/gizleme yayı, hover büyütme, sıralama kayması, `DockWindow` kare döngüsü); tam genişlikte de çalışıyor. Eksik olan görsel durumlar (nokta, rozet, dikkat). Hareket azaltma dock yaylarında yalnız pil tasarrufuna bağlı; Windows "animasyonları azalt" ve `AnimationSpeed` dock'a uygulanmıyor.
+- Basma tepkisi iki modda da yok; öğe stilleri yalnız hover/aktif/hedef/dikkat tetikliyor.
+- Sağ bölüm boşlukları: tam genişlikte Başlat `ShowStartButton`'a bağlı değil (hep görünür), İndirilenler yok, ayırıcı yok; kapsülde ikinci ayırıcı hiçbir ayara bağlı değil.
+- Pencere süzgeci farkları: `WS_EX_APPWINDOW` istisnası yok, `WS_EX_NOACTIVATE` bakılmıyor, boş başlık eleniyor. Olaylarda `EVENT_OBJECT_UNCLOAKED`, `EVENT_OBJECT_NAMECHANGE` ve sanal masaüstü değişimi yok. `WindowTracker` çentikle ortak: olay eklemek çentiği de etkiler.
+- Çalışma alanı: AppBar yalnız "Yer ayır"da; 44 sabiti 6 yerde (`DockPositionResolver.cs:46`, `DockWindow.xaml.cs:31,147,167,169`, `DockFullWidth.xaml:14`, `DockViewModel.cs:669`) — 48'e geçişte tek sabite toplanır. Piksel yuvarlaması üç yerde farklı (`AppBarService` kesme, `WindowPlacementMath` yuvarlama, `DockFeature` tavan) → tek kurala.
+- Taşma: kapsülde sınır/küçülme yok, fazlası ekran kenarında kesilir (sağdaki tepsi ve Koy menüsü ilk gider); tam genişlikte orta sütun yan sütunlara taşar.
+- Açık uygulama süzgeci (`Platform/Shell/WindowTracker.GetOpenWindows`) Windows görev çubuğunun kuralından ayrılıyor: sahibi olan pencereleri (`GW_OWNER`) `WS_EX_APPWINDOW` olsa bile atıyor, başlığı boş pencereleri atıyor, `WS_EX_NOACTIVATE`/`WS_EX_APPWINDOW` ayrımı yok.
+
+**İşler:**
+1. [ ] **Sağ bölüm sadeleşmesi:**
+   - Üç anahtar tam genişlik modunda da geçerli olsun (İndirilenler düğmesi eklenir, `ShowFolders` bağlanır); kapalı düğmelerin ayırıcısı da gizlenir.
+   - **Yeni seçenek "Küçük tepsi"** (proje sahibi onayladı 2026-11-07, varsayılan açık): tepsi düğmesi tam boy simge yerine dar bir ok (`^`, ~18 px genişlik) olarak Koy menüsü düğmesinin **sağına** geçer; tepsi paneli aynı yerden açılır. Son kullanılanlar ve İndirilenler kendi anahtarlarıyla kalır.
+2. [ ] **Açık uygulamaların bazen görünmemesi:**
+   - Önce yeniden üretme: görünmeyen uygulama yakalanınca `EnumWindows` dökümüyle (sınıf, stil, sahip, cloak, başlık) hangi süzgece takıldığı bulunur.
+   - Süzgeç Windows'un kuralına çekilir (Core'da saf, testli `TaskbarWindowRule`): görünür + cloak değil + (`WS_EX_APPWINDOW` ise her zaman göster; değilse sahipsiz ve `WS_EX_TOOLWINDOW`/`WS_EX_NOACTIVATE` değil). Boş başlık tek başına eleme sebebi olmaz.
+   - Olay kapsamı denetlenir: `EVENT_OBJECT_UNCLOAKED`, `EVENT_OBJECT_SHOW`, başlık değişimi, sanal masaüstü değişimi; kaçan olay için yoklama eklenmez.
+   - **Taşma:** çok uygulama açıkken kapsül ekran genişliğini geçmez; önce simgeler küçülür (en küçük 24 px), yetmezse kapsül ekran kenarına kadar genişler. Tam genişlikte orta bölüm sağ/sol bölümlere taşmaz (sabit 260 px sütunlar yerine içerik kadar).
+3. [ ] **Windows tarzı tam genişlik (cam):**
+   - Ayarlar > Dock > Stil: "Yüzen kapsül" / "Tam genişlik". Tam genişlik Windows 11 görev çubuğu ölçüsünde: **48 px**, ekran kenarına sıfır boşlukla yapışık, köşe yuvarlaması yok, üst kenarda ince parıltı çizgisi. Başlat solda veya ortada (Windows'taki "Görev çubuğu hizalaması" gibi), uygulamalar ortada, sağda Koy menüsü + küçük tepsi + saat/tarih (isteğe bağlı).
+   - Cam: `Material` ayarına uyar (akrilik/mika; katı modda opak). Koy renkleri ve yazı tipleri.
+   - **Çalışma alanı:** tam genişlikte "Her zaman göster" seçiliyse AppBar ile tam 48 px ayrılır (piksel/DPI yuvarlaması testli) → büyütülmüş pencere çubuğun hemen üstünde biter, arada boşluk kalmaz. "Otomatik gizle" seçiliyse yer ayrılmaz; fare ekranın en altına değince çubuk çıkar (bugünkü kenardan açma, `EdgeRevealTracker`).
+   - Yakınlık modları tam genişlikte sadeleşir: yalnız "Her zaman göster" ve "Otomatik gizle" (Windows'taki gibi); "Aşağı yapış" ve "Kaç" yalnız kapsülde.
+   - Çoklu ekran: her ekranda kendi çubuğu (bugünkü dock ayarına uyar).
+   - **Çalışma göstergeleri (eksik):** tam genişlikte nokta yok, kapsülde var. Kapsülün gösterge şablonu (nokta / çizgi / çoklu pencere / dikkat / rozet) ortak bir kaynağa alınır, iki mod aynısını kullanır.
+   - **Animasyonlar:** yaylar zaten ortak; tam genişlik yeni 48 px düzende de aynı hissi verecek şekilde denenir (hover büyütme 48 px çubukta taşmamalı). Hareket azaltma tek kaynağa bağlanır: pil tasarrufu + Windows "animasyonları azalt" + `AnimationSpeed` dock yaylarına da uygulanır.
+4. [ ] **Basma hissi (iki modda):** dock'ta uygulamaya basınca simge kısa süre içe çöker (ör. %92 ölçek + hafif koyulaşma), bırakınca yayla geri gelir. Sürükleme başlarsa iptal olur. Hareket azaltmada yalnız renk değişir. Basılı durum `DockEntryViewModel`'de; ölçek hover ölçeğiyle aynı yay hedefini ezmez (basma çarpanı ayrı uygulanır).
+5. [ ] **Doğrulama:** Core testleri (pencere kuralı, AppBar yüksekliği, taşma ölçüsü), UiSnapshots sahnesi (tam genişlik açık/koyu, küçük tepsi), bellek ölçümü, elle sınama (büyütülmüş pencere ile boşluk yok, otomatik gizle, iki ekran, tepsi paneli).
+
 ## Sonraya kalanlar
 - Bildirimleri çentikte gösterme: Windows bildirimleri gelince çentik kısa süre gösterir (Claude Code gibi ajanların "iş bitti" bildirimleri de bu yoldan gelir). `UserNotificationListener` paket kimliği ister; Velopack kurulumu için seyrek (sparse) paket ve imza gerekir. Ara çözüm: Claude Code kancasının çağırdığı yerel komutla doğrudan bildirim.
 - Kullanıcının düzenleyebildiği çentik arayüzü: sayfaların ve kartların sırası, hangilerinin görüneceği kullanıcı tarafından seçilir.
