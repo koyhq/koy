@@ -352,7 +352,7 @@ Proje sahibi aşağıdakilerin hepsinin yapılmasına karar verdi. Sıra öneril
      3. `tests/Core.Tests` altında `IdleDisplay` testlerini doğrula, `dotnet build` ve `dotnet test` çalıştır.
 
 **E paketi (çentik göstergeleri):**
-9. [ ] **Pil uyarıları (OSD):**
+9. [x] **Pil uyarıları (OSD):**
    - **Hedef:** Şarja takıldı, şarjdan çıkarıldı, düşük pil (%20 ve %10 eşikleri) ve şarj tamamlandı (%100) durumlarında çentikte 1,5 sn OSD göstergesi.
    - **Yapılacak:**
      1. **`Core/Power/BatteryNotificationPolicy.cs` (saf C#, testli):** Önceki ve yeni `PowerChangedEventArgs` durumunu karşılaştırıp `BatteryAlertKind { None, PluggedIn, Unplugged, LowBattery, FullyCharged }` ve yüzde döndüren durum sınıfı yaz. İlk okumada (açılışta) bildirim üretmez; yalnız gerçek geçişte üretir. Düşük pil uyarısı %20 ve %10 altına ilk düşüşte birer kez tetiklenir, şarja takılınca veya %25 üstüne çıkınca sıfırlanır (histerezis). Masaüstünde (`HasBattery == false`) her zaman `None`. Testleri: `tests/Core.Tests/BatteryNotificationPolicyTests.cs`.

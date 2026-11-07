@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:Koy.App.Features.Notch.OSD"
+             xmlns:power="clr-namespace:Koy.Core.Power;assembly=Koy.Core"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:OsdIndicatorViewModel}"
              Width="260" Height="40">
@@ -15,7 +16,7 @@
       <ColumnDefinition Width="Auto" />
     </Grid.ColumnDefinitions>
 
-    <!-- Sol: İkon (Ses için hoparlör #F4F4F5, Parlaklık için güneş #FACC15) -->
+    <!-- Sol: İkon (Ses için hoparlör #F4F4F5, Parlaklık için güneş #FACC15, Pil için yeşil/kırmızı/gri) -->
     <Grid Grid.Column="0" Width="18" Height="18" VerticalAlignment="Center">
       <!-- Ses İkonu (Hoparlör) -->
       <Path x:Name="VolumeIcon" Width="18" Height="18" Stretch="Uniform"
@@ -56,36 +57,140 @@
           </Style>
         </Path.Style>
       </Path>
+
+      <!-- Pil İkonu -->
+      <Path x:Name="BatteryIcon" Width="18" Height="18" Stretch="Uniform"
+            StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+            Data="{StaticResource IconBattery}">
+        <Path.Style>
+          <Style TargetType="Path">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Setter Property="Stroke" Value="#10B981" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Type}" Value="{x:Static local:OsdType.Battery}">
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+              <DataTrigger Binding="{Binding BatteryKind}" Value="{x:Static power:BatteryAlertKind.LowBattery}">
+                <Setter Property="Stroke" Value="#EF4444" />
+                <Setter Property="Data" Value="{StaticResource IconBattery}" />
+              </DataTrigger>
+              <DataTrigger Binding="{Binding BatteryKind}" Value="{x:Static power:BatteryAlertKind.PluggedIn}">
+                <Setter Property="Stroke" Value="#10B981" />
+                <Setter Property="Data" Value="{StaticResource IconBatteryCharging}" />
+              </DataTrigger>
+              <DataTrigger Binding="{Binding BatteryKind}" Value="{x:Static power:BatteryAlertKind.FullyCharged}">
+                <Setter Property="Stroke" Value="#10B981" />
+                <Setter Property="Data" Value="{StaticResource IconBatteryCharging}" />
+              </DataTrigger>
+              <DataTrigger Binding="{Binding BatteryKind}" Value="{x:Static power:BatteryAlertKind.Unplugged}">
+                <Setter Property="Stroke" Value="#F4F4F5" />
+                <Setter Property="Data" Value="{StaticResource IconBattery}" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Path.Style>
+      </Path>
     </Grid>
 
-    <!-- Orta: Seviye Çubuğu (Yükseklik 6px, arka plan #3F3F46, dolgu ses için #F4F4F5, parlaklık için #FACC15) -->
-    <Border Grid.Column="1" Height="6" CornerRadius="3" Background="#3F3F46" Margin="12,0,12,0" ClipToBounds="True">
+    <!-- Orta Alan: Volume/Brightness için seviye çubuğu; Battery için durum metni ve seviye çubuğu -->
+    <Grid Grid.Column="1" Margin="12,0,12,0" VerticalAlignment="Center">
+      <!-- Ses ve Parlaklık Seviye Çubuğu -->
+      <Border Height="6" CornerRadius="3" Background="#3F3F46" ClipToBounds="True">
+        <Border.Style>
+          <Style TargetType="Border">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Type}" Value="{x:Static local:OsdType.Battery}">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Border.Style>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{Binding FillStarWidth}" />
+            <ColumnDefinition Width="{Binding RemainingStarWidth}" />
+          </Grid.ColumnDefinitions>
+          <Border Grid.Column="0" CornerRadius="3">
+            <Border.Style>
+              <Style TargetType="Border">
+                <Setter Property="Background" Value="#F4F4F5" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding Type}" Value="{x:Static local:OsdType.Brightness}">
+                    <Setter Property="Background" Value="#FACC15" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Border.Style>
+          </Border>
+        </Grid>
+      </Border>
+
+      <!-- Pil Alanı: Durum metni ve ince seviye çubuğu -->
       <Grid>
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="{Binding FillStarWidth}" />
-          <ColumnDefinition Width="{Binding RemainingStarWidth}" />
-        </Grid.ColumnDefinitions>
-        <Border Grid.Column="0" CornerRadius="3">
-          <Border.Style>
-            <Style TargetType="Border">
-              <Setter Property="Background" Value="#F4F4F5" />
+        <Grid.Style>
+          <Style TargetType="Grid">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Type}" Value="{x:Static local:OsdType.Battery}">
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Grid.Style>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="3" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0"
+                   Text="{Binding BatteryStatusText}"
+                   FontSize="11"
+                   FontWeight="Medium"
+                   TextTrimming="CharacterEllipsis"
+                   Margin="0,0,0,2">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Foreground" Value="#E4E4E7" />
               <Style.Triggers>
-                <DataTrigger Binding="{Binding Type}" Value="{x:Static local:OsdType.Brightness}">
-                  <Setter Property="Background" Value="#FACC15" />
+                <DataTrigger Binding="{Binding BatteryKind}" Value="{x:Static power:BatteryAlertKind.LowBattery}">
+                  <Setter Property="Foreground" Value="#EF4444" />
                 </DataTrigger>
               </Style.Triggers>
             </Style>
-          </Border.Style>
+          </TextBlock.Style>
+        </TextBlock>
+        <Border Grid.Row="1" Height="3" CornerRadius="1.5" Background="#3F3F46" ClipToBounds="True">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="{Binding FillStarWidth}" />
+              <ColumnDefinition Width="{Binding RemainingStarWidth}" />
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" CornerRadius="1.5">
+              <Border.Style>
+                <Style TargetType="Border">
+                  <Setter Property="Background" Value="#10B981" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding BatteryKind}" Value="{x:Static power:BatteryAlertKind.LowBattery}">
+                      <Setter Property="Background" Value="#EF4444" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding BatteryKind}" Value="{x:Static power:BatteryAlertKind.Unplugged}">
+                      <Setter Property="Background" Value="#A1A1AA" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Border.Style>
+            </Border>
+          </Grid>
         </Border>
       </Grid>
-    </Border>
+    </Grid>
 
-    <!-- Sağ: Yüzde Metni (12px, font-weight 600, genişlik 26px, sağa dayalı, #F4F4F5) -->
+    <!-- Sağ: Yüzde Metni (12px, font-weight 600, sağa dayalı, #F4F4F5) -->
     <TextBlock Grid.Column="2"
                Text="{Binding PercentText}"
                FontSize="12"
                FontWeight="SemiBold"
-               Width="26"
+               MinWidth="26"
                TextAlignment="Right"
                Foreground="#F4F4F5"
                VerticalAlignment="Center" />

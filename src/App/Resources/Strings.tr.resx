@@ -124,7 +124,16 @@
     <value>Pil: %{0}</value>
   </data>
   <data name="BatteryCharging" xml:space="preserve">
-    <value>Pil: %{0} (şarj oluyor)</value>
+    <value>Şarj ediliyor</value>
+  </data>
+  <data name="BatteryOnBattery" xml:space="preserve">
+    <value>Pilde çalışıyor</value>
+  </data>
+  <data name="BatteryLow" xml:space="preserve">
+    <value>Düşük pil</value>
+  </data>
+  <data name="BatteryFull" xml:space="preserve">
+    <value>Şarj tamamlandı</value>
   </data>
   <data name="NetworkWiFi" xml:space="preserve">
     <value>Wi-Fi: bağlı</value>

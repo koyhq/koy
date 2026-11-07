@@ -14,6 +14,7 @@ using Koy.Core.Clipboard;
 using Koy.Core.Diagnostics;
 using Koy.Core.Display;
 using Koy.Core.Notch;
+using Koy.Core.Power;
 using Koy.Core.Settings;
 using Koy.Core.Timers;
 using Koy.Core.Shell;
@@ -69,7 +70,8 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     private readonly SharedEvents _sharedEvents = new();
 
     private MediaService? _mediaService;
-    private PowerService? _powerService;
+    private IPowerService? _powerService;
+    private readonly BatteryNotificationPolicy _batteryPolicy = new();
     private NetworkService? _networkService;
     private WeatherService? _weatherService;
     // Cihaz konumunun yer adı: bütün ekranların çentikleri tek servisi paylaşır (koordinat başına tek istek).
@@ -98,7 +100,8 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         _focusTimers = new FocusTimers(PomodoroConfig.FromMinutes(
             settings.PomodoroWorkMinutes, settings.PomodoroShortBreakMinutes, settings.PomodoroLongBreakMinutes));
 
-        _powerService = new PowerService();
+        _powerService = services.AcquirePowerService();
+        _powerService.PowerChanged += OnPowerChanged;
         _networkService = services.AcquireNetworkService();
         if (settings.ClipboardHistoryEnabled)
             _clipboardHistory = services.AcquireClipboardHistory();
@@ -504,6 +507,21 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         return _windowStates.Values.First();
     }
 
+    private void OnPowerChanged(object? sender, PowerChangedEventArgs e)
+    {
+        var alert = _batteryPolicy.Update(e);
+        if (alert.Kind == BatteryAlertKind.None)
+            return;
+
+        Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            foreach (var (_, state) in _windowStates)
+            {
+                state.ViewModel.Osd.ShowBattery(alert.Kind, alert.Percent);
+            }
+        });
+    }
+
     public void Stop()
     {
         _stopped = true;
@@ -550,8 +568,12 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             _mediaService = null;
         }
 
-        _powerService?.Dispose();
-        _powerService = null;
+        if (_powerService is not null)
+        {
+            _powerService.PowerChanged -= OnPowerChanged;
+            _powerService = null;
+            services.ReleasePowerService();
+        }
 
         if (_networkService is not null)
         {

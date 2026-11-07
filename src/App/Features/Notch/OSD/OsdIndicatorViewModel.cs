@@ -1,20 +1,15 @@
 using System.Windows;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Koy.App.Resources;
 using Koy.Core.Audio;
 using Koy.Core.Display;
+using Koy.Core.Power;
 
 namespace Koy.App.Features.Notch.OSD;
 
-public enum OsdType
-{
-    None,
-    Volume,
-    Brightness
-}
-
 /// <summary>
-/// Çentik OSD (ses ve parlaklık HUD göstergesi) görünüm modeli.
+/// Çentik OSD (ses, parlaklık ve pil HUD göstergesi) görünüm modeli.
 /// 260×40 px ebadında, 1.5 saniye hareketsizlik sonrası otomatik kapanan gösterge mantığı.
 /// </summary>
 public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposable
@@ -44,6 +39,12 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
 
     [ObservableProperty]
     private string _percentText = "";
+
+    [ObservableProperty]
+    private BatteryAlertKind _batteryKind = BatteryAlertKind.None;
+
+    [ObservableProperty]
+    private string _batteryStatusText = "";
 
     public GridLength FillStarWidth => new(Math.Clamp(Percent, 0, 100), GridUnitType.Star);
     public GridLength RemainingStarWidth => new(Math.Max(0, 100 - Math.Clamp(Percent, 0, 100)), GridUnitType.Star);
@@ -100,6 +101,38 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
     }
 
     /// <summary>
+    /// Pil bildirimini gösterir (şarja takıldı, şarjdan çıktı, düşük pil, tam şarj).
+    /// 1.5 saniye sonra otomatik kapanır.
+    /// </summary>
+    public void ShowBattery(BatteryAlertKind kind, int percent)
+    {
+        RunOnUi(() =>
+        {
+            var pct = Math.Clamp(percent, 0, 100);
+            Type = OsdType.Battery;
+            BatteryKind = kind;
+            Percent = pct;
+            PercentText = $"{pct}%";
+            IsMuted = false;
+            BatteryStatusText = kind switch
+            {
+                BatteryAlertKind.PluggedIn => Strings.BatteryCharging,
+                BatteryAlertKind.Unplugged => Strings.Get("BatteryOnBattery"),
+                BatteryAlertKind.LowBattery => Strings.Get("BatteryLow"),
+                BatteryAlertKind.FullyCharged => Strings.Get("BatteryFull"),
+                _ => $"{pct}%"
+            };
+            IsActive = true;
+
+            OnPropertyChanged(nameof(FillStarWidth));
+            OnPropertyChanged(nameof(RemainingStarWidth));
+
+            ResetTimer(TimeSpan.FromSeconds(1.5));
+            Activated?.Invoke(this, EventArgs.Empty);
+        });
+    }
+
+    /// <summary>
     /// İsteğe bağlı olarak harici IAudioService dinlemesi bağlar.
     /// </summary>
     public void Attach(IAudioService audioService)
@@ -148,9 +181,10 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
         }
     }
 
-    private void ResetTimer()
+    private void ResetTimer(TimeSpan? interval = null)
     {
         _autoDismissTimer.Stop();
+        _autoDismissTimer.Interval = interval ?? TimeSpan.FromMilliseconds(1500);
         _autoDismissTimer.Start();
     }
 
@@ -167,6 +201,8 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
 
         IsActive = false;
         Type = OsdType.None;
+        BatteryKind = BatteryAlertKind.None;
+        BatteryStatusText = "";
         Dismissed?.Invoke(this, EventArgs.Empty);
     }
 

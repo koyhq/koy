@@ -124,7 +124,16 @@
     <value>Battery: {0}%</value>
   </data>
   <data name="BatteryCharging" xml:space="preserve">
-    <value>Battery: {0}% (charging)</value>
+    <value>Charging</value>
+  </data>
+  <data name="BatteryOnBattery" xml:space="preserve">
+    <value>On battery</value>
+  </data>
+  <data name="BatteryLow" xml:space="preserve">
+    <value>Low battery</value>
+  </data>
+  <data name="BatteryFull" xml:space="preserve">
+    <value>Fully charged</value>
   </data>
   <data name="NetworkWiFi" xml:space="preserve">
     <value>Wi-Fi: connected</value>

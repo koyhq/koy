@@ -1,6 +1,7 @@
 using Koy.Core.Tray;
 using Koy.Core.Clipboard;
 using Koy.Core.Network;
+using Koy.Core.Power;
 using Koy.Core.QuickLaunch;
 using Koy.Core.Settings;
 using Koy.Core.SystemStats;
@@ -10,6 +11,7 @@ using Koy.Platform.Bluetooth;
 using Koy.Platform.Clipboard;
 using Koy.Platform.Media;
 using Koy.Platform.Network;
+using Koy.Platform.Power;
 using Koy.Platform.Radio;
 using Koy.Platform.Shell;
 using Koy.Platform.SystemStats;
@@ -46,6 +48,9 @@ public sealed class SharedServices : IDisposable
     private int _systemStatsUsers;
     private TaskService? _tasks;
     private QuickLaunchService? _quickLaunch;
+    private readonly object _powerLock = new();
+    private IPowerService? _powerService;
+    private int _powerServiceUsers;
     private bool _disposed;
 
     public WindowTracker AcquireWindowTracker()
@@ -210,6 +215,37 @@ public sealed class SharedServices : IDisposable
             _networkService?.Dispose();
             _networkService = null;
         }
+    }
+
+    /// <summary>
+    /// Pil ve güç servisi. Notch ve Dock aynı örneği paylaşır (WinRT PowerManager olay aboneliği tek örneğe iner).
+    /// Son kullanan bıraktığında Dispose edilir. İş parçacığı güvenlidir.
+    /// </summary>
+    public IPowerService AcquirePowerService()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        lock (_powerLock)
+        {
+            _powerServiceUsers++;
+            return _powerService ??= new PowerService();
+        }
+    }
+
+    public void ReleasePowerService()
+    {
+        IPowerService? toDispose = null;
+        lock (_powerLock)
+        {
+            if (_powerServiceUsers == 0)
+                return;
+
+            if (--_powerServiceUsers == 0)
+            {
+                toDispose = _powerService;
+                _powerService = null;
+            }
+        }
+        toDispose?.Dispose();
     }
 
     /// <summary>
@@ -398,5 +434,11 @@ public sealed class SharedServices : IDisposable
         _windowTrackerUsers = 0;
         _mediaServiceUsers = 0;
         _radioServiceUsers = 0;
+        lock (_powerLock)
+        {
+            _powerService?.Dispose();
+            _powerService = null;
+            _powerServiceUsers = 0;
+        }
     }
 }

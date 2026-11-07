@@ -54,7 +54,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     private MonitorService? _monitorService;
     private DisplayEvents? _displayEvents;
     private MediaService? _mediaService;
-    private PowerService? _powerService;
+    private IPowerService? _powerService;
     private TrayHostService? _trayService;   // yalnız görev çubuğu gizliyken dolu (ApplyTrayPolicy)
     private DockController? _controller;
     private DispatcherTimer? _edgePeekTimer;
@@ -104,7 +104,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         // Pil tasarrufu için güç durumu; ayar kapalıysa servis kurulmaz.
         if (settings.BatterySaverReduceMotion)
         {
-            _powerService = new PowerService();
+            _powerService = services.AcquirePowerService();
             _powerService.PowerChanged += OnPowerChanged;
             ApplyReduceMotion();
         }
@@ -794,8 +794,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         if (_powerService is not null)
         {
             _powerService.PowerChanged -= OnPowerChanged;
-            _powerService.Dispose();
             _powerService = null;
+            services.ReleasePowerService();
         }
 
         _controller?.Dispose();
