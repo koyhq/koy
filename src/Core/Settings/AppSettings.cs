@@ -58,6 +58,12 @@ public sealed record AppSettings
     /// sırası tohum alınır; sonra dock'ta sürükleyerek değiştirilir. Yeni sabitlenen sona eklenir, kaldırılan düşer.
     /// </summary>
     public List<string> DockPinnedOrder { get; set; } = [];
+
+    /// <summary>
+    /// Dock üzerindeki klasör tanımları. Her klasör kısa bir kimlik (Id), görünen ad (Name)
+    /// ve kısayol adlarından (.lnk) oluşan uygulama listesi (Items) içerir.
+    /// </summary>
+    public List<DockFolder> DockFolders { get; set; } = [];
     public bool DockThumbnailPreview { get; set; } = true;
     public int DockThumbnailDelayMs { get; set; } = 400;
     public int DockDodgeDelayMs { get; set; } = 150;
@@ -216,7 +222,8 @@ public sealed record AppSettings
                (QuickLaunchItems == other.QuickLaunchItems || (QuickLaunchItems is not null && other.QuickLaunchItems is not null && QuickLaunchItems.SequenceEqual(other.QuickLaunchItems))) &&
                (ControlCenterLayout == other.ControlCenterLayout || (ControlCenterLayout is not null && other.ControlCenterLayout is not null && ControlCenterLayout.SequenceEqual(other.ControlCenterLayout))) &&
                (EnabledPanels == other.EnabledPanels || (EnabledPanels is not null && other.EnabledPanels is not null && EnabledPanels.SequenceEqual(other.EnabledPanels))) &&
-               ListsEqual(DockPinnedOrder, other.DockPinnedOrder);
+               ListsEqual(DockPinnedOrder, other.DockPinnedOrder) &&
+               FoldersEqual(DockFolders, other.DockFolders);
     }
 
     public override int GetHashCode()
@@ -302,11 +309,48 @@ public sealed record AppSettings
             foreach (var item in DockPinnedOrder)
                 hash.Add(item);
         }
+        if (DockFolders is not null)
+        {
+            foreach (var folder in DockFolders)
+            {
+                if (folder is null) continue;
+                hash.Add(folder.Id, StringComparer.OrdinalIgnoreCase);
+                hash.Add(folder.Name);
+                if (folder.Items is not null)
+                {
+                    foreach (var item in folder.Items)
+                        hash.Add(item, StringComparer.OrdinalIgnoreCase);
+                }
+            }
+        }
         return hash.ToHashCode();
     }
 
     private static bool ListsEqual(List<string>? a, List<string>? b)
         => ReferenceEquals(a, b) || ((a ?? []).SequenceEqual(b ?? []));
+
+    private static bool FoldersEqual(List<DockFolder>? a, List<DockFolder>? b)
+    {
+        if (ReferenceEquals(a, b)) return true;
+        a ??= [];
+        b ??= [];
+        if (a.Count != b.Count) return false;
+        for (var i = 0; i < a.Count; i++)
+        {
+            var fa = a[i];
+            var fb = b[i];
+            if (fa is null || fb is null)
+            {
+                if (!ReferenceEquals(fa, fb)) return false;
+                continue;
+            }
+            if (!string.Equals(fa.Id, fb.Id, StringComparison.OrdinalIgnoreCase) ||
+                !string.Equals(fa.Name, fb.Name, StringComparison.Ordinal) ||
+                !fa.Items.SequenceEqual(fb.Items, StringComparer.OrdinalIgnoreCase))
+                return false;
+        }
+        return true;
+    }
 
     private static bool MonitorsEqual(Dictionary<string, MonitorSettings>? a, Dictionary<string, MonitorSettings>? b)
     {

@@ -10,5 +10,7 @@ namespace Koy.Core.Settings;
 [JsonSerializable(typeof(DockStyleMode))]
 [JsonSerializable(typeof(DockProximityMode))]
 [JsonSerializable(typeof(List<string>))]
+[JsonSerializable(typeof(DockFolder))]
+[JsonSerializable(typeof(List<DockFolder>))]
 [JsonSerializable(typeof(Dictionary<string, MonitorSettings>))]
 internal sealed partial class SettingsJsonContext : JsonSerializerContext;

@@ -383,11 +383,11 @@ Proje sahibi istedi (2026-11-07). Sabitli uygulamalar dock'ta klasörlere toplan
 - **Çalışan uygulama klasördeyse (onaylandı):** uygulama klasörün içinde kalır, klasör kutusunun altında çalışma noktası yanar; panelde o uygulamanın altında da nokta. Klasördeki uygulamanın pencerelerine tıklama / önizleme panelden yapılır.
 - **Sabitli olmayan açık uygulamalar** klasöre konmaz (yalnız sabitliler). Windows'un sabit klasörü (`User Pinned\TaskBar\*.lnk`) değiştirilmez; klasörler yalnız Koy'un ayarında.
 
-**Adım 4A — Veri ve kurallar (Core, testli; AGENTS #11):**
-- [ ] `AppSettings.DockFolders`: `List<DockFolder>`; `DockFolder { Id (kısa guid), Name, Items: List<string> (.lnk adları, DockPinnedOrder'daki gibi) }`. `SettingsJsonContext`'e ekle (`[JsonSerializable(typeof(DockFolder))]`, `[JsonSerializable(typeof(List<DockFolder>))]`); eski dosyada alan yoksa boş liste (göç testli). `Equals`/`GetHashCode` (`AppSettings.cs` 219 / 300 civarı) güncellenir.
-- [ ] `DockPinnedOrder` öğesi ya `.lnk` adı ya `folder:<Id>`. `Core/Dock/PinnedOrder.cs` klasör öğelerini tanır: klasördeki uygulama dock'ta ayrıca görünmez; kaldırılmış `.lnk` klasörden de düşer; boş kalan klasör silinir, tek kalan dağılır.
-- [ ] `Core/Dock/DockFolders.cs` (saf): `CreateFromDrop(order, folders, dragged, target)`, `AddToFolder`, `RemoveFromFolder(…, insertIndex)`, `Dissolve`, `Rename`, `ReorderInFolder`, `NextDefaultName`. Her biri yeni sıra + klasör listesi döndürür. `Core/Dock/DockDropZone.cs` (saf): simge dikdörtgeni + imleç konumu → `Before / Merge / After` (orta bölge ~%50 genişlik) ve bekleme süresi dolunca `Merge` geçerli.
-- [ ] Testler: `tests/Core.Tests/DockFoldersTests.cs`, `DockDropZoneTests.cs` (oluştur, ekle, çıkar, tek kalınca dağıt, aynı ad, kaldırılmış lnk, eski ayar dosyası).
+[x] **Adım 4A — Veri ve kurallar (Core, testli; AGENTS #11):**
+- [x] `AppSettings.DockFolders`: `List<DockFolder>`; `DockFolder { Id (kısa guid), Name, Items: List<string> (.lnk adları, DockPinnedOrder'daki gibi) }`. `SettingsJsonContext`'e ekle (`[JsonSerializable(typeof(DockFolder))]`, `[JsonSerializable(typeof(List<DockFolder>))]`); eski dosyada alan yoksa boş liste (göç testli). `Equals`/`GetHashCode` (`AppSettings.cs` 219 / 300 civarı) güncellenir.
+- [x] `DockPinnedOrder` öğesi ya `.lnk` adı ya `folder:<Id>`. `Core/Dock/PinnedOrder.cs` klasör öğelerini tanır: klasördeki uygulama dock'ta ayrıca görünmez; kaldırılmış `.lnk` klasörden de düşer; boş kalan klasör silinir, tek kalan dağılır.
+- [x] `Core/Dock/DockFolders.cs` (saf): `CreateFromDrop(order, folders, dragged, target)`, `AddToFolder`, `RemoveFromFolder(…, insertIndex)`, `Dissolve`, `Rename`, `ReorderInFolder`, `NextDefaultName`. Her biri yeni sıra + klasör listesi döndürür. `Core/Dock/DockDropZone.cs` (saf): simge dikdörtgeni + imleç konumu → `Before / Merge / After` (orta bölge ~%50 genişlik) ve bekleme süresi dolunca `Merge` geçerli.
+- [x] Testler: `tests/Core.Tests/DockFoldersTests.cs`, `DockDropZoneTests.cs` (oluştur, ekle, çıkar, tek kalınca dağıt, aynı ad, kaldırılmış lnk, eski ayar dosyası).
 
 **Adım 4B — App, Görsel ve Sürükleme:**
 - [ ] `DockItemViewModel` yanında `DockFolderViewModel` (ilk 4 simge, çalışma noktası = içerdekilerden biri çalışıyor mu). Dock öğe listesi karışık tür (uygulama / klasör); `DockCapsule.xaml` ve `DockFullWidth.xaml` için ayrı `DataTemplate` (2×2 ızgara).

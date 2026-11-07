@@ -9,6 +9,22 @@ namespace Koy.Core.Dock;
 /// </summary>
 public static class PinnedOrder
 {
+    public const string FolderPrefix = "folder:";
+
+    /// <summary>Belirtilen kimliğin bir klasör belirteci olup olmadığını döndürür.</summary>
+    public static bool IsFolderId(string id) =>
+        id.StartsWith(FolderPrefix, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>Klasör kimliğini dock sıralama belirtecine dönüştürür ("folder:<Id>").</summary>
+    public static string ToFolderToken(string folderId) =>
+        FolderPrefix + folderId;
+
+    /// <summary>Klasör belirtecinden klasör kimliğini ayıklar ("folder:abc" -> "abc").</summary>
+    public static string ExtractFolderId(string folderToken) =>
+        folderToken.StartsWith(FolderPrefix, StringComparison.OrdinalIgnoreCase)
+            ? folderToken[FolderPrefix.Length..]
+            : folderToken;
+
     /// <summary>Sabitli uygulamanın sıralama kimliği: kısayol dosyasının adı (yoldan bağımsız, kullanıcıdan bağımsız).</summary>
     public static string IdOf(string shortcutPath) => Path.GetFileName(shortcutPath);
 
@@ -35,6 +51,7 @@ public static class PinnedOrder
 
     /// <summary>
     /// Kayıtlı sırayı mevcut kimliklerle eşitler: kaldırılanlar listeden düşer, yeni sabitlenenler sona eklenir.
+    /// Klasör belirteçleri ('folder:<Id>') tanınır ve korunur.
     /// Mevcut kimlik listesi boşsa (klasör okunamadı) kayıt bozulmasın diye aynen döner.
     /// </summary>
     public static List<string> Reconcile(IReadOnlyList<string> saved, IReadOnlyList<string> currentIds)
@@ -48,8 +65,15 @@ public static class PinnedOrder
 
         foreach (var id in saved)
         {
-            if (present.Contains(id) && seen.Add(id))
+            if (IsFolderId(id))
+            {
+                if (seen.Add(id))
+                    result.Add(id);
+            }
+            else if (present.Contains(id) && seen.Add(id))
+            {
                 result.Add(id);
+            }
         }
 
         foreach (var id in currentIds)
@@ -59,6 +83,100 @@ public static class PinnedOrder
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Klasör farkındalıklı sıra eşitlemesi:
+    /// - Klasör içindeki uygulamalar ana dock sırasında ayrıca görünmez.
+    /// - Diskten silinmiş kısayollar klasörlerden ayıklanır.
+    /// - Klasörde 1 öğe kalırsa klasör dağıtılır ve kalan öğe klasörün sırasına yerleştirilir.
+    /// - Klasörde 0 öğe kalırsa klasör silinir ve belirteci dock sırasından kaldırılır.
+    /// - Kalan aktif klasörler (>= 2 öğe) ve güncellenmiş dock sırası döndürülür.
+    /// </summary>
+    public static (List<string> Order, List<DockFolder> Folders) Reconcile(
+        IReadOnlyList<string> saved,
+        IReadOnlyList<string> currentIds,
+        IReadOnlyList<DockFolder> folders)
+    {
+        if (currentIds.Count == 0)
+            return ([.. saved], [.. folders]);
+
+        var available = new HashSet<string>(currentIds, StringComparer.OrdinalIgnoreCase);
+
+        // 1. Klasörlerdeki silinmiş kısayolları temizle
+        var prunedFolders = new Dictionary<string, (DockFolder Folder, List<string> ValidItems)>(StringComparer.OrdinalIgnoreCase);
+        foreach (var f in folders)
+        {
+            var validItems = f.Items.Where(available.Contains).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            prunedFolders[f.Id] = (f, validItems);
+        }
+
+        // Aktif klasörler: en az 2 öğesi olanlar
+        var activeFolders = prunedFolders.Values
+            .Where(x => x.ValidItems.Count >= 2)
+            .Select(x => x.Folder with { Items = x.ValidItems })
+            .ToList();
+
+        // Aktif klasörlerin içindeki uygulamalar dock kök düzeyinde görünmemeli
+        var appsInFolders = new HashSet<string>(
+            activeFolders.SelectMany(f => f.Items),
+            StringComparer.OrdinalIgnoreCase);
+
+        var resultOrder = new List<string>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        // 2. Kayıtlı sırayı tara
+        foreach (var id in saved)
+        {
+            if (IsFolderId(id))
+            {
+                var folderId = ExtractFolderId(id);
+                if (prunedFolders.TryGetValue(folderId, out var entry))
+                {
+                    if (entry.ValidItems.Count >= 2)
+                    {
+                        var token = ToFolderToken(entry.Folder.Id);
+                        if (seen.Add(token))
+                            resultOrder.Add(token);
+                    }
+                    else if (entry.ValidItems.Count == 1)
+                    {
+                        // 1 öğe kaldı: klasör dağılır, kalan tek öğe klasörün yuvasına geçer
+                        var singleItem = entry.ValidItems[0];
+                        if (!appsInFolders.Contains(singleItem) && seen.Add(singleItem))
+                            resultOrder.Add(singleItem);
+                    }
+                    // 0 öğe kaldı: klasör silinir (belirteç eklenmez)
+                }
+            }
+            else
+            {
+                // Kök düzeyindeki kısayol (herhangi bir aktif klasörde yoksa ve diskte mevcutsa)
+                if (!appsInFolders.Contains(id) && available.Contains(id) && seen.Add(id))
+                {
+                    resultOrder.Add(id);
+                }
+            }
+        }
+
+        // 3. Sıraya henüz girmemiş aktif klasörler (yeni oluşturulmuş)
+        foreach (var f in activeFolders)
+        {
+            var token = ToFolderToken(f.Id);
+            if (seen.Add(token))
+                resultOrder.Add(token);
+        }
+
+        // 4. Henüz görülmemiş ve klasörlerde olmayan diskteki yeni kısayolları sona ekle
+        foreach (var id in currentIds)
+        {
+            if (!appsInFolders.Contains(id) && seen.Add(id))
+            {
+                resultOrder.Add(id);
+            }
+        }
+
+        return (resultOrder, activeFolders);
     }
 
     /// <summary>Bir öğeyi yeni dizine taşır (dizin sınırlara kırpılır). Kimlik listede yoksa sıra değişmeden döner.</summary>

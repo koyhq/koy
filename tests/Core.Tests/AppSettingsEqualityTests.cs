@@ -1,5 +1,6 @@
 using System.Reflection;
 using Koy.Core.Display;
+using Koy.Core.Dock;
 using Koy.Core.Settings;
 
 namespace Koy.Core.Tests;
@@ -13,6 +14,7 @@ public class AppSettingsEqualityTests
     public static IEnumerable<object[]> ScalarProperties() =>
         typeof(AppSettings).GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Where(p => p.CanWrite && p.PropertyType != typeof(List<string>) &&
+                        p.PropertyType != typeof(List<DockFolder>) &&
                         p.PropertyType != typeof(Dictionary<string, MonitorSettings>))
             .Select(p => new object[] { p.Name });
 
@@ -53,6 +55,38 @@ public class AppSettingsEqualityTests
         Assert.NotEqual(new AppSettings().GetHashCode(), changed.GetHashCode());
         Assert.NotEqual(changed, other);
         Assert.Equal(changed, new AppSettings { Monitors = new() { ["A"] = new MonitorSettings { DockEnabled = false } } });
+    }
+
+    [Fact]
+    public void Changing_dock_folders_makes_settings_unequal_and_changes_the_hash()
+    {
+        var original = new AppSettings();
+        var changed = new AppSettings
+        {
+            DockFolders = [new DockFolder("f1", "Araçlar", ["calc.lnk", "notepad.lnk"])]
+        };
+
+        Assert.NotEqual(original, changed);
+        Assert.NotEqual(original.GetHashCode(), changed.GetHashCode());
+
+        var same = new AppSettings
+        {
+            DockFolders = [new DockFolder("f1", "Araçlar", ["calc.lnk", "notepad.lnk"])]
+        };
+        Assert.Equal(changed, same);
+        Assert.Equal(changed.GetHashCode(), same.GetHashCode());
+
+        var differentName = new AppSettings
+        {
+            DockFolders = [new DockFolder("f1", "Farklı", ["calc.lnk", "notepad.lnk"])]
+        };
+        Assert.NotEqual(changed, differentName);
+
+        var differentItems = new AppSettings
+        {
+            DockFolders = [new DockFolder("f1", "Araçlar", ["calc.lnk"])]
+        };
+        Assert.NotEqual(changed, differentItems);
     }
 
     private static object? Different(Type type, object? value)
