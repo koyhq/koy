@@ -2,6 +2,7 @@ using Koy.Core.Tray;
 using Koy.Core.Clipboard;
 using Koy.Core.Network;
 using Koy.Core.Power;
+using Koy.Core.Privacy;
 using Koy.Core.QuickLaunch;
 using Koy.Core.Settings;
 using Koy.Core.SystemStats;
@@ -12,6 +13,7 @@ using Koy.Platform.Clipboard;
 using Koy.Platform.Media;
 using Koy.Platform.Network;
 using Koy.Platform.Power;
+using Koy.Platform.Privacy;
 using Koy.Platform.Radio;
 using Koy.Platform.Shell;
 using Koy.Platform.SystemStats;
@@ -46,6 +48,8 @@ public sealed class SharedServices : IDisposable
     private int _clipboardUsers;
     private SystemStatsService? _systemStats;
     private int _systemStatsUsers;
+    private ConsentStorePrivacyService? _privacyMonitor;
+    private int _privacyMonitorUsers;
     private TaskService? _tasks;
     private QuickLaunchService? _quickLaunch;
     private readonly object _powerLock = new();
@@ -355,6 +359,35 @@ public sealed class SharedServices : IDisposable
         }
     }
 
+    /// <summary>
+    /// Kamera ve mikrofon aktif kullanım izleyicisi (RegNotifyChangeKeyValue ile olay tabanlı).
+    /// Çentik açıkken ve gizlilik göstergesi etkinken alınır; son kullanan bıraktığında durdurulur ve yok edilir.
+    /// </summary>
+    public IPrivacyMonitorService AcquirePrivacyMonitor()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        _privacyMonitorUsers++;
+        if (_privacyMonitor is null)
+        {
+            _privacyMonitor = new ConsentStorePrivacyService();
+            _privacyMonitor.Start();
+        }
+
+        return _privacyMonitor;
+    }
+
+    public void ReleasePrivacyMonitor()
+    {
+        if (_privacyMonitorUsers == 0)
+            return;
+
+        if (--_privacyMonitorUsers == 0)
+        {
+            _privacyMonitor?.Dispose();
+            _privacyMonitor = null;
+        }
+    }
+
     /// <summary>Odak görev listesi: tek örnek (tasks.json), ilk istendiğinde diskten okunur. UI iş parçacığından kullanın.</summary>
     public ITaskService Tasks
     {
@@ -431,6 +464,9 @@ public sealed class SharedServices : IDisposable
         _systemStats = null;
         _clipboardUsers = 0;
         _systemStatsUsers = 0;
+        _privacyMonitor?.Dispose();
+        _privacyMonitor = null;
+        _privacyMonitorUsers = 0;
         _windowTrackerUsers = 0;
         _mediaServiceUsers = 0;
         _radioServiceUsers = 0;
