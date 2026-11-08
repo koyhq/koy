@@ -56,9 +56,11 @@
   <main id="icerik">
     <!-- HERO -->
     <section class="hero" data-hero>
-      <div class="screen screen--hero">
-        <img class="screen__img" src="img/centik-ana.webp" width="1008" height="570" fetchpriority="high"
+      <div class="screen screen--hero is-open" data-notch="hero">
+        <img class="hero__closed" src="img/centik-kapali.webp" width="418" height="57" alt="">
+        <img class="hero__open" id="hero-open" src="img/centik-ana.webp" width="1008" height="570" fetchpriority="high"
              alt="Açık Koy çentiği: çalan müzik, kulaklık pili, işlemci ve bellek, ağ hızı ve hızlı başlat">
+        <button class="hero__zone" type="button" data-notch-zone aria-expanded="true" aria-controls="hero-open" aria-label="Çentiği aç ya da kapat"></button>
       </div>
 
       <a class="badge" id="surum" href="https://github.com/koyhq/koy/releases/latest" hidden>
@@ -136,11 +138,11 @@
           </ul>
         </div>
         <div data-reveal style="--d:.12s">
-          <div class="screen screen--desktop" data-notch-demo>
+          <div class="screen screen--desktop" data-notch="demo">
             <img class="desktop__notch" src="img/centik-kapali.webp" width="418" height="57" loading="lazy" alt="">
             <img class="desktop__open" id="desktop-open" src="img/centik-ana.webp" width="1008" height="570" loading="lazy" alt="Açılmış çentik: müzik, kulaklık pili, sistem ve hızlı başlat">
             <img class="desktop__dock" src="img/dock.webp" width="494" height="48" loading="lazy" alt="Ekranın altında Koy dock'u: sabitli uygulamalar ve açık pencereler">
-            <button class="desktop__zone" type="button" aria-expanded="false" aria-controls="desktop-open" aria-label="Çentiği aç ya da kapat"></button>
+            <button class="desktop__zone" type="button" data-notch-zone aria-expanded="false" aria-controls="desktop-open" aria-label="Çentiği aç ya da kapat"></button>
           </div>
           <p class="hint">Fareyi çentiğin üstüne götür, yayla açılsın. Dokunmatikte dokun.</p>
         </div>

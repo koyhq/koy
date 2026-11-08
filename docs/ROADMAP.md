@@ -478,6 +478,6 @@ Proje sahibi istedi. Kod yazılmadı.
 - [x] Depo ve org "Website" alanı siteye bağlandı; sosyal medya görseli (mavi, yalnız yazı, `scripts/generate-og-banner.py`) ve `og`/Twitter etiketleri yayında; hero başlığı "Masaüstünü hafifçe değiştir."; org avatarı ve social preview yüklendi.
 - [x] Hero çentiği her masaüstü genişliğinde (900 px ve üstü) sayfanın en tepesinden sarkar; dar masaüstünde (900–1359 px) üst çubukta yalnız logo ve İndir kalır.
 - [ ] README rozetleri ve uygulamadaki Hakkında düğmesi site adresine bağlanır (güncelleme akışı GitHub Releases'ta kalır). Alan adı alınırsa `canonical` ve `og:url` güncellenir.
-- [ ] Hero'daki çentik fareyle açılır olsun (Dock bölümündeki demo gibi: üst kenara gelince yayla açılır, çıkınca 400 ms sonra kapanır; dokunmatikte dokununca).
+- [x] Hero'daki çentik fareyle açılır olsun (Dock bölümündeki demo gibi: üst kenara gelince yayla açılır, çıkınca 400 ms sonra kapanır; dokunmatikte dokununca).
 - [ ] İngilizce sürüm (şimdilik yalnız Türkçe).
 - [ ] Uygulamadaki Hakkında sayfasına teşekkür ve tanıtım kartı (Nectar ve Seelen UI esinlenmesi, site bağlantısı; TR ve EN).
