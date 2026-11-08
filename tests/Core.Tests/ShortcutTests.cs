@@ -94,6 +94,18 @@ public class ShortcutDefaultsTests
         }
     }
 
+    [Theory]
+    [InlineData("Win+Shift+Q", true)]
+    [InlineData("Shift+Win+Q", true)]
+    [InlineData("win + shift + q", true)]
+    [InlineData("Win+Shift+Z", false)]
+    [InlineData("Alt+F2", false)]
+    [InlineData("", false)]
+    public void IsDefault_compares_the_combination_not_the_spelling(string text, bool expected)
+    {
+        Assert.Equal(expected, ShortcutBindings.IsDefault(ShortcutAction.OpenSearch, text));
+    }
+
     [Fact]
     public void AppSettings_defaults_match_ShortcutBindings_defaults()
     {

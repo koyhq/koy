@@ -59,6 +59,10 @@ public static class ShortcutBindings
         _ => settings
     };
 
+    /// <summary>Metin, eylemin varsayılan kombinasyonu mu? Yazım sırası önemsizdir (Win+Shift+Q = Shift+Win+Q).</summary>
+    public static bool IsDefault(ShortcutAction action, string text) =>
+        Hotkey.TryParse(text, out var current) && Hotkey.TryParse(DefaultText(action), out var fallback) && current == fallback;
+
     /// <summary>Bütün eylemlerin ayardaki metni (boş metin = atanmamış).</summary>
     public static Dictionary<ShortcutAction, string> ReadAll(AppSettings settings) =>
         All.ToDictionary(a => a, a => GetText(settings, a));
