@@ -94,7 +94,7 @@ public class ChangelogParserTests
     [Fact]
     public void ReadEmbeddedChangelog_GomuluKaynagiBasariylaOkur()
     {
-        var markdown = ChangelogParser.ReadEmbeddedChangelog();
+        var markdown = ChangelogParser.ReadEmbeddedChangelog("tr");
         Assert.NotNull(markdown);
         Assert.Contains("Değişiklik Günlüğü", markdown);
 
@@ -132,7 +132,7 @@ public class ChangelogParserTests
     [InlineData("`Ayarlar` sayfası", "Ayarlar sayfası")]
     public void CleanItem_DuzMetneCevirir(string input, string expected)
     {
-        Assert.Equal(expected, ChangelogParser.CleanItem(input));
+        Assert.Equal(expected, ChangelogParser.CleanItem(input, "tr"));
     }
 
     [Fact]
@@ -149,5 +149,89 @@ public class ChangelogParserTests
         Assert.Equal(["Hep havada: kapsül havada kalır."], notes.Highlights);
         var added = Assert.Single(notes.Sections);
         Assert.Equal(["Yüzen kapsüle Hep havada modunu ekle"], added.Items);
+    }
+
+    private const string Tr = "## [0.3.0] (2026-11-09)\n\nÖne çıkanlar:\n- **dock:** ikon hizası\n";
+    private const string En = "## [0.3.0] (2026-11-09)\n\nHighlights:\n- **dock:** icon alignment\n";
+    private const string OnlyOld = "## [0.2.0] (2026-11-07)\n\nHighlights:\n- old\n";
+
+    [Fact]
+    public void ReadEmbeddedChangelog_ReturnsBothLanguages()
+    {
+        Assert.Contains("# Changelog", ChangelogParser.ReadEmbeddedChangelog("en"));
+        Assert.Contains("Değişiklik Günlüğü", ChangelogParser.ReadEmbeddedChangelog("tr"));
+    }
+
+    [Fact]
+    public void ResolveEmbedded_FindsSharedVersionInEachLanguage()
+    {
+        var version = ChangelogParser.GetAllVersions(ChangelogParser.ReadEmbeddedChangelog("en"))[0];
+        Assert.Equal(version, ChangelogParser.ResolveEmbedded(version, "en")!.Version);
+        Assert.Equal(version, ChangelogParser.ResolveEmbedded(version, "tr")!.Version);
+    }
+
+    [Theory]
+    [InlineData("tr", "İkon hizası")]
+    [InlineData("en", "Icon alignment")]
+    public void ResolveVersion_UsesSelectedLanguage(string language, string expected)
+    {
+        var notes = ChangelogParser.ResolveVersion("0.3.0", language, l => l == "tr" ? Tr : En);
+        Assert.Equal([expected], notes!.Highlights);
+    }
+
+    [Theory]
+    [InlineData("tr", "Icon alignment")]
+    public void ResolveVersion_FallsBackToEnglishWhenTurkishIsMissing(string language, string expected)
+    {
+        var notes = ChangelogParser.ResolveVersion("0.3.0", language, l => l == "tr" ? OnlyOld : En);
+        Assert.Equal([expected], notes!.Highlights);
+    }
+
+    [Fact]
+    public void ResolveVersion_FallsBackToTurkishWhenEnglishIsMissing()
+    {
+        var notes = ChangelogParser.ResolveVersion("0.3.0", "en", l => l == "tr" ? Tr : OnlyOld);
+        Assert.Equal(["İkon hizası"], notes!.Highlights);
+    }
+
+    [Fact]
+    public void ResolveVersion_ReturnsNullWhenNoLanguageHasTheVersion()
+    {
+        Assert.Null(ChangelogParser.ResolveVersion("0.3.0", "en", _ => OnlyOld));
+    }
+
+    [Fact]
+    public void CleanItem_CapitalizesIByLanguage()
+    {
+        Assert.Equal("Improve the dock", ChangelogParser.CleanItem("**dock:** improve the dock"));
+        Assert.Equal("İyileştir", ChangelogParser.CleanItem("**dock:** iyileştir", "tr"));
+    }
+
+    [Theory]
+    [InlineData("tr", "tr", "İkon hizası")]
+    [InlineData("en", "en", "Icon alignment")]
+    public void SelectFeedNotes_PicksTheLanguageSection(string language, string expectedLanguage, string expected)
+    {
+        var feed = En + "\n" + ChangelogParser.TurkishNotesMarker + "\n\n" + Tr;
+
+        var (markdown, actualLanguage) = ChangelogParser.SelectFeedNotes(feed, language);
+
+        Assert.Equal(expectedLanguage, actualLanguage);
+        Assert.Equal([expected], ChangelogParser.ExtractVersion(markdown, "0.3.0", actualLanguage)!.Highlights);
+    }
+
+    [Fact]
+    public void SelectFeedNotes_WithoutMarkerIsEnglish()
+    {
+        var (markdown, language) = ChangelogParser.SelectFeedNotes(En, "tr");
+        Assert.Equal("en", language);
+        Assert.Equal(En, markdown);
+    }
+
+    [Fact]
+    public void Feed_with_both_languages_stays_readable_for_older_versions()
+    {
+        var feed = En + "\n" + ChangelogParser.TurkishNotesMarker + "\n\n" + Tr;
+        Assert.Equal(["Icon alignment"], ChangelogParser.ExtractVersion(feed, "0.3.0")!.Highlights);
     }
 }

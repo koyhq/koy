@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -74,7 +75,7 @@ public sealed partial class BluetoothDeviceRowViewModel : ObservableObject
         Kind = info.Kind;
         IsConnected = info.IsConnected;
         IsAudio = info.IsAudio;
-        BatteryText = info.IsConnected ? BluetoothList.BatteryText(info.BatteryPercent) : null;
+        BatteryText = info.IsConnected ? BluetoothList.BatteryText(info.BatteryPercent, CultureInfo.CurrentCulture) : null;
         Refresh();
     }
 

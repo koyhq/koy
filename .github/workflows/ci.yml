@@ -47,6 +47,19 @@ jobs:
           path: "**/TestResults/*.trx"
           retention-days: 14
 
+  # Surum PR'inda notlar iki dilde de olmali; "Neler Geldi" uygulamanin diline gore okur.
+  changelog-languages:
+    name: Release notes in both languages
+    if: ${{ github.event_name == 'pull_request' && startsWith(github.head_ref, 'release-please--') }}
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check CHANGELOG.md and CHANGELOG.tr.md
+        shell: pwsh
+        run: ./scripts/check-changelogs.ps1
+
   # Yayin is akisinin paketleme adimlarini (gozcu Native AOT, vpk pack) hicbir sey yuklemeden dener.
   # Bu adimlar yalniz surum aninda kosuyordu; orada bozulurlarsa etiket ve surum sayfasi dosyasiz kalir.
   package-dry-run:

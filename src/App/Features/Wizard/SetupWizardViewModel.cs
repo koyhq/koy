@@ -29,7 +29,7 @@ public sealed partial class SetupWizardViewModel : ObservableObject
     private int _selectedLayoutIndex; // 0: Çentik ve dock, 1: Yalnız çentik, 2: Yalnız dock
 
     [ObservableProperty]
-    private string _selectedLanguage = "tr";
+    private string _selectedLanguage = AppLanguage.SystemDefault;
 
     [ObservableProperty]
     private bool _runAtStartup = true;

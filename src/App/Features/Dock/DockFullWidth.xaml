@@ -44,7 +44,7 @@
                         CornerRadius="8"
                         Padding="6,4"
                         MouseLeftButtonUp="OnNowPlayingClick"
-                        ToolTip="Çalan Müzik (Çentiği Aç)"
+                        ToolTip="{Binding [DockNowPlayingTooltip], Source={x:Static res:Loc.Instance}}"
                         Visibility="{Binding HasNowPlaying, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <!-- Albüm Kapağı -->

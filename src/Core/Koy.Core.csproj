@@ -7,5 +7,8 @@
   <ItemGroup>
     <EmbeddedResource Include="..\..\CHANGELOG.md" Link="CHANGELOG.md" />
     <None Include="..\..\CHANGELOG.md" Link="CHANGELOG.md" CopyToOutputDirectory="PreserveNewest" />
+    <!-- WithCulture=false: ad "tr" içerdiği için aksi halde uydu derlemeye gider, ana derlemede bulunamaz. -->
+    <EmbeddedResource Include="..\..\CHANGELOG.tr.md" Link="CHANGELOG.tr.md" WithCulture="false" />
+    <None Include="..\..\CHANGELOG.tr.md" Link="CHANGELOG.tr.md" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

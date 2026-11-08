@@ -216,10 +216,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     // Tam Genişlik Modu: Çalan müzik hapı (Sol bölüm)
     [ObservableProperty]
-    private string _nowPlayingTitle = "Şarkı çalınmıyor";
+    private string _nowPlayingTitle = Strings.NoMediaPlaying;
 
     [ObservableProperty]
-    private string _nowPlayingArtist = "Koy Müzik";
+    private string _nowPlayingArtist = "Koy";
 
     [ObservableProperty]
     private ImageSource? _nowPlayingCover;
@@ -1383,15 +1383,15 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         if (info is null || !info.IsPlaying)
         {
             HasNowPlaying = false;
-            NowPlayingTitle = "Çalan müzik yok";
+            NowPlayingTitle = Strings.NoMediaPlaying;
             NowPlayingArtist = "Koy";
             NowPlayingCover = null;
             return;
         }
 
         HasNowPlaying = true;
-        NowPlayingTitle = !string.IsNullOrWhiteSpace(info.Title) ? info.Title : "Bilinmeyen Parça";
-        NowPlayingArtist = !string.IsNullOrWhiteSpace(info.Artist) ? info.Artist : "Bilinmeyen Sanatçı";
+        NowPlayingTitle = !string.IsNullOrWhiteSpace(info.Title) ? info.Title : Strings.Get("UnknownTrack");
+        NowPlayingArtist = !string.IsNullOrWhiteSpace(info.Artist) ? info.Artist : Strings.Get("UnknownArtist");
 
         if (info.Thumbnail is { Length: > 0 })
         {

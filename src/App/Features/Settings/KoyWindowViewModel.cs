@@ -40,7 +40,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _hideWindowsTaskbar = true;
 
     [ObservableProperty]
-    private string _language = "tr";
+    private string _language = AppLanguage.SystemDefault;
 
     [ObservableProperty]
     private bool _autoCheckUpdates = true;
@@ -788,8 +788,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
         // Yeni sürümün notları güncelleme beslemesinden gelir (yayın akışı CHANGELOG bölümünü paket notu yapar).
         // Gömülü CHANGELOG yalnız kurulu sürümü bilir; yeni sürüm orada yoksa eski notları göstermek yerine liste boş kalır.
-        var release = ChangelogParser.ExtractVersion(UpdateStatus.AvailableUpdate?.TargetFullRelease?.NotesMarkdown, version)
-                      ?? ChangelogParser.ExtractVersion(ChangelogParser.ReadEmbeddedChangelog(), version);
+        var (feedNotes, feedLanguage) = ChangelogParser.SelectFeedNotes(UpdateStatus.AvailableUpdate?.TargetFullRelease?.NotesMarkdown, Language);
+        var release = ChangelogParser.ExtractVersion(feedNotes, version, feedLanguage)
+                      ?? ChangelogParser.ResolveEmbedded(version, Language);
 
         UpdateHighlights.Clear();
         if (release is not null && release.Highlights.Count > 0)
@@ -845,9 +846,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     public void OpenWhatsNewOverlay()
     {
         WhatsNewTitleText = string.Format(Strings.Get("WhatsNewTitle"), AppVersion);
-        var embeddedChangelog = ChangelogParser.ReadEmbeddedChangelog();
-        var release = ChangelogParser.ExtractVersion(embeddedChangelog, AppVersion)
-                      ?? ChangelogParser.ParseLatest(embeddedChangelog);
+        var release = ChangelogParser.ResolveEmbedded(AppVersion, Language)
+                      ?? ChangelogParser.ParseLatest(ChangelogParser.ReadEmbeddedChangelog(Language), Language);
 
         WhatsNewHighlights.Clear();
         WhatsNewSections.Clear();

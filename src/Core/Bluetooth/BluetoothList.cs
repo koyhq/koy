@@ -1,3 +1,4 @@
+using Koy.Core.SystemStats;
 using System.Globalization;
 using Koy.Core.Radio;
 
@@ -110,9 +111,9 @@ public static class BluetoothList
             .OrderByDescending(d => d.BatteryPercent.HasValue)
             .FirstOrDefault();
 
-    /// <summary>"%86" biçimi (tasarımdaki gibi); pil bilinmiyorsa ya da aralık dışıysa null (hiçbir şey gösterilmez).</summary>
-    public static string? BatteryText(int? percent) =>
-        percent is >= 0 and <= 100 ? $"%{percent.Value}" : null;
+    /// <summary>Dile uygun yüzde ("%86", "86%"); pil bilinmiyorsa ya da aralık dışıysa null (hiçbir şey gösterilmez).</summary>
+    public static string? BatteryText(int? percent, CultureInfo culture) =>
+        percent is >= 0 and <= 100 ? SystemFormat.Percent(percent.Value, culture) : null;
 
     /// <summary>Ham pil değerini (bayt) yüzdeye çevirir; 0-100 dışı değer ya da okunamayan değer "pil yok" sayılır.</summary>
     public static int? ParseBattery(object? raw)

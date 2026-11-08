@@ -110,13 +110,13 @@ public class BluetoothListTests
     [InlineData(86, "%86")]
     [InlineData(0, "%0")]
     [InlineData(100, "%100")]
-    public void BatteryText_Gecerli(int percent, string expected) => Assert.Equal(expected, BluetoothList.BatteryText(percent));
+    public void BatteryText_Gecerli(int percent, string expected) => Assert.Equal(expected, BluetoothList.BatteryText(percent, System.Globalization.CultureInfo.GetCultureInfo("tr-TR")));
 
     [Theory]
     [InlineData(null)]
     [InlineData(-1)]
     [InlineData(101)]
-    public void BatteryText_Gecersiz_Null(int? percent) => Assert.Null(BluetoothList.BatteryText(percent));
+    public void BatteryText_Gecersiz_Null(int? percent) => Assert.Null(BluetoothList.BatteryText(percent, System.Globalization.CultureInfo.GetCultureInfo("tr-TR")));
 
     [Fact]
     public void ParseBattery_BaytVeGecersizDegerler()

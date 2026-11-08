@@ -37,58 +37,28 @@ public sealed class CaptureUsagePolicyTests
     [InlineData("C:\\path\\to\\app.exe", "app")]
     [InlineData("Microsoft.WindowsCamera_8wekyb3d8bbwe!App", "WindowsCamera")]
     [InlineData("5319275A.WhatsAppDesktop_cv1g1gvanyjgm", "WhatsAppDesktop")]
-    [InlineData("", "Bilinmeyen uygulama")]
-    [InlineData(null, "Bilinmeyen uygulama")]
-    public void ExtractAppNameFromKey_ExtractsExpectedName(string? key, string expected)
+    [InlineData("", null)]
+    [InlineData(null, null)]
+    public void ExtractAppNameFromKey_ExtractsExpectedName(string? key, string? expected)
     {
         var actual = CaptureUsagePolicy.ExtractAppNameFromKey(key);
         Assert.Equal(expected, actual);
     }
 
-    [Fact]
-    public void FormatToolTip_BothInUse_FormatsBoth()
+    private const string Both = "Cam: {0}, Mic: {1}";
+    private const string CamOnly = "Cam: {0}";
+    private const string MicOnly = "Mic: {0}";
+
+    [Theory]
+    [InlineData(true, true, "CameraApp", "MicApp", "Cam: CameraApp, Mic: MicApp")]
+    [InlineData(true, false, "CameraApp", null, "Cam: CameraApp")]
+    [InlineData(false, true, null, "MicApp", "Mic: MicApp")]
+    [InlineData(true, true, null, null, "Cam: Unknown, Mic: Unknown")]
+    [InlineData(true, false, null, null, "Cam: Unknown")]
+    [InlineData(false, false, null, null, "")]
+    public void FormatToolTip_UsesTemplatesAndUnknownName(bool cam, bool mic, string? camApp, string? micApp, string expected)
     {
-        var state = new PrivacyState(true, true, "CameraApp", "MicApp");
-        var text = CaptureUsagePolicy.FormatToolTip(state);
-        Assert.Equal("Kamera (CameraApp) ve Mikrofon (MicApp) kullanımda", text);
-    }
-
-    [Fact]
-    public void FormatToolTip_OnlyCamera_FormatsCamera()
-    {
-        var state = new PrivacyState(true, false, "CameraApp", null);
-        var text = CaptureUsagePolicy.FormatToolTip(state);
-        Assert.Equal("Kamera kullanımda (CameraApp)", text);
-    }
-
-    [Fact]
-    public void FormatToolTip_OnlyMic_FormatsMic()
-    {
-        var state = new PrivacyState(false, true, null, "MicApp");
-        var text = CaptureUsagePolicy.FormatToolTip(state);
-        Assert.Equal("Mikrofon kullanımda (MicApp)", text);
-    }
-
-    [Fact]
-    public void FormatToolTip_NoneInUse_ReturnsEmpty()
-    {
-        var text = CaptureUsagePolicy.FormatToolTip(PrivacyState.Empty);
-        Assert.Empty(text);
-    }
-
-    [Fact]
-    public void FormatToolTip_WithCustomFormats_UsesTemplates()
-    {
-        var stateBoth = new PrivacyState(true, true, "CameraApp", "MicApp");
-        var textBoth = CaptureUsagePolicy.FormatToolTip(stateBoth, "Cam: {0}, Mic: {1}");
-        Assert.Equal("Cam: CameraApp, Mic: MicApp", textBoth);
-
-        var stateCam = new PrivacyState(true, false, "CameraApp", null);
-        var textCam = CaptureUsagePolicy.FormatToolTip(stateCam, null, "Cam: {0}");
-        Assert.Equal("Cam: CameraApp", textCam);
-
-        var stateMic = new PrivacyState(false, true, null, "MicApp");
-        var textMic = CaptureUsagePolicy.FormatToolTip(stateMic, null, null, "Mic: {0}");
-        Assert.Equal("Mic: MicApp", textMic);
+        var state = new PrivacyState(cam, mic, camApp, micApp);
+        Assert.Equal(expected, CaptureUsagePolicy.FormatToolTip(state, Both, CamOnly, MicOnly, "Unknown"));
     }
 }

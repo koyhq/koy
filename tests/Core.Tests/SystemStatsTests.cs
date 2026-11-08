@@ -1,3 +1,4 @@
+using System.Globalization;
 using Koy.Core.SystemStats;
 
 namespace Koy.Core.Tests;
@@ -85,6 +86,9 @@ public class TopProcessPickerTests
 
 public class SystemFormatTests
 {
+    private static readonly CultureInfo Tr = CultureInfo.GetCultureInfo("tr-TR");
+    private static readonly CultureInfo En = CultureInfo.GetCultureInfo("en-US");
+
     [Theory]
     [InlineData(0, "0 B/sn")]
     [InlineData(512, "512 B/sn")]
@@ -94,30 +98,41 @@ public class SystemFormatTests
     [InlineData(1536, "1,5 KB/sn")]
     [InlineData(1024L * 1024 * 1024 * 3, "3 GB/sn")]
     [InlineData(-5, "0 B/sn")]
-    public void Speed(long bytes, string expected) => Assert.Equal(expected, SystemFormat.Speed(bytes));
+    public void Speed(long bytes, string expected) => Assert.Equal(expected, SystemFormat.Speed(bytes, Tr));
 
     [Fact]
     public void Speed_rounding_rolls_over_to_next_unit() =>
-        Assert.Equal("1 MB/sn", SystemFormat.Speed(1024 * 1024 - 1));
+        Assert.Equal("1 MB/sn", SystemFormat.Speed(1024 * 1024 - 1, Tr));
 
     [Fact]
     public void Memory_uses_one_decimal_for_used_and_trims_whole_total()
     {
         const long gb = 1024L * 1024 * 1024;
-        Assert.Equal("9,2 / 16 GB", SystemFormat.Memory((long)(9.2 * gb), 16 * gb));
-        Assert.Equal("9,0 / 15,8 GB", SystemFormat.Memory(9 * gb, (long)(15.8 * gb)));
+        Assert.Equal("9,2 / 16 GB", SystemFormat.Memory((long)(9.2 * gb), 16 * gb, Tr));
+        Assert.Equal("9,0 / 15,8 GB", SystemFormat.Memory(9 * gb, (long)(15.8 * gb), Tr));
     }
 
     [Theory]
     [InlineData(0, "0 B")]
     [InlineData(150L * 1024 * 1024, "150 MB")]
     [InlineData(1503238554L, "1,4 GB")]
-    public void Size(long bytes, string expected) => Assert.Equal(expected, SystemFormat.Size(bytes));
+    public void Size(long bytes, string expected) => Assert.Equal(expected, SystemFormat.Size(bytes, Tr));
 
     [Theory]
     [InlineData(42.4, "%42")]
     [InlineData(42.5, "%43")]
     [InlineData(-3, "%0")]
     [InlineData(140, "%100")]
-    public void Percent(double value, string expected) => Assert.Equal(expected, SystemFormat.Percent(value));
+    public void Percent(double value, string expected) => Assert.Equal(expected, SystemFormat.Percent(value, Tr));
+
+    [Fact]
+    public void English_uses_decimal_point_seconds_and_trailing_percent()
+    {
+        const long gb = 1024L * 1024 * 1024;
+        Assert.Equal("2.5 MB/s", SystemFormat.Speed(2621440, En));
+        Assert.Equal("2 MB/s", SystemFormat.Speed(2 * 1024 * 1024, En));
+        Assert.Equal("1.4 GB", SystemFormat.Size(1503238554L, En));
+        Assert.Equal("9.2 / 16 GB", SystemFormat.Memory((long)(9.2 * gb), 16 * gb, En));
+        Assert.Equal("42%", SystemFormat.Percent(42.4, En));
+    }
 }

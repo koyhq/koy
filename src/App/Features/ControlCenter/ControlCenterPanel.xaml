@@ -353,7 +353,7 @@
                   Value="{Binding VolumePercent, Mode=OneWay}"
                   ValueChanged="VolumeSlider_ValueChanged"
                   Margin="6,0" />
-          <TextBlock Grid.Column="2" Text="{Binding VolumePercent, StringFormat='%{0}'}"
+          <TextBlock Grid.Column="2" Text="{Binding VolumePercent, Converter={x:Static res:PercentTextConverter.Instance}}"
                      FontSize="11" Foreground="{DynamicResource KoyNotchMuted}" VerticalAlignment="Center" HorizontalAlignment="Right" />
         </Grid>
 
@@ -384,7 +384,7 @@
                   Value="{Binding Brightness, Mode=OneWay}"
                   ValueChanged="BrightnessSlider_ValueChanged"
                   Margin="6,0" />
-          <TextBlock Grid.Column="2" Text="{Binding Brightness, StringFormat='%{0}'}"
+          <TextBlock Grid.Column="2" Text="{Binding Brightness, Converter={x:Static res:PercentTextConverter.Instance}}"
                      FontSize="11" Foreground="{DynamicResource KoyNotchMuted}" VerticalAlignment="Center" HorizontalAlignment="Right" />
         </Grid>
         <TextBlock Text="{Binding [BrightnessUnavailable], Source={x:Static res:Loc.Instance}}" FontSize="11" Foreground="{DynamicResource KoyNotchMuted}" Margin="0,2,0,0" TextWrapping="Wrap">

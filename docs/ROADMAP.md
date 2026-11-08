@@ -482,6 +482,13 @@ Proje sahibi istedi. Kod yazılmadı.
 - UWP (Store) uygulamalarının dock'ta sabitlenmesi: kimlik AUMID, simge `shell:AppsFolder`, pencere eşleme `SHGetPropertyStoreForWindow`. Windows'un sabitleri arasında Spotify, WhatsApp gibi UWP uygulamalar var; Koy bugün yalnız `.lnk` sabitlerini gösteriyor.
 - Kod imzalama.
 
+## Uygulamada İngilizce (2026-11-08)
+- [x] Görünen sabit metinler resx'e alındı; hava durumu ve gizlilik metinleri Core'dan anahtar ya da kalıpla geçer, `SystemFormat` kültürü dışarıdan alır.
+- [x] İlk açılış dili sistem diline göre (`AppLanguage`); kayıtlı ayar korunur.
+- [x] "Neler Geldi" uygulamanın diline göre: `CHANGELOG.md` (İngilizce, release-please), `CHANGELOG.tr.md` (Türkçe, sürüm PR'ında elle). O dilde not yoksa öbür dile düşer. Güncelleme penceresi için iki dil tek paket notunda (`ChangelogParser.TurkishNotesMarker`).
+- [x] CI: sürüm PR'ında iki günlükte de yeni sürüm başlığı olmalı (`scripts/check-changelogs.ps1`).
+- [ ] Elle sınama (proje sahibi): iki dilde çentik, dock, sihirbaz ve "Neler Geldi"; İngilizce Windows'ta ilk açılış.
+
 ## Tanıtım sayfası (2026-11-07)
 - [x] `site/` (düz HTML/CSS/JS, derleme yok): hero (çentik sayfanın tepesinden sarkar, yayla açılır), çentik sekmeleri (gerçek ekran görüntüleri), dock, hafiflik, ayrıntılar, kurulum (SmartScreen uyarısı ve SHA256 doğrulama dahil). Koyu/açık tema sistemi izler. Son sürüm numarası GitHub API'den gelir, gelmezse rozet görünmez.
 - [x] `.github/workflows/pages.yml`: `main`'e `site/**` girince koyhq.github.io/koy adresinde yayınlar (SHA'ya sabit action'lar). Pages kaynağı "GitHub Actions" olarak açıldı.

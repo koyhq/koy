@@ -64,7 +64,7 @@ public sealed class WeatherService : IWeatherService
                 _cachedWeather = new WeatherInfo(
                     current.Temperature,
                     current.WeatherCode,
-                    WeatherCodeMapper.ToDescription(current.WeatherCode),
+                    WeatherCodeMapper.ToDescriptionKey(current.WeatherCode),
                     WeatherCodeMapper.ToIconKind(current.WeatherCode),
                     now);
                 _cachedLatitude = latitude;
