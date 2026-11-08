@@ -705,10 +705,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             var newVersion = await mgr.CheckForUpdatesAsync();
             if (newVersion != null)
             {
-                await mgr.DownloadUpdatesAsync(newVersion);
-                // ApplyUpdatesAndRestart süreci hemen sonlandırır (OnExit çalışmaz): görev çubuğunu önce geri getir.
-                Koy.App.App.SafeRestoreTaskbar();
-                mgr.ApplyUpdatesAndRestart(newVersion);
+                UpdateStatus.RecordAvailable(newVersion);
                 return;
             }
 

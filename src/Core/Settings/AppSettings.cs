@@ -98,6 +98,9 @@ public sealed record AppSettings
     /// <summary>İlk açılış sihirbazının tamamlanıp tamamlanmadığını belirtir.</summary>
     public bool FirstRunCompleted { get; set; }
 
+    /// <summary>Kullanıcının gördüğü en son Koy sürümü (güncelleme sonrası 'Neler Geldi' ekranı için).</summary>
+    public string LastSeenVersion { get; set; } = "";
+
     public string Theme { get; set; } = "Dark";
     /// <summary>Koy penceresinin köşe seçimi (bkz. CornerSetting): 6 Keskin, 12 Standart, 17 Yuvarlak. Eski varsayılan 18 Standart sayılır.</summary>
     public double CornerRadius { get; set; } = 12.0;
@@ -193,6 +196,7 @@ public sealed record AppSettings
                AccentColor == other.AccentColor &&
                UseWindowsAccent == other.UseWindowsAccent &&
                FirstRunCompleted == other.FirstRunCompleted &&
+               LastSeenVersion == other.LastSeenVersion &&
                Theme == other.Theme &&
                CornerRadius.Equals(other.CornerRadius) &&
                AnimationSpeed == other.AnimationSpeed &&
@@ -264,6 +268,7 @@ public sealed record AppSettings
         hash.Add(AccentColor);
         hash.Add(UseWindowsAccent);
         hash.Add(FirstRunCompleted);
+        hash.Add(LastSeenVersion);
         hash.Add(Theme);
         hash.Add(CornerRadius);
         hash.Add(AnimationSpeed);

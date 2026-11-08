@@ -37,10 +37,8 @@ internal static class AutoUpdater
                 return;
             }
 
-            await manager.DownloadUpdatesAsync(update);
-            manager.WaitExitThenApplyUpdates(update, silent: true, restart: false);
-            // Yeni sürüm bulunduysa "güncel" yazılmaz: indirildi, Koy kapanınca kurulacak.
-            UpdateStatus.Record(UpdateCheckResult.UpdateReady);
+            // Otomatik indirme ve kurma yapılmaz: kullanıcı onayı için durum kaydedilir.
+            UpdateStatus.RecordAvailable(update);
         }
         catch (Exception ex)
         {

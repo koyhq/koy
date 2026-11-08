@@ -4,4 +4,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Koy.Core</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\CHANGELOG.md" Link="CHANGELOG.md" />
+    <None Include="..\..\CHANGELOG.md" Link="CHANGELOG.md" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
