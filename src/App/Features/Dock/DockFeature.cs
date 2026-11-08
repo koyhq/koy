@@ -824,21 +824,64 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
         var isMaximized = WindowStyles.IsWindowMaximized(info.Handle);
 
+        List<DockCandidateWindow>? candidates = null;
+        List<DockCandidateWindow> GetCandidates()
+        {
+            if (candidates is not null)
+                return candidates;
+
+            candidates = new List<DockCandidateWindow>();
+            if (_windowTracker is null)
+                return candidates;
+
+            var open = _windowTracker.GetOpenWindows();
+            foreach (var w in open)
+            {
+                if (w.ProcessId == Environment.ProcessId)
+                    continue;
+
+                var mon = WindowStyles.GetWindowMonitor(w.Handle);
+                var isMin = WindowStyles.IsWindowMinimized(w.Handle);
+                var isMax = WindowStyles.IsWindowMaximized(w.Handle);
+                candidates.Add(new DockCandidateWindow(w.Handle, w.Bounds, mon, isMax, isMin));
+            }
+            return candidates;
+        }
+
         foreach (var (_, state) in _windowStates)
         {
-            // Pencere bu monitörde değilse bu monitör için büyütülmüş sayılmaz (M6.2: Yan ekrandaki durum burayı etkilemez)
             var onThisMonitor = DockForegroundFilter.AppliesToDock(fgMon, state.Monitor.Handle);
-            var monitorMaximized = isMaximized && onThisMonitor;
 
-            // Pencere yalnız kendi ekranının dock'unu etkiler; yan ekrandaki büyütülmüş pencerenin kenar taşması
-            // bu dock'u yapışık moda geçirmesin (DockForegroundFilter).
-            var bounds = DockForegroundFilter.BoundsForDock(info.Bounds, fgMon, state.Monitor.Handle);
+            WindowRect bounds;
+            bool monitorMaximized;
+            nint activeHandle;
+
+            if (onThisMonitor)
+            {
+                bounds = info.Bounds;
+                monitorMaximized = isMaximized;
+                activeHandle = info.Handle;
+            }
+            else
+            {
+                var candList = GetCandidates();
+                var resolved = DockForegroundFilter.ResolveMonitorWindow(
+                    state.Monitor.Handle,
+                    info,
+                    fgMon,
+                    isMaximized,
+                    candList);
+
+                bounds = resolved.Bounds;
+                monitorMaximized = resolved.IsMaximized;
+                activeHandle = resolved.Handle;
+            }
 
             // Her monitörün kendi tam ekran durumu sorgulanır:
             // Yan ekranda tam ekran uygulama olması bu monitördeki Koy'u gizlemez!
             var isFullscreen = _fullscreenDetector.IsFullscreen(state.Monitor.Handle);
             state.VisibilityController.SetFullscreen(isFullscreen);
-            state.VisibilityController.UpdateForegroundWindow(onThisMonitor ? info.Handle : 0, bounds);
+            state.VisibilityController.UpdateForegroundWindow(activeHandle, bounds);
 
             var boundsDip = bounds.IsEmpty
                 ? WindowRect.Empty

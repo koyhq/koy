@@ -53,4 +53,60 @@ public class DockForegroundFilterTests
         Assert.False(state.IsHidden);
         Assert.False(state.IsSnapped);
     }
+
+    [Fact]
+    public void ResolveMonitorWindow_AyniMonitorde_OnPlanPenceresiniDondurur()
+    {
+        var fg = new WindowInfo(999, MaximizedOnPrimary);
+        var result = DockForegroundFilter.ResolveMonitorWindow(Primary, fg, Primary, true, null);
+
+        Assert.Equal(MaximizedOnPrimary, result.Bounds);
+        Assert.True(result.IsMaximized);
+        Assert.Equal(999, result.Handle);
+    }
+
+    [Fact]
+    public void ResolveMonitorWindow_FarkliMonitorde_KendiMonitorundekiEnUstAdayiDondurur()
+    {
+        var fg = new WindowInfo(999, MaximizedOnPrimary);
+        var candidate1 = new DockCandidateWindow(10, new WindowRect(0, 0, 800, 600), Primary, IsMaximized: false);
+        var candidate2 = new DockCandidateWindow(20, new WindowRect(1920, 500, 2920, 1000), Secondary, IsMaximized: true);
+        var candidate3 = new DockCandidateWindow(30, new WindowRect(1920, 200, 2500, 700), Secondary, IsMaximized: false);
+
+        var result = DockForegroundFilter.ResolveMonitorWindow(
+            Secondary, fg, Primary, true, [candidate1, candidate2, candidate3]);
+
+        Assert.Equal(candidate2.Bounds, result.Bounds);
+        Assert.True(result.IsMaximized);
+        Assert.Equal(20, result.Handle);
+    }
+
+    [Fact]
+    public void ResolveMonitorWindow_KucultulmusAdaylarAtlanir()
+    {
+        var fg = new WindowInfo(999, MaximizedOnPrimary);
+        var minimized = new DockCandidateWindow(20, new WindowRect(1920, 0, 2500, 500), Secondary, IsMaximized: false, IsMinimized: true);
+        var visible = new DockCandidateWindow(30, new WindowRect(1920, 500, 2920, 1000), Secondary, IsMaximized: false, IsMinimized: false);
+
+        var result = DockForegroundFilter.ResolveMonitorWindow(
+            Secondary, fg, Primary, true, [minimized, visible]);
+
+        Assert.Equal(visible.Bounds, result.Bounds);
+        Assert.False(result.IsMaximized);
+        Assert.Equal(30, result.Handle);
+    }
+
+    [Fact]
+    public void ResolveMonitorWindow_KendiMonitorundeAdayYoksa_BosDoner()
+    {
+        var fg = new WindowInfo(999, MaximizedOnPrimary);
+        var candidateOnPrimary = new DockCandidateWindow(10, new WindowRect(0, 0, 800, 600), Primary, IsMaximized: false);
+
+        var result = DockForegroundFilter.ResolveMonitorWindow(
+            Secondary, fg, Primary, true, [candidateOnPrimary]);
+
+        Assert.Equal(WindowRect.Empty, result.Bounds);
+        Assert.False(result.IsMaximized);
+        Assert.Equal(0, result.Handle);
+    }
 }

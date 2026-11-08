@@ -119,6 +119,15 @@ public static class WindowStyles
     }
 
     /// <summary>
+    /// Pencerenin simge durumuna küçültülüp küçültülmediğini (IsIconic / WS_MINIMIZE) denetler.
+    /// </summary>
+    public static bool IsWindowMinimized(nint hwnd)
+    {
+        if (hwnd == 0) return false;
+        return PInvoke.IsIconic(new HWND(hwnd));
+    }
+
+    /// <summary>
     /// Verilen pencerenin ait olduğu süreç kimliğini (PID) döndürür.
     /// </summary>
     public static uint GetWindowProcessId(nint hwnd)
