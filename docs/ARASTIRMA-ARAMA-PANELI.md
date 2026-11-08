@@ -1,6 +1,6 @@
 # Araştırma: Kısayolla açılan arama paneli
 
-**Tarih:** 2026-11-08. **Durum:** yalnız araştırma; karar verilmedi, kod yazılmadı.
+**Tarih:** 2026-11-08. **Durum:** araştırma; panelin yeri kararlaştırıldı, diğer kararlar açık, kod yazılmadı.
 
 Soru: Kısayolla açılıp yazdıkça uygulama, pencere, hesap ve komut sonuçları gösteren bir panel Koy'a nasıl eklenir?
 
@@ -111,6 +111,7 @@ Ek gereksinimler:
 | Uygulama listesi, hesap, komutlar, puanlama | Yok |
 
 ## Panel nerede açılır
+**Karar (2026-11-08, proje sahibi):** panel çentiğin içinde açılır. Karşılaştırma aşağıda kayıt için duruyor.
 
 | | Çentiğin içinde | Ayrı pencere |
 |---|---|---|
@@ -123,7 +124,7 @@ Ek gereksinimler:
 Ölçüler: açık çentik 352 birim; gövde 236, durum satırı 26, sekme çubuğu 44 (`NotchLayout`).
 
 ## Karar bekleyen sorular
-1. Panel çentiğin içinde mi, ayrı pencere mi?
+1. Arama açıkken sekme çubuğu ve durum satırı gizlensin mi? Gizlenirse ~7, kalırsa ~4–5 sonuç sığar. Öneri: gizlensin.
 2. İlk sürümde hangi kaynaklar olsun? Aday: uygulama, açık pencere, hesap, pano, sistem komutları.
 3. Dosya arama ilk sürümde mi, sonra mı? `System.Data.OleDb` kabul edilir mi?
 4. Arama geçmişi tutulsun mu? Tutulursa kapatılabilir olmalı.
