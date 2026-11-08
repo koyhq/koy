@@ -7,6 +7,13 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ## [0.2.1](https://github.com/koyhq/koy/compare/v0.2.0...v0.2.1) (2026-11-08)
 
+Öne çıkanlar:
+- **Atlama listesi:** dock'ta bir uygulamaya sağ tıklayınca Windows'taki gibi son dosyalar, sık kullanılanlar ve uygulamanın kendi görevleri çıkar (VS Code'da son klasörler, Edge'de yeni InPrivate penceresi).
+- **Hep havada:** yüzen kapsül, pencere yaklaşsa ya da büyütülse bile alta yapışmadan havada kalır.
+- **Gizlilik noktaları:** kamera kullanılırken çentikte yeşil, mikrofon kullanılırken turuncu nokta yanar; üstüne gelince hangi uygulama olduğu yazar. Ayarlardan kapatılabilir.
+- **Yeni güncelleme akışı:** yeni sürüm kendiliğinden inmez; Koy önce sorar, ne değiştiğini gösterir, indirirken ilerleme çubuğu çıkar. Güncellemeden sonra bu "Neler Geldi" ekranı açılır.
+- **Daha kararlı dock:** çoklu ekranda odak öbür ekrana geçince "Aşağı yapış" dock'u artık havaya kalkmıyor; dock kapalıyken Koy açılınca görev çubuğu otomatik gizlemeye geçmiyor.
+
 
 ### Eklenenler
 
