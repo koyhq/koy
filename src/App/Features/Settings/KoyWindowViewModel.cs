@@ -508,7 +508,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         if (_isLoading) return;
         if (e.PropertyName is nameof(SelectedPageIndex) or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
             or nameof(IsResetConfirming) or nameof(UninstallAvailability) or nameof(CanUninstall) or nameof(UninstallRowDescription)
-            or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates))
+            or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates) or nameof(DownloadProgressText))
             return;
 
         SaveSettings();
@@ -568,6 +568,13 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             Thread.CurrentThread.CurrentUICulture = culture;
             Thread.CurrentThread.CurrentCulture = culture;
             Koy.App.Resources.Loc.Instance.Refresh();
+
+            // Bu metinler Loc'a bağlı değil, burada hesaplanıyor; dil değişince kendileri haber vermeli.
+            OnPropertyChanged(nameof(CheckButtonText));
+            OnPropertyChanged(nameof(LastCheckText));
+            OnPropertyChanged(nameof(AboutStatusText));
+            OnPropertyChanged(nameof(UninstallRowDescription));
+            OnPropertyChanged(nameof(DownloadProgressText));
         }
         catch { }
     }
