@@ -34,25 +34,35 @@ public static class CaptureUsagePolicy
     /// <summary>
     /// Aktif duruma göre kullanıcıya gösterilecek ToolTip metnini üretir.
     /// </summary>
-    public static string FormatToolTip(PrivacyState state)
+    public static string FormatToolTip(
+        PrivacyState state,
+        string? formatCamAndMic = null,
+        string? formatCam = null,
+        string? formatMic = null)
     {
         if (state.IsCameraInUse && state.IsMicrophoneInUse)
         {
             var cam = state.ActiveCameraApp ?? "Kamera";
             var mic = state.ActiveMicrophoneApp ?? "Mikrofon";
-            return $"Kamera ({cam}) ve Mikrofon ({mic}) kullanımda";
+            return formatCamAndMic is not null
+                ? string.Format(formatCamAndMic, cam, mic)
+                : $"Kamera ({cam}) ve Mikrofon ({mic}) kullanımda";
         }
 
         if (state.IsCameraInUse)
         {
             var cam = state.ActiveCameraApp ?? "Uygulama";
-            return $"Kamera kullanımda ({cam})";
+            return formatCam is not null
+                ? string.Format(formatCam, cam)
+                : $"Kamera kullanımda ({cam})";
         }
 
         if (state.IsMicrophoneInUse)
         {
             var mic = state.ActiveMicrophoneApp ?? "Uygulama";
-            return $"Mikrofon kullanımda ({mic})";
+            return formatMic is not null
+                ? string.Format(formatMic, mic)
+                : $"Mikrofon kullanımda ({mic})";
         }
 
         return string.Empty;

@@ -1638,4 +1638,14 @@
   <data name="PrivacyIndicatorDesc" xml:space="preserve">
     <value>Shows a coloured dot on the notch when an app uses the camera or microphone.</value>
   </data>
+  <data name="PrivacyTooltipCamAndMic" xml:space="preserve">
+    <value>Camera ({0}) and microphone ({1}) in use</value>
+  </data>
+  <data name="PrivacyTooltipCam" xml:space="preserve">
+    <value>Camera in use ({0})</value>
+  </data>
+  <data name="PrivacyTooltipMic" xml:space="preserve">
+    <value>Microphone in use ({0})</value>
+  </data>
 </root>
+

@@ -115,7 +115,11 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
         IsCameraActive = state.IsCameraInUse;
         IsMicrophoneActive = state.IsMicrophoneInUse;
-        PrivacyToolTip = Koy.Core.Privacy.CaptureUsagePolicy.FormatToolTip(state);
+        PrivacyToolTip = Koy.Core.Privacy.CaptureUsagePolicy.FormatToolTip(
+            state,
+            Strings.Get("PrivacyTooltipCamAndMic"),
+            Strings.Get("PrivacyTooltipCam"),
+            Strings.Get("PrivacyTooltipMic"));
         OnPropertyChanged(nameof(HasPrivacyActivity));
     }
 

@@ -117,11 +117,21 @@ public sealed class ConsentStorePrivacyService : IPrivacyMonitorService
 
         while (true)
         {
+            if (_webcamKey is null)
+            {
+                try { _webcamKey = Registry.CurrentUser.OpenSubKey(WebcamKeyPath, RegistryKeyPermissionCheck.ReadSubTree); } catch { }
+            }
+            if (_micKey is null)
+            {
+                try { _micKey = Registry.CurrentUser.OpenSubKey(MicKeyPath, RegistryKeyPermissionCheck.ReadSubTree); } catch { }
+            }
+
             // Olayları kaydet (RegNotifyChangeKeyValue tek seferliktir; sinyalden sonra tekrar kurulmalı)
             RegisterKeyNotification(_webcamKey, _camEvent);
             RegisterKeyNotification(_micKey, _micEvent);
 
-            var index = WaitHandle.WaitAny(waitHandles);
+            int timeout = (_webcamKey is null || _micKey is null) ? 10000 : Timeout.Infinite;
+            var index = WaitHandle.WaitAny(waitHandles, timeout);
             if (index == 0) // cancelEvent
                 break;
 

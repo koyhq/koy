@@ -109,4 +109,20 @@ public class DockForegroundFilterTests
         Assert.False(result.IsMaximized);
         Assert.Equal(0, result.Handle);
     }
+
+    [Fact]
+    public void ResolveMonitorWindow_SinirlariBosAdaylarAtlanir()
+    {
+        var fg = new WindowInfo(999, MaximizedOnPrimary);
+        var emptyWindow = new DockCandidateWindow(20, WindowRect.Empty, Secondary, IsMaximized: false, IsMinimized: false);
+        var zeroSizeWindow = new DockCandidateWindow(25, new WindowRect(100, 100, 100, 100), Secondary, IsMaximized: false, IsMinimized: false);
+        var validWindow = new DockCandidateWindow(30, new WindowRect(1920, 500, 2920, 1000), Secondary, IsMaximized: false, IsMinimized: false);
+
+        var result = DockForegroundFilter.ResolveMonitorWindow(
+            Secondary, fg, Primary, true, [emptyWindow, zeroSizeWindow, validWindow]);
+
+        Assert.Equal(validWindow.Bounds, result.Bounds);
+        Assert.False(result.IsMaximized);
+        Assert.Equal(30, result.Handle);
+    }
 }

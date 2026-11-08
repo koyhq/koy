@@ -1638,4 +1638,14 @@
   <data name="PrivacyIndicatorDesc" xml:space="preserve">
     <value>Bir uygulama kamera veya mikrofonu kullandığında çentikte renkli nokta gösterir.</value>
   </data>
+  <data name="PrivacyTooltipCamAndMic" xml:space="preserve">
+    <value>Kamera ({0}) ve mikrofon ({1}) kullanımda</value>
+  </data>
+  <data name="PrivacyTooltipCam" xml:space="preserve">
+    <value>Kamera kullanımda ({0})</value>
+  </data>
+  <data name="PrivacyTooltipMic" xml:space="preserve">
+    <value>Mikrofon kullanımda ({0})</value>
+  </data>
 </root>
+

@@ -66,7 +66,7 @@ public static class DockForegroundFilter
 
         foreach (var c in candidates)
         {
-            if (!c.IsMinimized && c.MonitorHandle == dockMonitor)
+            if (!c.IsMinimized && !c.Bounds.IsEmpty && c.MonitorHandle == dockMonitor)
                 return c;
         }
 

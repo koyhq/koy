@@ -75,4 +75,20 @@ public sealed class CaptureUsagePolicyTests
         var text = CaptureUsagePolicy.FormatToolTip(PrivacyState.Empty);
         Assert.Empty(text);
     }
+
+    [Fact]
+    public void FormatToolTip_WithCustomFormats_UsesTemplates()
+    {
+        var stateBoth = new PrivacyState(true, true, "CameraApp", "MicApp");
+        var textBoth = CaptureUsagePolicy.FormatToolTip(stateBoth, "Cam: {0}, Mic: {1}");
+        Assert.Equal("Cam: CameraApp, Mic: MicApp", textBoth);
+
+        var stateCam = new PrivacyState(true, false, "CameraApp", null);
+        var textCam = CaptureUsagePolicy.FormatToolTip(stateCam, null, "Cam: {0}");
+        Assert.Equal("Cam: CameraApp", textCam);
+
+        var stateMic = new PrivacyState(false, true, null, "MicApp");
+        var textMic = CaptureUsagePolicy.FormatToolTip(stateMic, null, null, "Mic: {0}");
+        Assert.Equal("Mic: MicApp", textMic);
+    }
 }

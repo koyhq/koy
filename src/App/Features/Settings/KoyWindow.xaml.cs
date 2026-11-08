@@ -168,6 +168,11 @@ public partial class KoyWindow : Window
         if (AppUninstaller.InProgress)
             return;
 
+        if (ViewModel.IsWhatsNewOverlayOpen)
+        {
+            ViewModel.CloseWhatsNewOverlay();
+        }
+
         ViewModel.SyncFromDisk();
         ViewModel.SaveSettingsCommand.Execute(null);
     }

@@ -112,6 +112,7 @@ public sealed partial class SetupWizardViewModel : ObservableObject
         var updated = settings with
         {
             FirstRunCompleted = true,
+            LastSeenVersion = AppInfo.Version,
             Language = SelectedLanguage,
             NotchEnabled = notchEnabled,
             DockEnabled = dockEnabled,
