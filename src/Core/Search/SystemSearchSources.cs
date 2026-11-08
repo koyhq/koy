@@ -7,6 +7,11 @@ public sealed class ShellCommandSearchSource(ISearchShell shell, Func<string, st
 {
     private static readonly string[] DefaultExtensions = [".com", ".exe", ".bat", ".cmd"];
 
+    // Her tuşta PATH × PATHEXT taranmasın: çözülen (ya da bulunamayan) komutlar panel oturumu boyunca saklanır.
+    private readonly Dictionary<string, string?> _resolved = new(StringComparer.OrdinalIgnoreCase);
+
+    public override void Release() => _resolved.Clear();
+
     public override IEnumerable<SearchResult> Search(SearchQuery query)
     {
         // Kabuğa satır sonu hiç gitmez; pano ve çok satırlı metin ayrıca onay ister.
@@ -63,14 +68,34 @@ public sealed class ShellCommandSearchSource(ISearchShell shell, Func<string, st
 
     private string? FindExecutable(string command)
     {
+        if (_resolved.TryGetValue(command, out var known))
+            return known;
+
+        var found = Resolve(command);
+        _resolved[command] = found;
+        return found;
+    }
+
+    /// <summary>Ağ yolları (\\sunucu\paylaşım) yoklanmaz: yanıt vermeyen paylaşım arayüz iş parçacığını bekletir.</summary>
+    public static bool IsNetworkPath(string path)
+    {
+        var trimmed = path.TrimStart();
+        return trimmed.StartsWith(@"\\", StringComparison.Ordinal) || trimmed.StartsWith("//", StringComparison.Ordinal);
+    }
+
+    private string? Resolve(string command)
+    {
         // Yolu verilmiş komutu Konumlar değil, burası çalıştırır; ama yalnız program uzantılarında.
         if (command.Contains('\\') || command.Contains('/'))
-            return HasExecutableExtension(command) && shell.FileExists(command) ? command : null;
+            return !IsNetworkPath(command) && HasExecutableExtension(command) && shell.FileExists(command) ? command : null;
 
         var extensions = Extensions();
         var hasExtension = HasExecutableExtension(command);
         foreach (var directory in (shell.GetEnvironmentVariable("PATH") ?? "").Split(';', StringSplitOptions.RemoveEmptyEntries))
         {
+            if (IsNetworkPath(directory))
+                continue;
+
             if (hasExtension)
             {
                 var direct = Path.Combine(directory.Trim(), command);

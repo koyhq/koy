@@ -145,4 +145,71 @@ public class SearchCommandSafetyTests
 
         Assert.Equal("", panel.Query);
     }
+
+    // --- PATH çözümleme önbelleği ---
+
+    private sealed class CountingShell : ISearchShell
+    {
+        public int FileChecks { get; private set; }
+        public List<string> Checked { get; } = [];
+
+        public bool FileExists(string path)
+        {
+            FileChecks++;
+            Checked.Add(path);
+            return path == @"C:\Tools\build.CMD";
+        }
+
+        public bool DirectoryExists(string path) => false;
+        public string? GetEnvironmentVariable(string name) => name == "PATH" ? @"\\nas\share;C:\Tools" : name == "PATHEXT" ? ".CMD" : null;
+        public void Open(string target)
+        {
+        }
+
+        public void Run(string executable, string? arguments)
+        {
+        }
+
+        public void RunInTerminal(string commandLine)
+        {
+        }
+
+        public void OpenContainingFolder(string path)
+        {
+        }
+
+        public void CopyText(string text)
+        {
+        }
+    }
+
+    [Fact]
+    public void Path_lookup_is_cached_until_release_and_skips_network_directories()
+    {
+        var shell = new CountingShell();
+        var source = new ShellCommandSearchSource(shell, T);
+
+        source.Search(new SearchQuery("build a")).Single();
+        var afterFirst = shell.FileChecks;
+        source.Search(new SearchQuery("build a b")).Single();
+        Assert.Equal(afterFirst, shell.FileChecks);
+
+        source.Search(new SearchQuery("nope")).ToList();
+        var afterMiss = shell.FileChecks;
+        Assert.True(afterMiss > afterFirst);
+        source.Search(new SearchQuery("nope x")).ToList();
+        Assert.Equal(afterMiss, shell.FileChecks);
+        Assert.DoesNotContain(shell.Checked, c => c.StartsWith(@"\\", StringComparison.Ordinal));
+
+        source.Release();
+        source.Search(new SearchQuery("build a")).Single();
+        Assert.True(shell.FileChecks > afterMiss);
+    }
+
+    [Theory]
+    [InlineData(@"\\nas\share\x.exe", true)]
+    [InlineData("//nas/share", true)]
+    [InlineData(@"C:\Tools", false)]
+    public void Network_paths_are_recognised(string path, bool expected) =>
+        Assert.Equal(expected, ShellCommandSearchSource.IsNetworkPath(path));
 }
