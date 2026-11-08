@@ -52,7 +52,7 @@ Her bilginin kaynağı yanında yazar:
 | Kaynak başına iş parçacığı | Değiştir | Hesap ve pencere listesi anlık; yalnız yavaş kaynaklar için iptal edilebilir görev yeter |
 | Ayrı süreçte çalışan eklentiler | Uygulama | AGENTS #4 tek süreç |
 | Harici hesap kütüphanesi | Uygulama | AGENTS #8; küçük bir ayrıştırıcı yeter |
-| Kabuk komutu, süreç öldürme | Şimdilik uygulama | Yanlış Enter'ın maliyeti yüksek |
+| Kabuk komutu, süreç öldürme | Uygula | Karar 7; süreç sonlandırma tetik sözcüğü ister |
 
 ## Windows tarafı
 
@@ -126,10 +126,11 @@ Ek gereksinimler:
 ## Kararlar (2026-11-08, proje sahibi)
 1. Arama açıkken sekme çubuğu ve durum satırı gizlenir.
 2. İlk sürümün kaynakları: uygulamalar, açık pencereler, hesap makinesi, pano, bilgisayar komutları.
-3. Dosya arama ilk sürümde yok, sonraya kalır.
-4. Aranan kelimeler kaydedilmez.
+3. Dosya arama ilk sürümde var.
+4. Arama geçmişi tutulur; ayarlardan kapatılabilir, başında boşluk olan arama yazılmaz.
 5. Tam ekran oyundayken kısayol hiçbir şey yapmaz.
 6. Kapat ve yeniden başlat onay ister.
+7. İşlev olarak incelenen araçlarla aynı davranır; fark yalnız görünümdedir. Açık kalan her kararda onların davranışı esas alınır.
 
 ## Sıradaki adımlar (karardan sonra)
 1. `Ctrl+Alt+K` sınaması (yukarıda).
