@@ -155,6 +155,8 @@ public static class SearchBookmarks
 {
     private const long MaxFileBytes = 16 * 1024 * 1024;
 
+    private static readonly FileStampCache<IReadOnlyList<BrowserBookmark>> Cache = new();
+
     private static readonly string[] Browsers =
     [
         @"Google\Chrome\User Data",
@@ -191,12 +193,19 @@ public static class SearchBookmarks
         {
             var info = new FileInfo(path);
             if (!info.Exists || info.Length > MaxFileBytes)
+            {
+                Cache.Remove(path);
                 return [];
+            }
 
-            // Tarayıcı dosyayı yazıyor olabilir.
-            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-            using var reader = new StreamReader(stream);
-            return ChromiumBookmarks.Parse(reader.ReadToEnd());
+            // Dosya değişmediyse (son yazma zamanı + boyut) ayrıştırılmış liste yeniden kullanılır.
+            return Cache.GetOrLoad(path, info.LastWriteTimeUtc.Ticks, info.Length, () =>
+            {
+                // Tarayıcı dosyayı yazıyor olabilir.
+                using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                using var reader = new StreamReader(stream);
+                return ChromiumBookmarks.Parse(reader.ReadToEnd());
+            });
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
