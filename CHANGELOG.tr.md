@@ -5,6 +5,37 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.3](https://github.com/koyhq/koy/compare/v0.2.2...v0.2.3) (2026-11-08)
+
+Öne çıkanlar:
+- **Çentikte arama:** Win+Shift+Q ile uygulamaları, açık pencereleri, dosyaları, ayarları, yer imlerini ve webi çentikten ararsın; hızlı hesap yapar, çalışan bir uygulamayı kapatırsın. Alt+Shift+F2 aramayı panodaki metinle açar.
+- **İngilizce desteği:** Koy artık Türkçenin yanında İngilizce de konuşuyor ve ilk açılışta Windows'un dilini seçiyor. "Neler Geldi" uygulamanın diline göre geliyor; site ve depo İngilizce açılıyor.
+- **Dock simge hizası:** tam genişlik dock'ta uygulama simgeleri sola, ortaya ya da sağa yaslanabiliyor.
+- **Daha güvenli arama:** panodan gelen ya da birden çok satırlı metin komut olarak çalışmadan önce onay istiyor; varsayılan eylem uygulamayı kapatmak, zorla sonlandırmak onay istiyor; arama geçmişi siz açmadıkça kapalı.
+
+
+### Eklenenler
+
+* **notch:** çentikte arama paneli ([#40](https://github.com/koyhq/koy/issues/40)) ([14c3939](https://github.com/koyhq/koy/commit/14c39392fa76530b177ee2d936c9d5efa9d450ac))
+* **i18n:** İngilizce desteği tamamlandı, ilk açılışta sistem dili seçiliyor ([#46](https://github.com/koyhq/koy/issues/46)) ([58e794a](https://github.com/koyhq/koy/commit/58e794a625c2e8b087b696dba274813879f32cb2)), closes [#37](https://github.com/koyhq/koy/issues/37)
+* **dock:** tam genişlik dock için simge hizası ayarı ([#41](https://github.com/koyhq/koy/issues/41)) ([f4942df](https://github.com/koyhq/koy/commit/f4942df28ec6d3c7a53139edcaab7c943fe4a8c8))
+* **site:** İngilizce ve dil seçici, varsayılan dil İngilizce ([#45](https://github.com/koyhq/koy/issues/45)) ([276acfe](https://github.com/koyhq/koy/commit/276acfe7e904115c96a528679d30c33610a0f21e)), closes [#35](https://github.com/koyhq/koy/issues/35)
+
+
+### Düzeltmeler
+
+* **search:** panodan gelen ya da çok satırlı metni komut olarak çalıştırmadan önce onay iste ([bc47c75](https://github.com/koyhq/koy/commit/bc47c751b1f56631fbf52bbb46d888744d139d9f))
+* **search:** süreçlerde varsayılan eylem kapatma, zorla sonlandırmadan önce sürecin kimliğini doğrula ([233cbb3](https://github.com/koyhq/koy/commit/233cbb3f68278afadf80d9c0a14369124845bbe2))
+* **search:** arama geçmişi varsayılan kapalı, çok satırlı ve pano metni kaydedilmez ([c494301](https://github.com/koyhq/koy/commit/c4943018693dbeff3623d54c1ba92f172995f953))
+* **search:** dosya araması durumunu kilitle koru, iptal kaynaklarını bırak ([d71a820](https://github.com/koyhq/koy/commit/d71a820d409e4ffdf30fc408ef7e3a7eec176ba9))
+* **i18n:** dil değişince hesaplanan ayar metinleri de yenilensin ([5759104](https://github.com/koyhq/koy/commit/5759104d7f4b9c4ff17a8930d4b5aac53a9d1a35))
+
+
+### Performans
+
+* **search:** PATH aramalarını panel oturumu boyunca önbellekte tut, ağ klasörlerini atla ([4d201e6](https://github.com/koyhq/koy/commit/4d201e6af8ec4b3a9d053d27f57d237a5e794337))
+* **search:** yer imlerini dosya değişmedikçe yeniden ayrıştırma ([728b2e3](https://github.com/koyhq/koy/commit/728b2e300f2cf8574a020c8efbb32c57d8d7384d))
+
 ## [0.2.2](https://github.com/koyhq/koy/compare/v0.2.1...v0.2.2) (2026-11-08)
 
 Öne çıkanlar:

@@ -9,29 +9,28 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ## [0.2.3](https://github.com/koyhq/koy/compare/v0.2.2...v0.2.3) (2026-11-08)
 
+Highlights:
+- **Search in the notch:** press Win+Shift+Q to search apps, open windows, files, settings, bookmarks and the web, do quick math, or close a running app, all from the notch. Alt+Shift+F2 opens it with the clipboard text.
+- **English everywhere:** Koy now speaks English as well as Turkish and picks the Windows language on first run. "What's New" follows the app language, and the website and repository open in English.
+- **Dock icon alignment:** on the full-width dock, app icons can sit on the left, in the center or on the right.
+- **Safer search:** text from the clipboard or with several lines asks before it runs as a command, closing an app is the default and force-quitting asks first, and search history is off unless you turn it on.
+
 
 ### Added
 
-* arama paneli kısayolu Win+Shift+Q ([2dba84e](https://github.com/koyhq/koy/commit/2dba84e668de4ac0851f5a795f71b325c72888a6))
-* aramada uygulamaları üste, dosyaları alta al ([e60caa5](https://github.com/koyhq/koy/commit/e60caa5654836b19e9ba70f0a847deee3ec9f99c))
-* **dock:** add icon alignment option for the full-width dock ([f4942df](https://github.com/koyhq/koy/commit/f4942df28ec6d3c7a53139edcaab7c943fe4a8c8))
-* **dock:** tam genişlikte ikon hizası ayarını ekle ([5932982](https://github.com/koyhq/koy/commit/59329827bfeb2a995359a8f64aba7e6e62deca6c))
-* **i18n:** complete English support and follow the system language on first run ([58e794a](https://github.com/koyhq/koy/commit/58e794a625c2e8b087b696dba274813879f32cb2))
-* **i18n:** complete English support and follow the system language on first run ([d36549c](https://github.com/koyhq/koy/commit/d36549c0da5a7e4c76d6e3c9b454d6b7e014af95)), closes [#37](https://github.com/koyhq/koy/issues/37)
-* **notch:** add search panel inside the notch ([14c3939](https://github.com/koyhq/koy/commit/14c39392fa76530b177ee2d936c9d5efa9d450ac))
-* **notch:** çentikte arama panelini ekle ([4180187](https://github.com/koyhq/koy/commit/4180187b87399183c1e153ab8ff045894587a19b))
-* **site:** add English and a language switch, default to English ([276acfe](https://github.com/koyhq/koy/commit/276acfe7e904115c96a528679d30c33610a0f21e))
-* **site:** add English and a language switch, default to English ([7f92c42](https://github.com/koyhq/koy/commit/7f92c424baa4f2728ea61f0afe54b9fcc212c688)), closes [#35](https://github.com/koyhq/koy/issues/35)
+* **notch:** add search panel inside the notch ([#40](https://github.com/koyhq/koy/issues/40)) ([14c3939](https://github.com/koyhq/koy/commit/14c39392fa76530b177ee2d936c9d5efa9d450ac))
+* **i18n:** complete English support and follow the system language on first run ([#46](https://github.com/koyhq/koy/issues/46)) ([58e794a](https://github.com/koyhq/koy/commit/58e794a625c2e8b087b696dba274813879f32cb2)), closes [#37](https://github.com/koyhq/koy/issues/37)
+* **dock:** add icon alignment option for the full-width dock ([#41](https://github.com/koyhq/koy/issues/41)) ([f4942df](https://github.com/koyhq/koy/commit/f4942df28ec6d3c7a53139edcaab7c943fe4a8c8))
+* **site:** add English and a language switch, default to English ([#45](https://github.com/koyhq/koy/issues/45)) ([276acfe](https://github.com/koyhq/koy/commit/276acfe7e904115c96a528679d30c33610a0f21e)), closes [#35](https://github.com/koyhq/koy/issues/35)
 
 
 ### Fixed
 
-* **i18n:** refresh computed settings text when the language changes ([5759104](https://github.com/koyhq/koy/commit/5759104d7f4b9c4ff17a8930d4b5aac53a9d1a35))
-* kısayolu yazım sırasından bağımsız varsayılan say ([2ecc032](https://github.com/koyhq/koy/commit/2ecc032e7d87d8cf4edbd4ede65cd306cc20a8cd))
 * **search:** ask before running clipboard or multi-line text as a command ([bc47c75](https://github.com/koyhq/koy/commit/bc47c751b1f56631fbf52bbb46d888744d139d9f))
-* **search:** guard file search state with a lock and dispose its cancellation sources ([d71a820](https://github.com/koyhq/koy/commit/d71a820d409e4ffdf30fc408ef7e3a7eec176ba9))
 * **search:** make graceful close the default process action and verify process identity ([233cbb3](https://github.com/koyhq/koy/commit/233cbb3f68278afadf80d9c0a14369124845bbe2))
 * **search:** turn history off by default and never store multi-line or clipboard text ([c494301](https://github.com/koyhq/koy/commit/c4943018693dbeff3623d54c1ba92f172995f953))
+* **search:** guard file search state with a lock and dispose its cancellation sources ([d71a820](https://github.com/koyhq/koy/commit/d71a820d409e4ffdf30fc408ef7e3a7eec176ba9))
+* **i18n:** refresh computed settings text when the language changes ([5759104](https://github.com/koyhq/koy/commit/5759104d7f4b9c4ff17a8930d4b5aac53a9d1a35))
 
 
 ### Performance
