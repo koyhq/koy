@@ -87,6 +87,16 @@ jobs:
           $ver = $env:TAG_NAME.TrimStart('v')
           New-Item -ItemType Directory -Path dist -Force | Out-Null
 
+          # Bu sürümün CHANGELOG bölümü paket notu olur; uygulama güncelleme penceresinde yeni sürümün notlarını buradan okur.
+          $changelog = Get-Content CHANGELOG.md -Raw -Encoding utf8
+          $pattern = '(?ms)^## \[' + [regex]::Escape($ver) + '\].*?(?=^## \[|\z)'
+          $section = [regex]::Match($changelog, $pattern).Value
+          $notesArgs = @()
+          if ($section) {
+            Set-Content -Path dist/release-notes.md -Value $section -Encoding utf8
+            $notesArgs = @('--releaseNotes', 'dist/release-notes.md')
+          }
+
           vpk pack --packId Koy `
                    --packVersion $ver `
                    --packDir publish/win-x64 `
@@ -95,8 +105,10 @@ jobs:
                    --packAuthors "Burhan Şahin" `
                    --icon src/App/Resources/app.ico `
                    --runtime win-x64 `
-                   --outputDir dist
+                   --outputDir dist `
+                   @notesArgs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Remove-Item dist/release-notes.md -ErrorAction SilentlyContinue
 
           Compress-Archive -Path "publish/win-x64/*" -DestinationPath "dist/Koy-win-Portable.zip" -Force
 

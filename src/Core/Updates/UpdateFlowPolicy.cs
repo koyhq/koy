@@ -19,7 +19,50 @@ public static class UpdateFlowPolicy
         if (va is null) return -1;
         if (vb is null) return 1;
 
-        return va.CompareTo(vb);
+        var core = va.CompareTo(vb);
+        if (core != 0)
+            return core;
+
+        // SemVer: çekirdek eşitse ön sürüm (0.3.0-rc.2) son sürümden (0.3.0) küçüktür.
+        return ComparePrerelease(Prerelease(versionA), Prerelease(versionB));
+    }
+
+    private static string? Prerelease(string? v)
+    {
+        if (string.IsNullOrWhiteSpace(v))
+            return null;
+
+        var s = v.Trim();
+        var plus = s.IndexOf('+');
+        if (plus >= 0) s = s[..plus];
+        var dash = s.IndexOf('-');
+        return dash >= 0 && dash < s.Length - 1 ? s[(dash + 1)..] : null;
+    }
+
+    private static int ComparePrerelease(string? a, string? b)
+    {
+        if (a is null && b is null) return 0;
+        if (a is null) return 1;
+        if (b is null) return -1;
+
+        var pa = a.Split('.');
+        var pb = b.Split('.');
+        for (var i = 0; i < Math.Min(pa.Length, pb.Length); i++)
+        {
+            var na = int.TryParse(pa[i], out var ia);
+            var nb = int.TryParse(pb[i], out var ib);
+            var c = (na, nb) switch
+            {
+                (true, true) => ia.CompareTo(ib),
+                (true, false) => -1,
+                (false, true) => 1,
+                _ => string.CompareOrdinal(pa[i], pb[i])
+            };
+            if (c != 0)
+                return Math.Sign(c);
+        }
+
+        return pa.Length.CompareTo(pb.Length);
     }
 
     /// <summary>

@@ -12,6 +12,11 @@ public class UpdateFlowPolicyTests
     [InlineData("0.2.0+abc", "0.2.0+def", 0)]
     [InlineData("0.2.1", "0.2.0", 1)]
     [InlineData("1.0.0", "0.9.9", 1)]
+    [InlineData("0.3.0", "0.3.0-rc.2", 1)]
+    [InlineData("0.3.0-rc.2", "0.3.0", -1)]
+    [InlineData("0.3.0-rc.10", "0.3.0-rc.2", 1)]
+    [InlineData("0.3.0-rc.1", "0.3.0-rc.1", 0)]
+    [InlineData("0.3.0-beta", "0.3.0-alpha", 1)]
     public void CompareVersions_DogruKarsilastirir(string vA, string vB, int expectedSign)
     {
         var result = UpdateFlowPolicy.CompareVersions(vA, vB);
@@ -66,5 +71,12 @@ public class UpdateFlowPolicyTests
     public void FormatDisplayVersion_Formatlar(string input, bool prefixWithV, string expected)
     {
         Assert.Equal(expected, UpdateFlowPolicy.FormatDisplayVersion(input, prefixWithV));
+    }
+
+    [Fact]
+    public void ShouldShowWhatsNew_OnSurumdenSonSurumeGecinceGosterir()
+    {
+        Assert.True(UpdateFlowPolicy.ShouldShowWhatsNew("0.3.0", "0.3.0-rc.2"));
+        Assert.False(UpdateFlowPolicy.ShouldShowWhatsNew("0.3.0-rc.2", "0.3.0"));
     }
 }

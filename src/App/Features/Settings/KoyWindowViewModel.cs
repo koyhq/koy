@@ -786,9 +786,10 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         UpdateModalTitleText = Strings.Get("UpdateModalTitle");
         UpdateModalIntroText = string.Format(Strings.Get("UpdateModalIntro"), version);
 
-        var embeddedChangelog = ChangelogParser.ReadEmbeddedChangelog();
-        var release = ChangelogParser.ExtractVersion(embeddedChangelog, version)
-                      ?? ChangelogParser.ParseLatest(embeddedChangelog);
+        // Yeni sürümün notları güncelleme beslemesinden gelir (yayın akışı CHANGELOG bölümünü paket notu yapar).
+        // Gömülü CHANGELOG yalnız kurulu sürümü bilir; yeni sürüm orada yoksa eski notları göstermek yerine liste boş kalır.
+        var release = ChangelogParser.ExtractVersion(UpdateStatus.AvailableUpdate?.TargetFullRelease?.NotesMarkdown, version)
+                      ?? ChangelogParser.ExtractVersion(ChangelogParser.ReadEmbeddedChangelog(), version);
 
         UpdateHighlights.Clear();
         if (release is not null && release.Highlights.Count > 0)
@@ -797,8 +798,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 UpdateHighlights.Add(h);
         }
 
-        IsDownloadingUpdate = false;
-        DownloadProgress = 0;
+        // İndirme sürerken (pencere kapatılıp menüden yeniden açıldıysa) durumu sıfırlama: ikinci indirme başlamasın.
+        if (!IsDownloadingUpdate)
+            DownloadProgress = 0;
         IsUpdateOverlayOpen = true;
     }
 
@@ -822,16 +824,19 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         try
         {
             var mgr = new Velopack.UpdateManager(new Velopack.Sources.GithubSource("https://github.com/koyhq/koy", null, UpdateChannel == "Önizleme"));
+            var dispatcher = System.Windows.Application.Current.Dispatcher;
             await mgr.DownloadUpdatesAsync(update, progress =>
             {
-                DownloadProgress = progress;
+                // Velopack ilerlemeyi arka plan iş parçacığından bildirebilir.
+                dispatcher.BeginInvoke(() => DownloadProgress = progress);
             });
 
             App.SafeRestoreTaskbar();
             mgr.ApplyUpdatesAndRestart(update);
         }
-        catch
+        catch (Exception ex)
         {
+            Koy.Core.Diagnostics.CrashLog.Write("Güncelleme indirme", ex);
             IsDownloadingUpdate = false;
         }
     }

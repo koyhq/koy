@@ -102,4 +102,22 @@ public class ChangelogParserTests
         Assert.NotNull(notes);
         Assert.NotEmpty(notes.Version);
     }
+
+    [Fact]
+    public void ExtractVersion_SurumYoksaSonSurumeDusmez()
+    {
+        // Güncelleme penceresi yeni sürümün notunu ister; kurulu sürümün notları yerine null dönmeli.
+        var md = "## [0.2.0] (2026-11-07)\r\n\r\nÖne çıkanlar:\r\n- **Eski:** not\r\n";
+        Assert.Null(ChangelogParser.ExtractVersion(md, "0.2.1"));
+    }
+
+    [Fact]
+    public void ExtractVersion_PaketNotuBiciminiOkur()
+    {
+        // Yayın akışının --releaseNotes ile pakete koyduğu bölüm (CRLF, tek sürüm).
+        var md = "## [0.2.1](https://github.com/koyhq/koy/compare/v0.2.0...v0.2.1) (2026-11-09)\r\n\r\nÖne çıkanlar:\r\n- **Yeni:** özellik\r\n\r\n### Düzeltilenler (Fixed)\r\n- bir şey\r\n";
+        var notes = ChangelogParser.ExtractVersion(md, "0.2.1");
+        Assert.NotNull(notes);
+        Assert.NotEmpty(notes!.Highlights);
+    }
 }
