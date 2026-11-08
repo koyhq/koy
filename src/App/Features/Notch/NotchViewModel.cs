@@ -131,7 +131,8 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
             state,
             Strings.Get("PrivacyTooltipCamAndMic"),
             Strings.Get("PrivacyTooltipCam"),
-            Strings.Get("PrivacyTooltipMic"));
+            Strings.Get("PrivacyTooltipMic"),
+            Strings.Get("PrivacyUnknownApp"));
         OnPropertyChanged(nameof(HasPrivacyActivity));
     }
 

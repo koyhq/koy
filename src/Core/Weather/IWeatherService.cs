@@ -3,7 +3,7 @@ namespace Koy.Core.Weather;
 public sealed record WeatherInfo(
     double Temperature,
     int WeatherCode,
-    string Description,
+    string DescriptionKey,
     string IconKind,
     DateTimeOffset FetchedAt);
 

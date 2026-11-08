@@ -32,50 +32,39 @@ public static class CaptureUsagePolicy
     }
 
     /// <summary>
-    /// Aktif duruma göre kullanıcıya gösterilecek ToolTip metnini üretir.
+    /// Aktif duruma göre kullanıcıya gösterilecek ToolTip metnini üretir. Kalıplar ve "bilinmeyen uygulama" adı
+    /// arayüz katmanından gelir (Core resx'e erişemez).
     /// </summary>
     public static string FormatToolTip(
         PrivacyState state,
-        string? formatCamAndMic = null,
-        string? formatCam = null,
-        string? formatMic = null)
+        string formatCamAndMic,
+        string formatCam,
+        string formatMic,
+        string unknownApp)
     {
+        var cam = state.ActiveCameraApp ?? unknownApp;
+        var mic = state.ActiveMicrophoneApp ?? unknownApp;
+
         if (state.IsCameraInUse && state.IsMicrophoneInUse)
-        {
-            var cam = state.ActiveCameraApp ?? "Kamera";
-            var mic = state.ActiveMicrophoneApp ?? "Mikrofon";
-            return formatCamAndMic is not null
-                ? string.Format(formatCamAndMic, cam, mic)
-                : $"Kamera ({cam}) ve Mikrofon ({mic}) kullanımda";
-        }
+            return string.Format(formatCamAndMic, cam, mic);
 
         if (state.IsCameraInUse)
-        {
-            var cam = state.ActiveCameraApp ?? "Uygulama";
-            return formatCam is not null
-                ? string.Format(formatCam, cam)
-                : $"Kamera kullanımda ({cam})";
-        }
+            return string.Format(formatCam, cam);
 
         if (state.IsMicrophoneInUse)
-        {
-            var mic = state.ActiveMicrophoneApp ?? "Uygulama";
-            return formatMic is not null
-                ? string.Format(formatMic, mic)
-                : $"Mikrofon kullanımda ({mic})";
-        }
+            return string.Format(formatMic, mic);
 
         return string.Empty;
     }
 
     /// <summary>
     /// ConsentStore alt anahtar adından okunabilir uygulama adını ayıklar.
-    /// Paket adı (UWP) veya NonPackaged yol (# ile ayrılmış) desteklenir.
+    /// Paket adı (UWP) veya NonPackaged yol (# ile ayrılmış) desteklenir. Ad yoksa null döner.
     /// </summary>
-    public static string ExtractAppNameFromKey(string? keyName)
+    public static string? ExtractAppNameFromKey(string? keyName)
     {
         if (string.IsNullOrWhiteSpace(keyName))
-            return "Bilinmeyen uygulama";
+            return null;
 
         var clean = keyName.Trim();
 

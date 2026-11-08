@@ -1,3 +1,5 @@
+using System.Globalization;
+using Koy.Core.SystemStats;
 using System.Windows;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -153,7 +155,7 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
             BluetoothDeviceName = name;
             BluetoothConnected = connected;
             Percent = battery ?? 0;
-            PercentText = battery is >= 0 and <= 100 ? $"%{battery.Value}" : "";
+            PercentText = battery is >= 0 and <= 100 ? SystemFormat.Percent(battery.Value, CultureInfo.CurrentCulture) : "";
             BluetoothStatusText = connected
                 ? Strings.Get("BluetoothConnected")
                 : Strings.Get("BluetoothDisconnected");

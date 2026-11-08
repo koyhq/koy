@@ -1,3 +1,4 @@
+using Koy.Core.SystemStats;
 using System.Globalization;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -284,7 +285,7 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
             BatteryPercent = e.RemainingPercent;
             IsCharging = e.IsCharging;
             SetBatteryStatus(e.Status);
-            BatteryText = IsCharging ? $"%{BatteryPercent} ({Strings.Charging})" : $"%{BatteryPercent}";
+            BatteryText = IsCharging ? $"{SystemFormat.Percent(BatteryPercent, CultureInfo.CurrentCulture)} ({Strings.Charging})" : SystemFormat.Percent(BatteryPercent, CultureInfo.CurrentCulture);
         });
     }
 
@@ -294,7 +295,7 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
         BatteryPercent = _powerService.RemainingPercent;
         IsCharging = _powerService.IsCharging;
         SetBatteryStatus(_powerService.Status);
-        BatteryText = IsCharging ? $"%{BatteryPercent} ({Strings.Charging})" : $"%{BatteryPercent}";
+        BatteryText = IsCharging ? $"{SystemFormat.Percent(BatteryPercent, CultureInfo.CurrentCulture)} ({Strings.Charging})" : SystemFormat.Percent(BatteryPercent, CultureInfo.CurrentCulture);
     }
 
     private void SetBatteryStatus(BatteryStatus status)
@@ -351,7 +352,7 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
         HasWeather = true;
         TemperatureText = $"{Math.Round(weather.Temperature)}°C";
         TemperatureShort = $"{Math.Round(weather.Temperature)}°";
-        WeatherDescription = weather.Description;
+        WeatherDescription = Strings.Get(weather.DescriptionKey);
         WeatherIconKind = weather.IconKind;
     }
 

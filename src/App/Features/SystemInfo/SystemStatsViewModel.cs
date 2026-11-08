@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Koy.App.Resources;
@@ -124,20 +125,20 @@ public sealed partial class SystemStatsViewModel : ObservableObject, IDisposable
         var hasRates = hasData && s.RatesReady;
 
         CpuProgress = Math.Clamp(s.CpuPercent, 0, 100) / 100;
-        CpuText = hasRates ? SystemFormat.Percent(s.CpuPercent) : NoValue;
+        CpuText = hasRates ? SystemFormat.Percent(s.CpuPercent, CultureInfo.CurrentCulture) : NoValue;
         TopProcessText = string.IsNullOrWhiteSpace(s.TopProcessName)
             ? ""
             : string.Format(Strings.Get("SystemTopProcess"), s.TopProcessName);
 
         RamProgress = Math.Clamp(s.RamPercent, 0, 100) / 100;
-        RamText = hasData ? SystemFormat.Percent(s.RamPercent) : NoValue;
-        MemoryDetailText = hasData ? SystemFormat.Memory(s.RamUsedBytes, s.RamTotalBytes) : "";
+        RamText = hasData ? SystemFormat.Percent(s.RamPercent, CultureInfo.CurrentCulture) : NoValue;
+        MemoryDetailText = hasData ? SystemFormat.Memory(s.RamUsedBytes, s.RamTotalBytes, CultureInfo.CurrentCulture) : "";
 
         NetworkName = string.IsNullOrWhiteSpace(s.NetworkName) ? Strings.Get("SystemNoNetwork") : s.NetworkName;
-        DownloadText = "↓ " + (hasRates ? SystemFormat.Speed(s.NetDownBytesPerSec) : NoValue);
-        UploadText = "↑ " + (hasRates ? SystemFormat.Speed(s.NetUpBytesPerSec) : NoValue);
+        DownloadText = "↓ " + (hasRates ? SystemFormat.Speed(s.NetDownBytesPerSec, CultureInfo.CurrentCulture) : NoValue);
+        UploadText = "↑ " + (hasRates ? SystemFormat.Speed(s.NetUpBytesPerSec, CultureInfo.CurrentCulture) : NoValue);
 
-        KoyMemoryText = s.KoyMemoryBytes > 0 ? SystemFormat.Size(s.KoyMemoryBytes) : NoValue;
+        KoyMemoryText = s.KoyMemoryBytes > 0 ? SystemFormat.Size(s.KoyMemoryBytes, CultureInfo.CurrentCulture) : NoValue;
     }
 
     public void Dispose()

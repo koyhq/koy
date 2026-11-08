@@ -1989,5 +1989,104 @@
   <data name="PrivacyTooltipMic" xml:space="preserve">
     <value>Microphone in use ({0})</value>
   </data>
+  <data name="WeatherCondClear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="WeatherCondMostlyClear" xml:space="preserve">
+    <value>Mostly clear</value>
+  </data>
+  <data name="WeatherCondPartlyCloudy" xml:space="preserve">
+    <value>Partly cloudy</value>
+  </data>
+  <data name="WeatherCondOvercast" xml:space="preserve">
+    <value>Overcast</value>
+  </data>
+  <data name="WeatherCondFog" xml:space="preserve">
+    <value>Foggy</value>
+  </data>
+  <data name="WeatherCondRimeFog" xml:space="preserve">
+    <value>Rime fog</value>
+  </data>
+  <data name="WeatherCondLightDrizzle" xml:space="preserve">
+    <value>Light drizzle</value>
+  </data>
+  <data name="WeatherCondModerateDrizzle" xml:space="preserve">
+    <value>Moderate drizzle</value>
+  </data>
+  <data name="WeatherCondDenseDrizzle" xml:space="preserve">
+    <value>Dense drizzle</value>
+  </data>
+  <data name="WeatherCondFreezingDrizzle" xml:space="preserve">
+    <value>Freezing drizzle</value>
+  </data>
+  <data name="WeatherCondLightRain" xml:space="preserve">
+    <value>Light rain</value>
+  </data>
+  <data name="WeatherCondRain" xml:space="preserve">
+    <value>Rain</value>
+  </data>
+  <data name="WeatherCondHeavyRain" xml:space="preserve">
+    <value>Heavy rain</value>
+  </data>
+  <data name="WeatherCondFreezingRain" xml:space="preserve">
+    <value>Freezing rain</value>
+  </data>
+  <data name="WeatherCondLightSnow" xml:space="preserve">
+    <value>Light snow</value>
+  </data>
+  <data name="WeatherCondSnow" xml:space="preserve">
+    <value>Snow</value>
+  </data>
+  <data name="WeatherCondHeavySnow" xml:space="preserve">
+    <value>Heavy snow</value>
+  </data>
+  <data name="WeatherCondSnowGrains" xml:space="preserve">
+    <value>Snow grains</value>
+  </data>
+  <data name="WeatherCondLightShowers" xml:space="preserve">
+    <value>Light showers</value>
+  </data>
+  <data name="WeatherCondShowers" xml:space="preserve">
+    <value>Showers</value>
+  </data>
+  <data name="WeatherCondHeavyShowers" xml:space="preserve">
+    <value>Heavy showers</value>
+  </data>
+  <data name="WeatherCondLightSnowShowers" xml:space="preserve">
+    <value>Light snow showers</value>
+  </data>
+  <data name="WeatherCondHeavySnowShowers" xml:space="preserve">
+    <value>Heavy snow showers</value>
+  </data>
+  <data name="WeatherCondThunderstorm" xml:space="preserve">
+    <value>Thunderstorm</value>
+  </data>
+  <data name="WeatherCondHailStorm" xml:space="preserve">
+    <value>Thunderstorm with hail</value>
+  </data>
+  <data name="WeatherCondUnknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="DockNowPlayingTooltip" xml:space="preserve">
+    <value>Now playing (open the notch)</value>
+  </data>
+  <data name="DockShowTooltip" xml:space="preserve">
+    <value>Show the dock</value>
+  </data>
+  <data name="UnknownTrack" xml:space="preserve">
+    <value>Unknown track</value>
+  </data>
+  <data name="UnknownArtist" xml:space="preserve">
+    <value>Unknown artist</value>
+  </data>
+  <data name="MenuWindowTitle" xml:space="preserve">
+    <value>Koy Menu</value>
+  </data>
+  <data name="WizardWindowTitle" xml:space="preserve">
+    <value>Koy Setup</value>
+  </data>
+  <data name="PrivacyUnknownApp" xml:space="preserve">
+    <value>Unknown app</value>
+  </data>
 </root>
 

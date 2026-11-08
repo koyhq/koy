@@ -7,7 +7,7 @@
         xmlns:res="clr-namespace:Koy.App.Resources"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:SetupWizardViewModel}"
-        Title="Koy İlk Kurulum"
+        Title="{Binding [WizardWindowTitle], Source={x:Static res:Loc.Instance}}"
         Width="880"
         Height="600"
         WindowStartupLocation="CenterScreen"

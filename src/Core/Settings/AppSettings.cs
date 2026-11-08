@@ -17,7 +17,7 @@ public sealed record AppSettings
     public const int CurrentVersion = 3;
 
     public int Version { get; set; } = CurrentVersion;
-    public string Language { get; set; } = "tr";
+    public string Language { get; set; } = AppLanguage.SystemDefault;
     public bool NotchEnabled { get; set; } = true;
 
     /// <summary>Kapalıysa Windows görev çubuğuna hiç dokunulmaz.</summary>

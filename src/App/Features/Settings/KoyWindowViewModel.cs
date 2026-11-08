@@ -40,7 +40,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _hideWindowsTaskbar = true;
 
     [ObservableProperty]
-    private string _language = "tr";
+    private string _language = AppLanguage.SystemDefault;
 
     [ObservableProperty]
     private bool _autoCheckUpdates = true;
@@ -537,7 +537,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         if (_isLoading) return;
         if (e.PropertyName is nameof(SelectedPageIndex) or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
             or nameof(IsResetConfirming) or nameof(UninstallAvailability) or nameof(CanUninstall) or nameof(UninstallRowDescription)
-            or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates))
+            or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates) or nameof(DownloadProgressText))
             return;
 
         SaveSettings();
@@ -598,6 +598,13 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             Thread.CurrentThread.CurrentUICulture = culture;
             Thread.CurrentThread.CurrentCulture = culture;
             Koy.App.Resources.Loc.Instance.Refresh();
+
+            // Bu metinler Loc'a bağlı değil, burada hesaplanıyor; dil değişince kendileri haber vermeli.
+            OnPropertyChanged(nameof(CheckButtonText));
+            OnPropertyChanged(nameof(LastCheckText));
+            OnPropertyChanged(nameof(AboutStatusText));
+            OnPropertyChanged(nameof(UninstallRowDescription));
+            OnPropertyChanged(nameof(DownloadProgressText));
         }
         catch { }
     }
@@ -822,8 +829,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
         // Yeni sürümün notları güncelleme beslemesinden gelir (yayın akışı CHANGELOG bölümünü paket notu yapar).
         // Gömülü CHANGELOG yalnız kurulu sürümü bilir; yeni sürüm orada yoksa eski notları göstermek yerine liste boş kalır.
-        var release = ChangelogParser.ExtractVersion(UpdateStatus.AvailableUpdate?.TargetFullRelease?.NotesMarkdown, version)
-                      ?? ChangelogParser.ExtractVersion(ChangelogParser.ReadEmbeddedChangelog(), version);
+        var (feedNotes, feedLanguage) = ChangelogParser.SelectFeedNotes(UpdateStatus.AvailableUpdate?.TargetFullRelease?.NotesMarkdown, Language);
+        var release = ChangelogParser.ExtractVersion(feedNotes, version, feedLanguage)
+                      ?? ChangelogParser.ResolveEmbedded(version, Language);
 
         UpdateHighlights.Clear();
         if (release is not null && release.Highlights.Count > 0)
@@ -879,9 +887,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     public void OpenWhatsNewOverlay()
     {
         WhatsNewTitleText = string.Format(Strings.Get("WhatsNewTitle"), AppVersion);
-        var embeddedChangelog = ChangelogParser.ReadEmbeddedChangelog();
-        var release = ChangelogParser.ExtractVersion(embeddedChangelog, AppVersion)
-                      ?? ChangelogParser.ParseLatest(embeddedChangelog);
+        var release = ChangelogParser.ResolveEmbedded(AppVersion, Language)
+                      ?? ChangelogParser.ParseLatest(ChangelogParser.ReadEmbeddedChangelog(Language), Language);
 
         WhatsNewHighlights.Clear();
         WhatsNewSections.Clear();

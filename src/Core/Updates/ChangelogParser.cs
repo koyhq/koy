@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using Koy.Core.Settings;
 
 namespace Koy.Core.Updates;
 
@@ -37,14 +38,18 @@ public static class ChangelogParser
         @"^###\s+(.+)$",
         RegexOptions.Compiled | RegexOptions.Multiline);
 
+    /// <summary>Yayın akışının paket notunda İngilizce ve Türkçe bölümleri ayıran satır.</summary>
+    public const string TurkishNotesMarker = "<!-- koy-notes:tr -->";
+
     /// <summary>
-    /// Derlemeye gömülü CHANGELOG.md dosyasını okur.
+    /// Derlemeye gömülü değişiklik günlüğünü okur: Türkçe için CHANGELOG.tr.md, diğer dillerde CHANGELOG.md.
     /// </summary>
-    public static string? ReadEmbeddedChangelog(Assembly? assembly = null)
+    public static string? ReadEmbeddedChangelog(string language = AppLanguage.English, Assembly? assembly = null)
     {
         var asm = assembly ?? typeof(ChangelogParser).Assembly;
+        var fileName = language == AppLanguage.Turkish ? "CHANGELOG.tr.md" : "CHANGELOG.md";
         var resourceName = asm.GetManifestResourceNames()
-            .FirstOrDefault(n => n.EndsWith("CHANGELOG.md", StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(n => n.EndsWith(fileName, StringComparison.OrdinalIgnoreCase));
 
         if (resourceName is null)
             return null;
@@ -60,13 +65,13 @@ public static class ChangelogParser
     /// <summary>
     /// Belirtilen sürüme ait notları ayıklar.
     /// </summary>
-    public static ReleaseNotes? ExtractVersion(string? markdown, string targetVersion)
+    public static ReleaseNotes? ExtractVersion(string? markdown, string targetVersion, string language = AppLanguage.English)
     {
         if (string.IsNullOrWhiteSpace(markdown) || string.IsNullOrWhiteSpace(targetVersion))
             return null;
 
         var cleanTarget = NormalizeVersion(targetVersion);
-        var entries = SplitVersionEntries(markdown);
+        var entries = SplitVersionEntries(markdown, language);
 
         foreach (var entry in entries)
         {
@@ -82,13 +87,48 @@ public static class ChangelogParser
     /// <summary>
     /// Belgedeki en son (en üstteki) sürüm notunu ayrıştırır.
     /// </summary>
-    public static ReleaseNotes? ParseLatest(string? markdown)
+    public static ReleaseNotes? ParseLatest(string? markdown, string language = AppLanguage.English)
     {
         if (string.IsNullOrWhiteSpace(markdown))
             return null;
 
-        var entries = SplitVersionEntries(markdown);
+        var entries = SplitVersionEntries(markdown, language);
         return entries.FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Sürümün notunu seçili dilde arar, o dilde yoksa öbür dile düşer; ekran hiç boş kalmaz.
+    /// </summary>
+    public static ReleaseNotes? ResolveVersion(string version, string language, Func<string, string?> readChangelog)
+    {
+        var preferred = language == AppLanguage.Turkish ? AppLanguage.Turkish : AppLanguage.English;
+        var other = preferred == AppLanguage.Turkish ? AppLanguage.English : AppLanguage.Turkish;
+        return ExtractVersion(readChangelog(preferred), version, preferred)
+               ?? ExtractVersion(readChangelog(other), version, other);
+    }
+
+    /// <summary>Gömülü günlüklerden <see cref="ResolveVersion"/>.</summary>
+    public static ReleaseNotes? ResolveEmbedded(string version, string language) =>
+        ResolveVersion(version, language, l => ReadEmbeddedChangelog(l));
+
+    /// <summary>
+    /// Güncelleme beslemesindeki paket notundan seçili dilin bölümünü ayırır. İşaret yoksa not İngilizcedir;
+    /// Türkçe bölüm boşsa İngilizce kullanılır. Dönen dil, metnin gerçek dilidir.
+    /// </summary>
+    public static (string? Markdown, string Language) SelectFeedNotes(string? notes, string language)
+    {
+        if (string.IsNullOrWhiteSpace(notes))
+            return (notes, AppLanguage.English);
+
+        var index = notes.IndexOf(TurkishNotesMarker, StringComparison.Ordinal);
+        if (index < 0)
+            return (notes, AppLanguage.English);
+
+        var english = notes[..index].Trim();
+        var turkish = notes[(index + TurkishNotesMarker.Length)..].Trim();
+        return language == AppLanguage.Turkish && turkish.Length > 0
+            ? (turkish, AppLanguage.Turkish)
+            : (english, AppLanguage.English);
     }
 
     /// <summary>
@@ -109,7 +149,7 @@ public static class ChangelogParser
         return list;
     }
 
-    private static List<ReleaseNotes> SplitVersionEntries(string markdown)
+    private static List<ReleaseNotes> SplitVersionEntries(string markdown, string language)
     {
         var result = new List<ReleaseNotes>();
         var matches = VersionHeaderRegex.Matches(markdown);
@@ -136,14 +176,14 @@ public static class ChangelogParser
             var bodyIndex = sectionRaw.IndexOf('\n');
             var body = bodyIndex >= 0 ? sectionRaw[(bodyIndex + 1)..].Trim() : string.Empty;
 
-            var parsed = ParseEntryBody(version, compareUrl, date, body, sectionRaw);
+            var parsed = ParseEntryBody(version, compareUrl, date, body, sectionRaw, language);
             result.Add(parsed);
         }
 
         return result;
     }
 
-    private static ReleaseNotes ParseEntryBody(string version, string? compareUrl, string? date, string body, string raw)
+    private static ReleaseNotes ParseEntryBody(string version, string? compareUrl, string? date, string body, string raw, string language)
     {
         var highlights = new List<string>();
         var sections = new List<ReleaseSection>();
@@ -178,7 +218,7 @@ public static class ChangelogParser
 
             if (line.StartsWith("- ") || line.StartsWith("* "))
             {
-                var bullet = CleanItem(line[2..].Trim());
+                var bullet = CleanItem(line[2..].Trim(), language);
                 if (bullet is null)
                     continue;
                 if (inHighlights)
@@ -232,7 +272,7 @@ public static class ChangelogParser
     /// Sürüm notu maddesini düz metne çevirir: bağlantılar, commit ve issue referansları, kalın/kod işaretleri atılır;
     /// conventional commit kapsamı ("**dock:**") düşer ve ilk harf büyür. Uygulamayla ilgisiz kapsamda null döner.
     /// </summary>
-    public static string? CleanItem(string item)
+    public static string? CleanItem(string item, string language = AppLanguage.English)
     {
         if (string.IsNullOrWhiteSpace(item))
             return null;
@@ -255,7 +295,7 @@ public static class ChangelogParser
             return null;
 
         if (droppedScope || char.IsLower(s[0]))
-            s = char.ToUpper(s[0], Turkish) + s[1..];
+            s = char.ToUpper(s[0], language == AppLanguage.Turkish ? Turkish : CultureInfo.InvariantCulture) + s[1..];
 
         return s;
     }

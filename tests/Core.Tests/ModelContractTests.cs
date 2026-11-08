@@ -40,10 +40,10 @@ public sealed class ModelContractTests
     public void WeatherInfo_InitializesProperly()
     {
         var now = DateTimeOffset.UtcNow;
-        var info = new WeatherInfo(21.5, 2, "Parçalı Bulutlu", "PartlyCloudy", now);
+        var info = new WeatherInfo(21.5, 2, "WeatherCondPartlyCloudy", "PartlyCloudy", now);
         Assert.Equal(21.5, info.Temperature);
         Assert.Equal(2, info.WeatherCode);
-        Assert.Equal("Parçalı Bulutlu", info.Description);
+        Assert.Equal("WeatherCondPartlyCloudy", info.DescriptionKey);
         Assert.Equal("PartlyCloudy", info.IconKind);
         Assert.Equal(now, info.FetchedAt);
     }

@@ -51,7 +51,7 @@
                 VerticalAlignment="Bottom"
                 Margin="0,0,0,4"
                 Cursor="Hand"
-                ToolTip="Dock'u Göster"
+                ToolTip="{Binding [DockShowTooltip], Source={x:Static res:Loc.Instance}}"
                 Visibility="{Binding IsHandleVisible, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"
                 MouseEnter="OnDodgeHandleMouseEnter"
                 MouseLeave="OnDodgeHandleMouseLeave"/>

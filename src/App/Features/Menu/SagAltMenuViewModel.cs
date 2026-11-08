@@ -16,7 +16,7 @@ public sealed partial class SagAltMenuViewModel : ObservableObject
     private int _monitorCount = 1;
 
     [ObservableProperty]
-    private string _monitorSummary = "1 ekranda çalışıyor";
+    private string _monitorSummary = string.Format(System.Globalization.CultureInfo.CurrentCulture, Koy.App.Resources.Strings.MonitorSummary, 1);
 
     [ObservableProperty]
     private bool _notchEnabled = true;
@@ -35,7 +35,7 @@ public sealed partial class SagAltMenuViewModel : ObservableObject
     public string ExitText => Koy.App.Resources.Loc.Instance[IsExitConfirming ? "ExitKoyConfirm" : "ExitKoyAction"];
 
     [ObservableProperty]
-    private string _pauseText = "1 saat duraklat";
+    private string _pauseText = Koy.App.Resources.Strings.Get("PauseOneHourAction");
 
     public event Action? RequestClose;
     public event Action? RequestOpenKoyWindow;

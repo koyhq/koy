@@ -459,7 +459,7 @@
               </Button>
 
               <!-- Pil: yalnız pil varsa -->
-              <TextBlock Text="{Binding BatteryPercent, StringFormat='%{0}'}" FontSize="12" FontWeight="SemiBold"
+              <TextBlock Text="{Binding BatteryPercent, Converter={x:Static res:PercentTextConverter.Instance}}" FontSize="12" FontWeight="SemiBold"
                          Foreground="{DynamicResource KoyNotchOk}" VerticalAlignment="Center" Margin="0,0,8,0"
                          Visibility="{Binding HasBattery, Converter={StaticResource BoolToVis}}" />
 

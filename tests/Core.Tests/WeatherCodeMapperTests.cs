@@ -5,18 +5,18 @@ namespace Koy.Core.Tests;
 public sealed class WeatherCodeMapperTests
 {
     [Theory]
-    [InlineData(0, "Açık", "Sun")]
-    [InlineData(1, "Çoğunlukla Açık", "PartlyCloudy")]
-    [InlineData(2, "Parçalı Bulutlu", "PartlyCloudy")]
-    [InlineData(3, "Kapalı", "Cloud")]
-    [InlineData(45, "Sisli", "Fog")]
-    [InlineData(61, "Hafif Yağmurlu", "Rain")]
-    [InlineData(71, "Hafif Kar Yağışlı", "Snow")]
-    [InlineData(95, "Gök Gürültülü Fırtına", "Thunderstorm")]
-    [InlineData(999, "Bilinmiyor", "Cloud")]
-    public void Maps_Wmo_Codes_Correctly(int code, string expectedDescription, string expectedIcon)
+    [InlineData(0, "WeatherCondClear", "Sun")]
+    [InlineData(1, "WeatherCondMostlyClear", "PartlyCloudy")]
+    [InlineData(2, "WeatherCondPartlyCloudy", "PartlyCloudy")]
+    [InlineData(3, "WeatherCondOvercast", "Cloud")]
+    [InlineData(45, "WeatherCondFog", "Fog")]
+    [InlineData(61, "WeatherCondLightRain", "Rain")]
+    [InlineData(71, "WeatherCondLightSnow", "Snow")]
+    [InlineData(95, "WeatherCondThunderstorm", "Thunderstorm")]
+    [InlineData(999, "WeatherCondUnknown", "Cloud")]
+    public void Maps_Wmo_Codes_Correctly(int code, string expectedKey, string expectedIcon)
     {
-        Assert.Equal(expectedDescription, WeatherCodeMapper.ToDescription(code));
+        Assert.Equal(expectedKey, WeatherCodeMapper.ToDescriptionKey(code));
         Assert.Equal(expectedIcon, WeatherCodeMapper.ToIconKind(code));
     }
 }

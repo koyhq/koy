@@ -7,7 +7,7 @@
         xmlns:res="clr-namespace:Koy.App.Resources"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:SagAltMenuViewModel}"
-        Title="Koy Menüsü"
+        Title="{Binding [MenuWindowTitle], Source={x:Static res:Loc.Instance}}"
         Width="320"
         SizeToContent="Height"
         WindowStyle="None"

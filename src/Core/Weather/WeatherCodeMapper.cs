@@ -2,34 +2,35 @@ namespace Koy.Core.Weather;
 
 public static class WeatherCodeMapper
 {
-    public static string ToDescription(int code) => code switch
+    /// <summary>WMO hava kodunun çeviri anahtarı; metni arayüz katmanı çözer (Strings.resx).</summary>
+    public static string ToDescriptionKey(int code) => code switch
     {
-        0 => "Açık",
-        1 => "Çoğunlukla Açık",
-        2 => "Parçalı Bulutlu",
-        3 => "Kapalı",
-        45 => "Sisli",
-        48 => "Kırağılı Sis",
-        51 => "Hafif Çisenti",
-        53 => "Orta Çisenti",
-        55 => "Yoğun Çisenti",
-        56 or 57 => "Dondurucu Çisenti",
-        61 => "Hafif Yağmurlu",
-        63 => "Yağmurlu",
-        65 => "Kuvvetli Yağmurlu",
-        66 or 67 => "Dondurucu Yağmur",
-        71 => "Hafif Kar Yağışlı",
-        73 => "Kar Yağışlı",
-        75 => "Yoğun Kar Yağışlı",
-        77 => "Kar Taneli",
-        80 => "Hafif Sağanak",
-        81 => "Sağanak Yağışlı",
-        82 => "Kuvvetli Sağanak",
-        85 => "Hafif Kar Sağanağı",
-        86 => "Kuvvetli Kar Sağanağı",
-        95 => "Gök Gürültülü Fırtına",
-        96 or 99 => "Dolulu Fırtına",
-        _ => "Bilinmiyor"
+        0 => "WeatherCondClear",
+        1 => "WeatherCondMostlyClear",
+        2 => "WeatherCondPartlyCloudy",
+        3 => "WeatherCondOvercast",
+        45 => "WeatherCondFog",
+        48 => "WeatherCondRimeFog",
+        51 => "WeatherCondLightDrizzle",
+        53 => "WeatherCondModerateDrizzle",
+        55 => "WeatherCondDenseDrizzle",
+        56 or 57 => "WeatherCondFreezingDrizzle",
+        61 => "WeatherCondLightRain",
+        63 => "WeatherCondRain",
+        65 => "WeatherCondHeavyRain",
+        66 or 67 => "WeatherCondFreezingRain",
+        71 => "WeatherCondLightSnow",
+        73 => "WeatherCondSnow",
+        75 => "WeatherCondHeavySnow",
+        77 => "WeatherCondSnowGrains",
+        80 => "WeatherCondLightShowers",
+        81 => "WeatherCondShowers",
+        82 => "WeatherCondHeavyShowers",
+        85 => "WeatherCondLightSnowShowers",
+        86 => "WeatherCondHeavySnowShowers",
+        95 => "WeatherCondThunderstorm",
+        96 or 99 => "WeatherCondHailStorm",
+        _ => "WeatherCondUnknown"
     };
 
     public static string ToIconKind(int code) => code switch
