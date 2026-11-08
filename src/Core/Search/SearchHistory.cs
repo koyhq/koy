@@ -20,12 +20,19 @@ public sealed class SearchHistory(string filePath)
     /// <summary>Listede gösterilen kayıt; fazlası yalnız öneride kullanılır.</summary>
     public const int VisibleEntries = 20;
 
+    /// <summary>Bundan uzun arama geçmişe yazılmaz (yapıştırılmış metin olabilir).</summary>
+    public const int MaxEntryLength = 256;
+
     private List<string>? _entries;
 
     public IReadOnlyList<string> Entries => Load();
 
     public void Add(string term)
     {
+        // Satır sonu dosyayı bozar (satır başına bir kayıt); çok satırlı metin hiç yazılmaz.
+        if (term.Length == 0 || term.Length > MaxEntryLength || SearchCommandSafety.HasControlCharacters(term))
+            return;
+
         var entries = Load();
         if (entries.Count > 0 && entries[0] == term)
             return;
@@ -71,7 +78,7 @@ public sealed class SearchHistory(string filePath)
         try
         {
             _entries = File.Exists(filePath)
-                ? File.ReadAllLines(filePath).Where(l => l.Length > 0).Take(MaxEntries).ToList()
+                ? File.ReadAllLines(filePath).Where(l => l.Length is > 0 and <= MaxEntryLength && !SearchCommandSafety.HasControlCharacters(l)).Take(MaxEntries).ToList()
                 : [];
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
@@ -90,7 +97,10 @@ public sealed class SearchHistory(string filePath)
             if (!string.IsNullOrEmpty(directory))
                 Directory.CreateDirectory(directory);
 
-            File.WriteAllLines(filePath, _entries ?? []);
+            // Geçici dosya + taşıma: yarım yazılmış geçmiş kalmaz.
+            var temp = filePath + ".tmp";
+            File.WriteAllLines(temp, _entries ?? []);
+            File.Move(temp, filePath, overwrite: true);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {

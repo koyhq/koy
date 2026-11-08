@@ -353,9 +353,9 @@ public sealed class SearchPanelController : IDisposable
 
     private void Remember(SearchResult result)
     {
-        // Başında boşluk olan arama, kabuktaki gibi geçmişe yazılmaz.
+        // Başında boşluk olan arama, kabuktaki gibi geçmişe yazılmaz; pano metni (parola olabilir) hiç yazılmaz.
         if (result.SkipHistory || HistoryMode == SearchHistoryMode.Disabled || ShowingHistory
-            || _query.IsEmpty || _untrimmed.StartsWith(' '))
+            || _query.IsEmpty || _untrimmed.StartsWith(' ') || QueryFromClipboard)
             return;
 
         _history?.Add(_query.Raw);

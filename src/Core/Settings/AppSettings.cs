@@ -134,7 +134,8 @@ public sealed record AppSettings
     /// <summary>Arama paneli yeniden açılınca son sorgu geri gelsin.</summary>
     public bool SearchRetainPrior { get; set; } = true;
 
-    public Koy.Core.Search.SearchHistoryMode SearchHistoryMode { get; set; } = Koy.Core.Search.SearchHistoryMode.Suggestion;
+    /// <summary>Varsayılan kapalı: geçmiş düz metin dosyasına yazılır, açmak kullanıcının kararı. Ayarda açık değer varsa korunur.</summary>
+    public Koy.Core.Search.SearchHistoryMode SearchHistoryMode { get; set; } = Koy.Core.Search.SearchHistoryMode.Disabled;
 
     /// <summary>Kapatılan arama kaynaklarının kimlikleri.</summary>
     public List<string> SearchDisabledSources { get; set; } = [];

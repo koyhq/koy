@@ -499,7 +499,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _searchRetainPrior = true;
 
     [ObservableProperty]
-    private Koy.Core.Search.SearchHistoryMode _searchHistoryMode = Koy.Core.Search.SearchHistoryMode.Suggestion;
+    private Koy.Core.Search.SearchHistoryMode _searchHistoryMode = Koy.Core.Search.SearchHistoryMode.Disabled;
 
     /// <summary>Kaynak anahtarlarından biri değişince artar; kaydı ve çentiğin yeniden kurulmasını tetikler.</summary>
     [ObservableProperty]

@@ -608,4 +608,57 @@ public sealed class SearchPanelTests : IDisposable
         Assert.Empty(history.Entries);
         Assert.False(panel.ShowingHistory);
     }
+
+    // --- Geçmiş gizliliği ---
+
+    [Theory]
+    [InlineData("a\nb")]
+    [InlineData("a\r\nb")]
+    [InlineData("a\u0007b")]
+    [InlineData("")]
+    public void History_never_saves_control_characters(string term)
+    {
+        var history = History();
+        history.Add("güvenli");
+        history.Add(term);
+
+        Assert.Equal(["güvenli"], history.Entries);
+        Assert.Equal(["güvenli"], new SearchHistory(Path.Combine(_dir, "history.txt")).Entries);
+    }
+
+    [Fact]
+    public void History_skips_overlong_entries()
+    {
+        var history = History();
+        history.Add(new string('x', SearchHistory.MaxEntryLength + 1));
+        history.Add(new string('y', SearchHistory.MaxEntryLength));
+
+        Assert.Single(history.Entries);
+    }
+
+    [Fact]
+    public void History_ignores_corrupted_lines_when_loading()
+    {
+        Directory.CreateDirectory(_dir);
+        File.WriteAllText(Path.Combine(_dir, "history.txt"), "iyi\n\u0007kötü\nbaşka\n");
+
+        Assert.Equal(["iyi", "başka"], History().Entries);
+    }
+
+    [Fact]
+    public void History_is_off_by_default_for_new_settings() =>
+        Assert.Equal(SearchHistoryMode.Disabled, new Koy.Core.Settings.AppSettings().SearchHistoryMode);
+
+    [Fact]
+    public void Clipboard_query_is_not_saved_to_history()
+    {
+        var history = History();
+        var panel = new SearchPanelController([new FakeSource(R("a"))], history: history) { HistoryMode = SearchHistoryMode.Suggestion };
+        panel.Open();
+        panel.ReplaceQuery("gizli parola", fromClipboard: true);
+
+        panel.Activate();
+
+        Assert.Empty(history.Entries);
+    }
 }
