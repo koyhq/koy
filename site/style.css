@@ -87,7 +87,26 @@ p a, dd a { text-underline-offset: 3px; }
 /* ---------- Hero ---------- */
 .hero { text-align: center; padding: 0 var(--gutter) clamp(64px, 9vw, 128px); }
 .screen--hero { width: min(600px, 100%); margin: 8px auto 0; aspect-ratio: 1008 / 570; }
-.screen--hero .screen__img { width: 100%; transform-origin: 50% 0; }
+/* Hero çentiği Dock demosuyla aynı betikle (notch.js) çalışır; kapalı hali sayfa tepesinden sarkan çentik. */
+.hero__closed { position: absolute; top: 0; left: 50%; width: 41.5%; transform: translateX(-50%); transition: opacity .25s ease; }
+.hero__open {
+  position: absolute; top: 0; left: 0; width: 100%;
+  transform-origin: 50% 0; transform: scale(.42); opacity: 0; pointer-events: none;
+  transition: transform .9s var(--ease-spring), opacity .3s ease;
+}
+/* Çentik kapalıyken ekran boş kalmasın: Dock demosundaki gibi altta dock durur, açılınca çentiğin arkasında söner. */
+.hero__dock {
+  position: absolute; left: 50%; bottom: 7%; width: min(86%, 494px); transform: translateX(-50%);
+  border-radius: 14px; box-shadow: 0 4px 14px rgba(0, 0, 0, .16); transition: opacity .25s ease;
+}
+/* Tıklama alanı: kapalıyken yalnız çentiğin çevresi, açıkken bütün açık çentik (fare içindeyken kapanmasın). */
+.hero__zone {
+  position: absolute; z-index: 3; top: 0; left: 24%; width: 52%; height: max(14%, 44px);
+  padding: 0; border: 0; background: none; cursor: pointer; border-radius: 0 0 24px 24px;
+}
+.screen--hero.is-open .hero__open { transform: none; opacity: 1; }
+.screen--hero.is-open .hero__closed, .screen--hero.is-open .hero__dock { opacity: 0; }
+.screen--hero.is-open .hero__zone { left: 0; width: 100%; height: 100%; border-radius: 0; }
 
 .badge {
   display: inline-flex; align-items: center; gap: 10px; margin-top: clamp(28px, 4vw, 44px);
@@ -231,7 +250,6 @@ h3 { margin: 0; font: 600 18px/1.3 var(--font-display); letter-spacing: -.015em;
 
 /* ---------- Giriş koreografisi (yalnız JS varsa gizli başlar) ---------- */
 .js .nav, .js .badge, .js .hero__sub, .js .hero__cta, .js .hero__facts { opacity: 0; transform: translateY(18px); }
-.js .screen--hero .screen__img { opacity: 0; transform: scale(.42); }
 .js .line { overflow: hidden; padding-top: .14em; margin-top: -.14em; padding-bottom: .1em; margin-bottom: -.1em; }
 .js .line > span { display: block; transform: translateY(112%); }
 
@@ -244,10 +262,8 @@ h3 { margin: 0; font: 600 18px/1.3 var(--font-display); letter-spacing: -.015em;
 .is-ready .hero__sub { --t: .85s; }
 .is-ready .hero__cta { --t: .95s; }
 .is-ready .hero__facts { --t: 1.05s; }
-.is-ready .screen--hero .screen__img {
-  opacity: 1; transform: none;
-  transition: opacity .35s ease .1s, transform 1.15s var(--ease-spring) .1s;
-}
+/* Giriş: sayfa hazır olana dek hero çentiği küçük ve saydam bekler, sonra yayla açılır. */
+.js body:not(.is-ready) .screen--hero.is-open .hero__open { opacity: 0; transform: scale(.42); }
 .is-ready .line > span { transform: none; transition: transform 1s var(--ease-out) var(--t, .5s); }
 .is-ready .line:nth-child(2) > span { --t: .62s; }
 
@@ -260,6 +276,9 @@ h3 { margin: 0; font: 600 18px/1.3 var(--font-display); letter-spacing: -.015em;
      Dar masaüstünde (900–1359 px) çerçevenin iki yanındaki yer bağlantılara yetmez, yalnız logo ve İndir kalır. */
   .nav { position: absolute; inset: 0 0 auto 0; }
   .screen--hero { margin-top: 0; border-radius: 0 0 var(--radius) var(--radius); }
+  /* Üst çubuk çentik alanının üstünden geçer; yalnız kendi öğeleri fareyi tutsun, çentik hover'ı engellenmesin. */
+  .nav { pointer-events: none; }
+  .nav > * { pointer-events: auto; }
 }
 @media (min-width: 900px) and (max-width: 1359px) {
   .nav__links a:not(.btn) { display: none; }
@@ -295,5 +314,5 @@ h3 { margin: 0; font: 600 18px/1.3 var(--font-display); letter-spacing: -.015em;
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
   .js .nav, .js .badge, .js .hero__sub, .js .hero__cta, .js .hero__facts,
-  .js .screen--hero .screen__img, .js .line > span, .js [data-reveal] { opacity: 1; transform: none; }
+  .js .line > span, .js [data-reveal] { opacity: 1; transform: none; }
 }

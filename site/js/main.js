@@ -2,7 +2,7 @@ import { initReveal } from './reveal.js';
 import { initTabs } from './tabs.js';
 import { initVersion } from './version.js';
 import { initCopy } from './copy.js';
-import { initNotchDemo } from './notch.js';
+import { initNotch } from './notch.js';
 import { initParallax } from './parallax.js';
 
 // Giriş animasyonu fontlar yerleşince başlar; yoksa başlık sıçrar.
@@ -15,6 +15,6 @@ Promise.race([fontsReady, timeout]).then(() => {
 initReveal();
 document.querySelectorAll('[data-tabs]').forEach(initTabs);
 initCopy();
-document.querySelectorAll('[data-notch-demo]').forEach(initNotchDemo);
+document.querySelectorAll('[data-notch]').forEach(initNotch);
 initParallax();
 initVersion();
