@@ -1,26 +1,26 @@
-# Davranış Kuralları (Code of Conduct)
+# Code of Conduct
 
-## Taahhüdümüz
+## Our Pledge
 
-Koy topluluğu olarak; deneyim düzeyi, kimliği, dili veya geçmişi ne olursa olsun herkes için açık, saygılı, yapıcı ve tacizden uzak bir açık kaynak ortamı sağlamayı taahhüt ediyoruz.
+As the Koy community, we pledge to provide an open, respectful, constructive and harassment-free open source environment for everyone, regardless of experience level, identity, language or background.
 
-## Beklenen Davranışlar
+## Expected Behavior
 
-- **Teknik ve Yapıcı Odak:** Tartışmaları kişisel görüşler yerine ölçülebilir teknik veriler (bellek kullanımı, CPU etkisi, temiz mimari) üzerinden yürütmek.
-- **Saygılı İletişim:** Farklı bakış açılarına, hata bildirimlerine ve yeni katkıda bulunanlara nazik ve yol gösterici yaklaşmak.
-- **Sorumluluk:** Hataları kabul etmek, geri bildirimleri yapıcı şekilde değerlendirmek ve projenin bütünlüğünü korumak.
+- **Technical and Constructive Focus:** Keeping discussions on measurable technical data (memory usage, CPU impact, clean architecture) rather than personal opinions.
+- **Respectful Communication:** Being kind and helpful towards different viewpoints, bug reports and new contributors.
+- **Responsibility:** Acknowledging mistakes, weighing feedback constructively and protecting the integrity of the project.
 
-## Kabul Edilmeyen Davranışlar
+## Unacceptable Behavior
 
-- Kişisel saldırılar, aşağılayıcı dil, hakaret veya taciz.
-- İstenmeyen reklam, spam veya konu dışı tartışmalarla kayıtları (Issues/PRs) kirletmek.
-- Başkalarının özel bilgilerini izinsiz paylaşmak.
-- Telif hakkı veya lisans ihlali içeren kod kopyalamak.
+- Personal attacks, demeaning language, insults or harassment.
+- Unsolicited advertising, spam or off-topic discussions in Issues/PRs.
+- Sharing other people's private information without permission.
+- Copying code that violates copyright or licenses.
 
-## Yaptırım ve Bildirim
+## Enforcement and Reporting
 
-Proje yöneticileri, bu kurallara uymayan yorumları, commit'leri, PR'ları veya kayıtları düzenleme, kaldırma ve ilgili kullanıcıları topluluktan uzaklaştırma hakkına ve sorumluluğuna sahiptir.
+Project maintainers have the right and responsibility to edit or remove comments, commits, PRs and issues that do not follow these rules, and to remove the users involved from the community.
 
-Kurallara aykırı bir durumla karşılaşırsanız GitHub üzerinden proje sahibi ([@brhnshn](https://github.com/brhnshn)) ile iletişime geçebilirsiniz.
+If you encounter a violation, you can contact the project owner ([@brhnshn](https://github.com/brhnshn)) on GitHub.
 
-*Bu belge [Contributor Covenant v2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html) esas alınarak hazırlanmıştır.*
+*This document is based on the [Contributor Covenant v2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html).*

@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: "Sorular & Tartışmalar (Discussions)"
+  - name: "Questions & Discussions"
     url: "https://github.com/koyhq/koy/discussions"
-    about: "Kullanım soruları, fikir alışverişi ve genel sohbet için GitHub Discussions alanını kullanın."
+    about: "Use GitHub Discussions for usage questions, ideas and general chat."

@@ -1,38 +1,38 @@
-name: "Özellik İsteği / Feature Request"
-description: "Koy için yeni bir panel, etkileşim veya iyileştirme önerin."
+name: "Feature Request"
+description: "Suggest a new panel, interaction or improvement for Koy."
 title: "[Feat]: "
 labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
       value: |
-        > **Not:** Koy'un en temel tasarım ilkesi **hafifliktir** (tek süreç, sıfır tarayıcı/WebView2, boşta %0 CPU, düşük bellek). Lütfen önerinizin bu mimariyle uyumunu göz önünde bulundurun.
+        > **Note:** Koy's core design principle is being **lightweight** (single process, no browser/WebView2, 0% idle CPU, low memory). Please keep this architecture in mind when making your suggestion.
 
   - type: textarea
     id: problem
     attributes:
-      label: "Çözülen Sorun veya İhtiyaç (Problem / Motivation)"
-      description: "Bu özellik hangi kullanım senaryosunu kolaylaştıracak?"
+      label: "Problem / Motivation"
+      description: "Which use case would this feature make easier?"
     validations:
       required: true
 
   - type: textarea
     id: solution
     attributes:
-      label: "Önerilen Çözüm (Proposed Solution)"
-      description: "Nasıl görünmeli ve nasıl çalışmalı?"
+      label: "Proposed Solution"
+      description: "How should it look and work?"
     validations:
       required: true
 
   - type: dropdown
     id: area
     attributes:
-      label: "Etki Alanı (Area)"
+      label: "Area"
       options:
-        - "Notch (Çentik & Paneller)"
-        - "Dock & Pencere Yönetimi"
-        - "Çoklu Ekran"
-        - "Ayarlar & Özelleştirme"
-        - "Performans & Bellek"
+        - "Notch & Panels"
+        - "Dock & Window Management"
+        - "Multi-Monitor"
+        - "Settings & Customization"
+        - "Performance & Memory"
     validations:
       required: true

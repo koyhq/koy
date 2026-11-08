@@ -1,30 +1,30 @@
-# Güvenlik Politikası (Security Policy)
+# Security Policy
 
-## Desteklenen Sürümler (Supported Versions)
+## Supported Versions
 
-Koy'un güvenlik güncellemeleri en son yayınlanan kararlı sürüm üzerinden sağlanır:
+Security updates for Koy are provided on the latest stable release:
 
-| Sürüm | Destek Durumu |
+| Version | Status |
 | --- | --- |
-| `0.1.x` | Destekleniyor |
+| Latest release | Supported |
 
-## Güvenlik Mimarisinin Temelleri
+## Security Architecture
 
-Koy, Windows 11 masaüstü ortamında çalışırken kullanıcı güvenliğini ve gizliliğini korumak için şu ilkeleri uygular:
+Koy follows these principles to protect user security and privacy on the Windows 11 desktop:
 
-1. **Sıfır Telemetri ve Bulut Hesabı:** Koy hiçbir kullanıcı verisini, ekran görüntüsünü veya dosya bilgisini dış sunuculara göndermez.
-2. **Yerel Veri Saklama:** Ayarlar (`%AppData%\Koy\settings.json`) ve Raf öğeleri (`%AppData%\Koy\shelf.json`) yalnızca kullanıcının yerel diskinde tutulur.
-3. **Minimale İndirgenmiş Ağ İstekleri:** Ağ erişimi yalnızca iki amaçla yapılır:
-   - Hava durumu paneli açıldığında **Open-Meteo** API'sinden (`api.open-meteo.com`) anahtarsız hava durumu verisi çekmek (cihaz konum izni istenmez, yalnız ayardaki şehir adı kullanılır).
-   - **Velopack** aracılığıyla resmi GitHub Releases (`github.com/koyhq/koy`) üzerinden sürüm denetimi yapmak.
-4. **SHA256 Bütünlük Doğrulaması:** Her GitHub Release sürümü, kurulum ve taşınabilir paketlerin bütünlüğünü doğrulamak için `SHA256SUMS.txt` dosyası ile birlikte yayınlanır.
+1. **No Telemetry, No Cloud Account:** Koy never sends user data, screenshots or file information to external servers.
+2. **Local Data Storage:** Settings (`%AppData%\Koy\settings.json`) and Shelf items (`%AppData%\Koy\shelf.json`) are kept only on the user's local disk.
+3. **Minimal Network Requests:** Network access is used for only two purposes:
+   - Fetching keyless weather data from the **Open-Meteo** API (`api.open-meteo.com`) when the weather panel is opened (no device location permission is requested; only the city name in settings is used).
+   - Checking for releases through **Velopack** on the official GitHub Releases (`github.com/koyhq/koy`).
+4. **SHA256 Integrity Verification:** Every GitHub release is published with a `SHA256SUMS.txt` file to verify the integrity of the installer and portable packages.
 
-## Güvenlik Açığı Bildirimi (Reporting a Vulnerability)
+## Reporting a Vulnerability
 
-Koy'da bir güvenlik açığı (ör. ayrıcalık yükselmesi, güvensiz dosya işlemi, P/Invoke bellek hatası) tespit ederseniz:
+If you find a security vulnerability in Koy (e.g. privilege escalation, unsafe file handling, a P/Invoke memory bug):
 
-1. **Lütfen açığı herkese açık bir GitHub Issue olarak paylaşmayın.**
-2. Bunun yerine GitHub deposundaki **[Security Advisories -> Report a vulnerability](https://github.com/koyhq/koy/security/advisories/new)** sekmesini kullanarak özel bildirim oluşturun.
-3. Bildiriminize hatanın nasıl tetiklendiğini, etkilenen bileşeni (`Core`, `Platform`, `App`) ve varsa çözüm önerinizi ekleyin.
+1. **Please do not share it as a public GitHub issue.**
+2. Instead, create a private report using **[Security Advisories → Report a vulnerability](https://github.com/koyhq/koy/security/advisories/new)** in the GitHub repository.
+3. Include how the bug is triggered, the affected component (`Core`, `Platform`, `App`) and a proposed fix if you have one.
 
-Bildiriminiz en geç **72 saat** içinde incelenecek ve doğrulanan açıklar için yama sürümü yayınlanacaktır.
+Your report will be reviewed within **72 hours**, and a patch release will be published for confirmed vulnerabilities.

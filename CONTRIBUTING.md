@@ -1,122 +1,120 @@
-# Katkıda Bulunma Rehberi (Contributing to Koy)
+# Contributing to Koy
 
-**Koy** projesine katkıda bulunmak istediğiniz için teşekkürler! Bu belge; kod mimarisini, açık kaynak geliştirme kurallarını, kod yazım standartlarını ve PR sürecini açıklar.
-
-> *English summary:* Koy is a lightweight, zero-browser, single-process Windows 11 Notch & Dock written in C# (.NET 10) and WPF. Please follow the strict 3-layer architecture (`Core` -> `Platform` -> `App`), zero-idle-CPU spring animation rules, and memory discipline outlined below.
+Thank you for your interest in contributing to **Koy**! This document covers the code architecture, open source development rules, coding standards and the PR process.
 
 ---
 
-## 1. Mimari ve Katman Kuralları (Strict Layering)
+## 1. Architecture and Layering Rules
 
-Koy, tek bir süreçte çalışan üç katmanlı temiz bir mimariye sahiptir:
+Koy is a clean three-layer architecture running in a single process:
 
 ```text
 src/
-  Core/         Saf C# (net10.0) — WPF, Win32 ve WinRT KESİNLİKLE YOK
-  Platform/     Windows 11 API uygulamaları (CsWin32 & WinRT) — WPF YOK
-  App/          WPF arayüzü, ince ViewModel'ler (CommunityToolkit.Mvvm) ve XAML görünümleri
+  Core/         Pure C# (net10.0): absolutely no WPF, Win32 or WinRT
+  Platform/     Windows 11 API implementations (CsWin32 & WinRT): no WPF
+  App/          WPF UI, thin ViewModels (CommunityToolkit.Mvvm) and XAML views
 tests/
-  Core.Tests/   xUnit birim testleri (Yalnızca Core katmanını test eder)
+  Core.Tests/   xUnit unit tests (covers the Core layer only)
 ```
 
-### Değişmez Mimari İlkeler
-1. **Bağımlılık Yönü:** `App → Platform → Core` ve `App → Core`. `Core` hiçbir dış katmana veya işletim sistemi API'sine bağımlı olamaz.
-2. **Sözleşmeler Core'da:** Her platform servisinin arayüzü (`IMediaService`, `IAudioService`, `IMonitorService` vb.) ve veri modeli `src/Core/<Alan>/` içinde tanımlanır.
-   - `Core` arayüzlerinde **WinRT veya Win32 tipi bulunamaz** (`HWND`, `HMONITOR`, `IRandomAccessStreamReference` yasaktır).
-   - Pencere ve ekran tanıtıcıları `nint`, görseller `byte[]` olarak taşınır.
-3. **CsWin32 Kullanımı:** Elle `[DllImport]` veya `[LibraryImport]` yazılmaz. Gerekli Win32 API veya COM arayüzünün adını `src/Platform/NativeMethods.txt` dosyasına ekleyin; `Microsoft.Windows.CsWin32` kaynak üreticisi tip güvenli P/Invoke kodunu otomatik üretir.
-4. **Özellik Giriş Noktası (`IFeature`):** Her ana özellik (`NotchFeature`, `DockFeature`) `IFeature` (`Start` / `Stop`) arayüzünü uygular. Kapalı olan bir özelliğin penceresi oluşturulmaz, arka plan servisi veya WinEvent kancası (`SetWinEventHook`) kurulmaz.
-5. **Monolitik Dosya Yasağı:** Tek bir dosyaya hem iş mantığı, hem P/Invoke, hem de UI mantığı yığılamaz. Alt sekmeler (`Pages/`), pencereler ve dönüştürücüler (`Converters`) ayrı dosyalarda modüler tutulur.
+### Architecture Principles
+1. **Dependency Direction:** `App → Platform → Core` and `App → Core`. `Core` must not depend on any outer layer or operating system API.
+2. **Contracts Live in Core:** The interface (`IMediaService`, `IAudioService`, `IMonitorService`, etc.) and data model of every platform service are defined in `src/Core/<Area>/`.
+   - **WinRT and Win32 types must not appear** in `Core` interfaces (`HWND`, `HMONITOR` and `IRandomAccessStreamReference` are forbidden).
+   - Window and display handles are passed as `nint`, images as `byte[]`.
+3. **CsWin32:** Do not write `[DllImport]` or `[LibraryImport]` by hand. Add the name of the Win32 API or COM interface to `src/Platform/NativeMethods.txt`; the `Microsoft.Windows.CsWin32` source generator produces type-safe P/Invoke code.
+4. **Feature Entry Point (`IFeature`):** Every main feature (`NotchFeature`, `DockFeature`) implements `IFeature` (`Start` / `Stop`). A disabled feature creates no window, background service or WinEvent hook (`SetWinEventHook`).
+5. **No Monolithic Files:** Do not pile business logic, P/Invoke and UI logic into one file. Sub-pages (`Pages/`), windows and `Converters` stay modular in separate files.
 
 ---
 
-## 2. Performans ve Bellek Disiplini
+## 2. Performance and Memory Discipline
 
-Koy'u elektron/tarayıcı tabanlı alternatiflerden (Tauri/WebView2/Electron) ayıran en temel özellik **hafifliğidir**:
+What sets Koy apart from Electron or browser-based alternatives (Tauri/WebView2/Electron) is that it is **lightweight**:
 
-1. **Tarayıcı Yok:** WebView2, CefSharp, Electron veya Blazor Hybrid kesinlikle kullanılmaz.
-2. **Ağır Kütüphane Yok:** Serilog, Autofac, ReactiveUI, MahApps gibi ağır NuGet paketleri eklenmez. Ayarlar serileştirmesi için yansımalı (reflection) JSON yerine kaynak üreticili `SettingsJsonContext` kullanılır.
-3. **Yazılımla Çizim (`RenderMode.SoftwareOnly`):** GPU sürücülerinin sürece ~135 MB eklemesini önlemek için varsayılan olarak yazılımla çizim kullanılır.
-4. **Sıfır Boşta İşlemci (`0% Idle CPU`):**
-   - WPF `Storyboard` yerine `Koy.Core.Animation.Spring` fizik motoru kullanılır.
-   - `CompositionTarget.Rendering` yalnızca animasyon başladığında bağlanır, yay dengeye ulaştığında (`Spring.IsAtRest`) derhal çözülür.
-   - Görünmeyen panellerde `DispatcherTimer` çalıştırılmaz; Kontrol Merkezi ve Durum servisleri ilgili panel ilk kez açılana kadar tembel (lazy) başlatılır.
-5. **Görsel Optimizasyonu:** Albüm kapakları ve uygulama simgeleri gösterilecek boyutta (`DecodePixelWidth`) çözülür ve derhal `.Freeze()` çağrılır.
-6. **Sabit Tuval Kuralı:** Çentik penceresi (`NotchWindow`) animasyon sırasında `Window.Width/Height` değiştirmez (saydam pencerede titreme yapar); sabit tuval içinde `NotchShape` geometrisi büyüyüp küçülür.
-
----
-
-## 3. Görev Çubuğu Güvenliği (Kritik Kural)
-
-Koy, Dock etkinken Windows görev çubuğunu (`Shell_TrayWnd` ve ikincil ekranlardaki `Shell_SecondaryTrayWnd`) gizler.
-- Uygulama nasıl kapanırsa kapansın (normal çıkış, yakalanmamış istisna, güncelleme, kaldırma veya Görev Yöneticisi'nden zorla sonlandırma sonrası yeniden açılış), **Windows görev çubuğu mutlaka geri gelmelidir** (`TaskbarService.Restore()`).
-- **Dock kapalıyken (`DockEnabled = false`)** açılıştaki güvenlik `Restore()` çağrısı dışında Windows görev çubuğuna asla dokunulmaz.
-- Dock ile ilgili her PR'da şu testi elle yapın:
-  1. Koy çalışırken Görev Yöneticisi'nden `Koy.exe` sürecini öldürün.
-  2. Koy'u yeniden başlatın veya Hakkında sayfasındaki **"Windows görev çubuğunu geri getir"** düğmesine basın.
-  3. Görev çubuğunun eksiksiz geri geldiğini doğrulayın.
+1. **No Browser:** WebView2, CefSharp, Electron and Blazor Hybrid are never used.
+2. **No Heavy Libraries:** Heavy NuGet packages such as Serilog, Autofac, ReactiveUI and MahApps are not added. Settings serialization uses the source-generated `SettingsJsonContext` instead of reflection-based JSON.
+3. **Software Rendering (`RenderMode.SoftwareOnly`):** Software rendering is the default, to avoid the ~135 MB that GPU drivers add to the process.
+4. **Zero Idle CPU:**
+   - The `Koy.Core.Animation.Spring` physics engine is used instead of WPF `Storyboard`.
+   - `CompositionTarget.Rendering` is attached only when an animation starts and detached as soon as the spring settles (`Spring.IsAtRest`).
+   - `DispatcherTimer` does not run in hidden panels; Control Center and Status services are started lazily when the panel is first opened.
+5. **Image Optimization:** Album art and app icons are decoded at display size (`DecodePixelWidth`) and immediately `.Freeze()`d.
+6. **Fixed Canvas Rule:** The notch window (`NotchWindow`) does not change `Window.Width/Height` during animation (this flickers on transparent windows); the `NotchShape` geometry grows and shrinks inside a fixed canvas.
 
 ---
 
-## 4. Kod Biçimi ve UI Kuralları
+## 3. Taskbar Safety (Critical Rule)
 
-- **C# Standartları:** Dosya kapsamlı namespace (`namespace Koy.Core.Notch;`), `<Nullable>enable</Nullable>`, private alanlar `_camelCase`.
-- **MVVM:** ViewModel'lerde `CommunityToolkit.Mvvm` kaynak üreticileri (`[ObservableProperty]`, `[RelayCommand]`) kullanılır.
-- **Sıfır Düz Emoji:** Arayüzde düz Unicode emojiler (`🚀`, `🎵`, `⚙️` vb.) **kesinlikle kullanılmaz**. Tüm ikonlar `Styles.xaml` veya ilgili XAML içinde temiz vektörel `Path` (`Geometry`) olarak tanımlanır.
-- **İşlevsiz Buton Yasağı:** Arayüze tıklanınca çalışmayan sahte buton veya işlevsiz kısayol eklenmez.
-- **Çoklu Dil (TR / EN):** Kullanıcıya görünen hiçbir metin XAML veya C# içine sabit yazılmaz. Her yeni metin hem `src/App/Resources/Strings.resx` (İngilizce) hem de `src/App/Resources/Strings.tr.resx` (Türkçe) dosyalarına eklenir.
+When the Dock is enabled, Koy hides the Windows taskbar (`Shell_TrayWnd` and `Shell_SecondaryTrayWnd` on secondary displays).
+- However the app exits (normal exit, unhandled exception, update, uninstall, or relaunch after being force-killed from Task Manager), **the Windows taskbar must come back** (`TaskbarService.Restore()`).
+- **When the Dock is disabled (`DockEnabled = false`)**, the Windows taskbar is never touched, except for the safety `Restore()` call at startup.
+- Perform this manual test in every Dock-related PR:
+  1. While Koy is running, kill the `Koy.exe` process from Task Manager.
+  2. Restart Koy or press the **"Restore Windows taskbar"** button on the About page.
+  3. Verify that the taskbar is fully back.
 
 ---
 
-## 5. Geliştirme Ortamı ve Komutlar
+## 4. Code Style and UI Rules
 
-### Gereksinimler
-- Windows 11 (22H2 / Derleme 22621 veya üzeri)
+- **C# Standards:** File-scoped namespaces (`namespace Koy.Core.Notch;`), `<Nullable>enable</Nullable>`, private fields as `_camelCase`.
+- **MVVM:** ViewModels use the `CommunityToolkit.Mvvm` source generators (`[ObservableProperty]`, `[RelayCommand]`).
+- **No Plain Emoji:** Plain Unicode emoji (`🚀`, `🎵`, `⚙️`, etc.) are **never** used in the UI. All icons are clean vector `Path` (`Geometry`) definitions in `Styles.xaml` or the relevant XAML.
+- **No Dead Buttons:** Do not add fake buttons or shortcuts that do nothing.
+- **Localization (EN / TR):** No user-visible text is hard-coded in XAML or C#. Every new string goes into both `src/App/Resources/Strings.resx` (English) and `src/App/Resources/Strings.tr.resx` (Turkish).
+
+---
+
+## 5. Development Environment and Commands
+
+### Requirements
+- Windows 11 (22H2 / build 22621 or later)
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 
-### Derleme, Test ve Paketleme
+### Build, Test and Package
 ```powershell
-# Derle (Release, sıfır uyarı)
+# Build (Release, zero warnings)
 dotnet build Koy.slnx -c Release -warnaserror
 
-# Birim testlerini çalıştır (xUnit)
+# Run unit tests (xUnit)
 dotnet test Koy.slnx -c Release
 
-# Uygulamayı çalıştır
+# Run the app
 dotnet run --project src/App
 
-# Bellek kullanımını ölç (Private Bytes)
+# Measure memory usage (Private Bytes)
 powershell -ExecutionPolicy Bypass -File scripts\measure-memory.ps1
 
-# Velopack kurulum paketi ve Portable ZIP üret
+# Build the Velopack installer and portable ZIP
 powershell -ExecutionPolicy Bypass -File scripts\pack.ps1 -Version 0.1.0
 ```
 
 ---
 
-## 6. Git Akışı ve Pull Request Süreci
+## 6. Git Flow and Pull Requests
 
-1. **Dal (Branch) İsimlendirmesi:**
-   - Yeni özellikler: `feat/kisa-aciklama`
-   - Hata düzeltmeleri: `fix/kisa-aciklama`
-   - Performans iyileştirmeleri: `perf/kisa-aciklama`
-2. **Commit Mesajları:** Konvansiyonel (`feat:`, `fix:`, `perf:`, `refactor:`, `docs:`, `test:`) önekleriyle, Türkçe veya İngilizce net emir kipinde yazılır.
-3. **Test Zorunluluğu:** `Core` katmanına eklenen her durum makinesi, yerleşim hesaplayıcısı veya kural için `tests/Core.Tests/` altında xUnit testi yazılmalıdır.
-4. **Lisans:** Gönderdiğiniz her katkı, projenin [GPLv3](LICENSE) lisansı altında yayınlanmayı kabul ettiğiniz anlamına gelir.
+1. **Branch Names:**
+   - New features: `feat/short-description`
+   - Bug fixes: `fix/short-description`
+   - Performance improvements: `perf/short-description`
+2. **Commit Messages:** Written in **English**, in the imperative mood, with Conventional prefixes (`feat:`, `fix:`, `perf:`, `refactor:`, `docs:`, `test:`), for example `fix(dock): keep taskbar hidden on sleep`.
+3. **Tests Required:** Every state machine, layout calculator or rule added to `Core` must have an xUnit test under `tests/Core.Tests/`.
+4. **License:** By submitting a contribution you agree that it is published under the project's [GPLv3](LICENSE) license.
 
 ---
 
-## 7. Sürüm Nasıl Çıkar
+## 7. How Releases Work
 
-Sürümler [release-please](https://github.com/googleapis/release-please) ile otomatik hazırlanır; elle etiket atılmaz.
+Releases are prepared automatically with [release-please](https://github.com/googleapis/release-please); tags are never created by hand.
 
-1. **Commit önekleri sürümü belirler** (`main` dalına birleşen commit'lere bakılır):
-   - `fix:` → yama sürümü, değişiklik günlüğünde **Düzeltmeler**.
-   - `perf:` → yama sürümü, **Performans**.
-   - `!` işareti ya da `BREAKING CHANGE:` (ör. `fix!:`) → 1.0 öncesinde minör sürüm.
-   - `docs:`, `refactor:`, `test:`, `chore:`, `ci:` değişiklik günlüğüne girmez ve tek başına sürüm çıkarmaz.
-2. `main`'e her birleştirmede release-please bir **sürüm PR'ı** açar ya da günceller (`CHANGELOG.md` ve `Directory.Build.props` içindeki sürüm numarası).
-3. Yayınlamaya hazır olunca bu PR'ı birleştirin. Başka bir şey yapmayın.
-4. Birleştirmeden sonra otomatik olarak etiket (`vX.Y.Z`) ve GitHub release'i oluşur, aynı iş akışı kurulum dosyasını, taşınabilir zip'i ve `SHA256SUMS.txt` dosyasını release'e ekler.
+1. **Commit prefixes determine the release** (based on the commits merged into `main`):
+   - `fix:` → patch release, listed under fixes in the changelog.
+   - `perf:` → patch release, listed under performance.
+   - `!` or `BREAKING CHANGE:` (e.g. `fix!:`) → minor release before 1.0.
+   - `docs:`, `refactor:`, `test:`, `chore:` and `ci:` do not appear in the changelog and do not trigger a release on their own.
+2. On every merge to `main`, release-please opens or updates a **release PR** (`CHANGELOG.md` and the version number in `Directory.Build.props`).
+3. When ready to publish, merge that PR. Nothing else is needed.
+4. After the merge, the tag (`vX.Y.Z`) and GitHub release are created automatically, and the same workflow attaches the installer, the portable zip and `SHA256SUMS.txt` to the release.
 
-Sürüm PR'ının metnini (`CHANGELOG.md`) birleştirmeden önce düzenleyebilirsiniz. `CHANGELOG.md` içindeki elle yazılmış `[Unreleased]` bölümü release-please'in ürettiği girdiyle aynı değişiklikleri anlatır: sürüm PR'ında `[Unreleased]` başlığını silin ve içeriğini yeni sürüm başlığının altına taşıyın (release-please yalnız `fix:`/`perf:` satırlarını listeler, `refactor:` önekli kullanıcıya dönük işler günlüğe girmez). Bir etiketi yeniden paketlemek gerekirse Actions sekmesinden **Release** iş akışını elle (`workflow_dispatch`) etiket adıyla çalıştırın.
+You can edit the release PR's text (`CHANGELOG.md`) before merging. The hand-written `[Unreleased]` section in `CHANGELOG.md` describes the same changes as the entry generated by release-please: in the release PR, delete the `[Unreleased]` heading and move its content under the new version heading (release-please only lists `fix:`/`perf:` lines, so user-facing work with a `refactor:` prefix does not appear in the changelog). To repackage a tag, run the **Release** workflow manually (`workflow_dispatch`) from the Actions tab with the tag name.
