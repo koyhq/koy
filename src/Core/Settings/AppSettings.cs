@@ -142,6 +142,8 @@ public sealed record AppSettings
     public bool MusicShowWaveform { get; set; } = true;
     /// <summary>Tam ekran uygulama ya da oyun varken çentik gizlensin.</summary>
     public bool NotchHideInFullscreen { get; set; } = true;
+    /// <summary>Kamera ve mikrofon kullanımında çentikte gizlilik noktaları görünsün.</summary>
+    public bool ShowPrivacyIndicator { get; set; } = true;
 
     public List<string> ControlCenterLayout { get; set; } = ["wifi", "bluetooth", "donotdisturb"];
     public List<string> EnabledPanels { get; set; } = ["home", "focus", "calendar", "shelf", "clipboard", "system", "controlcenter"];
@@ -225,6 +227,7 @@ public sealed record AppSettings
                ShowVolumeOsd == other.ShowVolumeOsd &&
                MusicShowWaveform == other.MusicShowWaveform &&
                NotchHideInFullscreen == other.NotchHideInFullscreen &&
+               ShowPrivacyIndicator == other.ShowPrivacyIndicator &&
                WeatherLatitude.Equals(other.WeatherLatitude) &&
                WeatherLongitude.Equals(other.WeatherLongitude) &&
                WeatherCity == other.WeatherCity &&
@@ -297,6 +300,7 @@ public sealed record AppSettings
         hash.Add(ShowVolumeOsd);
         hash.Add(MusicShowWaveform);
         hash.Add(NotchHideInFullscreen);
+        hash.Add(ShowPrivacyIndicator);
         hash.Add(WeatherLatitude);
         hash.Add(WeatherLongitude);
         hash.Add(WeatherCity);

@@ -16,6 +16,7 @@ using Koy.Core.Diagnostics;
 using Koy.Core.Display;
 using Koy.Core.Notch;
 using Koy.Core.Power;
+using Koy.Core.Privacy;
 using Koy.Core.Settings;
 using Koy.Core.Timers;
 using Koy.Core.Shell;
@@ -91,6 +92,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     // Ses/parlaklık göstergeleri (OSD) için kendi servisleri; ilgili ayar kapalıysa hiç kurulmaz (AGENTS.md #5).
     private AudioService? _osdAudio;
     private BrightnessService? _osdBrightness;
+    private IPrivacyMonitorService? _privacyMonitor;
     private bool _stopped;
 
     public void Start()
@@ -112,6 +114,11 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         _networkService = services.AcquireNetworkService();
         if (settings.ClipboardHistoryEnabled)
             _clipboardHistory = services.AcquireClipboardHistory();
+        if (settings.ShowPrivacyIndicator)
+        {
+            _privacyMonitor = services.AcquirePrivacyMonitor();
+            _privacyMonitor.StateChanged += OnPrivacyStateChanged;
+        }
         _weatherService = new WeatherService(cacheDuration: WeatherRefreshPolicy.CacheDuration(settings.WeatherRefreshInterval));
         _focusAssistService = new FocusAssistService();
         _shelfService = new ShelfService();
@@ -243,6 +250,9 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             clipboardVm,
             visibilityController,
             shellActions: _shellActions);
+
+        if (_privacyMonitor is not null)
+            viewModel.UpdatePrivacyState(_privacyMonitor.CurrentState);
 
         var window = new NotchWindow { DataContext = viewModel };
         window.SetTargetMonitor(monitor);
@@ -634,5 +644,21 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             _clipboardHistory = null;
             services.ReleaseClipboardHistory();
         }
+
+        if (_privacyMonitor is not null)
+        {
+            _privacyMonitor.StateChanged -= OnPrivacyStateChanged;
+            _privacyMonitor = null;
+            services.ReleasePrivacyMonitor();
+        }
+    }
+
+    private void OnPrivacyStateChanged(PrivacyState state)
+    {
+        Application.Current?.Dispatcher?.BeginInvoke(() =>
+        {
+            foreach (var s in _windowStates.Values)
+                s.ViewModel.UpdatePrivacyState(state);
+        });
     }
 }

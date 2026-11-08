@@ -335,6 +335,12 @@ public static class Program
         ShotNotch(set, name("kapali-muzik"), expanded: false);
         set.Vm.Dispose();
 
+        // Gizlilik noktaları (kamera ve mikrofon aktif)
+        set = MakeNotch(music: false);
+        set.Vm.UpdatePrivacyState(new Koy.Core.Privacy.PrivacyState(true, true, "CameraApp", "MicApp"));
+        ShotNotch(set, name("kapali-gizlilik"), expanded: false);
+        set.Vm.Dispose();
+
         // Ana: müzik çalıyor / çalmıyor + çalışan zamanlayıcı satırı.
         set = MakeNotch(music: true);
         set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);

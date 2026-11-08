@@ -90,6 +90,35 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     /// <summary>"Çentiği açık tut" açık: fare çıkınca kapanmaz.</summary>
     public bool IsPinned => _controller.IsPinned;
 
+    // --- GİZLİLİK GÖSTERGESİ (KAMERA / MİKROFON) ---
+    [ObservableProperty]
+    private bool _isCameraActive;
+
+    [ObservableProperty]
+    private bool _isMicrophoneActive;
+
+    [ObservableProperty]
+    private string _privacyToolTip = "";
+
+    public bool HasPrivacyActivity => IsCameraActive || IsMicrophoneActive;
+
+    public void UpdatePrivacyState(Koy.Core.Privacy.PrivacyState state)
+    {
+        if (!Settings.ShowPrivacyIndicator)
+        {
+            IsCameraActive = false;
+            IsMicrophoneActive = false;
+            PrivacyToolTip = string.Empty;
+            OnPropertyChanged(nameof(HasPrivacyActivity));
+            return;
+        }
+
+        IsCameraActive = state.IsCameraInUse;
+        IsMicrophoneActive = state.IsMicrophoneInUse;
+        PrivacyToolTip = Koy.Core.Privacy.CaptureUsagePolicy.FormatToolTip(state);
+        OnPropertyChanged(nameof(HasPrivacyActivity));
+    }
+
     public ObservableObject CurrentPanelContent => CurrentPanel switch
     {
         NotchPanel.Home => Home,

@@ -100,6 +100,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _showBrightnessOsd = true;
 
     [ObservableProperty]
+    private bool _showPrivacyIndicator = true;
+
+    [ObservableProperty]
     private bool _panelFocus = true;
 
     [ObservableProperty]
@@ -391,6 +394,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             NotchHideInFullscreen = s.NotchHideInFullscreen;
             ShowVolumeOsd = s.ShowVolumeOsd;
             ShowBrightnessOsd = s.ShowBrightnessOsd;
+            ShowPrivacyIndicator = s.ShowPrivacyIndicator;
             MusicShowWaveform = s.MusicShowWaveform;
             IdleDisplayMode = s.IdleDisplayMode;
             NotchOpenBehavior = s.NotchOpenBehavior;
@@ -545,7 +549,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     private static bool AffectsNotch(string? name) =>
         name is nameof(NotchVisibility) or nameof(NotchHideInFullscreen) or nameof(MusicShowWaveform)
-            or nameof(ShowVolumeOsd) or nameof(ShowBrightnessOsd) or nameof(IdleDisplayMode)
+            or nameof(ShowVolumeOsd) or nameof(ShowBrightnessOsd) or nameof(ShowPrivacyIndicator) or nameof(IdleDisplayMode)
             or nameof(NotchOpenBehavior) or nameof(WheelAction) or nameof(BatterySaverReduceMotion)
             or nameof(WeatherRefreshInterval) or nameof(PomodoroWorkMinutes) or nameof(PomodoroShortBreakMinutes) or nameof(PomodoroLongBreakMinutes)
             or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
@@ -615,6 +619,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             NotchHideInFullscreen = NotchHideInFullscreen,
             ShowVolumeOsd = ShowVolumeOsd,
             ShowBrightnessOsd = ShowBrightnessOsd,
+            ShowPrivacyIndicator = ShowPrivacyIndicator,
             MusicShowWaveform = MusicShowWaveform,
             IdleDisplayMode = IdleDisplayMode,
             NotchOpenBehavior = NotchOpenBehavior,
