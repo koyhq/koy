@@ -12,7 +12,8 @@ namespace Koy.UiSnapshots;
 /// <summary>
 /// Koy'un pencerelerini ekrana çıkarmadan PNG'ye çevirir. Hiçbir Win32 kancası, AppBar ya da görev çubuğu
 /// servisi başlatılmaz; pencereler gösterilmez, yalnız ölçülüp çizilir.
-/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall|centik|dock|dockbar]
+/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall|centik|dock|dockbar|jumplist]
+/// <c>--scene jumplist</c>: dock sağ tık menüsünün bölümlü atlama listesi hâli (sentetik veri).
 /// <c>--scene uninstall</c>: yalnız Hakkında sayfası ve kaldırma onay görünümü (kaldırıcı hiçbir zaman çalıştırılmaz).
 /// </summary>
 public static class Program
@@ -46,10 +47,13 @@ public static class Program
                 DockBarSnapshots.Render(outDir, prefix, theme, RenderElement);
             else if (scene is "dock" or "folder" or "folders")
                 RenderDockFolders(outDir, prefix, theme);
+            else if (scene is "jumplist" or "atlama")
+                JumpListSnapshots.Render(outDir, prefix, theme, RenderElement);
             else
             {
                 RenderAll(outDir, prefix, theme);
                 RenderDockFolders(outDir, prefix, theme);
+                JumpListSnapshots.Render(outDir, prefix, theme, RenderElement);
             }
         }
 

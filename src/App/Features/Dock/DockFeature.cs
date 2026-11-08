@@ -9,6 +9,7 @@ using Koy.Core.Shell;
 using Koy.Core.Tray;
 using Koy.Core.Visibility;
 using Koy.Platform.Display;
+using Koy.Platform.JumpList;
 using Koy.Platform.Media;
 using Koy.Platform.Power;
 using Koy.Platform.Shell;
@@ -48,6 +49,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     private readonly RecentFilesService _recentFiles = new();   // durumsuz; listeyi yalnız yığın açılınca okur
     private WindowTracker? _windowTracker;
     private ShellActionService? _shellActionService;
+    private JumpListService? _jumpLists;   // yalnız dock açıkken var; listeyi ancak sağ tık menüsü açılınca okur
     private FullscreenDetector? _fullscreenDetector;
     private uint _lastFlyoutCheckPid;
     private bool _lastFlyoutCheckResult;
@@ -79,6 +81,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             TaskbandFavoritesReader.Read);
         _windowTracker = services.AcquireWindowTracker();
         _shellActionService = new ShellActionService();
+        _jumpLists = new JumpListService();
         _fullscreenDetector = new FullscreenDetector();
         _monitorService = new MonitorService();
         _monitorService.Start();
@@ -533,7 +536,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
     private DockViewModel CreateViewModel(VisibilityController visibilityController) =>
         new(settings, _controller!, _shellActionService!, visibilityController, status: null,
-            mediaService: _mediaService, trayService: _trayService, recentFiles: _recentFiles)
+            mediaService: _mediaService, trayService: _trayService, recentFiles: _recentFiles, jumpLists: _jumpLists)
         {
             ReduceMotion = _reduceMotion
         };
@@ -1048,5 +1051,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         _fullscreenDetector = null;
         _pinnedAppsService = null;
         _shellActionService = null;
+
+        _jumpLists?.Clear();
+        _jumpLists = null;
     }
 }

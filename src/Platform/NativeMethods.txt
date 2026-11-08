@@ -89,6 +89,17 @@ IShellLinkW
 IPersistFile
 ShellLink
 
+IApplicationDocumentLists
+ApplicationDocumentLists
+APPDOCLISTTYPE
+IObjectArray
+IPersistStream
+SHCreateMemStream
+SHLoadIndirectString
+SHGetNameFromIDList
+SIGDN
+PropVariantToBooleanWithDefault
+
 SHCreateItemFromParsingName
 IShellItem
 IShellItemImageFactory

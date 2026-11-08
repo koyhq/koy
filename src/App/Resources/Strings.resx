@@ -111,6 +111,15 @@
   <data name="EndTask" xml:space="preserve">
     <value>End Task</value>
   </data>
+  <data name="DockJumpListRecent" xml:space="preserve">
+    <value>Recent</value>
+  </data>
+  <data name="DockJumpListFrequent" xml:space="preserve">
+    <value>Frequent</value>
+  </data>
+  <data name="DockJumpListTasks" xml:space="preserve">
+    <value>Tasks</value>
+  </data>
   <data name="StartMenu" xml:space="preserve">
     <value>Start</value>
   </data>

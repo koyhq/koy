@@ -111,6 +111,15 @@
   <data name="EndTask" xml:space="preserve">
     <value>Görevi Sonlandır</value>
   </data>
+  <data name="DockJumpListRecent" xml:space="preserve">
+    <value>Son kullanılanlar</value>
+  </data>
+  <data name="DockJumpListFrequent" xml:space="preserve">
+    <value>Sık kullanılanlar</value>
+  </data>
+  <data name="DockJumpListTasks" xml:space="preserve">
+    <value>Görevler</value>
+  </data>
   <data name="StartMenu" xml:space="preserve">
     <value>Başlat</value>
   </data>
