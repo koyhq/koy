@@ -15,15 +15,11 @@ public sealed class ConsentStorePrivacyService : IPrivacyMonitorService
     private const string WebcamKeyPath = @"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam";
     private const string MicKeyPath = @"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone";
 
+    private const string ConsentStorePath = @"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore";
+
     private readonly object _lock = new();
-    private Thread? _workerThread;
-    private AutoResetEvent? _camEvent;
-    private AutoResetEvent? _micEvent;
-    private ManualResetEvent? _cancelEvent;
-    private RegistryKey? _webcamKey;
-    private RegistryKey? _micKey;
+    private Run? _run;
     private PrivacyState _currentState = PrivacyState.Empty;
-    private bool _started;
     private bool _disposed;
 
     public PrivacyState CurrentState
@@ -37,155 +33,185 @@ public sealed class ConsentStorePrivacyService : IPrivacyMonitorService
 
     public event Action<PrivacyState>? StateChanged;
 
+    /// <summary>
+    /// Bir Start–Stop döngüsünün tanıtıcıları. İş parçacığı kendi Run'ını sahiplenir ve çıkarken bırakır;
+    /// böylece Stop iş parçacığı hâlâ beklerken tanıtıcıları altından çekmez.
+    /// </summary>
+    private sealed class Run
+    {
+        public readonly ManualResetEvent Cancel = new(false);
+        public readonly AutoResetEvent CamEvent = new(false);
+        public readonly AutoResetEvent MicEvent = new(false);
+        public readonly AutoResetEvent ParentEvent = new(false);
+        public RegistryKey? Webcam;
+        public RegistryKey? Mic;
+        public RegistryKey? Parent;
+        public bool CamArmed;
+        public bool MicArmed;
+        public bool ParentArmed;
+        public Thread? Thread;
+
+        public void Release()
+        {
+            Webcam?.Dispose();
+            Mic?.Dispose();
+            Parent?.Dispose();
+            Cancel.Dispose();
+            CamEvent.Dispose();
+            MicEvent.Dispose();
+            ParentEvent.Dispose();
+        }
+    }
+
     public void Start()
     {
         lock (_lock)
         {
-            if (_disposed || _started)
+            if (_disposed || _run is not null)
                 return;
 
-            _started = true;
-            _cancelEvent = new ManualResetEvent(false);
-            _camEvent = new AutoResetEvent(false);
-            _micEvent = new AutoResetEvent(false);
-
-            try
+            var run = new Run
             {
-                _webcamKey = Registry.CurrentUser.OpenSubKey(WebcamKeyPath, RegistryKeyPermissionCheck.ReadSubTree);
-            }
-            catch
-            {
-                _webcamKey = null;
-            }
+                Webcam = TryOpen(WebcamKeyPath),
+                Mic = TryOpen(MicKeyPath),
+            };
 
-            try
-            {
-                _micKey = Registry.CurrentUser.OpenSubKey(MicKeyPath, RegistryKeyPermissionCheck.ReadSubTree);
-            }
-            catch
-            {
-                _micKey = null;
-            }
+            // İlk durumu hemen oku (çentik açılışta doğru noktayla başlasın).
+            _currentState = QueryCurrentState(run);
 
-            // İlk durumu hemen oku
-            _currentState = QueryCurrentState();
-
-            _workerThread = new Thread(WorkerLoop)
+            run.Thread = new Thread(() => WorkerLoop(run))
             {
                 Name = "Koy.PrivacyMonitor",
                 IsBackground = true
             };
-            _workerThread.Start();
+            _run = run;
+            run.Thread.Start();
         }
     }
 
     public void Stop()
     {
-        Thread? threadToJoin = null;
+        Run? run;
         lock (_lock)
         {
-            if (!_started || _disposed)
-                return;
-
-            _started = false;
-            _cancelEvent?.Set();
-            threadToJoin = _workerThread;
-            _workerThread = null;
+            run = _run;
+            _run = null;
         }
 
-        threadToJoin?.Join(1000);
+        if (run is null)
+            return;
 
-        lock (_lock)
+        run.Cancel.Set();
+        // Tanıtıcıları iş parçacığı kendisi bırakır (WorkerLoop finally); burada yalnız bekleriz.
+        run.Thread?.Join(2000);
+    }
+
+    private static RegistryKey? TryOpen(string path)
+    {
+        try { return Registry.CurrentUser.OpenSubKey(path, RegistryKeyPermissionCheck.ReadSubTree); }
+        catch { return null; }
+    }
+
+    private void WorkerLoop(Run run)
+    {
+        var waitHandles = new WaitHandle[] { run.Cancel, run.CamEvent, run.MicEvent, run.ParentEvent };
+
+        try
         {
-            _webcamKey?.Dispose();
-            _webcamKey = null;
-            _micKey?.Dispose();
-            _micKey = null;
+            while (true)
+            {
+                // Eksik anahtar (ör. kamerasız makinede webcam) yoklanmaz: üst ConsentStore anahtarında
+                // alt anahtar oluşturma bildirimi beklenir, oluşunca açılır.
+                run.Webcam ??= TryOpen(WebcamKeyPath);
+                run.Mic ??= TryOpen(MicKeyPath);
 
-            _cancelEvent?.Dispose();
-            _cancelEvent = null;
-            _camEvent?.Dispose();
-            _camEvent = null;
-            _micEvent?.Dispose();
-            _micEvent = null;
+                // RegNotifyChangeKeyValue tek seferliktir: yalnız sinyali tüketilmiş olanı yeniden kur.
+                if (!run.CamArmed && run.Webcam is not null)
+                    run.CamArmed = Arm(ref run.Webcam, run.CamEvent, watchSubtree: true, REG_NOTIFY_FILTER.REG_NOTIFY_CHANGE_LAST_SET);
+                if (!run.MicArmed && run.Mic is not null)
+                    run.MicArmed = Arm(ref run.Mic, run.MicEvent, watchSubtree: true, REG_NOTIFY_FILTER.REG_NOTIFY_CHANGE_LAST_SET);
+
+                if (run.Webcam is null || run.Mic is null)
+                {
+                    run.Parent ??= TryOpen(ConsentStorePath);
+                    if (!run.ParentArmed && run.Parent is not null)
+                        run.ParentArmed = Arm(ref run.Parent, run.ParentEvent, watchSubtree: false, REG_NOTIFY_FILTER.REG_NOTIFY_CHANGE_NAME);
+                }
+
+                // Bildirimler kurulduktan SONRA oku: okuma ile kurulum arasındaki yazımlar kaçmaz.
+                Publish(QueryCurrentState(run));
+
+                var index = WaitHandle.WaitAny(waitHandles);
+                if (index == 0)
+                    break;
+                if (index == 1) run.CamArmed = false;
+                else if (index == 2) run.MicArmed = false;
+                else run.ParentArmed = false;
+
+                // Windows başlangıç ve bitiş damgalarını birkaç milisaniye arayla yazabilir.
+                if (run.Cancel.WaitOne(50))
+                    break;
+            }
+        }
+        catch
+        {
+            // Arka plan iş parçacığında yakalanmayan hata süreci düşürür; izleme sessizce durur.
+        }
+        finally
+        {
+            run.Release();
         }
     }
 
-    private void WorkerLoop()
+    private void Publish(PrivacyState newState)
     {
-        var waitHandles = new WaitHandle[] { _cancelEvent!, _camEvent!, _micEvent! };
-
-        while (true)
+        bool changed;
+        lock (_lock)
         {
-            if (_webcamKey is null)
-            {
-                try { _webcamKey = Registry.CurrentUser.OpenSubKey(WebcamKeyPath, RegistryKeyPermissionCheck.ReadSubTree); } catch { }
-            }
-            if (_micKey is null)
-            {
-                try { _micKey = Registry.CurrentUser.OpenSubKey(MicKeyPath, RegistryKeyPermissionCheck.ReadSubTree); } catch { }
-            }
-
-            // Olayları kaydet (RegNotifyChangeKeyValue tek seferliktir; sinyalden sonra tekrar kurulmalı)
-            RegisterKeyNotification(_webcamKey, _camEvent);
-            RegisterKeyNotification(_micKey, _micEvent);
-
-            int timeout = (_webcamKey is null || _micKey is null) ? 10000 : Timeout.Infinite;
-            var index = WaitHandle.WaitAny(waitHandles, timeout);
-            if (index == 0) // cancelEvent
-                break;
-
-            // Kısa bir debounce/tolerans: Windows başlangıç ve bitiş damgalarını birkaç milisaniye arayla yazabilir
-            Thread.Sleep(50);
-
-            var newState = QueryCurrentState();
-            bool changed;
-            lock (_lock)
-            {
-                changed = newState != _currentState;
-                if (changed)
-                    _currentState = newState;
-            }
-
+            changed = newState != _currentState;
             if (changed)
-            {
-                try
-                {
-                    StateChanged?.Invoke(newState);
-                }
-                catch
-                {
-                }
-            }
+                _currentState = newState;
         }
-    }
 
-    private static void RegisterKeyNotification(RegistryKey? key, AutoResetEvent? evt)
-    {
-        if (key is null || evt is null)
+        if (!changed)
             return;
 
         try
         {
-            var hKey = new HKEY(key.Handle.DangerousGetHandle());
-            var hEvt = new HANDLE(evt.SafeWaitHandle.DangerousGetHandle());
-
-            PInvoke.RegNotifyChangeKeyValue(
-                hKey,
-                bWatchSubtree: true,
-                REG_NOTIFY_FILTER.REG_NOTIFY_CHANGE_LAST_SET,
-                hEvt,
-                fAsynchronous: true);
+            StateChanged?.Invoke(newState);
         }
         catch
         {
         }
     }
 
-    private PrivacyState QueryCurrentState()
+    /// <summary>Bildirimi kurar; kurulamazsa anahtarı kapatıp null yapar (bir sonraki turda yeniden açılır ya da üst anahtar izlenir).</summary>
+    private static bool Arm(ref RegistryKey? key, AutoResetEvent evt, bool watchSubtree, REG_NOTIFY_FILTER filter)
     {
-        var (camInUse, camApp) = CheckDeviceUsage(_webcamKey);
-        var (micInUse, micApp) = CheckDeviceUsage(_micKey);
+        if (key is null)
+            return false;
+
+        try
+        {
+            var hKey = new HKEY(key.Handle.DangerousGetHandle());
+            var hEvt = new HANDLE(evt.SafeWaitHandle.DangerousGetHandle());
+            var result = PInvoke.RegNotifyChangeKeyValue(hKey, watchSubtree, filter, hEvt, fAsynchronous: true);
+            if (result == WIN32_ERROR.ERROR_SUCCESS)
+                return true;
+        }
+        catch
+        {
+        }
+
+        key.Dispose();
+        key = null;
+        return false;
+    }
+
+    private static PrivacyState QueryCurrentState(Run run)
+    {
+        var (camInUse, camApp) = CheckDeviceUsage(run.Webcam);
+        var (micInUse, micApp) = CheckDeviceUsage(run.Mic);
 
         return new PrivacyState(camInUse, micInUse, camApp, micApp);
     }
@@ -263,10 +289,14 @@ public sealed class ConsentStorePrivacyService : IPrivacyMonitorService
 
     public void Dispose()
     {
-        if (_disposed)
-            return;
+        lock (_lock)
+        {
+            if (_disposed)
+                return;
+            _disposed = true;
+        }
 
-        _disposed = true;
+        // Önce _disposed, sonra Stop: Stop artık _disposed'a bakmaz, izleyici gerçekten durur (eskiden hiç durmuyordu).
         Stop();
     }
 }
