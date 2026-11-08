@@ -9,7 +9,9 @@ public enum ShortcutAction
     OpenShelf,
     ToggleDock,
     OpenMenu,
-    PlayPause
+    PlayPause,
+    OpenSearch,
+    OpenSearchClipboard
 }
 
 /// <summary>Eylem ile ayar alanı ve varsayılan tuş eşlemesi.</summary>
@@ -28,6 +30,8 @@ public static class ShortcutBindings
         ShortcutAction.ToggleDock => "Ctrl+Alt+D",
         ShortcutAction.OpenMenu => "Ctrl+Alt+K",
         ShortcutAction.PlayPause => "Ctrl+Alt+Space",
+        ShortcutAction.OpenSearch => "Alt+F2",
+        ShortcutAction.OpenSearchClipboard => "Alt+Shift+F2",
         _ => ""
     };
 
@@ -38,6 +42,8 @@ public static class ShortcutBindings
         ShortcutAction.ToggleDock => settings.ShortcutToggleDock,
         ShortcutAction.OpenMenu => settings.ShortcutOpenMenu,
         ShortcutAction.PlayPause => settings.ShortcutPlayPause,
+        ShortcutAction.OpenSearch => settings.ShortcutOpenSearch,
+        ShortcutAction.OpenSearchClipboard => settings.ShortcutOpenSearchClipboard,
         _ => ""
     };
 
@@ -48,6 +54,8 @@ public static class ShortcutBindings
         ShortcutAction.ToggleDock => settings with { ShortcutToggleDock = text },
         ShortcutAction.OpenMenu => settings with { ShortcutOpenMenu = text },
         ShortcutAction.PlayPause => settings with { ShortcutPlayPause = text },
+        ShortcutAction.OpenSearch => settings with { ShortcutOpenSearch = text },
+        ShortcutAction.OpenSearchClipboard => settings with { ShortcutOpenSearchClipboard = text },
         _ => settings
     };
 

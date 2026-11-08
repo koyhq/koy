@@ -128,6 +128,19 @@ public sealed record AppSettings
     public string ShortcutToggleDock { get; set; } = "Ctrl+Alt+D";
     public string ShortcutOpenMenu { get; set; } = "Ctrl+Alt+K";
     public string ShortcutPlayPause { get; set; } = "Ctrl+Alt+Space";
+    public string ShortcutOpenSearch { get; set; } = "Alt+F2";
+    public string ShortcutOpenSearchClipboard { get; set; } = "Alt+Shift+F2";
+
+    /// <summary>Arama paneli yeniden açılınca son sorgu geri gelsin.</summary>
+    public bool SearchRetainPrior { get; set; } = true;
+
+    public Koy.Core.Search.SearchHistoryMode SearchHistoryMode { get; set; } = Koy.Core.Search.SearchHistoryMode.Suggestion;
+
+    /// <summary>Kapatılan arama kaynaklarının kimlikleri.</summary>
+    public List<string> SearchDisabledSources { get; set; } = [];
+
+    /// <summary>Arama paneli odak gidince ve sonuç çalışınca kapanmasın.</summary>
+    public bool SearchPinned { get; set; }
     /// <summary>Pomodoro uzun mola süresi (dakika).</summary>
     public int PomodoroLongBreakMinutes { get; set; } = 15;
     /// <summary>Pomodoro kısa mola süresi (dakika).</summary>
@@ -220,6 +233,12 @@ public sealed record AppSettings
                ShortcutToggleDock == other.ShortcutToggleDock &&
                ShortcutOpenMenu == other.ShortcutOpenMenu &&
                ShortcutPlayPause == other.ShortcutPlayPause &&
+               ShortcutOpenSearch == other.ShortcutOpenSearch &&
+               ShortcutOpenSearchClipboard == other.ShortcutOpenSearchClipboard &&
+               SearchRetainPrior == other.SearchRetainPrior &&
+               SearchHistoryMode == other.SearchHistoryMode &&
+               SearchDisabledSources.SequenceEqual(other.SearchDisabledSources) &&
+               SearchPinned == other.SearchPinned &&
                PomodoroLongBreakMinutes == other.PomodoroLongBreakMinutes &&
                PomodoroShortBreakMinutes == other.PomodoroShortBreakMinutes &&
                PomodoroWorkMinutes == other.PomodoroWorkMinutes &&
@@ -293,6 +312,11 @@ public sealed record AppSettings
         hash.Add(ShortcutToggleDock);
         hash.Add(ShortcutOpenMenu);
         hash.Add(ShortcutPlayPause);
+        hash.Add(ShortcutOpenSearch);
+        hash.Add(ShortcutOpenSearchClipboard);
+        hash.Add(SearchRetainPrior);
+        hash.Add(SearchHistoryMode);
+        hash.Add(SearchPinned);
         hash.Add(PomodoroLongBreakMinutes);
         hash.Add(PomodoroShortBreakMinutes);
         hash.Add(PomodoroWorkMinutes);

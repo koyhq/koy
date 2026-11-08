@@ -6,6 +6,7 @@ using Koy.App.Features.ClipboardPanel;
 using Koy.App.Features.ControlCenter;
 using Koy.App.Features.Focus;
 using Koy.App.Features.Home;
+using Koy.App.Features.Search;
 using Koy.App.Features.Music;
 using Koy.App.Features.Shelf;
 using Koy.App.Features.Status;
@@ -17,6 +18,7 @@ using Koy.Core.Display;
 using Koy.Core.Notch;
 using Koy.Core.Power;
 using Koy.Core.Privacy;
+using Koy.Core.Search;
 using Koy.Core.Settings;
 using Koy.Core.Timers;
 using Koy.Core.Shell;
@@ -70,6 +72,9 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     // Pano geçmişi yalnız ayar açıkken alınır (dinleyici ancak o zaman kurulur); Stop'ta bırakılır. Etkinlik defteri
     // bütün monitörlerde tek örnektir ve ilk Takvim açılışında diskten okunur.
     private IClipboardHistoryService? _clipboardHistory;
+
+    // Uygulama listesi bütün ekranların araması için tek kopya.
+    private AppSearchSource? _appSearch;
     private readonly SharedEvents _sharedEvents = new();
 
     private MediaService? _mediaService;
@@ -498,6 +503,60 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             controller.OnClick();
         else
             controller.Expand();
+    }
+
+    /// <summary>Kısayol: fare hangi ekrandaysa orada aramayı açar, açıksa kapatır. Tam ekranda hiçbir şey yapmaz.</summary>
+    /// <param name="useClipboard">Panodaki metinle aç.</param>
+    public void ToggleSearch(bool useClipboard = false)
+    {
+        var state = PickStateForShortcut();
+        if (state is null || _windowTracker is null)
+            return;
+
+        var query = useClipboard ? ReadClipboardText() : null;
+        if (state.ViewModel.IsSearchOpen && query is null)
+        {
+            state.ViewModel.CloseSearch(restoreFocus: true);
+            return;
+        }
+
+        if (_fullscreenDetector?.IsFullscreen(state.Monitor.Handle) == true)
+            return;
+
+        foreach (var other in _windowStates.Values.Where(s => !ReferenceEquals(s, state)))
+            other.ViewModel.CloseSearch(restoreFocus: false);
+
+        if (state.ViewModel.IsSearchOpen)
+            state.ViewModel.CloseSearch(restoreFocus: false);
+
+        var previous = _windowTracker.CurrentForeground?.Handle ?? 0;
+        state.ViewModel.OpenSearch(() => CreateSearch(), previous, query);
+        state.Window.FocusSearch();
+    }
+
+    private SearchViewModel CreateSearch()
+    {
+        _appSearch ??= SearchFactory.CreateAppSource(_shellActions);
+        return SearchFactory.Create(settings, _appSearch, _windowTracker!, _clipboardHistory, Application.Current.Dispatcher, SaveSearchPinned);
+    }
+
+    private void SaveSearchPinned(bool pinned)
+    {
+        settings.SearchPinned = pinned;
+        var store = new SettingsStore(SettingsStore.DefaultPath);
+        store.Save(store.Load() with { SearchPinned = pinned });
+    }
+
+    private static string? ReadClipboardText()
+    {
+        try
+        {
+            return Clipboard.ContainsText() ? Clipboard.GetText() : null;
+        }
+        catch (System.Runtime.InteropServices.ExternalException)
+        {
+            return null;
+        }
     }
 
     /// <summary>Kısayol: Raf panelini açar (panel kapalıysa da).</summary>

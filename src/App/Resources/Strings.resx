@@ -606,6 +606,330 @@
   <data name="ShortcutOpenMenu" xml:space="preserve">
     <value>Koy menu</value>
   </data>
+  <data name="ShortcutOpenSearch" xml:space="preserve">
+    <value>Open search</value>
+  </data>
+  <data name="ShortcutOpenSearchClipboard" xml:space="preserve">
+    <value>Search clipboard text</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Search…</value>
+  </data>
+  <data name="SearchEmptyHint" xml:space="preserve">
+    <value>Type to search. ? shows what you can do.</value>
+  </data>
+  <data name="SearchSearching" xml:space="preserve">
+    <value>Searching…</value>
+  </data>
+  <data name="SearchConfirmHint" xml:space="preserve">
+    <value>Press Enter again to confirm</value>
+  </data>
+  <data name="SearchHelpTip" xml:space="preserve">
+    <value>Show usage help</value>
+  </data>
+  <data name="SearchHistoryTip" xml:space="preserve">
+    <value>Recent searches</value>
+  </data>
+  <data name="SearchPinTip" xml:space="preserve">
+    <value>Keep open</value>
+  </data>
+  <data name="SearchConfigureTip" xml:space="preserve">
+    <value>Configure search</value>
+  </data>
+  <data name="SearchRecentQueries" xml:space="preserve">
+    <value>Recent searches</value>
+  </data>
+  <data name="SearchActRemove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="SearchActCopy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="SearchActOpenFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
+  <data name="SearchActRunInTerminal" xml:space="preserve">
+    <value>Run in terminal</value>
+  </data>
+  <data name="SearchActRequestClose" xml:space="preserve">
+    <value>Ask to close</value>
+  </data>
+  <data name="SearchHintCopy" xml:space="preserve">
+    <value>Press Enter to copy</value>
+  </data>
+  <data name="SearchRunCommand" xml:space="preserve">
+    <value>Run {0}</value>
+  </data>
+  <data name="SearchOpen" xml:space="preserve">
+    <value>Open {0}</value>
+  </data>
+  <data name="SearchGoTo" xml:space="preserve">
+    <value>Go to {0}</value>
+  </data>
+  <data name="SearchSendMail" xml:space="preserve">
+    <value>Send email to {0}</value>
+  </data>
+  <data name="SearchWebFor" xml:space="preserve">
+    <value>Search {0} for {1}</value>
+  </data>
+  <data name="SearchTerminate" xml:space="preserve">
+    <value>Terminate {0}</value>
+  </data>
+  <data name="SearchProcessId" xml:space="preserve">
+    <value>Process ID: {0}</value>
+  </data>
+  <data name="SearchCatApps" xml:space="preserve">
+    <value>Applications</value>
+  </data>
+  <data name="SearchCatWindows" xml:space="preserve">
+    <value>Windows</value>
+  </data>
+  <data name="SearchCatCalculator" xml:space="preserve">
+    <value>Calculator</value>
+  </data>
+  <data name="SearchCatSession" xml:space="preserve">
+    <value>Session</value>
+  </data>
+  <data name="SearchCatShell" xml:space="preserve">
+    <value>Command line</value>
+  </data>
+  <data name="SearchCatLocations" xml:space="preserve">
+    <value>Locations</value>
+  </data>
+  <data name="SearchCatPlaces" xml:space="preserve">
+    <value>Places</value>
+  </data>
+  <data name="SearchCatRecent" xml:space="preserve">
+    <value>Recent documents</value>
+  </data>
+  <data name="SearchCatFiles" xml:space="preserve">
+    <value>Files</value>
+  </data>
+  <data name="SearchCatAudio" xml:space="preserve">
+    <value>Audio</value>
+  </data>
+  <data name="SearchCatImages" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="SearchCatVideos" xml:space="preserve">
+    <value>Videos</value>
+  </data>
+  <data name="SearchCatSpreadsheets" xml:space="preserve">
+    <value>Spreadsheets</value>
+  </data>
+  <data name="SearchCatPresentations" xml:space="preserve">
+    <value>Presentations</value>
+  </data>
+  <data name="SearchCatFolders" xml:space="preserve">
+    <value>Folders</value>
+  </data>
+  <data name="SearchCatDocuments" xml:space="preserve">
+    <value>Documents</value>
+  </data>
+  <data name="SearchCatArchives" xml:space="preserve">
+    <value>Archives</value>
+  </data>
+  <data name="SearchCatTexts" xml:space="preserve">
+    <value>Texts</value>
+  </data>
+  <data name="SearchCatWeb" xml:space="preserve">
+    <value>Web search</value>
+  </data>
+  <data name="SearchCatBookmarks" xml:space="preserve">
+    <value>Bookmarks</value>
+  </data>
+  <data name="SearchCatProcesses" xml:space="preserve">
+    <value>Processes</value>
+  </data>
+  <data name="SearchCatClipboard" xml:space="preserve">
+    <value>Clipboard</value>
+  </data>
+  <data name="SearchCatDateTime" xml:space="preserve">
+    <value>Date and time</value>
+  </data>
+  <data name="SearchCatHelp" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="SearchKwPlaces" xml:space="preserve">
+    <value>places</value>
+  </data>
+  <data name="SearchKwKill" xml:space="preserve">
+    <value>kill</value>
+  </data>
+  <data name="SearchKwHelp" xml:space="preserve">
+    <value>help</value>
+  </data>
+  <data name="SearchKwBookmarks" xml:space="preserve">
+    <value>bookmarks</value>
+  </data>
+  <data name="SearchKwDate" xml:space="preserve">
+    <value>date;today</value>
+  </data>
+  <data name="SearchKwTime" xml:space="preserve">
+    <value>time</value>
+  </data>
+  <data name="SearchKwLock" xml:space="preserve">
+    <value>lock;lock screen</value>
+  </data>
+  <data name="SearchKwSleep" xml:space="preserve">
+    <value>sleep;suspend</value>
+  </data>
+  <data name="SearchKwSignOut" xml:space="preserve">
+    <value>logout;log out;sign out</value>
+  </data>
+  <data name="SearchKwSwitchUser" xml:space="preserve">
+    <value>switch user;new session</value>
+  </data>
+  <data name="SearchKwRestart" xml:space="preserve">
+    <value>restart;reboot</value>
+  </data>
+  <data name="SearchKwShutdown" xml:space="preserve">
+    <value>shutdown;shut down;power off</value>
+  </data>
+  <data name="SearchCmdLock" xml:space="preserve">
+    <value>Lock</value>
+  </data>
+  <data name="SearchCmdSleep" xml:space="preserve">
+    <value>Sleep</value>
+  </data>
+  <data name="SearchCmdSignOut" xml:space="preserve">
+    <value>Log out</value>
+  </data>
+  <data name="SearchCmdSwitchUser" xml:space="preserve">
+    <value>Switch user</value>
+  </data>
+  <data name="SearchCmdRestart" xml:space="preserve">
+    <value>Restart</value>
+  </data>
+  <data name="SearchCmdShutdown" xml:space="preserve">
+    <value>Shut down</value>
+  </data>
+  <data name="SearchPlaceHome" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="SearchPlaceDesktop" xml:space="preserve">
+    <value>Desktop</value>
+  </data>
+  <data name="SearchPlaceDocuments" xml:space="preserve">
+    <value>Documents</value>
+  </data>
+  <data name="SearchPlaceDownloads" xml:space="preserve">
+    <value>Downloads</value>
+  </data>
+  <data name="SearchPlaceMusic" xml:space="preserve">
+    <value>Music</value>
+  </data>
+  <data name="SearchPlacePictures" xml:space="preserve">
+    <value>Pictures</value>
+  </data>
+  <data name="SearchPlaceVideos" xml:space="preserve">
+    <value>Videos</value>
+  </data>
+  <data name="SearchPlaceDevices" xml:space="preserve">
+    <value>Devices</value>
+  </data>
+  <data name="SearchExampleApp" xml:space="preserve">
+    <value>notepad</value>
+  </data>
+  <data name="SearchExampleWindow" xml:space="preserve">
+    <value>report</value>
+  </data>
+  <data name="SearchExampleDocument" xml:space="preserve">
+    <value>report</value>
+  </data>
+  <data name="SearchExampleWeb" xml:space="preserve">
+    <value>cats</value>
+  </data>
+  <data name="SearchExampleClipboard" xml:space="preserve">
+    <value>copied text</value>
+  </data>
+  <data name="SearchSyntaxApps" xml:space="preserve">
+    <value>Finds installed applications.</value>
+  </data>
+  <data name="SearchSyntaxWindows" xml:space="preserve">
+    <value>Switches to an open window.</value>
+  </data>
+  <data name="SearchSyntaxCalc" xml:space="preserve">
+    <value>Calculates an expression. Enter puts the result in the box.</value>
+  </data>
+  <data name="SearchSyntaxCalcFunctions" xml:space="preserve">
+    <value>Math functions: sqrt, sin, cos, tan, ln, log, abs.</value>
+  </data>
+  <data name="SearchSyntaxCalcBase" xml:space="preserve">
+    <value>Shows the result in hex, bin or oct.</value>
+  </data>
+  <data name="SearchSyntaxSession" xml:space="preserve">
+    <value>Lock, sleep, log out, switch user, restart or shut down.</value>
+  </data>
+  <data name="SearchSyntaxShell" xml:space="preserve">
+    <value>Runs a command found on PATH.</value>
+  </data>
+  <data name="SearchSyntaxLocations" xml:space="preserve">
+    <value>Opens a file or folder path.</value>
+  </data>
+  <data name="SearchSyntaxLocationsUrl" xml:space="preserve">
+    <value>Opens a web address.</value>
+  </data>
+  <data name="SearchSyntaxPlaces" xml:space="preserve">
+    <value>Lists known folders and drives.</value>
+  </data>
+  <data name="SearchSyntaxRecent" xml:space="preserve">
+    <value>Finds recently used documents.</value>
+  </data>
+  <data name="SearchSyntaxFiles" xml:space="preserve">
+    <value>Searches file names in the Windows index.</value>
+  </data>
+  <data name="SearchSyntaxWeb" xml:space="preserve">
+    <value>Searches {0}.</value>
+  </data>
+  <data name="SearchSyntaxWebBang" xml:space="preserve">
+    <value>Same search with ! syntax.</value>
+  </data>
+  <data name="SearchSyntaxBookmarks" xml:space="preserve">
+    <value>Lists browser bookmarks.</value>
+  </data>
+  <data name="SearchSyntaxKill" xml:space="preserve">
+    <value>Terminates matching processes.</value>
+  </data>
+  <data name="SearchSyntaxClipboard" xml:space="preserve">
+    <value>Finds text in clipboard history.</value>
+  </data>
+  <data name="SearchSyntaxDate" xml:space="preserve">
+    <value>Shows today's date.</value>
+  </data>
+  <data name="SearchSyntaxTime" xml:space="preserve">
+    <value>Shows the current time.</value>
+  </data>
+  <data name="SearchSettingsHeader" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="SearchRetainTitle" xml:space="preserve">
+    <value>Keep last search</value>
+  </data>
+  <data name="SearchRetainDesc" xml:space="preserve">
+    <value>The last search comes back selected when the panel opens.</value>
+  </data>
+  <data name="SearchHistoryTitle" xml:space="preserve">
+    <value>Search history</value>
+  </data>
+  <data name="SearchHistoryOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="SearchHistorySuggest" xml:space="preserve">
+    <value>Suggest</value>
+  </data>
+  <data name="SearchHistoryComplete" xml:space="preserve">
+    <value>Autocomplete</value>
+  </data>
+  <data name="SearchClearHistoryTitle" xml:space="preserve">
+    <value>Clear search history</value>
+  </data>
+  <data name="SearchClearHistoryButton" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="SearchSourcesHeader" xml:space="preserve">
+    <value>Search sources</value>
+  </data>
   <data name="ShortcutPlayPause" xml:space="preserve">
     <value>Music: play / pause</value>
   </data>

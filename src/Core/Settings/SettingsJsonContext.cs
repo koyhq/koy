@@ -9,6 +9,7 @@ namespace Koy.Core.Settings;
 [JsonSerializable(typeof(AppSettings))]
 [JsonSerializable(typeof(DockStyleMode))]
 [JsonSerializable(typeof(DockProximityMode))]
+[JsonSerializable(typeof(Koy.Core.Search.SearchHistoryMode))]
 [JsonSerializable(typeof(List<string>))]
 [JsonSerializable(typeof(DockFolder))]
 [JsonSerializable(typeof(List<DockFolder>))]

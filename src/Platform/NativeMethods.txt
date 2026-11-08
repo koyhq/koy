@@ -213,3 +213,9 @@ _AUDCLNT_BUFFERFLAGS
 
 RegNotifyChangeKeyValue
 REG_NOTIFY_FILTER
+IEnumShellItems
+BHID_EnumItems
+SIGDN
+LockWorkStation
+SetSuspendState
+WTSDisconnectSession

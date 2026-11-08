@@ -13,6 +13,7 @@
         xmlns:calendar="clr-namespace:Koy.App.Features.Calendar"
         xmlns:clip="clr-namespace:Koy.App.Features.ClipboardPanel"
         xmlns:sysinfo="clr-namespace:Koy.App.Features.SystemInfo"
+        xmlns:search="clr-namespace:Koy.App.Features.Search"
         xmlns:res="clr-namespace:Koy.App.Resources"
         xmlns:core="clr-namespace:Koy.Core.Notch;assembly=Koy.Core"
         mc:Ignorable="d"
@@ -400,6 +401,10 @@
                   </MultiDataTrigger.Conditions>
                   <Setter Property="Visibility" Value="Visible" />
                 </MultiDataTrigger>
+                <!-- Arama açıkken durum satırı, sayfa ve sekmeler yerine arama paneli görünür -->
+                <DataTrigger Binding="{Binding IsSearchOpen}" Value="True">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
               </Style.Triggers>
             </Style>
           </Grid.Style>
@@ -552,6 +557,11 @@
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
+        </Grid>
+
+        <!-- 4. Arama: açık çentiğin bütün gövdesini kullanır -->
+        <Grid Margin="24,10,24,12" Visibility="{Binding IsSearchOpen, Converter={StaticResource BoolToVis}}">
+          <search:SearchPanel x:Name="SearchHost" DataContext="{Binding Search}" />
         </Grid>
       </Grid>
     </local:NotchShape>

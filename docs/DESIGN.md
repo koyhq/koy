@@ -94,6 +94,11 @@ Koy penceresi, sihirbaz ve sağ alt menü renk, ölçü ve hareketi koda gömmez
 - **Kapalı ve Peek:** kapalı çentikte yalnız saat ve pil durur; üzerine gelince (Peek) tarih ve ağ simgesi (ve Bluetooth) de görünür, kapalı çentik kalabalıklaşmaz.
 - **Kısa bildirimler (Peek):** "Pomodoro bitti", "Şarj tamamlandı", "Kulaklık bağlandı" gibi.
 
+## Arama paneli
+- `Alt+F2` ile açık çentiğin içinde açılır, tuval büyümez (AGENTS #13). Durum satırı, sayfa ve sekmeler o sırada gizlidir.
+- Üstte arama çubuğu (yardım, yazı alanı, son aramalar, ayarlar, açık tut), altında kategori başlıklı liste. En çok 15 satır; sığmayanlara kaydırılır.
+- Seçili satırda eylem düğmeleri görünür. Kapat, yeniden başlat ve oturumu kapat ikinci Enter ile çalışır.
+
 ## Koy penceresi
 - 880 px genişliğinde, orta boy bir pencere.
 - Pencereyi kapatmak Koy'u kapatmaz. Çıkış yalnız sağ alttaki Koy menüsünden ya da pencerenin sol altındaki "Koy'dan çık" düğmesinden yapılır.

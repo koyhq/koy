@@ -606,6 +606,330 @@
   <data name="ShortcutOpenMenu" xml:space="preserve">
     <value>Koy menüsü</value>
   </data>
+  <data name="ShortcutOpenSearch" xml:space="preserve">
+    <value>Aramayı aç</value>
+  </data>
+  <data name="ShortcutOpenSearchClipboard" xml:space="preserve">
+    <value>Panodaki metinle ara</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Ara…</value>
+  </data>
+  <data name="SearchEmptyHint" xml:space="preserve">
+    <value>Aramak için yazın. ? neler yapabileceğinizi gösterir.</value>
+  </data>
+  <data name="SearchSearching" xml:space="preserve">
+    <value>Aranıyor…</value>
+  </data>
+  <data name="SearchConfirmHint" xml:space="preserve">
+    <value>Onaylamak için tekrar Enter'a basın</value>
+  </data>
+  <data name="SearchHelpTip" xml:space="preserve">
+    <value>Kullanım yardımını göster</value>
+  </data>
+  <data name="SearchHistoryTip" xml:space="preserve">
+    <value>Son aramalar</value>
+  </data>
+  <data name="SearchPinTip" xml:space="preserve">
+    <value>Açık tut</value>
+  </data>
+  <data name="SearchConfigureTip" xml:space="preserve">
+    <value>Aramayı ayarla</value>
+  </data>
+  <data name="SearchRecentQueries" xml:space="preserve">
+    <value>Son aramalar</value>
+  </data>
+  <data name="SearchActRemove" xml:space="preserve">
+    <value>Kaldır</value>
+  </data>
+  <data name="SearchActCopy" xml:space="preserve">
+    <value>Kopyala</value>
+  </data>
+  <data name="SearchActOpenFolder" xml:space="preserve">
+    <value>Klasörü aç</value>
+  </data>
+  <data name="SearchActRunInTerminal" xml:space="preserve">
+    <value>Terminalde çalıştır</value>
+  </data>
+  <data name="SearchActRequestClose" xml:space="preserve">
+    <value>Kapatmasını iste</value>
+  </data>
+  <data name="SearchHintCopy" xml:space="preserve">
+    <value>Kopyalamak için Enter</value>
+  </data>
+  <data name="SearchRunCommand" xml:space="preserve">
+    <value>Çalıştır: {0}</value>
+  </data>
+  <data name="SearchOpen" xml:space="preserve">
+    <value>Aç: {0}</value>
+  </data>
+  <data name="SearchGoTo" xml:space="preserve">
+    <value>Git: {0}</value>
+  </data>
+  <data name="SearchSendMail" xml:space="preserve">
+    <value>E-posta gönder: {0}</value>
+  </data>
+  <data name="SearchWebFor" xml:space="preserve">
+    <value>{0} üzerinde ara: {1}</value>
+  </data>
+  <data name="SearchTerminate" xml:space="preserve">
+    <value>Sonlandır: {0}</value>
+  </data>
+  <data name="SearchProcessId" xml:space="preserve">
+    <value>Süreç kimliği: {0}</value>
+  </data>
+  <data name="SearchCatApps" xml:space="preserve">
+    <value>Uygulamalar</value>
+  </data>
+  <data name="SearchCatWindows" xml:space="preserve">
+    <value>Pencereler</value>
+  </data>
+  <data name="SearchCatCalculator" xml:space="preserve">
+    <value>Hesap makinesi</value>
+  </data>
+  <data name="SearchCatSession" xml:space="preserve">
+    <value>Oturum</value>
+  </data>
+  <data name="SearchCatShell" xml:space="preserve">
+    <value>Komut satırı</value>
+  </data>
+  <data name="SearchCatLocations" xml:space="preserve">
+    <value>Konumlar</value>
+  </data>
+  <data name="SearchCatPlaces" xml:space="preserve">
+    <value>Yerler</value>
+  </data>
+  <data name="SearchCatRecent" xml:space="preserve">
+    <value>Son belgeler</value>
+  </data>
+  <data name="SearchCatFiles" xml:space="preserve">
+    <value>Dosyalar</value>
+  </data>
+  <data name="SearchCatAudio" xml:space="preserve">
+    <value>Ses</value>
+  </data>
+  <data name="SearchCatImages" xml:space="preserve">
+    <value>Görseller</value>
+  </data>
+  <data name="SearchCatVideos" xml:space="preserve">
+    <value>Videolar</value>
+  </data>
+  <data name="SearchCatSpreadsheets" xml:space="preserve">
+    <value>Tablolar</value>
+  </data>
+  <data name="SearchCatPresentations" xml:space="preserve">
+    <value>Sunumlar</value>
+  </data>
+  <data name="SearchCatFolders" xml:space="preserve">
+    <value>Klasörler</value>
+  </data>
+  <data name="SearchCatDocuments" xml:space="preserve">
+    <value>Belgeler</value>
+  </data>
+  <data name="SearchCatArchives" xml:space="preserve">
+    <value>Arşivler</value>
+  </data>
+  <data name="SearchCatTexts" xml:space="preserve">
+    <value>Metinler</value>
+  </data>
+  <data name="SearchCatWeb" xml:space="preserve">
+    <value>Web araması</value>
+  </data>
+  <data name="SearchCatBookmarks" xml:space="preserve">
+    <value>Yer imleri</value>
+  </data>
+  <data name="SearchCatProcesses" xml:space="preserve">
+    <value>Süreçler</value>
+  </data>
+  <data name="SearchCatClipboard" xml:space="preserve">
+    <value>Pano</value>
+  </data>
+  <data name="SearchCatDateTime" xml:space="preserve">
+    <value>Tarih ve saat</value>
+  </data>
+  <data name="SearchCatHelp" xml:space="preserve">
+    <value>Yardım</value>
+  </data>
+  <data name="SearchKwPlaces" xml:space="preserve">
+    <value>yerler</value>
+  </data>
+  <data name="SearchKwKill" xml:space="preserve">
+    <value>kill</value>
+  </data>
+  <data name="SearchKwHelp" xml:space="preserve">
+    <value>yardım</value>
+  </data>
+  <data name="SearchKwBookmarks" xml:space="preserve">
+    <value>yer imleri</value>
+  </data>
+  <data name="SearchKwDate" xml:space="preserve">
+    <value>tarih;bugün;date</value>
+  </data>
+  <data name="SearchKwTime" xml:space="preserve">
+    <value>saat;time</value>
+  </data>
+  <data name="SearchKwLock" xml:space="preserve">
+    <value>kilitle;ekranı kilitle;lock</value>
+  </data>
+  <data name="SearchKwSleep" xml:space="preserve">
+    <value>uyku;uyut;sleep</value>
+  </data>
+  <data name="SearchKwSignOut" xml:space="preserve">
+    <value>oturumu kapat;çıkış yap;logout</value>
+  </data>
+  <data name="SearchKwSwitchUser" xml:space="preserve">
+    <value>kullanıcı değiştir;switch user</value>
+  </data>
+  <data name="SearchKwRestart" xml:space="preserve">
+    <value>yeniden başlat;restart</value>
+  </data>
+  <data name="SearchKwShutdown" xml:space="preserve">
+    <value>kapat;bilgisayarı kapat;shutdown</value>
+  </data>
+  <data name="SearchCmdLock" xml:space="preserve">
+    <value>Bilgisayarı kilitle</value>
+  </data>
+  <data name="SearchCmdSleep" xml:space="preserve">
+    <value>Uyku</value>
+  </data>
+  <data name="SearchCmdSignOut" xml:space="preserve">
+    <value>Oturumu kapat</value>
+  </data>
+  <data name="SearchCmdSwitchUser" xml:space="preserve">
+    <value>Kullanıcı değiştir</value>
+  </data>
+  <data name="SearchCmdRestart" xml:space="preserve">
+    <value>Yeniden başlat</value>
+  </data>
+  <data name="SearchCmdShutdown" xml:space="preserve">
+    <value>Bilgisayarı kapat</value>
+  </data>
+  <data name="SearchPlaceHome" xml:space="preserve">
+    <value>Ana klasör</value>
+  </data>
+  <data name="SearchPlaceDesktop" xml:space="preserve">
+    <value>Masaüstü</value>
+  </data>
+  <data name="SearchPlaceDocuments" xml:space="preserve">
+    <value>Belgeler</value>
+  </data>
+  <data name="SearchPlaceDownloads" xml:space="preserve">
+    <value>İndirilenler</value>
+  </data>
+  <data name="SearchPlaceMusic" xml:space="preserve">
+    <value>Müzik</value>
+  </data>
+  <data name="SearchPlacePictures" xml:space="preserve">
+    <value>Resimler</value>
+  </data>
+  <data name="SearchPlaceVideos" xml:space="preserve">
+    <value>Videolar</value>
+  </data>
+  <data name="SearchPlaceDevices" xml:space="preserve">
+    <value>Aygıtlar</value>
+  </data>
+  <data name="SearchExampleApp" xml:space="preserve">
+    <value>not defteri</value>
+  </data>
+  <data name="SearchExampleWindow" xml:space="preserve">
+    <value>rapor</value>
+  </data>
+  <data name="SearchExampleDocument" xml:space="preserve">
+    <value>rapor</value>
+  </data>
+  <data name="SearchExampleWeb" xml:space="preserve">
+    <value>kedi</value>
+  </data>
+  <data name="SearchExampleClipboard" xml:space="preserve">
+    <value>kopyalanan metin</value>
+  </data>
+  <data name="SearchSyntaxApps" xml:space="preserve">
+    <value>Kurulu uygulamaları bulur.</value>
+  </data>
+  <data name="SearchSyntaxWindows" xml:space="preserve">
+    <value>Açık pencereye geçer.</value>
+  </data>
+  <data name="SearchSyntaxCalc" xml:space="preserve">
+    <value>İşlemi hesaplar. Enter sonucu kutuya alır.</value>
+  </data>
+  <data name="SearchSyntaxCalcFunctions" xml:space="preserve">
+    <value>Matematik işlevleri: sqrt, sin, cos, tan, ln, log, abs.</value>
+  </data>
+  <data name="SearchSyntaxCalcBase" xml:space="preserve">
+    <value>Sonucu hex, bin ya da oct olarak gösterir.</value>
+  </data>
+  <data name="SearchSyntaxSession" xml:space="preserve">
+    <value>Kilitle, uyku, oturumu kapat, kullanıcı değiştir, yeniden başlat ya da kapat.</value>
+  </data>
+  <data name="SearchSyntaxShell" xml:space="preserve">
+    <value>PATH'teki bir komutu çalıştırır.</value>
+  </data>
+  <data name="SearchSyntaxLocations" xml:space="preserve">
+    <value>Dosya ya da klasör yolunu açar.</value>
+  </data>
+  <data name="SearchSyntaxLocationsUrl" xml:space="preserve">
+    <value>Web adresini açar.</value>
+  </data>
+  <data name="SearchSyntaxPlaces" xml:space="preserve">
+    <value>Bilinen klasörleri ve sürücüleri listeler.</value>
+  </data>
+  <data name="SearchSyntaxRecent" xml:space="preserve">
+    <value>Son kullanılan belgeleri bulur.</value>
+  </data>
+  <data name="SearchSyntaxFiles" xml:space="preserve">
+    <value>Windows dizininde dosya adı arar.</value>
+  </data>
+  <data name="SearchSyntaxWeb" xml:space="preserve">
+    <value>{0} üzerinde arar.</value>
+  </data>
+  <data name="SearchSyntaxWebBang" xml:space="preserve">
+    <value>Aynı arama, ! yazımıyla.</value>
+  </data>
+  <data name="SearchSyntaxBookmarks" xml:space="preserve">
+    <value>Tarayıcı yer imlerini listeler.</value>
+  </data>
+  <data name="SearchSyntaxKill" xml:space="preserve">
+    <value>Eşleşen süreçleri sonlandırır.</value>
+  </data>
+  <data name="SearchSyntaxClipboard" xml:space="preserve">
+    <value>Pano geçmişinde metin bulur.</value>
+  </data>
+  <data name="SearchSyntaxDate" xml:space="preserve">
+    <value>Bugünün tarihini gösterir.</value>
+  </data>
+  <data name="SearchSyntaxTime" xml:space="preserve">
+    <value>Şu anki saati gösterir.</value>
+  </data>
+  <data name="SearchSettingsHeader" xml:space="preserve">
+    <value>Arama</value>
+  </data>
+  <data name="SearchRetainTitle" xml:space="preserve">
+    <value>Son aramayı hatırla</value>
+  </data>
+  <data name="SearchRetainDesc" xml:space="preserve">
+    <value>Panel açılınca son arama seçili olarak geri gelir.</value>
+  </data>
+  <data name="SearchHistoryTitle" xml:space="preserve">
+    <value>Arama geçmişi</value>
+  </data>
+  <data name="SearchHistoryOff" xml:space="preserve">
+    <value>Kapalı</value>
+  </data>
+  <data name="SearchHistorySuggest" xml:space="preserve">
+    <value>Öner</value>
+  </data>
+  <data name="SearchHistoryComplete" xml:space="preserve">
+    <value>Otomatik tamamla</value>
+  </data>
+  <data name="SearchClearHistoryTitle" xml:space="preserve">
+    <value>Arama geçmişini temizle</value>
+  </data>
+  <data name="SearchClearHistoryButton" xml:space="preserve">
+    <value>Temizle</value>
+  </data>
+  <data name="SearchSourcesHeader" xml:space="preserve">
+    <value>Arama kaynakları</value>
+  </data>
   <data name="ShortcutPlayPause" xml:space="preserve">
     <value>Müzik: oynat / duraklat</value>
   </data>

@@ -45,6 +45,7 @@ src/Core/       Saf C# (net10.0). WPF ve Windows API YOK.
                 SystemStats/ CPU/RAM/ağ örnekleme hesapları, süreç seçici, Türkçe biçimlendirme (SystemFormat)
                 QuickLaunch/ hızlı başlat listesi (en çok 8, kalıcı: AppSettings.QuickLaunchItems)
                 Tasks/      odak görevleri (TaskService, tasks.json); Settings/JsonListFile ayar klasöründeki küçük JSON listeleri okur/yazar
+                Search/     arama paneli: kaynaklar (ISearchSource), puanlama, sıralama, geçmiş, panel durumu (SearchPanelController), hesap
 src/Platform/   Core'daki sözleşmelerin Windows 11 uygulamaları (WinRT / CsWin32). Aynı klasör adları:
                 Shell/TrayHostService.cs : Core.Tray.ITrayService. Koy'un gizli Shell_TrayWnd penceresi (kendi iş
                 parçacığında); her kaydı Windows'a da iletir. SharedServices.AcquireTrayHost ile sayaçlı paylaşılır;
@@ -56,6 +57,7 @@ src/Platform/   Core'daki sözleşmelerin Windows 11 uygulamaları (WinRT / CsWi
                 AcquireBluetoothService sayaçlı; Wi-Fi yalnız liste sayfası açıkken (10 sn tarama), Bluetooth yalnız Ana/Kontrol görünürken.
                 Core/Wireless ve Core/Bluetooth: liste mantığı (WifiList, BluetoothList) saf ve testli.
                 Clipboard/ClipboardHistoryService.cs : pano dinleyicisi (kendi iş parçacığında gizli mesaj penceresi), SystemStats/SystemStatsService.cs :
+                Search/ : uygulama listesi (shell:AppsFolder, kısa ömürlü STA), Windows dizini (ADO COM, NuGet'siz), oturum komutları, yer imleri.
                 1 sn zamanlayıcı (yalnız Start ile), Diagnostics/ProcessMemory.cs : özel çalışma kümesi. SharedServices.AcquireClipboardHistory/AcquireSystemStats sayaçlı.
                 Media/MediaService.cs : Core.Media.IMediaService. Win32 çağrısı için adını NativeMethods.txt'ye
                 ekle, CsWin32 üretir; elle DllImport yazma.
@@ -63,6 +65,7 @@ src/App/        WPF. Yalnız görseller ve ince ViewModel'ler, özellik klasörl
                 Features/IFeature.cs           özellik giriş noktası (Start / Stop)
                 Features/Notch/                NotchFeature, NotchWindow, NotchShape, NotchViewModel
                 Features/Home/, Focus/, Calendar/, Shelf/, ClipboardPanel/, SystemInfo/, ControlCenter/   çentik sayfaları (Ana, Odak, Takvim, Raf, Pano,
+                Features/Search/               çentikteki arama paneli; ilk açılışta kurulur (SearchFactory), kapalıyken kaynaklar çalışmaz
                                                Sistem, Kontrol); Music/ ve Status/ Ana'nın ve durum satırının veri kaynağı (kendi paneli yok).
                                                Servisler yalnız sayfası görünürken alınır: SystemStatsViewModel.SetActive (Ana + Sistem),
                                                Pano / Takvim / görevler / hızlı başlat kendi SetActive'leri; pano dinleyicisi NotchFeature'da yalnız ayar açıkken alınır
