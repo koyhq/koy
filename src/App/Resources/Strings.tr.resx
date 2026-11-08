@@ -675,8 +675,11 @@
   <data name="SearchWebFor" xml:space="preserve">
     <value>{0} üzerinde ara: {1}</value>
   </data>
-  <data name="SearchTerminate" xml:space="preserve">
-    <value>Sonlandır: {0}</value>
+  <data name="SearchCloseProcess" xml:space="preserve">
+    <value>Kapat: {0}</value>
+  </data>
+  <data name="SearchActTerminate" xml:space="preserve">
+    <value>Zorla sonlandır</value>
   </data>
   <data name="SearchProcessId" xml:space="preserve">
     <value>Süreç kimliği: {0}</value>

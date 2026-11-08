@@ -95,23 +95,57 @@ public static class SearchProcesses
             using (process)
             {
                 if (process.Id > 4)
-                    result.Add(new RunningProcess(process.Id, process.ProcessName));
+                    result.Add(new RunningProcess(process.Id, process.ProcessName, StartTicks(process)));
             }
         }
 
         return result;
     }
 
-    public static void RequestClose(int processId)
+    public static void RequestClose(RunningProcess target)
     {
         try
         {
-            using var process = Process.GetProcessById(processId);
-            process.CloseMainWindow();
+            using var process = Process.GetProcessById(target.Id);
+            if (IsSame(process, target))
+                process.CloseMainWindow();
         }
         catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
         {
             // Süreç bu arada kapanmış.
+        }
+    }
+
+    /// <summary>Zorla sonlandırır; kimlik başka bir sürece geçmişse dokunmaz.</summary>
+    public static void Terminate(RunningProcess target, Action<int> kill)
+    {
+        try
+        {
+            using var process = Process.GetProcessById(target.Id);
+            if (IsSame(process, target))
+                kill(target.Id);
+        }
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
+        {
+            // Süreç bu arada kapanmış.
+        }
+    }
+
+    // Liste alındığından beri kimlik başka sürece verilmiş olabilir: ad ve başlangıç zamanı aynı olmalı.
+    private static bool IsSame(Process process, RunningProcess target) =>
+        string.Equals(process.ProcessName, target.Name, StringComparison.OrdinalIgnoreCase)
+        && StartTicks(process) == target.StartTicks;
+
+    private static long StartTicks(Process process)
+    {
+        try
+        {
+            return process.StartTime.ToUniversalTime().Ticks;
+        }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            // Korumalı süreç: başlangıç zamanı okunamaz, yalnız ad karşılaştırılır.
+            return 0;
         }
     }
 }

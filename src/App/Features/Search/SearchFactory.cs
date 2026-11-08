@@ -123,7 +123,7 @@ public static class SearchFactory
         {
             Syntaxes = [new SearchSyntax(T("SearchKwBookmarks"), T("SearchSyntaxBookmarks"))]
         });
-        Add(new KillSearchSource(SearchProcesses.List, windows.TerminateProcess, SearchProcesses.RequestClose, T)
+        Add(new KillSearchSource(SearchProcesses.List, p => SearchProcesses.Terminate(p, windows.TerminateProcess), SearchProcesses.RequestClose, T)
         {
             Syntaxes = [new SearchSyntax(T("SearchKwKill") + " notepad", T("SearchSyntaxKill"))]
         });

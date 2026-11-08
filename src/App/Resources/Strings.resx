@@ -675,8 +675,11 @@
   <data name="SearchWebFor" xml:space="preserve">
     <value>Search {0} for {1}</value>
   </data>
-  <data name="SearchTerminate" xml:space="preserve">
-    <value>Terminate {0}</value>
+  <data name="SearchCloseProcess" xml:space="preserve">
+    <value>Close {0}</value>
+  </data>
+  <data name="SearchActTerminate" xml:space="preserve">
+    <value>Terminate (force)</value>
   </data>
   <data name="SearchProcessId" xml:space="preserve">
     <value>Process ID: {0}</value>

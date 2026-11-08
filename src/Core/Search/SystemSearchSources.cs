@@ -413,13 +413,25 @@ public sealed class FileSearchSource(IFileSearchService service, ISearchShell sh
     }
 }
 
-/// <summary>"kill ad": eşleşen süreçleri listeler. Tetik sözcüğü olmadan hiç çalışmaz.</summary>
-public sealed class KillSearchSource(Func<IReadOnlyList<RunningProcess>> processes, Action<int> terminate, Action<int> requestClose, Func<string, string> t)
-    : SearchSource("kill", t("SearchCatProcesses"))
+/// <summary>
+/// "kill ad": eşleşen süreçleri listeler. Tetik sözcüğü olmadan hiç çalışmaz.
+/// Ana eylem nazik kapatma; zorla sonlandırma ayrı eylemdir ve onay ister.
+/// </summary>
+public sealed class KillSearchSource(
+    Func<IReadOnlyList<RunningProcess>> processes,
+    Action<RunningProcess> terminate,
+    Action<RunningProcess> requestClose,
+    Func<string, string> t,
+    Func<long>? clock = null) : SearchSource("kill", t("SearchCatProcesses"))
 {
     private const int MinNameLength = 2;
 
+    /// <summary>Liste bundan eskiyse yeniden alınır (panel iğnelenip açık kalırsa kimlikler eskir).</summary>
+    public const long MaxSnapshotAgeMs = 10_000;
+
+    private readonly Func<long> _clock = clock ?? (() => Environment.TickCount64);
     private IReadOnlyList<RunningProcess>? _snapshot;
+    private long _snapshotAt;
 
     public override void Release() => _snapshot = null;
 
@@ -433,17 +445,23 @@ public sealed class KillSearchSource(Func<IReadOnlyList<RunningProcess>> process
         if (term.Length < MinNameLength)
             return [];
 
-        // Süreç listesi pahalı: yalnız bu kaynak gerçekten kullanılınca, oturumda bir kez alınır.
-        _snapshot ??= processes();
+        // Süreç listesi pahalı: yalnız bu kaynak gerçekten kullanılınca, kısa süreliğine saklanır.
+        var now = _clock();
+        if (_snapshot is null || now - _snapshotAt > MaxSnapshotAgeMs)
+        {
+            _snapshot = processes();
+            _snapshotAt = now;
+        }
+
         return _snapshot
             .Where(p => SearchText.Fold(p.Name).Contains(term, StringComparison.Ordinal))
-            .Select(p => new SearchResult("kill:" + p.Id, Name, string.Format(t("SearchTerminate"), p.Name), () => terminate(p.Id))
+            .Select(p => new SearchResult("kill:" + p.Id, Name, string.Format(t("SearchCloseProcess"), p.Name), () => requestClose(p))
             {
                 Subtitle = string.Format(t("SearchProcessId"), p.Id),
                 Glyph = SearchGlyph.Process,
                 CategoryRelevance = SearchRelevance.Moderate,
                 Relevance = SearchText.Fold(p.Name) == term ? 1 : 0.9,
-                Actions = [new SearchAction("close", t("SearchActRequestClose"), () => requestClose(p.Id))]
+                Actions = [new SearchAction("terminate", t("SearchActTerminate"), () => terminate(p)) { RequiresConfirmation = true }]
             })
             .ToList();
     }

@@ -165,7 +165,8 @@ public interface IFileSearchService
 /// <summary>Bilinen klasör ya da sürücü.</summary>
 public sealed record SearchPlace(string Name, string Path, string? Group = null);
 
-public sealed record RunningProcess(int Id, string Name);
+/// <param name="StartTicks">Başlangıç zamanı (UTC tik); 0 bilinmiyor. Kimlik yeniden kullanılırsa başka süreç öldürülmesin diye.</param>
+public sealed record RunningProcess(int Id, string Name, long StartTicks = 0);
 
 public sealed record BrowserBookmark(string Title, string Url);
 

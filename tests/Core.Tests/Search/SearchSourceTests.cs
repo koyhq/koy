@@ -430,11 +430,11 @@ public class SearchSourceTests
 
     // --- Süreçler ---
 
-    private static KillSearchSource Kill(List<string> log, Func<int>? onList = null) => new(() =>
+    private static KillSearchSource Kill(List<string> log, Func<int>? onList = null, Func<long>? clock = null) => new(() =>
     {
         onList?.Invoke();
-        return [new RunningProcess(7, "notepad"), new RunningProcess(8, "chrome")];
-    }, id => log.Add("kill " + id), id => log.Add("close " + id), T);
+        return [new RunningProcess(7, "notepad", 111), new RunningProcess(8, "chrome", 222)];
+    }, p => log.Add("kill " + p.Id), p => log.Add("close " + p.Id), T, clock);
 
     [Fact]
     public void Kill_needs_trigger_word_and_two_letters()
@@ -451,16 +451,70 @@ public class SearchSourceTests
     public void Kill_lists_matches_and_snapshots_once()
     {
         var calls = 0;
-        var log = new List<string>();
-        var source = Kill(log, () => ++calls);
+        var source = Kill([], () => ++calls);
 
-        var result = source.Search(Q("kill note")).Single();
+        source.Search(Q("kill note")).Single();
         source.Search(Q("kill notep"));
+
+        Assert.Equal(1, calls);
+    }
+
+    [Fact]
+    public void Kill_primary_action_is_graceful_close_and_terminate_needs_confirmation()
+    {
+        var log = new List<string>();
+        var result = Kill(log).Search(Q("kill note")).Single();
+
+        Assert.False(result.RequiresConfirmation);
+        Assert.Contains("SearchCloseProcess", result.Title);
+        Assert.True(result.Actions.Single().RequiresConfirmation);
+
         result.Execute();
         result.Actions[0].Execute();
 
+        Assert.Equal(["close 7", "kill 7"], log);
+    }
+
+    [Fact]
+    public void Kill_terminate_asks_before_running_in_the_panel()
+    {
+        var log = new List<string>();
+        var panel = new SearchPanelController([Kill(log)]);
+        panel.Open();
+        panel.SetQuery("kill note");
+
+        Assert.Equal(SearchActivation.NeedsConfirmation, panel.Activate(firstAction: true).Outcome);
+        Assert.Empty(log);
+        Assert.Equal(SearchActivation.Executed, panel.Activate(firstAction: true).Outcome);
+        Assert.Equal(["kill 7"], log);
+    }
+
+    [Fact]
+    public void Kill_snapshot_is_refreshed_when_stale()
+    {
+        var calls = 0;
+        var now = 0L;
+        var source = Kill([], () => ++calls, () => now);
+
+        source.Search(Q("kill note"));
+        now = KillSearchSource.MaxSnapshotAgeMs;
+        source.Search(Q("kill note"));
         Assert.Equal(1, calls);
-        Assert.Equal(["kill 7", "close 7"], log);
+
+        now = KillSearchSource.MaxSnapshotAgeMs + 1;
+        source.Search(Q("kill note"));
+        Assert.Equal(2, calls);
+    }
+
+    [Fact]
+    public void Kill_actions_carry_the_listed_process_identity()
+    {
+        RunningProcess? closed = null;
+        var source = new KillSearchSource(() => [new RunningProcess(7, "notepad", 111)], _ => { }, p => closed = p, T);
+
+        source.Search(Q("kill note")).Single().Execute();
+
+        Assert.Equal(new RunningProcess(7, "notepad", 111), closed);
     }
 
     // --- Web ---
