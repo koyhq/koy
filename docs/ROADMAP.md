@@ -304,10 +304,12 @@ Araştırma bitti; Windows 11 build 26200'de deneme programıyla doğrulandı. K
 - **Pencereden AppID'ye:** önce `SHGetPropertyStoreForWindow` → `PKEY_AppUserModel_ID` (Koy'da var). Sabitli uygulamada kısayolun AUMID'i. İkisi de yoksa Windows'un exe yolundan türettiği kimlik; bu yol doğrulanmadı.
 
 **Yapılacaklar:**
-- [ ] Core: AppID hash'i, customDestinations okuyucu (bilinmeyen biçimde boş döner, uydurma öğe yok), bölüm sırası ve sınırlar. Testleriyle.
-- [ ] Platform: `JumpListService`. Yalnız menü açılınca okunur, dosya zamanına göre önbelleklenir; boşta %0 CPU.
-- [ ] App: dock menüsü bölümlere ayrılır. Sıra: uygulamanın kategorileri → son kullanılanlar → görevler → Koy'un kendi öğeleri. Tıklanınca ShellLink ya da shell item çalıştırılır.
-- [ ] Snapshot: VS Code ve Steam örnekleriyle bölümlü menü.
+- [x] Core (`Core/JumpList/`): AppID hash'i (`JumpListAppId`; dosya adı `%x` ile yazılır, baştaki sıfırlar atılır, diskte 15 haneli adlar var), customDestinations okuyucu (`CustomDestinationsReader`; bozuk / kısaltılmış / bilinmeyen biçim / sınır aşımı boş döner, uydurma öğe yok; dosya, kategori, öğe ve dize için üst sınırlar `JumpListLimits`'te), bölüm sırası ve sınırlar (`JumpListLayout`), sınırlı önbellek (`JumpListCache`), başlık / hedef kuralları (`JumpListEntryFactory`). Testleriyle (`tests/Core.Tests/JumpList/`, `Dock/DockItemAppIdTests`). `DockItem.AppUserModelId` eklendi (çalışan pencerenin AUMID'i, yoksa sabitli kısayolun; exe yolundan türetilmez).
+- [x] Platform: `Platform/JumpList/JumpListService`. Yalnız menü açılınca okunur, iki kaynak dosyanın boyut + yazılma zamanına göre en çok 16 uygulama önbelleklenir; zamanlayıcı, izleyici, kalıcı iş parçacığı yok. Her okuma bitince biten kısa ömürlü STA iş parçacığında (kabuk nesneleri apartman ister). Son / sık: `IApplicationDocumentLists`; görevler ve kategoriler: `customDestinations-ms` + `IPersistStream.Load` (ShellLink). Son / sık yalnız uygulamanın listesi istiyorsa (ya da hiç listesi yoksa son kullanılanlar). Başlık `PKEY_Title` (BSTR ya da LPWSTR), `@dll,-id` ise `SHLoadIndirectString`; ayırıcı = boş başlık + boş hedef ya da `IsDestListSeparator`; başlığı boş ama hedefi olan öğe atlanır. COM nesneleri `FinalReleaseComObject` ile bırakılır.
+- [x] App: dock menüsü bölümlere ayrıldı (`DockJumpListMenu`). Sıra: uygulamanın kategorileri → sık → son kullanılanlar → görevler → Koy'un kendi öğeleri. Bölüm başına sınır (özel 6, son 5, sık 3, görev 6, en çok 3 özel kategori) ve toplam 14. Tıklanınca görev kısayolu olduğu gibi, belge uygulamanın kendi exe'siyle (olmazsa varsayılan ilişkiyle) çalışır. Okuma 700 ms'yi aşarsa menü listesiz açılır. AppID yoksa yalnız Koy'un öğeleri görünür.
+- [x] Snapshot: `dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix jl --theme both [--scene jumplist]` (VS Code ve Steam benzeri, sınır ve yalnız-Koy sahneleri; sentetik veri).
+- [ ] Elle sınama (gerçek uygulamalarla; uygulama çalıştırılmadı): VS Code'da son klasörler + son dosyalar + Yeni Pencere; Edge / Chrome görevleri; Explorer sık kullanılanları; Windows Terminal profilleri; Steam / Spotify; sabitli ama çalışmayan uygulamada menü; AppID'siz klasik uygulamada yalnız Koy'un öğeleri; listedeki girdinin tıklanınca doğru uygulamada açılması (özellikle klasör ve belge girdileri, `.url` oyunlar); menü ekrandan taşmıyor mu (özellikle dock üstte / yanda); sağ tık gecikmesi; menü kapanınca sonraki sağ tıkta liste tazelenmiş mi (uygulama yeni belge açtıktan sonra).
+- [ ] Bellek ve CPU ölçümü (AGENTS #1): ölçülmedi (`measure-memory` çalıştırılmadı). Menü açıkken ve kapandıktan sonra private bellek, boşta CPU %0 doğrulanmalı.
 
 **Açık sorular:**
 - Spotify öğelerinde `PKEY_Title` boş; başlık başka bir anahtarda olmalı.
@@ -335,7 +337,7 @@ Proje sahibi aşağıdakilerin hepsinin yapılmasına karar verdi. Sıra öneril
 
 **Özellikler:**
 4. [x] **Dock klasörleri:** aşağıdaki "Dock klasörleri" bölümü. Flash ajanına verilecekse önce **Adım 4A (Core + Test)**, ardından **Adım 4B (App + UI + Snapshot)** olarak iki parçada çalıştırılır.
-5. [ ] **Atlama listesi:** "Dock'ta uygulama bazlı sağ tık menüsü" bölümü, araştırma hazır.
+5. [x] **Atlama listesi:** "Dock'ta uygulama bazlı sağ tık menüsü" bölümü, araştırma hazır.
 6. [ ] **UWP (Store) uygulama sabitleme:** kimlik AUMID, simge `shell:AppsFolder`, pencere eşleme `SHGetPropertyStoreForWindow` (ayrıntı "Sonraya kalanlar"daki maddede). Windows'un sabitleri arasındaki Spotify, WhatsApp gibi uygulamalar dock'ta görünsün.
 7. [x] **Hızlı başlata klasör ekleme:**
    - **Mevcut durum:** `Core/QuickLaunch/QuickLaunchService.cs` zaten `Directory.Exists(p)` ve klasör adı gösterimini (`DisplayName`) destekliyor; `IconHelper.GetIconBytes` da klasör simgesi çözebiliyor. Eksik olan yalnız UI'daki seçici.
