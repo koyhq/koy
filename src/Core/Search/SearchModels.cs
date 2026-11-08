@@ -10,6 +10,14 @@ public static class SearchRelevance
     public const int Highest = 100;
 }
 
+/// <summary>Kategorinin listedeki yeri; önemden önce gelir: uygulamalar hep üstte, dosyalar hep altta.</summary>
+public enum SearchCategoryPlacement
+{
+    Top,
+    Normal,
+    Bottom
+}
+
 public enum SearchGlyph
 {
     App,
@@ -35,6 +43,8 @@ public sealed record SearchAction(string Id, string Label, Action Execute);
 public sealed record SearchResult(string Id, string Category, string Title, Action Execute)
 {
     public string? Subtitle { get; init; }
+
+    public SearchCategoryPlacement Placement { get; init; } = SearchCategoryPlacement.Normal;
 
     public int CategoryRelevance { get; init; } = SearchRelevance.Moderate;
 

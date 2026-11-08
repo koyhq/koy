@@ -1,7 +1,8 @@
 namespace Koy.Core.Search;
 
 /// <summary>
-/// Sonuçları listeye dizer: aynı kategori bir arada, önemli kategori üstte. Aşağıdaki kategori daha az yer alır:
+/// Sonuçları listeye dizer: aynı kategori bir arada, önce kategorinin yeri (uygulamalar üstte, dosyalar altta),
+/// sonra önemi. Aşağıdaki kategori daha az yer alır:
 /// ilk kategori sınırın en çok yarısını, ikincisi üçte birini kullanır; her kategoriye en az bir satır kalır.
 /// </summary>
 public static class SearchLayout
@@ -14,7 +15,8 @@ public static class SearchLayout
         var groups = results
             .GroupBy(r => r.Category)
             .Select(g => g.OrderByDescending(r => r.Relevance).ThenBy(r => r.Title, StringComparer.OrdinalIgnoreCase).ToList())
-            .OrderByDescending(g => g.Max(r => r.CategoryRelevance))
+            .OrderBy(g => g.Min(r => r.Placement))
+            .ThenByDescending(g => g.Max(r => r.CategoryRelevance))
             .ToList();
 
         if (groups.Count == 1)

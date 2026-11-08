@@ -266,6 +266,7 @@ public sealed class RecentDocumentsSearchSource(Func<IReadOnlyList<string>> path
             {
                 Subtitle = Path.GetDirectoryName(path),
                 Glyph = SearchGlyph.File,
+                Placement = SearchCategoryPlacement.Bottom,
                 CategoryRelevance = exact ? SearchRelevance.Highest : index == 0 ? SearchRelevance.High : SearchRelevance.Low,
                 Relevance = index == 0 ? relevance + 0.1 : relevance,
                 Actions = [new SearchAction("folder", t("SearchActOpenFolder"), () => shell.OpenContainingFolder(captured))]
@@ -351,6 +352,7 @@ public sealed class FileSearchSource(IFileSearchService service, ISearchShell sh
         {
             Subtitle = Path.GetDirectoryName(path),
             Glyph = item.IsFolder ? SearchGlyph.Folder : SearchGlyph.File,
+            Placement = SearchCategoryPlacement.Bottom,
             CategoryRelevance = exact ? SearchRelevance.Highest : folded.Contains(query.Folded, StringComparison.Ordinal) ? SearchRelevance.High : SearchRelevance.Low,
             Relevance = 0.75,
             Actions = [new SearchAction("folder", t("SearchActOpenFolder"), () => shell.OpenContainingFolder(path))],

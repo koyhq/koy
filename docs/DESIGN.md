@@ -96,7 +96,7 @@ Koy penceresi, sihirbaz ve sağ alt menü renk, ölçü ve hareketi koda gömmez
 
 ## Arama paneli
 - `Win+Shift+Q` ile açık çentiğin içinde açılır, tuval büyümez (AGENTS #13). Durum satırı, sayfa ve sekmeler o sırada gizlidir.
-- Üstte arama çubuğu (yardım, yazı alanı, son aramalar, ayarlar, açık tut), altında kategori başlıklı liste. En çok 15 satır; sığmayanlara kaydırılır.
+- Üstte arama çubuğu (yardım, yazı alanı, son aramalar, ayarlar, açık tut), altında kategori başlıklı liste. Uygulamalar hep en üstte, dosyalar hep en altta, aradaki kategoriler önem sırasıyla dizilir. En çok 15 satır; sığmayanlara kaydırılır.
 - Seçili satırda eylem düğmeleri görünür. Kapat, yeniden başlat ve oturumu kapat ikinci Enter ile çalışır.
 
 ## Koy penceresi

@@ -47,6 +47,7 @@ public sealed class AppSearchSource(
             {
                 Glyph = SearchGlyph.App,
                 Relevance = score,
+                Placement = SearchCategoryPlacement.Top,
                 CategoryRelevance = entry.Name == query.Folded ? SearchRelevance.Highest : SearchRelevance.Moderate,
                 LoadIcon = loadIcon is null ? null : () => loadIcon(app)
             };

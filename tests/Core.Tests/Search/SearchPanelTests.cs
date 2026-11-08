@@ -62,6 +62,18 @@ public sealed class SearchPanelTests : IDisposable
     }
 
     [Fact]
+    public void Apps_stay_on_top_and_files_at_the_bottom_whatever_their_importance()
+    {
+        var list = SearchLayout.Arrange([
+            R("file", "F", SearchRelevance.Highest, 0.9) with { Placement = SearchCategoryPlacement.Bottom },
+            R("session", "S", SearchRelevance.Low, 0.9),
+            R("calc", "C", SearchRelevance.High, 0.9),
+            R("app", "A", SearchRelevance.Moderate, 0.1) with { Placement = SearchCategoryPlacement.Top }]);
+
+        Assert.Equal(["app", "calc", "session", "file"], list.Select(r => r.Id));
+    }
+
+    [Fact]
     public void Single_category_may_use_whole_limit()
     {
         var list = SearchLayout.Arrange(Enumerable.Range(0, 40).Select(i => R("a" + i)));

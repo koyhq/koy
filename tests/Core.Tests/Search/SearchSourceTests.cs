@@ -171,6 +171,7 @@ public class SearchSourceTests
 
         Assert.Single(source.Search(Q("cift")));
         Assert.Equal(SearchRelevance.Highest, source.Search(Q("hesap makinesi")).Single().CategoryRelevance);
+        Assert.Equal(SearchCategoryPlacement.Top, source.Search(Q("hesap makinesi")).Single().Placement);
 
         source.Search(Q("calc")).Single().Execute();
         Assert.Equal("Hesap Makinesi", Assert.Single(launched).Name);
@@ -346,6 +347,7 @@ public class SearchSourceTests
         Assert.Equal(2, results.Count);
         Assert.Equal(SearchRelevance.Highest, results[0].CategoryRelevance); // uzantısız tam ad
         Assert.Equal(SearchRelevance.Low, results[1].CategoryRelevance);
+        Assert.All(results, r => Assert.Equal(SearchCategoryPlacement.Bottom, r.Placement));
 
         results[1].Actions[0].Execute();
         Assert.Equal([@"folder C:\d\yillik-rapor.docx"], shell.Log);
@@ -388,6 +390,7 @@ public class SearchSourceTests
 
         Assert.Equal(SearchRelevance.Highest, results.Single(r => r.Title == "rapor.pdf").CategoryRelevance);
         Assert.Equal(SearchRelevance.Low, results.Single(r => r.Title == "yillik.pdf").CategoryRelevance);
+        Assert.All(results, r => Assert.Equal(SearchCategoryPlacement.Bottom, r.Placement));
 
         results[0].Actions[0].Execute();
         Assert.Contains(shell.Log, l => l.StartsWith("folder ", StringComparison.Ordinal));
