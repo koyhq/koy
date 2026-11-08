@@ -100,7 +100,7 @@ powershell -ExecutionPolicy Bypass -File scripts\pack.ps1 -Version 0.1.0
    - Yeni özellikler: `feat/kisa-aciklama`
    - Hata düzeltmeleri: `fix/kisa-aciklama`
    - Performans iyileştirmeleri: `perf/kisa-aciklama`
-2. **Commit Mesajları:** Konvansiyonel (`feat:`, `fix:`, `perf:`, `refactor:`, `docs:`, `test:`) önekleriyle, **İngilizce** ve net emir kipinde yazılır (ör. `fix(dock): keep taskbar hidden on second monitor`). İngilizce değişiklik günlüğü bu mesajlardan otomatik üretilir.
+2. **Commit Mesajları:** Konvansiyonel (`feat:`, `fix:`, `perf:`, `refactor:`, `docs:`, `test:`) önekleriyle, Türkçe veya İngilizce net emir kipinde yazılır.
 3. **Test Zorunluluğu:** `Core` katmanına eklenen her durum makinesi, yerleşim hesaplayıcısı veya kural için `tests/Core.Tests/` altında xUnit testi yazılmalıdır.
 4. **Lisans:** Gönderdiğiniz her katkı, projenin [GPLv3](LICENSE) lisansı altında yayınlanmayı kabul ettiğiniz anlamına gelir.
 
