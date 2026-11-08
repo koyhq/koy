@@ -18,7 +18,7 @@ Galerideki beş sayfa:
 
 ## İlkeler
 1. Koy, Windows görev çubuğunun kopyası değildir. Saat, pil ve ağ çentikte durur, dock'ta değil.
-2. Dock hiçbir pencerenin içeriğini örtmez. Pencere yaklaşınca yer ayırır, aşağı yapışır ya da çekilir.
+2. Dock hiçbir pencerenin içeriğini örtmez. Pencere yaklaşınca yer ayırır, aşağı yapışır ya da çekilir; istenirse hiçbir şey yapmadan havada yüzer (Hep havada).
 3. Boştayken işlemci kullanımı sıfırdır. Zamanlayıcılar ve animasyonlar yalnız görünen panelde çalışır.
 4. Göz yoran animasyon kullanılmaz. Yay animasyonları kısa ve sakindir.
 5. Her davranış ayardan değiştirilebilir. Varsayılanlar akıllı seçilir.
@@ -61,8 +61,9 @@ Koy penceresi, sihirbaz ve sağ alt menü renk, ölçü ve hareketi koda gömmez
 - **Pencere yaklaşınca** (Koy › Dock):
   - **Yer ayır (varsayılan):** dock alt kenara oturur ve koyu bir şerit olur. Çalışma alanından 46 px ayrılır. Büyütülmüş pencere tam dock'un üstünde biter, arada boşluk kalmaz.
   - **Aşağı yapış:** normal boy bir pencere dock'a yaklaşınca dock alt kenara iner, 60 px'ten 46 px'e incelir, yalnız üst köşeleri yuvarlak kalır. Pencere uzaklaşınca dock yeniden yüzer.
-  - **Çekil:** büyütülmüş pencere varken dock gizlenir ve altta 120×4 px'lik bir tutamak kalır. Fare alt kenara inince dock 150 ms sonra geri gelir.
-  - **Hep gizli.**
+  - **Çekil** (Ayarlar'da "Pencereden çekil"): yalnız bir pencere dock'a yaklaşınca ya da büyütülünce dock gizlenir ve altta 120×4 px'lik bir tutamak kalır. Fare alt kenara inince dock 150 ms sonra geri gelir; pencere uzaklaşınca da kendiliğinden döner.
+  - **Hep gizli:** pencereler ne yaparsa yapsın dock, fare alt kenara gelene kadar hep gizlidir.
+  - **Hep havada** (yalnız yüzen kapsülde): pencere yaklaşsa ya da büyütülse bile dock asla alta yapışmaz, gizlenmez, yer ayırmaz; her zaman alttan 10 px boşlukla 60 px yükseklikte yüzer. Yalnız gerçek tam ekranda (ve "Tam ekranda gizle" açıkken) gizlenir. Tam genişlikte seçilemez; tam genişliğe geçilirse Yer ayır'a eşlenir.
   - **Gerçek tam ekran** (oyun, F11 tarayıcı, tam ekran video) her modda gizlidir ve kenardan da ASLA açılmaz. Tam ekran üç işaretin birleşimidir: Windows'un tam ekran bildirimi (`SHQueryUserNotificationState`: meşgul / özel kip D3D / sunum), başlık çubuğunun olmayışı, monitörü tamamen kaplama. Büyütülmüş (IsZoomed) pencere tam ekran sayılmaz; yalnız monitöre tam oturan başlıksız büyütülmüş pencere (F11) sayılır. Karar monitör başınadır.
   - **Alt kenardan açılma:** büyütülmüş pencere dock'u gizlediyse (Yer ayır modunda dock zaten görünür kalır) fare o monitörün alt kenarında ~300 ms kesintisiz durunca dock çıkar; fare tuşu basılıyken (pencere sürükleme, boyutlandırma) çıkmaz. Dock'a yürürken kapanmasın diye açıkken bölge yukarı genişler. Fare izleme yalnız dock gizliyken ve 100 ms aralıkla çalışır. Dock sayfasındaki "Alt kenardan aç" ile kapatılabilir (varsayılan açık); kapalıyken büyütülmüş pencerede dock gizli kalır.
 - **Etkileşimler:**
@@ -102,7 +103,7 @@ Koy penceresi, sihirbaz ve sağ alt menü renk, ölçü ve hareketi koda gömmez
 |---|---|
 | Genel | Windows açılınca başlat; Windows görev çubuğunu gizle; arayüz dili; güncellemeleri otomatik denetle; kanal (Kararlı / Önizleme); Şimdi denetle |
 | Çentik | Çentiği göster; ne zaman görünsün (Her zaman / Akıllı / Fareyle); tam ekranda gizle; boştayken ne gösterilsin (Saat ve pil / Yalnız saat / Hiçbiri); müzik çalarken kapak ve dalga; ses göstergesi; parlaklık göstergesi; Windows'un kendi göstergesini gizle (deneysel); paneller (Odak, Raf, Kontrol tek tek kapatılır; Ana her zaman açık, sıra sabit); açılma (Üzerine gelince / Tıklayınca); boyut |
-| Dock | Dock'u göster; biçim (Yüzen / Tam genişlik); pencere yaklaşınca (Yer ayır / Aşağı yapış / Çekil / Hep gizli); tam ekranda gizle; alt kenardan aç; geri çıkma gecikmesi; simge boyutu; büyütme efekti; çalışan göstergesi (Nokta / Çizgi); pencereleri grupla; bildirim rozetleri; Başlat düğmesi; klasörler; son kullanılanlar yığını; sistem tepsisini dock'ta göster (varsayılan açık; yalnız Windows görev çubuğu gizliyken etkili); pencere önizlemesi ve gecikmesi |
+| Dock | Dock'u göster; biçim (Yüzen / Tam genişlik); pencere yaklaşınca (Yer ayır / Aşağı yapış / Pencereden çekil / Hep gizli / Hep havada; tam genişlikte yalnız Her zaman göster / Otomatik gizle); tam ekranda gizle; alt kenardan aç; geri çıkma gecikmesi; simge boyutu; büyütme efekti; çalışan göstergesi (Nokta / Çizgi); pencereleri grupla; bildirim rozetleri; Başlat düğmesi; klasörler; son kullanılanlar yığını; sistem tepsisini dock'ta göster (varsayılan açık; yalnız Windows görev çubuğu gizliyken etkili); pencere önizlemesi ve gecikmesi |
 | Ekranlar | Bağlı monitörler gerçek yerleşimiyle bir haritada kartlar olarak görünür; karta tıklayınca o ekranın ayarları açılır ("Tanımla" ekranın üstünde numarasını kısa süre gösterir). Ekran başına: çentik ve dock açık/kapalı, dock'ta yalnız o ekrandaki pencereler. Yeni bağlanan ekranda ne gösterilsin (Çentik ve dock / Yalnız çentik / Hiçbiri); varsayılan Çentik ve dock: ayarlar ekran başına baştan yapılmaz, genel ayarlar her ekrana uygulanır, kapatmak isteyen o ekranı seçip kapatır. Ayarlar kararlı bir monitör kimliğine bağlıdır; ekran çıkarılıp takılınca ayarı geri gelir. Gerçek çok monitörlü ve karışık DPI'lı donanımda henüz elle denenmedi. |
 | Görünüm | Tema (Sistem / Koyu / Açık); vurgu rengi; Windows vurgu rengini kullan; malzeme (Katı / Yarı saydam); köşe yuvarlaklığı; animasyon (Sakin / Normal / Hızlı / Kapalı); Windows'un "animasyonları azalt" ayarına uy |
 | Kısayollar | Çentik, Raf, Dock, Koy menüsü ve oynat/duraklat için genel kısayollar; satıra tıklayıp tuşlara basarak değiştirilir. Varsayılanlar `Ctrl+Alt+N`, `R`, `D`, `K`, `Space`. Windows'un ayırdığı (Alt+Tab, Win+harf vb.) ya da başka uygulamanın tuttuğu bir kombinasyon kaydedilmez ve sebebi satırda gösterilir. Çentikte tekerlek (Panel değiştir / Ses); dock'ta orta tık (Yeni pencere / Kapat) |

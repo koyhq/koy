@@ -31,7 +31,7 @@ public sealed record DockResolvedState(
 
 /// <summary>
 /// Dock'un ekran üzerindeki konumunu, boyutlarını, köşe yuvarlaklıklarını ve görünürlük durumunu
-/// pencere yakınlığı (DockDown, ReserveSpace, Dodge, AlwaysHidden) ve dock stiline (FloatingCapsule, FullWidth)
+/// pencere yakınlığı (DockDown, ReserveSpace, Dodge, AlwaysHidden, AlwaysFloating) ve dock stiline (FloatingCapsule, FullWidth)
 /// göre hesaplayan saf mantık çözücüsü (Core).
 /// </summary>
 public static class DockPositionResolver
@@ -251,8 +251,9 @@ public static class DockPositionResolver
 
         // Aşağı yapış'ta büyütülmüş pencere dock'u gizlemez: dock alta yapışık kalır (aşağıdaki DockDown kolu), yer ayırmaz.
         // Yalnız gerçek tam ekran (yukarıdaki dal) gizler. Çekil ve Hep gizli büyütülmüş pencerede gizlemeyi sürdürür.
+        // Hep havada da gizlemez: pencere ne kadar yaklaşırsa yaklaşsın kapsül yüzer kalır.
         if (isWindowMaximized && hideInFullscreen
-            && proximityMode is not (DockProximityMode.ReserveSpace or DockProximityMode.DockDown))
+            && proximityMode is not (DockProximityMode.ReserveSpace or DockProximityMode.DockDown or DockProximityMode.AlwaysFloating))
         {
             var top = monitorBottom - FloatingHeightDip - FloatingBottomMarginDip;
             var isHovered = (edgeRevealEnabled && isMouseAtBottomEdge) || isMouseOverDock;
@@ -433,6 +434,28 @@ public static class DockPositionResolver
                     IsSnapped: false,
                     IsHandleVisible: false,
                     IsHidden: !isHovered,
+                    IsFullWidth: false,
+                    AppBarReservedHeightDip: 0);
+            }
+
+            case DockProximityMode.AlwaysFloating:
+            {
+                // Hep havada: pencere yakınlığına (windowIntersects) ve büyütülmüşlüğe bakılmaz; hep yüzen kapsül.
+                var top = monitorBottom - FloatingHeightDip - FloatingBottomMarginDip;
+                return new DockResolvedState(
+                    LeftDip: capsuleLeft,
+                    TopDip: top,
+                    WidthDip: capsuleWidth,
+                    HeightDip: FloatingHeightDip,
+                    CornerRadiusTopLeft: FloatingCornerRadiusDip,
+                    CornerRadiusTopRight: FloatingCornerRadiusDip,
+                    CornerRadiusBottomRight: FloatingCornerRadiusDip,
+                    CornerRadiusBottomLeft: FloatingCornerRadiusDip,
+                    TranslationY: 0,
+                    Opacity: 1.0,
+                    IsSnapped: false,
+                    IsHandleVisible: false,
+                    IsHidden: false,
                     IsFullWidth: false,
                     AppBarReservedHeightDip: 0);
             }

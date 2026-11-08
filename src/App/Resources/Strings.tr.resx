@@ -406,10 +406,13 @@
     <value>Yer ayır</value>
   </data>
   <data name="ProxDodge" xml:space="preserve">
-    <value>Çekil</value>
+    <value>Pencereden çekil</value>
   </data>
   <data name="ProxAlwaysHidden" xml:space="preserve">
     <value>Hep gizli</value>
+  </data>
+  <data name="ProxAlwaysFloating" xml:space="preserve">
+    <value>Hep havada</value>
   </data>
   <data name="ProxReserveDesc" xml:space="preserve">
     <value>Dock hep görünür; pencereler onun üstünde biter, Windows görev çubuğu gibi.</value>
@@ -418,10 +421,13 @@
     <value>Dock yüzer; bir pencere yaklaşınca ekranın altına yapışır ve incelir. Büyütülmüş pencerede de görünür kalır, yer ayırmaz.</value>
   </data>
   <data name="ProxDodgeDesc" xml:space="preserve">
-    <value>Bir pencere yaklaşınca dock gizlenir; fare alt kenara gelince geri çıkar.</value>
+    <value>Dock yalnız bir pencere ona yaklaşınca ya da büyütülünce çekilir; fare alt kenara gelince ya da pencere uzaklaşınca geri çıkar.</value>
   </data>
   <data name="ProxAlwaysHiddenDesc" xml:space="preserve">
-    <value>Dock yalnız fare alt kenara gelince görünür.</value>
+    <value>Pencereler ne yaparsa yapsın dock gizli kalır; fare alt kenara gelene kadar görünmez.</value>
+  </data>
+  <data name="ProxAlwaysFloatingDesc" xml:space="preserve">
+    <value>Dock hep alt kenarın üstünde yüzer: pencere yaklaşsa ya da büyütülse bile yapışmaz, gizlenmez, yer ayırmaz. Yalnız tam ekranda gizlenir.</value>
   </data>
   <data name="DockSizeHeader" xml:space="preserve">
     <value>Boyutlar</value>

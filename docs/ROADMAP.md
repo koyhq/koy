@@ -139,6 +139,14 @@ Kutuları iş bittikçe işaretle. Dosya yolları önerilir; daha iyi bir ad var
 - [x] İsteğe bağlı ayırıcı: solda uygulamalar, sağda klasörler, son kullanılanlar ve küçültülmüş pencereler. Ayırıcı, İndirilenler klasörü, küçültülmüş pencereler ve son kullanılanlar yığını var (Windows Son Kullanılanlar klasörü, en çok 10 öğe, yalnız tıklanınca okunur); hepsi Dock sayfasından kapatılır.
 - [x] Saat, pil, ses ve ağ dock'tan çentiğe taşınır (tasarıma göre). Dock'ta durum alanı yok; saat, pil ve ağ durumu çentik H arayüzünde (üst durum satırı + Ana sağ sütunu), ses kontrol merkezinde.
 
+### 6.3b Dock: "Hep havada" yakınlık modu (issue #25)
+- [x] `DockProximityMode.AlwaysFloating`, enum'un sonuna eklendi. Ayar dosyasında adıyla yazılır (`UseStringEnumConverter`), eski dosyalar göçsüz okunur; testli.
+- [x] `DockPositionResolver`: pencere yakınlığından ve büyütülmüşlükten etkilenmeden hep yüzen kapsül geometrisi (60 px, alttan 10 px, AppBar payı yok). Tam ekranda gizlenme kuralları aynı. Testli.
+- [x] `DockProximityMapping`: tam genişlikte seçilemez, etkin karşılığı Yer ayır. `DockSettingsDiff` AppBar'ı yalnız Yer ayır'a girip çıkışta yeniden kurar. Testli.
+- [x] Ayarlar › Dock: yeni seçenek ve tek cümlelik açıklaması; Çekil "Pencereden çekil" olarak, Hep gizli açıklamasıyla farkları net olacak şekilde yeniden adlandırıldı/anlatıldı (davranışları değişmedi, enum değerleri korundu).
+- [ ] Elle sınama: Hep havada seçiliyken büyütülmüş pencere, pencereyi dock'a sürükleme, Alt+Tab, tam ekran (oyun/F11), "Tam ekranda gizle" kapalıyken, akıllı görünürlük açıkken, çok monitör; Yer ayır ↔ Hep havada geçişinde çalışma alanının yerinde kalması.
+- [ ] Bellek ölçümü (`scripts/measure-memory.ps1`, AGENTS #1) ve `docs/MEMORY.md` güncellemesi.
+
 ### 6.4 Çentik genişler
 - [x] Ses ve parlaklık değişince çentikte gösterge: Paket C'de `AudioService` ve `BrightnessService` olaylarına bağlandı, ayrı ayrı kapatılır. Windows'un kendi göstergesini gizleme hâlâ deneysel.
 - [x] Dosya rafı ve takvim çentikte zaten var (M3). Kapalı çentikten erişimi gözden geçirilir.
