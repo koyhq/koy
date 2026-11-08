@@ -33,7 +33,7 @@ public static class JumpListLimits
     public const int MaxTasks = 6;
 
     /// <summary>Bütün bölümlerdeki toplam girdi sınırı; aşılırsa önce sık, sonra son kullanılanlar kırpılır.</summary>
-    public const int MaxTotalEntries = 16;
+    public const int MaxTotalEntries = 14;
 
     /// <summary>Toplam sınır yüzünden kırpılırken bir bölümde en az bu kadar girdi kalır.</summary>
     public const int MinPerSectionWhenTrimming = 2;

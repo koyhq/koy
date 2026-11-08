@@ -88,13 +88,30 @@ public partial class DockItemsStrip : UserControl
         e.Handled = true; // Menü açılışını OnItemRightClick ve DockContextMenuManager yönetir
     }
 
-    private void OnItemRightClick(object sender, MouseButtonEventArgs e)
+    private async void OnItemRightClick(object sender, MouseButtonEventArgs e)
     {
-        if (sender is FrameworkElement element && element.ContextMenu is not null)
+        if (sender is not FrameworkElement { ContextMenu: { } menu } element)
+            return;
+
+        e.Handled = true; // await'ten önce: sonraki işleyiciler olayı ikinci kez işlemesin
+        ViewModel?.ClosePreviewNow();
+
+        if (element.DataContext is not DockItemViewModel item)
         {
-            ViewModel?.ClosePreviewNow();
-            DockContextMenuManager.Open(element.ContextMenu, element);
-            e.Handled = true;
+            DockContextMenuManager.Open(menu, element);
+            return;
+        }
+
+        try
+        {
+            // Uygulamanın atlama listesi menüye eklenir; okuma ayrı iş parçacığında, UI beklemez.
+            await DockJumpListMenu.OpenAsync(element, menu, item, ViewModel?.JumpLists);
+        }
+        catch
+        {
+            // Liste okunamasa da Koy'un kendi menüsü açılır.
+            DockJumpListMenu.Clear(menu);
+            DockContextMenuManager.Open(menu, element);
         }
     }
 

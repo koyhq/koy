@@ -14,6 +14,7 @@ using Koy.Core.Animation;
 using Koy.Core.Appearance;
 using Koy.Core.Display;
 using Koy.Core.Dock;
+using Koy.Core.JumpList;
 using Koy.Core.Media;
 using Koy.Core.Settings;
 using Koy.Core.Shell;
@@ -147,6 +148,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     // Son kullanılanlar: yığın düğmesi; liste yalnız düğmeye tıklanınca okunur (sürekli izleme yok), kapanınca bırakılır.
     private readonly IRecentFilesService? _recentFiles;
+
+    /// <summary>Uygulama simgesinin sağ tık menüsündeki atlama listesi; yalnız menü açılınca okunur.</summary>
+    public IJumpListService? JumpLists { get; }
 
     /// <summary>Son kullanılanlar düğmesi görünür mü (ayar açık ve servis var).</summary>
     public bool ShowRecents => _settings.DockShowRecents && _recentFiles is not null;
@@ -294,10 +298,12 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         DockStatusViewModel? status = null,
         IMediaService? mediaService = null,
         ITrayService? trayService = null,
-        IRecentFilesService? recentFiles = null)
+        IRecentFilesService? recentFiles = null,
+        IJumpListService? jumpLists = null)
     {
         _settings = settings;
         _recentFiles = recentFiles;
+        JumpLists = jumpLists;
         Status = status;
         _controller = controller;
         _shellActionService = shellActionService;
