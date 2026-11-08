@@ -7,6 +7,9 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ## [0.2.2](https://github.com/koyhq/koy/compare/v0.2.1...v0.2.2) (2026-11-08)
 
+Öne çıkanlar:
+- **Daha okunur sürüm notları:** "Neler Geldi" ve güncelleme penceresinde bağlantılar, commit numaraları ve teknik etiketler artık görünmüyor; uzun satırlar kesilmeden sarılıyor.
+
 
 ### Düzeltmeler
 
