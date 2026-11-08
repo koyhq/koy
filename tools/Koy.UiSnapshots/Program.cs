@@ -120,6 +120,13 @@ public static class Program
                 vm.WhatsNewHighlights.Add("Pano geçmişi ve sabitlenenler sekmesi");
             }
             RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-neler-geldi.png"));
+            // Alt kategoriler (Eklenenler, Düzeltmeler) kaydırınca görünür: notların sonu da çizilir.
+            if (win.FindName("WhatsNewCard") is DependencyObject whatsNewCard)
+            {
+                foreach (var notesScroll in FindAll<System.Windows.Controls.ScrollViewer>(whatsNewCard))
+                    notesScroll.ScrollToEnd();
+                RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-neler-geldi-alt.png"));
+            }
             vm.CloseWhatsNewOverlay();
 
             var menu = new SagAltMenuWindow(new SagAltMenuViewModel(store));

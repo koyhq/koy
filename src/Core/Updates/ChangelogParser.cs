@@ -178,7 +178,9 @@ public static class ChangelogParser
 
             if (line.StartsWith("- ") || line.StartsWith("* "))
             {
-                var bullet = line[2..].Trim();
+                var bullet = CleanItem(line[2..].Trim());
+                if (bullet is null)
+                    continue;
                 if (inHighlights)
                 {
                     highlights.Add(bullet);
@@ -209,6 +211,53 @@ public static class ChangelogParser
         var summary = summaryBuilder.Length > 0 ? summaryBuilder.ToString() : null;
 
         return new ReleaseNotes(version, compareUrl, date, summary, highlights, sections, raw);
+    }
+
+    // release-please'in madde sonuna eklediği bağlantılar: " ([#32](url))", " ([9aa22ea](url))", " ([#24](url), [#27](url))".
+    private static readonly Regex RefGroupRegex = new(
+        @"\s*\(\[[^\]]+\]\([^)]*\)(?:\s*,\s*\[[^\]]+\]\([^)]*\))*\)",
+        RegexOptions.Compiled);
+
+    private static readonly Regex LinkRegex = new(@"\[([^\]]+)\]\([^)]*\)", RegexOptions.Compiled);
+
+    // Conventional commit kapsamı: "**dock:** ..." (küçük harfli tek sözcük). Öne çıkanlardaki "**Atlama listesi:**" başlığı kapsam değildir.
+    private static readonly Regex ScopeRegex = new(@"^\*\*([a-z0-9-]+):\*\*\s*", RegexOptions.Compiled);
+
+    private static readonly CultureInfo Turkish = CultureInfo.GetCultureInfo("tr-TR");
+
+    /// <summary>Kapsamı uygulamaya ait olmayan maddeler "Neler Geldi"de gösterilmez (tanıtım sitesi, CI).</summary>
+    private static readonly HashSet<string> HiddenScopes = new(StringComparer.OrdinalIgnoreCase) { "site", "ci", "deps" };
+
+    /// <summary>
+    /// Sürüm notu maddesini düz metne çevirir: bağlantılar, commit ve issue referansları, kalın/kod işaretleri atılır;
+    /// conventional commit kapsamı ("**dock:**") düşer ve ilk harf büyür. Uygulamayla ilgisiz kapsamda null döner.
+    /// </summary>
+    public static string? CleanItem(string item)
+    {
+        if (string.IsNullOrWhiteSpace(item))
+            return null;
+
+        var s = RefGroupRegex.Replace(item, string.Empty);
+        s = LinkRegex.Replace(s, "$1");
+
+        var scope = ScopeRegex.Match(s);
+        var droppedScope = false;
+        if (scope.Success)
+        {
+            if (HiddenScopes.Contains(scope.Groups[1].Value))
+                return null;
+            s = s[scope.Length..];
+            droppedScope = true;
+        }
+
+        s = s.Replace("**", string.Empty).Replace("`", string.Empty).Trim();
+        if (s.Length == 0)
+            return null;
+
+        if (droppedScope || char.IsLower(s[0]))
+            s = char.ToUpper(s[0], Turkish) + s[1..];
+
+        return s;
     }
 
     private static string NormalizeVersion(string v)

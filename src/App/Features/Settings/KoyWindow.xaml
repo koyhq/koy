@@ -293,10 +293,14 @@
                                 <ItemsControl ItemsSource="{Binding UpdateHighlights}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" Margin="0,3">
-                                                <res:KoyIcon Data="{StaticResource IconCheck}" Size="14" StrokeWidth="2.5" Foreground="{DynamicResource KoyStatusOk}" VerticalAlignment="Top" Margin="0,2,10,0" />
-                                                <TextBlock Text="{Binding}" Style="{StaticResource SettingTitleStyle}" FontWeight="Normal" TextWrapping="Wrap" MaxWidth="380" />
-                                            </StackPanel>
+                                            <Grid Margin="0,3">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <res:KoyIcon Grid.Column="0" Data="{StaticResource IconCheck}" Size="14" StrokeWidth="2.5" Foreground="{DynamicResource KoyStatusOk}" VerticalAlignment="Top" Margin="0,2,10,0" />
+                                                <TextBlock Grid.Column="1" Text="{Binding}" Style="{StaticResource SettingTitleStyle}" FontWeight="Normal" TextWrapping="Wrap" />
+                                            </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
@@ -393,10 +397,14 @@
                                         <ItemsControl ItemsSource="{Binding WhatsNewHighlights}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
-                                                    <StackPanel Orientation="Horizontal" Margin="0,3">
-                                                        <res:KoyIcon Data="{StaticResource IconCheck}" Size="14" StrokeWidth="2.5" Foreground="{DynamicResource KoyStatusOk}" VerticalAlignment="Top" Margin="0,2,10,0" />
-                                                        <TextBlock Text="{Binding}" Style="{StaticResource SettingTitleStyle}" FontWeight="Normal" TextWrapping="Wrap" MaxWidth="400" />
-                                                    </StackPanel>
+                                                    <Grid Margin="0,3">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <res:KoyIcon Grid.Column="0" Data="{StaticResource IconCheck}" Size="14" StrokeWidth="2.5" Foreground="{DynamicResource KoyStatusOk}" VerticalAlignment="Top" Margin="0,2,10,0" />
+                                                        <TextBlock Grid.Column="1" Text="{Binding}" Style="{StaticResource SettingTitleStyle}" FontWeight="Normal" TextWrapping="Wrap" />
+                                                    </Grid>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>

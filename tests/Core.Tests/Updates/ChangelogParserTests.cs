@@ -120,4 +120,34 @@ public class ChangelogParserTests
         Assert.NotNull(notes);
         Assert.NotEmpty(notes!.Highlights);
     }
+
+    [Theory]
+    [InlineData("**dock:** sağ tık menüsüne atlama listesini ekle ([#32](https://github.com/koyhq/koy/issues/32)) ([9aa22ea](https://github.com/koyhq/koy/commit/9aa22ea9))",
+                "Sağ tık menüsüne atlama listesini ekle")]
+    [InlineData("gizlilik ipucu metinleri ([#24](https://x/24), [#27](https://x/27), [#29](https://x/29)) ([890cf03](https://x/c))",
+                "Gizlilik ipucu metinleri")]
+    [InlineData("**updater:** indirme ([#27](https://x/27))", "İndirme")]
+    [InlineData("**Atlama listesi:** dock'ta sağ tık", "Atlama listesi: dock'ta sağ tık")]
+    [InlineData("**Depo taşındı:** Koy artık [github.com/koyhq/koy](https://github.com/koyhq/koy) adresinde.", "Depo taşındı: Koy artık github.com/koyhq/koy adresinde.")]
+    [InlineData("`Ayarlar` sayfası", "Ayarlar sayfası")]
+    public void CleanItem_DuzMetneCevirir(string input, string expected)
+    {
+        Assert.Equal(expected, ChangelogParser.CleanItem(input));
+    }
+
+    [Fact]
+    public void CleanItem_SiteKapsaminiGizler()
+    {
+        Assert.Null(ChangelogParser.CleanItem("**site:** hero çentiğini aç ([#33](https://x/33)) ([00708b3](https://x/c))"));
+    }
+
+    [Fact]
+    public void ExtractVersion_ReleasePleaseMaddeleriniTemizler()
+    {
+        var md = "## [0.2.1](https://github.com/koyhq/koy/compare/v0.2.0...v0.2.1) (2026-11-08)\r\n\r\nÖne çıkanlar:\r\n- **Hep havada:** kapsül havada kalır.\r\n\r\n\r\n### Eklenenler\r\n\r\n* **dock:** yüzen kapsüle Hep havada modunu ekle ([#31](https://x/31)) ([3c828bd](https://x/c))\r\n* **site:** hero çentiği ([#33](https://x/33))\r\n";
+        var notes = ChangelogParser.ExtractVersion(md, "0.2.1")!;
+        Assert.Equal(["Hep havada: kapsül havada kalır."], notes.Highlights);
+        var added = Assert.Single(notes.Sections);
+        Assert.Equal(["Yüzen kapsüle Hep havada modunu ekle"], added.Items);
+    }
 }
