@@ -417,6 +417,43 @@ public class SearchSourceTests
         Assert.Single(files.Terms);
     }
 
+    [Fact]
+    public async Task File_search_survives_rapid_queries_and_release_from_other_threads()
+    {
+        var source = new FileSearchSource(new FakeFiles(new IndexedItem(@"C:\d\f.pdf", false)), new FakeShell(), T);
+        var failures = new List<Exception>();
+
+        var worker = Task.Run(() =>
+        {
+            try
+            {
+                for (var i = 0; i < 300; i++)
+                {
+                    _ = source.IsBusy;
+                    source.Search(Q("rapor" + i % 7)).ToList();
+                    if (i % 25 == 0)
+                        source.Release();
+                }
+            }
+            catch (Exception ex)
+            {
+                lock (failures)
+                    failures.Add(ex);
+            }
+        });
+        for (var i = 0; i < 300; i++)
+        {
+            _ = source.IsBusy;
+            source.Search(Q("belge" + i % 5)).ToList();
+        }
+
+        await worker;
+        source.Release();
+
+        Assert.Empty(failures);
+        Assert.False(source.IsBusy);
+    }
+
     [Theory]
     [InlineData("a")]
     [InlineData("=1+1")]

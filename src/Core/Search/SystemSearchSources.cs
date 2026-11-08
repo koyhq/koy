@@ -291,20 +291,30 @@ public sealed class FileSearchSource(IFileSearchService service, ISearchShell sh
     private const int PerCategory = 10;
     private static readonly TimeSpan Debounce = TimeSpan.FromMilliseconds(150);
 
+    // Arka plan görevi yazar, arayüz iş parçacığı okur: bütün durum bu kilitle korunur.
+    private readonly object _gate = new();
     private CancellationTokenSource? _running;
     private string _pending = "";
     private string _ready = "";
     private IReadOnlyList<IndexedItem> _items = [];
 
-    public override bool IsBusy => _running is not null;
+    public override bool IsBusy
+    {
+        get
+        {
+            lock (_gate)
+                return _running is not null;
+        }
+    }
 
     public override void Release()
     {
-        _running?.Cancel();
-        _running = null;
-        _pending = "";
-        _ready = "";
-        _items = [];
+        lock (_gate)
+        {
+            CancelLocked();
+            _ready = "";
+            _items = [];
+        }
     }
 
     public override IEnumerable<SearchResult> Search(SearchQuery query)
@@ -312,14 +322,23 @@ public sealed class FileSearchSource(IFileSearchService service, ISearchShell sh
         // "=" hesap makinesinindir; dizin sorgusunda işleç sayılır.
         if (query.Raw.Length < MinQueryLength || query.Raw.StartsWith('='))
         {
-            Cancel();
+            lock (_gate)
+                CancelLocked();
             return [];
         }
 
-        if (_ready != query.Raw && _pending != query.Raw)
-            Start(query.Raw);
+        IReadOnlyList<IndexedItem> items;
+        bool ready;
+        lock (_gate)
+        {
+            if (_ready != query.Raw && _pending != query.Raw)
+                StartLocked(query.Raw);
 
-        return _ready == query.Raw ? Build(query) : [];
+            ready = _ready == query.Raw;
+            items = _items;
+        }
+
+        return ready ? Build(query, items) : [];
     }
 
     /// <summary>Uzantıya göre sonuç grubu; tanınmayan "Dosyalar".</summary>
@@ -342,7 +361,7 @@ public sealed class FileSearchSource(IFileSearchService service, ISearchShell sh
         };
     }
 
-    private IEnumerable<SearchResult> Build(SearchQuery query) => _items
+    private IEnumerable<SearchResult> Build(SearchQuery query, IReadOnlyList<IndexedItem> items) => items
         .GroupBy(item => CategoryKey(item.Path, item.IsFolder))
         .SelectMany(group => group.Take(PerCategory).Select(item => ToResult(query, item, t(group.Key))))
         .ToList();
@@ -365,14 +384,15 @@ public sealed class FileSearchSource(IFileSearchService service, ISearchShell sh
         };
     }
 
-    private void Cancel()
+    private void CancelLocked()
     {
+        // Kaynağı görev kendi finally'sinde bırakır; burada yalnız iptal edilir.
         _running?.Cancel();
         _running = null;
         _pending = "";
     }
 
-    private void Start(string term)
+    private void StartLocked(string term)
     {
         _running?.Cancel();
         var running = new CancellationTokenSource();
@@ -383,17 +403,24 @@ public sealed class FileSearchSource(IFileSearchService service, ISearchShell sh
 
     private async Task RunAsync(string term, CancellationTokenSource running)
     {
+        // Kaynak başka iş parçacığında bırakılabilir; belirteç baştan alınır.
+        var token = running.Token;
         try
         {
-            await Task.Delay(Debounce, running.Token).ConfigureAwait(false);
-            var items = await service.SearchAsync(term, FetchLimit, running.Token).ConfigureAwait(false);
-            if (running.IsCancellationRequested)
-                return;
+            await Task.Delay(Debounce, token).ConfigureAwait(false);
+            var items = await service.SearchAsync(term, FetchLimit, token).ConfigureAwait(false);
 
-            _items = items;
-            _ready = term;
-            _pending = "";
-            _running = null;
+            lock (_gate)
+            {
+                if (token.IsCancellationRequested || !ReferenceEquals(_running, running))
+                    return;
+
+                _items = items;
+                _ready = term;
+                _pending = "";
+                _running = null;
+            }
+
             RaiseChanged();
         }
         catch (OperationCanceledException)
@@ -403,12 +430,23 @@ public sealed class FileSearchSource(IFileSearchService service, ISearchShell sh
         catch (Exception ex)
         {
             CrashLog.Write("Dosya arama", ex);
-            if (ReferenceEquals(_running, running))
+            bool cleared;
+            lock (_gate)
             {
-                _running = null;
-                _pending = "";
-                RaiseChanged();
+                cleared = ReferenceEquals(_running, running);
+                if (cleared)
+                {
+                    _running = null;
+                    _pending = "";
+                }
             }
+
+            if (cleared)
+                RaiseChanged();
+        }
+        finally
+        {
+            running.Dispose();
         }
     }
 }
