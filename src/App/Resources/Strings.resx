@@ -406,10 +406,13 @@
     <value>Reserve space</value>
   </data>
   <data name="ProxDodge" xml:space="preserve">
-    <value>Dodge</value>
+    <value>Dodge windows</value>
   </data>
   <data name="ProxAlwaysHidden" xml:space="preserve">
     <value>Always hidden</value>
+  </data>
+  <data name="ProxAlwaysFloating" xml:space="preserve">
+    <value>Always floating</value>
   </data>
   <data name="ProxReserveDesc" xml:space="preserve">
     <value>The dock is always visible; windows end above it, like the Windows taskbar.</value>
@@ -418,10 +421,13 @@
     <value>The dock floats; when a window gets close it snaps to the screen bottom and thins out. It stays visible over maximized windows and reserves no space.</value>
   </data>
   <data name="ProxDodgeDesc" xml:space="preserve">
-    <value>The dock hides when a window gets close; it returns when the mouse reaches the bottom edge.</value>
+    <value>The dock hides only when a window gets close to it or is maximized; it returns when the mouse reaches the bottom edge, or when the window moves away.</value>
   </data>
   <data name="ProxAlwaysHiddenDesc" xml:space="preserve">
-    <value>The dock only shows when the mouse reaches the bottom edge.</value>
+    <value>The dock stays hidden whatever the windows do, until the mouse reaches the bottom edge.</value>
+  </data>
+  <data name="ProxAlwaysFloatingDesc" xml:space="preserve">
+    <value>The dock always floats above the bottom edge: it never snaps down, hides or reserves space, even next to a maximized window. It hides only in full screen.</value>
   </data>
   <data name="DockSizeHeader" xml:space="preserve">
     <value>Dimensions</value>

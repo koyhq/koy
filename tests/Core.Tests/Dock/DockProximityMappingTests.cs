@@ -9,6 +9,7 @@ public class DockProximityMappingTests
     [InlineData(DockProximityMode.DockDown)]
     [InlineData(DockProximityMode.Dodge)]
     [InlineData(DockProximityMode.AlwaysHidden)]
+    [InlineData(DockProximityMode.AlwaysFloating)]
     public void Capsule_keeps_every_mode(DockProximityMode mode)
     {
         Assert.True(DockProximityMapping.IsAvailable(DockStyleMode.FloatingCapsule, mode));
@@ -20,6 +21,7 @@ public class DockProximityMappingTests
     [InlineData(DockProximityMode.AlwaysHidden, true, DockProximityMode.AlwaysHidden)]
     [InlineData(DockProximityMode.DockDown, false, DockProximityMode.ReserveSpace)]
     [InlineData(DockProximityMode.Dodge, false, DockProximityMode.AlwaysHidden)]
+    [InlineData(DockProximityMode.AlwaysFloating, false, DockProximityMode.ReserveSpace)]
     public void FullWidth_offers_only_always_show_and_auto_hide(
         DockProximityMode mode, bool available, DockProximityMode effective)
     {

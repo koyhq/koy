@@ -200,6 +200,46 @@ public sealed class SettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public void AlwaysFloating_round_trips_and_is_written_by_name()
+    {
+        // Enum ADIYLA yazılır (UseStringEnumConverter): yeni değerin sayısı eski dosyaları etkilemez.
+        var store = NewStore();
+        store.Save(new AppSettings { DockProximity = Koy.Core.Dock.DockProximityMode.AlwaysFloating });
+
+        Assert.Contains("\"DockProximity\": \"AlwaysFloating\"", File.ReadAllText(store.Path));
+        Assert.Equal(Koy.Core.Dock.DockProximityMode.AlwaysFloating, store.Load().DockProximity);
+    }
+
+    [Theory]
+    [InlineData("ReserveSpace", Koy.Core.Dock.DockProximityMode.ReserveSpace)]
+    [InlineData("DockDown", Koy.Core.Dock.DockProximityMode.DockDown)]
+    [InlineData("Dodge", Koy.Core.Dock.DockProximityMode.Dodge)]
+    [InlineData("AlwaysHidden", Koy.Core.Dock.DockProximityMode.AlwaysHidden)]
+    [InlineData("AlwaysFloating", Koy.Core.Dock.DockProximityMode.AlwaysFloating)]
+    public void Existing_proximity_names_load_unchanged_and_file_is_untouched(string name, Koy.Core.Dock.DockProximityMode expected)
+    {
+        // Eski dosyalar göçsüz okunur: bilinen adlar aynı değere döner, dosya yeniden yazılmaz.
+        var store = NewStore();
+        Directory.CreateDirectory(_dir);
+        var json = "{ \"DockProximity\": \"" + name + "\" }";
+        File.WriteAllText(store.Path, json);
+
+        Assert.Equal(expected, store.Load().DockProximity);
+        Assert.Equal(json, File.ReadAllText(store.Path));
+    }
+
+    [Fact]
+    public void Existing_numeric_proximity_values_keep_their_meaning()
+    {
+        // Elle ya da eski sürümle sayı yazılmış olsa bile yeni değer en sonda olduğu için anlamlar kaymaz.
+        Assert.Equal(0, (int)Koy.Core.Dock.DockProximityMode.DockDown);
+        Assert.Equal(1, (int)Koy.Core.Dock.DockProximityMode.ReserveSpace);
+        Assert.Equal(2, (int)Koy.Core.Dock.DockProximityMode.Dodge);
+        Assert.Equal(3, (int)Koy.Core.Dock.DockProximityMode.AlwaysHidden);
+        Assert.Equal(4, (int)Koy.Core.Dock.DockProximityMode.AlwaysFloating);
+    }
+
+    [Fact]
     public void DockShowTray_DefaultsOnForOldFilesAndRoundTripsOff()
     {
         // Tepsi alanı olmayan eski dosyada tepsi açık gelmeli; kapatılınca kapalı kalmalı.

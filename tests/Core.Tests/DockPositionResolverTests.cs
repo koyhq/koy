@@ -436,4 +436,83 @@ public class DockPositionResolverTests
         Assert.Equal(1.0, result.Opacity);
         Assert.Equal(0.0, result.TranslationY);
     }
+
+    [Theory]
+    [InlineData(false, 0, 0, 0, 0)]          // pencere yok
+    [InlineData(true, 100, 100, 900, 700)]   // uzakta, büyütülmüş
+    [InlineData(false, 100, 960, 900, 1075)] // dock bölgesine binmiş
+    [InlineData(true, 0, 0, 1920, 1080)]     // tam büyütülmüş
+    public void FloatingCapsule_AlwaysFloating_NeverSnapsHidesOrReserves(bool maximized, int l, int t, int r, int b)
+    {
+        var bounds = l == 0 && t == 0 && r == 0 && b == 0 ? default : new WindowRect(l, t, r, b);
+        var result = DockPositionResolver.Resolve(
+            monitor: Primary1080p,
+            dockStyle: DockStyleMode.FloatingCapsule,
+            proximityMode: DockProximityMode.AlwaysFloating,
+            contentWidthDip: 500.0,
+            foregroundWindowBoundsDip: bounds,
+            isWindowMaximized: maximized,
+            hideInFullscreen: true);
+
+        Assert.Equal(60.0, result.HeightDip);
+        Assert.Equal(1010.0, result.TopDip); // 1080 - 60 - 10
+        Assert.Equal(710.0, result.LeftDip);
+        Assert.Equal(500.0, result.WidthDip);
+        Assert.Equal(18.0, result.CornerRadiusTopLeft);
+        Assert.Equal(18.0, result.CornerRadiusBottomRight);
+        Assert.True(result.HasUniformRadius);
+        Assert.Equal(0.0, result.TranslationY);
+        Assert.Equal(1.0, result.Opacity);
+        Assert.False(result.IsSnapped);
+        Assert.False(result.IsHidden);
+        Assert.False(result.IsHandleVisible);
+        Assert.Equal(0, result.AppBarReservedHeightDip);
+    }
+
+    [Fact]
+    public void FloatingCapsule_AlwaysFloating_IsHiddenInRealFullscreen()
+    {
+        var result = DockPositionResolver.Resolve(
+            monitor: Primary1080p,
+            dockStyle: DockStyleMode.FloatingCapsule,
+            proximityMode: DockProximityMode.AlwaysFloating,
+            contentWidthDip: 500.0,
+            foregroundWindowBoundsDip: new WindowRect(0, 0, 1920, 1080),
+            isWindowMaximized: true,
+            isWindowFullscreen: true,
+            hideInFullscreen: true);
+
+        Assert.True(result.IsHidden);
+        Assert.Equal(0.0, result.Opacity);
+        Assert.True(result.TranslationY > 60.0);
+    }
+
+    [Fact]
+    public void FloatingCapsule_AlwaysFloating_StaysWhenFullscreenHidingIsOff()
+    {
+        var result = DockPositionResolver.Resolve(
+            monitor: Primary1080p,
+            dockStyle: DockStyleMode.FloatingCapsule,
+            proximityMode: DockProximityMode.AlwaysFloating,
+            contentWidthDip: 500.0,
+            foregroundWindowBoundsDip: new WindowRect(0, 0, 1920, 1080),
+            isWindowMaximized: true,
+            isWindowFullscreen: true,
+            hideInFullscreen: false);
+
+        Assert.False(result.IsHidden);
+        Assert.Equal(1010.0, result.TopDip);
+        Assert.False(result.IsSnapped);
+    }
+
+    [Fact]
+    public void FloatingCapsule_AlwaysFloating_IgnoresMouseAtEdge()
+    {
+        var withMouse = DockPositionResolver.Resolve(Primary1080p, DockStyleMode.FloatingCapsule, DockProximityMode.AlwaysFloating,
+            500.0, new WindowRect(0, 0, 1920, 1080), isWindowMaximized: true, isMouseAtBottomEdge: true, isMouseOverDock: true);
+        var without = DockPositionResolver.Resolve(Primary1080p, DockStyleMode.FloatingCapsule, DockProximityMode.AlwaysFloating,
+            500.0, new WindowRect(0, 0, 1920, 1080), isWindowMaximized: true);
+
+        Assert.Equal(without, withMouse);
+    }
 }

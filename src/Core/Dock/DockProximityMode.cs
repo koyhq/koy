@@ -27,7 +27,14 @@ public enum DockProximityMode
     /// <summary>
     /// Hep gizli: Fare ekranın alt kenarına inene kadar dock tamamen gizli kalır.
     /// </summary>
-    AlwaysHidden
+    AlwaysHidden,
+
+    /// <summary>
+    /// Hep havada: Yüzen kapsül pencere yaklaşsa ya da büyütülse bile asla alta yapışmaz, gizlenmez, yer ayırmaz;
+    /// her zaman alttan 10 px boşlukla 60 px yükseklikte yüzer. Yalnız tam ekranda (DockHideInFullscreen) gizlenir.
+    /// Ayar dosyasında ADIYLA yazıldığı için (UseStringEnumConverter) sıra önemsizdir; yine de en sona eklendi.
+    /// </summary>
+    AlwaysFloating
 }
 
 /// <summary>

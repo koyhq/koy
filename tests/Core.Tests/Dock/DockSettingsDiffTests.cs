@@ -53,6 +53,40 @@ public class DockSettingsDiffTests
             new AppSettings { DockProximity = DockProximityMode.DockDown }).ReconcileAppBar);
 
     [Fact]
+    public void Capsule_reserve_to_always_floating_releases_the_appbar()
+    {
+        var d = DockSettingsDiff.Compare(
+            new AppSettings { DockProximity = DockProximityMode.ReserveSpace },
+            new AppSettings { DockProximity = DockProximityMode.AlwaysFloating });
+
+        Assert.True(d.ReconcileAppBar);
+        Assert.True(d.RebuildViewModels);
+        Assert.False(d.ReconcileTaskbar);
+    }
+
+    [Fact]
+    public void Dockdown_to_always_floating_keeps_the_appbar_but_rebuilds_view_models()
+    {
+        // İkisi de yer ayırmaz: AppBar'a dokunulmaz, ama yakınlık ayarı ViewModel'e okunur, yeniden kurulur.
+        var d = DockSettingsDiff.Compare(
+            new AppSettings { DockProximity = DockProximityMode.DockDown },
+            new AppSettings { DockProximity = DockProximityMode.AlwaysFloating });
+
+        Assert.False(d.ReconcileAppBar);
+        Assert.True(d.RebuildViewModels);
+    }
+
+    [Fact]
+    public void Full_width_always_floating_maps_to_reserve_space_so_the_appbar_stays()
+    {
+        // Tam genişlikte Hep havada etkin olarak Yer ayır'dır: Yer ayır'dan geçişte AppBar'a dokunulmaz.
+        var a = new AppSettings { DockStyle = DockStyleMode.FullWidth, DockProximity = DockProximityMode.AlwaysFloating };
+        var b = new AppSettings { DockStyle = DockStyleMode.FullWidth, DockProximity = DockProximityMode.ReserveSpace };
+
+        Assert.False(DockSettingsDiff.Compare(a, b).ReconcileAppBar);
+    }
+
+    [Fact]
     public void Hide_taskbar_toggle_reconciles_taskbar_and_tray()
     {
         var d = DockSettingsDiff.Compare(new AppSettings { HideWindowsTaskbar = true }, new AppSettings { HideWindowsTaskbar = false });
