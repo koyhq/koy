@@ -5,6 +5,36 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.1](https://github.com/koyhq/koy/compare/v0.2.0...v0.2.1) (2026-11-08)
+
+Öne çıkanlar:
+- **Atlama listesi:** dock'ta bir uygulamaya sağ tıklayınca Windows'taki gibi son dosyalar, sık kullanılanlar ve uygulamanın kendi görevleri çıkar (VS Code'da son klasörler, Edge'de yeni InPrivate penceresi).
+- **Hep havada:** yüzen kapsül, pencere yaklaşsa ya da büyütülse bile alta yapışmadan havada kalır.
+- **Gizlilik noktaları:** kamera kullanılırken çentikte yeşil, mikrofon kullanılırken turuncu nokta yanar; üstüne gelince hangi uygulama olduğu yazar. Ayarlardan kapatılabilir.
+- **Yeni güncelleme akışı:** yeni sürüm kendiliğinden inmez; Koy önce sorar, ne değiştiğini gösterir, indirirken ilerleme çubuğu çıkar. Güncellemeden sonra bu "Neler Geldi" ekranı açılır.
+- **Daha kararlı dock:** çoklu ekranda odak öbür ekrana geçince "Aşağı yapış" dock'u artık havaya kalkmıyor; dock kapalıyken Koy açılınca görev çubuğu otomatik gizlemeye geçmiyor.
+
+
+### Eklenenler
+
+* **dock:** sağ tık menüsüne atlama listesini ekle ([#32](https://github.com/koyhq/koy/issues/32)) ([9aa22ea](https://github.com/koyhq/koy/commit/9aa22ea9a37a9414145335b6554eba55f64019e4))
+* **dock:** yüzen kapsüle Hep havada modunu ekle ([#31](https://github.com/koyhq/koy/issues/31)) ([3c828bd](https://github.com/koyhq/koy/commit/3c828bdeda46a14381b9dff3fdd290603d74d62f))
+* **notch:** çentikte kamera ve mikrofon gizlilik noktaları ve ayarı ([#29](https://github.com/koyhq/koy/issues/29)) ([fd64f30](https://github.com/koyhq/koy/commit/fd64f3049bb3c935b2a06f0f5a34db22fccb75f4))
+* **notch:** mikrofon ve kamera gizlilik izleme servisi ve politikasi ([#29](https://github.com/koyhq/koy/issues/29)) ([e41cd52](https://github.com/koyhq/koy/commit/e41cd5202e9d9a526ce86b8a570ba7f3f977317c))
+* **site:** hero çentiğini fareyle ve dokunarak aç ([#33](https://github.com/koyhq/koy/issues/33)) ([00708b3](https://github.com/koyhq/koy/commit/00708b35e1546c0d72df656c176cdef36a6c72d6))
+* **updater:** denetim odaklı güncelleme akışı, sürüm politikası ve değişiklik günlüğü ayrıştırıcı ([#27](https://github.com/koyhq/koy/issues/27)) ([6b6a2af](https://github.com/koyhq/koy/commit/6b6a2afe2be3a7360db0b39f29c0a6767baa614a))
+* **updater:** guncelleme onay penceresi, indirme ilerlemesi ve 'Neler Geldi' ekrani ([#27](https://github.com/koyhq/koy/issues/27)) ([9fc3570](https://github.com/koyhq/koy/commit/9fc3570e011bb2cfaaa36424b300b8e8279e2e7a))
+
+
+### Düzeltmeler
+
+* **dock:** çoklu ekranda odak değişince diğer monitörün dock'u kendi en üst penceresini korusun ([#24](https://github.com/koyhq/koy/issues/24)) ([e81eea0](https://github.com/koyhq/koy/commit/e81eea0bc57794c637201e40276add65090a372c))
+* **dock:** dock kapalıyken açılışta görev çubuğu durumunu koru ([#30](https://github.com/koyhq/koy/issues/30)) ([8e86f78](https://github.com/koyhq/koy/commit/8e86f78da7d8d23c0a80ea695a3a72a3aa6272a3))
+* gizlilik ipucu metinleri, ilk kurulumda sürüm notu ve çoklu ekran odak düzeltmeleri ([#24](https://github.com/koyhq/koy/issues/24), [#27](https://github.com/koyhq/koy/issues/27), [#29](https://github.com/koyhq/koy/issues/29)) ([890cf03](https://github.com/koyhq/koy/commit/890cf0342ae85865e218324cb958ee3d785a5d86))
+* hero çentiği dar masaüstünde de tepeden sarksın ([#22](https://github.com/koyhq/koy/issues/22)) ([09a3bd8](https://github.com/koyhq/koy/commit/09a3bd80df413753e0336a8ff09f24bfa56e4d5c))
+* **notch:** gizlilik izleyicisi kapanınca gerçekten dursun, eksik anahtarı yoklamasın ([#29](https://github.com/koyhq/koy/issues/29)) ([05a783f](https://github.com/koyhq/koy/commit/05a783fe7072b4b83e68898fd50ed7f5ef2f15b3))
+* **updater:** güncelleme penceresi yeni sürümün notlarını göstersin, ön sürüm sırası ve indirme hataları ([#27](https://github.com/koyhq/koy/issues/27)) ([b95368b](https://github.com/koyhq/koy/commit/b95368b1b62faf45fb4e0d85aa472c7ca4dca15f))
+
 ## [0.2.0](https://github.com/koyhq/koy/compare/v0.1.1...v0.2.0) (2026-11-07)
 
 Öne çıkanlar:
