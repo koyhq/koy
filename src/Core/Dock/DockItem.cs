@@ -28,4 +28,5 @@ public sealed record DockItem(
     int ProcessId = 0,
     bool IsFlashing = false,
     int BadgeCount = 0,
-    IReadOnlyList<DockWindowEntry>? Windows = null);
+    IReadOnlyList<DockWindowEntry>? Windows = null,
+    string? AppUserModelId = null);

@@ -108,7 +108,9 @@ public sealed class DockController : IDisposable
                 ProcessId: processId,
                 IsFlashing: isFlashing,
                 BadgeCount: 0,
-                Windows: windowEntries));
+                Windows: windowEntries,
+                // Çalışan pencerenin kimliği öncelikli (ör. Chrome profili); yoksa sabitli kısayolun AUMID'i.
+                AppUserModelId: ResolveAppId(matchingWindows) ?? pin.AppUserModelId));
         }
 
         // 2. Sabitlenmemiş açık pencereleri grupla ve ilk görülme sırasını koru (Alt+Tab zıplamasını engelle)
@@ -168,11 +170,30 @@ public sealed class DockController : IDisposable
                 ProcessId: first.ProcessId,
                 IsFlashing: isFlashing,
                 BadgeCount: 0,
-                Windows: windowEntries));
+                Windows: windowEntries,
+                AppUserModelId: ResolveAppId(list)));
         }
 
         _items = newItems;
         ItemsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Pencerelerden ilk AppUserModelID (pencerede yoksa bilinen sistem uygulamaları tablosundan). Atlama listesi bu kimliğe
+    /// bağlıdır; kimlik yoksa null (exe yolundan kimlik türetilmez).
+    /// </summary>
+    private static string? ResolveAppId(IEnumerable<OpenWindowInfo> windows)
+    {
+        foreach (var w in windows)
+        {
+            var id = !string.IsNullOrEmpty(w.AppUserModelId)
+                ? w.AppUserModelId
+                : KnownAppUserModelIds.ForWindow(w.ProcessPath, w.ClassName);
+            if (!string.IsNullOrEmpty(id))
+                return id;
+        }
+
+        return null;
     }
 
     /// <summary>Sabitli uygulamaların sırasını sürükleyerek değiştirebilir miyiz (kaynak sıralamayı destekliyor mu).</summary>
