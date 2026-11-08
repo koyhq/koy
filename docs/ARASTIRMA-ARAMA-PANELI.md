@@ -19,7 +19,7 @@ Her bilginin kaynağı yanında yazar:
 - Her kaynağın iki işi vardır: sonuç üretmek ve seçileni çalıştırmak.
 - Bir sonucun iki puanı vardır: kategori önemi (grupları sıralar) ve sonuç puanı (grup içini sıralar).
 - Kaynaklar birbirini bekletmez; biri yavaşsa diğerlerinin sonuçları gelir.
-- Liste en sık **250 ms**'de bir yenilenir. Yeni aramada boş liste hemen gösterilmez, titreme olmaz.
+- Liste en sık **250 ms**'de bir yenilenir. Yeni aramada boş liste hemen gösterilmez, titreme olmaz. (Başka araçlarda böyle; Koy'da #40 bunu **uygulamıyor**: liste her sorgu değişiminde yenilenir, 250 ms'lik toplu yenileme gelecek iş.)
 - Kaynak gereksiz çalışmasın diye en az harf sayısı, desen ve tetik sözcüğü tanımlanabilir.
 - Hazırlık ve temizlik adımları: panel açılınca kaynak hazırlanır, kapanınca bırakılır.
 - Kategori başına sınır vardır: her kategori kalan yerin en çok 1/(n+1)'ini alır, en az bir sonuç gösterilir. Tek kaynak bütün listeyi doldurmaz.
@@ -31,9 +31,8 @@ Her bilginin kaynağı yanında yazar:
 - Anahtar sözcüklerde kural daha sıkıdır. Aynı komuta giden iki sonuç tekilleştirilir.
 
 **Pencere ve klavye [Kod]**
-- Ekranın üstüne yapışık, tepeden kayarak iner. Genişlik sabit, yükseklik sonuçlara göre uzar, ekrana sınırlıdır.
-- İsteğe bağlı "serbest" mod: ekranın 1/3'ünden aşağıda açılır.
-- Odak gidince kapanır; iğnelenirse açık kalır. Etkin ekranda açılır.
+- Diğer araçlarda: ekranın üstüne yapışık, tepeden kayarak inen ayrı pencere; genişlik sabit, yükseklik sonuçlara göre uzar; isteğe bağlı "serbest" mod ekranın 1/3'ünden aşağıda açılır; odak gidince kapanır, iğnelenirse açık kalır.
+- **Koy'da (#40) böyle değil:** panel ayrı pencere değil, çentiğin içinde açılır (sabit tuval, AGENTS #13). "Serbest" mod ve iğneleme yok.
 - Önceki aramayı hatırlar (ayarlı). Boşken aşağı ok geçmişi açar.
 - Geçmiş: 50 kayıt saklanır, 20'si gösterilir. **Başında boşluk olan arama geçmişe yazılmaz.**
 - Sonuçların ek eylemleri olabilir (ör. hesapta "Kopyala").
@@ -47,7 +46,7 @@ Her bilginin kaynağı yanında yazar:
 | Yaklaşım | Koy için öneri | Sebep |
 |---|---|---|
 | Kaynak + puan modeli | Uygula | Core'da saf ve testli yazılır (AGENTS #11) |
-| 250 ms toplu yenileme, eski aramayı iptal | Uygula | Yazılımla çizimde her yenileme pahalı (AGENTS #3, #13) |
+| 250 ms toplu yenileme, eski aramayı iptal | Uygulanmadı (gelecek iş; #40 her sorgu değişiminde yeniler) | Yazılımla çizimde her yenileme pahalı (AGENTS #3, #13) |
 | Hazırlık ve temizlik adımları | Uygula | AGENTS #5 ile aynı fikir |
 | Kaynak başına iş parçacığı | Değiştir | Hesap ve pencere listesi anlık; yalnız yavaş kaynaklar için iptal edilebilir görev yeter |
 | Ayrı süreçte çalışan eklentiler | Uygulama | AGENTS #4 tek süreç |
@@ -116,7 +115,7 @@ Ek gereksinimler:
 
 | | Çentiğin içinde | Ayrı pencere |
 |---|---|---|
-| Görünen sonuç | Sekmeler kalırsa ~4–5, sekmeler gizlenirse ~7 satır (40 birimlik satır varsayımı) | Sonuç sayısına göre uzar |
+| Görünen sonuç | Başlangıç varsayımı: sekmeler kalırsa ~4–5, gizlenirse ~7 satır (40 birimlik satır). #40'ta sekmeler gizlenir; liste en çok 15 satırdır (`SearchLayout.MaxResults`), görünmeyenlere kaydırılarak ulaşılır | Sonuç sayısına göre uzar |
 | Sınır | Tuval 640×364'ten büyütülmez (AGENTS #13) | Çentikle yan yana durması tasarlanmalı |
 | Bellek | Yeni pencere yok; ölçülmedi | Yeni pencere, yalnız açılınca; ölçülmedi |
 | Çoklu ekran | Hangi çentik: fare mi etkin pencere mi, seçilmeli | Aynı seçim gerekir |
