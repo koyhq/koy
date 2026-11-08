@@ -166,6 +166,17 @@ public class JumpListLayoutTests
     }
 
     [Fact]
+    public void Valid_file_with_only_an_unrecognised_known_category_does_not_default_to_recent()
+    {
+        var file = CustomDestinationsReader.Parse(new CustomDestinationsBuilder().Known(-1).Build());
+
+        Assert.True(file.IsValid);
+        Assert.True(file.IsEmpty);
+        Assert.False(JumpListLayout.ShowsRecent(file));
+        Assert.False(JumpListLayout.ShowsFrequent(file));
+    }
+
+    [Fact]
     public void Known_categories_follow_what_the_app_declared()
     {
         var tasksOnly = CustomDestinationsReader.Parse(new CustomDestinationsBuilder().Tasks(Link()).Build());

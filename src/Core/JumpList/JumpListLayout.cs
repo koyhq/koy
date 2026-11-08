@@ -7,11 +7,11 @@ namespace Koy.Core.JumpList;
 public static class JumpListLayout
 {
     /// <summary>
-    /// Son kullanılanlar bölümü gösterilsin mi. Uygulamanın kendi listesi yoksa Windows varsayılanı (son kullanılanlar)
+    /// Son kullanılanlar bölümü gösterilsin mi. Uygulamanın kendi listesi yoksa (dosya yok ya da okunamadı) Windows varsayılanı (son kullanılanlar)
     /// geçerlidir; kendi listesi varsa yalnız <c>AppendKnownCategory(RECENT)</c> demişse.
     /// </summary>
     public static bool ShowsRecent(CustomDestinationsFile? file) =>
-        file is null || file.IsEmpty || file.Declares(JumpListKnownCategory.Recent);
+        file is null || !file.IsValid || file.Declares(JumpListKnownCategory.Recent);
 
     /// <summary>Sık kullanılanlar yalnız uygulamanın listesi isterse gösterilir (Explorer gibi).</summary>
     public static bool ShowsFrequent(CustomDestinationsFile? file) =>

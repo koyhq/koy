@@ -34,13 +34,24 @@ public sealed record CustomDestinationsCategory(
 /// <summary>Okunmuş dosya. Bozuk ya da bilinmeyen biçim <see cref="Empty"/> olur (kategori yok).</summary>
 public sealed class CustomDestinationsFile
 {
-    public static CustomDestinationsFile Empty { get; } = new([]);
+    /// <summary>Okunamayan (yok, bozuk, bilinmeyen biçim) dosya.</summary>
+    public static CustomDestinationsFile Empty { get; } = new([], isValid: false);
 
-    public CustomDestinationsFile(IReadOnlyList<CustomDestinationsCategory> categories) => Categories = categories;
+    public CustomDestinationsFile(IReadOnlyList<CustomDestinationsCategory> categories, bool isValid = true)
+    {
+        Categories = categories;
+        IsValid = isValid;
+    }
 
     public IReadOnlyList<CustomDestinationsCategory> Categories { get; }
 
-    /// <summary>Dosya kullanılabilir bir uygulama listesi tanımlıyor mu (en az bir kategori okundu).</summary>
+    /// <summary>
+    /// Dosya yapısı geçerli okundu. Geçerli ama gösterilecek kategorisi olmayan dosya (yalnız tanımadığımız bilinen
+    /// kategori) mümkündür: uygulamanın bir listesi vardır ve son / sık kullanılanları istememiş sayılır.
+    /// </summary>
+    public bool IsValid { get; }
+
+    /// <summary>Okunmuş gösterilebilir kategori yok.</summary>
     public bool IsEmpty => Categories.Count == 0;
 
     public bool Declares(JumpListKnownCategory known) =>
