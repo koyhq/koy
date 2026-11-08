@@ -9,19 +9,24 @@ public sealed class ShellCommandSearchSource(ISearchShell shell, Func<string, st
 
     public override IEnumerable<SearchResult> Search(SearchQuery query)
     {
-        var (command, arguments) = SplitCommand(query.Raw);
+        // Kabuğa satır sonu hiç gitmez; pano ve çok satırlı metin ayrıca onay ister.
+        var line = SearchCommandSafety.ToSingleLine(query.Raw);
+        var (command, arguments) = SplitCommand(line);
         if (command.Length == 0 || FindExecutable(command) is not { } executable)
             return [];
 
-        var line = query.Raw;
+        var confirm = query.NeedsCommandConfirmation;
+        var shown = SearchCommandSafety.ForDisplay(query.Raw);
         return
         [
-            new SearchResult("exec:" + executable + " " + arguments, Name, string.Format(t("SearchRunCommand"), line), () => shell.Run(executable, arguments))
+            new SearchResult("exec:" + executable + " " + arguments, Name, string.Format(t("SearchRunCommand"), shown), () => shell.Run(executable, arguments))
             {
                 Glyph = SearchGlyph.Terminal,
                 CategoryRelevance = SearchRelevance.Highest,
                 Relevance = 0.7,
-                Actions = [new SearchAction("terminal", t("SearchActRunInTerminal"), () => shell.RunInTerminal(line))]
+                RequiresConfirmation = confirm,
+                ConfirmationDetail = confirm ? shown : null,
+                Actions = [new SearchAction("terminal", t("SearchActRunInTerminal"), () => shell.RunInTerminal(line)) { RequiresConfirmation = confirm }]
             }
         ];
     }

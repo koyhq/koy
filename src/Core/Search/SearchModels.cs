@@ -37,7 +37,11 @@ public enum SearchGlyph
 }
 
 /// <summary>Satırın ek eylemi (ör. "Kopyala", "Bulunduğu klasörü aç").</summary>
-public sealed record SearchAction(string Id, string Label, Action Execute);
+public sealed record SearchAction(string Id, string Label, Action Execute)
+{
+    /// <summary>İlk Enter yalnız sorar, ikinci Enter eylemi çalıştırır.</summary>
+    public bool RequiresConfirmation { get; init; }
+}
 
 /// <summary>Listede bir satır.</summary>
 public sealed record SearchResult(string Id, string Category, string Title, Action Execute)
@@ -56,6 +60,9 @@ public sealed record SearchResult(string Id, string Category, string Title, Acti
 
     /// <summary>İlk Enter yalnız sorar, ikinci Enter çalıştırır (kapat, yeniden başlat).</summary>
     public bool RequiresConfirmation { get; init; }
+
+    /// <summary>Onay satırında gösterilecek tam metin (ör. çalıştırılacak komut, satır sonları ⏎ ile).</summary>
+    public string? ConfirmationDetail { get; init; }
 
     /// <summary>Panel kapanınca odak önceki pencereye dönsün: kopyalanan sonucu oraya yapıştırmak için.</summary>
     public bool RestoresFocus { get; init; }

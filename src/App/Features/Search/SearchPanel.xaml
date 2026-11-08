@@ -147,7 +147,7 @@
 
                   <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock Text="{Binding Title}" FontSize="13.5" Foreground="{DynamicResource KoyNotchText}" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Text="{Binding Subtitle}" FontSize="11" Foreground="{DynamicResource KoyNotchMuted}" TextTrimming="CharacterEllipsis"
+                    <TextBlock Text="{Binding Subtitle}" ToolTip="{Binding Subtitle}" FontSize="11" Foreground="{DynamicResource KoyNotchMuted}" TextTrimming="CharacterEllipsis" TextWrapping="Wrap" MaxHeight="64"
                                Visibility="{Binding HasSubtitle, Converter={StaticResource BoolToVis}}" />
                   </StackPanel>
 

@@ -34,6 +34,7 @@ public sealed class SearchPanelController : IDisposable
     private string _untrimmed = "";
     private string _prior = "";
     private bool _activateWhenReady;
+    private int _pendingAction = -1;
     private bool _disposed;
 
     /// <param name="sources">Sonuç kaynakları.</param>
@@ -82,6 +83,9 @@ public sealed class SearchPanelController : IDisposable
 
     public string? PendingConfirmationId { get; private set; }
 
+    /// <summary>Metin panodan geldi; komut olarak çalıştırmak onay ister.</summary>
+    public bool QueryFromClipboard { get; private set; }
+
     public bool ShowingHistory { get; private set; }
 
     public bool IsBusy => _sources.Any(s => s.IsBusy);
@@ -122,7 +126,9 @@ public sealed class SearchPanelController : IDisposable
             return;
 
         IsOpen = false;
-        _prior = _untrimmed;
+        // Pano metni bir sonraki açılışa taşınmaz.
+        _prior = QueryFromClipboard ? "" : _untrimmed;
+        QueryFromClipboard = false;
         SetText("");
         Results = [];
         ShowingHistory = false;
@@ -146,10 +152,13 @@ public sealed class SearchPanelController : IDisposable
         if (value == _untrimmed)
             return;
 
+        // Kutu boşalınca pano kaynağı biter; kullanıcı yazdıkça değişmez.
+        if (value.Length == 0)
+            QueryFromClipboard = false;
         SetText(value);
         ShowingHistory = false;
         _activateWhenReady = false;
-        PendingConfirmationId = null;
+        ClearPending();
         Refresh();
     }
 
@@ -173,7 +182,7 @@ public sealed class SearchPanelController : IDisposable
 
         SelectedIndex = ((SelectedIndex + delta) % Results.Count + Results.Count) % Results.Count;
         ActiveAction = -1;
-        PendingConfirmationId = null;
+        ClearPending();
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
@@ -203,7 +212,7 @@ public sealed class SearchPanelController : IDisposable
 
         SelectedIndex = index;
         ActiveAction = -1;
-        PendingConfirmationId = null;
+        ClearPending();
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
@@ -218,7 +227,7 @@ public sealed class SearchPanelController : IDisposable
             return false;
 
         ActiveAction = next;
-        PendingConfirmationId = null;
+        ClearPending();
         Changed?.Invoke(this, EventArgs.Empty);
         return true;
     }
@@ -249,18 +258,29 @@ public sealed class SearchPanelController : IDisposable
         var actionIndex = firstAction && result.Actions.Count > 0 ? 0 : ActiveAction;
         if (actionIndex >= 0 && actionIndex < result.Actions.Count)
         {
-            CrashLog.Guard("Arama eylemi", result.Actions[actionIndex].Execute);
+            var action = result.Actions[actionIndex];
+            if (action.RequiresConfirmation && !(PendingConfirmationId == result.Id && _pendingAction == actionIndex))
+            {
+                PendingConfirmationId = result.Id;
+                _pendingAction = actionIndex;
+                Changed?.Invoke(this, EventArgs.Empty);
+                return new SearchActivationResult(SearchActivation.NeedsConfirmation, result);
+            }
+
+            ClearPending();
+            CrashLog.Guard("Arama eylemi", action.Execute);
             return Finish(result, staysOpen: ShowingHistory);
         }
 
-        if (result.RequiresConfirmation && PendingConfirmationId != result.Id)
+        if (result.RequiresConfirmation && !(PendingConfirmationId == result.Id && _pendingAction == -1))
         {
             PendingConfirmationId = result.Id;
+            _pendingAction = -1;
             Changed?.Invoke(this, EventArgs.Empty);
             return new SearchActivationResult(SearchActivation.NeedsConfirmation, result);
         }
 
-        PendingConfirmationId = null;
+        ClearPending();
         CrashLog.Guard("Arama sonucu çalıştırma", result.Execute);
 
         if (result.ReplacesQuery is { } replacement)
@@ -274,9 +294,21 @@ public sealed class SearchPanelController : IDisposable
     }
 
     /// <summary>Sorguyu program tarafından değiştirir ve yazı kutusuna bildirir.</summary>
-    public void ReplaceQuery(string text)
+    /// <param name="fromClipboard">Metin panodan geldi; komut olarak çalıştırmak onay ister.</param>
+    public void ReplaceQuery(string text, bool fromClipboard = false)
     {
-        SetQuery(text);
+        QueryFromClipboard = fromClipboard;
+        if (IsOpen && text == _untrimmed)
+        {
+            // Aynı metin ama kaynağı değişmiş olabilir: sorgu yeniden kurulur.
+            _query = new SearchQuery(_untrimmed, fromClipboard);
+            Refresh();
+        }
+        else
+        {
+            SetQuery(text);
+        }
+
         QueryReplaced?.Invoke(this, text.Length);
     }
 
@@ -345,14 +377,20 @@ public sealed class SearchPanelController : IDisposable
     private void SetText(string text)
     {
         _untrimmed = text;
-        _query = new SearchQuery(text);
+        _query = new SearchQuery(text, QueryFromClipboard);
+    }
+
+    private void ClearPending()
+    {
+        PendingConfirmationId = null;
+        _pendingAction = -1;
     }
 
     private void ResetSelection()
     {
         SelectedIndex = -1;
         ActiveAction = -1;
-        PendingConfirmationId = null;
+        ClearPending();
         _activateWhenReady = false;
     }
 
@@ -398,7 +436,7 @@ public sealed class SearchPanelController : IDisposable
             ActiveAction = -1;
 
         if (PendingConfirmationId is not null && Results.All(r => r.Id != PendingConfirmationId))
-            PendingConfirmationId = null;
+            ClearPending();
 
         Changed?.Invoke(this, EventArgs.Empty);
 

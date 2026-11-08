@@ -63,7 +63,7 @@ public sealed class SearchShell(Action<string> copyText) : ISearchShell
         Start(new ProcessStartInfo(executable, arguments ?? "") { UseShellExecute = true });
 
     public void RunInTerminal(string commandLine) =>
-        Start(new ProcessStartInfo("cmd.exe", "/k " + commandLine) { UseShellExecute = true });
+        Start(new ProcessStartInfo("cmd.exe", "/k " + SearchCommandSafety.ToSingleLine(commandLine)) { UseShellExecute = true });
 
     public void OpenContainingFolder(string path) =>
         Start(new ProcessStartInfo("explorer.exe", $"/select,\"{path}\"") { UseShellExecute = true });

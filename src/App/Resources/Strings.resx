@@ -621,6 +621,9 @@
   <data name="SearchSearching" xml:space="preserve">
     <value>Searching…</value>
   </data>
+  <data name="SearchConfirmRun" xml:space="preserve">
+    <value>Run: {0}. Press Enter again to confirm</value>
+  </data>
   <data name="SearchConfirmHint" xml:space="preserve">
     <value>Press Enter again to confirm</value>
   </data>

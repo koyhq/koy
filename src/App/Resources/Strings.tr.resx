@@ -621,6 +621,9 @@
   <data name="SearchSearching" xml:space="preserve">
     <value>Aranıyor…</value>
   </data>
+  <data name="SearchConfirmRun" xml:space="preserve">
+    <value>Çalıştırılacak: {0}. Onaylamak için tekrar Enter'a basın</value>
+  </data>
   <data name="SearchConfirmHint" xml:space="preserve">
     <value>Onaylamak için tekrar Enter'a basın</value>
   </data>

@@ -40,14 +40,21 @@ public static class SearchText
 /// <summary>Kullanıcının yazdığı metin ve karşılaştırma için hazırlanmış hâli.</summary>
 public sealed class SearchQuery
 {
-    public SearchQuery(string? raw)
+    public SearchQuery(string? raw, bool fromClipboard = false)
     {
+        FromClipboard = fromClipboard;
         Raw = raw?.Trim() ?? "";
         Folded = SearchText.Fold(Raw);
         Words = Folded.Split(' ', StringSplitOptions.RemoveEmptyEntries);
     }
 
     public string Raw { get; }
+
+    /// <summary>Metin panodan geldi (Alt+Shift+F2); kullanıcı yazmadı.</summary>
+    public bool FromClipboard { get; }
+
+    /// <summary>Komut ya da program olarak çalıştırmak onay ister: pano metni, satır sonu ya da denetim karakteri var.</summary>
+    public bool NeedsCommandConfirmation => FromClipboard || SearchCommandSafety.HasControlCharacters(Raw);
 
     public string Folded { get; }
 

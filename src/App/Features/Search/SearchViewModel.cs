@@ -56,7 +56,9 @@ public sealed partial class SearchRowViewModel(SearchResult result, string? head
     [NotifyPropertyChangedFor(nameof(Subtitle))]
     private bool _isConfirming;
 
-    public string? Subtitle => IsConfirming ? Strings.Get("SearchConfirmHint") : Result.Subtitle;
+    public string? Subtitle => IsConfirming
+        ? Result.ConfirmationDetail is { } detail ? string.Format(Strings.Get("SearchConfirmRun"), detail) : Strings.Get("SearchConfirmHint")
+        : Result.Subtitle;
 
     public bool HasSubtitle => !string.IsNullOrEmpty(Subtitle);
 }
@@ -128,7 +130,7 @@ public sealed partial class SearchViewModel : ObservableObject, IDisposable
     {
         _panel.Open();
         if (initialQuery is not null)
-            _panel.ReplaceQuery(initialQuery);
+            _panel.ReplaceQuery(initialQuery, fromClipboard: true);
         SyncText();
         Refresh();
     }
