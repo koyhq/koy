@@ -7,6 +7,37 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.3](https://github.com/koyhq/koy/compare/v0.2.2...v0.2.3) (2026-11-08)
+
+Highlights:
+- **Search in the notch:** press Win+Shift+Q to search apps, open windows, files, settings, bookmarks and the web, do quick math, or close a running app, all from the notch. Alt+Shift+F2 opens it with the clipboard text.
+- **English everywhere:** Koy now speaks English as well as Turkish and picks the Windows language on first run. "What's New" follows the app language, and the website and repository open in English.
+- **Dock icon alignment:** on the full-width dock, app icons can sit on the left, in the center or on the right.
+- **Safer search:** text from the clipboard or with several lines asks before it runs as a command, closing an app is the default and force-quitting asks first, and search history is off unless you turn it on.
+
+
+### Added
+
+* **notch:** add search panel inside the notch ([#40](https://github.com/koyhq/koy/issues/40)) ([14c3939](https://github.com/koyhq/koy/commit/14c39392fa76530b177ee2d936c9d5efa9d450ac))
+* **i18n:** complete English support and follow the system language on first run ([#46](https://github.com/koyhq/koy/issues/46)) ([58e794a](https://github.com/koyhq/koy/commit/58e794a625c2e8b087b696dba274813879f32cb2)), closes [#37](https://github.com/koyhq/koy/issues/37)
+* **dock:** add icon alignment option for the full-width dock ([#41](https://github.com/koyhq/koy/issues/41)) ([f4942df](https://github.com/koyhq/koy/commit/f4942df28ec6d3c7a53139edcaab7c943fe4a8c8))
+* **site:** add English and a language switch, default to English ([#45](https://github.com/koyhq/koy/issues/45)) ([276acfe](https://github.com/koyhq/koy/commit/276acfe7e904115c96a528679d30c33610a0f21e)), closes [#35](https://github.com/koyhq/koy/issues/35)
+
+
+### Fixed
+
+* **search:** ask before running clipboard or multi-line text as a command ([bc47c75](https://github.com/koyhq/koy/commit/bc47c751b1f56631fbf52bbb46d888744d139d9f))
+* **search:** make graceful close the default process action and verify process identity ([233cbb3](https://github.com/koyhq/koy/commit/233cbb3f68278afadf80d9c0a14369124845bbe2))
+* **search:** turn history off by default and never store multi-line or clipboard text ([c494301](https://github.com/koyhq/koy/commit/c4943018693dbeff3623d54c1ba92f172995f953))
+* **search:** guard file search state with a lock and dispose its cancellation sources ([d71a820](https://github.com/koyhq/koy/commit/d71a820d409e4ffdf30fc408ef7e3a7eec176ba9))
+* **i18n:** refresh computed settings text when the language changes ([5759104](https://github.com/koyhq/koy/commit/5759104d7f4b9c4ff17a8930d4b5aac53a9d1a35))
+
+
+### Performance
+
+* **search:** cache PATH lookups per panel session and skip network directories ([4d201e6](https://github.com/koyhq/koy/commit/4d201e6af8ec4b3a9d053d27f57d237a5e794337))
+* **search:** reuse parsed bookmarks until the file changes ([728b2e3](https://github.com/koyhq/koy/commit/728b2e300f2cf8574a020c8efbb32c57d8d7384d))
+
 ## [0.2.2](https://github.com/koyhq/koy/compare/v0.2.1...v0.2.2) (2026-11-08)
 
 Highlights:
