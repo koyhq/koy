@@ -5,6 +5,13 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.2](https://github.com/koyhq/koy/compare/v0.2.1...v0.2.2) (2026-11-08)
+
+
+### Düzeltmeler
+
+* **updater:** Neler Geldi notlarında bağlantı, commit ve kapsam işaretlerini temizle, satırlar kesilmesin ([fbace07](https://github.com/koyhq/koy/commit/fbace07de580c9d629395ad11990bf17a9fc5c7a))
+
 ## [0.2.1](https://github.com/koyhq/koy/compare/v0.2.0...v0.2.1) (2026-11-08)
 
 Öne çıkanlar:
