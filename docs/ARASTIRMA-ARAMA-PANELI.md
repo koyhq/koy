@@ -93,7 +93,8 @@ Ek gereksinimler:
 ### Kısayol
 - `Alt+Space` Koy'un kurallarına göre sisteme ayrılmış, `Ctrl+Alt+Space` oynat/duraklat [Kod].
 - `Win+Alt+Space` PowerToys Command Palette'in varsayılanı, çakışır [Belge].
-- `Alt+F2` Koy'un ayrılmış listesinde yok; başka uygulamalarla çakışması sınanmadı.
+- `Win+Shift+Space` Windows'ta klavye dili değiştirmeye ayrılmış, kaydedilemedi (hata 1409) [Ölçüm].
+- `Win+Shift+Q` Koy'un ayrılmış listesinde yok ve bu makinede kaydedilebildi [Ölçüm]; başka uygulamalarla çakışması sınanmadı.
 
 ### Türkçe
 - `I/ı/İ/i` ayrı harfler; standart büyük-küçük çevirileri arama için yetmez. Core'da kendi harf eşleme tablosu ve testi gerekir.
