@@ -21,7 +21,7 @@ public static class ShortcutBindings
 
     /// <summary>
     /// Varsayılanlar Ctrl+Alt+harf: Windows kendi kısayollarında Win+harf kullanır (Win+D, Win+K, Win+Alt+R Game Bar...),
-    /// Ctrl+Alt+harf ise sistemde ayrılmış değildir.
+    /// Ctrl+Alt+harf ise sistemde ayrılmış değildir. Arama paneli sık açıldığı için tek elle basılan Win+Shift+Q'dur.
     /// </summary>
     public static string DefaultText(ShortcutAction action) => action switch
     {
@@ -30,7 +30,7 @@ public static class ShortcutBindings
         ShortcutAction.ToggleDock => "Ctrl+Alt+D",
         ShortcutAction.OpenMenu => "Ctrl+Alt+K",
         ShortcutAction.PlayPause => "Ctrl+Alt+Space",
-        ShortcutAction.OpenSearch => "Alt+F2",
+        ShortcutAction.OpenSearch => "Win+Shift+Q",
         ShortcutAction.OpenSearchClipboard => "Alt+Shift+F2",
         _ => ""
     };

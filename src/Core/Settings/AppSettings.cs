@@ -128,7 +128,7 @@ public sealed record AppSettings
     public string ShortcutToggleDock { get; set; } = "Ctrl+Alt+D";
     public string ShortcutOpenMenu { get; set; } = "Ctrl+Alt+K";
     public string ShortcutPlayPause { get; set; } = "Ctrl+Alt+Space";
-    public string ShortcutOpenSearch { get; set; } = "Alt+F2";
+    public string ShortcutOpenSearch { get; set; } = "Win+Shift+Q";
     public string ShortcutOpenSearchClipboard { get; set; } = "Alt+Shift+F2";
 
     /// <summary>Arama paneli yeniden açılınca son sorgu geri gelsin.</summary>

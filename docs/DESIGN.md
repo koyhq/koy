@@ -95,7 +95,7 @@ Koy penceresi, sihirbaz ve sağ alt menü renk, ölçü ve hareketi koda gömmez
 - **Kısa bildirimler (Peek):** "Pomodoro bitti", "Şarj tamamlandı", "Kulaklık bağlandı" gibi.
 
 ## Arama paneli
-- `Alt+F2` ile açık çentiğin içinde açılır, tuval büyümez (AGENTS #13). Durum satırı, sayfa ve sekmeler o sırada gizlidir.
+- `Win+Shift+Q` ile açık çentiğin içinde açılır, tuval büyümez (AGENTS #13). Durum satırı, sayfa ve sekmeler o sırada gizlidir.
 - Üstte arama çubuğu (yardım, yazı alanı, son aramalar, ayarlar, açık tut), altında kategori başlıklı liste. En çok 15 satır; sığmayanlara kaydırılır.
 - Seçili satırda eylem düğmeleri görünür. Kapat, yeniden başlat ve oturumu kapat ikinci Enter ile çalışır.
 

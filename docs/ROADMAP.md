@@ -474,7 +474,7 @@ Proje sahibi istedi. Kod yazılmadı.
 8. **Doğrulama:** Core testleri (sürüm karşılaştırma, "ilk açılış mı" kararı, sürüm notu bölümü ayıklama), UiSnapshots sahneleri (düğme, onay, ilerleme, güncellendi, neler geldi; açık ve koyu), elle sınama: 0.2.0 kuruluyken yeni sürüme güncelleme.
 
 ## Çentikte arama paneli (2026-11-08)
-`Alt+F2` çentiği açar, içinde arama çıkar; durum satırı ve sekmeler o sırada gizlidir. `Alt+Shift+F2` panodaki metinle açar. Çentik kapalıysa arama da yoktur. Araştırma ve kararlar: `docs/ARASTIRMA-ARAMA-PANELI.md`.
+`Win+Shift+Q` çentiği açar, içinde arama çıkar; durum satırı ve sekmeler o sırada gizlidir. `Alt+Shift+F2` panodaki metinle açar. Çentik kapalıysa arama da yoktur. Araştırma ve kararlar: `docs/ARASTIRMA-ARAMA-PANELI.md`.
 - [x] **Core (`Core/Search/`, testli):** Türkçe harf eşleme, puanlama, kategori önemi ve 15 satır sınırı, geçmiş (50 kayıt, 20'si görünür, başı boşluklu arama yazılmaz), öneri ve otomatik tamamlama, satır eylemleri, onay, sonuç gelmeden basılan Enter.
 - [x] **Kaynaklar:** uygulamalar, pencereler, hesap (işlevler, hex/bin/oct), oturum komutları, komut satırı (PATH), konumlar ve adresler, bilinen klasörler, son belgeler, dosyalar (Windows dizini, türe göre gruplu), web kısayolları (`gg:`, `!gg`, varsayılan arama), yer imleri (Chrome ailesi), süreç sonlandırma (`kill ad`), pano, tarih ve saat, `?` yardımı. Her biri Koy › Çentik'ten kapatılabilir.
 - [x] **Klavye:** oklar, Ctrl+J/K, Ctrl+oklar ve PageUp/Down (kategori), Home/End, Tab (eylemler), Üst+Enter (ilk eylem), sağ ok (öneriyi al), boş kutuda aşağı ok (son aramalar), boş kutuda Enter ve Esc (kapat).
