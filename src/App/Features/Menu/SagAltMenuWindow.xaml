@@ -54,6 +54,43 @@
         <Style x:Key="DangerActionButtonStyle" TargetType="Button" BasedOn="{StaticResource MenuActionButtonStyle}">
             <Setter Property="Foreground" Value="{DynamicResource KoyDangerText}" />
         </Style>
+
+        <Style x:Key="UpdateActionButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Background" Value="{DynamicResource KoyAccent}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource KoyOnAccent}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="btnBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="{DynamicResource KoyRadiusControl}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Left" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource KoyAccentHover}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="btnBorder" Property="Opacity" Value="0.85" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasAvailableUpdate}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
     <!-- Ana Açılır Menü Kabuğu: 320 px, 16 px köşe yuvarlaklığı, koyu yarı saydam yüzey -->
@@ -199,6 +236,13 @@
                     <StackPanel Orientation="Horizontal">
                         <res:KoyIcon Data="{DynamicResource IconPause}" Size="16" Margin="0,0,12,0" />
                         <TextBlock Text="{Binding PauseText}" />
+                    </StackPanel>
+                </Button>
+
+                <Button Style="{StaticResource UpdateActionButtonStyle}" Command="{Binding OpenUpdateCommand}" Margin="0,4,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <res:KoyIcon Data="{StaticResource IconDownload}" Size="16" Margin="0,0,12,0" Foreground="{DynamicResource KoyOnAccent}" />
+                        <TextBlock Text="{Binding AvailableVersionText}" FontWeight="SemiBold" Foreground="{DynamicResource KoyOnAccent}" />
                     </StackPanel>
                 </Button>
 

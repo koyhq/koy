@@ -1,6 +1,7 @@
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Koy.App.Features.Settings;
 using Koy.Core.Settings;
 using Koy.Platform.Display;
 using Koy.Platform.Shell;
@@ -42,9 +43,19 @@ public sealed partial class SagAltMenuViewModel : ObservableObject
     public event Action<bool>? DockToggled;
     public event Action<bool>? PauseToggled;
 
+    [ObservableProperty]
+    private bool _hasAvailableUpdate;
+
+    [ObservableProperty]
+    private string _availableVersionText = "";
+
     public SagAltMenuViewModel(SettingsStore? store = null)
     {
         _store = store ?? new SettingsStore(SettingsStore.DefaultPath);
+        UpdateStatus.Changed += () =>
+        {
+            Application.Current?.Dispatcher?.BeginInvoke(Refresh);
+        };
         Refresh();
     }
 
@@ -72,6 +83,19 @@ public sealed partial class SagAltMenuViewModel : ObservableObject
 
         MonitorSummary = string.Format(System.Globalization.CultureInfo.CurrentCulture, Koy.App.Resources.Strings.MonitorSummary, MonitorCount);
         PauseText = IsPaused ? Koy.App.Resources.Loc.Instance["ResumePauseAction"] : Koy.App.Resources.Loc.Instance["PauseOneHourAction"];
+
+        HasAvailableUpdate = UpdateStatus.HasAvailableUpdate;
+        AvailableVersionText = UpdateStatus.AvailableVersion is { } v
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Koy.App.Resources.Strings.Get("UpdateAvailableBadge"), v)
+            : string.Empty;
+    }
+
+    [RelayCommand]
+    private void OpenUpdate()
+    {
+        RequestClose?.Invoke();
+        KoyWindow.ShowInstance();
+        KoyWindow.Instance.ViewModel.OpenUpdateOverlay();
     }
 
     [RelayCommand]

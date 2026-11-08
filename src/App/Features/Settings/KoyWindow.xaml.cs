@@ -59,6 +59,24 @@ public partial class KoyWindow : Window
             return;
         }
 
+        if (e.PropertyName == nameof(KoyWindowViewModel.IsUpdateOverlayOpen) && ViewModel.IsUpdateOverlayOpen && IsVisible)
+        {
+            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
+            {
+                Motion.PageEnter(UpdateCard);
+            });
+            return;
+        }
+
+        if (e.PropertyName == nameof(KoyWindowViewModel.IsWhatsNewOverlayOpen) && ViewModel.IsWhatsNewOverlayOpen && IsVisible)
+        {
+            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
+            {
+                Motion.PageEnter(WhatsNewCard);
+            });
+            return;
+        }
+
         if (e.PropertyName != nameof(KoyWindowViewModel.SelectedPageIndex) || !IsVisible)
             return;
 

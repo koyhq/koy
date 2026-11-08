@@ -1602,4 +1602,34 @@
   <data name="DockFolderDissolve" xml:space="preserve">
     <value>Dissolve folder</value>
   </data>
+  <data name="UpdateAvailableBadge" xml:space="preserve">
+    <value>New version: {0}</value>
+  </data>
+  <data name="UpdateModalTitle" xml:space="preserve">
+    <value>New Version Available</value>
+  </data>
+  <data name="UpdateModalIntro" xml:space="preserve">
+    <value>Koy {0} is available. Would you like to download and update now?</value>
+  </data>
+  <data name="UpdateModalHighlights" xml:space="preserve">
+    <value>Highlights:</value>
+  </data>
+  <data name="UpdateNow" xml:space="preserve">
+    <value>Update Now</value>
+  </data>
+  <data name="UpdateLater" xml:space="preserve">
+    <value>Later</value>
+  </data>
+  <data name="UpdateDownloading" xml:space="preserve">
+    <value>Downloading update… {0}%</value>
+  </data>
+  <data name="WhatsNewTitle" xml:space="preserve">
+    <value>Updated to Koy {0}</value>
+  </data>
+  <data name="WhatsNewIntro" xml:space="preserve">
+    <value>Here's what's new in this release:</value>
+  </data>
+  <data name="WhatsNewDone" xml:space="preserve">
+    <value>Got it</value>
+  </data>
 </root>

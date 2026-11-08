@@ -1602,4 +1602,34 @@
   <data name="DockFolderDissolve" xml:space="preserve">
     <value>Klasörü dağıt</value>
   </data>
+  <data name="UpdateAvailableBadge" xml:space="preserve">
+    <value>Yeni sürüm: {0}</value>
+  </data>
+  <data name="UpdateModalTitle" xml:space="preserve">
+    <value>Yeni Sürüm Mevcut</value>
+  </data>
+  <data name="UpdateModalIntro" xml:space="preserve">
+    <value>Koy {0} yayınlandı. Şimdi indirip güncellemek istiyor musunuz?</value>
+  </data>
+  <data name="UpdateModalHighlights" xml:space="preserve">
+    <value>Öne çıkanlar:</value>
+  </data>
+  <data name="UpdateNow" xml:space="preserve">
+    <value>Şimdi Güncelle</value>
+  </data>
+  <data name="UpdateLater" xml:space="preserve">
+    <value>Daha Sonra</value>
+  </data>
+  <data name="UpdateDownloading" xml:space="preserve">
+    <value>Güncelleme indiriliyor… %{0}</value>
+  </data>
+  <data name="WhatsNewTitle" xml:space="preserve">
+    <value>Koy {0} Sürümüne Güncellendi</value>
+  </data>
+  <data name="WhatsNewIntro" xml:space="preserve">
+    <value>İşte bu sürümdeki yenilikler:</value>
+  </data>
+  <data name="WhatsNewDone" xml:space="preserve">
+    <value>Anladım</value>
+  </data>
 </root>

@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -8,6 +9,7 @@ using Koy.Core.Appearance;
 using Koy.Core.Dock;
 using Koy.Core.Settings;
 using Koy.Core.Uninstall;
+using Koy.Core.Updates;
 using Koy.Core.Visibility;
 using Koy.Platform.Shell;
 
@@ -268,6 +270,42 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     public int[] PomodoroShortBreakOptions { get; } = [3, 5, 10, 15];
     public int[] PomodoroLongBreakOptions { get; } = [10, 15, 20, 30];
 
+    // --- GÜNCELLEME VE NELER GELDİ ---
+    [ObservableProperty]
+    private bool _hasAvailableUpdate;
+
+    [ObservableProperty]
+    private string _availableVersionText = "";
+
+    [ObservableProperty]
+    private bool _isUpdateOverlayOpen;
+
+    [ObservableProperty]
+    private bool _isDownloadingUpdate;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DownloadProgressText))]
+    private int _downloadProgress;
+
+    public string DownloadProgressText => string.Format(Strings.Get("UpdateDownloading"), DownloadProgress);
+
+    [ObservableProperty]
+    private string _updateModalTitleText = "";
+
+    [ObservableProperty]
+    private string _updateModalIntroText = "";
+
+    public ObservableCollection<string> UpdateHighlights { get; } = [];
+
+    [ObservableProperty]
+    private bool _isWhatsNewOverlayOpen;
+
+    [ObservableProperty]
+    private string _whatsNewTitleText = "";
+
+    public ObservableCollection<string> WhatsNewHighlights { get; } = [];
+    public ObservableCollection<ReleaseSection> WhatsNewSections { get; } = [];
+
     // --- HAKKINDA ---
     /// <summary>Çalışan derlemenin sürümü (AssemblyInformationalVersion; "+commit" eki atılır).</summary>
     public string AppVersion { get; } = AppInfo.Version;
@@ -282,6 +320,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             {
                 UpdateCheckResult.UpToDate => Strings.Get("UpdateStateUpToDate"),
                 UpdateCheckResult.UpdateReady => Strings.Get("UpdateStateReady"),
+                UpdateCheckResult.UpdateAvailable => string.Format(Strings.Get("UpdateAvailableBadge"), UpdateStatus.AvailableVersion ?? ""),
                 UpdateCheckResult.Failed => Strings.Get("UpdateStateFailed"),
                 _ => Strings.Get("UpdateStateUnknown")
             };
@@ -299,7 +338,19 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         Shortcuts = new ShortcutsViewModel(_store);
         Displays = new DisplaysViewModel(_store);
         Weather = new WeatherLocationViewModel(_store);
+        UpdateStatus.Changed += OnUpdateStatusChanged;
+        OnUpdateStatusChanged();
         LoadFromSettings();
+    }
+
+    private void OnUpdateStatusChanged()
+    {
+        HasAvailableUpdate = UpdateStatus.HasAvailableUpdate;
+        AvailableVersionText = UpdateStatus.AvailableVersion is { } v
+            ? string.Format(Strings.Get("UpdateAvailableBadge"), v)
+            : string.Empty;
+        OnPropertyChanged(nameof(LastCheckText));
+        OnPropertyChanged(nameof(AboutStatusText));
     }
 
     public void LoadFromSettings()
@@ -720,6 +771,95 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             IsCheckingUpdates = false;
             OnPropertyChanged(nameof(LastCheckText));
             OnPropertyChanged(nameof(AboutStatusText));
+        }
+    }
+
+    [RelayCommand]
+    public void OpenUpdateOverlay()
+    {
+        var version = UpdateStatus.AvailableVersion ?? AppVersion;
+        UpdateModalTitleText = Strings.Get("UpdateModalTitle");
+        UpdateModalIntroText = string.Format(Strings.Get("UpdateModalIntro"), version);
+
+        var embeddedChangelog = ChangelogParser.ReadEmbeddedChangelog();
+        var release = ChangelogParser.ExtractVersion(embeddedChangelog, version)
+                      ?? ChangelogParser.ParseLatest(embeddedChangelog);
+
+        UpdateHighlights.Clear();
+        if (release is not null && release.Highlights.Count > 0)
+        {
+            foreach (var h in release.Highlights)
+                UpdateHighlights.Add(h);
+        }
+
+        IsDownloadingUpdate = false;
+        DownloadProgress = 0;
+        IsUpdateOverlayOpen = true;
+    }
+
+    [RelayCommand]
+    public void CloseUpdateOverlay()
+    {
+        if (IsDownloadingUpdate)
+            return;
+        IsUpdateOverlayOpen = false;
+    }
+
+    [RelayCommand]
+    public async Task StartUpdateAsync()
+    {
+        if (UpdateStatus.AvailableUpdate is not { } update)
+            return;
+
+        IsDownloadingUpdate = true;
+        DownloadProgress = 0;
+
+        try
+        {
+            var mgr = new Velopack.UpdateManager(new Velopack.Sources.GithubSource("https://github.com/koyhq/koy", null, UpdateChannel == "Önizleme"));
+            await mgr.DownloadUpdatesAsync(update, progress =>
+            {
+                DownloadProgress = progress;
+            });
+
+            App.SafeRestoreTaskbar();
+            mgr.ApplyUpdatesAndRestart(update);
+        }
+        catch
+        {
+            IsDownloadingUpdate = false;
+        }
+    }
+
+    [RelayCommand]
+    public void OpenWhatsNewOverlay()
+    {
+        WhatsNewTitleText = string.Format(Strings.Get("WhatsNewTitle"), AppVersion);
+        var embeddedChangelog = ChangelogParser.ReadEmbeddedChangelog();
+        var release = ChangelogParser.ExtractVersion(embeddedChangelog, AppVersion)
+                      ?? ChangelogParser.ParseLatest(embeddedChangelog);
+
+        WhatsNewHighlights.Clear();
+        WhatsNewSections.Clear();
+        if (release is not null)
+        {
+            foreach (var h in release.Highlights)
+                WhatsNewHighlights.Add(h);
+            foreach (var s in release.Sections)
+                WhatsNewSections.Add(s);
+        }
+
+        IsWhatsNewOverlayOpen = true;
+    }
+
+    [RelayCommand]
+    public void CloseWhatsNewOverlay()
+    {
+        IsWhatsNewOverlayOpen = false;
+        var current = _store.Load();
+        if (current.LastSeenVersion != AppVersion)
+        {
+            _store.Save(current with { LastSeenVersion = AppVersion });
         }
     }
 

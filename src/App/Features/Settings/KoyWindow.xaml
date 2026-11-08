@@ -104,15 +104,36 @@
                                          Content="{Binding [NavAbout], Source={x:Static res:Loc.Instance}}" />
                         </StackPanel>
 
-                        <!-- Alt eylem: Koy'dan çık (Koy'u gerçekten kapatan tek düğme bu ve sağ alt menü) -->
-                        <Button Grid.Row="1" Style="{StaticResource DangerButtonStyle}" Height="34"
-                                Command="{Binding ExitAppCommand}"
-                                AutomationProperties.Name="{Binding [ExitKoy], Source={x:Static res:Loc.Instance}}">
-                            <StackPanel Orientation="Horizontal">
-                                <res:KoyIcon Data="{StaticResource IconPower}" Size="16" StrokeWidth="2" />
-                                <TextBlock Text="{Binding [ExitKoy], Source={x:Static res:Loc.Instance}}" Margin="10,0,0,0" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
+                        <!-- Alt eylemler: Güncelleme bildirimi ve Koy'dan çık -->
+                        <StackPanel Grid.Row="1" VerticalAlignment="Bottom">
+                            <Button Height="34" Margin="0,0,0,8"
+                                    Command="{Binding OpenUpdateOverlayCommand}"
+                                    AutomationProperties.Name="{Binding AvailableVersionText}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasAvailableUpdate}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <res:KoyIcon Data="{StaticResource IconDownload}" Size="16" StrokeWidth="2" Foreground="{DynamicResource KoyOnAccent}" />
+                                    <TextBlock Text="{Binding AvailableVersionText}" Margin="10,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource KoyOnAccent}" TextTrimming="CharacterEllipsis" MaxWidth="110" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource DangerButtonStyle}" Height="34"
+                                    Command="{Binding ExitAppCommand}"
+                                    AutomationProperties.Name="{Binding [ExitKoy], Source={x:Static res:Loc.Instance}}">
+                                <StackPanel Orientation="Horizontal">
+                                    <res:KoyIcon Data="{StaticResource IconPower}" Size="16" StrokeWidth="2" />
+                                    <TextBlock Text="{Binding [ExitKoy], Source={x:Static res:Loc.Instance}}" Margin="10,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
                     </Grid>
                 </Border>
 
@@ -222,6 +243,196 @@
                                     Style="{StaticResource DangerButtonStyle}" />
                         </StackPanel>
                     </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Güncelleme onayı: pencerenin üstünde, Koy tarzında kart -->
+            <Grid x:Name="UpdateOverlay" Grid.RowSpan="2" Focusable="False">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsUpdateOverlayOpen}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Border Background="{DynamicResource KoyScrim}" CornerRadius="{DynamicResource KoyRadiusWindow}" />
+                <Border x:Name="UpdateCard" Width="480" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Background="{DynamicResource KoyBgRow}" BorderBrush="{DynamicResource KoyBorderStrong}" BorderThickness="1"
+                        CornerRadius="{DynamicResource KoyRadiusRow}" Padding="24"
+                        AutomationProperties.Name="{Binding UpdateModalTitleText}">
+                    <StackPanel>
+                        <!-- Başlık -->
+                        <StackPanel Orientation="Horizontal">
+                            <res:KoyIcon Data="{StaticResource IconDownload}" Size="20" StrokeWidth="2" Foreground="{DynamicResource KoyAccent}" />
+                            <TextBlock Text="{Binding UpdateModalTitleText}" FontSize="{DynamicResource KoyFontPageTitle}" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource KoyTextPrimary}" Margin="10,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <!-- Açıklama -->
+                        <TextBlock Text="{Binding UpdateModalIntroText}" Style="{StaticResource SettingDescStyle}" Margin="0,14,0,10" TextWrapping="Wrap" />
+
+                        <!-- Öne çıkanlar -->
+                        <Border Background="{DynamicResource KoyBgWindow}" BorderBrush="{DynamicResource KoyBorderHairline}" BorderThickness="1"
+                                CornerRadius="{DynamicResource KoyRadiusRow}" Padding="14,12" Margin="0,0,0,16">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding UpdateHighlights.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <TextBlock Text="{Binding [UpdateModalHighlights], Source={x:Static res:Loc.Instance}}"
+                                           Style="{StaticResource SettingTitleStyle}" Margin="0,0,0,8" />
+                                <ItemsControl ItemsSource="{Binding UpdateHighlights}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="0,3">
+                                                <res:KoyIcon Data="{StaticResource IconCheck}" Size="14" StrokeWidth="2.5" Foreground="{DynamicResource KoyStatusOk}" VerticalAlignment="Top" Margin="0,2,10,0" />
+                                                <TextBlock Text="{Binding}" Style="{StaticResource SettingTitleStyle}" FontWeight="Normal" TextWrapping="Wrap" MaxWidth="380" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- İndirme İlerlemesi -->
+                        <StackPanel Margin="0,0,0,16">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsDownloadingUpdate}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock Text="{Binding DownloadProgressText}" Style="{StaticResource SettingTitleStyle}" Margin="0,0,0,8" />
+                            <ProgressBar Value="{Binding DownloadProgress}" Minimum="0" Maximum="100" Height="6"
+                                         Foreground="{DynamicResource KoyAccent}" Background="{DynamicResource KoyBgControl}" BorderThickness="0" />
+                        </StackPanel>
+
+                        <!-- Düğmeler -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                            <Button Content="{Binding [UpdateLater], Source={x:Static res:Loc.Instance}}"
+                                    Command="{Binding CloseUpdateOverlayCommand}"
+                                    IsEnabled="{Binding IsDownloadingUpdate, Converter={x:Static local:InverseBooleanConverter.Instance}}"
+                                    Style="{StaticResource SettingButtonStyle}" IsCancel="True" Margin="0,0,8,0" />
+                            <Button Content="{Binding [UpdateNow], Source={x:Static res:Loc.Instance}}"
+                                    Command="{Binding StartUpdateCommand}"
+                                    IsEnabled="{Binding IsDownloadingUpdate, Converter={x:Static local:InverseBooleanConverter.Instance}}"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Neler Geldi ("What's New") katmanı -->
+            <Grid x:Name="WhatsNewOverlay" Grid.RowSpan="2" Focusable="False">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsWhatsNewOverlayOpen}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Border Background="{DynamicResource KoyScrim}" CornerRadius="{DynamicResource KoyRadiusWindow}" />
+                <Border x:Name="WhatsNewCard" Width="500" MaxHeight="520" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Background="{DynamicResource KoyBgRow}" BorderBrush="{DynamicResource KoyBorderStrong}" BorderThickness="1"
+                        CornerRadius="{DynamicResource KoyRadiusRow}" Padding="24"
+                        AutomationProperties.Name="{Binding WhatsNewTitleText}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Başlık -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal">
+                            <res:KoyIcon Data="{StaticResource IconInfo}" Size="20" StrokeWidth="2" Foreground="{DynamicResource KoyAccent}" />
+                            <TextBlock Text="{Binding WhatsNewTitleText}" FontSize="{DynamicResource KoyFontPageTitle}" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource KoyTextPrimary}" Margin="10,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <!-- Giriş -->
+                        <TextBlock Grid.Row="1" Text="{Binding [WhatsNewIntro], Source={x:Static res:Loc.Instance}}"
+                                   Style="{StaticResource SettingDescStyle}" Margin="0,12,0,12" />
+
+                        <!-- Notlar listesi (kaydırılabilir) -->
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,0,0,16">
+                            <StackPanel>
+                                <!-- Öne çıkanlar -->
+                                <Border Background="{DynamicResource KoyBgWindow}" BorderBrush="{DynamicResource KoyBorderHairline}" BorderThickness="1"
+                                        CornerRadius="{DynamicResource KoyRadiusRow}" Padding="14,12" Margin="0,0,0,12">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding WhatsNewHighlights.Count}" Value="0">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding [UpdateModalHighlights], Source={x:Static res:Loc.Instance}}"
+                                                   Style="{StaticResource SettingTitleStyle}" Margin="0,0,0,8" />
+                                        <ItemsControl ItemsSource="{Binding WhatsNewHighlights}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,3">
+                                                        <res:KoyIcon Data="{StaticResource IconCheck}" Size="14" StrokeWidth="2.5" Foreground="{DynamicResource KoyStatusOk}" VerticalAlignment="Top" Margin="0,2,10,0" />
+                                                        <TextBlock Text="{Binding}" Style="{StaticResource SettingTitleStyle}" FontWeight="Normal" TextWrapping="Wrap" MaxWidth="400" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Alt kategoriler -->
+                                <ItemsControl ItemsSource="{Binding WhatsNewSections}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource KoyBgWindow}" BorderBrush="{DynamicResource KoyBorderHairline}" BorderThickness="1"
+                                                    CornerRadius="{DynamicResource KoyRadiusRow}" Padding="14,12" Margin="0,0,0,10">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Title}" Style="{StaticResource SettingTitleStyle}" Margin="0,0,0,6" />
+                                                    <ItemsControl ItemsSource="{Binding Items}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock Text="{Binding StringFormat='• {0}'}" Style="{StaticResource SettingDescStyle}" TextWrapping="Wrap" Margin="0,2" />
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <!-- Bitti butonu -->
+                        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="{Binding [WhatsNewDone], Source={x:Static res:Loc.Instance}}"
+                                    Command="{Binding CloseWhatsNewOverlayCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}" MinWidth="90" />
+                        </StackPanel>
+                    </Grid>
                 </Border>
             </Grid>
         </Grid>

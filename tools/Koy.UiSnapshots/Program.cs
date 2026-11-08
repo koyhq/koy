@@ -97,8 +97,36 @@ public static class Program
                 RenderElement((FrameworkElement)wizard.Content, 880, 600, Path.Combine(outDir, $"{prefix}-{theme}-sihirbaz-{step}.png"));
             }
 
+            // Güncelleme ve Neler Geldi görünümleri
+            vm.HasAvailableUpdate = true;
+            vm.AvailableVersionText = string.Format(Koy.App.Resources.Strings.Get("UpdateAvailableBadge"), "0.2.0");
+            RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-guncelleme-dugme.png"));
+
+            vm.OpenUpdateOverlay();
+            vm.UpdateHighlights.Clear();
+            vm.UpdateHighlights.Add("Windows 11 24H2 için yeni sistem tepsisi kancası");
+            vm.UpdateHighlights.Add("Hızlı başlat için klavye gezintisi ve odak halkası");
+            RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-guncelleme-onay.png"));
+
+            vm.IsDownloadingUpdate = true;
+            vm.DownloadProgress = 64;
+            RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-guncelleme-indiriliyor.png"));
+            vm.CloseUpdateOverlay();
+
+            vm.OpenWhatsNewOverlay();
+            if (vm.WhatsNewHighlights.Count == 0)
+            {
+                vm.WhatsNewHighlights.Add("Yeni çentik tasarımı ve yay fiziği");
+                vm.WhatsNewHighlights.Add("Pano geçmişi ve sabitlenenler sekmesi");
+            }
+            RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-neler-geldi.png"));
+            vm.CloseWhatsNewOverlay();
+
             var menu = new SagAltMenuWindow(new SagAltMenuViewModel(store));
             RenderElement((FrameworkElement)menu.Content, 320, 0, Path.Combine(outDir, $"{prefix}-{theme}-sagalt-menu.png"));
+
+            var menuWithUpdate = new SagAltMenuWindow(new SagAltMenuViewModel(store) { HasAvailableUpdate = true, AvailableVersionText = "Yeni sürüm: 0.2.0" });
+            RenderElement((FrameworkElement)menuWithUpdate.Content, 320, 0, Path.Combine(outDir, $"{prefix}-{theme}-sagalt-menu-guncelleme.png"));
         }
         finally
         {

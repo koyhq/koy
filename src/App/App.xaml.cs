@@ -15,6 +15,7 @@ using Koy.Core.Diagnostics;
 using Koy.Core.Settings;
 using Koy.Core.Shortcuts;
 using Koy.Core.Tray;
+using Koy.Core.Updates;
 using Koy.Platform.Media;
 using Koy.Platform.Shell;
 using Velopack;
@@ -133,6 +134,11 @@ public partial class App : Application
         if (isFirstRun)
         {
             KoyWindow.ShowInstance();
+        }
+        else if (UpdateFlowPolicy.ShouldShowWhatsNew(AppInfo.Version, settings.LastSeenVersion, settings.FirstRunCompleted))
+        {
+            KoyWindow.ShowInstance();
+            KoyWindow.Instance.ViewModel.OpenWhatsNewOverlay();
         }
     }
 
