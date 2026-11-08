@@ -76,9 +76,18 @@ p a, dd a { text-underline-offset: 3px; }
   padding: 16px var(--gutter);
 }
 .brand { display: inline-flex; line-height: 0; }
+.nav__start { display: flex; align-items: center; gap: clamp(10px, 1.6vw, 20px); }
 .nav__links { display: flex; align-items: center; gap: clamp(18px, 2.4vw, 32px); font-size: 14px; font-weight: 500; }
 .nav__links a:not(.btn) { color: var(--ink-2); text-decoration: none; padding: 8px 2px; transition: color .2s; }
 .nav__links a:not(.btn):hover { color: var(--ink); }
+.lang { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 999px; }
+.lang__btn {
+  min-width: 34px; min-height: 30px; padding: 0 8px;
+  border: 0; border-radius: 999px; background: transparent; color: var(--ink-2);
+  font: 600 12px/1 var(--font-body); cursor: pointer; transition: background .2s, color .2s;
+}
+.lang__btn:hover { color: var(--ink); }
+.lang__btn[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
 
 /* ---------- Ekran çerçevesi (gerçek ekran görüntüleri) ---------- */
 .screen { position: relative; overflow: hidden; background: var(--slate); border-radius: var(--radius); }
@@ -273,15 +282,20 @@ h3 { margin: 0; font: 600 18px/1.3 var(--font-display); letter-spacing: -.015em;
 /* ---------- Duyarlı ---------- */
 @media (min-width: 900px) {
   /* Çentik gerçekte olduğu gibi sayfanın tepesinden sarkar; üst çubuk iki yanına yaslanır.
-     Dar masaüstünde (900–1359 px) çerçevenin iki yanındaki yer bağlantılara yetmez, yalnız logo ve İndir kalır. */
+     Dar masaüstünde (900–1439 px) çerçevenin iki yanındaki yer bağlantılara yetmez, yalnız logo, dil ve İndir kalır. */
   .nav { position: absolute; inset: 0 0 auto 0; }
   .screen--hero { margin-top: 0; border-radius: 0 0 var(--radius) var(--radius); }
   /* Üst çubuk çentik alanının üstünden geçer; yalnız kendi öğeleri fareyi tutsun, çentik hover'ı engellenmesin. */
   .nav { pointer-events: none; }
   .nav > * { pointer-events: auto; }
 }
-@media (min-width: 900px) and (max-width: 1359px) {
+@media (min-width: 900px) and (max-width: 1439px) {
   .nav__links a:not(.btn) { display: none; }
+}
+/* En dar masaüstünde sol yana logo, sağ yana dil düğmesi ancak sığar; İndir hemen alttaki büyük düğmede duruyor. */
+@media (min-width: 900px) and (max-width: 1139px) {
+  .nav__start { display: contents; }
+  .nav__links { display: none; }
 }
 
 @media (max-width: 960px) {
