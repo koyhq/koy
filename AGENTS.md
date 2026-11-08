@@ -8,6 +8,7 @@ Windows 11 için hafif bir **notch** (ekranın üst ortasında, yay animasyonlu 
 İlham: [kua8/Nectar](https://github.com/kua8/Nectar) (Tauri/WebView2, bellek ağır). **Nectar'dan kod, görsel ya da metin kopyalanmaz**; Nectar GPLv3 olsa da biz kendi kodumuzu yazarız.
 
 - Hedefler, mimari, kararlar: `docs/PLAN.md`
+- Görev odaklı harita ("şunu değiştirmek için nereye bakarım"): `docs/MAP.md`
 - Sıradaki iş ve dosya dosya yapılacaklar: `docs/ROADMAP.md`
 - Bellek ölçümleri: `docs/MEMORY.md`
 - Arayüz tasarımı (dock, çentik, Koy penceresi, her sayfanın ayarları): `docs/DESIGN.md`. Arayüz işinden önce oku. Ekranların görseli: `docs/design/index.html` (tarayıcıda aç).
@@ -79,7 +80,7 @@ src/Watchdog/   Gözcü süreç (Koy.Watchdog.exe, WinExe, Native AOT). Platform
                 Geliştirme çalıştırmasında exe yoksa gözcü sessizce atlanır.
 tests/Core.Tests/  xUnit, yalnız Core. Ayrı App.Tests yok: mantık Core'da, ViewModel ince kalır.
 tools/Koy.UiSnapshots/  Arayüzü PNG'ye çizen yardımcı (bkz. Komutlar). Çözüme dahildir, sürümle yayımlanmaz.
-docs/           PLAN, DESIGN, ROADMAP, MEMORY, NAMING.
+docs/           PLAN, MAP, DESIGN, ROADMAP, MEMORY, NAMING.
 site/           Tanıtım sayfası (koyhq.github.io/koy): düz HTML/CSS/JS, derleme yok, `python -m http.server --directory site` ile denenir.
                 `main`'e site/** değişince .github/workflows/pages.yml yayınlar. Ekran görüntüleri docs/screenshots'tan WebP'ye çevrilip site/img'e konur.
 scripts/        pack.ps1 (Velopack paketi), measure-memory.ps1, generate-icons.py, get-velopack-version.ps1.
