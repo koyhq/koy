@@ -178,17 +178,17 @@ Kod incelemesinden çıkan işler paketlere bölündü.
 ## Sıradaki
 **E paketi adayları** (bütçe kararı verildi: 100–150 MB hedef, 200 MB'a kadar kabul; her biri yeni servis demek, önce ölç):
 - [x] Pano geçmişi (yalnız metin, sınırlı ve silinebilir) — H servisleri ve Çentik H arayüzü altında tamamlandı.
-- [ ] Mikrofon / kamera kullanım göstergesi (çentikte nokta).
-- [ ] Bluetooth cihaz HUD'u (kulaklık bağlandı / pil seviyesi).
-- [ ] Pil HUD'u tamamlama (düşük pil, şarj tamamlandı uyarıları).
-- [ ] **RAM optimizasyonu:** #14 radyo servisini açılışta kuruyor; yalnız boşta bağlantı simgesi (`IdleDisplay.ShowRadio`) açıkken açılışta kurulsun, aksi halde Kontrol Merkezi ilk açılana kadar ertelensin.
+- [x] Mikrofon / kamera kullanım göstergesi (çentikte nokta, #29).
+- [x] Bluetooth cihaz HUD'u (kulaklık bağlandı / pil seviyesi, `BluetoothHudPolicy` + `OsdIndicatorViewModel.ShowBluetoothDevice`).
+- [x] Pil HUD'u tamamlama (şarja takıldı/çıkarıldı, %20/%10 düşük pil, %100 tam şarj uyarıları; `BatteryNotificationPolicy` + `OsdIndicatorViewModel.ShowBattery`).
+- [x] **RAM optimizasyonu:** #14 radyo servisini açılışta kuruyor; yalnız boşta bağlantı simgesi (`IdleDisplay.ShowRadio`) açıkken açılışta kurulsun, aksi halde Kontrol Merkezi ilk açılana kadar ertelensin (`NotchViewModel`).
 - [x] **Bellek bütçesi kararı (2026-11-06):** boşta 100–150 MB private hedef, çok ekran / açık panellerle 200 MB'a kadar kabul. Kurulu v0.1.1 ölçümü: 99–100 MB private, Görev Yöneticisi "Bellek" 73,6 MB (`docs/MEMORY.md`).
 
 **Katkıcı PR'ları (xdaxer):**
 - [x] #8 pilsiz makinede pil gizleme, #10 dock pencere önizlemesi, #12 Kontrol Merkezi Wi-Fi/Bluetooth yönetimi, #13 açılış zemini: `main`'e alındı (bizim düzeltmelerimizle).
 - [x] #14 çentik sekmeleri ve Wi-Fi/Bluetooth durum simgeleri: `main`'e alındı (bizim düzeltmelerimizle: "Hiçbiri" modu, token/ikonlar, hareket politikası, paylaşımlı radyo servisi). Bellek ölçümü yapılmadı, aşağıdaki RAM optimizasyonu işine bırakıldı.
-- [ ] #11: kapsam kararı bekliyor (bu ROADMAP v1 dışı demişti).
-- #9: `main`'de farklı bir yapıyla (Ekranlar sayfası, D2) çözüldü; kapatılacak.
+- [x] #11: `main`'e entegre edildi ve PR birleştirildi (aşağıda "Dock sistem tepsisi"); kalan kapsam (taşma simgeleri, balon bildirimleri) "Sonraya kalanlar"da.
+- [x] #9: `main`'de farklı bir yapıyla (Ekranlar sayfası, D2) çözüldü ve kapatıldı.
 
 **Hâlâ açık olan eksikler:** iki sütunlu ana görünüm ve kapalı/Peek çentikte tarih ve ağ simgesi (tasarım bekliyor; veri tarafı hazır: `HomeViewModel`, `NotchLayout.ShowPeekDetails`); UWP uygulama sabitlemeleri (AUMID); ses görselleştirici; gerçek çoklu monitör ve karışık DPI doğrulaması; bellek ölçümü.
 
@@ -235,7 +235,7 @@ Kod incelemesinden çıkan işler paketlere bölündü.
 - [x] **Parlaklık, çözüm:** kaynak her açılışta ve ekran düzeni değişince (ekran eklendi/çıkarıldı) arka planda yeniden belirlenir; karar çentiğin bulunduğu ekrana göre (`Core/Display/BrightnessSourcePicker`: dahili panel WMI, harici DDC/CI, harici ekranda WMI kullanılmaz; DisplayConfig çıkış teknolojisiyle dahili/harici ayrımı). Monitör tanıtıcısı tutulmaz, her çağrıda güncel ekrandan çözülür. Ayar çağrıları UI'yi bloklamaz: `BrightnessWriteQueue` art arda değerleri birleştirir (yalnız son değer yazılır, sürerken yenisi birikmez, tek işçi). Yazım başarısız olursa kaynak yeniden belirlenir. DDC aralığı (min..max) yüzdeye ölçeklenir. Hiçbir yol yoksa kaydırıcı soluk ve devre dışı, altında "Bu ekranın parlaklığı ayarlanamıyor." yazar. Testli (`BrightnessTests`).
 - [x] **Sistem sayfası "–" göstermiyor:** servis yalnız sayfa görünürken tutulduğundan her dönüşte sıfırdan kuruluyor ve ilk örneğe kadar boştu. Şimdi servis başlarken anlık değerler (RAM, Koy belleği, ağ adı) hemen okunur (`SystemSnapshot.RatesReady`), CPU / en çok süreç / ağ hızı ilk yeni örneğe (400 ms) kadar son bilinen değerle gösterilir (`Core/SystemStats/SystemSnapshotMerge`, testli; Ana ve Sistem aynı modeli kullanır). "–" yalnız hiç değer gelmediyse (ilk açılış) görünür. Servis hâlâ yalnız görünürken alınır, boşta %0 CPU.
 - [x] **Hızlı başlat "+" çentiği kapatıyordu:** dosya seçici sahipsiz açılıyordu (Koy ön planda değilken görünmez kalabiliyor, görev çubuğu gizli) ve açıkken çentiğe tıklamak çentiği kapatıp seçiciyi yetim bırakıyordu; fare çıkınca kapanmayı yalnız iğne engelliyordu. Şimdi çentik denetleyicisinde sayaçlı "tutma" var (`NotchController.HoldOpen/ReleaseHold`: fare ayrılsa da tıklansa da kapanmaz; iğneden ayrı, iğne simgesi yanmaz); seçici kapanınca normal davranış döner (fare dışarıdaysa 400 ms sonra kapanır). Seçicinin sahibi çentik penceresi: çentik seçici için geçici etkinleştirilir, diyalog onun üstünde açılır. Ekleme yolu (`Add` kaydeder ve `Changed` yükseltir) testli.
-- [ ] **Klasör ekleme (kapsam dışı bırakıldı):** hızlı başlata klasör eklenemiyor; seçici yalnız dosya seçer. İsteyen için klasör seçici ve klasör öğesi başlatma.
+- [x] **Klasör ekleme:** hızlı başlata klasör seçici (`OpenFolderDialog`) ve bağlam menüsü eklendi (bkz. İş sırası #7).
 - [x] **Elle sınama (proje sahibi):** laptop + ikinci ekranla parlaklık (ikinci ekran açıkken ve kapatınca; dahili panel kaydırıcısı değişiyor mu, çentik donmuyor mu; harici monitörde DDC/CI; ekran çıkarılıp takılınca kaynağın yenilenmesi; hiç yol yokken kaydırıcı devre dışı mı); Sistem ve Ana sekmesinden çıkıp dönünce değerlerin hemen görünmesi; Hızlı başlat "+": diyalog çentiğin üstünde açılıyor mu, açıkken çentik kapanmıyor mu, seçilen öğe eklenip kalıyor mu, kapanınca çentik normale dönüyor mu; yeni kurulumda dock varsayılanı Yer ayır, mevcut ayar korunuyor mu. **Proje sahibi sınadı (2026-11-07), sorun yok.**
 - [ ] **Gerçek donanımda sınanamadı:** WMI / DDC/CI yolları, DisplayConfig dahili-harici ayrımı ve seçicinin ön plana gelmesi bu geliştirmede çalıştırılamadı (uygulama çalıştırılmadı; yalnız derleme, testler ve `tools/Koy.UiSnapshots`).
 
@@ -340,8 +340,8 @@ Proje sahibi aşağıdakilerin hepsinin yapılmasına karar verdi. Sıra öneril
      2. `App.xaml.cs` içinde `UpdateNotchState(bool enabled)` ve `UpdateDockState(bool enabled)` çağrıldığında (hem sağ alt menüden hem `ToggleDockEnabled` kısayolundan gelir), `settings.json`'da ilgili alanın güncel olduğundan emin ol ve `KoyWindow` örneği varsa `SyncExternalState` ile ViewModel'ini güncelle.
      3. `KoyWindow.xaml.cs` içinde `Close_Click` ve `OnClosing` zaten her özellik değişiminde `OnPropertyChanged` ile anında kaydedildiği için, kapanırken `SaveSettingsCommand.Execute(null)` çağırmadan önce ya dış durumu senkronize et ya da yalnız bekleyen değişiklik varsa kaydet.
    - **Doğrulama:** `dotnet build Koy.slnx` ve `dotnet test Koy.slnx` yeşil.
-2. [ ] **v0.1.2 (Yalnız proje sahibi onayıyla — kod ajanı çalıştırmaz):** `main`'i push et, sürüm hazırla (CHANGELOG `[Unreleased]` → 0.1.2: tepsi düğmesinin dock kapatılıp açılınca kaybolması, Bluetooth log gürültüsü, menü kaydı). Kurulu v0.1.1'de tepsi hatası duruyor.
-3. [ ] **#9 ve #11 PR'ları (Yalnız proje sahibi onayıyla — kod ajanı çalıştırmaz):** #9 `main`'de başka yapıyla (Ekranlar sayfası, D2) çözüldü, açıklamayla kapatılır. #11 (dock sistem tepsisi) `main`'e entegre edildi; GitHub'daki PR'ın durumu kontrol edilip açıklamayla kapatılır, kalan kapsam (taşma simgeleri, balon bildirimleri) "Sonraya kalanlar"da.
+2. [x] **v0.1.2 / v0.2.0 (Yalnız proje sahibi onayıyla — kod ajanı çalıştırmaz):** `main` push edildi ve `v0.2.0` yayınlandı (#18).
+3. [x] **#9 ve #11 PR'ları (Yalnız proje sahibi onayıyla — kod ajanı çalıştırmaz):** #9 `main`'de başka yapıyla (Ekranlar sayfası, D2) çözüldü ve kapatıldı. #11 (dock sistem tepsisi) `main`'e entegre edilip birleştirildi; kalan kapsam (taşma simgeleri, balon bildirimleri) "Sonraya kalanlar"da.
 
 **Özellikler:**
 4. [x] **Dock klasörleri:** aşağıdaki "Dock klasörleri" bölümü. Flash ajanına verilecekse önce **Adım 4A (Core + Test)**, ardından **Adım 4B (App + UI + Snapshot)** olarak iki parçada çalıştırılır.
