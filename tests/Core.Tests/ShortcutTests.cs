@@ -87,9 +87,23 @@ public class ShortcutDefaultsTests
         {
             Assert.True(Hotkey.TryParse(ShortcutBindings.DefaultText(action), out var hotkey), action.ToString());
             Assert.True(seen.Add(hotkey), $"{action} varsayılanı başka eylemle aynı");
-            Assert.False((hotkey.Modifiers & HotkeyModifiers.Win) != 0, $"{action} Win kullanıyor");
+            // Arama paneli proje sahibinin kararıyla Win+Shift+Q kullanır; sistem çakışması yine aşağıda denetlenir.
+            if (action != ShortcutAction.OpenSearch)
+                Assert.False((hotkey.Modifiers & HotkeyModifiers.Win) != 0, $"{action} Win kullanıyor");
             Assert.False(ShortcutConflicts.IsReservedBySystem(hotkey), $"{action} sistem kısayoluyla çakışıyor");
         }
+    }
+
+    [Theory]
+    [InlineData("Win+Shift+Q", true)]
+    [InlineData("Shift+Win+Q", true)]
+    [InlineData("win + shift + q", true)]
+    [InlineData("Win+Shift+Z", false)]
+    [InlineData("Alt+F2", false)]
+    [InlineData("", false)]
+    public void IsDefault_compares_the_combination_not_the_spelling(string text, bool expected)
+    {
+        Assert.Equal(expected, ShortcutBindings.IsDefault(ShortcutAction.OpenSearch, text));
     }
 
     [Fact]

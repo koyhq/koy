@@ -43,6 +43,8 @@ public static class Program
                 RenderUninstall(outDir, prefix, theme);
             else if (scene == "centik")
                 RenderCentik(outDir, prefix, theme);
+            else if (scene == "arama")
+                SearchSnapshots.Render(outDir, prefix, theme, RenderElement);
             else if (scene is "dockbar" or "dockbars")
                 DockBarSnapshots.Render(outDir, prefix, theme, RenderElement);
             else if (scene is "dock" or "folder" or "folders")

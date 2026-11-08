@@ -31,7 +31,7 @@ public sealed partial class ShortcutRowViewModel : ObservableObject
 
     public bool HasError => !string.IsNullOrEmpty(ErrorText);
     public bool HasShortcut => !string.IsNullOrWhiteSpace(Text);
-    public bool IsDefault => string.Equals(Text, ShortcutBindings.DefaultText(Action), StringComparison.Ordinal);
+    public bool IsDefault => ShortcutBindings.IsDefault(Action, Text);
 
     /// <summary>Rozet olarak gösterilecek tuş adları (Ctrl, Alt, N...).</summary>
     public IReadOnlyList<string> KeyTokens =>

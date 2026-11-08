@@ -10,6 +10,7 @@ using Koy.App.Features.Focus;
 using Koy.App.Features.Home;
 using Koy.App.Features.Music;
 using Koy.App.Features.Notch.OSD;
+using Koy.App.Features.Search;
 using Koy.App.Resources;
 using Koy.App.Features.Settings;
 using Koy.App.Features.Shelf;
@@ -35,6 +36,8 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private readonly VisibilityController _visibility;
     private readonly Dispatcher _dispatcher;
     private DispatcherTimer? _clockTimer;
+    private SearchViewModel? _search;
+    private nint _windowBeforeSearch;
     private bool _disposed;
 
     public AppSettings Settings { get; }
@@ -45,6 +48,15 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     public FocusViewModel Focus => _focus;
     public ShelfViewModel Shelf => _shelf;
     public CalendarViewModel Calendar => _calendar;
+
+    /// <summary>Arama paneli; ilk açılışta kurulur, açılmadıysa null.</summary>
+    public SearchViewModel? Search => _search;
+
+    /// <summary>Arama açık: durum satırı, sayfa ve sekmeler gizlidir.</summary>
+    public bool IsSearchOpen => _search?.IsOpen == true;
+
+    /// <summary>Arama kapandı; değer odağın döneceği pencere (yoksa 0).</summary>
+    public event Action<nint>? SearchClosed;
 
     /// <summary>Pano sayfası; pano geçmişi ayarı kapalıysa null (sekme de yoktur).</summary>
     public ClipboardViewModel? Clipboard => _clipboard;
@@ -418,7 +430,8 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     private void UpdateActivePanels()
     {
-        var isExpanded = State == NotchState.Expanded;
+        // Arama açıkken sayfalar görünmez; servisleri de çalışmaz.
+        var isExpanded = State == NotchState.Expanded && !IsSearchOpen;
         // Ses çubukları "kapak ve dalga" ayarına bağlı; pil tasarrufu hareketi kısarken hiç yakalanmaz.
         _music.SetSpectrumAllowed(Settings.MusicShowWaveform && !ReduceMotion);
         _music.SetActive(isExpanded && CurrentPanel == NotchPanel.Home);
@@ -495,6 +508,40 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     public void ShowBattery(BatteryAlertKind kind, int percent) => Osd.ShowBattery(kind, percent);
     public void ShowBluetoothDevice(string name, bool connected, int? battery) => Osd.ShowBluetoothDevice(name, connected, battery);
 
+    /// <summary>Çentiği açıp arama panelini gösterir. <paramref name="factory"/> yalnız ilk açılışta çalışır.</summary>
+    public void OpenSearch(Func<SearchViewModel> factory, nint previousWindow, string? initialQuery)
+    {
+        if (_search is null)
+        {
+            _search = factory();
+            _search.CloseRequested += restoreFocus => CloseSearch(restoreFocus);
+            OnPropertyChanged(nameof(Search));
+        }
+
+        _windowBeforeSearch = previousWindow;
+        _controller.Expand();
+        _controller.HoldOpen();
+        _search.Open(initialQuery);
+        OnPropertyChanged(nameof(IsSearchOpen));
+        UpdateActivePanels();
+    }
+
+    /// <summary>Panel açıkken sorguyu değiştirmeden odağı alır ya da verilen metni yazar.</summary>
+    public void CloseSearch(bool restoreFocus)
+    {
+        if (!IsSearchOpen)
+            return;
+
+        _search!.Close();
+        OnPropertyChanged(nameof(IsSearchOpen));
+        _controller.ReleaseHold();
+        if (!_controller.IsPinned)
+            _controller.OnClick();
+        UpdateActivePanels();
+
+        SearchClosed?.Invoke(restoreFocus ? _windowBeforeSearch : 0);
+    }
+
     public void ExpandToShelf()
     {
         _controller.Expand(NotchPanel.Shelf);
@@ -553,6 +600,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         _shelf.Dispose();
         _calendar.Dispose();
         _clipboard?.Dispose();
+        _search?.Dispose();
         Home.Dispose();
     }
 }

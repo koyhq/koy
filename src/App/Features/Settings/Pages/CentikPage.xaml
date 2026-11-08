@@ -406,5 +406,77 @@
                           Style="{StaticResource SettingComboBoxStyle}" />
             </Grid>
         </Border>
+        <!-- ARAMA -->
+        <TextBlock Text="{Binding [SearchSettingsHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [SearchRetainTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [SearchRetainDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [SearchRetainTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding SearchRetainPrior}"
+                          HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [SearchHistoryTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [SearchHistoryOff], Source={x:Static res:Loc.Instance}}" GroupName="SearchHistoryMode"
+                                     IsChecked="{Binding SearchHistoryMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Disabled}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [SearchHistorySuggest], Source={x:Static res:Loc.Instance}}" GroupName="SearchHistoryMode"
+                                     IsChecked="{Binding SearchHistoryMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Suggestion}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [SearchHistoryComplete], Source={x:Static res:Loc.Instance}}" GroupName="SearchHistoryMode"
+                                     IsChecked="{Binding SearchHistoryMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=ImmediateCompletion}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding [SearchClearHistoryTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" VerticalAlignment="Center" />
+                <Button Grid.Column="1" Content="{Binding [SearchClearHistoryButton], Source={x:Static res:Loc.Instance}}" Command="{Binding ClearSearchHistoryCommand}" Style="{StaticResource SettingButtonStyle}" />
+            </Grid>
+        </Border>
+
+        <TextBlock Text="{Binding [SearchSourcesHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+        <ItemsControl ItemsSource="{Binding SearchSources}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource SettingRowStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Name}" Style="{StaticResource SettingTitleStyle}" VerticalAlignment="Center" />
+                            <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding Name}" IsChecked="{Binding IsEnabled}"
+                                      HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource ToggleSwitchStyle}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </StackPanel>
 </UserControl>

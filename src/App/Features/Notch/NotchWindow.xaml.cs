@@ -123,6 +123,7 @@ public partial class NotchWindow : Window
             oldVm.TargetVisibilityChanged -= AnimateVisibility;
             oldVm.PanelTransitionTriggered -= AnimatePanelTransition;
             oldVm.ShakeRequested -= OnShakeRequested;
+            oldVm.SearchClosed -= OnSearchClosed;
             oldVm.Home.QuickLaunch.ResolveDialogOwner = null;
         }
 
@@ -132,6 +133,7 @@ public partial class NotchWindow : Window
             newVm.TargetVisibilityChanged += AnimateVisibility;
             newVm.PanelTransitionTriggered += AnimatePanelTransition;
             newVm.ShakeRequested += OnShakeRequested;
+            newVm.SearchClosed += OnSearchClosed;
             newVm.Home.QuickLaunch.ResolveDialogOwner = PrepareDialogOwner;
             AnimateTo(newVm.TargetWidth, newVm.TargetHeight);
             if (!newVm.IsNotchVisible)
@@ -179,6 +181,33 @@ public partial class NotchWindow : Window
         base.OnDeactivated(e);
         if (_hwnd != 0)
             WindowStyles.SetNoActivate(_hwnd, true);
+
+        // Odak başka yere gidince arama kapanır; iğnelendiyse açık kalır. Odak zaten gitti, geri çekilmez.
+        if (ViewModel is { IsSearchOpen: true, Search.IsPinned: false } viewModel)
+            viewModel.CloseSearch(restoreFocus: false);
+    }
+
+    /// <summary>
+    /// Arama kutusuna klavye odağını verir. Çentik normalde odak almaz; kısayola basıldığı için Windows öne geçmeye
+    /// izin verir, kutu düzen bittikten sonra odaklanır (görünür olmayan denetim odak alamaz).
+    /// </summary>
+    public void FocusSearch()
+    {
+        if (_hwnd == 0)
+            return;
+
+        WindowStyles.SetNoActivate(_hwnd, false);
+        Activate();
+        WindowStyles.SetForeground(_hwnd);
+        Dispatcher.BeginInvoke(SearchHost.FocusBox, System.Windows.Threading.DispatcherPriority.Input);
+    }
+
+    private void OnSearchClosed(nint restoreTo)
+    {
+        if (_hwnd != 0)
+            WindowStyles.SetNoActivate(_hwnd, true);
+        if (restoreTo != 0)
+            WindowStyles.SetForeground(restoreTo);
     }
 
     private void Notch_MouseEnter(object sender, MouseEventArgs e)
@@ -212,7 +241,8 @@ public partial class NotchWindow : Window
 
     private void Notch_MouseWheel(object sender, MouseWheelEventArgs e)
     {
-        if (ViewModel is null)
+        // Arama açıkken tekerlek sonuç listesini kaydırır, sekme ya da ses değiştirmez.
+        if (ViewModel is null || ViewModel.IsSearchOpen)
             return;
 
         // Tekerlek eylemi ayardan: 0 = panel değiştir, 1 = sistem sesi (yukarı = yükselt).

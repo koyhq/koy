@@ -480,6 +480,16 @@ Proje sahibi istedi. Kod yazılmadı.
 7. **"Şimdi denetle":** Ayarlar › Genel'deki düğme yalnız denetler; varsa aynı "Yeni güncelleme var" düğmesini ve onay penceresini gösterir, kendiliğinden indirmez.
 8. **Doğrulama:** Core testleri (sürüm karşılaştırma, "ilk açılış mı" kararı, sürüm notu bölümü ayıklama), UiSnapshots sahneleri (düğme, onay, ilerleme, güncellendi, neler geldi; açık ve koyu), elle sınama: 0.2.0 kuruluyken yeni sürüme güncelleme.
 
+## Çentikte arama paneli (2026-11-08)
+`Win+Shift+Q` çentiği açar, içinde arama çıkar; durum satırı ve sekmeler o sırada gizlidir. `Alt+Shift+F2` panodaki metinle açar. Çentik kapalıysa arama da yoktur. İki kısayol da Koy › Kısayollar'dan değiştirilir.
+- [x] **Core (`Core/Search/`, testli):** Türkçe harf eşleme, puanlama, kategori sırası (uygulamalar hep üstte, dosyalar hep altta, arası önem sırasıyla) ve 15 satır sınırı, geçmiş (50 kayıt, 20'si görünür, başı boşluklu arama yazılmaz), öneri ve otomatik tamamlama, satır eylemleri, onay, sonuç gelmeden basılan Enter.
+- [x] **Kaynaklar:** uygulamalar, pencereler, hesap (işlevler, hex/bin/oct), oturum komutları, komut satırı (PATH), konumlar ve adresler, bilinen klasörler, son belgeler, dosyalar (Windows dizini, türe göre gruplu), web kısayolları (`gg:`, `!gg`, varsayılan arama), yer imleri (Chrome ailesi), süreç sonlandırma (`kill ad`), pano, tarih ve saat, `?` yardımı. Her biri Koy › Çentik'ten kapatılabilir.
+- [x] **Klavye:** oklar, Ctrl+J/K, Ctrl+oklar ve PageUp/Down (kategori), Home/End, Tab (eylemler), Üst+Enter (ilk eylem), sağ ok (öneriyi al), boş kutuda aşağı ok (son aramalar), boş kutuda Enter ve Esc (kapat).
+- [x] **Doğrulandı (deneme programı, salt okunur):** 241 uygulama 468–687 ms, dizin sorgusu 16–130 ms, özel karakterli sorgu hatasız, simgeler geliyor.
+- [ ] **Elle sınama (proje sahibi):** kısayolla klavye odağı (en büyük risk); Esc sonrası odağın önceki pencereye dönmesi; her kaynaktan bir sonuç çalıştırma; kapat/yeniden başlat onayı; iğne; iki ekran; tam ekranda kısayolun bir şey yapmaması.
+- [ ] Bellek ve CPU ölçümü (AGENTS #1): panel açıkken ve kapanınca.
+- [ ] **Henüz yok:** birim çevirici, sözlük, özel karakter, renk, yazım denetimi; Firefox yer imleri (SQLite paketi gerekir); uygulamaların atlama listesi eylemleri (#26 sonrası); uygulama mağazası araması; sonuç sürükleme; ayrı süreçte eklentiler (AGENTS #4 izin vermez).
+
 ## Sonraya kalanlar
 - CsWin32 0.3.106 → güncel sürüme geçiş: 0.3.369'da üretilen türler değişti (Platform'da 70 derleme hatası: HWND/işaretçi imzaları, `unsafe` gereken yerler). Platform ve Watchdog birlikte, aynı sürüme geçirilir; Watchdog'un görev çubuğu geri getirme yolu elle sınanır. O zamana dek Dependabot bu paketi yoksayar (`.github/dependabot.yml`).
 - Bildirimleri çentikte gösterme: Windows bildirimleri gelince çentik kısa süre gösterir (Claude Code gibi ajanların "iş bitti" bildirimleri de bu yoldan gelir). `UserNotificationListener` paket kimliği ister; Velopack kurulumu için seyrek (sparse) paket ve imza gerekir. Ara çözüm: Claude Code kancasının çağırdığı yerel komutla doğrudan bildirim.

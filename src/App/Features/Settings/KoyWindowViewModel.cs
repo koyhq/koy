@@ -430,6 +430,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             PanelClipboard = panels.Contains(NotchPanel.Clipboard);
             PanelSystem = panels.Contains(NotchPanel.System);
             ClipboardHistoryEnabled = s.ClipboardHistoryEnabled;
+            SearchRetainPrior = s.SearchRetainPrior;
+            SearchHistoryMode = s.SearchHistoryMode;
+            LoadSearchSources(s.SearchDisabledSources);
 
             RefreshMemory();
 
@@ -496,6 +499,28 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         }
     }
 
+    [ObservableProperty]
+    private bool _searchRetainPrior = true;
+
+    [ObservableProperty]
+    private Koy.Core.Search.SearchHistoryMode _searchHistoryMode = Koy.Core.Search.SearchHistoryMode.Disabled;
+
+    /// <summary>Kaynak anahtarlarından biri değişince artar; kaydı ve çentiğin yeniden kurulmasını tetikler.</summary>
+    [ObservableProperty]
+    private int _searchSourcesVersion;
+
+    public System.Collections.ObjectModel.ObservableCollection<SearchSourceToggle> SearchSources { get; } = [];
+
+    private void LoadSearchSources(IReadOnlyCollection<string> disabled)
+    {
+        SearchSources.Clear();
+        foreach (var (id, nameKey) in Koy.App.Features.Search.SearchFactory.SourceCatalog)
+            SearchSources.Add(new SearchSourceToggle(id, Koy.App.Resources.Strings.Get(nameKey), !disabled.Contains(id), () => SearchSourcesVersion++));
+    }
+
+    [RelayCommand]
+    private void ClearSearchHistory() => Koy.App.Features.Search.SearchFactory.ClearHistory();
+
     [RelayCommand]
     public void SelectPage(int index)
     {
@@ -557,7 +582,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             or nameof(NotchOpenBehavior) or nameof(WheelAction) or nameof(BatterySaverReduceMotion)
             or nameof(WeatherRefreshInterval) or nameof(PomodoroWorkMinutes) or nameof(PomodoroShortBreakMinutes) or nameof(PomodoroLongBreakMinutes)
             or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
-            or nameof(PanelControlCenter) or nameof(PanelClipboard) or nameof(PanelSystem) or nameof(ClipboardHistoryEnabled);
+            or nameof(PanelControlCenter) or nameof(PanelClipboard) or nameof(PanelSystem) or nameof(ClipboardHistoryEnabled)
+            or nameof(SearchRetainPrior) or nameof(SearchHistoryMode) or nameof(SearchSourcesVersion);
 
     partial void OnLanguageChanged(string value)
     {
@@ -643,6 +669,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             WheelAction = WheelAction,
             MiddleClickAction = MiddleClickAction,
             ClipboardHistoryEnabled = ClipboardHistoryEnabled,
+            SearchRetainPrior = SearchRetainPrior,
+            SearchHistoryMode = SearchHistoryMode,
+            SearchDisabledSources = SearchSources.Where(s => !s.IsEnabled).Select(s => s.Id).ToList(),
             EnabledPanels = enabledPanels
         };
 

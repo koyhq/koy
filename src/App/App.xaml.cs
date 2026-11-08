@@ -184,6 +184,12 @@ public partial class App : Application
             case ShortcutAction.PlayPause:
                 _ = PlayPauseAsync();
                 break;
+            case ShortcutAction.OpenSearch:
+                _features.OfType<NotchFeature>().FirstOrDefault()?.ToggleSearch();
+                break;
+            case ShortcutAction.OpenSearchClipboard:
+                _features.OfType<NotchFeature>().FirstOrDefault()?.ToggleSearch(useClipboard: true);
+                break;
         }
     }
 
