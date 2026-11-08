@@ -283,6 +283,14 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     public DockProximityMode EffectiveProximity =>
         DockProximityMapping.Effective(_settings.DockStyle, _settings.DockProximity);
 
+    /// <summary>Tam genişlikte ikon şeridinin yeri. Ayar değişince ViewModel yeniden kurulur (DockSettingsDiff), bildirim gerekmez.</summary>
+    public HorizontalAlignment StripAlignment => _settings.DockIconAlignment switch
+    {
+        DockIconAlignment.Left => HorizontalAlignment.Left,
+        DockIconAlignment.Right => HorizontalAlignment.Right,
+        _ => HorizontalAlignment.Center
+    };
+
     public DockController Controller => _controller;
     public AppSettings Settings => _settings;
 

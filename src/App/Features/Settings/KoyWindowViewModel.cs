@@ -138,6 +138,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private DockStyleMode _dockStyle = DockStyleMode.FloatingCapsule;
 
     [ObservableProperty]
+    private DockIconAlignment _dockIconAlignment = DockIconAlignment.Center;
+
+    [ObservableProperty]
     private DockProximityMode _dockProximity = DockProximityMode.ReserveSpace;
 
     // Tam genişlikte Aşağı yapış / Çekil sunulmaz: seçiliyse geçerli karşılığına (Yer ayır / Hep gizli) çekilir.
@@ -373,6 +376,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             NotchVisibility = s.NotchVisibility;
             DockEnabled = s.DockEnabled;
             DockStyle = s.DockStyle;
+            DockIconAlignment = s.DockIconAlignment;
             DockProximity = s.DockProximity;
             DockHideInFullscreen = s.DockHideInFullscreen;
             DockEdgeReveal = s.DockEdgeReveal;
@@ -601,6 +605,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             NotchVisibility = NotchVisibility,
             DockEnabled = DockEnabled,
             DockStyle = DockStyle,
+            DockIconAlignment = DockIconAlignment,
             DockProximity = DockProximity,
             DockHideInFullscreen = DockHideInFullscreen,
             DockEdgeReveal = DockEdgeReveal,

@@ -405,6 +405,18 @@
   <data name="StyleFullWidth" xml:space="preserve">
     <value>Full-width glass</value>
   </data>
+  <data name="DockIconAlignmentTitle" xml:space="preserve">
+    <value>Icon alignment</value>
+  </data>
+  <data name="DockIconAlignLeft" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="DockIconAlignCenter" xml:space="preserve">
+    <value>Center</value>
+  </data>
+  <data name="DockIconAlignRight" xml:space="preserve">
+    <value>Right</value>
+  </data>
   <data name="DockProximityTitle" xml:space="preserve">
     <value>When a window nears the dock</value>
   </data>

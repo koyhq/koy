@@ -405,6 +405,18 @@
   <data name="StyleFullWidth" xml:space="preserve">
     <value>Tam genişlik glass</value>
   </data>
+  <data name="DockIconAlignmentTitle" xml:space="preserve">
+    <value>İkon hizası</value>
+  </data>
+  <data name="DockIconAlignLeft" xml:space="preserve">
+    <value>Sol</value>
+  </data>
+  <data name="DockIconAlignCenter" xml:space="preserve">
+    <value>Orta</value>
+  </data>
+  <data name="DockIconAlignRight" xml:space="preserve">
+    <value>Sağ</value>
+  </data>
   <data name="DockProximityTitle" xml:space="preserve">
     <value>Pencere dock'a yaklaşınca</value>
   </data>

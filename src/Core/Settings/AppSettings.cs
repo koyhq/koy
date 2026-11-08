@@ -36,6 +36,9 @@ public sealed record AppSettings
     /// <summary>Dock yerleşim stili: Yüzen kapsül (FloatingCapsule) veya Tam Genişlik (FullWidth).</summary>
     public DockStyleMode DockStyle { get; set; } = DockStyleMode.FloatingCapsule;
 
+    /// <summary>Tam genişlik dock'ta ikonların yeri: Left, Center (varsayılan), Right. Kapsülde etkisiz.</summary>
+    public DockIconAlignment DockIconAlignment { get; set; } = DockIconAlignment.Center;
+
     /// <summary>Pencere yaklaşınca dock davranışı: ReserveSpace (Yer ayır - varsayılan), DockDown (Aşağı yapış), Dodge (Çekil), AlwaysHidden (Hep gizli).</summary>
     public DockProximityMode DockProximity { get; set; } = DockProximityMode.ReserveSpace;
 
@@ -180,6 +183,7 @@ public sealed record AppSettings
                DockVisibility == other.DockVisibility &&
                DockHoverMagnify == other.DockHoverMagnify &&
                DockStyle == other.DockStyle &&
+               DockIconAlignment == other.DockIconAlignment &&
                DockProximity == other.DockProximity &&
                DockHideInFullscreen == other.DockHideInFullscreen &&
                DockEdgeReveal == other.DockEdgeReveal &&
@@ -253,6 +257,7 @@ public sealed record AppSettings
         hash.Add(DockVisibility);
         hash.Add(DockHoverMagnify);
         hash.Add(DockStyle);
+        hash.Add(DockIconAlignment);
         hash.Add(DockProximity);
         hash.Add(DockHideInFullscreen);
         hash.Add(DockEdgeReveal);

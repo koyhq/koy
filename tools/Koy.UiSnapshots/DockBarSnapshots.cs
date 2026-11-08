@@ -55,16 +55,20 @@ internal static class DockBarSnapshots
         Shoot(outDir, prefix, theme, "dockbar-tam-genislik-basili", renderElement, fullWidth: true, smallTray: true, appCount: 8, pressedIndex: 1);
         Shoot(outDir, prefix, theme, "dockbar-kapsul-basili", renderElement, fullWidth: false, smallTray: true, appCount: 8, pressedIndex: 1);
 
+        // 7. Tam genişlikte ikon hizası: ikonlar Başlat'ın ya da sağ düğmelerin yanına yanaşır, arada boşluk kalmaz
+        Shoot(outDir, prefix, theme, "dockbar-tam-genislik-sola", renderElement, fullWidth: true, smallTray: true, appCount: 8, alignment: DockIconAlignment.Left);
+        Shoot(outDir, prefix, theme, "dockbar-tam-genislik-saga", renderElement, fullWidth: true, smallTray: true, appCount: 8, alignment: DockIconAlignment.Right);
     }
 
     private static void Shoot(
         string outDir, string prefix, string theme, string name,
         Action<FrameworkElement, double, double, string> renderElement,
-        bool fullWidth, bool smallTray, int appCount, int pressedIndex = -1)
+        bool fullWidth, bool smallTray, int appCount, int pressedIndex = -1, DockIconAlignment alignment = DockIconAlignment.Center)
     {
         var settings = new AppSettings
         {
             DockStyle = fullWidth ? DockStyleMode.FullWidth : DockStyleMode.FloatingCapsule,
+            DockIconAlignment = alignment,
             DockSmallTray = smallTray,
             DockShowFolders = true,
             DockShowRecents = false,

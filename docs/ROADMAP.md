@@ -458,6 +458,13 @@ Proje sahibi istedi. Kod yazılmadı; önce bu plan onaylanır.
 
 5. [ ] **Doğrulama:** Core testleri (pencere kuralı, AppBar yüksekliği, taşma ölçüsü), UiSnapshots sahnesi (tam genişlik açık/koyu, küçük tepsi), bellek ölçümü, elle sınama (büyütülmüş pencere ile boşluk yok, otomatik gizle, iki ekran, tepsi paneli).
 
+## Tam genişlik dock'ta ikon hizası (2026-11-08)
+Proje sahibi istedi. Yalnız tam genişlik çubuk; kapsül değişmez.
+- [x] `AppSettings.DockIconAlignment` (`Left` / `Center` / `Right`, varsayılan `Center`); Koy › Dock'ta yalnız tam genişlikte görünen "İkon hizası" satırı. Değişince yalnız ViewModel yeniden kurulur, görev çubuğu ve AppBar oynamaz. Testli.
+- [x] Orta hizada yan sütunlar eşit kalır (ikonlar ekranın tam ortasında); sola ve sağa hizada serbest bırakılır, yoksa ikonlarla Başlat ya da sağ düğmeler arasında boşluk kalır.
+- [x] Görsel kanıt: `--scene dockbar` (`dockbar-tam-genislik-sola`, `dockbar-tam-genislik-saga`).
+- [ ] Elle sınama (proje sahibi): Sol / Orta / Sağ geçişi çalışan dock'ta; yeniden başlatınca korunma; ikon sürükleyerek sıralama, klasör paneli ve pencere önizlemesi üç hizada doğru yerde mi; iki ekran.
+
 ## Güncelleme akışı yeniden: sor, güncelle, "neler geldi" — AÇIK, yapılacak (2026-11-07)
 Proje sahibi istedi. Kod yazılmadı.
 
