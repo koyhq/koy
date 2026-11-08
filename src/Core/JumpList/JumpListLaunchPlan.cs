@@ -17,7 +17,9 @@ public sealed record JumpListLaunchPlan(string File, string? Arguments, string? 
         if (!launch.IsDocument || !CanOpenWithApp(launch.Target, appExePath))
             return new JumpListLaunchPlan(launch.Target, launch.Arguments, launch.WorkingDirectory);
 
-        return new JumpListLaunchPlan(appExePath!, "\"" + launch.Target + "\"", launch.WorkingDirectory);
+        // Sondaki ters bölü (D:\) kapanış tırnağını kaçırır; komut satırı kuralı gereği ikilenir.
+        var target = launch.Target.EndsWith('\\') ? launch.Target + "\\" : launch.Target;
+        return new JumpListLaunchPlan(appExePath!, "\"" + target + "\"", launch.WorkingDirectory);
     }
 
     private static bool CanOpenWithApp(string target, string? appExePath)

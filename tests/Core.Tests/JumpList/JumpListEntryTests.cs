@@ -136,6 +136,14 @@ public class JumpListLaunchPlanTests
         Assert.Equal("\"C:\\Dev\\proje\"", plan.Arguments);
     }
 
+    [Fact]
+    public void Document_path_ending_in_backslash_keeps_its_closing_quote()
+    {
+        var plan = JumpListLaunchPlan.For(new JumpListLaunch(@"D:\", IsDocument: true), Code);
+
+        Assert.Equal("\"D:\\\\\"", plan.Arguments);
+    }
+
     [Theory]
     [InlineData(@"C:\Oyunlar\Oyun.url")]
     [InlineData(@"C:\Kisayol\a.lnk")]
