@@ -1,6 +1,6 @@
 # Araştırma: Kısayolla açılan arama paneli
 
-**Tarih:** 2026-11-08. **Durum:** araştırma; panelin yeri kararlaştırıldı, diğer kararlar açık, kod yazılmadı.
+**Tarih:** 2026-11-08. **Durum:** araştırma tamamlandı, kararlar aşağıda. Uygulaması #40'ta.
 
 Soru: Kısayolla açılıp yazdıkça uygulama, pencere, hesap ve komut sonuçları gösteren bir panel Koy'a nasıl eklenir?
 
@@ -40,7 +40,7 @@ Her bilginin kaynağı yanında yazar:
 
 **Tehlikeli kaynaklar [Kod]**
 - Kabuk komutu kaynağı yazılanı çalıştırır, yetkiye bağlıdır. Süreç sonlandırma tetik sözcüğü ister.
-- Koy'un ilk sürümünde ikisi de önerilmez.
+- Koy'da ikisi de bulunur; süreç sonlandırma tetik sözcüğü ister (`kill ad`).
 
 ## Alınacaklar, alınmayacaklar
 
@@ -52,7 +52,7 @@ Her bilginin kaynağı yanında yazar:
 | Kaynak başına iş parçacığı | Değiştir | Hesap ve pencere listesi anlık; yalnız yavaş kaynaklar için iptal edilebilir görev yeter |
 | Ayrı süreçte çalışan eklentiler | Uygulama | AGENTS #4 tek süreç |
 | Harici hesap kütüphanesi | Uygulama | AGENTS #8; küçük bir ayrıştırıcı yeter |
-| Kabuk komutu, süreç öldürme | Uygula | Karar 7; süreç sonlandırma tetik sözcüğü ister |
+| Kabuk komutu, süreç öldürme | Uygula | Süreç sonlandırma tetik sözcüğü ister |
 
 ## Windows tarafı
 
@@ -126,12 +126,13 @@ Ek gereksinimler:
 
 ## Kararlar (2026-11-08, proje sahibi)
 1. Arama açıkken sekme çubuğu ve durum satırı gizlenir.
-2. İlk sürümün kaynakları: uygulamalar, açık pencereler, hesap makinesi, pano, bilgisayar komutları.
+2. İlk sürümün kaynakları: uygulamalar, açık pencereler, hesap makinesi, pano, bilgisayar komutları; sonra komut satırı, konumlar, web kısayolları, yer imleri ve süreç sonlandırma da eklendi.
 3. Dosya arama ilk sürümde var.
 4. Arama geçmişi tutulur; ayarlardan kapatılabilir, başında boşluk olan arama yazılmaz.
 5. Tam ekran oyundayken kısayol hiçbir şey yapmaz.
 6. Kapat ve yeniden başlat onay ister.
-7. İşlev olarak incelenen araçlarla aynı davranır; fark yalnız görünümdedir. Açık kalan her kararda onların davranışı esas alınır.
+7. Açık kalan davranış kararlarında masaüstü arama araçlarındaki yaygın alışkanlıklar esas alınır; Koy'un kodu ve görünümü kendisinindir.
+8. Varsayılan kısayol `Win+Shift+Q`. Listede uygulamalar hep en üstte, dosyalar hep en altta.
 
 ## Sıradaki adımlar (karardan sonra)
 1. `Ctrl+Alt+K` sınaması (yukarıda).
