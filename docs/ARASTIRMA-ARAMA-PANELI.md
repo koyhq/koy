@@ -123,13 +123,13 @@ Ek gereksinimler:
 
 Ölçüler: açık çentik 352 birim; gövde 236, durum satırı 26, sekme çubuğu 44 (`NotchLayout`).
 
-## Karar bekleyen sorular
-1. Arama açıkken sekme çubuğu ve durum satırı gizlensin mi? Gizlenirse ~7, kalırsa ~4–5 sonuç sığar. Öneri: gizlensin.
-2. İlk sürümde hangi kaynaklar olsun? Aday: uygulama, açık pencere, hesap, pano, sistem komutları.
-3. Dosya arama ilk sürümde mi, sonra mı? `System.Data.OleDb` kabul edilir mi?
-4. Arama geçmişi tutulsun mu? Tutulursa kapatılabilir olmalı.
-5. Tam ekran oyunda kısayol ne yapsın? Öneri: hiçbir şey.
-6. Kapat / yeniden başlat onay istesin mi? Öneri: evet.
+## Kararlar (2026-11-08, proje sahibi)
+1. Arama açıkken sekme çubuğu ve durum satırı gizlenir.
+2. İlk sürümün kaynakları: uygulamalar, açık pencereler, hesap makinesi, pano, bilgisayar komutları.
+3. Dosya arama ilk sürümde yok, sonraya kalır.
+4. Aranan kelimeler kaydedilmez.
+5. Tam ekran oyundayken kısayol hiçbir şey yapmaz.
+6. Kapat ve yeniden başlat onay ister.
 
 ## Sıradaki adımlar (karardan sonra)
 1. `Ctrl+Alt+K` sınaması (yukarıda).
