@@ -120,5 +120,8 @@ Bağımlılık yönü: `App → Platform → Core` ve `App → Core`. Core hiçb
 
 ## Git
 - Ana dal `main`. Her iş kendi dalında: `feat/m1-music-panel`, `fix/...`.
-- Commit mesajı Türkçe, kısa, emir kipinde: "Müzik panelini ekle".
+- Commit mesajı **İngilizce**, konvansiyonel önekli, kısa, emir kipinde: `feat(notch): add music panel`.
+  Sebep: `CHANGELOG.md` (İngilizce) release-please ile commit'lerden üretilir; Türkçe notlar `CHANGELOG.tr.md`
+  dosyasına sürüm PR'ında elle eklenir. Uygulamanın "Neler Geldi" ekranı seçili dile göre birini okur.
+  Kod yorumları ve iç belgeler Türkçe kalır.
 - Push ve PR yalnız proje sahibi isteyince.
