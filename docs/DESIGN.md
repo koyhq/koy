@@ -57,6 +57,7 @@ Koy penceresi, sihirbaz ve sağ alt menü renk, ölçü ve hareketi koda gömmez
 - **Tam genişlik:**
   - 44 px yüksekliğinde. Saat yoktur; sistem tepsisi düğmesi yüzen dock'taki gibi koşulludur.
   - Solda çalan müzik, ortada uygulamalar, sağda (varsa tepsi düğmesi ve) Koy simgesi durur.
+  - Uygulama ikonları sola, ortaya ya da sağa alınabilir (Koy › Dock › İkon hizası, varsayılan orta). Başlat düğmesi ve sağ bölüm yerinde kalır.
   - Aktif uygulama, adıyla birlikte hap biçiminde gösterilir.
 - **Pencere yaklaşınca** (Koy › Dock):
   - **Yer ayır (varsayılan):** dock alt kenara oturur ve koyu bir şerit olur. Çalışma alanından 46 px ayrılır. Büyütülmüş pencere tam dock'un üstünde biter, arada boşluk kalmaz.

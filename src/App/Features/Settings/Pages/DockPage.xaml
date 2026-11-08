@@ -51,6 +51,35 @@
             </Grid>
         </Border>
 
+        <!-- Yalnız tam genişlikte: kapsül içeriği kadar geniştir, hizalanacak boşluğu yoktur. -->
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Border.Visibility>
+                <Binding Path="DockStyle" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="FullWidth" />
+            </Border.Visibility>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockIconAlignmentTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [DockIconAlignLeft], Source={x:Static res:Loc.Instance}}" GroupName="DockIconAlignment"
+                                     IsChecked="{Binding DockIconAlignment, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Left}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [DockIconAlignCenter], Source={x:Static res:Loc.Instance}}" GroupName="DockIconAlignment"
+                                     IsChecked="{Binding DockIconAlignment, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Center}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [DockIconAlignRight], Source={x:Static res:Loc.Instance}}" GroupName="DockIconAlignment"
+                                     IsChecked="{Binding DockIconAlignment, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Right}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
         <!-- PENCERE YAKLAŞINCA -->
         <TextBlock Text="{Binding [DockProximityTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 

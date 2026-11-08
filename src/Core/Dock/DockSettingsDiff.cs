@@ -36,6 +36,7 @@ public readonly record struct DockSettingsDiff(
         // ViewModel / VisibilityController / EdgeTracker ayarı kurulurken okur: bunlardan biri değiştiyse yeniden kurulur
         // (pencere ve tutamaç aynı kalır).
         var rebuild = before.DockStyle != after.DockStyle
+                      || before.DockIconAlignment != after.DockIconAlignment
                       || before.DockProximity != after.DockProximity
                       || before.DockVisibility != after.DockVisibility
                       || before.DockHoverMagnify != after.DockHoverMagnify
