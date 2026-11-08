@@ -4,20 +4,19 @@ export function initCopy() {
     const target = document.querySelector(btn.dataset.copy);
     const label = btn.querySelector('[data-copy-label]');
     if (!target || !label) return;
-    const original = label.textContent;
     btn.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(target.textContent.trim());
-        label.textContent = 'Kopyalandı';
+        label.textContent = window.KoyI18n.t('copy.done');
       } catch {
         const range = document.createRange();
         range.selectNodeContents(target);
         const sel = getSelection();
         sel.removeAllRanges();
         sel.addRange(range);
-        label.textContent = 'Seçildi, Ctrl+C';
+        label.textContent = window.KoyI18n.t('copy.selected');
       }
-      setTimeout(() => { label.textContent = original; }, 1800);
+      setTimeout(() => { label.textContent = window.KoyI18n.t('copy.label'); }, 1800);
     });
   });
 }

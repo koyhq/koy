@@ -85,7 +85,7 @@ tests/Core.Tests/  xUnit, yalnız Core. Ayrı App.Tests yok: mantık Core'da, Vi
 tools/Koy.UiSnapshots/  Arayüzü PNG'ye çizen yardımcı (bkz. Komutlar). Çözüme dahildir, sürümle yayımlanmaz.
 docs/           PLAN, MAP, DESIGN, ROADMAP, MEMORY, NAMING.
 site/           Tanıtım sayfası (koyhq.github.io/koy): düz HTML/CSS/JS, derleme yok, `python -m http.server --directory site` ile denenir.
-                `main`'e site/** değişince .github/workflows/pages.yml yayınlar. Ekran görüntüleri docs/screenshots'tan WebP'ye çevrilip site/img'e konur.
+                `main`'e site/** değişince .github/workflows/pages.yml yayınlar. Ekran görüntüleri docs/screenshots'tan WebP'ye çevrilip site/img'e konur. Metinler iki dilde `site/js/i18n.js` içinde; varsayılan İngilizce.
 scripts/        pack.ps1 (Velopack paketi), measure-memory.ps1, generate-icons.py, get-velopack-version.ps1.
 ```
 Bağımlılık yönü: `App → Platform → Core` ve `App → Core`. Core hiçbir şeye bağımlı değildir. Platform WPF'e bağımlı olmaz.
