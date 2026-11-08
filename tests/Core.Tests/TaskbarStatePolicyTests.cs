@@ -81,4 +81,33 @@ public class TaskbarStatePolicyTests
     {
         Assert.Null(TaskbarStatePolicy.Parse(content));
     }
+
+    [Fact]
+    public void ShouldWriteState_KayitYokkenVeForceFalseIseFalse()
+    {
+        Assert.False(TaskbarStatePolicy.ShouldWriteState(null, force: false));
+    }
+
+    [Fact]
+    public void ShouldWriteState_KayitHiddenDegilseVeForceFalseIseFalse()
+    {
+        var saved = new TaskbarSavedState(Hidden: false, PreviousState: TaskbarStatePolicy.AutoHide);
+        Assert.False(TaskbarStatePolicy.ShouldWriteState(saved, force: false));
+    }
+
+    [Fact]
+    public void ShouldWriteState_KayitHiddenIkenForceFalseBileOlsaTrue()
+    {
+        var saved = new TaskbarSavedState(Hidden: true, PreviousState: TaskbarStatePolicy.AlwaysOnTop);
+        Assert.True(TaskbarStatePolicy.ShouldWriteState(saved, force: false));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ShouldWriteState_ForceTrueIseHerZamanTrue(bool hasRecord)
+    {
+        var saved = hasRecord ? new TaskbarSavedState(Hidden: false, PreviousState: 2) : (TaskbarSavedState?)null;
+        Assert.True(TaskbarStatePolicy.ShouldWriteState(saved, force: true));
+    }
 }

@@ -592,7 +592,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [RelayCommand]
     public void RestoreTaskbar()
     {
-        TaskbarService.Restore();
+        TaskbarService.Restore(force: true);
         // Dock çalışıyorsa Koy'un tepsi penceresi de bırakılır (görev çubuğu görünürken Shell_TrayWnd sahipliği alınmaz).
         (Application.Current as App)?.NotifyTaskbarRestoredManually();
     }

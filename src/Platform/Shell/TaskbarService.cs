@@ -67,7 +67,8 @@ public static partial class TaskbarService
     /// Explorer çalışmıyorsa (birincil çubuk yok) durum dosyası silinmez; sonraki açılış yeniden dener.
     /// </summary>
     /// <param name="alsoSkipProcessId">Gözcü için: ölen Koy sürecinin tepsi penceresini atla.</param>
-    public static unsafe void Restore(uint alsoSkipProcessId = 0)
+    /// <param name="force">Kurtarma amaçlı: kayıtlı durum olmasa bile ABM_SETSTATE gönder.</param>
+    public static unsafe void Restore(uint alsoSkipProcessId = 0, bool force = false)
     {
         // Temiz geri yüklemede gözcü gereksiz: önce durdurulur ki aynı işi ikinci kez yapmasın.
         OnRestoring();
@@ -75,6 +76,12 @@ public static partial class TaskbarService
         SetVisible(true);
 
         var saved = ReadSavedState();
+        if (!TaskbarStatePolicy.ShouldWriteState(saved, force))
+        {
+            DeleteState();
+            return;
+        }
+
         var primary = ShellTrayLocator.FindExplorerTray(alsoSkipProcessId);
         if (primary == HWND.Null)
             return;

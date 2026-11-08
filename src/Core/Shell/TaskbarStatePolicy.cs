@@ -26,6 +26,14 @@ public static class TaskbarStatePolicy
     public static int ResolveRestoreState(TaskbarSavedState? saved)
         => saved is { PreviousState: > 0 } s ? s.PreviousState : AlwaysOnTop;
 
+    /// <summary>
+    /// Geri yükleme sırasında ABM_SETSTATE gönderilmeli mi?
+    /// Koy görev çubuğunu gerçekten gizlemişse (saved is { Hidden: true }) veya kullanıcı kurtarma amacıyla
+    /// zorlamışsa (force: true) yazılır. Aksi halde Windows'un mevcut durumuna dokunulmaz.
+    /// </summary>
+    public static bool ShouldWriteState(TaskbarSavedState? saved, bool force = false)
+        => force || saved is { Hidden: true };
+
     public static string Serialize(TaskbarSavedState state, DateTime utcNow)
     {
         var sb = new StringBuilder();
