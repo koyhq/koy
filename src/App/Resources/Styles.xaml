@@ -729,6 +729,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type MenuItem}">
+                    <Grid>
                     <Border x:Name="menuItemBorder"
                             Background="Transparent"
                             CornerRadius="6"
@@ -758,9 +759,53 @@
                                        FontSize="11"
                                        Margin="16,0,0,0"
                                        VerticalAlignment="Center" />
+
+                            <!-- Alt menüsü olan satırda sağa ok -->
+                            <Path x:Name="SubmenuArrow"
+                                  Grid.Column="2"
+                                  Data="{DynamicResource IconChevronRight}"
+                                  Stroke="{DynamicResource KoyMenuTextMuted}"
+                                  StrokeThickness="1.6"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  StrokeLineJoin="Round"
+                                  Stretch="Uniform"
+                                  Width="9"
+                                  Height="9"
+                                  Margin="16,0,0,0"
+                                  VerticalAlignment="Center"
+                                  Visibility="Collapsed" />
                         </Grid>
                     </Border>
+
+                    <!-- Alt menü: yalnız öğesi olan satırda açılır (ör. Başlat menüsünde "Kapat veya oturumu kapat") -->
+                    <Popup x:Name="PART_Popup"
+                           AllowsTransparency="True"
+                           Focusable="False"
+                           PopupAnimation="None"
+                           Placement="Right"
+                           HorizontalOffset="-2"
+                           VerticalOffset="-5"
+                           PlacementTarget="{Binding ElementName=menuItemBorder}"
+                           IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}">
+                        <Border Background="{DynamicResource KoyMenuBg}"
+                                BorderBrush="{DynamicResource KoyMenuBorder}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="4"
+                                MinWidth="160"
+                                SnapsToDevicePixels="True">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000000" Opacity="0.5" BlurRadius="20" ShadowDepth="4" Direction="270" />
+                            </Border.Effect>
+                            <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" Grid.IsSharedSizeScope="True" />
+                        </Border>
+                    </Popup>
+                    </Grid>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="HasItems" Value="True">
+                            <Setter TargetName="SubmenuArrow" Property="Visibility" Value="Visible" />
+                        </Trigger>
                         <Trigger Property="IsHighlighted" Value="True">
                             <Setter TargetName="menuItemBorder" Property="Background" Value="{DynamicResource KoyMenuHover}" />
                             <Setter Property="Foreground" Value="{DynamicResource KoyMenuText}" />

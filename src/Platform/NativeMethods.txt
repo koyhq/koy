@@ -219,3 +219,5 @@ SIGDN
 LockWorkStation
 SetSuspendState
 WTSDisconnectSession
+GetSystemPowerStatus
+SYSTEM_POWER_STATUS

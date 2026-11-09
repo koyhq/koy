@@ -515,6 +515,14 @@ Proje sahibi istedi. Kod yazılmadı.
 - [x] CI: sürüm PR'ında iki günlükte de yeni sürüm başlığı olmalı (`scripts/check-changelogs.ps1`).
 - [ ] Elle sınama (proje sahibi): iki dilde çentik, dock, sihirbaz ve "Neler Geldi"; İngilizce Windows'ta ilk açılış.
 
+## Başlat düğmesi sağ tık menüsü (2026-11-09)
+- [x] Dock'taki Başlat düğmesine sağ tık, Windows'un Win+X menüsünün Koy tasarımındaki karşılığını açar (yüzen ve tam genişlik dock). Gerçek Windows menüsü açılmaz.
+- [x] **Core (`Core/StartMenu/`, testli):** Windows 11 sırası ve grupları (Yüklü uygulamalar ... Bilgisayar Yönetimi / Terminal, Terminal (Yönetici) / Görev Yöneticisi, Ayarlar, Dosya Gezgini, Ara, Çalıştır / Kapat veya oturumu kapat alt menüsü / Masaüstü), pilsiz makinede Mobilite Merkezi yok, her öğenin eylem türü ve hedefi. `StartMenuActions` hataları yutar; reddedilen UAC istemi sessiz, Windows Terminal yoksa PowerShell.
+- [x] **Platform (`Platform/StartMenu/StartMenuHost.cs`):** kabuk üzerinden başlatma (`ms-settings:`, `.msc`, `taskmgr`, `explorer`), Win+D / Win+S / Win+R, pil sorgusu (`GetSystemPowerStatus`, menü açılırken tek çağrı). Oturum komutları aramanın `SystemCommandService`'ini kullanır. Yeni zamanlayıcı ya da servis yok.
+- [x] **App:** `DockStartMenu` menüyü `DockContextMenuManager` ile açar (menü açıkken dock gizlenmez); `MenuItem` şablonuna alt menü (Popup ve ok) eklendi. Metinler `StartItem*` anahtarlarıyla iki dilde, Windows'un kendi ifadeleriyle.
+- [x] Görsel kanıt: `dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix baslat --theme both --scene startmenu` (TR ve EN, pilli, pilsiz, alt menü açık).
+- [ ] Elle sınama (proje sahibi): iki dock biçiminde sağ tık; alt menünün açılıp tıklanabilmesi ve dışarı tıklayınca kapanması; Terminal (Yönetici) UAC'i reddedince hiçbir şey olmaması; Windows Terminal yokken PowerShell'e düşmesi; Masaüstü, Ara, Çalıştır; pilsiz makinede Mobilite Merkezi'nin görünmemesi.
+
 ## Tanıtım sayfası (2026-11-07)
 - [x] `site/` (düz HTML/CSS/JS, derleme yok): hero (çentik sayfanın tepesinden sarkar, yayla açılır), çentik sekmeleri (gerçek ekran görüntüleri), dock, hafiflik, ayrıntılar, kurulum (SmartScreen uyarısı ve SHA256 doğrulama dahil). Koyu/açık tema sistemi izler. Son sürüm numarası GitHub API'den gelir, gelmezse rozet görünmez.
 - [x] `.github/workflows/pages.yml`: `main`'e `site/**` girince koyhq.github.io/koy adresinde yayınlar (SHA'ya sabit action'lar). Pages kaynağı "GitHub Actions" olarak açıldı.

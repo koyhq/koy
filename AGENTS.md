@@ -47,6 +47,7 @@ src/Core/       Saf C# (net10.0). WPF ve Windows API YOK.
                 QuickLaunch/ hızlı başlat listesi (en çok 8, kalıcı: AppSettings.QuickLaunchItems)
                 Tasks/      odak görevleri (TaskService, tasks.json); Settings/JsonListFile ayar klasöründeki küçük JSON listeleri okur/yazar
                 Search/     arama paneli: kaynaklar (ISearchSource), puanlama, sıralama, geçmiş, panel durumu (SearchPanelController), hesap
+                StartMenu/  dock Başlat düğmesinin sağ tık (Win+X) menüsü: grup ve sıra modeli (StartMenuModel), eylemler (StartMenuActions), IStartMenuHost
 src/Platform/   Core'daki sözleşmelerin Windows 11 uygulamaları (WinRT / CsWin32). Aynı klasör adları:
                 Shell/TrayHostService.cs : Core.Tray.ITrayService. Koy'un gizli Shell_TrayWnd penceresi (kendi iş
                 parçacığında); her kaydı Windows'a da iletir. SharedServices.AcquireTrayHost ile sayaçlı paylaşılır;

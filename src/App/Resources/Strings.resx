@@ -2112,5 +2112,71 @@
   <data name="PrivacyUnknownApp" xml:space="preserve">
     <value>Unknown app</value>
   </data>
+  <data name="StartItemInstalledApps" xml:space="preserve">
+    <value>Installed apps</value>
+  </data>
+  <data name="StartItemMobilityCenter" xml:space="preserve">
+    <value>Mobility Center</value>
+  </data>
+  <data name="StartItemPowerOptions" xml:space="preserve">
+    <value>Power Options</value>
+  </data>
+  <data name="StartItemEventViewer" xml:space="preserve">
+    <value>Event Viewer</value>
+  </data>
+  <data name="StartItemSystem" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="StartItemDeviceManager" xml:space="preserve">
+    <value>Device Manager</value>
+  </data>
+  <data name="StartItemNetworkConnections" xml:space="preserve">
+    <value>Network Connections</value>
+  </data>
+  <data name="StartItemDiskManagement" xml:space="preserve">
+    <value>Disk Management</value>
+  </data>
+  <data name="StartItemComputerManagement" xml:space="preserve">
+    <value>Computer Management</value>
+  </data>
+  <data name="StartItemTerminal" xml:space="preserve">
+    <value>Terminal</value>
+  </data>
+  <data name="StartItemTerminalAdmin" xml:space="preserve">
+    <value>Terminal (Admin)</value>
+  </data>
+  <data name="StartItemTaskManager" xml:space="preserve">
+    <value>Task Manager</value>
+  </data>
+  <data name="StartItemSettings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="StartItemFileExplorer" xml:space="preserve">
+    <value>File Explorer</value>
+  </data>
+  <data name="StartItemSearch" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="StartItemRun" xml:space="preserve">
+    <value>Run</value>
+  </data>
+  <data name="StartItemShutDownOrSignOut" xml:space="preserve">
+    <value>Shut down or sign out</value>
+  </data>
+  <data name="StartItemSignOut" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="StartItemSleep" xml:space="preserve">
+    <value>Sleep</value>
+  </data>
+  <data name="StartItemShutDown" xml:space="preserve">
+    <value>Shut down</value>
+  </data>
+  <data name="StartItemRestart" xml:space="preserve">
+    <value>Restart</value>
+  </data>
+  <data name="StartItemDesktop" xml:space="preserve">
+    <value>Desktop</value>
+  </data>
 </root>
 

@@ -1,18 +1,22 @@
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using Koy.Core.Diagnostics;
 using Koy.Core.Display;
 using Koy.Core.Power;
 using Koy.Core.Dock;
 using Koy.Core.Settings;
 using Koy.Core.Shell;
+using Koy.Core.StartMenu;
 using Koy.Core.Tray;
 using Koy.Core.Visibility;
 using Koy.Platform.Display;
 using Koy.Platform.JumpList;
 using Koy.Platform.Media;
 using Koy.Platform.Power;
+using Koy.Platform.Search;
 using Koy.Platform.Shell;
+using Koy.Platform.StartMenu;
 
 namespace Koy.App.Features.Dock;
 
@@ -50,6 +54,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     private WindowTracker? _windowTracker;
     private ShellActionService? _shellActionService;
     private JumpListService? _jumpLists;   // yalnız dock açıkken var; listeyi ancak sağ tık menüsü açılınca okur
+    private StartMenuActions? _startMenu;  // Başlat sağ tık menüsü; durumsuz, menü kapalıyken hiçbir şey çalışmaz
     private FullscreenDetector? _fullscreenDetector;
     private uint _lastFlyoutCheckPid;
     private bool _lastFlyoutCheckResult;
@@ -82,6 +87,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         _windowTracker = services.AcquireWindowTracker();
         _shellActionService = new ShellActionService();
         _jumpLists = new JumpListService();
+        _startMenu = new StartMenuActions(new StartMenuHost(), new SystemCommandService(), CrashLog.Write);
         _fullscreenDetector = new FullscreenDetector();
         _monitorService = new MonitorService();
         _monitorService.Start();
@@ -536,7 +542,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
     private DockViewModel CreateViewModel(VisibilityController visibilityController) =>
         new(settings, _controller!, _shellActionService!, visibilityController, status: null,
-            mediaService: _mediaService, trayService: _trayService, recentFiles: _recentFiles, jumpLists: _jumpLists)
+            mediaService: _mediaService, trayService: _trayService, recentFiles: _recentFiles, jumpLists: _jumpLists,
+            startMenu: _startMenu)
         {
             ReduceMotion = _reduceMotion
         };
@@ -1097,5 +1104,6 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
         _jumpLists?.Clear();
         _jumpLists = null;
+        _startMenu = null;
     }
 }
