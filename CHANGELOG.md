@@ -9,10 +9,16 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ## [0.2.4](https://github.com/koyhq/koy/compare/v0.2.3...v0.2.4) (2026-11-09)
 
+Highlights:
+- **Voice command in the notch:** press Ctrl+Alt+V, speak, check the text in the notch and press Enter to run Claude Code, Codex, Antigravity or your own command. No shell is used, and Esc cancels. Dictation uses Windows online speech recognition, so audio goes to Microsoft only while Koy is listening.
+- **Song lyrics:** the Home music card shows synced lyrics for the playing track, and clicking a line jumps there. Lyrics are off by default; turn them on with the small button on the music card (the track title is then looked up on LRCLIB, and .lrc files in Music\Lyrics are used first).
+- **Bluetooth battery:** BLE keyboards, mice and headsets that Windows shows without a battery level now show one, without jumps while typing or when lights change.
+- **Start button:** pick the Start icon on the dock, and right-click it for a Koy-styled Win+X menu.
+- **Shortcuts:** any key can be a shortcut and can replace a Windows shortcut. The notch now opens on hover by default.
+
 
 ### Added
 
-* Bluetooth battery via GATT and voice command in the notch ([9baed4b](https://github.com/koyhq/koy/commit/9baed4b1af5511ed44df0765c93bb2d40e01f0b2))
 * **bluetooth:** show battery for BLE devices that Windows reports without it ([44e731d](https://github.com/koyhq/koy/commit/44e731d174d61c1984783f982413386d6f2bc7f0)), closes [#50](https://github.com/koyhq/koy/issues/50)
 * **dock:** add a Koy-styled Start right-click menu ([2519c4e](https://github.com/koyhq/koy/commit/2519c4e5e3bf4da9ff2585a954ba4dd66937b27d))
 * **dock:** let users choose the Start button icon ([7f80337](https://github.com/koyhq/koy/commit/7f8033706282ff45702310cf6d1b93c04bd9887f))
@@ -20,7 +26,6 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 * **notch:** open the notch on hover by default ([d564720](https://github.com/koyhq/koy/commit/d564720143cb8aeda136ec759596dc232e445ed6))
 * **notch:** run a coding assistant from a voice command ([aa91b68](https://github.com/koyhq/koy/commit/aa91b6813a166b3a811ad2be2f36ad73f6e6dcfd)), closes [#48](https://github.com/koyhq/koy/issues/48)
 * **notch:** show lyrics directly on the Home music card ([5c85e05](https://github.com/koyhq/koy/commit/5c85e054e7b9eaddf008cdc7f1f9231d74bda37b))
-* **notch:** show synced lyrics on the Home music card ([ca08b64](https://github.com/koyhq/koy/commit/ca08b64ad251f5eeac10726dd29f5467b9ba8279))
 * **notch:** turn lyrics off by default with a button on the music card ([9f8b123](https://github.com/koyhq/koy/commit/9f8b12383f0531e707c37f0363c3c11632848f06))
 * **shortcuts:** allow any key and override Windows shortcuts ([a07507c](https://github.com/koyhq/koy/commit/a07507c353b6101cbe28105e8fa47e7413c4da76)), closes [#47](https://github.com/koyhq/koy/issues/47)
 

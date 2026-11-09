@@ -5,6 +5,33 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.4](https://github.com/koyhq/koy/compare/v0.2.3...v0.2.4) (2026-11-09)
+
+Öne çıkanlar:
+- **Çentikte sesli komut:** Ctrl+Alt+V ile konuş, metni çentikte gör, Enter ile Claude Code, Codex, Antigravity ya da kendi komutunu çalıştır. Kabuk kullanılmaz, Esc iptal eder. Dikte Windows'un çevrimiçi konuşma tanımasını kullanır; ses yalnız Koy dinlerken Microsoft'a gider.
+- **Şarkı sözleri:** Ana sayfadaki müzik kartı çalan şarkının sözlerini zamanında gösterir, satıra tıklayınca o yere atlar. Varsayılan kapalı; müzik kartındaki küçük düğmeyle açılır (açıkken parça adı LRCLIB'de aranır, Müzik\Lyrics klasöründeki .lrc dosyaları önce kullanılır).
+- **Bluetooth pil:** Windows'un pil göstermediği BLE klavye, fare ve kulaklıkların pili de görünür; tuş ve ışık anındaki sıçramalar süzülür.
+- **Başlat düğmesi:** dock'taki Başlat simgesini seçebilir, sağ tıklayınca Koy tarzında Win+X menüsünü açabilirsin.
+- **Kısayollar:** her tuş kısayol olabilir ve Windows kısayollarının yerine geçebilir. Çentik varsayılan olarak fareyle üzerine gelince açılır.
+
+
+### Eklenenler
+
+* **bluetooth:** Windows'un pil bildirmediği BLE cihazlarda pili göster ([44e731d](https://github.com/koyhq/koy/commit/44e731d174d61c1984783f982413386d6f2bc7f0)), closes [#50](https://github.com/koyhq/koy/issues/50)
+* **notch:** sesli komutla kodlama asistanı çalıştır ([aa91b68](https://github.com/koyhq/koy/commit/aa91b6813a166b3a811ad2be2f36ad73f6e6dcfd)), closes [#48](https://github.com/koyhq/koy/issues/48)
+* **notch:** büyük müzik kartında eşzamanlı şarkı sözleri ([6f3f7a2](https://github.com/koyhq/koy/commit/6f3f7a25e862d85c6a83009c65003572a30552ff))
+* **notch:** şarkı sözleri doğrudan Ana sayfadaki müzik kartında ([5c85e05](https://github.com/koyhq/koy/commit/5c85e054e7b9eaddf008cdc7f1f9231d74bda37b))
+* **notch:** şarkı sözleri varsayılan kapalı, müzik kartında aç/kapa düğmesi ([9f8b123](https://github.com/koyhq/koy/commit/9f8b12383f0531e707c37f0363c3c11632848f06))
+* **dock:** Koy tarzında Başlat sağ tık menüsü ([2519c4e](https://github.com/koyhq/koy/commit/2519c4e5e3bf4da9ff2585a954ba4dd66937b27d))
+* **dock:** Başlat düğmesinin simgesi seçilebilir ([7f80337](https://github.com/koyhq/koy/commit/7f8033706282ff45702310cf6d1b93c04bd9887f))
+* **notch:** çentik varsayılan olarak üzerine gelince açılır ([d564720](https://github.com/koyhq/koy/commit/d564720143cb8aeda136ec759596dc232e445ed6))
+* **shortcuts:** her tuş kısayol olabilir, Windows kısayollarının yerine geçebilir ([a07507c](https://github.com/koyhq/koy/commit/a07507c353b6101cbe28105e8fa47e7413c4da76)), closes [#47](https://github.com/koyhq/koy/issues/47)
+
+
+### Düzeltmeler
+
+* **dock:** dil değişince özel simge etiketi yenilensin ([4ac48f8](https://github.com/koyhq/koy/commit/4ac48f81d65f874c884ab40bdeb6e4d258a6125c))
+
 ## [0.2.3](https://github.com/koyhq/koy/compare/v0.2.2...v0.2.3) (2026-11-08)
 
 Öne çıkanlar:
