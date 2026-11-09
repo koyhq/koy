@@ -652,6 +652,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             OnPropertyChanged(nameof(AboutStatusText));
             OnPropertyChanged(nameof(UninstallRowDescription));
             OnPropertyChanged(nameof(DownloadProgressText));
+            OnPropertyChanged(nameof(StartIconFileName));
         }
         catch { }
     }
