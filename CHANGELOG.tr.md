@@ -5,6 +5,19 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.5](https://github.com/koyhq/koy/compare/v0.2.4...v0.2.5) (2026-11-09)
+Öne çıkanlar:
+- **Türkçe ve İngilizce sesli komut:** Ctrl+Alt+V artık çentikte bir kutu açıp Windows sesle yazmayı (Win+H) başlatıyor; klavye dilinde yazdığı için Türkçe, konuşma dili kurmadan çalışıyor. Komutu elle de yazabilirsin. Enter çalıştırır, Esc iptal eder; yanıtın ilk satırı çentikte görünür, tıklayınca tamamı açılır.
+- **Web araması tarayıcında:** hiç sonuç yoksa arama DuckDuckGo yerine varsayılan tarayıcını açıp onun kendi arama motoruyla arıyor (Chrome, Edge, Brave, Vivaldi, Firefox ve diğerleri).
+- **Daha anlaşılır hatalar:** kodlama aracı hata verirse çentik yalnız çıkış kodunu değil, aracın kendi mesajını gösteriyor (ör. "Not logged in").
+
+
+### Düzeltmeler
+
+* **notch:** sesli komut Windows sesle yazmayla Türkçe ve İngilizce çalışıyor ([3078a72](https://github.com/koyhq/koy/commit/3078a72a44f8f4d9c33ecccba81b3a9b25f1df41))
+* **notch:** sesli komutun yanıtı gösteriliyor, Enter çalışmaya devam ediyor ([afacb55](https://github.com/koyhq/koy/commit/afacb55aea7af8c125590ffa73a4fdafbc10f376))
+* **search:** web araması varsayılan tarayıcıda, onun kendi motoruyla ([7063934](https://github.com/koyhq/koy/commit/70639341f0ec69000e4b4cf7e6cf71d3ec52690d))
+
 ## [0.2.4](https://github.com/koyhq/koy/compare/v0.2.3...v0.2.4) (2026-11-09)
 
 Öne çıkanlar:
