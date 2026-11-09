@@ -15,8 +15,9 @@ public enum LyricsState
 /// Bir görünümün söz durumu: hangi parça yüklü, hangi satır etkin. Arayüz iş parçacığından çağrılır; dosya ve ağ işi
 /// arka plana alınır. Parça hızlı değişince eski istek iptal edilir, geç gelen eski sonuç yeni parçanın üzerine yazmaz.
 /// </summary>
-public sealed class LyricsSession(ILyricsProvider provider)
+public sealed class LyricsSession(ILyricsProvider provider, Action<string, Exception>? onError = null)
 {
+    private readonly Action<string, Exception> _onError = onError ?? ((source, ex) => CrashLog.Write(source, ex));
     private CancellationTokenSource? _load;
     private string? _key;
 
@@ -56,7 +57,7 @@ public sealed class LyricsSession(ILyricsProvider provider)
         }
         catch (Exception ex)
         {
-            CrashLog.Write("Şarkı sözü yüklenemedi", ex);
+            _onError("Şarkı sözü yüklenemedi", ex);
             result = LyricsLoadResult.Failed;
         }
 

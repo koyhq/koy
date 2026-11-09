@@ -177,13 +177,15 @@ public sealed class LyricsSessionTests : IDisposable
     public async Task Provider_exception_becomes_failed_state()
     {
         var provider = new ManualProvider();
-        var session = new LyricsSession(provider);
+        Exception? logged = null;
+        var session = new LyricsSession(provider, (_, ex) => logged = ex);
         var load = session.LoadAsync(A);
 
         provider.For(A).SetException(new InvalidOperationException("boom"));
         await load;
 
         Assert.Equal(LyricsState.Failed, session.State);
+        Assert.IsType<InvalidOperationException>(logged);
     }
 
     [Fact]
