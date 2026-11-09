@@ -116,7 +116,8 @@ public sealed record AppSettings
     public string WeatherRefreshInterval { get; set; } = "30m";
     public double DockIconSize { get; set; } = 28.0;
     public int IdleDisplayMode { get; set; }
-    public int NotchOpenBehavior { get; set; } = 1;
+    /// <summary>Çentiğin açılması: 0 = üzerine gelince (varsayılan), 1 = tıklayınca.</summary>
+    public int NotchOpenBehavior { get; set; }
     public string Material { get; set; } = "Katı";
     public int WheelAction { get; set; }
     public int MiddleClickAction { get; set; }
