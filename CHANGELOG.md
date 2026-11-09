@@ -7,6 +7,16 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.5](https://github.com/koyhq/koy/compare/v0.2.4...v0.2.5) (2026-11-09)
+
+
+### Fixed
+
+* **notch:** show the voice command reply and keep Enter working ([afacb55](https://github.com/koyhq/koy/commit/afacb55aea7af8c125590ffa73a4fdafbc10f376))
+* **notch:** use Windows voice typing so voice commands work in Turkish and English ([3078a72](https://github.com/koyhq/koy/commit/3078a72a44f8f4d9c33ecccba81b3a9b25f1df41))
+* **search:** search the web in the default browser with its own engine ([7063934](https://github.com/koyhq/koy/commit/70639341f0ec69000e4b4cf7e6cf71d3ec52690d))
+* web search in the default browser and voice commands via Windows voice typing ([dc95c74](https://github.com/koyhq/koy/commit/dc95c74a8a4f74f1c47dd9a53abc8b60965c6224))
+
 ## [0.2.4](https://github.com/koyhq/koy/compare/v0.2.3...v0.2.4) (2026-11-09)
 
 Highlights:
