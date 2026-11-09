@@ -664,7 +664,7 @@
     <value>Kodlama Aracı (Harness)</value>
   </data>
   <data name="VoiceHarnessDesc" xml:space="preserve">
-    <value>Dikte edilen sesli komutla çalıştırılacak CLI aracı.</value>
+    <value>Dikte edilen sesli komutla çalıştırılacak CLI aracı. Konuşma Windows'un çevrimiçi konuşma tanımasıyla yazıya çevrilir; Koy dinlerken ses Microsoft'a gönderilir.</value>
   </data>
   <data name="VoiceHarnessCustom" xml:space="preserve">
     <value>Özel</value>
@@ -2270,6 +2270,9 @@
   </data>
   <data name="VoiceErrorUnexpected" xml:space="preserve">
     <value>Bir şeyler ters gitti.</value>
+  </data>
+  <data name="LyricsToggle" xml:space="preserve">
+    <value>Şarkı sözlerini aç ya da kapat. Açıkken çalan parçanın adı LRCLIB'de aranır.</value>
   </data>
 </root>
 

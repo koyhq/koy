@@ -95,7 +95,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _musicShowWaveform = true;
 
     [ObservableProperty]
-    private bool _musicLyricsEnabled = true;
+    private bool _musicLyricsEnabled;
 
     [ObservableProperty]
     private bool _showVolumeOsd = true;

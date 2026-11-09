@@ -171,8 +171,11 @@ public sealed record AppSettings
     public bool ShowVolumeOsd { get; set; } = true;
     /// <summary>Müzik çalarken çentikte dalga simgesi görünsün.</summary>
     public bool MusicShowWaveform { get; set; } = true;
-    /// <summary>Ana sayfadaki müzik kartında eşzamanlı sözler. İstek yalnız Ana sayfa görünürken, parça başına bir kez gider.</summary>
-    public bool MusicLyricsEnabled { get; set; } = true;
+    /// <summary>
+    /// Ana sayfadaki müzik kartında eşzamanlı sözler. Varsayılan kapalı: açıkken çalan parçanın (tarayıcı videosu dahil) adı
+    /// LRCLIB'e gider, bu yüzden kullanıcı kartındaki düğmeyle ya da ayardan kendisi açar. İstek yalnız Ana görünürken, parça başına bir kez.
+    /// </summary>
+    public bool MusicLyricsEnabled { get; set; }
     /// <summary>Tam ekran uygulama ya da oyun varken çentik gizlensin.</summary>
     public bool NotchHideInFullscreen { get; set; } = true;
     /// <summary>Kamera ve mikrofon kullanımında çentikte gizlilik noktaları görünsün.</summary>

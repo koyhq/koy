@@ -664,7 +664,7 @@
     <value>Coding Assistant (Harness)</value>
   </data>
   <data name="VoiceHarnessDesc" xml:space="preserve">
-    <value>CLI tool executed with your transcribed speech prompt.</value>
+    <value>CLI tool executed with your transcribed speech prompt. Speech is transcribed by Windows online speech recognition, so audio is sent to Microsoft while Koy is listening.</value>
   </data>
   <data name="VoiceHarnessCustom" xml:space="preserve">
     <value>Custom</value>
@@ -2270,6 +2270,9 @@
   </data>
   <data name="VoiceErrorUnexpected" xml:space="preserve">
     <value>Something went wrong.</value>
+  </data>
+  <data name="LyricsToggle" xml:space="preserve">
+    <value>Lyrics on or off. When on, the playing title is looked up on LRCLIB.</value>
   </data>
 </root>
 

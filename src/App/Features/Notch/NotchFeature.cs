@@ -231,6 +231,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         // Müzik kartı çubukları: ses yakalama yalnız kart görünür ve müzik çalarken (MusicViewModel.UpdateSpectrum).
         var musicVm = new MusicViewModel(_mediaService!, spectrumAcquire: () => services.AcquireSpectrumService(), spectrumRelease: services.ReleaseSpectrumService,
             lyricsProvider: _lyricsProvider);
+        musicVm.Lyrics.EnabledToggled += SaveLyricsEnabled;
         // Parlaklık, çentiğin o anki ekranına bağlanır; ekran düzeni değişince state.Monitor güncellenir.
         NotchWindowState? stateRef = null;
         var controlCenterVm = new ControlCenterViewModel(
@@ -553,6 +554,14 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     {
         _appSearch ??= SearchFactory.CreateAppSource(_shellActions);
         return SearchFactory.Create(settings, _appSearch, _windowTracker!, _clipboardHistory, Application.Current.Dispatcher, SaveSearchPinned);
+    }
+
+    // Karttaki düğme ayarı değiştirir: paylaşılan ayar nesnesi (diğer ekranların çentikleri de okur) ve diskteki dosya.
+    private void SaveLyricsEnabled(bool enabled)
+    {
+        settings.MusicLyricsEnabled = enabled;
+        var store = new SettingsStore(SettingsStore.DefaultPath);
+        store.Save(store.Load() with { MusicLyricsEnabled = enabled });
     }
 
     private void SaveSearchPinned(bool pinned)

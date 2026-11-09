@@ -37,6 +37,7 @@ public sealed partial class LyricsViewModel : ObservableObject, IDisposable
     private readonly DispatcherTimer _lineTimer;
 
     private bool _panelActive;
+    private bool _allowed;
     private bool _running;
     private bool _disposed;
     private string? _trackIdentity;
@@ -56,6 +57,16 @@ public sealed partial class LyricsViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     private LyricLineItem? _activeLine;
+
+    /// <summary>Sözler ayarı açık mı (karttaki düğmenin durumu).</summary>
+    [ObservableProperty]
+    private bool _isEnabled;
+
+    /// <summary>Kaynak zinciri kurulduysa kartta sözler düğmesi gösterilir.</summary>
+    public bool CanToggle => _session is not null;
+
+    /// <summary>Kullanıcı karttaki düğmeyle sözleri açtı ya da kapattı; ayar kalıcı olarak kaydedilmeli.</summary>
+    public event Action<bool>? EnabledToggled;
 
     /// <summary>Kartta sözler mi var. Yüklenirken ya da söz yoksa kartta ses çubukları kalır.</summary>
     public bool IsShown => IsAvailable && State == LyricsState.Ready;
@@ -79,6 +90,8 @@ public sealed partial class LyricsViewModel : ObservableObject, IDisposable
     /// <summary>Çentik ayarındaki "şarkı sözleri" seçeneği.</summary>
     public void SetAllowed(bool allowed)
     {
+        _allowed = allowed;
+        IsEnabled = allowed;
         IsAvailable = allowed && _session is not null;
         UpdateRunning();
     }
@@ -88,6 +101,16 @@ public sealed partial class LyricsViewModel : ObservableObject, IDisposable
     {
         _panelActive = active;
         UpdateRunning();
+    }
+
+    [RelayCommand]
+    private void ToggleEnabled()
+    {
+        if (_session is null)
+            return;
+
+        SetAllowed(!_allowed);
+        EnabledToggled?.Invoke(_allowed);
     }
 
     [RelayCommand]
