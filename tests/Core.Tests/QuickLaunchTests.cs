@@ -114,7 +114,7 @@ public class QuickLaunchTests
         }
         finally
         {
-            Koy.Core.Diagnostics.CrashLog.LogPath = Koy.Core.Diagnostics.CrashLog.DefaultPath;
+            Koy.Core.Diagnostics.CrashLog.LogPath = TestLogRedirect.TestLogPath;
             if (File.Exists(logPath)) File.Delete(logPath);
         }
     }
