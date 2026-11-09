@@ -178,6 +178,51 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _dockShowStartButton = true;
 
     [ObservableProperty]
+    private DockStartIcon _dockStartIcon = DockStartIcon.Koy;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StartIconFileName))]
+    private string _dockStartIconPath = "";
+
+    /// <summary>Özel simge satırında gösterilen dosya adı; seçilmemişse "görsel seçilmedi".</summary>
+    public string StartIconFileName => string.IsNullOrWhiteSpace(DockStartIconPath)
+        ? Strings.Get("DockStartIconNoFile")
+        : System.IO.Path.GetFileName(DockStartIconPath);
+
+    /// <summary>
+    /// "Özel" seçilince ya da "Görsel seç" düğmesine basılınca çalışır. Yalnız kullanıcı tıklamasından çağrılır:
+    /// ayar yüklenirken (özellik değişimi) dosya penceresi açılmasın diye bir özellik değişim kancasına bağlanmaz.
+    /// </summary>
+    [RelayCommand]
+    public void PickStartIcon()
+    {
+        if (_isLoading)
+            return;
+
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = Strings.Get("DockStartIconPickTitle"),
+            Filter = Strings.Get("DockStartIconPickFilter"),
+            CheckFileExists = true
+        };
+
+        var owner = Application.Current?.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+        var accepted = owner is not null ? dialog.ShowDialog(owner) : dialog.ShowDialog();
+
+        if (accepted == true && DockStartIconResolver.IsSupportedFile(dialog.FileName))
+        {
+            // Önce yol, sonra tür: tek geçerli durum olarak kaydedilir.
+            DockStartIconPath = dialog.FileName;
+            DockStartIcon = DockStartIcon.Custom;
+        }
+        else if (DockStartIconResolver.Resolve(DockStartIcon.Custom, DockStartIconPath).Kind != DockStartIcon.Custom)
+        {
+            // İptal edildi ve elde geçerli dosya yok: "Özel" boş kalmasın, varsayılana dön.
+            DockStartIcon = DockStartIcon.Koy;
+        }
+    }
+
+    [ObservableProperty]
     private bool _dockShowFolders = true;
 
     [ObservableProperty]
@@ -382,6 +427,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             DockEdgeReveal = s.DockEdgeReveal;
             DockHoverMagnify = s.DockHoverMagnify;
             DockShowStartButton = s.DockShowStartButton;
+            DockStartIcon = s.DockStartIcon;
+            DockStartIconPath = s.DockStartIconPath ?? "";
             DockShowFolders = s.DockShowFolders;
             DockShowRecents = s.DockShowRecents;
             DockShowTray = s.DockShowTray;
@@ -537,7 +584,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         if (_isLoading) return;
         if (e.PropertyName is nameof(SelectedPageIndex) or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
             or nameof(IsResetConfirming) or nameof(UninstallAvailability) or nameof(CanUninstall) or nameof(UninstallRowDescription)
-            or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates) or nameof(DownloadProgressText))
+            or nameof(StartIconFileName) or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates) or nameof(DownloadProgressText))
             return;
 
         SaveSettings();
@@ -605,6 +652,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             OnPropertyChanged(nameof(AboutStatusText));
             OnPropertyChanged(nameof(UninstallRowDescription));
             OnPropertyChanged(nameof(DownloadProgressText));
+            OnPropertyChanged(nameof(StartIconFileName));
         }
         catch { }
     }
@@ -644,6 +692,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             DockEdgeReveal = DockEdgeReveal,
             DockHoverMagnify = DockHoverMagnify,
             DockShowStartButton = DockShowStartButton,
+            DockStartIcon = DockStartIcon,
+            DockStartIconPath = DockStartIconPath,
             DockShowFolders = DockShowFolders,
             DockShowRecents = DockShowRecents,
             DockShowTray = DockShowTray,

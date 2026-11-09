@@ -480,6 +480,30 @@
   <data name="StartButtonTitle" xml:space="preserve">
     <value>Windows Başlat düğmesi</value>
   </data>
+  <data name="DockStartIconTitle" xml:space="preserve">
+    <value>Başlat düğmesi simgesi</value>
+  </data>
+  <data name="DockStartIconKoy" xml:space="preserve">
+    <value>Koy</value>
+  </data>
+  <data name="DockStartIconWindows" xml:space="preserve">
+    <value>Windows</value>
+  </data>
+  <data name="DockStartIconCustom" xml:space="preserve">
+    <value>Özel</value>
+  </data>
+  <data name="DockStartIconChoose" xml:space="preserve">
+    <value>Görsel seç...</value>
+  </data>
+  <data name="DockStartIconNoFile" xml:space="preserve">
+    <value>Görsel seçilmedi</value>
+  </data>
+  <data name="DockStartIconPickTitle" xml:space="preserve">
+    <value>Başlat düğmesi simgesini seç</value>
+  </data>
+  <data name="DockStartIconPickFilter" xml:space="preserve">
+    <value>Görseller (*.png;*.jpg;*.jpeg;*.ico)|*.png;*.jpg;*.jpeg;*.ico</value>
+  </data>
   <data name="FoldersSectionTitle" xml:space="preserve">
     <value>Klasörler bölümü (İndirilenler)</value>
   </data>

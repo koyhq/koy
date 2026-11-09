@@ -465,6 +465,15 @@ Proje sahibi istedi. Yalnız tam genişlik çubuk; kapsül değişmez.
 - [x] Görsel kanıt: `--scene dockbar` (`dockbar-tam-genislik-sola`, `dockbar-tam-genislik-saga`).
 - [ ] Elle sınama (proje sahibi): Sol / Orta / Sağ geçişi çalışan dock'ta; yeniden başlatınca korunma; ikon sürükleyerek sıralama, klasör paneli ve pencere önizlemesi üç hizada doğru yerde mi; iki ekran.
 
+## Başlat düğmesi simgesi (2026-11-09)
+Proje sahibi istedi. Dock'un Başlat düğmesi artık varsayılan olarak Koy'un kendi simgesini gösterir; Windows logosu seçenek olarak kalır.
+- [x] `AppSettings.DockStartIcon` (`Koy` varsayılan / `Windows` / `Custom`) ve `DockStartIconPath`. Eski `settings.json` dosyaları alansız yüklenir ve Koy simgesini alır (Windows logosu görenler için bu bilinçli bir varsayılan değişikliği). Karar mantığı `Core/Dock/DockStartIcon.cs` (`DockStartIconResolver`): yol boşsa, uzantı PNG/JPG/ICO değilse ya da dosya yoksa Koy simgesi. Testli.
+- [x] Koy simgesi `assets/branding/koy-symbol-small.svg`'nin vektör karşılığı (`KoyStartIconImage`, `Styles.xaml`): 16-18 px'te her DPI'da keskin. Özel dosya `DockStartIconLoader`'da `DecodePixelWidth=64` ile çözülüp dondurulur (ICO'da hedefe en yakın kare seçilir); bozuk, okunamayan ya da 20 MB üstü dosya Koy simgesine düşer, dock çökmez.
+- [x] Değişince yalnız ViewModel yeniden kurulur (`DockSettingsDiff`); görev çubuğu, AppBar ve ekranlara dokunulmaz. Testli.
+- [x] Koy › Dock › Bölümler: "Başlat düğmesi simgesi" satırı (Koy / Windows / Özel). Başlat düğmesi kapalıysa satır görünmez. Dosya penceresi yalnız "Özel"e ya da "Görsel seç"e tıklayınca açılır, ayar yüklenirken asla açılmaz; iptalde geçerli dosya yoksa Koy'a dönülür.
+- [x] Görsel kanıt: `--scene dockbar` (`dockbar-*-baslat-windows`, `-ozel`, `-bozuk`, `-yok`; varsayılan Koy simgesi bütün öteki dockbar çekimlerinde) ve `--scene all` (`koy-dock`).
+- [ ] Elle sınama (proje sahibi): Koy / Windows / Özel geçişi çalışan dock'ta (kapsül ve tam genişlik), yeniden başlatınca korunma, yüksek DPI'da keskinlik, PNG / JPG / ICO seçimi, seçili dosyayı silip dock'u yeniden kurma (Koy'a dönmeli).
+
 ## Güncelleme akışı yeniden: sor, güncelle, "neler geldi" — AÇIK, yapılacak (2026-11-07)
 Proje sahibi istedi. Kod yazılmadı.
 

@@ -33,7 +33,7 @@
                     Height="{Binding ItemSize}"
                     Margin="1,0"
                     Visibility="{Binding ShowStartButton, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
-                <Image Source="{StaticResource WindowsLogoImage}" Width="18" Height="18"/>
+                <Image Source="{Binding StartIcon}" Width="18" Height="18" RenderOptions.BitmapScalingMode="HighQuality"/>
             </Button>
 
             <!-- 2. Dock Uygulama Öğeleri Listesi (ortak şerit) -->
