@@ -8,7 +8,8 @@ Soru: Çalan parçanın sözleri, müzikle eşzamanlı olarak çentikte nasıl g
 - Koy'a uyuyor. Yeni NuGet paketi ve ek süreç gerekmiyor; parça ve konum bilgisi `IMediaService`'ten geliyor.
 - Kaynak sırası: yerel `.lrc` dosyası, disk önbelleği, LRCLIB.
 - Yalnız zaman damgalı sözler gösterilir. Düz metin söz, müzikle akmadığı için kapsam dışı.
-- Kullanıcı "Sözler" düğmesine basmadıkça dosya ya da ağ işi yapılmaz.
+- Sözler Ana sayfadaki müzik kartında kendiliğinden görünür. Çentik kapalıyken ya da başka sekmedeyken dosya veya ağ işi yapılmaz.
+- Yüklenirken ya da söz yoksa kartta ses çubukları kalır, ayrıca mesaj gösterilmez.
 
 ## Kaynaklar
 | Sıra | Kaynak | Konum | Not |
@@ -86,10 +87,10 @@ Tarayıcıdaki videolarda başlık çoğu zaman `Sanatçı - Parça (Official Vi
 | Parça bilgisi parça parça gelir | 350 ms bekleme; süre sorgu kimliğine (`Key`) dahil değil |
 | Yeni parçaya önceki parçanın süresiyle sorgu gitmesi | Parça değişiminden 5 sn'den eski zaman çizelgesinin süresi kullanılmaz |
 | Büyük klasör taramasının arayüzü dondurması | Bütün kaynak zinciri arka planda; tarama derinlik ve dosya sayısıyla sınırlı, bağlantı klasörleri atlanır |
-| Görünmeyen özelliğin çalışması (AGENTS #5) | Yükleme ve zamanlayıcı yalnız sözler ekrandayken; sözler açıkken ses çubukları için yakalama durur |
+| Görünmeyen özelliğin çalışması (AGENTS #5) | Yükleme ve zamanlayıcı yalnız Ana sayfa görünürken; söz varken ses çubukları için yakalama durur |
 
 ## Gizlilik
-Sözler açıldığında parça adı, sanatçı ve süre LRCLIB'e gönderilir. Yerelde ya da önbellekte bulunan parça için istek gitmez. Ayarlar › Çentik › Şarkı sözleri kapatılınca düğme kalkar ve hiçbir istek gönderilmez; açıklama metni bunu kullanıcıya söyler.
+Ana sayfa görünürken çalan parçanın adı, sanatçı ve süre parça başına bir kez LRCLIB'e gönderilir. Oynatıcı müziği videodan ayırmadığı için tarayıcıdaki video başlıkları da buna dahildir. Yerelde ya da önbellekte bulunan parça için istek gitmez. Ayarlar › Çentik › Şarkı sözleri kapatılınca sözler gösterilmez ve hiçbir istek gönderilmez; açıklama metni bunu kullanıcıya söyler.
 
 ## Bu sürümde yok
 - Birden çok aday arasından elle söz seçme.
@@ -105,7 +106,7 @@ Sözler açıldığında parça adı, sanatçı ve süre LRCLIB'e gönderilir. Y
 | Mantık (ayrıştırma, sorgu, seçim, önbellek, oturum, saat) | `tests/Core.Tests`, xUnit | Yeşil |
 | LRCLIB yanıt biçimi | Gerçek istek | `200`, `404`, 20 sonuç |
 | Kaynak zinciri | `LyricsProvider` + `LrclibSource` gerçek hizmetle, geçici klasörde | Bulma, gürültülü başlık, önbellek, olmayan parça çalıştı |
-| Görünüm | `tools/Koy.UiSnapshots`, `ana-muzik-sozler` sahnesi | Koyu ve açık tema |
+| Görünüm | `tools/Koy.UiSnapshots`, `ana-muzik` ve `ana-muzik-buyuk` sahneleri | Koyu ve açık tema |
 | Gerçek medya oturumu → sorgu → söz | `MediaService` + `LyricsProvider`, Spotify'da duraklatılmış parça | Parça okundu, 27 satır bulundu, etkin satır doğru |
 | Çentikte çalarken senkron, satıra tıklama, parça değişimi | **Yapılmadı** | Elle sınama bekliyor |
 | Bellek | Debug derleme, açılıştan 25 sn sonra, sözler kapalı | 44,9 MB özel çalışma kümesi, 69,4 MB private bytes. Sözler açıkken ölçülmedi |

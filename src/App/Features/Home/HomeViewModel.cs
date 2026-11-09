@@ -49,8 +49,6 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     [NotifyPropertyChangedFor(nameof(ShowMusicCompact), nameof(ShowMusicLarge), nameof(ShowSideColumn))]
     private bool _isMusicExpanded;
 
-    partial void OnIsMusicExpandedChanged(bool value) => Music.Lyrics.SetCardLarge(ShowMusicLarge);
-
     /// <summary>Müzik kartı küçük düzende (sol sütun).</summary>
     public bool ShowMusicCompact => Music.HasTrack && !IsMusicExpanded;
 
@@ -97,7 +95,6 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
             OnPropertyChanged(nameof(ShowMusicCompact));
             OnPropertyChanged(nameof(ShowMusicLarge));
             OnPropertyChanged(nameof(ShowSideColumn));
-            Music.Lyrics.SetCardLarge(ShowMusicLarge);
         }
     }
 

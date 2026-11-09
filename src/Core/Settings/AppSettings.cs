@@ -157,7 +157,7 @@ public sealed record AppSettings
     public bool ShowVolumeOsd { get; set; } = true;
     /// <summary>Müzik çalarken çentikte dalga simgesi görünsün.</summary>
     public bool MusicShowWaveform { get; set; } = true;
-    /// <summary>Büyük müzik kartında "Sözler" düğmesi. İstek yalnız kullanıcı sözleri açınca gider.</summary>
+    /// <summary>Ana sayfadaki müzik kartında eşzamanlı sözler. İstek yalnız Ana sayfa görünürken, parça başına bir kez gider.</summary>
     public bool MusicLyricsEnabled { get; set; } = true;
     /// <summary>Tam ekran uygulama ya da oyun varken çentik gizlensin.</summary>
     public bool NotchHideInFullscreen { get; set; } = true;

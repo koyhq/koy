@@ -360,9 +360,6 @@ public static class Program
         // Müzik kartına tıklanınca: büyük kart Ana gövdesini kaplar.
         set.Vm.Home.ToggleMusicExpandedCommand.Execute(null);
         ShotNotch(set, name("ana-muzik-buyuk"), expanded: true);
-        // Sözler açık: çubukların yerinde eşzamanlı satırlar.
-        set.Vm.Music.Lyrics.ToggleCommand.Execute(null);
-        ShotNotch(set, name("ana-muzik-sozler"), expanded: true);
         set.Vm.Dispose();
 
         // Video kapağı (Chrome/YouTube Windows'a ~150×83 verir): kırpılmadan tamamı, arkada bulanık hâli.

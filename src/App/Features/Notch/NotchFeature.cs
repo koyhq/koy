@@ -86,7 +86,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     private WeatherService? _weatherService;
     // Cihaz konumunun yer adı: bütün ekranların çentikleri tek servisi paylaşır (koordinat başına tek istek).
     private readonly PlaceNameService _placeNameService = new();
-    // Kurulması ucuz: dosya ya da ağ işi yalnız kullanıcı sözleri açınca başlar.
+    // Kurulması ucuz: dosya ya da ağ işi yalnız Ana sayfa görünürken başlar.
     private readonly Koy.Core.Lyrics.LyricsProvider _lyricsProvider = new(
         new Koy.Core.Lyrics.LocalLyricsSource(Koy.Core.Lyrics.LocalLyricsSource.DefaultDirectory),
         new Koy.Core.Lyrics.LyricsCache(Koy.Core.Lyrics.LyricsCache.DefaultDirectory),

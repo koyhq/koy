@@ -209,6 +209,8 @@
           <music:SpectrumBars Grid.Row="1" Height="26" VerticalAlignment="Center" HorizontalAlignment="Center"
                               Feed="{Binding Music.Spectrum}" Fill="#BFBBF7D0" IsHitTestVisible="False"
                               Visibility="{Binding Music.ShowSpectrum, Converter={StaticResource BoolToVis}}" />
+          <music:LyricsView Grid.Row="1" FontSize="13" Margin="0,6,0,6" DataContext="{Binding Music.Lyrics}"
+                            Visibility="{Binding IsShown, Converter={StaticResource BoolToVis}}" />
 
           <!-- İlerleme (tıklayınca o yere atlar) -->
           <Grid Grid.Row="2" Margin="0,0,0,12">
@@ -333,32 +335,11 @@
               <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!-- Sözler açıkken başlık tek satıra iner, yer sözlere kalır. -->
-            <Button Grid.Row="0" Style="{StaticResource CardButtonStyle}" Command="{Binding Music.Lyrics.ToggleCommand}" Panel.ZIndex="1"
-                    HorizontalAlignment="Right" VerticalAlignment="Top"
-                    Visibility="{Binding Music.Lyrics.IsAvailable, Converter={StaticResource BoolToVis}}"
-                    ToolTip="{Binding [LyricsToggle], Source={x:Static res:Loc.Instance}}"
-                    AutomationProperties.Name="{Binding [LyricsToggle], Source={x:Static res:Loc.Instance}}">
-              <Border Width="28" Height="28" CornerRadius="9">
-                <Border.Style>
-                  <Style TargetType="Border">
-                    <Setter Property="Background" Value="Transparent" />
-                    <Style.Triggers>
-                      <DataTrigger Binding="{Binding Music.Lyrics.IsOpen}" Value="True">
-                        <Setter Property="Background" Value="{DynamicResource KoyNotchChip}" />
-                      </DataTrigger>
-                    </Style.Triggers>
-                  </Style>
-                </Border.Style>
-                <res:KoyIcon Data="{DynamicResource IconLyrics}" Size="16" StrokeWidth="2" Foreground="{DynamicResource KoyNotchText}"
-                             HorizontalAlignment="Center" VerticalAlignment="Center" />
-              </Border>
-            </Button>
-
+            <!-- Sözler varken başlık tek satıra iner, yer sözlere kalır. -->
             <TextBlock Grid.Row="0" Text="{Binding Music.Title}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
-                       Margin="0,4,36,0" Visibility="{Binding Music.Lyrics.IsShown, Converter={StaticResource BoolToVis}}" />
+                       Margin="0,4,0,0" Visibility="{Binding Music.Lyrics.IsShown, Converter={StaticResource BoolToVis}}" />
 
-            <StackPanel Grid.Row="0" Margin="0,0,36,0">
+            <StackPanel Grid.Row="0">
               <StackPanel.Style>
                 <Style TargetType="StackPanel">
                   <Style.Triggers>
@@ -387,7 +368,7 @@
                                 Feed="{Binding Music.Spectrum}" Fill="#BFBBF7D0" IsHitTestVisible="False"
                                 Visibility="{Binding Music.ShowSpectrum, Converter={StaticResource BoolToVis}}" />
 
-            <music:LyricsView Grid.Row="1" Margin="0,8,0,8" DataContext="{Binding Music.Lyrics}"
+            <music:LyricsView Grid.Row="1" FontSize="15" Margin="0,8,0,8" DataContext="{Binding Music.Lyrics}"
                               Visibility="{Binding IsShown, Converter={StaticResource BoolToVis}}" />
 
             <Grid Grid.Row="2" Margin="0,0,0,10">

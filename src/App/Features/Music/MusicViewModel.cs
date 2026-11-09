@@ -83,7 +83,7 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private bool _showSpectrum;
 
-    /// <summary>Büyük müzik kartındaki eşzamanlı sözler.</summary>
+    /// <summary>Müzik kartındaki eşzamanlı sözler.</summary>
     public LyricsViewModel Lyrics { get; }
 
     public MusicViewModel(IMediaService mediaService, Dispatcher? dispatcher = null,

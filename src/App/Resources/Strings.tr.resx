@@ -498,23 +498,11 @@
   <data name="ChannelPreview" xml:space="preserve">
     <value>Önizleme</value>
   </data>
-  <data name="LyricsToggle" xml:space="preserve">
-    <value>Sözler</value>
-  </data>
-  <data name="LyricsLoading" xml:space="preserve">
-    <value>Sözler yükleniyor…</value>
-  </data>
-  <data name="LyricsNotFound" xml:space="preserve">
-    <value>Bu parça için eşzamanlı söz bulunamadı</value>
-  </data>
-  <data name="LyricsFailed" xml:space="preserve">
-    <value>Sözler alınamadı. Bağlantını kontrol et.</value>
-  </data>
   <data name="LyricsSettingTitle" xml:space="preserve">
     <value>Şarkı sözleri</value>
   </data>
   <data name="LyricsSettingDesc" xml:space="preserve">
-    <value>Büyük müzik kartına Sözler düğmesi ekler. Açtığında parça adı ve sanatçı LRCLIB'e gönderilir. Müzik\Lyrics klasöründeki .lrc dosyaları önce kullanılır.</value>
+    <value>Ana sayfadaki müzik kartında eşzamanlı sözleri gösterir. Ana sayfa açıkken çalan parçanın adı ve sanatçısı, parça başına bir kez LRCLIB'e gönderilir. Müzik\Lyrics klasöründeki .lrc dosyaları önce kullanılır.</value>
   </data>
   <data name="MusicWaveformTitle" xml:space="preserve">
     <value>Müzik çalarken kapak ve dalga</value>

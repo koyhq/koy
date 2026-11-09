@@ -16,8 +16,8 @@ public sealed partial class LyricLineItem(LyricLine line) : ObservableObject
 }
 
 /// <summary>
-/// Büyük müzik kartındaki sözler. Kullanıcı açmadıkça hiçbir şey indirilmez; yükleme ve zamanlayıcı yalnız sözler
-/// ekrandayken çalışır (AGENTS #5). Zamanlayıcı saniyede bir yoklamaz, bir sonraki satırın zamanına kurulur.
+/// Ana sayfadaki müzik kartının sözleri. Yükleme ve zamanlayıcı yalnız Ana sayfa görünürken çalışır (AGENTS #5).
+/// Zamanlayıcı saniyede bir yoklamaz, bir sonraki satırın zamanına kurulur.
 /// </summary>
 public sealed partial class LyricsViewModel : ObservableObject, IDisposable
 {
@@ -37,7 +37,6 @@ public sealed partial class LyricsViewModel : ObservableObject, IDisposable
     private readonly DispatcherTimer _lineTimer;
 
     private bool _panelActive;
-    private bool _cardLarge;
     private bool _running;
     private bool _disposed;
     private string? _trackIdentity;
@@ -49,20 +48,17 @@ public sealed partial class LyricsViewModel : ObservableObject, IDisposable
     private bool _isAvailable;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsShown))]
-    private bool _isOpen;
-
-    [ObservableProperty]
     private IReadOnlyList<LyricLineItem> _lines = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsShown))]
     private LyricsState _state;
 
     [ObservableProperty]
     private LyricLineItem? _activeLine;
 
-    /// <summary>Sözler kartta görünüyor mu (ayar açık, kullanıcı açtı, kart büyük).</summary>
-    public bool IsShown => IsAvailable && IsOpen && _cardLarge;
+    /// <summary>Kartta sözler mi var. Yüklenirken ya da söz yoksa kartta ses çubukları kalır.</summary>
+    public bool IsShown => IsAvailable && State == LyricsState.Ready;
 
     public LyricsViewModel(IMediaService media, ILyricsProvider? provider, Dispatcher dispatcher)
     {
@@ -84,8 +80,6 @@ public sealed partial class LyricsViewModel : ObservableObject, IDisposable
     public void SetAllowed(bool allowed)
     {
         IsAvailable = allowed && _session is not null;
-        if (!IsAvailable)
-            IsOpen = false;
         UpdateRunning();
     }
 
@@ -95,22 +89,6 @@ public sealed partial class LyricsViewModel : ObservableObject, IDisposable
         _panelActive = active;
         UpdateRunning();
     }
-
-    /// <summary>Müzik kartı büyük düzende mi; sözler yalnız orada gösterilir.</summary>
-    public void SetCardLarge(bool large)
-    {
-        if (_cardLarge == large)
-            return;
-
-        _cardLarge = large;
-        OnPropertyChanged(nameof(IsShown));
-        UpdateRunning();
-    }
-
-    [RelayCommand]
-    private void Toggle() => IsOpen = !IsOpen;
-
-    partial void OnIsOpenChanged(bool value) => UpdateRunning();
 
     [RelayCommand]
     private async Task SeekToLine(LyricLineItem? item)
@@ -131,7 +109,7 @@ public sealed partial class LyricsViewModel : ObservableObject, IDisposable
 
     private void UpdateRunning()
     {
-        var want = !_disposed && IsShown && _panelActive && _session is not null;
+        var want = !_disposed && IsAvailable && _panelActive;
         if (want == _running)
             return;
 

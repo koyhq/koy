@@ -503,8 +503,8 @@ Proje sahibi istedi. Kod yazılmadı.
 Tasarım ve doğrulama: `docs/ARASTIRMA-SARKI-SOZLERI.md`.
 - [x] `Core/Lyrics/`: LRC ayrıştırıcı, etkin satır hesabı, sorgu temizliği, LRCLIB yanıt çözümü, yerel kaynak, disk önbelleği, kaynak zinciri, oturum durumu. Testli. `Core/Media/PlaybackClock` konum hesabını tek yerde toplar.
 - [x] `Platform/Lyrics/LrclibSource.cs`: önce tam eşleşme, sonra arama; geçici hatalar önbelleğe yazılmaz.
-- [x] Büyük müzik kartında "Sözler" düğmesi ve `LyricsView`: etkin satır yayla kayar, satıra tıklayınca o yere gider. Ağ ve zamanlayıcı yalnız sözler ekrandayken; sözler açıkken ses çubukları için yakalama durur.
-- [x] Ayar: `MusicLyricsEnabled` (Çentik sayfası, varsayılan açık); kapalıyken düğme yok, istek yok.
+- [x] Ana sayfadaki müzik kartında (küçük ve büyük) `LyricsView`: etkin satır yayla kayar, satıra tıklayınca o yere gider. Ağ ve zamanlayıcı yalnız Ana sayfa görünürken; söz varken ses çubukları için yakalama durur, söz yoksa çubuklar kalır.
+- [x] Ayar: `MusicLyricsEnabled` (Çentik sayfası, varsayılan açık); kapalıyken söz yok, istek yok.
 - [ ] Elle sınama (proje sahibi): Spotify ve tarayıcıda senkron, duraklat/devam, satıra tıklama, parça değişimi, çevrim dışı, çok monitör.
 - [ ] Bellek ölçümü (AGENTS #1): sözler kapalı ve açıkken, `docs/MEMORY.md`.
 
