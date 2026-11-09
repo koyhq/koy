@@ -1,0 +1,44 @@
+<UserControl x:Class="Koy.App.Features.Music.LyricsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Koy.App.Features.Music"
+             Background="Transparent">
+  <!-- Canvas: liste kendi tam yüksekliğini alır. Grid içinde kalsaydı yerleşim kırpması kaydırılan satırları keserdi. -->
+  <Canvas x:Name="Viewport" ClipToBounds="True">
+    <ItemsControl x:Name="LinesHost" ItemsSource="{Binding Lines}" Focusable="False"
+                  Width="{Binding ActualWidth, ElementName=Viewport}">
+      <ItemsControl.RenderTransform>
+        <TranslateTransform x:Name="ScrollTransform" />
+      </ItemsControl.RenderTransform>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate DataType="{x:Type local:LyricLineItem}">
+          <Button Cursor="Hand" Focusable="False" HorizontalContentAlignment="Stretch"
+                  Command="{Binding DataContext.SeekToLineCommand, RelativeSource={RelativeSource AncestorType=local:LyricsView}}"
+                  CommandParameter="{Binding}">
+            <Button.Template>
+              <ControlTemplate TargetType="Button">
+                <Border Background="Transparent" Padding="0,2">
+                  <ContentPresenter />
+                </Border>
+              </ControlTemplate>
+            </Button.Template>
+            <!-- Yazı boyutu kullanıldığı karttan gelir: küçük kartta 13, büyük kartta 15. -->
+            <TextBlock Text="{Binding Text}" FontSize="{Binding FontSize, RelativeSource={RelativeSource AncestorType=local:LyricsView}}"
+                       FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{DynamicResource KoyNotchText}">
+              <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                  <Setter Property="Opacity" Value="0.42" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                      <Setter Property="Opacity" Value="1" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            </TextBlock>
+          </Button>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </Canvas>
+</UserControl>

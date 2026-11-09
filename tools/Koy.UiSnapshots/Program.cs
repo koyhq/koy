@@ -221,7 +221,7 @@ public static class Program
             settings,
             controller,
             // Yakalama başlatılmayan servis: çubuklar aşağıda sahte düzeylerle doldurulur, gerçek ses okunmaz.
-            new Koy.App.Features.Music.MusicViewModel(new FakeMedia(info), spectrumAcquire: () => new Koy.Platform.Audio.SpectrumCaptureService()),
+            new Koy.App.Features.Music.MusicViewModel(new FakeMedia(info), spectrumAcquire: () => new Koy.Platform.Audio.SpectrumCaptureService(), lyricsProvider: new FakeLyrics()),
             new Koy.App.Features.ControlCenter.ControlCenterViewModel(
                 () => new FakeAudio(), () => new FakeRadio(), null, () => new FakeBrightness(brightnessSupported), new FakeFocusAssist(), settings,
                 wifiFactory: () => new FakeWifi(locationBlocked),

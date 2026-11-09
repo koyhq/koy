@@ -33,6 +33,27 @@ internal sealed class FakeMedia(MediaInfo? current) : IMediaService
     public void Dispose() { }
 }
 
+// Örnek metin bu proje için yazıldı; ağa ve dosyaya gidilmez. Satırlar FakeMedia'nın 84. saniyesi çevresinde.
+internal sealed class FakeLyrics : Koy.Core.Lyrics.ILyricsProvider
+{
+    private static readonly string[] Sample =
+    [
+        "Yol uzar, farlar söner",
+        "Şehir arkamda kalır",
+        "",
+        "Gece boyu radyoda aynı şarkı çalar, kimse söndürmez",
+        "Camda ince bir yağmur",
+        "Sabah daha çok uzak",
+        "Dönüş yok bu yoldan",
+        "Yine de gülümserim"
+    ];
+
+    public Task<Koy.Core.Lyrics.LyricsLoadResult> LoadAsync(Koy.Core.Lyrics.LyricsQuery query, CancellationToken cancellationToken) =>
+        Task.FromResult(new Koy.Core.Lyrics.LyricsLoadResult(
+            Koy.Core.Lyrics.LyricsLoadStatus.Found,
+            Sample.Select((text, i) => new Koy.Core.Lyrics.LyricLine(TimeSpan.FromSeconds(70 + i * 5), text)).ToArray()));
+}
+
 internal sealed class FakePower : IPowerService
 {
     public bool HasBattery => true;

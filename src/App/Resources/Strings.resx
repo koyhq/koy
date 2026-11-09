@@ -522,6 +522,12 @@
   <data name="ChannelPreview" xml:space="preserve">
     <value>Preview</value>
   </data>
+  <data name="LyricsSettingTitle" xml:space="preserve">
+    <value>Song lyrics</value>
+  </data>
+  <data name="LyricsSettingDesc" xml:space="preserve">
+    <value>Shows synced lyrics on the Home music card. While Home is open, the title and artist of what's playing are sent to LRCLIB once per track. .lrc files in Music\Lyrics are used first.</value>
+  </data>
   <data name="MusicWaveformTitle" xml:space="preserve">
     <value>Show album art and waveform when playing</value>
   </data>

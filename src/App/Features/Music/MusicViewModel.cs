@@ -4,6 +4,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Koy.Core.Lyrics;
 using Koy.Core.Media;
 using Koy.Platform.Audio;
 
@@ -82,14 +83,20 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private bool _showSpectrum;
 
+    /// <summary>Müzik kartındaki eşzamanlı sözler.</summary>
+    public LyricsViewModel Lyrics { get; }
+
     public MusicViewModel(IMediaService mediaService, Dispatcher? dispatcher = null,
-        Func<SpectrumCaptureService>? spectrumAcquire = null, Action? spectrumRelease = null)
+        Func<SpectrumCaptureService>? spectrumAcquire = null, Action? spectrumRelease = null,
+        ILyricsProvider? lyricsProvider = null)
     {
         _mediaService = mediaService;
         _dispatcher = dispatcher ?? System.Windows.Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
         _spectrumAcquire = spectrumAcquire;
         _spectrumRelease = spectrumRelease;
         Spectrum = new SpectrumFeed(SpectrumCaptureService.BandCount, _dispatcher);
+        Lyrics = new LyricsViewModel(mediaService, lyricsProvider, _dispatcher);
+        Lyrics.PropertyChanged += OnLyricsPropertyChanged;
 
         _progressTimer = new DispatcherTimer(DispatcherPriority.Background, _dispatcher)
         {
@@ -113,21 +120,29 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     public void SetActive(bool active)
     {
         _isActive = active;
+        Lyrics.SetPanelActive(active);
         UpdateProgressTimer();
+    }
+
+    // Sözler çubukların yerini alır: görünmeyen çubuk için ses yakalanmaz (AGENTS #5).
+    private void OnLyricsPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(LyricsViewModel.IsShown))
+            SetSpectrumAllowed(_spectrumAllowed);
     }
 
     /// <summary>Ses çubukları izinli mi (Çentik ayarındaki "kapak ve dalga" açık ve pil tasarrufu hareketi kısmıyor).</summary>
     public void SetSpectrumAllowed(bool allowed)
     {
         _spectrumAllowed = allowed;
-        ShowSpectrum = allowed && _spectrumAcquire is not null;
+        ShowSpectrum = allowed && _spectrumAcquire is not null && !Lyrics.IsShown;
         UpdateSpectrum();
     }
 
     // Yakalama yalnız kart görünür (çentik açık, Ana sekmesi) ve müzik çalarken sürer; aksi halde %0 CPU.
     private void UpdateSpectrum()
     {
-        var want = !_disposed && _isActive && HasTrack && IsPlaying && _spectrumAllowed && _spectrumAcquire is not null;
+        var want = !_disposed && _isActive && HasTrack && IsPlaying && ShowSpectrum;
         if (want && _spectrum is null)
         {
             try
@@ -254,20 +269,8 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
             return;
         }
 
-        Duration = timeline.EndTime - timeline.StartTime;
-        if (Duration < TimeSpan.Zero)
-            Duration = TimeSpan.Zero;
-        var rawPos = timeline.Position - timeline.StartTime;
-
-        // Çalma sürüyorsa geçen süreyi ekle
-        if (IsPlaying && timeline.LastUpdated != DateTimeOffset.MinValue)
-        {
-            var elapsed = DateTimeOffset.Now - timeline.LastUpdated;
-            if (elapsed > TimeSpan.Zero && elapsed < TimeSpan.FromHours(1))
-                rawPos += elapsed;
-        }
-
-        Position = rawPos < TimeSpan.Zero ? TimeSpan.Zero : (rawPos > Duration ? Duration : rawPos);
+        Duration = PlaybackClock.Duration(timeline);
+        Position = PlaybackClock.PositionAt(timeline, IsPlaying, DateTimeOffset.Now);
         Progress = Duration.TotalSeconds > 0 ? Math.Clamp(Position.TotalSeconds / Duration.TotalSeconds, 0.0, 1.0) : 0.0;
         PositionText = FormatTime(Position);
         DurationText = FormatTime(Duration);
@@ -344,6 +347,8 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
             return;
 
         _disposed = true;
+        Lyrics.PropertyChanged -= OnLyricsPropertyChanged;
+        Lyrics.Dispose();
         UpdateSpectrum();
         _progressTimer.Stop();
         _progressTimer.Tick -= OnProgressTick;

@@ -209,6 +209,8 @@
           <music:SpectrumBars Grid.Row="1" Height="26" VerticalAlignment="Center" HorizontalAlignment="Center"
                               Feed="{Binding Music.Spectrum}" Fill="#BFBBF7D0" IsHitTestVisible="False"
                               Visibility="{Binding Music.ShowSpectrum, Converter={StaticResource BoolToVis}}" />
+          <music:LyricsView Grid.Row="1" FontSize="13" Margin="0,6,0,6" DataContext="{Binding Music.Lyrics}"
+                            Visibility="{Binding IsShown, Converter={StaticResource BoolToVis}}" />
 
           <!-- İlerleme (tıklayınca o yere atlar) -->
           <Grid Grid.Row="2" Margin="0,0,0,12">
@@ -333,7 +335,20 @@
               <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
+            <!-- Sözler varken başlık tek satıra iner, yer sözlere kalır. -->
+            <TextBlock Grid.Row="0" Text="{Binding Music.Title}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                       Margin="0,4,0,0" Visibility="{Binding Music.Lyrics.IsShown, Converter={StaticResource BoolToVis}}" />
+
             <StackPanel Grid.Row="0">
+              <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding Music.Lyrics.IsShown}" Value="True">
+                      <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </StackPanel.Style>
               <TextBlock Text="{Binding Music.Title}" FontSize="20" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
               <TextBlock Text="{Binding Music.Artist}" FontSize="14" Foreground="{DynamicResource KoyNotchMusicSub}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis">
                 <TextBlock.Style>
@@ -352,6 +367,9 @@
             <music:SpectrumBars Grid.Row="1" Height="34" BarWidth="7" Gap="5" VerticalAlignment="Center" HorizontalAlignment="Center"
                                 Feed="{Binding Music.Spectrum}" Fill="#BFBBF7D0" IsHitTestVisible="False"
                                 Visibility="{Binding Music.ShowSpectrum, Converter={StaticResource BoolToVis}}" />
+
+            <music:LyricsView Grid.Row="1" FontSize="15" Margin="0,8,0,8" DataContext="{Binding Music.Lyrics}"
+                              Visibility="{Binding IsShown, Converter={StaticResource BoolToVis}}" />
 
             <Grid Grid.Row="2" Margin="0,0,0,10">
               <Grid.ColumnDefinitions>

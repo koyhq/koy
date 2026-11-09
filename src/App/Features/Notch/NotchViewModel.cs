@@ -435,6 +435,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         var isExpanded = State == NotchState.Expanded && !IsSearchOpen;
         // Ses çubukları "kapak ve dalga" ayarına bağlı; pil tasarrufu hareketi kısarken hiç yakalanmaz.
         _music.SetSpectrumAllowed(Settings.MusicShowWaveform && !ReduceMotion);
+        _music.Lyrics.SetAllowed(Settings.MusicLyricsEnabled);
         _music.SetActive(isExpanded && CurrentPanel == NotchPanel.Home);
         // Saat, hava ve pil her sekmede üstteki durum satırında görünür.
         _status.SetActive(isExpanded);

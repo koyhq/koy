@@ -514,6 +514,15 @@ Proje sahibi istedi. Kod yazılmadı.
 - UWP (Store) uygulamalarının dock'ta sabitlenmesi: kimlik AUMID, simge `shell:AppsFolder`, pencere eşleme `SHGetPropertyStoreForWindow`. Windows'un sabitleri arasında Spotify, WhatsApp gibi UWP uygulamalar var; Koy bugün yalnız `.lnk` sabitlerini gösteriyor.
 - Kod imzalama.
 
+## Şarkı sözleri (2026-11-09)
+Tasarım ve doğrulama: `docs/ARASTIRMA-SARKI-SOZLERI.md`.
+- [x] `Core/Lyrics/`: LRC ayrıştırıcı, etkin satır hesabı, sorgu temizliği, LRCLIB yanıt çözümü, yerel kaynak, disk önbelleği, kaynak zinciri, oturum durumu. Testli. `Core/Media/PlaybackClock` konum hesabını tek yerde toplar.
+- [x] `Platform/Lyrics/LrclibSource.cs`: önce tam eşleşme, sonra arama; geçici hatalar önbelleğe yazılmaz.
+- [x] Ana sayfadaki müzik kartında (küçük ve büyük) `LyricsView`: etkin satır yayla kayar, satıra tıklayınca o yere gider. Ağ ve zamanlayıcı yalnız Ana sayfa görünürken; söz varken ses çubukları için yakalama durur, söz yoksa çubuklar kalır.
+- [x] Ayar: `MusicLyricsEnabled` (Çentik sayfası, varsayılan açık); kapalıyken söz yok, istek yok.
+- [ ] Elle sınama (proje sahibi): Spotify ve tarayıcıda senkron, duraklat/devam, satıra tıklama, parça değişimi, çevrim dışı, çok monitör.
+- [ ] Bellek ölçümü (AGENTS #1): sözler kapalı ve açıkken, `docs/MEMORY.md`.
+
 ## Uygulamada İngilizce (2026-11-08)
 - [x] Görünen sabit metinler resx'e alındı; hava durumu ve gizlilik metinleri Core'dan anahtar ya da kalıpla geçer, `SystemFormat` kültürü dışarıdan alır.
 - [x] İlk açılış dili sistem diline göre (`AppLanguage`); kayıtlı ayar korunur.
