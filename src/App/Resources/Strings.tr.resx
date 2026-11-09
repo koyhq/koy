@@ -2088,5 +2088,71 @@
   <data name="PrivacyUnknownApp" xml:space="preserve">
     <value>Bilinmeyen uygulama</value>
   </data>
+  <data name="StartItemInstalledApps" xml:space="preserve">
+    <value>Yüklü uygulamalar</value>
+  </data>
+  <data name="StartItemMobilityCenter" xml:space="preserve">
+    <value>Mobilite Merkezi</value>
+  </data>
+  <data name="StartItemPowerOptions" xml:space="preserve">
+    <value>Güç Seçenekleri</value>
+  </data>
+  <data name="StartItemEventViewer" xml:space="preserve">
+    <value>Olay Görüntüleyicisi</value>
+  </data>
+  <data name="StartItemSystem" xml:space="preserve">
+    <value>Sistem</value>
+  </data>
+  <data name="StartItemDeviceManager" xml:space="preserve">
+    <value>Aygıt Yöneticisi</value>
+  </data>
+  <data name="StartItemNetworkConnections" xml:space="preserve">
+    <value>Ağ Bağlantıları</value>
+  </data>
+  <data name="StartItemDiskManagement" xml:space="preserve">
+    <value>Disk Yönetimi</value>
+  </data>
+  <data name="StartItemComputerManagement" xml:space="preserve">
+    <value>Bilgisayar Yönetimi</value>
+  </data>
+  <data name="StartItemTerminal" xml:space="preserve">
+    <value>Terminal</value>
+  </data>
+  <data name="StartItemTerminalAdmin" xml:space="preserve">
+    <value>Terminal (Yönetici)</value>
+  </data>
+  <data name="StartItemTaskManager" xml:space="preserve">
+    <value>Görev Yöneticisi</value>
+  </data>
+  <data name="StartItemSettings" xml:space="preserve">
+    <value>Ayarlar</value>
+  </data>
+  <data name="StartItemFileExplorer" xml:space="preserve">
+    <value>Dosya Gezgini</value>
+  </data>
+  <data name="StartItemSearch" xml:space="preserve">
+    <value>Ara</value>
+  </data>
+  <data name="StartItemRun" xml:space="preserve">
+    <value>Çalıştır</value>
+  </data>
+  <data name="StartItemShutDownOrSignOut" xml:space="preserve">
+    <value>Kapat veya oturumu kapat</value>
+  </data>
+  <data name="StartItemSignOut" xml:space="preserve">
+    <value>Oturumu kapat</value>
+  </data>
+  <data name="StartItemSleep" xml:space="preserve">
+    <value>Uyku</value>
+  </data>
+  <data name="StartItemShutDown" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="StartItemRestart" xml:space="preserve">
+    <value>Yeniden başlat</value>
+  </data>
+  <data name="StartItemDesktop" xml:space="preserve">
+    <value>Masaüstü</value>
+  </data>
 </root>
 

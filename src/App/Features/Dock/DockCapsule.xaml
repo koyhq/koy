@@ -29,6 +29,7 @@
             <Button Style="{StaticResource DockFlatButtonStyle}"
                     Command="{Binding StartMenuCommand}"
                     ToolTip="{x:Static res:Strings.StartMenu}"
+                    MouseRightButtonUp="OnStartRightClick"
                     Width="{Binding ItemSize}"
                     Height="{Binding ItemSize}"
                     Margin="1,0"
