@@ -157,6 +157,8 @@ public sealed record AppSettings
     public bool ShowVolumeOsd { get; set; } = true;
     /// <summary>Müzik çalarken çentikte dalga simgesi görünsün.</summary>
     public bool MusicShowWaveform { get; set; } = true;
+    /// <summary>Büyük müzik kartında "Sözler" düğmesi. İstek yalnız kullanıcı sözleri açınca gider.</summary>
+    public bool MusicLyricsEnabled { get; set; } = true;
     /// <summary>Tam ekran uygulama ya da oyun varken çentik gizlensin.</summary>
     public bool NotchHideInFullscreen { get; set; } = true;
     /// <summary>Kamera ve mikrofon kullanımında çentikte gizlilik noktaları görünsün.</summary>
@@ -250,6 +252,7 @@ public sealed record AppSettings
                ShowBrightnessOsd == other.ShowBrightnessOsd &&
                ShowVolumeOsd == other.ShowVolumeOsd &&
                MusicShowWaveform == other.MusicShowWaveform &&
+               MusicLyricsEnabled == other.MusicLyricsEnabled &&
                NotchHideInFullscreen == other.NotchHideInFullscreen &&
                ShowPrivacyIndicator == other.ShowPrivacyIndicator &&
                WeatherLatitude.Equals(other.WeatherLatitude) &&
@@ -329,6 +332,7 @@ public sealed record AppSettings
         hash.Add(ShowBrightnessOsd);
         hash.Add(ShowVolumeOsd);
         hash.Add(MusicShowWaveform);
+        hash.Add(MusicLyricsEnabled);
         hash.Add(NotchHideInFullscreen);
         hash.Add(ShowPrivacyIndicator);
         hash.Add(WeatherLatitude);

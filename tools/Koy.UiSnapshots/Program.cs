@@ -217,7 +217,7 @@ public static class Program
             settings,
             controller,
             // Yakalama başlatılmayan servis: çubuklar aşağıda sahte düzeylerle doldurulur, gerçek ses okunmaz.
-            new Koy.App.Features.Music.MusicViewModel(new FakeMedia(info), spectrumAcquire: () => new Koy.Platform.Audio.SpectrumCaptureService()),
+            new Koy.App.Features.Music.MusicViewModel(new FakeMedia(info), spectrumAcquire: () => new Koy.Platform.Audio.SpectrumCaptureService(), lyricsProvider: new FakeLyrics()),
             new Koy.App.Features.ControlCenter.ControlCenterViewModel(
                 () => new FakeAudio(), () => new FakeRadio(), null, () => new FakeBrightness(brightnessSupported), new FakeFocusAssist(), settings,
                 wifiFactory: () => new FakeWifi(locationBlocked),
@@ -360,6 +360,9 @@ public static class Program
         // Müzik kartına tıklanınca: büyük kart Ana gövdesini kaplar.
         set.Vm.Home.ToggleMusicExpandedCommand.Execute(null);
         ShotNotch(set, name("ana-muzik-buyuk"), expanded: true);
+        // Sözler açık: çubukların yerinde eşzamanlı satırlar.
+        set.Vm.Music.Lyrics.ToggleCommand.Execute(null);
+        ShotNotch(set, name("ana-muzik-sozler"), expanded: true);
         set.Vm.Dispose();
 
         // Video kapağı (Chrome/YouTube Windows'a ~150×83 verir): kırpılmadan tamamı, arkada bulanık hâli.

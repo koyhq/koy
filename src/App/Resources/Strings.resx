@@ -498,6 +498,24 @@
   <data name="ChannelPreview" xml:space="preserve">
     <value>Preview</value>
   </data>
+  <data name="LyricsToggle" xml:space="preserve">
+    <value>Lyrics</value>
+  </data>
+  <data name="LyricsLoading" xml:space="preserve">
+    <value>Loading lyrics…</value>
+  </data>
+  <data name="LyricsNotFound" xml:space="preserve">
+    <value>No synced lyrics found for this track</value>
+  </data>
+  <data name="LyricsFailed" xml:space="preserve">
+    <value>Couldn't load lyrics. Check your connection.</value>
+  </data>
+  <data name="LyricsSettingTitle" xml:space="preserve">
+    <value>Song lyrics</value>
+  </data>
+  <data name="LyricsSettingDesc" xml:space="preserve">
+    <value>Adds a Lyrics button to the large music card. When you open it, the track title and artist are sent to LRCLIB. .lrc files in Music\Lyrics are used first.</value>
+  </data>
   <data name="MusicWaveformTitle" xml:space="preserve">
     <value>Show album art and waveform when playing</value>
   </data>

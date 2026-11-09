@@ -86,6 +86,11 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     private WeatherService? _weatherService;
     // Cihaz konumunun yer adı: bütün ekranların çentikleri tek servisi paylaşır (koordinat başına tek istek).
     private readonly PlaceNameService _placeNameService = new();
+    // Kurulması ucuz: dosya ya da ağ işi yalnız kullanıcı sözleri açınca başlar.
+    private readonly Koy.Core.Lyrics.LyricsProvider _lyricsProvider = new(
+        new Koy.Core.Lyrics.LocalLyricsSource(Koy.Core.Lyrics.LocalLyricsSource.DefaultDirectory),
+        new Koy.Core.Lyrics.LyricsCache(Koy.Core.Lyrics.LyricsCache.DefaultDirectory),
+        new Koy.Platform.Lyrics.LrclibSource());
     private FocusAssistService? _focusAssistService;
     private ShelfService? _shelfService;
     private WindowTracker? _windowTracker;
@@ -218,7 +223,8 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         };
 
         // Müzik kartı çubukları: ses yakalama yalnız kart görünür ve müzik çalarken (MusicViewModel.UpdateSpectrum).
-        var musicVm = new MusicViewModel(_mediaService!, spectrumAcquire: () => services.AcquireSpectrumService(), spectrumRelease: services.ReleaseSpectrumService);
+        var musicVm = new MusicViewModel(_mediaService!, spectrumAcquire: () => services.AcquireSpectrumService(), spectrumRelease: services.ReleaseSpectrumService,
+            lyricsProvider: _lyricsProvider);
         // Parlaklık, çentiğin o anki ekranına bağlanır; ekran düzeni değişince state.Monitor güncellenir.
         NotchWindowState? stateRef = null;
         var controlCenterVm = new ControlCenterViewModel(
