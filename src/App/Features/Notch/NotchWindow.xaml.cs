@@ -177,12 +177,9 @@ public partial class NotchWindow : Window
     // ki klavye çalışsın (takvimde etkinlik eklemek için). Odak gidince yine odak çalmaz hale gelir.
     private void Notch_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (ViewModel?.Osd.Type == OsdType.Voice && ViewModel.Osd.VoiceState == Koy.Core.Voice.VoiceState.AwaitingConfirmation)
-        {
-            VoiceConfirmRequested?.Invoke();
-            e.Handled = true;
+        // Komut kutusu açıkken tıklama kutuya gider (imleç, seçim); onay Enter ile.
+        if (ViewModel?.Osd.Type == OsdType.Voice && ViewModel.Osd.IsVoiceEditing)
             return;
-        }
 
         if (_hwnd == 0 || e.OriginalSource is not DependencyObject source || FindParent<TextBox>(source) is null)
             return;
@@ -192,7 +189,7 @@ public partial class NotchWindow : Window
     }
 
     /// <summary>
-    /// Sesli komut onayı beklendiğinde klavye odağını çentiğe vererek Enter/Esc tuşlarının çalışmasını sağlar.
+    /// Komut kutusu açılınca klavye odağını çentiğe ve kutuya verir: sesle yazma (Win+H) odaktaki kutuya yazar, Enter/Esc burada yakalanır.
     /// </summary>
     public void FocusVoiceConfirmation()
     {
@@ -202,7 +199,7 @@ public partial class NotchWindow : Window
         WindowStyles.SetNoActivate(_hwnd, false);
         Activate();
         WindowStyles.SetForeground(_hwnd);
-        Focus();
+        OsdHost.FocusVoiceInput();
     }
 
     /// <summary>

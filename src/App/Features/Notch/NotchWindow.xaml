@@ -326,7 +326,7 @@
               </Style.Triggers>
             </Style>
           </Grid.Style>
-          <osd:OsdView DataContext="{Binding Osd}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          <osd:OsdView x:Name="OsdHost" DataContext="{Binding Osd}" HorizontalAlignment="Center" VerticalAlignment="Center" />
         </Grid>
 
         <!-- 2. Peek Durumu -->

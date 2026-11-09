@@ -145,7 +145,6 @@ public sealed record AppSettings
     public VoiceHarnessType VoiceHarness { get; set; } = VoiceHarnessType.Claude;
     public string VoiceCustomCommand { get; set; } = "";
     public string VoiceWorkingDirectory { get; set; } = "";
-    public bool VoiceAutoConfirm { get; set; }
     public int VoiceTimeoutSeconds { get; set; } = 60;
 
     /// <summary>Arama paneli yeniden açılınca son sorgu geri gelsin.</summary>
@@ -265,7 +264,6 @@ public sealed record AppSettings
                VoiceHarness == other.VoiceHarness &&
                VoiceCustomCommand == other.VoiceCustomCommand &&
                VoiceWorkingDirectory == other.VoiceWorkingDirectory &&
-               VoiceAutoConfirm == other.VoiceAutoConfirm &&
                VoiceTimeoutSeconds == other.VoiceTimeoutSeconds &&
                SearchRetainPrior == other.SearchRetainPrior &&
                SearchHistoryMode == other.SearchHistoryMode &&
@@ -354,7 +352,6 @@ public sealed record AppSettings
         hash.Add(VoiceHarness);
         hash.Add(VoiceCustomCommand);
         hash.Add(VoiceWorkingDirectory);
-        hash.Add(VoiceAutoConfirm);
         hash.Add(VoiceTimeoutSeconds);
         hash.Add(SearchRetainPrior);
         hash.Add(SearchHistoryMode);

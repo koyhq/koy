@@ -1,66 +1,49 @@
 namespace Koy.Core.Voice;
 
 /// <summary>
-/// Çentik içi sesli komut ve harness oturumunu yöneten durum makinesi.
-/// Boşta -> Dinleniyor -> Çevriliyor -> Onay Bekliyor -> Çalışıyor -> Bitti / Hata geçişlerini koordine eder.
+/// Çentikteki sesli komut oturumu: Boşta -> Yazılıyor -> Çalışıyor -> Bitti / Hata.
+/// Konuşmayı Koy tanımaz; Windows sesle yazma (Win+H) metni çentikteki kutuya yazar, kullanıcı isterse kendisi de yazar.
+/// Böylece Windows'un desteklediği her dilde (Türkçe, İngilizce…) çalışır ve ayrıca konuşma dili paketi gerekmez.
 /// Kullanıcıya metin üretmez: hata <see cref="Failure"/> koduyla bildirilir, metni App seçili dilde yazar.
 /// </summary>
-public sealed class VoiceSessionController : IDisposable
+public sealed class VoiceSessionController(IHarnessRunnerService runner, Func<VoiceSessionOptions> optionsProvider) : IDisposable
 {
-    private readonly IVoiceRecognitionService _recognition;
-    private readonly IHarnessRunnerService _runner;
-    private readonly Func<VoiceSessionOptions> _optionsProvider;
+    private readonly IHarnessRunnerService _runner = runner ?? throw new ArgumentNullException(nameof(runner));
+    private readonly Func<VoiceSessionOptions> _optionsProvider = optionsProvider ?? throw new ArgumentNullException(nameof(optionsProvider));
     private readonly Lock _gate = new();
 
     private CancellationTokenSource? _runningCts;
     private bool _disposed;
 
     public VoiceState State { get; private set; } = VoiceState.Idle;
-    public string CurrentHypothesis { get; private set; } = string.Empty;
-    public string RecognizedPrompt { get; private set; } = string.Empty;
+
+    /// <summary>Kutudaki komut metni (sesle yazılan ya da elle yazılan).</summary>
+    public string Prompt { get; private set; } = string.Empty;
 
     /// <summary>Son başarısızlığın kodu; başarı ya da iptalde <see cref="VoiceFailure.None"/>.</summary>
     public VoiceFailure Failure { get; private set; }
 
-    /// <summary>Başarısızlık mesajına eklenecek ham ayrıntı (yol, saniye, durum adı); çevrilmez.</summary>
+    /// <summary>Başarısızlık mesajına eklenecek ham ayrıntı (yol, saniye); çevrilmez.</summary>
     public string FailureDetail { get; private set; } = string.Empty;
 
     public HarnessExecutionResult? LastResult { get; private set; }
 
     public event Action<VoiceState>? StateChanged;
-    public event Action<string>? HypothesisChanged;
-    public event Action<string>? PromptChanged;
     public event Action<HarnessExecutionResult>? ExecutionFinished;
 
-    public VoiceSessionController(
-        IVoiceRecognitionService recognition,
-        IHarnessRunnerService runner,
-        Func<VoiceSessionOptions> optionsProvider)
-    {
-        _recognition = recognition ?? throw new ArgumentNullException(nameof(recognition));
-        _runner = runner ?? throw new ArgumentNullException(nameof(runner));
-        _optionsProvider = optionsProvider ?? throw new ArgumentNullException(nameof(optionsProvider));
-
-        _recognition.HypothesisReceived += OnHypothesisReceived;
-        _recognition.SpeechRecognized += OnSpeechRecognized;
-        _recognition.RecognitionFailed += OnRecognitionFailed;
-    }
-
     /// <summary>
-    /// Kısayol basıldığında çağrılır:
-    /// - Boştaysa dinlemeye başlar.
-    /// - Dinleniyorsa konuşmayı erken sonlandırıp transkripsiyona geçer.
-    /// - Onay bekliyorsa çalıştırır.
-    /// - Çevriliyor ya da çalışıyorsa iptal eder.
+    /// Kısayol: boştaysa kutuyu açar; kutu açıkken metin varsa çalıştırır, yoksa kapatır; çalışıyorsa iptal eder.
     /// </summary>
     public async Task TriggerShortcutAsync()
     {
         VoiceState current;
+        bool hasPrompt;
         lock (_gate)
         {
             if (_disposed)
                 return;
             current = State;
+            hasPrompt = !string.IsNullOrWhiteSpace(Prompt);
         }
 
         switch (current)
@@ -68,69 +51,46 @@ public sealed class VoiceSessionController : IDisposable
             case VoiceState.Idle:
             case VoiceState.Completed:
             case VoiceState.Failed:
-                await StartListeningAsync();
+                Start();
                 break;
 
-            case VoiceState.Listening:
-                await StopListeningAsync();
-                break;
-
-            case VoiceState.Transcribing:
-                Cancel();
-                break;
-
-            case VoiceState.AwaitingConfirmation:
+            case VoiceState.Editing when hasPrompt:
                 await ConfirmAsync();
                 break;
 
+            case VoiceState.Editing:
             case VoiceState.Running:
                 Cancel();
                 break;
         }
     }
 
-    public async Task StartListeningAsync()
+    /// <summary>Komut kutusunu boş açar.</summary>
+    public void Start()
     {
         lock (_gate)
         {
-            if (_disposed)
+            if (_disposed || State == VoiceState.Running)
                 return;
 
-            CurrentHypothesis = string.Empty;
-            RecognizedPrompt = string.Empty;
+            Prompt = string.Empty;
             LastResult = null;
             SetFailure(VoiceFailure.None);
-            SetState(VoiceState.Listening);
-        }
-
-        var started = await _recognition.StartListeningAsync();
-        if (!started)
-        {
-            lock (_gate)
-            {
-                // Servis nedenini (ör. izin yok) olayla zaten bildirdiyse o korunur.
-                if (_disposed || State == VoiceState.Failed)
-                    return;
-
-                SetFailure(VoiceFailure.MicrophoneUnavailable);
-                SetState(VoiceState.Failed);
-            }
+            SetState(VoiceState.Editing);
         }
     }
 
-    public async Task StopListeningAsync()
+    /// <summary>Kutudaki metin değişti (sesle yazma ya da klavye). Yalnız kutu açıkken kabul edilir.</summary>
+    public void UpdatePrompt(string text)
     {
         lock (_gate)
         {
-            if (_disposed || State != VoiceState.Listening)
-                return;
-
-            SetState(VoiceState.Transcribing);
+            if (!_disposed && State == VoiceState.Editing)
+                Prompt = text ?? string.Empty;
         }
-
-        await _recognition.StopListeningAsync();
     }
 
+    /// <summary>Kutudaki metni çalıştırır. Metin boşsa bir şey yapmaz (kutu açık kalır).</summary>
     public async Task ConfirmAsync()
     {
         VoiceSessionOptions options;
@@ -139,11 +99,11 @@ public sealed class VoiceSessionController : IDisposable
 
         lock (_gate)
         {
-            if (_disposed || State != VoiceState.AwaitingConfirmation)
+            if (_disposed || State != VoiceState.Editing || string.IsNullOrWhiteSpace(Prompt))
                 return;
 
             options = _optionsProvider();
-            prompt = RecognizedPrompt;
+            prompt = Prompt.Trim();
 
             _runningCts?.Cancel();
             _runningCts?.Dispose();
@@ -216,32 +176,12 @@ public sealed class VoiceSessionController : IDisposable
             if (_disposed)
                 return;
 
-            if (State == VoiceState.Listening || State == VoiceState.Transcribing)
-            {
-                _ = _recognition.StopListeningAsync();
-            }
-
             if (State == VoiceState.Running)
-            {
                 _runningCts?.Cancel();
-            }
 
-            CurrentHypothesis = string.Empty;
-            RecognizedPrompt = string.Empty;
+            Prompt = string.Empty;
             SetFailure(VoiceFailure.None);
             SetState(VoiceState.Idle);
-        }
-    }
-
-    public void Reset()
-    {
-        lock (_gate)
-        {
-            if (_disposed)
-                return;
-
-            Cancel();
-            LastResult = null;
         }
     }
 
@@ -249,61 +189,12 @@ public sealed class VoiceSessionController : IDisposable
     {
         lock (_gate)
         {
-            if (_disposed)
+            if (_disposed || State != VoiceState.Running)
                 return;
 
             SetFailure(failure, detail);
             SetState(VoiceState.Failed);
         }
-    }
-
-    private void OnHypothesisReceived(object? sender, string hypothesis)
-    {
-        lock (_gate)
-        {
-            if (_disposed || (State != VoiceState.Listening && State != VoiceState.Transcribing))
-                return;
-
-            CurrentHypothesis = hypothesis;
-        }
-
-        HypothesisChanged?.Invoke(hypothesis);
-    }
-
-    private void OnSpeechRecognized(object? sender, string prompt)
-    {
-        bool autoConfirm;
-        lock (_gate)
-        {
-            if (_disposed || (State != VoiceState.Listening && State != VoiceState.Transcribing))
-                return;
-
-            _ = _recognition.StopListeningAsync();
-
-            if (string.IsNullOrWhiteSpace(prompt))
-            {
-                SetFailure(VoiceFailure.NoSpeech);
-                SetState(VoiceState.Idle);
-                return;
-            }
-
-            RecognizedPrompt = prompt;
-            CurrentHypothesis = string.Empty;
-            SetState(VoiceState.AwaitingConfirmation);
-            autoConfirm = _optionsProvider().AutoConfirm;
-        }
-
-        PromptChanged?.Invoke(prompt);
-
-        if (autoConfirm)
-        {
-            _ = ConfirmAsync();
-        }
-    }
-
-    private void OnRecognitionFailed(object? sender, VoiceRecognitionError error)
-    {
-        Fail(error.Failure, error.Detail);
     }
 
     private void SetFailure(VoiceFailure failure, string detail = "")
@@ -330,10 +221,5 @@ public sealed class VoiceSessionController : IDisposable
             _runningCts?.Dispose();
             _runningCts = null;
         }
-
-        _recognition.HypothesisReceived -= OnHypothesisReceived;
-        _recognition.SpeechRecognized -= OnSpeechRecognized;
-        _recognition.RecognitionFailed -= OnRecognitionFailed;
-        _recognition.Dispose();
     }
 }

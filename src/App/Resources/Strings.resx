@@ -664,16 +664,10 @@
     <value>Coding Assistant (Harness)</value>
   </data>
   <data name="VoiceHarnessDesc" xml:space="preserve">
-    <value>CLI tool executed with your transcribed speech prompt. Speech is transcribed by Windows online speech recognition, so audio is sent to Microsoft while Koy is listening.</value>
+    <value>CLI tool that runs your command. Ctrl+Alt+V opens a box in the notch and starts Windows voice typing (Win+H): speak in your keyboard language, such as Turkish or English, or just type. Voice typing uses Microsoft's online speech recognition.</value>
   </data>
   <data name="VoiceHarnessCustom" xml:space="preserve">
     <value>Custom</value>
-  </data>
-  <data name="VoiceAutoConfirmTitle" xml:space="preserve">
-    <value>Auto Confirm</value>
-  </data>
-  <data name="VoiceAutoConfirmDesc" xml:space="preserve">
-    <value>Run the harness immediately without waiting for Enter confirmation.</value>
   </data>
   <data name="VoiceCustomCommandTitle" xml:space="preserve">
     <value>Custom Command Template</value>
@@ -2220,35 +2214,11 @@
   <data name="StartItemDesktop" xml:space="preserve">
     <value>Desktop</value>
   </data>
-  <data name="VoiceListening" xml:space="preserve">
-    <value>Listening…</value>
-  </data>
-  <data name="VoiceTranscribing" xml:space="preserve">
-    <value>Transcribing…</value>
-  </data>
-  <data name="VoiceAwaitingConfirmation" xml:space="preserve">
-    <value>Enter to run, Esc to cancel</value>
-  </data>
   <data name="VoiceRunning" xml:space="preserve">
     <value>{0} is running…</value>
   </data>
   <data name="VoiceCompleted" xml:space="preserve">
     <value>Done</value>
-  </data>
-  <data name="VoiceErrorMicrophoneUnavailable" xml:space="preserve">
-    <value>Couldn't start the microphone.</value>
-  </data>
-  <data name="VoiceErrorMicrophonePermission" xml:space="preserve">
-    <value>Koy can't use the microphone. Allow it in Windows Settings › Privacy › Microphone.</value>
-  </data>
-  <data name="VoiceErrorOnlineSpeechDisabled" xml:space="preserve">
-    <value>Turn on Online speech recognition in Windows Settings › Privacy › Speech.</value>
-  </data>
-  <data name="VoiceErrorRecognitionFailed" xml:space="preserve">
-    <value>Couldn't recognize speech.</value>
-  </data>
-  <data name="VoiceErrorNoSpeech" xml:space="preserve">
-    <value>No speech detected.</value>
   </data>
   <data name="VoiceErrorInvalidCommand" xml:space="preserve">
     <value>The custom command isn't valid. Check it in Koy › Notch.</value>
@@ -2273,6 +2243,9 @@
   </data>
   <data name="LyricsToggle" xml:space="preserve">
     <value>Lyrics on or off. When on, the playing title is looked up on LRCLIB.</value>
+  </data>
+  <data name="VoiceEditing" xml:space="preserve">
+    <value>Speak or type · Enter runs, Esc cancels</value>
   </data>
 </root>
 

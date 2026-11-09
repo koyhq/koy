@@ -65,7 +65,28 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
     private string _voiceStatusText = "";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsVoiceEditing))]
     private VoiceState _voiceState = VoiceState.Idle;
+
+    /// <summary>Komut kutusunun metni; Windows sesle yazma da kullanıcı da buraya yazar.</summary>
+    [ObservableProperty]
+    private string _voiceInput = "";
+
+    /// <summary>Kutu açıkken (yazılıyor) metin kutusu, değilse komut metni gösterilir.</summary>
+    public bool IsVoiceEditing => VoiceState == VoiceState.Editing;
+
+    /// <summary>Kutudaki metin değişti (yalnız kutu açıkken).</summary>
+    public event Action<string>? VoiceInputChanged;
+
+    partial void OnVoiceInputChanged(string value)
+    {
+        if (VoiceState == VoiceState.Editing)
+            VoiceInputChanged?.Invoke(value);
+    }
+
+    /// <summary>Tek satıra sığmayan tam açıklama (fareyle üzerine gelince).</summary>
+    [ObservableProperty]
+    private string? _voiceDetail;
 
     public GridLength FillStarWidth => new(Math.Clamp(Percent, 0, 100), GridUnitType.Star);
     public GridLength RemainingStarWidth => new(Math.Max(0, 100 - Math.Clamp(Percent, 0, 100)), GridUnitType.Star);
@@ -242,7 +263,8 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
         Dismiss();
     }
 
-    public void ShowVoice(VoiceState state, string statusText, string prompt)
+    /// <param name="detail">Tek satıra sığmayan tam açıklama (hata), fareyle üzerine gelince.</param>
+    public void ShowVoice(VoiceState state, string statusText, string prompt, string? detail = null)
     {
         RunOnUi(() =>
         {
@@ -252,14 +274,18 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
                 return;
             }
 
+            // Kutu yeni açıldıysa boş başlar; açıkken gelen güncellemeler yazılanı silmez.
+            if (state == VoiceState.Editing && VoiceState != VoiceState.Editing)
+                VoiceInput = "";
+
             Type = OsdType.Voice;
             VoiceState = state;
             VoiceStatusText = statusText;
             VoicePrompt = prompt;
+            VoiceDetail = string.IsNullOrEmpty(detail) ? null : detail;
             PercentText = state switch
             {
-                VoiceState.AwaitingConfirmation => "Enter ↵",
-                VoiceState.Listening => "• REC",
+                VoiceState.Editing => "Enter ↵",
                 VoiceState.Running => "...",
                 _ => ""
             };
@@ -267,7 +293,7 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
 
             if (state is VoiceState.Completed or VoiceState.Failed)
             {
-                ResetTimer(TimeSpan.FromSeconds(3));
+                ResetTimer(TimeSpan.FromSeconds(state == VoiceState.Failed ? 6 : 3));
             }
             else
             {
@@ -291,6 +317,8 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
         BluetoothConnected = false;
         BluetoothStatusText = "";
         VoicePrompt = "";
+        VoiceInput = "";
+        VoiceDetail = null;
         VoiceStatusText = "";
         VoiceState = VoiceState.Idle;
         Dismissed?.Invoke(this, EventArgs.Empty);
