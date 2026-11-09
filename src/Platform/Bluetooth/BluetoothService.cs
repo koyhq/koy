@@ -3,7 +3,9 @@ using Koy.Core.Bluetooth;
 using Koy.Core.Diagnostics;
 using Koy.Platform.Wireless;
 using Windows.Devices.Bluetooth;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Enumeration;
+using Windows.Storage.Streams;
 
 namespace Koy.Platform.Bluetooth;
 
@@ -21,6 +23,7 @@ public sealed class BluetoothService : IBluetoothService
 
     private static readonly string[] RequestedProperties = [PropIsConnected, PropContainerId, PropBattery];
     private static readonly TimeSpan ConfirmTimeout = TimeSpan.FromSeconds(8);
+    private static readonly TimeSpan BatteryThrottle = TimeSpan.FromSeconds(60);
 
     private sealed class Entry(string id, bool isLowEnergy)
     {
@@ -32,16 +35,21 @@ public sealed class BluetoothService : IBluetoothService
         public string? ContainerId { get; set; }
         public BluetoothDeviceKind Kind { get; set; } = BluetoothDeviceKind.Other;
         public bool KindRequested { get; set; }
+        public bool HasPropBattery { get; set; }
     }
 
     private readonly Lock _gate = new();
     private readonly Dictionary<string, Entry> _entries = new(StringComparer.Ordinal);
     private readonly SemaphoreSlim _kindGate = new(1, 1);
+    private readonly BluetoothBatteryFilter _batteryFilter = new();
+    private readonly Dictionary<string, DateTime> _batteryLookups = new(StringComparer.OrdinalIgnoreCase);
+    private readonly CancellationTokenSource _cts = new();
     private DeviceWatcher? _classicWatcher;
     private DeviceWatcher? _leWatcher;
     private int _pendingEnumerations;
     private TaskCompletionSource _changed = NewSignal();
     private bool _disposed;
+    private bool _batteryReadsEnabled;
 
     public bool IsReady { get; private set; }
 
@@ -98,26 +106,47 @@ public sealed class BluetoothService : IBluetoothService
         }
 
         QueueKindLookup(entry);
+        QueueBatteryLookup(entry);
         Notify();
     }
 
     private void OnUpdated(DeviceInformationUpdate update)
     {
+        Entry? entryToLookup = null;
         lock (_gate)
         {
             if (_disposed || !_entries.TryGetValue(update.Id, out var entry))
                 return;
 
+            var wasConnected = entry.IsConnected;
             ApplyProperties(entry, update.Properties);
+
+            if (!entry.IsConnected && wasConnected)
+            {
+                _batteryFilter.Reset(update.Id);
+                _batteryLookups.Remove(update.Id);
+            }
+            else if (entry.IsConnected && entry.IsLowEnergy && !entry.HasPropBattery)
+            {
+                if (!wasConnected || !_batteryLookups.TryGetValue(update.Id, out var last) || (DateTime.UtcNow - last) >= BatteryThrottle)
+                {
+                    entryToLookup = entry;
+                }
+            }
         }
+
+        if (entryToLookup is not null)
+            QueueBatteryLookup(entryToLookup);
 
         Notify();
     }
 
     private void OnRemoved(DeviceInformationUpdate update)
     {
+        _batteryFilter.Reset(update.Id);
         lock (_gate)
         {
+            _batteryLookups.Remove(update.Id);
             if (_disposed || !_entries.Remove(update.Id))
                 return;
         }
@@ -134,7 +163,7 @@ public sealed class BluetoothService : IBluetoothService
         }
     }
 
-    private static void ApplyProperties(Entry entry, IReadOnlyDictionary<string, object> properties)
+    private void ApplyProperties(Entry entry, IReadOnlyDictionary<string, object> properties)
     {
         if (properties.TryGetValue(PropIsConnected, out var connected))
             entry.IsConnected = connected is true;
@@ -144,7 +173,14 @@ public sealed class BluetoothService : IBluetoothService
 
         // Pil güncellemesi yalnız pil değişince gelir; yok olan değer önceki pili silmez.
         if (properties.TryGetValue(PropBattery, out var battery))
-            entry.Battery = BluetoothList.ParseBattery(battery);
+        {
+            var parsed = BluetoothList.ParseBattery(battery);
+            if (parsed.HasValue)
+            {
+                entry.HasPropBattery = true;
+                entry.Battery = _batteryFilter.Filter(entry.Id, parsed.Value);
+            }
+        }
     }
 
     // HRESULT_FROM_WIN32(ERROR_DEVICE_NOT_AVAILABLE): "Cihaz kullanıma hazır değil".
@@ -200,6 +236,151 @@ public sealed class BluetoothService : IBluetoothService
     {
         using var device = await BluetoothLEDevice.FromIdAsync(id);
         return device is null ? BluetoothDeviceKind.Other : BluetoothList.FromAppearance(device.Appearance.RawValue);
+    }
+
+    public void SetBatteryReadsEnabled(bool enabled)
+    {
+        List<Entry> pending = [];
+        lock (_gate)
+        {
+            if (_disposed)
+                return;
+
+            _batteryReadsEnabled = enabled;
+            if (!enabled)
+                return;
+
+            // Sayfa yeni açıldı: pili eksik bağlı BLE cihazlar için okuma hemen sıraya girer.
+            foreach (var entry in _entries.Values)
+            {
+                if (entry.IsConnected && entry.IsLowEnergy && !entry.HasPropBattery)
+                    pending.Add(entry);
+            }
+        }
+
+        foreach (var entry in pending)
+            QueueBatteryLookup(entry);
+    }
+
+    private void QueueBatteryLookup(Entry entry)
+    {
+        string id;
+        lock (_gate)
+        {
+            if (_disposed || !_batteryReadsEnabled || !entry.IsConnected || !entry.IsLowEnergy || entry.HasPropBattery)
+                return;
+
+            if (_batteryLookups.TryGetValue(entry.Id, out var last) && (DateTime.UtcNow - last) < BatteryThrottle)
+                return;
+
+            _batteryLookups[entry.Id] = DateTime.UtcNow;
+            id = entry.Id;
+        }
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                bool enabled;
+                lock (_gate)
+                    enabled = _batteryReadsEnabled;
+
+                if (_cts.IsCancellationRequested || _disposed || !enabled)
+                    return;
+
+                var battery = await ReadGattBatteryAsync(id, _cts.Token);
+                if (battery.HasValue)
+                {
+                    var filtered = _batteryFilter.Filter(id, battery.Value);
+                    lock (_gate)
+                    {
+                        if (_disposed || !_entries.TryGetValue(id, out var current))
+                            return;
+                        current.Battery = filtered;
+                    }
+                    Notify();
+                }
+            }
+            catch (COMException ex) when (ex.HResult == DeviceNotAvailable)
+            {
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                CrashLog.Write("BluetoothService.GATT pil okuma", ex);
+            }
+        });
+    }
+
+    private static async Task<int?> ReadGattBatteryAsync(string id, CancellationToken ct)
+    {
+        using var device = await BluetoothLEDevice.FromIdAsync(id);
+        if (device is null || device.ConnectionStatus != BluetoothConnectionStatus.Connected)
+            return null;
+
+        if (ct.IsCancellationRequested)
+            return null;
+
+        var servicesResult = await device.GetGattServicesForUuidAsync(GattServiceUuids.Battery, BluetoothCacheMode.Cached);
+        if (servicesResult.Status != GattCommunicationStatus.Success || servicesResult.Services.Count == 0)
+        {
+            if (ct.IsCancellationRequested)
+                return null;
+
+            servicesResult = await device.GetGattServicesForUuidAsync(GattServiceUuids.Battery, BluetoothCacheMode.Uncached);
+            if (servicesResult.Status != GattCommunicationStatus.Success || servicesResult.Services.Count == 0)
+                return null;
+        }
+
+        var readings = new List<ReadOnlyMemory<byte>>();
+
+        try
+        {
+            foreach (var service in servicesResult.Services)
+            {
+                if (ct.IsCancellationRequested)
+                    break;
+
+                var charResult = await service.GetCharacteristicsForUuidAsync(GattCharacteristicUuids.BatteryLevel, BluetoothCacheMode.Cached);
+                if (charResult.Status != GattCommunicationStatus.Success || charResult.Characteristics.Count == 0)
+                {
+                    charResult = await service.GetCharacteristicsForUuidAsync(GattCharacteristicUuids.BatteryLevel, BluetoothCacheMode.Uncached);
+                    if (charResult.Status != GattCommunicationStatus.Success || charResult.Characteristics.Count == 0)
+                        continue;
+                }
+
+                foreach (var ch in charResult.Characteristics)
+                {
+                    if (ct.IsCancellationRequested)
+                        break;
+
+                    var readResult = await ch.ReadValueAsync(BluetoothCacheMode.Cached);
+                    if (readResult.Status != GattCommunicationStatus.Success || readResult.Value is null || readResult.Value.Length == 0)
+                    {
+                        readResult = await ch.ReadValueAsync(BluetoothCacheMode.Uncached);
+                    }
+
+                    if (readResult.Status == GattCommunicationStatus.Success && readResult.Value is { Length: > 0 } buffer)
+                    {
+                        var bytes = new byte[buffer.Length];
+                        using var reader = DataReader.FromBuffer(buffer);
+                        reader.ReadBytes(bytes);
+                        readings.Add(bytes);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            foreach (var service in servicesResult.Services)
+            {
+                service.Dispose();
+            }
+        }
+
+        return GattBatteryParser.ParseLowest(readings);
     }
 
     private static BluetoothDeviceInfo ToInfo(Entry e) =>
@@ -322,6 +503,10 @@ public sealed class BluetoothService : IBluetoothService
                 return;
 
             _disposed = true;
+            _cts.Cancel();
+            _cts.Dispose();
+            _batteryFilter.Clear();
+            _batteryLookups.Clear();
             watchers = [_classicWatcher, _leWatcher];
             _classicWatcher = null;
             _leWatcher = null;

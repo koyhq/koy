@@ -50,6 +50,7 @@ internal sealed class FakeBluetooth(bool anyAudioConnected = true) : IBluetoothS
     public event EventHandler? DevicesChanged { add { } remove { } }
     public Task<BluetoothActionResult> ConnectAsync(string deviceId) => Task.FromResult(BluetoothActionResult.Confirmed);
     public Task<BluetoothActionResult> DisconnectAsync(string deviceId) => Task.FromResult(BluetoothActionResult.Confirmed);
+    public void SetBatteryReadsEnabled(bool enabled) { }
     public void OpenSettings() { }
     public void Dispose() { }
 }
