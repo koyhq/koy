@@ -1087,7 +1087,7 @@
     <value>Reset to default</value>
   </data>
   <data name="ShortcutErrInvalid" xml:space="preserve">
-    <value>Press a key together with at least Ctrl, Alt or Win.</value>
+    <value>This key can't be used as a shortcut.</value>
   </data>
   <data name="ShortcutErrReserved" xml:space="preserve">
     <value>Windows reserves this shortcut, choose another combination.</value>
@@ -1100,6 +1100,9 @@
   </data>
   <data name="ShortcutErrFailed" xml:space="preserve">
     <value>The shortcut could not be registered.</value>
+  </data>
+  <data name="ShortcutWarnTyping" xml:space="preserve">
+    <value>This key is captured in every app, so you can't type it while this shortcut is set.</value>
   </data>
   <data name="PomodoroHeader" xml:space="preserve">
     <value>Pomodoro</value>

@@ -69,6 +69,12 @@ RegisterWindowMessage
 SendInput
 INPUT
 KEYBDINPUT
+SetWindowsHookEx
+UnhookWindowsHookEx
+CallNextHookEx
+KBDLLHOOKSTRUCT
+PostThreadMessage
+GetCurrentThreadId
 ExtractIconEx
 DestroyIcon
 SHGetFileInfo

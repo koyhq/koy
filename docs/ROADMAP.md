@@ -499,6 +499,12 @@ Proje sahibi istedi. Kod yazılmadı.
 - [ ] Bellek ve CPU ölçümü (AGENTS #1): panel açıkken ve kapanınca.
 - [ ] **Henüz yok:** birim çevirici, sözlük, özel karakter, renk, yazım denetimi; Firefox yer imleri (SQLite paketi gerekir); uygulamaların atlama listesi eylemleri (#26 sonrası); uygulama mağazası araması; sonuç sürükleme; ayrı süreçte eklentiler (AGENTS #4 izin vermez).
 
+## Kısayollarda serbestlik (#47)
+- [x] Ana değiştirici zorunluluğu kalktı: `F9`, `Shift+F9`, tek başına harf (uyarıyla) atanabilir.
+- [x] Yalnız değiştiriciler (tek başına `Win`) ve Windows'un kendi kısayolları klavye kancasıyla alınır (`KeyboardHookEngine`, `KeyboardHookService`). Kanca yalnız böyle bir kısayol atanmışken ya da yakalama sürerken kuruludur.
+- [x] `Win+L` ve `Ctrl+Alt+Del` ezilemez, reddedilir. Başka uygulamanın tuttuğu Win'siz kısayol hata olarak görünür.
+- [ ] Elle sınama (proje sahibi): tek başına `Win` Başlat'ı açmadan aramayı açıyor; `Win+S` ezildiğinde Başlat açılmıyor; yakalama kutusu `Win`'i alıyor; yönetici penceresi öndeyken davranış; bellek ve gecikme.
+
 ## Sonraya kalanlar
 - CsWin32 0.3.106 → güncel sürüme geçiş: 0.3.369'da üretilen türler değişti (Platform'da 70 derleme hatası: HWND/işaretçi imzaları, `unsafe` gereken yerler). Platform ve Watchdog birlikte, aynı sürüme geçirilir; Watchdog'un görev çubuğu geri getirme yolu elle sınanır. O zamana dek Dependabot bu paketi yoksayar (`.github/dependabot.yml`).
 - Bildirimleri çentikte gösterme: Windows bildirimleri gelince çentik kısa süre gösterir (Claude Code gibi ajanların "iş bitti" bildirimleri de bu yoldan gelir). `UserNotificationListener` paket kimliği ister; Velopack kurulumu için seyrek (sparse) paket ve imza gerekir. Ara çözüm: Claude Code kancasının çağırdığı yerel komutla doğrudan bildirim.

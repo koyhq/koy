@@ -37,7 +37,7 @@ src/Core/       Saf C# (net10.0). WPF ve Windows API YOK.
                 Servis sözleşmeleri (IMediaService…) ve veri modelleri, durum makineleri, orkestrasyon,
                 yay fiziği, ayarlar. Klasörler özelliğe göre: Media/, Audio/, Notch/, Visibility/, Settings/…
                 Appearance/ tema, vurgu rengi, malzeme, köşe ve hareket (MotionPolicy) kararları
-                Shortcuts/  kısayol modeli (Hotkey), varsayılanlar, çakışma/ayrılmış kombinasyon denetimi
+                Shortcuts/  kısayol modeli (Hotkey), varsayılanlar, çakışma/ayrılmış kombinasyon denetimi, klavye kancası kararları (KeyboardHookEngine)
                 Display/    monitör modeli, ekran başına ayar, yerleşim çözümleyici (DisplayLayoutResolver)
                 Uninstall/  kaldırma kararları ve temizlik listesi (UninstallPlan, UninstallCleaner)
                 Tray/       dock sistem tepsisi: SHELLTRAYDATA çözümleyici, simge deposu (üst sınırlı), tıklama geri
