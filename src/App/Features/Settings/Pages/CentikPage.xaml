@@ -493,5 +493,69 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
+
+        <!-- SESLİ KOMUT VE HARNESS -->
+        <TextBlock Text="{Binding [VoiceHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [VoiceHarnessTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [VoiceHarnessDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="Claude" GroupName="VoiceHarnessChoice"
+                                     IsChecked="{Binding VoiceHarness, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Claude}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="Codex" GroupName="VoiceHarnessChoice"
+                                     IsChecked="{Binding VoiceHarness, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Codex}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="Antigravity" GroupName="VoiceHarnessChoice"
+                                     IsChecked="{Binding VoiceHarness, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Agy}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [VoiceHarnessCustom], Source={x:Static res:Loc.Instance}}" GroupName="VoiceHarnessChoice"
+                                     IsChecked="{Binding VoiceHarness, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Custom}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [VoiceAutoConfirmTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [VoiceAutoConfirmDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [VoiceAutoConfirmTitle], Source={x:Static res:Loc.Instance}}"
+                          IsChecked="{Binding VoiceAutoConfirm}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <StackPanel>
+                <TextBlock Text="{Binding [VoiceCustomCommandTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                <TextBlock Text="{Binding [VoiceCustomCommandDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                <TextBox Margin="0,8,0,0" Style="{StaticResource SettingTextBoxStyle}" Text="{Binding VoiceCustomCommand, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <StackPanel>
+                <TextBlock Text="{Binding [VoiceWorkingDirTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                <TextBlock Text="{Binding [VoiceWorkingDirDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                <TextBox Margin="0,8,0,0" Style="{StaticResource SettingTextBoxStyle}" Text="{Binding VoiceWorkingDirectory, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </Border>
     </StackPanel>
 </UserControl>

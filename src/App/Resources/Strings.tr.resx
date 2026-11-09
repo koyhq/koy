@@ -654,6 +654,39 @@
   <data name="ShortcutOpenSearchClipboard" xml:space="preserve">
     <value>Panodaki metinle ara</value>
   </data>
+  <data name="ShortcutVoiceCommand" xml:space="preserve">
+    <value>Sesli komut (harness)</value>
+  </data>
+  <data name="VoiceHeader" xml:space="preserve">
+    <value>SESLİ KOMUT VE HARNESS</value>
+  </data>
+  <data name="VoiceHarnessTitle" xml:space="preserve">
+    <value>Kodlama Aracı (Harness)</value>
+  </data>
+  <data name="VoiceHarnessDesc" xml:space="preserve">
+    <value>Dikte edilen sesli komutla çalıştırılacak CLI aracı.</value>
+  </data>
+  <data name="VoiceHarnessCustom" xml:space="preserve">
+    <value>Özel</value>
+  </data>
+  <data name="VoiceAutoConfirmTitle" xml:space="preserve">
+    <value>Otomatik Onayla</value>
+  </data>
+  <data name="VoiceAutoConfirmDesc" xml:space="preserve">
+    <value>Enter onayı beklemeden konuşma biter bitmez komutu çalıştır.</value>
+  </data>
+  <data name="VoiceCustomCommandTitle" xml:space="preserve">
+    <value>Özel Komut Şablonu</value>
+  </data>
+  <data name="VoiceCustomCommandDesc" xml:space="preserve">
+    <value>İsteğe bağlı {prompt} yer tutucusu içeren komut kalıbı (örn. gh copilot suggest "{prompt}").</value>
+  </data>
+  <data name="VoiceWorkingDirTitle" xml:space="preserve">
+    <value>Çalışma Klasörü</value>
+  </data>
+  <data name="VoiceWorkingDirDesc" xml:space="preserve">
+    <value>Komutların çalıştırılacağı başlangıç dizini (boşsa kullanıcı profili).</value>
+  </data>
   <data name="SearchPlaceholder" xml:space="preserve">
     <value>Ara…</value>
   </data>
@@ -2186,6 +2219,57 @@
   </data>
   <data name="StartItemDesktop" xml:space="preserve">
     <value>Masaüstü</value>
+  </data>
+  <data name="VoiceListening" xml:space="preserve">
+    <value>Dinleniyor…</value>
+  </data>
+  <data name="VoiceTranscribing" xml:space="preserve">
+    <value>Çevriliyor…</value>
+  </data>
+  <data name="VoiceAwaitingConfirmation" xml:space="preserve">
+    <value>Çalıştırmak için Enter, iptal için Esc</value>
+  </data>
+  <data name="VoiceRunning" xml:space="preserve">
+    <value>{0} çalışıyor…</value>
+  </data>
+  <data name="VoiceCompleted" xml:space="preserve">
+    <value>Tamamlandı</value>
+  </data>
+  <data name="VoiceErrorMicrophoneUnavailable" xml:space="preserve">
+    <value>Mikrofon başlatılamadı.</value>
+  </data>
+  <data name="VoiceErrorMicrophonePermission" xml:space="preserve">
+    <value>Koy mikrofonu kullanamıyor. Windows Ayarlar › Gizlilik › Mikrofon'dan izin verin.</value>
+  </data>
+  <data name="VoiceErrorOnlineSpeechDisabled" xml:space="preserve">
+    <value>Windows Ayarlar › Gizlilik › Konuşma'da Çevrimiçi konuşma tanımayı açın.</value>
+  </data>
+  <data name="VoiceErrorRecognitionFailed" xml:space="preserve">
+    <value>Konuşma tanınamadı.</value>
+  </data>
+  <data name="VoiceErrorNoSpeech" xml:space="preserve">
+    <value>Konuşma algılanmadı.</value>
+  </data>
+  <data name="VoiceErrorInvalidCommand" xml:space="preserve">
+    <value>Özel komut geçersiz. Koy › Çentik'ten kontrol edin.</value>
+  </data>
+  <data name="VoiceErrorScriptNotSupported" xml:space="preserve">
+    <value>{0} bir .cmd ya da .bat betiği, Koy bunu başlatamaz. Özel komut olarak .exe yolunu verin.</value>
+  </data>
+  <data name="VoiceErrorCommandNotFound" xml:space="preserve">
+    <value>{0} bulunamadı. Kurulu ve PATH'te olduğundan emin olun.</value>
+  </data>
+  <data name="VoiceErrorTimeout" xml:space="preserve">
+    <value>Komut {0} sn'den uzun sürdü ve durduruldu.</value>
+  </data>
+  <data name="VoiceErrorExitCode" xml:space="preserve">
+    <value>Komut {0} koduyla çıktı.</value>
+  </data>
+  <data name="VoiceErrorStartFailed" xml:space="preserve">
+    <value>{0} başlatılamadı.</value>
+  </data>
+  <data name="VoiceErrorUnexpected" xml:space="preserve">
+    <value>Bir şeyler ters gitti.</value>
   </data>
 </root>
 

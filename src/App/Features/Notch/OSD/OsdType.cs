@@ -6,5 +6,6 @@ public enum OsdType
     Volume,
     Brightness,
     Battery,
-    Bluetooth
+    Bluetooth,
+    Voice
 }

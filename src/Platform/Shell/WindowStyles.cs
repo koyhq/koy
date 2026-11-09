@@ -107,6 +107,11 @@ public static class WindowStyles
     }
 
     /// <summary>
+    /// Geçerli ön plan penceresinin tanıtıcısını (HWND) döndürür.
+    /// </summary>
+    public static nint GetForeground() => PInvoke.GetForegroundWindow().Value;
+
+    /// <summary>
     /// Pencerenin ekranı kaplayıp kaplamadığını (WS_MAXIMIZE) denetler.
     /// </summary>
     public static bool IsWindowMaximized(nint hwnd)

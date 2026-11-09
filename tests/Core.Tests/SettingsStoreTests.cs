@@ -255,6 +255,32 @@ public sealed class SettingsStoreTests : IDisposable
         Assert.NotEqual(new AppSettings(), loaded);
     }
 
+    [Fact]
+    public void VoiceSettings_RoundTrips_WithJsonContext()
+    {
+        var store = NewStore();
+        var original = new AppSettings
+        {
+            ShortcutVoiceCommand = "Ctrl+Shift+V",
+            VoiceHarness = Koy.Core.Voice.VoiceHarnessType.Codex,
+            VoiceCustomCommand = "my-ai {prompt}",
+            VoiceWorkingDirectory = @"C:\Workspace",
+            VoiceAutoConfirm = true,
+            VoiceTimeoutSeconds = 120
+        };
+
+        store.Save(original);
+        var loaded = store.Load();
+
+        Assert.Equal(original, loaded);
+        Assert.Equal("Ctrl+Shift+V", loaded.ShortcutVoiceCommand);
+        Assert.Equal(Koy.Core.Voice.VoiceHarnessType.Codex, loaded.VoiceHarness);
+        Assert.Equal("my-ai {prompt}", loaded.VoiceCustomCommand);
+        Assert.Equal(@"C:\Workspace", loaded.VoiceWorkingDirectory);
+        Assert.True(loaded.VoiceAutoConfirm);
+        Assert.Equal(120, loaded.VoiceTimeoutSeconds);
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_dir))

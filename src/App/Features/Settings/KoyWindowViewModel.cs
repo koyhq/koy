@@ -11,6 +11,7 @@ using Koy.Core.Settings;
 using Koy.Core.Uninstall;
 using Koy.Core.Updates;
 using Koy.Core.Visibility;
+using Koy.Core.Voice;
 using Koy.Platform.Shell;
 
 namespace Koy.App.Features.Settings;
@@ -324,6 +325,24 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     public int[] PomodoroShortBreakOptions { get; } = [3, 5, 10, 15];
     public int[] PomodoroLongBreakOptions { get; } = [10, 15, 20, 30];
 
+    // --- SESLİ KOMUT VE HARNESS ---
+    [ObservableProperty]
+    private string _voiceHarness = "Claude";
+
+    [ObservableProperty]
+    private string _voiceCustomCommand = "";
+
+    [ObservableProperty]
+    private string _voiceWorkingDirectory = "";
+
+    [ObservableProperty]
+    private bool _voiceAutoConfirm;
+
+    [ObservableProperty]
+    private int _voiceTimeoutSeconds = 60;
+
+    public string[] VoiceHarnessOptions { get; } = ["Claude", "Codex", "Agy", "Custom"];
+
     // --- GÜNCELLEME VE NELER GELDİ ---
     [ObservableProperty]
     private bool _hasAvailableUpdate;
@@ -467,6 +486,12 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             PomodoroWorkMinutes = s.PomodoroWorkMinutes;
             PomodoroShortBreakMinutes = s.PomodoroShortBreakMinutes;
             PomodoroLongBreakMinutes = s.PomodoroLongBreakMinutes;
+
+            VoiceHarness = s.VoiceHarness.ToString();
+            VoiceCustomCommand = s.VoiceCustomCommand;
+            VoiceWorkingDirectory = s.VoiceWorkingDirectory;
+            VoiceAutoConfirm = s.VoiceAutoConfirm;
+            VoiceTimeoutSeconds = s.VoiceTimeoutSeconds;
 
             WheelAction = s.WheelAction;
             MiddleClickAction = s.MiddleClickAction;
@@ -634,6 +659,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             or nameof(WeatherRefreshInterval) or nameof(PomodoroWorkMinutes) or nameof(PomodoroShortBreakMinutes) or nameof(PomodoroLongBreakMinutes)
             or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
             or nameof(PanelControlCenter) or nameof(PanelClipboard) or nameof(PanelSystem) or nameof(ClipboardHistoryEnabled)
+            or nameof(VoiceHarness) or nameof(VoiceCustomCommand) or nameof(VoiceWorkingDirectory) or nameof(VoiceAutoConfirm) or nameof(VoiceTimeoutSeconds)
             or nameof(SearchRetainPrior) or nameof(SearchHistoryMode) or nameof(SearchSourcesVersion);
 
     partial void OnLanguageChanged(string value)
@@ -728,6 +754,11 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             PomodoroWorkMinutes = PomodoroWorkMinutes,
             PomodoroShortBreakMinutes = PomodoroShortBreakMinutes,
             PomodoroLongBreakMinutes = PomodoroLongBreakMinutes,
+            VoiceHarness = Enum.TryParse<VoiceHarnessType>(VoiceHarness, out var vh) ? vh : VoiceHarnessType.Claude,
+            VoiceCustomCommand = VoiceCustomCommand,
+            VoiceWorkingDirectory = VoiceWorkingDirectory,
+            VoiceAutoConfirm = VoiceAutoConfirm,
+            VoiceTimeoutSeconds = VoiceTimeoutSeconds,
             WheelAction = WheelAction,
             MiddleClickAction = MiddleClickAction,
             ClipboardHistoryEnabled = ClipboardHistoryEnabled,
