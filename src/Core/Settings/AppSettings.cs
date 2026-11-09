@@ -1,6 +1,7 @@
 using Koy.Core.Display;
 using Koy.Core.Dock;
 using Koy.Core.Visibility;
+using Koy.Core.Voice;
 using Koy.Core.Weather;
 
 namespace Koy.Core.Settings;
@@ -140,6 +141,12 @@ public sealed record AppSettings
     public string ShortcutPlayPause { get; set; } = "Ctrl+Alt+Space";
     public string ShortcutOpenSearch { get; set; } = "Win+Shift+Q";
     public string ShortcutOpenSearchClipboard { get; set; } = "Alt+Shift+F2";
+    public string ShortcutVoiceCommand { get; set; } = "Ctrl+Alt+V";
+    public VoiceHarnessType VoiceHarness { get; set; } = VoiceHarnessType.Claude;
+    public string VoiceCustomCommand { get; set; } = "";
+    public string VoiceWorkingDirectory { get; set; } = "";
+    public bool VoiceAutoConfirm { get; set; }
+    public int VoiceTimeoutSeconds { get; set; } = 60;
 
     /// <summary>Arama paneli yeniden açılınca son sorgu geri gelsin.</summary>
     public bool SearchRetainPrior { get; set; } = true;
@@ -164,8 +171,11 @@ public sealed record AppSettings
     public bool ShowVolumeOsd { get; set; } = true;
     /// <summary>Müzik çalarken çentikte dalga simgesi görünsün.</summary>
     public bool MusicShowWaveform { get; set; } = true;
-    /// <summary>Ana sayfadaki müzik kartında eşzamanlı sözler. İstek yalnız Ana sayfa görünürken, parça başına bir kez gider.</summary>
-    public bool MusicLyricsEnabled { get; set; } = true;
+    /// <summary>
+    /// Ana sayfadaki müzik kartında eşzamanlı sözler. Varsayılan kapalı: açıkken çalan parçanın (tarayıcı videosu dahil) adı
+    /// LRCLIB'e gider, bu yüzden kullanıcı kartındaki düğmeyle ya da ayardan kendisi açar. İstek yalnız Ana görünürken, parça başına bir kez.
+    /// </summary>
+    public bool MusicLyricsEnabled { get; set; }
     /// <summary>Tam ekran uygulama ya da oyun varken çentik gizlensin.</summary>
     public bool NotchHideInFullscreen { get; set; } = true;
     /// <summary>Kamera ve mikrofon kullanımında çentikte gizlilik noktaları görünsün.</summary>
@@ -251,6 +261,12 @@ public sealed record AppSettings
                ShortcutPlayPause == other.ShortcutPlayPause &&
                ShortcutOpenSearch == other.ShortcutOpenSearch &&
                ShortcutOpenSearchClipboard == other.ShortcutOpenSearchClipboard &&
+               ShortcutVoiceCommand == other.ShortcutVoiceCommand &&
+               VoiceHarness == other.VoiceHarness &&
+               VoiceCustomCommand == other.VoiceCustomCommand &&
+               VoiceWorkingDirectory == other.VoiceWorkingDirectory &&
+               VoiceAutoConfirm == other.VoiceAutoConfirm &&
+               VoiceTimeoutSeconds == other.VoiceTimeoutSeconds &&
                SearchRetainPrior == other.SearchRetainPrior &&
                SearchHistoryMode == other.SearchHistoryMode &&
                SearchDisabledSources.SequenceEqual(other.SearchDisabledSources) &&
@@ -334,6 +350,12 @@ public sealed record AppSettings
         hash.Add(ShortcutPlayPause);
         hash.Add(ShortcutOpenSearch);
         hash.Add(ShortcutOpenSearchClipboard);
+        hash.Add(ShortcutVoiceCommand);
+        hash.Add(VoiceHarness);
+        hash.Add(VoiceCustomCommand);
+        hash.Add(VoiceWorkingDirectory);
+        hash.Add(VoiceAutoConfirm);
+        hash.Add(VoiceTimeoutSeconds);
         hash.Add(SearchRetainPrior);
         hash.Add(SearchHistoryMode);
         hash.Add(SearchPinned);

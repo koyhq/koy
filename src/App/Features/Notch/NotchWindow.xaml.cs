@@ -6,6 +6,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using Koy.Core.Animation;
 using Koy.App.Resources;
+using Koy.App.Features.Notch.OSD;
 using Koy.Core.Display;
 using Koy.Platform.Shell;
 
@@ -32,6 +33,8 @@ public partial class NotchWindow : Window
 
     private DisplayMonitor? _targetMonitor;
     public Action? DisplayChangeHandler { get; set; }
+    public Action? VoiceConfirmRequested { get; set; }
+    public Action? VoiceCancelRequested { get; set; }
 
     public DisplayMonitor? TargetMonitor => _targetMonitor;
     public nint Handle => _hwnd != 0 ? _hwnd : (_hwnd = new WindowInteropHelper(this).Handle);
@@ -42,6 +45,24 @@ public partial class NotchWindow : Window
         Loaded += (_, _) => PlaceAtTopCenter(_targetMonitor);
         DpiChanged += (_, _) => PlaceAtTopCenter(_targetMonitor);
         DataContextChanged += OnDataContextChanged;
+    }
+
+    protected override void OnPreviewKeyDown(KeyEventArgs e)
+    {
+        base.OnPreviewKeyDown(e);
+        if (ViewModel?.Osd.Type == OsdType.Voice)
+        {
+            if (e.Key == Key.Enter)
+            {
+                VoiceConfirmRequested?.Invoke();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Escape)
+            {
+                VoiceCancelRequested?.Invoke();
+                e.Handled = true;
+            }
+        }
     }
 
     private const int WmDisplayChange = 0x007E;
@@ -156,11 +177,44 @@ public partial class NotchWindow : Window
     // ki klavye çalışsın (takvimde etkinlik eklemek için). Odak gidince yine odak çalmaz hale gelir.
     private void Notch_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        if (ViewModel?.Osd.Type == OsdType.Voice && ViewModel.Osd.VoiceState == Koy.Core.Voice.VoiceState.AwaitingConfirmation)
+        {
+            VoiceConfirmRequested?.Invoke();
+            e.Handled = true;
+            return;
+        }
+
         if (_hwnd == 0 || e.OriginalSource is not DependencyObject source || FindParent<TextBox>(source) is null)
             return;
 
         WindowStyles.SetNoActivate(_hwnd, false);
         Activate();
+    }
+
+    /// <summary>
+    /// Sesli komut onayı beklendiğinde klavye odağını çentiğe vererek Enter/Esc tuşlarının çalışmasını sağlar.
+    /// </summary>
+    public void FocusVoiceConfirmation()
+    {
+        if (_hwnd == 0)
+            return;
+
+        WindowStyles.SetNoActivate(_hwnd, false);
+        Activate();
+        WindowStyles.SetForeground(_hwnd);
+        Focus();
+    }
+
+    /// <summary>
+    /// Sesli komut onayından çıkıldığında odak çalmama stilini geri getirir ve önceki pencereyi ön plana alır.
+    /// </summary>
+    public void ReleaseVoiceConfirmation(nint restoreTo)
+    {
+        if (_hwnd != 0)
+            WindowStyles.SetNoActivate(_hwnd, true);
+
+        if (restoreTo != 0)
+            WindowStyles.SetForeground(restoreTo);
     }
 
     // Dosya seçici gibi diyaloglara sahip olabilmek için çentik geçici etkinleştirilir (kullanıcı az önce tıkladı,

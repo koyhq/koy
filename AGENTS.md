@@ -57,7 +57,10 @@ src/Platform/   Core'daki sözleşmelerin Windows 11 uygulamaları (WinRT / CsWi
                 (z-sırası denetimi) bilinçli kalır.
                 Wireless/WifiService.cs (WiFiAdapter + WlanProfiles) : Core.Wireless.IWifiService, Bluetooth/BluetoothService.cs
                 (DeviceWatcher) + BluetoothAudioKs.cs (KS bağlan/kes) : Core.Bluetooth.IBluetoothService. SharedServices.AcquireWifiService /
-                AcquireBluetoothService sayaçlı; Wi-Fi yalnız liste sayfası açıkken (10 sn tarama), Bluetooth yalnız Ana/Kontrol görünürken.
+                AcquireBluetoothService sayaçlı; Wi-Fi yalnız liste sayfası açıkken (10 sn tarama), Bluetooth listesi yalnız Ana/Kontrol görünürken.
+                İstisna: Bluetooth cihaz izleyicisi (DeviceWatcher, olay tabanlı, yoklamasız) çentik açıkken sürekli çalışır,
+                çünkü kapalı çentikteki bağlan/kes göstergesi (NotchFeature.OnBluetoothDevicesChanged) ona bağlı. GATT pil
+                okuması ise yalnız bir sayfa listeyi izlerken yapılır (IBluetoothService.SetBatteryReadsEnabled).
                 Core/Wireless ve Core/Bluetooth: liste mantığı (WifiList, BluetoothList) saf ve testli.
                 Clipboard/ClipboardHistoryService.cs : pano dinleyicisi (kendi iş parçacığında gizli mesaj penceresi), SystemStats/SystemStatsService.cs :
                 Search/ : uygulama listesi (shell:AppsFolder, kısa ömürlü STA), Windows dizini (ADO COM, NuGet'siz), oturum komutları, yer imleri.

@@ -161,6 +161,7 @@ public sealed partial class BluetoothDevicesViewModel : ObservableObject, IDispo
 
         _service = _acquire();
         _service.DevicesChanged += OnDevicesChanged;
+        _service.SetBatteryReadsEnabled(true);
         Sync();
     }
 
@@ -169,6 +170,7 @@ public sealed partial class BluetoothDevicesViewModel : ObservableObject, IDispo
         if (_service is null)
             return;
 
+        _service.SetBatteryReadsEnabled(false);
         _service.DevicesChanged -= OnDevicesChanged;
         if (_release is not null)
             _release();

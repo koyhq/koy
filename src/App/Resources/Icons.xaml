@@ -73,4 +73,5 @@
     <Geometry x:Key="IconSmartphone">M7 2 h10 a2 2 0 0 1 2 2 v16 a2 2 0 0 1 -2 2 H7 a2 2 0 0 1 -2 -2 V4 a2 2 0 0 1 2 -2 z M12 18 h.01</Geometry>
     <Geometry x:Key="IconTablet">M6 2 h12 a2 2 0 0 1 2 2 v16 a2 2 0 0 1 -2 2 H6 a2 2 0 0 1 -2 -2 V4 a2 2 0 0 1 2 -2 z M12 18 h.01</Geometry>
     <Geometry x:Key="IconLock">M5 11 h14 a2 2 0 0 1 2 2 v7 a2 2 0 0 1 -2 2 H5 a2 2 0 0 1 -2 -2 v-7 a2 2 0 0 1 2 -2 z M7 11 V7 a5 5 0 0 1 10 0 v4</Geometry>
+    <Geometry x:Key="IconMic">M12 2 a3 3 0 0 0 -3 3 v7 a3 3 0 0 0 6 0 V5 a3 3 0 0 0 -3 -3 z M19 10 v2 a7 7 0 0 1 -14 0 v-2 M12 19 v3 M8 22 h8</Geometry>
 </ResourceDictionary>

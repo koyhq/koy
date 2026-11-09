@@ -7,6 +7,7 @@ using Koy.App.Resources;
 using Koy.Core.Audio;
 using Koy.Core.Display;
 using Koy.Core.Power;
+using Koy.Core.Voice;
 
 namespace Koy.App.Features.Notch.OSD;
 
@@ -56,6 +57,15 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
 
     [ObservableProperty]
     private string _bluetoothStatusText = "";
+
+    [ObservableProperty]
+    private string _voicePrompt = "";
+
+    [ObservableProperty]
+    private string _voiceStatusText = "";
+
+    [ObservableProperty]
+    private VoiceState _voiceState = VoiceState.Idle;
 
     public GridLength FillStarWidth => new(Math.Clamp(Percent, 0, 100), GridUnitType.Star);
     public GridLength RemainingStarWidth => new(Math.Max(0, 100 - Math.Clamp(Percent, 0, 100)), GridUnitType.Star);
@@ -232,6 +242,42 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
         Dismiss();
     }
 
+    public void ShowVoice(VoiceState state, string statusText, string prompt)
+    {
+        RunOnUi(() =>
+        {
+            if (state == VoiceState.Idle)
+            {
+                Dismiss();
+                return;
+            }
+
+            Type = OsdType.Voice;
+            VoiceState = state;
+            VoiceStatusText = statusText;
+            VoicePrompt = prompt;
+            PercentText = state switch
+            {
+                VoiceState.AwaitingConfirmation => "Enter ↵",
+                VoiceState.Listening => "• REC",
+                VoiceState.Running => "...",
+                _ => ""
+            };
+            IsActive = true;
+
+            if (state is VoiceState.Completed or VoiceState.Failed)
+            {
+                ResetTimer(TimeSpan.FromSeconds(3));
+            }
+            else
+            {
+                _autoDismissTimer.Stop();
+            }
+
+            Activated?.Invoke(this, EventArgs.Empty);
+        });
+    }
+
     public void Dismiss()
     {
         if (!IsActive)
@@ -244,6 +290,9 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
         BluetoothDeviceName = "";
         BluetoothConnected = false;
         BluetoothStatusText = "";
+        VoicePrompt = "";
+        VoiceStatusText = "";
+        VoiceState = VoiceState.Idle;
         Dismissed?.Invoke(this, EventArgs.Empty);
     }
 

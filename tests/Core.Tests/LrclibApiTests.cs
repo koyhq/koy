@@ -7,8 +7,9 @@ public class LrclibApiTests
     private static LyricsQuery Query(double? seconds = 200) =>
         new("Song", "Artist", seconds is { } s ? TimeSpan.FromSeconds(s) : null);
 
+    // JSON sayısı kültürden bağımsız yazılır: Türkçe Windows'ta 200.5 "200,5" olur ve JSON bozulur.
     private static string Item(string title, double duration, string? synced) =>
-        $$"""{"trackName":"{{title}}","duration":{{duration}},"syncedLyrics":{{(synced is null ? "null" : $"\"{synced}\"")}}}""";
+        $$"""{"trackName":"{{title}}","duration":{{duration.ToString(System.Globalization.CultureInfo.InvariantCulture)}},"syncedLyrics":{{(synced is null ? "null" : $"\"{synced}\"")}}}""";
 
     [Fact]
     public void Get_url_escapes_fields_and_rounds_duration()

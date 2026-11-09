@@ -190,6 +190,9 @@ public partial class App : Application
             case ShortcutAction.OpenSearchClipboard:
                 _features.OfType<NotchFeature>().FirstOrDefault()?.ToggleSearch(useClipboard: true);
                 break;
+            case ShortcutAction.VoiceCommand:
+                _features.OfType<NotchFeature>().FirstOrDefault()?.ToggleVoiceCommand();
+                break;
         }
     }
 

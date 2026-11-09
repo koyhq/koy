@@ -2,7 +2,7 @@ namespace Koy.Core.Bluetooth;
 
 /// <summary>
 /// Eşleşmiş Bluetooth cihazlarının listesi, bağlantı durumu ve pili. Servis yaşadığı sürece cihaz izleyicisi çalışır
-/// (olay tabanlı, yoklama yok); arayüz yalnız ilgili sayfa görünürken servisi alır.
+/// (olay tabanlı, yoklama yok). Çentik bağlan/kes göstergesi için servisi sürekli tutar; liste sayfaları yalnız görünürken alır.
 /// </summary>
 public interface IBluetoothService : IDisposable
 {
@@ -20,6 +20,12 @@ public interface IBluetoothService : IDisposable
 
     /// <summary>Ses cihazının bağlantısını keser ve sonucu bağlantı durumundan okur.</summary>
     Task<BluetoothActionResult> DisconnectAsync(string deviceId);
+
+    /// <summary>
+    /// GATT pil okumasını açar ya da kapatır. Yalnız Bluetooth listesini izleyen bir sayfa (Ana, Kontrol) açıkken açık olmalı;
+    /// servis çentikte kalıcı tutulsa da okuma yapılmaz (AGENTS.md kural #5).
+    /// </summary>
+    void SetBatteryReadsEnabled(bool enabled);
 
     /// <summary>Windows'ta Bluetooth ayarlarını açar.</summary>
     void OpenSettings();

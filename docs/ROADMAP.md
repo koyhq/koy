@@ -505,6 +505,23 @@ Proje sahibi istedi. Kod yazılmadı.
 - [x] `Win+L` ve `Ctrl+Alt+Del` ezilemez, reddedilir. Başka uygulamanın tuttuğu Win'siz kısayol hata olarak görünür.
 - [ ] Elle sınama (proje sahibi): tek başına `Win` Başlat'ı açmadan aramayı açıyor; `Win+S` ezildiğinde Başlat açılmıyor; yakalama kutusu `Win`'i alıyor; yönetici penceresi öndeyken davranış; bellek ve gecikme.
 
+## Bağlı Bluetooth cihazlarında pil seviyesi (#50)
+- [x] **Araştırma (`arastirma/21-bluetooth-pil.md`):** Windows `DEVPKEY_Bluetooth_Battery` alanı boş dönen bağlı LE klavye/fare/kulaklıklar için WinRT üzerinden standart GATT Battery Service (`0x180F` / `0x2A19`) yedek okuma yolu.
+- [x] **Core (`Core/Bluetooth/`, testli):** `GattBatteryParser` (0-100 aralığı ve çoklu pil durumunda en düşük pil seçimi) ve `BluetoothBatteryFilter` (tuş basımı/RGB voltaj sıçramalarını süzen histerezis filtresi).
+- [x] **Platform (`Platform/Bluetooth/BluetoothService.cs`):** Yalnız `DEVPKEY_Bluetooth_Battery` boş döndüğünde ve ilgili sayfa görünürken GATT okuması; bağlantı kopup yeniden sağlandığında ve 60 sn sonra tazeleme.
+- [ ] Elle sınama (proje sahibi): Pil göstermeyen BLE fare veya klavyenin çentikte pilinin görünmesi, pil zıplamalarının filtrelenmesi.
+
+## Çentikte sesli komut ve harness (#48)
+- [x] **Araştırma (`arastirma/22-sesli-komut-harness.md`):** WinRT `SpeechRecognizer` dikte mimarisi, güvenli argüman listesiyle harness yürütme ve çentik OSD durum makinesi.
+- [x] **Core (`Core/Voice/`, testli):** `VoiceSessionController` durum makinesi (Idle -> Listening -> Transcribing -> AwaitingConfirmation -> Running -> Succeeded/Failed), `VoiceCommandParser` (Claude `-p --`, Codex `exec --`, Antigravity `agy -p` ve özel kalıp ayrıştırma, kabuk enjeksiyon koruması; tire ile başlayan dikte seçenek sayılmaz). Hata metni üretmez, `VoiceFailure` kodu verir; metin `Strings.resx` (EN/TR) içinde.
+- [x] **Platform (`Platform/Voice/`):** `WinRtSpeechRecognitionService` (dinleme bitince mikrofon anında kapanır) ve `ProcessHarnessRunnerService` (argüman listesiyle güvenli çalıştırma, iptal edilebilir süreç ağacı yönetimi; `HarnessExecutableResolver` PATH'te `.exe` arar, npm'in `.cmd` shim'ini açıkça bildirir).
+- [x] **Gizlilik (karar 2026-11-09):** Dikte Microsoft'un çevrimiçi konuşma hizmetini kullanır; ses yalnız Koy dinlerken (kısayoldan sonra) gider ve Ayarlar › Çentik'teki harness açıklamasında yazıyor. Yerel serbest dikte büyük bir konuşma modeli ister (bellek bütçesi, kural #8), bu yüzden şimdilik yok.
+- [x] **Arayüz (App):** `Ctrl+Alt+V` varsayılan kısayolu, çentikte 260×40 OSD ses göstergesi, onaylama için geçici pencere odak yönetimi (Enter/Esc veya çentiğe tıklama), Ayarlar › Çentik altında Harness ve onaylama ayarları.
+- [ ] Elle sınama (proje sahibi): `Ctrl+Alt+V` ile konuşma, metni onaylayıp çalıştırma, model çıktısının çentikte görünmesi.
+
+## Şarkı sözleri (#57) sonrası karar
+- [x] Sözler varsayılan kapalı (çalan başlık, tarayıcı videoları dahil, LRCLIB'e gider). Ana sayfadaki müzik kartında küçük düğmeyle açılıp kapanır, ayar kalıcı kaydedilir; Ayarlar › Çentik'teki seçenek aynı ayar.
+
 ## Sonraya kalanlar
 - CsWin32 0.3.106 → güncel sürüme geçiş: 0.3.369'da üretilen türler değişti (Platform'da 70 derleme hatası: HWND/işaretçi imzaları, `unsafe` gereken yerler). Platform ve Watchdog birlikte, aynı sürüme geçirilir; Watchdog'un görev çubuğu geri getirme yolu elle sınanır. O zamana dek Dependabot bu paketi yoksayar (`.github/dependabot.yml`).
 - Bildirimleri çentikte gösterme: Windows bildirimleri gelince çentik kısa süre gösterir (Claude Code gibi ajanların "iş bitti" bildirimleri de bu yoldan gelir). `UserNotificationListener` paket kimliği ister; Velopack kurulumu için seyrek (sparse) paket ve imza gerekir. Ara çözüm: Claude Code kancasının çağırdığı yerel komutla doğrudan bildirim.

@@ -11,7 +11,8 @@ public enum ShortcutAction
     OpenMenu,
     PlayPause,
     OpenSearch,
-    OpenSearchClipboard
+    OpenSearchClipboard,
+    VoiceCommand
 }
 
 /// <summary>Eylem ile ayar alanı ve varsayılan tuş eşlemesi.</summary>
@@ -32,6 +33,7 @@ public static class ShortcutBindings
         ShortcutAction.PlayPause => "Ctrl+Alt+Space",
         ShortcutAction.OpenSearch => "Win+Shift+Q",
         ShortcutAction.OpenSearchClipboard => "Alt+Shift+F2",
+        ShortcutAction.VoiceCommand => "Ctrl+Alt+V",
         _ => ""
     };
 
@@ -44,6 +46,7 @@ public static class ShortcutBindings
         ShortcutAction.PlayPause => settings.ShortcutPlayPause,
         ShortcutAction.OpenSearch => settings.ShortcutOpenSearch,
         ShortcutAction.OpenSearchClipboard => settings.ShortcutOpenSearchClipboard,
+        ShortcutAction.VoiceCommand => settings.ShortcutVoiceCommand,
         _ => ""
     };
 
@@ -56,6 +59,7 @@ public static class ShortcutBindings
         ShortcutAction.PlayPause => settings with { ShortcutPlayPause = text },
         ShortcutAction.OpenSearch => settings with { ShortcutOpenSearch = text },
         ShortcutAction.OpenSearchClipboard => settings with { ShortcutOpenSearchClipboard = text },
+        ShortcutAction.VoiceCommand => settings with { ShortcutVoiceCommand = text },
         _ => settings
     };
 

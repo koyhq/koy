@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -11,6 +12,8 @@ using Koy.App.Features.Music;
 using Koy.App.Features.Shelf;
 using Koy.App.Features.Status;
 using Koy.App.Features.SystemInfo;
+using Koy.App.Features.Notch.OSD;
+using Koy.App.Resources;
 using Koy.Core.Bluetooth;
 using Koy.Core.Clipboard;
 using Koy.Core.Diagnostics;
@@ -23,6 +26,7 @@ using Koy.Core.Settings;
 using Koy.Core.Timers;
 using Koy.Core.Shell;
 using Koy.Core.Visibility;
+using Koy.Core.Voice;
 using Koy.Core.Weather;
 using Koy.Platform.Audio;
 using Koy.Platform.Bluetooth;
@@ -33,6 +37,7 @@ using Koy.Platform.Power;
 using Koy.Platform.Radio;
 using Koy.Platform.Shelf;
 using Koy.Platform.Shell;
+using Koy.Platform.Voice;
 using Koy.Platform.Weather;
 
 namespace Koy.App.Features.Notch;
@@ -103,6 +108,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     private AudioService? _osdAudio;
     private BrightnessService? _osdBrightness;
     private IPrivacyMonitorService? _privacyMonitor;
+    private VoiceSessionController? _voiceController;
     private bool _stopped;
 
     public void Start()
@@ -225,6 +231,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         // Müzik kartı çubukları: ses yakalama yalnız kart görünür ve müzik çalarken (MusicViewModel.UpdateSpectrum).
         var musicVm = new MusicViewModel(_mediaService!, spectrumAcquire: () => services.AcquireSpectrumService(), spectrumRelease: services.ReleaseSpectrumService,
             lyricsProvider: _lyricsProvider);
+        musicVm.Lyrics.EnabledToggled += SaveLyricsEnabled;
         // Parlaklık, çentiğin o anki ekranına bağlanır; ekran düzeni değişince state.Monitor güncellenir.
         NotchWindowState? stateRef = null;
         var controlCenterVm = new ControlCenterViewModel(
@@ -292,6 +299,9 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         {
             _monitorService?.NotifyDisplayChanged();
         };
+
+        window.VoiceConfirmRequested = ConfirmVoiceCommand;
+        window.VoiceCancelRequested = CancelVoiceCommand;
 
         visibilityController.Changed += OnVisibilityChanged;
 
@@ -546,6 +556,14 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         return SearchFactory.Create(settings, _appSearch, _windowTracker!, _clipboardHistory, Application.Current.Dispatcher, SaveSearchPinned);
     }
 
+    // Karttaki düğme ayarı değiştirir: paylaşılan ayar nesnesi (diğer ekranların çentikleri de okur) ve diskteki dosya.
+    private void SaveLyricsEnabled(bool enabled)
+    {
+        settings.MusicLyricsEnabled = enabled;
+        var store = new SettingsStore(SettingsStore.DefaultPath);
+        store.Save(store.Load() with { MusicLyricsEnabled = enabled });
+    }
+
     private void SaveSearchPinned(bool pinned)
     {
         settings.SearchPinned = pinned;
@@ -569,6 +587,148 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     public void OpenShelf()
     {
         PickStateForShortcut()?.ViewModel.ExpandToShelf();
+    }
+
+    /// <summary>Kısayol: Sesli komut dinlemeyi başlatır / sonlandırır / iptal eder.</summary>
+    public void ToggleVoiceCommand()
+    {
+        EnsureVoiceController();
+        _ = _voiceController?.TriggerShortcutAsync();
+    }
+
+    public void ConfirmVoiceCommand()
+    {
+        _ = _voiceController?.ConfirmAsync();
+    }
+
+    public void CancelVoiceCommand()
+    {
+        _voiceController?.Cancel();
+    }
+
+    private void EnsureVoiceController()
+    {
+        if (_voiceController is not null)
+            return;
+
+        var rec = new WinRtSpeechRecognitionService();
+        var runner = new ProcessHarnessRunnerService();
+        _voiceController = new VoiceSessionController(rec, runner, () => new VoiceSessionOptions(
+            HarnessType: settings.VoiceHarness,
+            WorkingDirectory: settings.VoiceWorkingDirectory,
+            AutoConfirm: settings.VoiceAutoConfirm,
+            TimeoutSeconds: settings.VoiceTimeoutSeconds,
+            CustomExecutable: settings.VoiceCustomCommand));
+
+        _voiceController.StateChanged += _ => UpdateVoiceOsd();
+        _voiceController.HypothesisChanged += _ => UpdateVoiceOsd();
+        _voiceController.PromptChanged += _ => UpdateVoiceOsd();
+    }
+
+    // Core yalnız durum ve hata kodu verir; metin burada seçili dilde yazılır.
+    private string VoiceStatusText(VoiceSessionController controller, VoiceState state) => state switch
+    {
+        VoiceState.Listening => Strings.Get("VoiceListening"),
+        VoiceState.Transcribing => Strings.Get("VoiceTranscribing"),
+        VoiceState.AwaitingConfirmation => Strings.Get("VoiceAwaitingConfirmation"),
+        VoiceState.Running => string.Format(CultureInfo.CurrentCulture, Strings.Get("VoiceRunning"), VoiceHarnessName(settings.VoiceHarness)),
+        VoiceState.Completed => Strings.Get("VoiceCompleted"),
+        VoiceState.Failed => VoiceFailureText(controller),
+        _ => string.Empty
+    };
+
+    private static string VoiceFailureText(VoiceSessionController controller)
+    {
+        // Araç kendi hata çıktısını verdiyse en açıklayıcısı odur (aracın dilinde gelir).
+        if (controller.Failure == VoiceFailure.ExitCode && controller.LastResult?.Error is { Length: > 0 } stderr)
+        {
+            var firstLine = stderr.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).FirstOrDefault();
+            if (!string.IsNullOrEmpty(firstLine))
+                return firstLine;
+        }
+
+        var failure = controller.Failure == VoiceFailure.None ? VoiceFailure.Unexpected : controller.Failure;
+        return string.Format(CultureInfo.CurrentCulture, Strings.Get("VoiceError" + failure), controller.FailureDetail);
+    }
+
+    private static string VoiceHarnessName(VoiceHarnessType harness) => harness switch
+    {
+        VoiceHarnessType.Agy => "Antigravity",
+        VoiceHarnessType.Custom => Strings.Get("VoiceHarnessCustom"),
+        _ => harness.ToString()
+    };
+
+    private nint _voicePriorForeground;
+
+    private void UpdateVoiceOsd()
+    {
+        if (_voiceController is null)
+            return;
+
+        var state = _voiceController.State;
+        if (state == VoiceState.Listening && _voicePriorForeground == 0)
+        {
+            _voicePriorForeground = WindowStyles.GetForeground();
+        }
+
+        if (state == VoiceState.Idle)
+        {
+            Application.Current?.Dispatcher.InvokeAsync(() =>
+            {
+                foreach (var (_, windowState) in _windowStates)
+                {
+                    if (windowState.ViewModel.Osd.Type == OsdType.Voice)
+                    {
+                        windowState.Window.ReleaseVoiceConfirmation(_voicePriorForeground);
+                        windowState.ViewModel.Osd.Dismiss();
+                    }
+                }
+                _voicePriorForeground = 0;
+            });
+            return;
+        }
+
+        var text = VoiceStatusText(_voiceController, state);
+
+        var prompt = !string.IsNullOrEmpty(_voiceController.RecognizedPrompt)
+            ? _voiceController.RecognizedPrompt
+            : _voiceController.CurrentHypothesis;
+
+        Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            var target = PickStateForShortcut();
+            if (target is not null)
+            {
+                target.ViewModel.Osd.ShowVoice(state, text, prompt);
+                if (state == VoiceState.AwaitingConfirmation)
+                {
+                    target.Window.FocusVoiceConfirmation();
+                }
+                else if (state != VoiceState.Listening && state != VoiceState.Transcribing)
+                {
+                    target.Window.ReleaseVoiceConfirmation(_voicePriorForeground);
+                    if (state is VoiceState.Completed or VoiceState.Failed)
+                        _voicePriorForeground = 0;
+                }
+            }
+            else
+            {
+                foreach (var (_, windowState) in _windowStates)
+                {
+                    windowState.ViewModel.Osd.ShowVoice(state, text, prompt);
+                    if (state == VoiceState.AwaitingConfirmation)
+                    {
+                        windowState.Window.FocusVoiceConfirmation();
+                    }
+                    else if (state != VoiceState.Listening && state != VoiceState.Transcribing)
+                    {
+                        windowState.Window.ReleaseVoiceConfirmation(_voicePriorForeground);
+                        if (state is VoiceState.Completed or VoiceState.Failed)
+                            _voicePriorForeground = 0;
+                    }
+                }
+            }
+        });
     }
 
     private NotchWindowState? PickStateForShortcut()
@@ -652,6 +812,8 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         _windows.Clear();
 
         // Pencerelerin Osd görünüm modelleri yukarıda Dispose edildi (olay bağları çözüldü); servisler artık bırakılır.
+        _voiceController?.Dispose();
+        _voiceController = null;
         _osdAudio?.Dispose();
         _osdAudio = null;
         _osdBrightness?.Dispose();

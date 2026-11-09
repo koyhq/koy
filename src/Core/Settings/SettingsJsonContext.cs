@@ -12,6 +12,7 @@ namespace Koy.Core.Settings;
 [JsonSerializable(typeof(DockProximityMode))]
 [JsonSerializable(typeof(DockStartIcon))]
 [JsonSerializable(typeof(Koy.Core.Search.SearchHistoryMode))]
+[JsonSerializable(typeof(Koy.Core.Voice.VoiceHarnessType))]
 [JsonSerializable(typeof(List<string>))]
 [JsonSerializable(typeof(DockFolder))]
 [JsonSerializable(typeof(List<DockFolder>))]
