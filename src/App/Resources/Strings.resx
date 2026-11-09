@@ -480,6 +480,30 @@
   <data name="StartButtonTitle" xml:space="preserve">
     <value>Windows Start button</value>
   </data>
+  <data name="DockStartIconTitle" xml:space="preserve">
+    <value>Start button icon</value>
+  </data>
+  <data name="DockStartIconKoy" xml:space="preserve">
+    <value>Koy</value>
+  </data>
+  <data name="DockStartIconWindows" xml:space="preserve">
+    <value>Windows</value>
+  </data>
+  <data name="DockStartIconCustom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="DockStartIconChoose" xml:space="preserve">
+    <value>Choose image...</value>
+  </data>
+  <data name="DockStartIconNoFile" xml:space="preserve">
+    <value>No image chosen</value>
+  </data>
+  <data name="DockStartIconPickTitle" xml:space="preserve">
+    <value>Choose a Start button icon</value>
+  </data>
+  <data name="DockStartIconPickFilter" xml:space="preserve">
+    <value>Images (*.png;*.jpg;*.jpeg;*.ico)|*.png;*.jpg;*.jpeg;*.ico</value>
+  </data>
   <data name="FoldersSectionTitle" xml:space="preserve">
     <value>Folders section (Downloads)</value>
   </data>

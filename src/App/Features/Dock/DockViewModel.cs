@@ -291,6 +291,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _ => HorizontalAlignment.Center
     };
 
+    /// <summary>Başlat düğmesinin simgesi. Ayar değişince ViewModel yeniden kurulur (DockSettingsDiff), bildirim gerekmez.</summary>
+    public ImageSource? StartIcon { get; }
+
     public DockController Controller => _controller;
     public AppSettings Settings => _settings;
 
@@ -327,6 +330,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
         _isFullWidthMode = settings.DockStyle == DockStyleMode.FullWidth;
         _showStartButton = settings.DockShowStartButton;
+        // Düğme gizliyken dosya okunmaz.
+        StartIcon = settings.DockShowStartButton ? DockStartIconLoader.Load(settings) : null;
         _showFolders = settings.DockShowFolders;
         _showBadges = settings.DockShowBadges;
 

@@ -58,17 +58,62 @@ internal static class DockBarSnapshots
         // 7. Tam genişlikte ikon hizası: ikonlar Başlat'ın ya da sağ düğmelerin yanına yanaşır, arada boşluk kalmaz
         Shoot(outDir, prefix, theme, "dockbar-tam-genislik-sola", renderElement, fullWidth: true, smallTray: true, appCount: 8, alignment: DockIconAlignment.Left);
         Shoot(outDir, prefix, theme, "dockbar-tam-genislik-saga", renderElement, fullWidth: true, smallTray: true, appCount: 8, alignment: DockIconAlignment.Right);
+
+        // 8. Başlat simgesi: varsayılan Koy simgesi yukarıdaki bütün çekimlerde görünür; burada Windows logosu, özel dosya ve bozuk dosya
+        Shoot(outDir, prefix, theme, "dockbar-tam-genislik-baslat-windows", renderElement, fullWidth: true, smallTray: true, appCount: 8, startIcon: DockStartIcon.Windows);
+        Shoot(outDir, prefix, theme, "dockbar-kapsul-baslat-windows", renderElement, fullWidth: false, smallTray: true, appCount: 8, startIcon: DockStartIcon.Windows);
+
+        var dir = Path.Combine(Path.GetTempPath(), "koy-snap-baslat-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            var custom = Path.Combine(dir, "ozel.png");
+            WriteSamplePng(custom);
+            Shoot(outDir, prefix, theme, "dockbar-tam-genislik-baslat-ozel", renderElement, fullWidth: true, smallTray: true, appCount: 8, startIcon: DockStartIcon.Custom, startIconPath: custom);
+            Shoot(outDir, prefix, theme, "dockbar-kapsul-baslat-ozel", renderElement, fullWidth: false, smallTray: true, appCount: 8, startIcon: DockStartIcon.Custom, startIconPath: custom);
+
+            // Bozuk dosya (PNG uzantılı ama içeriği değil) ve olmayan dosya: ikisi de Koy simgesine düşmeli.
+            var corrupt = Path.Combine(dir, "bozuk.png");
+            File.WriteAllText(corrupt, "bu bir png degil");
+            Shoot(outDir, prefix, theme, "dockbar-kapsul-baslat-bozuk", renderElement, fullWidth: false, smallTray: true, appCount: 8, startIcon: DockStartIcon.Custom, startIconPath: corrupt);
+            Shoot(outDir, prefix, theme, "dockbar-kapsul-baslat-yok", renderElement, fullWidth: false, smallTray: true, appCount: 8, startIcon: DockStartIcon.Custom, startIconPath: Path.Combine(dir, "yok.png"));
+        }
+        finally
+        {
+            Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    /// <summary>Özel simge örneği: turuncu yuvarlak karo, ortasında beyaz yıldız benzeri halka.</summary>
+    private static void WriteSamplePng(string path)
+    {
+        var visual = new DrawingVisual();
+        using (var dc = visual.RenderOpen())
+        {
+            dc.DrawRoundedRectangle(new SolidColorBrush(Color.FromRgb(0xF5, 0x7C, 0x00)), null, new Rect(0, 0, 128, 128), 32, 32);
+            dc.DrawEllipse(null, new Pen(Brushes.White, 14), new Point(64, 64), 30, 30);
+        }
+
+        var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap(128, 128, 96, 96, PixelFormats.Pbgra32);
+        bitmap.Render(visual);
+        var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+        encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bitmap));
+        using var stream = File.Create(path);
+        encoder.Save(stream);
     }
 
     private static void Shoot(
         string outDir, string prefix, string theme, string name,
         Action<FrameworkElement, double, double, string> renderElement,
-        bool fullWidth, bool smallTray, int appCount, int pressedIndex = -1, DockIconAlignment alignment = DockIconAlignment.Center)
+        bool fullWidth, bool smallTray, int appCount, int pressedIndex = -1, DockIconAlignment alignment = DockIconAlignment.Center,
+        DockStartIcon startIcon = DockStartIcon.Koy, string startIconPath = "")
     {
         var settings = new AppSettings
         {
             DockStyle = fullWidth ? DockStyleMode.FullWidth : DockStyleMode.FloatingCapsule,
             DockIconAlignment = alignment,
+            DockStartIcon = startIcon,
+            DockStartIconPath = startIconPath,
             DockSmallTray = smallTray,
             DockShowFolders = true,
             DockShowRecents = false,

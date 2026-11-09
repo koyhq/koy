@@ -283,6 +283,51 @@
             </Grid>
         </Border>
 
+        <!-- Başlat simgesi: düğme gizliyken seçenek sunulmaz. Özel görsel satırı yalnız "Özel" seçiliyken. -->
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Border.Visibility>
+                <Binding Path="DockShowStartButton" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="True" />
+            </Border.Visibility>
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [DockStartIconTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    </StackPanel>
+                    <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Content="{Binding [DockStartIconKoy], Source={x:Static res:Loc.Instance}}" GroupName="DockStartIcon"
+                                         IsChecked="{Binding DockStartIcon, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Koy}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [DockStartIconWindows], Source={x:Static res:Loc.Instance}}" GroupName="DockStartIcon"
+                                         IsChecked="{Binding DockStartIcon, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Windows}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [DockStartIconCustom], Source={x:Static res:Loc.Instance}}" GroupName="DockStartIcon"
+                                         IsChecked="{Binding DockStartIcon, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Custom}"
+                                         Command="{Binding PickStartIconCommand}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                <Grid Margin="0,10,0,0">
+                    <Grid.Visibility>
+                        <Binding Path="DockStartIcon" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="Custom" />
+                    </Grid.Visibility>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding StartIconFileName}" Style="{StaticResource SettingDescStyle}"
+                               VerticalAlignment="Center" Margin="0,0,16,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                    <Button Grid.Column="1" Content="{Binding [DockStartIconChoose], Source={x:Static res:Loc.Instance}}"
+                            Command="{Binding PickStartIconCommand}" Style="{StaticResource SettingButtonStyle}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
                 <Grid.ColumnDefinitions>
