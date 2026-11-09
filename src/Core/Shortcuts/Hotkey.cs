@@ -15,7 +15,8 @@ public enum HotkeyModifiers
 
 /// <summary>
 /// Genel (sistem çapında) klavye kısayolu: değiştirici tuşlar + sanal tuş kodu (VK_*).
-/// Metin biçimi "Ctrl+Alt+N": ayarlarda saklanır, arayüzde gösterilir.
+/// Metin biçimi "Ctrl+Alt+N": ayarlarda saklanır, arayüzde gösterilir. <see cref="VirtualKey"/> 0 ise yalnız
+/// değiştiricilerden oluşur ("Win", "Shift+Win").
 /// </summary>
 public readonly record struct Hotkey(HotkeyModifiers Modifiers, int VirtualKey)
 {
@@ -27,12 +28,16 @@ public readonly record struct Hotkey(HotkeyModifiers Modifiers, int VirtualKey)
         ("Left", 0x25), ("Up", 0x26), ("Right", 0x27), ("Down", 0x28)
     ];
 
-    /// <summary>Ctrl, Alt ya da Win'den en az biri gerekir; yalnız Shift ya da çıplak tuş yazı yazmayı bozar.</summary>
-    public bool HasPrimaryModifier =>
-        (Modifiers & (HotkeyModifiers.Alt | HotkeyModifiers.Control | HotkeyModifiers.Win)) != 0;
+    /// <summary>Ana tuşu yok, yalnız değiştiricilerden oluşuyor (tek başına Win gibi).</summary>
+    public bool IsModifierOnly => VirtualKey == 0 && Modifiers != HotkeyModifiers.None;
 
-    /// <summary>Kaydedilebilir mi: ana değiştirici var ve tuş adlandırılabilir bir tuş.</summary>
-    public bool IsValid => HasPrimaryModifier && NameOf(VirtualKey) is not null;
+    /// <summary>Kaydedilebilir mi: yalnız değiştiriciler ya da adlandırılabilir bir tuş.</summary>
+    public bool IsValid => IsModifierOnly || NameOf(VirtualKey) is not null;
+
+    /// <summary>Bu kısayol, yazı yazarken kullanılan bir tuşu bütün uygulamalarda yakalar (uyarı gösterilir).</summary>
+    public bool CapturesTyping =>
+        (Modifiers & ~HotkeyModifiers.Shift) == HotkeyModifiers.None &&
+        VirtualKey is (>= 0x41 and <= 0x5A) or (>= 0x30 and <= 0x39) or 0x20 or 0x0D or 0x09;
 
     /// <summary>Tuşun ayarlarda yazılan adı; desteklenmeyen tuş (değiştirici tuşlar dahil) için null.</summary>
     public static string? NameOf(int vk)
@@ -125,10 +130,10 @@ public readonly record struct Hotkey(HotkeyModifiers Modifiers, int VirtualKey)
             }
         }
 
-        if (key is null)
+        if (key is null && modifiers == HotkeyModifiers.None)
             return false;
 
-        var candidate = new Hotkey(modifiers, key.Value);
+        var candidate = new Hotkey(modifiers, key ?? 0);
         if (!candidate.IsValid)
             return false;
 
@@ -144,7 +149,8 @@ public readonly record struct Hotkey(HotkeyModifiers Modifiers, int VirtualKey)
         if ((Modifiers & HotkeyModifiers.Alt) != 0) parts.Add("Alt");
         if ((Modifiers & HotkeyModifiers.Shift) != 0) parts.Add("Shift");
         if ((Modifiers & HotkeyModifiers.Win) != 0) parts.Add("Win");
-        parts.Add(NameOf(VirtualKey) ?? "0x" + VirtualKey.ToString("X2", CultureInfo.InvariantCulture));
+        if (VirtualKey != 0)
+            parts.Add(NameOf(VirtualKey) ?? "0x" + VirtualKey.ToString("X2", CultureInfo.InvariantCulture));
         return string.Join('+', parts);
     }
 

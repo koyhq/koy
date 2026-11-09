@@ -57,12 +57,24 @@ public sealed partial class ShortcutRowViewModel : ObservableObject
     {
         ErrorText = null;
         IsCapturing = true;
+        _owner.BeginHookCapture(this);
     }
 
     [RelayCommand]
     private void ResetToDefault() => _owner.Assign(this, ShortcutBindings.DefaultText(Action));
 
-    public void CancelCapture() => IsCapturing = false;
+    public void CancelCapture()
+    {
+        IsCapturing = false;
+        _owner.EndHookCapture(this);
+    }
+
+    /// <summary>Klavye kancasından gelen kombinasyon (tek başına Win ve Windows'un kısayolları yalnız böyle yakalanır).</summary>
+    public void HandleCaptured(Hotkey hotkey)
+    {
+        if (IsCapturing)
+            Complete(hotkey);
+    }
 
     /// <summary>Yakalama kutusuna gelen tuş. true dönerse tuş işlendi (olay tüketilir).</summary>
     public bool HandleKey(Key key, ModifierKeys modifiers)
@@ -75,33 +87,37 @@ public sealed partial class ShortcutRowViewModel : ObservableObject
             or Key.LWin or Key.RWin or Key.System or Key.None)
             return true;
 
-        if (modifiers == ModifierKeys.None)
+        Complete(new Hotkey(ToHotkeyModifiers(modifiers), KeyInterop.VirtualKeyFromKey(key)));
+        return true;
+    }
+
+    private void Complete(Hotkey hotkey)
+    {
+        if (hotkey.Modifiers == HotkeyModifiers.None)
         {
-            if (key == Key.Escape)
+            if (hotkey.VirtualKey == KeyInterop.VirtualKeyFromKey(Key.Escape))
             {
-                IsCapturing = false;
-                return true;
+                CancelCapture();
+                return;
             }
 
-            if (key is Key.Back or Key.Delete)
+            if (hotkey.VirtualKey == KeyInterop.VirtualKeyFromKey(Key.Back) || hotkey.VirtualKey == KeyInterop.VirtualKeyFromKey(Key.Delete))
             {
-                IsCapturing = false;
+                CancelCapture();
                 _owner.Assign(this, "");
-                return true;
+                return;
             }
         }
 
-        var hotkey = new Hotkey(ToHotkeyModifiers(modifiers), KeyInterop.VirtualKeyFromKey(key));
         if (!hotkey.IsValid)
         {
             // Yakalama sürer: kullanıcı yeni bir kombinasyon deneyebilir.
             ErrorText = Strings.Get("ShortcutErrInvalid");
-            return true;
+            return;
         }
 
-        IsCapturing = false;
+        CancelCapture();
         _owner.Assign(this, hotkey.Format());
-        return true;
     }
 
     private static HotkeyModifiers ToHotkeyModifiers(ModifierKeys m)
@@ -123,6 +139,7 @@ public sealed class ShortcutsViewModel
 {
     private readonly SettingsStore _store;
     private ShortcutController? _subscribedTo;
+    private ShortcutRowViewModel? _hookCaptureRow;
 
     public ObservableCollection<ShortcutRowViewModel> Rows { get; } = [];
 
@@ -131,6 +148,21 @@ public sealed class ShortcutsViewModel
         _store = store;
         foreach (var action in ShortcutBindings.All)
             Rows.Add(new ShortcutRowViewModel(this, action));
+    }
+
+    public void BeginHookCapture(ShortcutRowViewModel row)
+    {
+        if ((Application.Current as App)?.Shortcuts is { } controller && controller.BeginCapture(row.HandleCaptured))
+            _hookCaptureRow = row;
+    }
+
+    public void EndHookCapture(ShortcutRowViewModel row)
+    {
+        if (!ReferenceEquals(_hookCaptureRow, row))
+            return;
+
+        _hookCaptureRow = null;
+        (Application.Current as App)?.Shortcuts?.EndCapture();
     }
 
     private void OnResultsChanged() => Application.Current?.Dispatcher.InvokeAsync(ShowRegistrationResults);
@@ -198,7 +230,9 @@ public sealed class ShortcutsViewModel
 
             row.ErrorText = results is not null && results.TryGetValue(row.Action, out var result) && result.IsError
                 ? Describe(result)
-                : null;
+                : Hotkey.TryParse(row.Text, out var hotkey) && hotkey.CapturesTyping
+                    ? Strings.Get("ShortcutWarnTyping")
+                    : null;
         }
     }
 

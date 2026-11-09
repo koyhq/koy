@@ -1063,7 +1063,7 @@
     <value>Varsayılana dön</value>
   </data>
   <data name="ShortcutErrInvalid" xml:space="preserve">
-    <value>En az Ctrl, Alt ya da Win ile birlikte bir tuşa basın.</value>
+    <value>Bu tuş kısayol olarak kullanılamıyor.</value>
   </data>
   <data name="ShortcutErrReserved" xml:space="preserve">
     <value>Windows bu kısayolu kendine ayırmış, başka bir kombinasyon seçin.</value>
@@ -1076,6 +1076,9 @@
   </data>
   <data name="ShortcutErrFailed" xml:space="preserve">
     <value>Kısayol kaydedilemedi.</value>
+  </data>
+  <data name="ShortcutWarnTyping" xml:space="preserve">
+    <value>Bu tuş bütün uygulamalarda yakalanır; bu kısayol atalıyken o tuşla yazı yazamazsın.</value>
   </data>
   <data name="PomodoroHeader" xml:space="preserve">
     <value>Pomodoro</value>

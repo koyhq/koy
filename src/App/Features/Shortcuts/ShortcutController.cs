@@ -14,6 +14,7 @@ public sealed class ShortcutController : IDisposable
 {
     private HwndSource? _source;
     private HotkeyService? _hotkeys;
+    private KeyboardHookService? _hook;
     private ShortcutManager? _manager;
 
     /// <summary>Son kayıt denemesinin eylem başına sonucu. Sayfa hata satırlarını bundan çizer.</summary>
@@ -37,7 +38,9 @@ public sealed class ShortcutController : IDisposable
         _source.AddHook(WndProc);
 
         _hotkeys = new HotkeyService(_source.Handle);
-        _manager = new ShortcutManager(_hotkeys);
+        var dispatcher = _source.Dispatcher;
+        _hook = new KeyboardHookService(action => dispatcher.BeginInvoke(action));
+        _manager = new ShortcutManager(_hotkeys, _hook);
         _manager.Triggered += (_, action) => CrashLog.Guard("Kısayol " + action, () => Triggered?.Invoke(action));
 
         Apply(settings);
@@ -52,6 +55,11 @@ public sealed class ShortcutController : IDisposable
         Results = _manager.Apply(ShortcutBindings.ReadAll(settings));
         ResultsChanged?.Invoke();
     }
+
+    /// <summary>Ayarlardaki kutu için bir sonraki kombinasyonu yakalar; kanca kurulamazsa false (kutu WPF tuş olaylarıyla çalışır).</summary>
+    public bool BeginCapture(Action<Hotkey> onCaptured) => _hook?.BeginCapture(onCaptured) ?? false;
+
+    public void EndCapture() => _hook?.EndCapture();
 
     private nint WndProc(nint hwnd, int msg, nint wParam, nint lParam, ref bool handled)
     {
@@ -74,6 +82,7 @@ public sealed class ShortcutController : IDisposable
         _manager?.Dispose();
         _manager = null;
         _hotkeys = null;
+        _hook = null;
 
         if (_source is not null)
         {
