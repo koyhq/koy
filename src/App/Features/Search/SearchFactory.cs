@@ -110,7 +110,7 @@ public static class SearchFactory
             Syntaxes = [new SearchSyntax(T("SearchExampleDocument"), T("SearchSyntaxFiles"))]
         });
 
-        web = new WebShortcutSearchSource(WebShortcutSearchSource.Defaults, shell, T)
+        web = new WebShortcutSearchSource(WebShortcutSearchSource.Defaults, shell, T, Koy.Platform.Search.DefaultBrowserLocator.Find)
         {
             Syntaxes = WebShortcutSearchSource.Defaults
                 .Select(s => new SearchSyntax(s.Key + ":" + T("SearchExampleWeb"), string.Format(T("SearchSyntaxWeb"), s.Provider)))

@@ -335,8 +335,6 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private string _voiceWorkingDirectory = "";
 
-    [ObservableProperty]
-    private bool _voiceAutoConfirm;
 
     [ObservableProperty]
     private int _voiceTimeoutSeconds = 60;
@@ -490,7 +488,6 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             VoiceHarness = s.VoiceHarness.ToString();
             VoiceCustomCommand = s.VoiceCustomCommand;
             VoiceWorkingDirectory = s.VoiceWorkingDirectory;
-            VoiceAutoConfirm = s.VoiceAutoConfirm;
             VoiceTimeoutSeconds = s.VoiceTimeoutSeconds;
 
             WheelAction = s.WheelAction;
@@ -659,7 +656,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             or nameof(WeatherRefreshInterval) or nameof(PomodoroWorkMinutes) or nameof(PomodoroShortBreakMinutes) or nameof(PomodoroLongBreakMinutes)
             or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
             or nameof(PanelControlCenter) or nameof(PanelClipboard) or nameof(PanelSystem) or nameof(ClipboardHistoryEnabled)
-            or nameof(VoiceHarness) or nameof(VoiceCustomCommand) or nameof(VoiceWorkingDirectory) or nameof(VoiceAutoConfirm) or nameof(VoiceTimeoutSeconds)
+            or nameof(VoiceHarness) or nameof(VoiceCustomCommand) or nameof(VoiceWorkingDirectory) or nameof(VoiceTimeoutSeconds)
             or nameof(SearchRetainPrior) or nameof(SearchHistoryMode) or nameof(SearchSourcesVersion);
 
     partial void OnLanguageChanged(string value)
@@ -757,7 +754,6 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             VoiceHarness = Enum.TryParse<VoiceHarnessType>(VoiceHarness, out var vh) ? vh : VoiceHarnessType.Claude,
             VoiceCustomCommand = VoiceCustomCommand,
             VoiceWorkingDirectory = VoiceWorkingDirectory,
-            VoiceAutoConfirm = VoiceAutoConfirm,
             VoiceTimeoutSeconds = VoiceTimeoutSeconds,
             WheelAction = WheelAction,
             MiddleClickAction = MiddleClickAction,

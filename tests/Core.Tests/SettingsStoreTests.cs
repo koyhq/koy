@@ -265,7 +265,6 @@ public sealed class SettingsStoreTests : IDisposable
             VoiceHarness = Koy.Core.Voice.VoiceHarnessType.Codex,
             VoiceCustomCommand = "my-ai {prompt}",
             VoiceWorkingDirectory = @"C:\Workspace",
-            VoiceAutoConfirm = true,
             VoiceTimeoutSeconds = 120
         };
 
@@ -277,7 +276,6 @@ public sealed class SettingsStoreTests : IDisposable
         Assert.Equal(Koy.Core.Voice.VoiceHarnessType.Codex, loaded.VoiceHarness);
         Assert.Equal("my-ai {prompt}", loaded.VoiceCustomCommand);
         Assert.Equal(@"C:\Workspace", loaded.VoiceWorkingDirectory);
-        Assert.True(loaded.VoiceAutoConfirm);
         Assert.Equal(120, loaded.VoiceTimeoutSeconds);
     }
 

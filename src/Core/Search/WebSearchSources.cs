@@ -5,8 +5,15 @@ namespace Koy.Core.Search;
 
 public sealed record WebShortcut(string Key, string Provider, string UrlTemplate);
 
-/// <summary>"gg:kedi" ya da "!gg kedi": seçilen sitede arar. Hiç sonuç yoksa varsayılan arama motoru önerilir.</summary>
-public sealed class WebShortcutSearchSource(IReadOnlyList<WebShortcut> shortcuts, ISearchShell shell, Func<string, string> t) : SearchSource("web", t("SearchCatWeb"))
+/// <summary>
+/// "gg:kedi" ya da "!gg kedi": seçilen sitede arar. Hiç sonuç yoksa varsayılan tarayıcının kendi arama motoruyla aranır
+/// (<see cref="DefaultBrowserSearch"/>); tarayıcı tanınmazsa DuckDuckGo.
+/// </summary>
+public sealed class WebShortcutSearchSource(
+    IReadOnlyList<WebShortcut> shortcuts,
+    ISearchShell shell,
+    Func<string, string> t,
+    Func<DefaultBrowser?>? defaultBrowser = null) : SearchSource("web", t("SearchCatWeb"))
 {
     public static IReadOnlyList<WebShortcut> Defaults { get; } =
     [
@@ -28,11 +35,18 @@ public sealed class WebShortcutSearchSource(IReadOnlyList<WebShortcut> shortcuts
         return shortcut is null ? [] : [Row(shortcut, term)];
     }
 
-    /// <summary>Varsayılan motorla arama satırı (ilk kısayol değil, DuckDuckGo).</summary>
+    /// <summary>Hiç sonuç yokken arama satırı: varsayılan tarayıcının motoru, tanınmazsa DuckDuckGo.</summary>
     public SearchResult? Fallback(SearchQuery query)
     {
+        if (query.IsEmpty)
+            return null;
+
+        // Kayıt defteri okuması ucuz ve yalnız sonuçsuz arama bitince yapılır; kullanıcı tarayıcıyı değiştirmiş olabilir.
+        if (defaultBrowser?.Invoke() is { } browser && DefaultBrowserSearch.SearchCommand(browser, query.Raw) is { } command)
+            return Row("browser", browser.Name, query.Raw, () => shell.RunWithArguments(command.Executable, command.Arguments));
+
         var shortcut = shortcuts.FirstOrDefault(s => s.Key == "ddg") ?? shortcuts.FirstOrDefault();
-        return shortcut is null || query.IsEmpty ? null : Row(shortcut, query.Raw);
+        return shortcut is null ? null : Row(shortcut, query.Raw);
     }
 
     public static bool TryParse(string text, out string key, out string term)
@@ -63,7 +77,12 @@ public sealed class WebShortcutSearchSource(IReadOnlyList<WebShortcut> shortcuts
     private SearchResult Row(WebShortcut shortcut, string term)
     {
         var url = string.Format(shortcut.UrlTemplate, Uri.EscapeDataString(term));
-        return new SearchResult("web:" + shortcut.Key + ":" + term, Name, string.Format(t("SearchWebFor"), shortcut.Provider, term), () => shell.Open(url))
+        return Row(shortcut.Key, shortcut.Provider, term, () => shell.Open(url));
+    }
+
+    private SearchResult Row(string key, string provider, string term, Action execute)
+    {
+        return new SearchResult("web:" + key + ":" + term, Name, string.Format(t("SearchWebFor"), provider, term), execute)
         {
             Glyph = SearchGlyph.Globe,
             CategoryRelevance = SearchRelevance.Highest,

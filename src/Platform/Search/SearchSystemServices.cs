@@ -62,6 +62,14 @@ public sealed class SearchShell(Action<string> copyText) : ISearchShell
     public void Run(string executable, string? arguments) =>
         Start(new ProcessStartInfo(executable, arguments ?? "") { UseShellExecute = true });
 
+    public void RunWithArguments(string executable, IReadOnlyList<string> arguments)
+    {
+        var info = new ProcessStartInfo(executable) { UseShellExecute = false };
+        foreach (var argument in arguments)
+            info.ArgumentList.Add(argument);
+        Start(info);
+    }
+
     public void RunInTerminal(string commandLine) =>
         Start(new ProcessStartInfo("cmd.exe", "/k " + SearchCommandSafety.ToSingleLine(commandLine)) { UseShellExecute = true });
 

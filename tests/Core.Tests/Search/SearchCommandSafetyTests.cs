@@ -13,6 +13,7 @@ public class SearchCommandSafetyTests
         public string? GetEnvironmentVariable(string name) => name == "PATH" ? @"C:\Tools" : name == "PATHEXT" ? ".CMD" : null;
         public void Open(string target) => Log.Add("open " + target);
         public void Run(string executable, string? arguments) => Log.Add($"run {executable} {arguments}".TrimEnd());
+        public void RunWithArguments(string executable, IReadOnlyList<string> arguments) => Log.Add($"run {executable} [{string.Join("|", arguments)}]");
         public void RunInTerminal(string commandLine) => Log.Add("term " + commandLine);
         public void OpenContainingFolder(string path) => Log.Add("folder " + path);
         public void CopyText(string text) => Log.Add("copy " + text);
@@ -167,6 +168,10 @@ public class SearchCommandSafetyTests
         }
 
         public void Run(string executable, string? arguments)
+        {
+        }
+
+        public void RunWithArguments(string executable, IReadOnlyList<string> arguments)
         {
         }
 

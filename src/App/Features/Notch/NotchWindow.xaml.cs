@@ -35,6 +35,7 @@ public partial class NotchWindow : Window
     public Action? DisplayChangeHandler { get; set; }
     public Action? VoiceConfirmRequested { get; set; }
     public Action? VoiceCancelRequested { get; set; }
+    public Action? VoiceReplyRequested { get; set; }
 
     public DisplayMonitor? TargetMonitor => _targetMonitor;
     public nint Handle => _hwnd != 0 ? _hwnd : (_hwnd = new WindowInteropHelper(this).Handle);
@@ -177,9 +178,28 @@ public partial class NotchWindow : Window
     // ki klavye çalışsın (takvimde etkinlik eklemek için). Odak gidince yine odak çalmaz hale gelir.
     private void Notch_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (ViewModel?.Osd.Type == OsdType.Voice && ViewModel.Osd.VoiceState == Koy.Core.Voice.VoiceState.AwaitingConfirmation)
+        // Komut kutusu açıkken: "Enter ↵" etiketi komutu çalıştırır; başka yere tıklama çentiği yeniden etkinleştirip
+        // odağı kutuya verir (sesle yazma paneli açılınca çentik odağı kaybedebiliyor, Enter/Esc o zaman gelmez).
+        if (ViewModel?.Osd.Type == OsdType.Voice && ViewModel.Osd.IsVoiceEditing)
         {
-            VoiceConfirmRequested?.Invoke();
+            if (OsdHost.IsEnterLabel(e.OriginalSource as DependencyObject))
+            {
+                VoiceConfirmRequested?.Invoke();
+                e.Handled = true;
+            }
+            else
+            {
+                FocusVoiceConfirmation();
+            }
+
+            return;
+        }
+
+        // Komut bitti ya da hata verdi: tıklama yanıtın tamamını açar.
+        if (ViewModel?.Osd.Type == OsdType.Voice
+            && ViewModel.Osd.VoiceState is Koy.Core.Voice.VoiceState.Completed or Koy.Core.Voice.VoiceState.Failed)
+        {
+            VoiceReplyRequested?.Invoke();
             e.Handled = true;
             return;
         }
@@ -192,7 +212,7 @@ public partial class NotchWindow : Window
     }
 
     /// <summary>
-    /// Sesli komut onayı beklendiğinde klavye odağını çentiğe vererek Enter/Esc tuşlarının çalışmasını sağlar.
+    /// Komut kutusu açılınca klavye odağını çentiğe ve kutuya verir: sesle yazma (Win+H) odaktaki kutuya yazar, Enter/Esc burada yakalanır.
     /// </summary>
     public void FocusVoiceConfirmation()
     {
@@ -202,7 +222,7 @@ public partial class NotchWindow : Window
         WindowStyles.SetNoActivate(_hwnd, false);
         Activate();
         WindowStyles.SetForeground(_hwnd);
-        Focus();
+        OsdHost.FocusVoiceInput();
     }
 
     /// <summary>

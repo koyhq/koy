@@ -3,9 +3,9 @@ namespace Koy.Core.Voice;
 public enum VoiceState
 {
     Idle,
-    Listening,
-    Transcribing,
-    AwaitingConfirmation,
+
+    /// <summary>Çentikte komut kutusu açık: Windows sesle yazma (Win+H) metni yazıyor ya da kullanıcı kendisi yazıyor.</summary>
+    Editing,
     Running,
     Completed,
     Failed
@@ -21,18 +21,12 @@ public enum VoiceHarnessType
 }
 
 /// <summary>
-/// Sesli komutun neden başarısız olduğu. Kullanıcıya görünen metni App, seçili dile göre bu koddan üretir
+/// Komutun neden başarısız olduğu. Kullanıcıya görünen metni App, seçili dile göre bu koddan üretir
 /// (Core ve Platform dil bilmez).
 /// </summary>
 public enum VoiceFailure
 {
     None,
-    MicrophoneUnavailable,
-    MicrophonePermission,
-    /// <summary>Windows'ta "Çevrimiçi konuşma tanıma" kapalı; dikte bu olmadan çalışmaz.</summary>
-    OnlineSpeechDisabled,
-    RecognitionFailed,
-    NoSpeech,
     InvalidCommand,
     ScriptNotSupported,
     CommandNotFound,
@@ -41,9 +35,6 @@ public enum VoiceFailure
     StartFailed,
     Unexpected
 }
-
-/// <param name="Detail">Mesaja eklenecek ham ayrıntı (durum adı, istisna metni); çevrilmez.</param>
-public sealed record VoiceRecognitionError(VoiceFailure Failure, string Detail = "");
 
 public sealed record ResolvedCommand(string Executable, IReadOnlyList<string> Arguments);
 
@@ -70,7 +61,6 @@ public sealed record HarnessExecutionResult(
 public sealed record VoiceSessionOptions(
     VoiceHarnessType HarnessType = VoiceHarnessType.Claude,
     string WorkingDirectory = "",
-    bool AutoConfirm = false,
     int TimeoutSeconds = 60,
     string? CustomExecutable = null,
     string? CustomArgumentsTemplate = null);
