@@ -12,8 +12,9 @@ namespace Koy.UiSnapshots;
 /// <summary>
 /// Koy'un pencerelerini ekrana çıkarmadan PNG'ye çevirir. Hiçbir Win32 kancası, AppBar ya da görev çubuğu
 /// servisi başlatılmaz; pencereler gösterilmez, yalnız ölçülüp çizilir.
-/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall|centik|dock|dockbar|jumplist]
+/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall|centik|dock|dockbar|jumplist|startmenu]
 /// <c>--scene jumplist</c>: dock sağ tık menüsünün bölümlü atlama listesi hâli (sentetik veri).
+/// <c>--scene startmenu</c>: Başlat düğmesinin sağ tık menüsü (Win+X karşılığı), alt menü açık hâliyle.
 /// <c>--scene uninstall</c>: yalnız Hakkında sayfası ve kaldırma onay görünümü (kaldırıcı hiçbir zaman çalıştırılmaz).
 /// </summary>
 public static class Program
@@ -51,11 +52,14 @@ public static class Program
                 RenderDockFolders(outDir, prefix, theme);
             else if (scene is "jumplist" or "atlama")
                 JumpListSnapshots.Render(outDir, prefix, theme, RenderElement);
+            else if (scene is "startmenu" or "baslat")
+                StartMenuSnapshots.Render(outDir, prefix, theme, RenderElement);
             else
             {
                 RenderAll(outDir, prefix, theme);
                 RenderDockFolders(outDir, prefix, theme);
                 JumpListSnapshots.Render(outDir, prefix, theme, RenderElement);
+                StartMenuSnapshots.Render(outDir, prefix, theme, RenderElement);
             }
         }
 

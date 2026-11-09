@@ -10,6 +10,7 @@ namespace Koy.Core.Settings;
 [JsonSerializable(typeof(DockStyleMode))]
 [JsonSerializable(typeof(DockIconAlignment))]
 [JsonSerializable(typeof(DockProximityMode))]
+[JsonSerializable(typeof(DockStartIcon))]
 [JsonSerializable(typeof(Koy.Core.Search.SearchHistoryMode))]
 [JsonSerializable(typeof(List<string>))]
 [JsonSerializable(typeof(DockFolder))]

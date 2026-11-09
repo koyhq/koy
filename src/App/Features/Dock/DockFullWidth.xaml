@@ -45,11 +45,12 @@
                 <Button Style="{StaticResource DockFlatButtonStyle}"
                         Command="{Binding StartMenuCommand}"
                         ToolTip="{x:Static res:Strings.StartMenu}"
+                        MouseRightButtonUp="OnStartRightClick"
                         Width="36"
                         Height="34"
                         Margin="0,0,6,0"
                         Visibility="{Binding ShowStartButton, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
-                    <Image Source="{StaticResource WindowsLogoImage}" Width="16" Height="16"/>
+                    <Image Source="{Binding StartIcon}" Width="16" Height="16" RenderOptions.BitmapScalingMode="HighQuality"/>
                 </Button>
 
                 <!-- Çalan Müzik Hapı (Yalnız medya etkinken görünür) -->

@@ -43,6 +43,8 @@ public readonly record struct DockSettingsDiff(
                       || before.DockHideInFullscreen != after.DockHideInFullscreen
                       || before.DockEdgeReveal != after.DockEdgeReveal
                       || before.DockShowStartButton != after.DockShowStartButton
+                      || before.DockStartIcon != after.DockStartIcon
+                      || before.DockStartIconPath != after.DockStartIconPath
                       || before.DockShowFolders != after.DockShowFolders
                       || before.DockShowRecents != after.DockShowRecents
                       || before.DockShowTray != after.DockShowTray

@@ -18,6 +18,7 @@ using Koy.Core.JumpList;
 using Koy.Core.Media;
 using Koy.Core.Settings;
 using Koy.Core.Shell;
+using Koy.Core.StartMenu;
 using Koy.Core.Tray;
 using Koy.Core.Visibility;
 using Koy.Platform.Shell;
@@ -151,6 +152,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     /// <summary>Uygulama simgesinin sağ tık menüsündeki atlama listesi; yalnız menü açılınca okunur.</summary>
     public IJumpListService? JumpLists { get; }
+
+    /// <summary>Başlat düğmesinin sağ tık menüsü (Win+X karşılığı); yoksa sağ tık bir şey açmaz.</summary>
+    public StartMenuActions? StartContextMenu { get; }
 
     /// <summary>Son kullanılanlar düğmesi görünür mü (ayar açık ve servis var).</summary>
     public bool ShowRecents => _settings.DockShowRecents && _recentFiles is not null;
@@ -291,6 +295,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _ => HorizontalAlignment.Center
     };
 
+    /// <summary>Başlat düğmesinin simgesi. Ayar değişince ViewModel yeniden kurulur (DockSettingsDiff), bildirim gerekmez.</summary>
+    public ImageSource? StartIcon { get; }
+
     public DockController Controller => _controller;
     public AppSettings Settings => _settings;
 
@@ -307,11 +314,13 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         IMediaService? mediaService = null,
         ITrayService? trayService = null,
         IRecentFilesService? recentFiles = null,
-        IJumpListService? jumpLists = null)
+        IJumpListService? jumpLists = null,
+        StartMenuActions? startMenu = null)
     {
         _settings = settings;
         _recentFiles = recentFiles;
         JumpLists = jumpLists;
+        StartContextMenu = startMenu;
         Status = status;
         _controller = controller;
         _shellActionService = shellActionService;
@@ -327,6 +336,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
         _isFullWidthMode = settings.DockStyle == DockStyleMode.FullWidth;
         _showStartButton = settings.DockShowStartButton;
+        // Düğme gizliyken dosya okunmaz.
+        StartIcon = settings.DockShowStartButton ? DockStartIconLoader.Load(settings) : null;
         _showFolders = settings.DockShowFolders;
         _showBadges = settings.DockShowBadges;
 

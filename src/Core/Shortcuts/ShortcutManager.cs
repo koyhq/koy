@@ -6,10 +6,10 @@ public enum ShortcutStatus
     Unassigned,
     Registered,
 
-    /// <summary>Metin çözülemedi ya da ana değiştirici (Ctrl/Alt/Win) yok.</summary>
+    /// <summary>Metin çözülemedi ya da tuş kısayol olamıyor.</summary>
     Invalid,
 
-    /// <summary>Windows'un kendine ayırdığı kısayol (Alt+Tab, Win+L...).</summary>
+    /// <summary>Windows'un hiçbir uygulamaya bırakmadığı kısayol (Win+L, Ctrl+Alt+Del).</summary>
     ReservedBySystem,
 
     /// <summary>Aynı kombinasyon başka bir Koy eylemine atanmış; bu eylem kaydedilmedi.</summary>
@@ -29,8 +29,16 @@ public sealed record ShortcutResult(ShortcutStatus Status, ShortcutAction? Confl
 /// <summary>Kısayol kombinasyonu için ön denetimler (kayıt denemeden önce).</summary>
 public static class ShortcutConflicts
 {
-    /// <summary>Windows'un kendine ayırdığı ve uygulamaların alamayacağı kombinasyonlar.</summary>
+    /// <summary>Kancayla bile ezilemeyen kombinasyonlar: bunları Windows, uygulamalardan önce işler.</summary>
     public static bool IsReservedBySystem(Hotkey hotkey)
+    {
+        var m = hotkey.Modifiers;
+        var ctrlAlt = (m & (HotkeyModifiers.Control | HotkeyModifiers.Alt)) == (HotkeyModifiers.Control | HotkeyModifiers.Alt);
+        return (m == HotkeyModifiers.Win && hotkey.VirtualKey == 0x4C) || (ctrlAlt && hotkey.VirtualKey == 0x2E);
+    }
+
+    /// <summary>Windows'un kullandığı ama kancayla ezilebilen kombinasyonlar; RegisterHotKey bunları alamaz.</summary>
+    public static bool IsWindowsOwned(Hotkey hotkey)
     {
         var m = hotkey.Modifiers;
         var vk = hotkey.VirtualKey;
@@ -48,10 +56,6 @@ public static class ShortcutConflicts
 
         // Ctrl+Esc (Başlat), Ctrl+Shift+Esc (Görev Yöneticisi)
         if (ctrl && !alt && !win && vk == 0x1B)
-            return true;
-
-        // Ctrl+Alt+Del
-        if (ctrl && alt && vk == 0x2E)
             return true;
 
         // Yalnız Win + harf/rakam/boşluk: Windows neredeyse hepsini kullanır (D, E, L, R, K, A, S, V...).
@@ -93,15 +97,20 @@ public static class ShortcutConflicts
 public sealed class ShortcutManager : IDisposable
 {
     private readonly IHotkeyService _service;
+    private readonly IKeyboardHookService? _hook;
     private readonly HashSet<ShortcutAction> _registered = [];
+    private readonly HashSet<ShortcutAction> _hooked = [];
     private bool _disposed;
 
     public event EventHandler<ShortcutAction>? Triggered;
 
-    public ShortcutManager(IHotkeyService service)
+    public ShortcutManager(IHotkeyService service, IKeyboardHookService? hook = null)
     {
         _service = service;
+        _hook = hook;
         _service.HotkeyPressed += OnHotkeyPressed;
+        if (_hook is not null)
+            _hook.HotkeyPressed += OnHookPressed;
     }
 
     private static int IdOf(ShortcutAction action) => (int)action + 1;
@@ -116,6 +125,7 @@ public sealed class ShortcutManager : IDisposable
 
         var results = new Dictionary<ShortcutAction, ShortcutResult>();
         var taken = new Dictionary<Hotkey, ShortcutAction>();
+        var hookBindings = new Dictionary<int, Hotkey>();
 
         foreach (var action in ShortcutBindings.All)
         {
@@ -144,7 +154,21 @@ public sealed class ShortcutManager : IDisposable
                 continue;
             }
 
+            if (NeedsHook(hotkey))
+            {
+                results[action] = UseHook(action, hotkey, hookBindings, taken);
+                continue;
+            }
+
             var registration = _service.Register(IdOf(action), hotkey);
+
+            // Win'li bir kombinasyonu tutan büyük olasılıkla Windows'tur: kullanıcının seçimi kazanır.
+            if (registration == HotkeyRegistrationResult.AlreadyInUse && _hook is not null && (hotkey.Modifiers & HotkeyModifiers.Win) != 0)
+            {
+                results[action] = UseHook(action, hotkey, hookBindings, taken);
+                continue;
+            }
+
             results[action] = registration switch
             {
                 HotkeyRegistrationResult.Success => new ShortcutResult(ShortcutStatus.Registered),
@@ -159,7 +183,28 @@ public sealed class ShortcutManager : IDisposable
             }
         }
 
+        if (_hook is not null && !_hook.SetBindings(hookBindings))
+        {
+            foreach (var action in _hooked)
+                results[action] = new ShortcutResult(ShortcutStatus.Failed);
+            _hooked.Clear();
+        }
+
         return results;
+    }
+
+    private bool NeedsHook(Hotkey hotkey) =>
+        hotkey.IsModifierOnly || (_hook is not null && ShortcutConflicts.IsWindowsOwned(hotkey));
+
+    private ShortcutResult UseHook(ShortcutAction action, Hotkey hotkey, Dictionary<int, Hotkey> bindings, Dictionary<Hotkey, ShortcutAction> taken)
+    {
+        if (_hook is null)
+            return new ShortcutResult(ShortcutStatus.Failed);
+
+        bindings[IdOf(action)] = hotkey;
+        taken[hotkey] = action;
+        _hooked.Add(action);
+        return new ShortcutResult(ShortcutStatus.Registered);
     }
 
     private void UnregisterAll()
@@ -167,6 +212,14 @@ public sealed class ShortcutManager : IDisposable
         foreach (var action in _registered)
             _service.Unregister(IdOf(action));
         _registered.Clear();
+        _hooked.Clear();
+    }
+
+    private void OnHookPressed(object? sender, int id)
+    {
+        var action = (ShortcutAction)(id - 1);
+        if (_hooked.Contains(action))
+            Triggered?.Invoke(this, action);
     }
 
     private void OnHotkeyPressed(object? sender, int id)
@@ -185,5 +238,10 @@ public sealed class ShortcutManager : IDisposable
         _service.HotkeyPressed -= OnHotkeyPressed;
         UnregisterAll();
         _service.Dispose();
+        if (_hook is not null)
+        {
+            _hook.HotkeyPressed -= OnHookPressed;
+            _hook.Dispose();
+        }
     }
 }

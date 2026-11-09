@@ -33,7 +33,7 @@ public sealed class ShellActionService : IShellActionService
 
     public void OpenNotificationCenter() => SendWinCombo(VIRTUAL_KEY.VK_N);
 
-    private static unsafe void SendWinCombo(VIRTUAL_KEY key)
+    internal static unsafe void SendWinCombo(VIRTUAL_KEY key)
     {
         var inputs = new INPUT[4];
 

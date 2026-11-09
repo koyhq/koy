@@ -69,6 +69,12 @@ RegisterWindowMessage
 SendInput
 INPUT
 KEYBDINPUT
+SetWindowsHookEx
+UnhookWindowsHookEx
+CallNextHookEx
+KBDLLHOOKSTRUCT
+PostThreadMessage
+GetCurrentThreadId
 ExtractIconEx
 DestroyIcon
 SHGetFileInfo
@@ -219,3 +225,5 @@ SIGDN
 LockWorkStation
 SetSuspendState
 WTSDisconnectSession
+GetSystemPowerStatus
+SYSTEM_POWER_STATUS

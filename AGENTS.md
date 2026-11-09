@@ -37,7 +37,7 @@ src/Core/       Saf C# (net10.0). WPF ve Windows API YOK.
                 Servis sözleşmeleri (IMediaService…) ve veri modelleri, durum makineleri, orkestrasyon,
                 yay fiziği, ayarlar. Klasörler özelliğe göre: Media/, Audio/, Notch/, Visibility/, Settings/…
                 Appearance/ tema, vurgu rengi, malzeme, köşe ve hareket (MotionPolicy) kararları
-                Shortcuts/  kısayol modeli (Hotkey), varsayılanlar, çakışma/ayrılmış kombinasyon denetimi
+                Shortcuts/  kısayol modeli (Hotkey), varsayılanlar, çakışma/ayrılmış kombinasyon denetimi, klavye kancası kararları (KeyboardHookEngine)
                 Display/    monitör modeli, ekran başına ayar, yerleşim çözümleyici (DisplayLayoutResolver)
                 Uninstall/  kaldırma kararları ve temizlik listesi (UninstallPlan, UninstallCleaner)
                 Tray/       dock sistem tepsisi: SHELLTRAYDATA çözümleyici, simge deposu (üst sınırlı), tıklama geri
@@ -48,6 +48,7 @@ src/Core/       Saf C# (net10.0). WPF ve Windows API YOK.
                 Tasks/      odak görevleri (TaskService, tasks.json); Settings/JsonListFile ayar klasöründeki küçük JSON listeleri okur/yazar
                 Search/     arama paneli: kaynaklar (ISearchSource), puanlama, sıralama, geçmiş, panel durumu (SearchPanelController), hesap
                 Lyrics/     eşzamanlı sözler: LRC ayrıştırıcı, kaynak zinciri (yerel, önbellek, LRCLIB), oturum durumu (LyricsSession)
+                StartMenu/  dock Başlat düğmesinin sağ tık (Win+X) menüsü: grup ve sıra modeli (StartMenuModel), eylemler (StartMenuActions), IStartMenuHost
 src/Platform/   Core'daki sözleşmelerin Windows 11 uygulamaları (WinRT / CsWin32). Aynı klasör adları:
                 Shell/TrayHostService.cs : Core.Tray.ITrayService. Koy'un gizli Shell_TrayWnd penceresi (kendi iş
                 parçacığında); her kaydı Windows'a da iletir. SharedServices.AcquireTrayHost ile sayaçlı paylaşılır;

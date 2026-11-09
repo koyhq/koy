@@ -465,6 +465,15 @@ Proje sahibi istedi. Yalnız tam genişlik çubuk; kapsül değişmez.
 - [x] Görsel kanıt: `--scene dockbar` (`dockbar-tam-genislik-sola`, `dockbar-tam-genislik-saga`).
 - [ ] Elle sınama (proje sahibi): Sol / Orta / Sağ geçişi çalışan dock'ta; yeniden başlatınca korunma; ikon sürükleyerek sıralama, klasör paneli ve pencere önizlemesi üç hizada doğru yerde mi; iki ekran.
 
+## Başlat düğmesi simgesi (2026-11-09)
+Proje sahibi istedi. Dock'un Başlat düğmesi artık varsayılan olarak Koy'un kendi simgesini gösterir; Windows logosu seçenek olarak kalır.
+- [x] `AppSettings.DockStartIcon` (`Koy` varsayılan / `Windows` / `Custom`) ve `DockStartIconPath`. Eski `settings.json` dosyaları alansız yüklenir ve Koy simgesini alır (Windows logosu görenler için bu bilinçli bir varsayılan değişikliği). Karar mantığı `Core/Dock/DockStartIcon.cs` (`DockStartIconResolver`): yol boşsa, uzantı PNG/JPG/ICO değilse ya da dosya yoksa Koy simgesi. Testli.
+- [x] Koy simgesi `assets/branding/koy-symbol-small.svg`'nin vektör karşılığı (`KoyStartIconImage`, `Styles.xaml`): 16-18 px'te her DPI'da keskin. Özel dosya `DockStartIconLoader`'da `DecodePixelWidth=64` ile çözülüp dondurulur (ICO'da hedefe en yakın kare seçilir); bozuk, okunamayan ya da 20 MB üstü dosya Koy simgesine düşer, dock çökmez.
+- [x] Değişince yalnız ViewModel yeniden kurulur (`DockSettingsDiff`); görev çubuğu, AppBar ve ekranlara dokunulmaz. Testli.
+- [x] Koy › Dock › Bölümler: "Başlat düğmesi simgesi" satırı (Koy / Windows / Özel). Başlat düğmesi kapalıysa satır görünmez. Dosya penceresi yalnız "Özel"e ya da "Görsel seç"e tıklayınca açılır, ayar yüklenirken asla açılmaz; iptalde geçerli dosya yoksa Koy'a dönülür.
+- [x] Görsel kanıt: `--scene dockbar` (`dockbar-*-baslat-windows`, `-ozel`, `-bozuk`, `-yok`; varsayılan Koy simgesi bütün öteki dockbar çekimlerinde) ve `--scene all` (`koy-dock`).
+- [ ] Elle sınama (proje sahibi): Koy / Windows / Özel geçişi çalışan dock'ta (kapsül ve tam genişlik), yeniden başlatınca korunma, yüksek DPI'da keskinlik, PNG / JPG / ICO seçimi, seçili dosyayı silip dock'u yeniden kurma (Koy'a dönmeli).
+
 ## Güncelleme akışı yeniden: sor, güncelle, "neler geldi" — AÇIK, yapılacak (2026-11-07)
 Proje sahibi istedi. Kod yazılmadı.
 
@@ -490,6 +499,12 @@ Proje sahibi istedi. Kod yazılmadı.
 - [ ] Bellek ve CPU ölçümü (AGENTS #1): panel açıkken ve kapanınca.
 - [ ] **Henüz yok:** birim çevirici, sözlük, özel karakter, renk, yazım denetimi; Firefox yer imleri (SQLite paketi gerekir); uygulamaların atlama listesi eylemleri (#26 sonrası); uygulama mağazası araması; sonuç sürükleme; ayrı süreçte eklentiler (AGENTS #4 izin vermez).
 
+## Kısayollarda serbestlik (#47)
+- [x] Ana değiştirici zorunluluğu kalktı: `F9`, `Shift+F9`, tek başına harf (uyarıyla) atanabilir.
+- [x] Yalnız değiştiriciler (tek başına `Win`) ve Windows'un kendi kısayolları klavye kancasıyla alınır (`KeyboardHookEngine`, `KeyboardHookService`). Kanca yalnız böyle bir kısayol atanmışken ya da yakalama sürerken kuruludur.
+- [x] `Win+L` ve `Ctrl+Alt+Del` ezilemez, reddedilir. Başka uygulamanın tuttuğu Win'siz kısayol hata olarak görünür.
+- [ ] Elle sınama (proje sahibi): tek başına `Win` Başlat'ı açmadan aramayı açıyor; `Win+S` ezildiğinde Başlat açılmıyor; yakalama kutusu `Win`'i alıyor; yönetici penceresi öndeyken davranış; bellek ve gecikme.
+
 ## Sonraya kalanlar
 - CsWin32 0.3.106 → güncel sürüme geçiş: 0.3.369'da üretilen türler değişti (Platform'da 70 derleme hatası: HWND/işaretçi imzaları, `unsafe` gereken yerler). Platform ve Watchdog birlikte, aynı sürüme geçirilir; Watchdog'un görev çubuğu geri getirme yolu elle sınanır. O zamana dek Dependabot bu paketi yoksayar (`.github/dependabot.yml`).
 - Bildirimleri çentikte gösterme: Windows bildirimleri gelince çentik kısa süre gösterir (Claude Code gibi ajanların "iş bitti" bildirimleri de bu yoldan gelir). `UserNotificationListener` paket kimliği ister; Velopack kurulumu için seyrek (sparse) paket ve imza gerekir. Ara çözüm: Claude Code kancasının çağırdığı yerel komutla doğrudan bildirim.
@@ -514,6 +529,14 @@ Tasarım ve doğrulama: `docs/ARASTIRMA-SARKI-SOZLERI.md`.
 - [x] "Neler Geldi" uygulamanın diline göre: `CHANGELOG.md` (İngilizce, release-please), `CHANGELOG.tr.md` (Türkçe, sürüm PR'ında elle). O dilde not yoksa öbür dile düşer. Güncelleme penceresi için iki dil tek paket notunda (`ChangelogParser.TurkishNotesMarker`).
 - [x] CI: sürüm PR'ında iki günlükte de yeni sürüm başlığı olmalı (`scripts/check-changelogs.ps1`).
 - [ ] Elle sınama (proje sahibi): iki dilde çentik, dock, sihirbaz ve "Neler Geldi"; İngilizce Windows'ta ilk açılış.
+
+## Başlat düğmesi sağ tık menüsü (2026-11-09)
+- [x] Dock'taki Başlat düğmesine sağ tık, Windows'un Win+X menüsünün Koy tasarımındaki karşılığını açar (yüzen ve tam genişlik dock). Gerçek Windows menüsü açılmaz.
+- [x] **Core (`Core/StartMenu/`, testli):** Windows 11 sırası ve grupları (Yüklü uygulamalar ... Bilgisayar Yönetimi / Terminal, Terminal (Yönetici) / Görev Yöneticisi, Ayarlar, Dosya Gezgini, Ara, Çalıştır / Kapat veya oturumu kapat alt menüsü / Masaüstü), pilsiz makinede Mobilite Merkezi yok, her öğenin eylem türü ve hedefi. `StartMenuActions` hataları yutar; reddedilen UAC istemi sessiz, Windows Terminal yoksa PowerShell.
+- [x] **Platform (`Platform/StartMenu/StartMenuHost.cs`):** kabuk üzerinden başlatma (`ms-settings:`, `.msc`, `taskmgr`, `explorer`), Win+D / Win+S / Win+R, pil sorgusu (`GetSystemPowerStatus`, menü açılırken tek çağrı). Oturum komutları aramanın `SystemCommandService`'ini kullanır. Yeni zamanlayıcı ya da servis yok.
+- [x] **App:** `DockStartMenu` menüyü `DockContextMenuManager` ile açar (menü açıkken dock gizlenmez); `MenuItem` şablonuna alt menü (Popup ve ok) eklendi. Metinler `StartItem*` anahtarlarıyla iki dilde, Windows'un kendi ifadeleriyle.
+- [x] Görsel kanıt: `dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix baslat --theme both --scene startmenu` (TR ve EN, pilli, pilsiz, alt menü açık).
+- [ ] Elle sınama (proje sahibi): iki dock biçiminde sağ tık; alt menünün açılıp tıklanabilmesi ve dışarı tıklayınca kapanması; Terminal (Yönetici) UAC'i reddedince hiçbir şey olmaması; Windows Terminal yokken PowerShell'e düşmesi; Masaüstü, Ara, Çalıştır; pilsiz makinede Mobilite Merkezi'nin görünmemesi.
 
 ## Tanıtım sayfası (2026-11-07)
 - [x] `site/` (düz HTML/CSS/JS, derleme yok): hero (çentik sayfanın tepesinden sarkar, yayla açılır), çentik sekmeleri (gerçek ekran görüntüleri), dock, hafiflik, ayrıntılar, kurulum (SmartScreen uyarısı ve SHA256 doğrulama dahil). Koyu/açık tema sistemi izler. Son sürüm numarası GitHub API'den gelir, gelmezse rozet görünmez.

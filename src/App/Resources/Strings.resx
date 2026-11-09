@@ -480,6 +480,30 @@
   <data name="StartButtonTitle" xml:space="preserve">
     <value>Windows Start button</value>
   </data>
+  <data name="DockStartIconTitle" xml:space="preserve">
+    <value>Start button icon</value>
+  </data>
+  <data name="DockStartIconKoy" xml:space="preserve">
+    <value>Koy</value>
+  </data>
+  <data name="DockStartIconWindows" xml:space="preserve">
+    <value>Windows</value>
+  </data>
+  <data name="DockStartIconCustom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="DockStartIconChoose" xml:space="preserve">
+    <value>Choose image...</value>
+  </data>
+  <data name="DockStartIconNoFile" xml:space="preserve">
+    <value>No image chosen</value>
+  </data>
+  <data name="DockStartIconPickTitle" xml:space="preserve">
+    <value>Choose a Start button icon</value>
+  </data>
+  <data name="DockStartIconPickFilter" xml:space="preserve">
+    <value>Images (*.png;*.jpg;*.jpeg;*.ico)|*.png;*.jpg;*.jpeg;*.ico</value>
+  </data>
   <data name="FoldersSectionTitle" xml:space="preserve">
     <value>Folders section (Downloads)</value>
   </data>
@@ -1069,7 +1093,7 @@
     <value>Reset to default</value>
   </data>
   <data name="ShortcutErrInvalid" xml:space="preserve">
-    <value>Press a key together with at least Ctrl, Alt or Win.</value>
+    <value>This key can't be used as a shortcut.</value>
   </data>
   <data name="ShortcutErrReserved" xml:space="preserve">
     <value>Windows reserves this shortcut, choose another combination.</value>
@@ -1082,6 +1106,9 @@
   </data>
   <data name="ShortcutErrFailed" xml:space="preserve">
     <value>The shortcut could not be registered.</value>
+  </data>
+  <data name="ShortcutWarnTyping" xml:space="preserve">
+    <value>This key is captured in every app, so you can't type it while this shortcut is set.</value>
   </data>
   <data name="PomodoroHeader" xml:space="preserve">
     <value>Pomodoro</value>
@@ -2093,6 +2120,72 @@
   </data>
   <data name="PrivacyUnknownApp" xml:space="preserve">
     <value>Unknown app</value>
+  </data>
+  <data name="StartItemInstalledApps" xml:space="preserve">
+    <value>Installed apps</value>
+  </data>
+  <data name="StartItemMobilityCenter" xml:space="preserve">
+    <value>Mobility Center</value>
+  </data>
+  <data name="StartItemPowerOptions" xml:space="preserve">
+    <value>Power Options</value>
+  </data>
+  <data name="StartItemEventViewer" xml:space="preserve">
+    <value>Event Viewer</value>
+  </data>
+  <data name="StartItemSystem" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="StartItemDeviceManager" xml:space="preserve">
+    <value>Device Manager</value>
+  </data>
+  <data name="StartItemNetworkConnections" xml:space="preserve">
+    <value>Network Connections</value>
+  </data>
+  <data name="StartItemDiskManagement" xml:space="preserve">
+    <value>Disk Management</value>
+  </data>
+  <data name="StartItemComputerManagement" xml:space="preserve">
+    <value>Computer Management</value>
+  </data>
+  <data name="StartItemTerminal" xml:space="preserve">
+    <value>Terminal</value>
+  </data>
+  <data name="StartItemTerminalAdmin" xml:space="preserve">
+    <value>Terminal (Admin)</value>
+  </data>
+  <data name="StartItemTaskManager" xml:space="preserve">
+    <value>Task Manager</value>
+  </data>
+  <data name="StartItemSettings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="StartItemFileExplorer" xml:space="preserve">
+    <value>File Explorer</value>
+  </data>
+  <data name="StartItemSearch" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="StartItemRun" xml:space="preserve">
+    <value>Run</value>
+  </data>
+  <data name="StartItemShutDownOrSignOut" xml:space="preserve">
+    <value>Shut down or sign out</value>
+  </data>
+  <data name="StartItemSignOut" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="StartItemSleep" xml:space="preserve">
+    <value>Sleep</value>
+  </data>
+  <data name="StartItemShutDown" xml:space="preserve">
+    <value>Shut down</value>
+  </data>
+  <data name="StartItemRestart" xml:space="preserve">
+    <value>Restart</value>
+  </data>
+  <data name="StartItemDesktop" xml:space="preserve">
+    <value>Desktop</value>
   </data>
 </root>
 

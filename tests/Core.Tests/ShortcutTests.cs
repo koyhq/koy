@@ -11,6 +11,12 @@ public class HotkeyTests
     [InlineData("Win+Shift+F5", HotkeyModifiers.Win | HotkeyModifiers.Shift, 0x74)]
     [InlineData("Control + Alt + 7", HotkeyModifiers.Control | HotkeyModifiers.Alt, 0x37)]
     [InlineData("Alt+PageDown", HotkeyModifiers.Alt, 0x22)]
+    [InlineData("N", HotkeyModifiers.None, 0x4E)]
+    [InlineData("F9", HotkeyModifiers.None, 0x78)]
+    [InlineData("Shift+N", HotkeyModifiers.Shift, 0x4E)]
+    [InlineData("Win", HotkeyModifiers.Win, 0)]
+    [InlineData("Win+Shift", HotkeyModifiers.Win | HotkeyModifiers.Shift, 0)]
+    [InlineData("Ctrl+Alt", HotkeyModifiers.Control | HotkeyModifiers.Alt, 0)]
     public void TryParse_accepts_valid_text(string text, HotkeyModifiers modifiers, int vk)
     {
         Assert.True(Hotkey.TryParse(text, out var hotkey));
@@ -20,9 +26,6 @@ public class HotkeyTests
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    [InlineData("N")]              // değiştirici yok
-    [InlineData("Shift+N")]        // yalnız Shift yazı yazmayı bozar
-    [InlineData("Ctrl+Alt")]       // ana tuş yok
     [InlineData("Ctrl+Alt+N+M")]   // iki ana tuş
     [InlineData("Ctrl++N")]
     [InlineData("Ctrl+Alt+Foo")]
@@ -44,6 +47,10 @@ public class HotkeyTests
     [InlineData("Alt+Left")]
     [InlineData("Ctrl+Alt+Space")]
     [InlineData("Win+Tab")]
+    [InlineData("Win")]
+    [InlineData("Shift+Win")]
+    [InlineData("F9")]
+    [InlineData("Shift+N")]
     public void Format_then_parse_round_trips(string text)
     {
         Assert.True(Hotkey.TryParse(text, out var hotkey));
@@ -159,18 +166,26 @@ public class ShortcutConflictsTests
     }
 
     [Theory]
+    [InlineData("Ctrl+Alt+Delete")]
+    [InlineData("Win+L")]
+    public void Only_combinations_windows_never_gives_up_are_reserved(string text)
+    {
+        Assert.True(ShortcutConflicts.IsReservedBySystem(Parse(text)));
+    }
+
+    [Theory]
     [InlineData("Alt+Tab")]
     [InlineData("Alt+F4")]
     [InlineData("Ctrl+Esc")]
     [InlineData("Ctrl+Shift+Esc")]
-    [InlineData("Ctrl+Alt+Delete")]
-    [InlineData("Win+L")]
     [InlineData("Win+D")]
+    [InlineData("Win+S")]
     [InlineData("Win+Tab")]
     [InlineData("Win+Shift+S")]
-    public void System_shortcuts_are_reserved(string text)
+    public void Windows_shortcuts_can_be_overridden(string text)
     {
-        Assert.True(ShortcutConflicts.IsReservedBySystem(Parse(text)));
+        Assert.False(ShortcutConflicts.IsReservedBySystem(Parse(text)));
+        Assert.True(ShortcutConflicts.IsWindowsOwned(Parse(text)));
     }
 
     [Theory]
@@ -208,8 +223,8 @@ public class ShortcutConflictsTests
     {
         var current = ShortcutBindings.ReadAll(new AppSettings());
 
-        Assert.Equal(ShortcutStatus.ReservedBySystem, ShortcutConflicts.Check(Parse("Alt+Tab"), ShortcutAction.OpenMenu, current)?.Status);
-        Assert.Equal(ShortcutStatus.Invalid, ShortcutConflicts.Check(new Hotkey(HotkeyModifiers.None, 0x4E), ShortcutAction.OpenMenu, current)?.Status);
+        Assert.Equal(ShortcutStatus.ReservedBySystem, ShortcutConflicts.Check(Parse("Win+L"), ShortcutAction.OpenMenu, current)?.Status);
+        Assert.Equal(ShortcutStatus.Invalid, ShortcutConflicts.Check(default, ShortcutAction.OpenMenu, current)?.Status);
     }
 }
 
@@ -321,12 +336,12 @@ public class ShortcutManagerTests
     {
         var fake = new FakeHotkeyService();
         using var manager = new ShortcutManager(fake);
-        var settings = ShortcutBindings.WithText(new AppSettings(), ShortcutAction.OpenMenu, "Alt+Tab");
+        var settings = ShortcutBindings.WithText(new AppSettings(), ShortcutAction.OpenMenu, "Win+L");
 
         var results = manager.Apply(Desired(settings));
 
         Assert.Equal(ShortcutStatus.ReservedBySystem, results[ShortcutAction.OpenMenu].Status);
-        Assert.DoesNotContain(fake.Log, l => l == "reg Alt+Tab");
+        Assert.DoesNotContain(fake.Log, l => l == "reg Win+L");
     }
 
     [Fact]

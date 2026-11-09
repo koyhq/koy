@@ -480,6 +480,30 @@
   <data name="StartButtonTitle" xml:space="preserve">
     <value>Windows Başlat düğmesi</value>
   </data>
+  <data name="DockStartIconTitle" xml:space="preserve">
+    <value>Başlat düğmesi simgesi</value>
+  </data>
+  <data name="DockStartIconKoy" xml:space="preserve">
+    <value>Koy</value>
+  </data>
+  <data name="DockStartIconWindows" xml:space="preserve">
+    <value>Windows</value>
+  </data>
+  <data name="DockStartIconCustom" xml:space="preserve">
+    <value>Özel</value>
+  </data>
+  <data name="DockStartIconChoose" xml:space="preserve">
+    <value>Görsel seç...</value>
+  </data>
+  <data name="DockStartIconNoFile" xml:space="preserve">
+    <value>Görsel seçilmedi</value>
+  </data>
+  <data name="DockStartIconPickTitle" xml:space="preserve">
+    <value>Başlat düğmesi simgesini seç</value>
+  </data>
+  <data name="DockStartIconPickFilter" xml:space="preserve">
+    <value>Görseller (*.png;*.jpg;*.jpeg;*.ico)|*.png;*.jpg;*.jpeg;*.ico</value>
+  </data>
   <data name="FoldersSectionTitle" xml:space="preserve">
     <value>Klasörler bölümü (İndirilenler)</value>
   </data>
@@ -1069,7 +1093,7 @@
     <value>Varsayılana dön</value>
   </data>
   <data name="ShortcutErrInvalid" xml:space="preserve">
-    <value>En az Ctrl, Alt ya da Win ile birlikte bir tuşa basın.</value>
+    <value>Bu tuş kısayol olarak kullanılamıyor.</value>
   </data>
   <data name="ShortcutErrReserved" xml:space="preserve">
     <value>Windows bu kısayolu kendine ayırmış, başka bir kombinasyon seçin.</value>
@@ -1082,6 +1106,9 @@
   </data>
   <data name="ShortcutErrFailed" xml:space="preserve">
     <value>Kısayol kaydedilemedi.</value>
+  </data>
+  <data name="ShortcutWarnTyping" xml:space="preserve">
+    <value>Bu tuş bütün uygulamalarda yakalanır; bu kısayol atalıyken o tuşla yazı yazamazsın.</value>
   </data>
   <data name="PomodoroHeader" xml:space="preserve">
     <value>Pomodoro</value>
@@ -2093,6 +2120,72 @@
   </data>
   <data name="PrivacyUnknownApp" xml:space="preserve">
     <value>Bilinmeyen uygulama</value>
+  </data>
+  <data name="StartItemInstalledApps" xml:space="preserve">
+    <value>Yüklü uygulamalar</value>
+  </data>
+  <data name="StartItemMobilityCenter" xml:space="preserve">
+    <value>Mobilite Merkezi</value>
+  </data>
+  <data name="StartItemPowerOptions" xml:space="preserve">
+    <value>Güç Seçenekleri</value>
+  </data>
+  <data name="StartItemEventViewer" xml:space="preserve">
+    <value>Olay Görüntüleyicisi</value>
+  </data>
+  <data name="StartItemSystem" xml:space="preserve">
+    <value>Sistem</value>
+  </data>
+  <data name="StartItemDeviceManager" xml:space="preserve">
+    <value>Aygıt Yöneticisi</value>
+  </data>
+  <data name="StartItemNetworkConnections" xml:space="preserve">
+    <value>Ağ Bağlantıları</value>
+  </data>
+  <data name="StartItemDiskManagement" xml:space="preserve">
+    <value>Disk Yönetimi</value>
+  </data>
+  <data name="StartItemComputerManagement" xml:space="preserve">
+    <value>Bilgisayar Yönetimi</value>
+  </data>
+  <data name="StartItemTerminal" xml:space="preserve">
+    <value>Terminal</value>
+  </data>
+  <data name="StartItemTerminalAdmin" xml:space="preserve">
+    <value>Terminal (Yönetici)</value>
+  </data>
+  <data name="StartItemTaskManager" xml:space="preserve">
+    <value>Görev Yöneticisi</value>
+  </data>
+  <data name="StartItemSettings" xml:space="preserve">
+    <value>Ayarlar</value>
+  </data>
+  <data name="StartItemFileExplorer" xml:space="preserve">
+    <value>Dosya Gezgini</value>
+  </data>
+  <data name="StartItemSearch" xml:space="preserve">
+    <value>Ara</value>
+  </data>
+  <data name="StartItemRun" xml:space="preserve">
+    <value>Çalıştır</value>
+  </data>
+  <data name="StartItemShutDownOrSignOut" xml:space="preserve">
+    <value>Kapat veya oturumu kapat</value>
+  </data>
+  <data name="StartItemSignOut" xml:space="preserve">
+    <value>Oturumu kapat</value>
+  </data>
+  <data name="StartItemSleep" xml:space="preserve">
+    <value>Uyku</value>
+  </data>
+  <data name="StartItemShutDown" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="StartItemRestart" xml:space="preserve">
+    <value>Yeniden başlat</value>
+  </data>
+  <data name="StartItemDesktop" xml:space="preserve">
+    <value>Masaüstü</value>
   </data>
 </root>
 

@@ -52,6 +52,12 @@ public sealed record AppSettings
     public bool DockEdgeReveal { get; set; } = true;
 
     public bool DockShowStartButton { get; set; } = true;
+
+    /// <summary>Başlat düğmesinin simgesi: Koy (varsayılan), Windows logosu ya da Custom (<see cref="DockStartIconPath"/>).</summary>
+    public DockStartIcon DockStartIcon { get; set; } = DockStartIcon.Koy;
+
+    /// <summary>Özel Başlat simgesinin dosya yolu (PNG, JPG, ICO). Boşsa ya da dosya yoksa Koy simgesi gösterilir.</summary>
+    public string DockStartIconPath { get; set; } = "";
     public bool DockShowFolders { get; set; } = true;
 
     /// <summary>Dock'ta son kullanılan dosyaların yığın düğmesi (Windows'un Son Kullanılanlar klasörü, en çok 10 öğe).</summary>
@@ -116,7 +122,8 @@ public sealed record AppSettings
     public string WeatherRefreshInterval { get; set; } = "30m";
     public double DockIconSize { get; set; } = 28.0;
     public int IdleDisplayMode { get; set; }
-    public int NotchOpenBehavior { get; set; } = 1;
+    /// <summary>Çentiğin açılması: 0 = üzerine gelince (varsayılan), 1 = tıklayınca.</summary>
+    public int NotchOpenBehavior { get; set; }
     public string Material { get; set; } = "Katı";
     public int WheelAction { get; set; }
     public int MiddleClickAction { get; set; }
@@ -204,6 +211,8 @@ public sealed record AppSettings
                DockHideInFullscreen == other.DockHideInFullscreen &&
                DockEdgeReveal == other.DockEdgeReveal &&
                DockShowStartButton == other.DockShowStartButton &&
+               DockStartIcon == other.DockStartIcon &&
+               DockStartIconPath == other.DockStartIconPath &&
                DockShowFolders == other.DockShowFolders &&
                DockShowRecents == other.DockShowRecents &&
                DockShowTray == other.DockShowTray &&
@@ -285,6 +294,8 @@ public sealed record AppSettings
         hash.Add(DockHideInFullscreen);
         hash.Add(DockEdgeReveal);
         hash.Add(DockShowStartButton);
+        hash.Add(DockStartIcon);
+        hash.Add(DockStartIconPath);
         hash.Add(DockShowFolders);
         hash.Add(DockShowRecents);
         hash.Add(DockShowTray);
