@@ -106,5 +106,6 @@ Sözler açıldığında parça adı, sanatçı ve süre LRCLIB'e gönderilir. Y
 | LRCLIB yanıt biçimi | Gerçek istek | `200`, `404`, 20 sonuç |
 | Kaynak zinciri | `LyricsProvider` + `LrclibSource` gerçek hizmetle, geçici klasörde | Bulma, gürültülü başlık, önbellek, olmayan parça çalıştı |
 | Görünüm | `tools/Koy.UiSnapshots`, `ana-muzik-sozler` sahnesi | Koyu ve açık tema |
-| Gerçek oynatıcıyla senkron | **Yapılmadı** | Elle sınama bekliyor |
-| Bellek ölçümü | **Yapılmadı** | Elle sınamayla birlikte |
+| Gerçek medya oturumu → sorgu → söz | `MediaService` + `LyricsProvider`, Spotify'da duraklatılmış parça | Parça okundu, 27 satır bulundu, etkin satır doğru |
+| Çentikte çalarken senkron, satıra tıklama, parça değişimi | **Yapılmadı** | Elle sınama bekliyor |
+| Bellek | Debug derleme, açılıştan 25 sn sonra, sözler kapalı | 44,9 MB özel çalışma kümesi, 69,4 MB private bytes. Sözler açıkken ölçülmedi |

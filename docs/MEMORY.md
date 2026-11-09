@@ -29,6 +29,7 @@ Makine: Windows 11 Home 26200, RTX 4050 Laptop + Intel UHD.
 | 2026-11-08 | Karşılaştırma: main `e40e67f`, Release, açılıştan 25 sn sonra, 3 tur | 78,6 / 81,7 / 109,9 MB | 188–233 MB | Tek monitör; çentik + tam genişlik dock + tepsi açık. Aşağıdaki satırla aynı koşul. |
 | 2026-11-08 | Aynı main + arama paneli (#40), ikon hizası (#41), İngilizce (#46), Release, açılıştan 25 sn sonra, 3 tur | 76,8 / 80,4 / 122,6 MB | 186–250 MB | Orta değerde fark yok (81,7 → 80,4 MB). İki tarafta da birer yüksek değer var, sebebi araştırılmadı. |
 | 2026-11-08 | Kurulu `0.3.0-test.3`, arama paneli: açılmadan önce → açıkken (15 sn) → kapandıktan 60 sn sonra | 85,8 → 90,2 → 88,9 MB | 219 → 226 → 224 MB | Tek monitör. Panel boş, sorgu yazılmadı; sonuç simgeleri dahil değil. Panel WM_HOTKEY iletisiyle açıldı. İki monitör ölçülmedi. |
+| 2026-11-09 | `test/0.3.0-test.6` (dört açık PR + şarkı sözleri), **Debug**, açılıştan 25 sn sonra, sözler kapalı | 69,4 MB (özel çalışma kümesi 44,9 MB) | 170,6 MB | Tek monitör; çentik + dock açık, ön planda tam ekran oyun. Debug olduğu için Release satırlarıyla birebir karşılaştırılamaz. Sözler açıkken ölçülmedi. |
 
 > **Not (2026-11-05):** 82,7 MB'lık ölçümden sonra kısayollar, çoklu ekran, tema/ikon/hareket ve kaldırma ekranı eklendi; bu revizyon 2026-11-06 satırında ölçüldü (63,9 MB). Dock/tepsi paketi (gözcü süreç, son kullanılanlar, sabitli sıra, kenardan açma) sonrası yeniden ölçülmedi.
 >
