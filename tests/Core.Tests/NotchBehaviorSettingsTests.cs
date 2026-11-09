@@ -62,9 +62,25 @@ public class NotchBehaviorSettingsTests
     }
 
     [Fact]
-    public void Default_open_behavior_setting_is_click()
+    public void Default_open_behavior_setting_is_hover()
     {
-        Assert.Equal(1, new AppSettings().NotchOpenBehavior);
+        Assert.Equal(0, new AppSettings().NotchOpenBehavior);
+    }
+
+    [Fact]
+    public void Saved_click_choice_is_kept()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "koy-open-" + Guid.NewGuid().ToString("N") + ".json");
+        try
+        {
+            var store = new SettingsStore(path);
+            store.Save(new AppSettings { NotchOpenBehavior = 1 });
+            Assert.Equal(1, store.Load().NotchOpenBehavior);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
     }
 
     [Fact]
