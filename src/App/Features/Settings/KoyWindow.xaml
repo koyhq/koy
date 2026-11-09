@@ -96,11 +96,14 @@
                             <RadioButton GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconKeyboard}" Click="NavKisayollar_Click"
                                          IsChecked="{Binding SelectedPageIndex, Mode=TwoWay, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=5}"
                                          Content="{Binding [NavShortcuts], Source={x:Static res:Loc.Instance}}" />
-                            <RadioButton GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconActivity}" Click="NavPerformans_Click"
+                            <RadioButton GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconMic}" Click="NavDikte_Click"
                                          IsChecked="{Binding SelectedPageIndex, Mode=TwoWay, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=6}"
+                                         Content="{Binding [NavDictation], Source={x:Static res:Loc.Instance}}" />
+                            <RadioButton GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconActivity}" Click="NavPerformans_Click"
+                                         IsChecked="{Binding SelectedPageIndex, Mode=TwoWay, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=7}"
                                          Content="{Binding [NavPerformance], Source={x:Static res:Loc.Instance}}" />
                             <RadioButton GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconInfo}" Click="NavHakkinda_Click"
-                                         IsChecked="{Binding SelectedPageIndex, Mode=TwoWay, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=7}"
+                                         IsChecked="{Binding SelectedPageIndex, Mode=TwoWay, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=8}"
                                          Content="{Binding [NavAbout], Source={x:Static res:Loc.Instance}}" />
                         </StackPanel>
 
@@ -150,8 +153,9 @@
                         <pages:EkranlarPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=3}" />
                         <pages:GorunumPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=4}" />
                         <pages:KisayollarPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=5}" />
-                        <pages:PerformansPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=6}" />
-                        <pages:HakkindaPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=7}" />
+                        <pages:DiktePage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=6}" />
+                        <pages:PerformansPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=7}" />
+                        <pages:HakkindaPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=8}" />
                     </Grid>
                 </ScrollViewer>
             </Grid>

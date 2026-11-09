@@ -27,20 +27,62 @@ public static class VoiceCommandParser
         VoiceHarnessType harnessType,
         string prompt,
         string? customExecutable = null,
-        string? customArgumentsTemplate = null)
+        string? customArgumentsTemplate = null,
+        VoiceClaudePermission claudePermission = VoiceClaudePermission.Auto,
+        string? model = null)
     {
         var safePrompt = prompt ?? string.Empty;
 
         return harnessType switch
         {
             // "--" istemi seçenek olarak okunmasın diye konur: "-p --version" sürüm yazdırır, dikte "--version" olsa da istem olarak gider.
-            VoiceHarnessType.Claude => new ResolvedCommand("claude", ["-p", "--", safePrompt]),
+            // İzin bayrağı "--" öncesinde durur; sonrası istem sayılır.
+            VoiceHarnessType.Claude => new ResolvedCommand("claude", ClaudeArguments(safePrompt, claudePermission, model)),
             VoiceHarnessType.Codex => new ResolvedCommand("codex", ["exec", "--", safePrompt]),
             // agy (Go) -p değer alır ve sonraki argümanı tire ile başlasa da değer sayar; "--" gerekmez, konursa istem "--" olur.
             VoiceHarnessType.Agy => new ResolvedCommand("agy", ["-p", safePrompt]),
             VoiceHarnessType.Custom => ResolveCustom(safePrompt, customExecutable, customArgumentsTemplate),
             _ => throw new ArgumentOutOfRangeException(nameof(harnessType), $"Bilinmeyen harness türü: {harnessType}")
         };
+    }
+
+    /// <summary>Ayarda "model yok" anlamına gelen değer: araç kendi varsayılanını kullanır.</summary>
+    public const string DefaultModel = "default";
+
+    // Model adı seçenek gibi okunmasın (ör. "--dangerously...") ve kabuk karakteri taşımasın: yalnız ad karakterleri.
+    private static bool IsValidModel(string model) =>
+        model.Length <= 80 && char.IsAsciiLetterOrDigit(model[0])
+        && model.All(c => char.IsAsciiLetterOrDigit(c) || c is '.' or '_' or '-' or ':' or '[' or ']');
+
+    private static List<string> ClaudeArguments(string prompt, VoiceClaudePermission permission, string? model)
+    {
+        var args = new List<string> { "-p" };
+
+        var trimmed = model?.Trim();
+        if (!string.IsNullOrEmpty(trimmed) && !trimmed.Equals(DefaultModel, StringComparison.OrdinalIgnoreCase))
+        {
+            if (!IsValidModel(trimmed))
+                throw new VoiceCommandException($"Geçersiz model adı: {trimmed}");
+            args.Add("--model");
+            args.Add(trimmed);
+        }
+
+        switch (permission)
+        {
+            case VoiceClaudePermission.Auto:
+                args.Add("--permission-mode");
+                args.Add("auto");
+                break;
+            case VoiceClaudePermission.AcceptEdits:
+                args.Add("--permission-mode");
+                args.Add("acceptEdits");
+                break;
+        }
+
+        // "--" istemden önce: seçenekler burada biter.
+        args.Add("--");
+        args.Add(prompt);
+        return args;
     }
 
     private static ResolvedCommand ResolveCustom(string prompt, string? customExecutable, string? customTemplate)

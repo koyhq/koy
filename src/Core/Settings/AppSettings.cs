@@ -143,6 +143,9 @@ public sealed record AppSettings
     public string ShortcutOpenSearchClipboard { get; set; } = "Alt+Shift+F2";
     public string ShortcutVoiceCommand { get; set; } = "Ctrl+Alt+V";
     public VoiceHarnessType VoiceHarness { get; set; } = VoiceHarnessType.Claude;
+    public VoiceClaudePermission VoiceClaudePermission { get; set; } = VoiceClaudePermission.Auto;
+    /// <summary>Claude'un modeli (takma ad ya da tam ad); "default" = aracın kendi varsayılanı.</summary>
+    public string VoiceModel { get; set; } = "default";
     public string VoiceCustomCommand { get; set; } = "";
     public string VoiceWorkingDirectory { get; set; } = "";
     public int VoiceTimeoutSeconds { get; set; } = 60;
@@ -262,6 +265,8 @@ public sealed record AppSettings
                ShortcutOpenSearchClipboard == other.ShortcutOpenSearchClipboard &&
                ShortcutVoiceCommand == other.ShortcutVoiceCommand &&
                VoiceHarness == other.VoiceHarness &&
+               VoiceClaudePermission == other.VoiceClaudePermission &&
+               VoiceModel == other.VoiceModel &&
                VoiceCustomCommand == other.VoiceCustomCommand &&
                VoiceWorkingDirectory == other.VoiceWorkingDirectory &&
                VoiceTimeoutSeconds == other.VoiceTimeoutSeconds &&
@@ -350,6 +355,8 @@ public sealed record AppSettings
         hash.Add(ShortcutOpenSearchClipboard);
         hash.Add(ShortcutVoiceCommand);
         hash.Add(VoiceHarness);
+        hash.Add(VoiceClaudePermission);
+        hash.Add(VoiceModel);
         hash.Add(VoiceCustomCommand);
         hash.Add(VoiceWorkingDirectory);
         hash.Add(VoiceTimeoutSeconds);

@@ -21,6 +21,22 @@ public enum VoiceHarnessType
 }
 
 /// <summary>
+/// Claude'un izin modu. Sesli komut <c>claude -p</c> ile başsız çalışır: izin sorusu çıkamaz,
+/// bu yüzden <see cref="Default"/> kipinde Claude yalnız okur; dosya oluşturma ve düzenleme reddedilir.
+/// </summary>
+public enum VoiceClaudePermission
+{
+    /// <summary>Ek bayrak yok: yalnız okuma.</summary>
+    Default,
+
+    /// <summary>Claude'un otomatik modu (<c>--permission-mode auto</c>): sınıflandırıcı güvenli işleri onaylar, riskliyi reddeder.</summary>
+    Auto,
+
+    /// <summary>Dosya düzenleme ve oluşturma (<c>--permission-mode acceptEdits</c>) onaysız yapılır.</summary>
+    AcceptEdits
+}
+
+/// <summary>
 /// Komutun neden başarısız olduğu. Kullanıcıya görünen metni App, seçili dile göre bu koddan üretir
 /// (Core ve Platform dil bilmez).
 /// </summary>
@@ -44,7 +60,9 @@ public sealed record HarnessExecutionRequest(
     string WorkingDirectory,
     int TimeoutSeconds = 60,
     string? CustomExecutable = null,
-    string? CustomArgumentsTemplate = null);
+    string? CustomArgumentsTemplate = null,
+    VoiceClaudePermission ClaudePermission = VoiceClaudePermission.Auto,
+    string? Model = null);
 
 /// <param name="Error">Aracın kendi stderr çıktısı.</param>
 /// <param name="Failure">Başarısızlık kodu; başarıda <see cref="VoiceFailure.None"/>.</param>
@@ -63,7 +81,9 @@ public sealed record VoiceSessionOptions(
     string WorkingDirectory = "",
     int TimeoutSeconds = 60,
     string? CustomExecutable = null,
-    string? CustomArgumentsTemplate = null);
+    string? CustomArgumentsTemplate = null,
+    VoiceClaudePermission ClaudePermission = VoiceClaudePermission.Auto,
+    string? Model = null);
 
 /// <summary>Özel harness komutu geçersiz (boş, kabuk yorumlayıcısı ya da kabuk metakarakteri içeriyor).</summary>
 public sealed class VoiceCommandException(string message) : InvalidOperationException(message);

@@ -183,6 +183,7 @@ public partial class KoyWindow : Window
     private void NavEkranlar_Click(object sender, RoutedEventArgs e) => Navigate(3);
     private void NavGorunum_Click(object sender, RoutedEventArgs e) => Navigate(4);
     private void NavKisayollar_Click(object sender, RoutedEventArgs e) => Navigate(5);
-    private void NavPerformans_Click(object sender, RoutedEventArgs e) => Navigate(6);
-    private void NavHakkinda_Click(object sender, RoutedEventArgs e) => Navigate(7);
+    private void NavDikte_Click(object sender, RoutedEventArgs e) => Navigate(6);
+    private void NavPerformans_Click(object sender, RoutedEventArgs e) => Navigate(7);
+    private void NavHakkinda_Click(object sender, RoutedEventArgs e) => Navigate(8);
 }

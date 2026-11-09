@@ -617,7 +617,9 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             HarnessType: settings.VoiceHarness,
             WorkingDirectory: settings.VoiceWorkingDirectory,
             TimeoutSeconds: settings.VoiceTimeoutSeconds,
-            CustomExecutable: settings.VoiceCustomCommand));
+            CustomExecutable: settings.VoiceCustomCommand,
+            ClaudePermission: settings.VoiceClaudePermission,
+            Model: settings.VoiceModel));
 
         _voiceController.StateChanged += state => Application.Current?.Dispatcher.InvokeAsync(() => UpdateVoiceOsd(state));
     }
@@ -681,7 +683,27 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         }
     }
 
+    // Yanıtın tamamı çentiğin altındaki kartta okunur; dosya yedek olarak kalır.
+    private void ShowVoiceReplyCard(NotchWindowState target, string prompt, HarnessExecutionResult result)
+    {
+        var body = string.IsNullOrWhiteSpace(result.Error)
+            ? result.Output
+            : string.IsNullOrWhiteSpace(result.Output) ? result.Error : result.Output + Environment.NewLine + Environment.NewLine + result.Error;
+        var info = string.Format(CultureInfo.CurrentCulture, "{0} · {1:F1} s", VoiceHarnessName(settings.VoiceHarness), result.Duration.TotalSeconds);
+        var window = target.Window;
+        VoiceReplyWindow.ShowReply(window.Left + window.Width / 2, window.Top + 72, prompt, info, body, OpenVoiceReplyFile);
+    }
+
     private void OpenVoiceReply()
+    {
+        // Kart açıksa çentiğe tıklamak ona odak verir; yoksa yanıt dosyası açılır.
+        if (VoiceReplyWindow.FocusCurrent())
+            return;
+
+        OpenVoiceReplyFile();
+    }
+
+    private void OpenVoiceReplyFile()
     {
         if (!File.Exists(VoiceReplyPath))
             return;
@@ -721,6 +743,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
 
         if (state == VoiceState.Editing)
         {
+            VoiceReplyWindow.CloseCurrent();
             _voicePriorForeground = WindowStyles.GetForeground();
             _voiceWindow = PickStateForShortcut();
         }
@@ -748,6 +771,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             && SaveVoiceReply(_voiceController.Prompt, result))
         {
             hasReply = true;
+            ShowVoiceReplyCard(target, _voiceController.Prompt, result);
             if (state == VoiceState.Completed)
             {
                 // Çentikte yanıtın ilk satırı; tamamı tıklayınca açılan dosyada.
@@ -883,6 +907,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     public void Stop()
     {
         _stopped = true;
+        VoiceReplyWindow.CloseCurrent();
         _edgePeekTimer?.Stop();
         _edgePeekTimer = null;
 

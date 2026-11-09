@@ -31,7 +31,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     public WeatherLocationViewModel Weather { get; }
 
     [ObservableProperty]
-    private int _selectedPageIndex; // 0: Genel, 1: Çentik, 2: Dock, 3: Ekranlar, 4: Görünüm, 5: Kısayollar, 6: Performans, 7: Hakkında
+    private int _selectedPageIndex; // 0: Genel, 1: Çentik, 2: Dock, 3: Ekranlar, 4: Görünüm, 5: Kısayollar, 6: Dikte, 7: Performans, 8: Hakkında
 
     // --- GENEL ---
     [ObservableProperty]
@@ -330,6 +330,14 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private string _voiceHarness = "Claude";
 
     [ObservableProperty]
+    private string _voiceClaudePermission = "Auto";
+
+    [ObservableProperty]
+    private string _voiceModel = "default";
+
+    public string[] VoiceModelOptions { get; } = ["default", "fable", "opus", "sonnet", "haiku"];
+
+    [ObservableProperty]
     private string _voiceCustomCommand = "";
 
     [ObservableProperty]
@@ -486,6 +494,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             PomodoroLongBreakMinutes = s.PomodoroLongBreakMinutes;
 
             VoiceHarness = s.VoiceHarness.ToString();
+            VoiceClaudePermission = s.VoiceClaudePermission.ToString();
+            VoiceModel = string.IsNullOrWhiteSpace(s.VoiceModel) ? "default" : s.VoiceModel;
             VoiceCustomCommand = s.VoiceCustomCommand;
             VoiceWorkingDirectory = s.VoiceWorkingDirectory;
             VoiceTimeoutSeconds = s.VoiceTimeoutSeconds;
@@ -598,7 +608,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     public void SelectPage(int index)
     {
         SelectedPageIndex = index;
-        if (index == 6) // Performans
+        if (index == 7) // Performans
         {
             RefreshMemory();
         }
@@ -656,7 +666,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             or nameof(WeatherRefreshInterval) or nameof(PomodoroWorkMinutes) or nameof(PomodoroShortBreakMinutes) or nameof(PomodoroLongBreakMinutes)
             or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
             or nameof(PanelControlCenter) or nameof(PanelClipboard) or nameof(PanelSystem) or nameof(ClipboardHistoryEnabled)
-            or nameof(VoiceHarness) or nameof(VoiceCustomCommand) or nameof(VoiceWorkingDirectory) or nameof(VoiceTimeoutSeconds)
+            or nameof(VoiceHarness) or nameof(VoiceClaudePermission) or nameof(VoiceModel) or nameof(VoiceCustomCommand) or nameof(VoiceWorkingDirectory) or nameof(VoiceTimeoutSeconds)
             or nameof(SearchRetainPrior) or nameof(SearchHistoryMode) or nameof(SearchSourcesVersion);
 
     partial void OnLanguageChanged(string value)
@@ -752,6 +762,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             PomodoroShortBreakMinutes = PomodoroShortBreakMinutes,
             PomodoroLongBreakMinutes = PomodoroLongBreakMinutes,
             VoiceHarness = Enum.TryParse<VoiceHarnessType>(VoiceHarness, out var vh) ? vh : VoiceHarnessType.Claude,
+            VoiceClaudePermission = Enum.TryParse<VoiceClaudePermission>(VoiceClaudePermission, out var vp) ? vp : Koy.Core.Voice.VoiceClaudePermission.Auto,
+            VoiceModel = string.IsNullOrWhiteSpace(VoiceModel) ? "default" : VoiceModel,
             VoiceCustomCommand = VoiceCustomCommand,
             VoiceWorkingDirectory = VoiceWorkingDirectory,
             VoiceTimeoutSeconds = VoiceTimeoutSeconds,

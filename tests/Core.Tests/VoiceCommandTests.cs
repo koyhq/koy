@@ -9,7 +9,60 @@ public class VoiceCommandTests
     {
         var resolved = VoiceCommandParser.Resolve(VoiceHarnessType.Claude, "unit test yaz");
         Assert.Equal("claude", resolved.Executable);
-        Assert.Equal(["-p", "--", "unit test yaz"], resolved.Arguments);
+        // Başsız çalışmada izin sorusu çıkamaz: varsayılan Claude'un auto modudur.
+        Assert.Equal(["-p", "--permission-mode", "auto", "--", "unit test yaz"], resolved.Arguments);
+    }
+
+    [Theory]
+    [InlineData(VoiceClaudePermission.Auto, new[] { "-p", "--permission-mode", "auto", "--", "x" })]
+    [InlineData(VoiceClaudePermission.AcceptEdits, new[] { "-p", "--permission-mode", "acceptEdits", "--", "x" })]
+    [InlineData(VoiceClaudePermission.Default, new[] { "-p", "--", "x" })]
+    public void VoiceCommandParser_ClaudePermission_AddsModeBeforeDoubleDash(VoiceClaudePermission mode, string[] expected)
+    {
+        var resolved = VoiceCommandParser.Resolve(VoiceHarnessType.Claude, "x", claudePermission: mode);
+        Assert.Equal(expected, resolved.Arguments);
+    }
+
+    [Fact]
+    public void VoiceCommandParser_ClaudeModel_AddsModelFlagBeforeDoubleDash()
+    {
+        var resolved = VoiceCommandParser.Resolve(VoiceHarnessType.Claude, "x", claudePermission: VoiceClaudePermission.Auto, model: "opus");
+        Assert.Equal(["-p", "--model", "opus", "--permission-mode", "auto", "--", "x"], resolved.Arguments);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  ")]
+    [InlineData("default")]
+    [InlineData("DEFAULT")]
+    public void VoiceCommandParser_ClaudeModel_DefaultOrEmpty_AddsNoModelFlag(string? model)
+    {
+        var resolved = VoiceCommandParser.Resolve(VoiceHarnessType.Claude, "x", claudePermission: VoiceClaudePermission.Default, model: model);
+        Assert.Equal(["-p", "--", "x"], resolved.Arguments);
+    }
+
+    [Theory]
+    [InlineData("--dangerously-skip-permissions")]
+    [InlineData("-x")]
+    [InlineData("opus; calc")]
+    [InlineData("a b")]
+    public void VoiceCommandParser_ClaudeModel_InvalidName_Throws(string model)
+    {
+        Assert.Throws<VoiceCommandException>(() => VoiceCommandParser.Resolve(VoiceHarnessType.Claude, "x", model: model));
+    }
+
+    [Fact]
+    public void VoiceCommandParser_Model_DoesNotAffectOtherHarnesses()
+    {
+        Assert.Equal(["exec", "--", "x"], VoiceCommandParser.Resolve(VoiceHarnessType.Codex, "x", model: "opus").Arguments);
+    }
+
+    [Fact]
+    public void VoiceCommandParser_ClaudePermission_DoesNotAffectOtherHarnesses()
+    {
+        Assert.Equal(["exec", "--", "x"], VoiceCommandParser.Resolve(VoiceHarnessType.Codex, "x", claudePermission: VoiceClaudePermission.Auto).Arguments);
+        Assert.Equal(["-p", "x"], VoiceCommandParser.Resolve(VoiceHarnessType.Agy, "x", claudePermission: VoiceClaudePermission.Auto).Arguments);
     }
 
     [Fact]
@@ -32,7 +85,7 @@ public class VoiceCommandTests
     public void VoiceCommandParser_DashPrompt_StaysAPromptForEveryPreset()
     {
         // Claude ve Codex "--" ile, agy ise -p değeri olarak istemi seçenek sanmaz.
-        Assert.Equal(["-p", "--", "--version"], VoiceCommandParser.Resolve(VoiceHarnessType.Claude, "--version").Arguments);
+        Assert.Equal(["-p", "--permission-mode", "auto", "--", "--version"], VoiceCommandParser.Resolve(VoiceHarnessType.Claude, "--version").Arguments);
         Assert.Equal(["exec", "--", "--version"], VoiceCommandParser.Resolve(VoiceHarnessType.Codex, "--version").Arguments);
         Assert.Equal(["-p", "--version"], VoiceCommandParser.Resolve(VoiceHarnessType.Agy, "--version").Arguments);
     }
@@ -96,11 +149,11 @@ public class VoiceCommandTests
         var resolved = VoiceCommandParser.Resolve(VoiceHarnessType.Claude, maliciousPrompt);
         
         Assert.Equal("claude", resolved.Executable);
-        Assert.Equal(3, resolved.Arguments.Count);
+        Assert.Equal(5, resolved.Arguments.Count);
         Assert.Equal("-p", resolved.Arguments[0]);
-        Assert.Equal("--", resolved.Arguments[1]);
+        Assert.Equal("--", resolved.Arguments[3]);
         // Argüman parçalanmadan tam olarak tek bir öğe olarak kalmalı
-        Assert.Equal(maliciousPrompt, resolved.Arguments[2]);
+        Assert.Equal(maliciousPrompt, resolved.Arguments[4]);
     }
 
     [Fact]

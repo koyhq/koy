@@ -122,7 +122,9 @@ public sealed class VoiceSessionController(IHarnessRunnerService runner, Func<Vo
                 options.WorkingDirectory,
                 options.TimeoutSeconds,
                 options.CustomExecutable,
-                options.CustomArgumentsTemplate);
+                options.CustomArgumentsTemplate,
+                options.ClaudePermission,
+                options.Model);
 
             var result = await _runner.ExecuteAsync(request, cts.Token);
 

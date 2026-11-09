@@ -21,7 +21,9 @@ public sealed class ProcessHarnessRunnerService : IHarnessRunnerService
             request.HarnessType,
             request.Prompt,
             request.CustomExecutable,
-            request.CustomArgumentsTemplate);
+            request.CustomArgumentsTemplate,
+            request.ClaudePermission,
+            request.Model);
 
         var workingDir = ResolveWorkingDirectory(request.WorkingDirectory);
         var timeout = TimeSpan.FromSeconds(Math.Max(5, request.TimeoutSeconds));

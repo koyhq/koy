@@ -264,6 +264,12 @@
   <data name="NavShortcuts" xml:space="preserve">
     <value>Shortcuts</value>
   </data>
+  <data name="NavDictation" xml:space="preserve">
+    <value>Dictation</value>
+  </data>
+  <data name="DictationSubtitle" xml:space="preserve">
+    <value>Run a coding assistant with your voice or a typed command</value>
+  </data>
   <data name="NavPerformance" xml:space="preserve">
     <value>Performance</value>
   </data>
@@ -668,6 +674,36 @@
   </data>
   <data name="VoiceHarnessCustom" xml:space="preserve">
     <value>Custom</value>
+  </data>
+  <data name="VoicePermissionTitle" xml:space="preserve">
+    <value>Claude permissions</value>
+  </data>
+  <data name="VoicePermissionDesc" xml:space="preserve">
+    <value>Voice commands run headless, so Claude cannot ask for approval. Auto lets Claude approve safe actions itself and block risky ones. Edits allows file edits only. Read-only blocks creating or changing files.</value>
+  </data>
+  <data name="VoicePermissionAuto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="VoicePermissionAcceptEdits" xml:space="preserve">
+    <value>Edits</value>
+  </data>
+  <data name="VoicePermissionReadOnly" xml:space="preserve">
+    <value>Read-only</value>
+  </data>
+  <data name="VoiceReplyTitle" xml:space="preserve">
+    <value>Voice command reply</value>
+  </data>
+  <data name="VoiceReplyOpenFile" xml:space="preserve">
+    <value>Open as file</value>
+  </data>
+  <data name="VoiceReplyClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="VoiceModelTitle" xml:space="preserve">
+    <value>Claude model</value>
+  </data>
+  <data name="VoiceModelDesc" xml:space="preserve">
+    <value>Model the voice command runs on. Default uses the model Claude Code is set to. Only applies to Claude.</value>
   </data>
   <data name="VoiceCustomCommandTitle" xml:space="preserve">
     <value>Custom Command Template</value>
