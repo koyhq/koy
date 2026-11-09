@@ -2247,5 +2247,8 @@
   <data name="VoiceEditing" xml:space="preserve">
     <value>Speak or type · Enter runs, Esc cancels</value>
   </data>
+  <data name="VoiceReplyOpen" xml:space="preserve">
+    <value>Done · click for the full reply</value>
+  </data>
 </root>
 

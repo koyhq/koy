@@ -320,7 +320,7 @@
     </Grid>
 
     <!-- Sağ: Yüzde Metni (12px, font-weight 600, sağa dayalı, #F4F4F5) -->
-    <TextBlock Grid.Column="2"
+    <TextBlock x:Name="PercentLabel" Grid.Column="2"
                Text="{Binding PercentText}"
                FontSize="12"
                FontWeight="SemiBold"
@@ -330,8 +330,12 @@
                VerticalAlignment="Center">
       <TextBlock.Style>
         <Style TargetType="TextBlock">
+          <!-- Komut kutusu açıkken "Enter ↵" tıklanabilir: klavye odağı kaybolsa da komut fareyle çalıştırılabilsin. -->
           <Setter Property="Visibility" Value="Visible" />
           <Style.Triggers>
+            <DataTrigger Binding="{Binding IsVoiceEditing}" Value="True">
+              <Setter Property="Cursor" Value="Hand" />
+            </DataTrigger>
             <Trigger Property="Text" Value="">
               <Setter Property="Visibility" Value="Collapsed" />
             </Trigger>

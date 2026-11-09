@@ -35,6 +35,7 @@ public partial class NotchWindow : Window
     public Action? DisplayChangeHandler { get; set; }
     public Action? VoiceConfirmRequested { get; set; }
     public Action? VoiceCancelRequested { get; set; }
+    public Action? VoiceReplyRequested { get; set; }
 
     public DisplayMonitor? TargetMonitor => _targetMonitor;
     public nint Handle => _hwnd != 0 ? _hwnd : (_hwnd = new WindowInteropHelper(this).Handle);
@@ -177,9 +178,31 @@ public partial class NotchWindow : Window
     // ki klavye çalışsın (takvimde etkinlik eklemek için). Odak gidince yine odak çalmaz hale gelir.
     private void Notch_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        // Komut kutusu açıkken tıklama kutuya gider (imleç, seçim); onay Enter ile.
+        // Komut kutusu açıkken: "Enter ↵" etiketi komutu çalıştırır; başka yere tıklama çentiği yeniden etkinleştirip
+        // odağı kutuya verir (sesle yazma paneli açılınca çentik odağı kaybedebiliyor, Enter/Esc o zaman gelmez).
         if (ViewModel?.Osd.Type == OsdType.Voice && ViewModel.Osd.IsVoiceEditing)
+        {
+            if (OsdHost.IsEnterLabel(e.OriginalSource as DependencyObject))
+            {
+                VoiceConfirmRequested?.Invoke();
+                e.Handled = true;
+            }
+            else
+            {
+                FocusVoiceConfirmation();
+            }
+
             return;
+        }
+
+        // Komut bitti ya da hata verdi: tıklama yanıtın tamamını açar.
+        if (ViewModel?.Osd.Type == OsdType.Voice
+            && ViewModel.Osd.VoiceState is Koy.Core.Voice.VoiceState.Completed or Koy.Core.Voice.VoiceState.Failed)
+        {
+            VoiceReplyRequested?.Invoke();
+            e.Handled = true;
+            return;
+        }
 
         if (_hwnd == 0 || e.OriginalSource is not DependencyObject source || FindParent<TextBox>(source) is null)
             return;

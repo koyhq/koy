@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -302,6 +303,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
 
         window.VoiceConfirmRequested = ConfirmVoiceCommand;
         window.VoiceCancelRequested = CancelVoiceCommand;
+        window.VoiceReplyRequested = OpenVoiceReply;
 
         visibilityController.Changed += OnVisibilityChanged;
 
@@ -632,16 +634,72 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
 
     private static string VoiceFailureText(VoiceSessionController controller)
     {
-        // Araç kendi hata çıktısını verdiyse en açıklayıcısı odur (aracın dilinde gelir).
-        if (controller.Failure == VoiceFailure.ExitCode && controller.LastResult?.Error is { Length: > 0 } stderr)
-        {
-            var firstLine = stderr.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).FirstOrDefault();
-            if (!string.IsNullOrEmpty(firstLine))
-                return firstLine;
-        }
+        // Araç kendi hata metnini verdiyse en açıklayıcısı odur (aracın dilinde gelir). Bazı araçlar hatayı stdout'a yazar
+        // (ör. claude: "Not logged in · Please run /login"), bu yüzden stderr boşsa stdout'a bakılır.
+        if (controller.Failure == VoiceFailure.ExitCode && controller.LastResult is { } result
+            && (FirstLine(result.Error) ?? FirstLine(result.Output)) is { } toolLine)
+            return toolLine;
 
         var failure = controller.Failure == VoiceFailure.None ? VoiceFailure.Unexpected : controller.Failure;
         return string.Format(CultureInfo.CurrentCulture, Strings.Get("VoiceError" + failure), controller.FailureDetail);
+    }
+
+    private static string? FirstLine(string? text) =>
+        text?.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).FirstOrDefault() is { Length: > 0 } line
+            ? line
+            : null;
+
+    private static readonly string VoiceReplyPath =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Koy", "voice-reply.txt");
+
+    // Yanıtın tamamı çentiğe sığmaz: dosyaya yazılır, çentiğe tıklayınca varsayılan metin düzenleyicide açılır.
+    private bool SaveVoiceReply(string prompt, HarnessExecutionResult result)
+    {
+        if (string.IsNullOrWhiteSpace(result.Output) && string.IsNullOrWhiteSpace(result.Error))
+            return false;
+
+        try
+        {
+            var text = new System.Text.StringBuilder()
+                .Append("> ").AppendLine(prompt)
+                .Append('(').Append(VoiceHarnessName(settings.VoiceHarness)).Append(", ")
+                .Append(result.ExitCode.ToString(CultureInfo.InvariantCulture)).Append(", ")
+                .Append(result.Duration.TotalSeconds.ToString("F1", CultureInfo.CurrentCulture)).AppendLine(" s)")
+                .AppendLine()
+                .AppendLine(result.Output);
+            if (!string.IsNullOrWhiteSpace(result.Error))
+                text.AppendLine().AppendLine("[stderr]").AppendLine(result.Error);
+
+            Directory.CreateDirectory(Path.GetDirectoryName(VoiceReplyPath)!);
+            File.WriteAllText(VoiceReplyPath, text.ToString());
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            CrashLog.Write("Sesli komut yanıtı", ex);
+            return false;
+        }
+    }
+
+    private void OpenVoiceReply()
+    {
+        if (!File.Exists(VoiceReplyPath))
+            return;
+
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(VoiceReplyPath) { UseShellExecute = true })?.Dispose();
+        }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            CrashLog.Write("Sesli komut yanıtını açma", ex);
+        }
+
+        foreach (var (_, windowState) in _windowStates)
+        {
+            if (windowState.ViewModel.Osd.Type == OsdType.Voice)
+                windowState.ViewModel.Osd.Dismiss();
+        }
     }
 
     private static string VoiceHarnessName(VoiceHarnessType harness) => harness switch
@@ -684,8 +742,22 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
 
         var text = VoiceStatusText(_voiceController, state);
         var prompt = state == VoiceState.Editing ? string.Empty : _voiceController.Prompt;
-        var detail = state == VoiceState.Failed ? text : null;
-        target.ViewModel.Osd.ShowVoice(state, text, prompt, detail);
+        string? detail = state == VoiceState.Failed ? text : null;
+        var hasReply = false;
+        if (state is VoiceState.Completed or VoiceState.Failed && _voiceController.LastResult is { } result
+            && SaveVoiceReply(_voiceController.Prompt, result))
+        {
+            hasReply = true;
+            if (state == VoiceState.Completed)
+            {
+                // Çentikte yanıtın ilk satırı; tamamı tıklayınca açılan dosyada.
+                prompt = FirstLine(result.Output) ?? Strings.Get("VoiceCompleted");
+                text = Strings.Get("VoiceReplyOpen");
+                detail = result.Output.Length > 600 ? result.Output[..600] + "…" : result.Output;
+            }
+        }
+
+        target.ViewModel.Osd.ShowVoice(state, text, prompt, detail, linger: hasReply);
 
         if (state == VoiceState.Editing)
         {
@@ -727,6 +799,16 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
                 return;
 
             await VoiceTyping.OpenAsync(TimeSpan.FromSeconds(2), cancellationToken);
+
+            // Sesle yazma paneli belirince çentik odağı kaybedebiliyor; odak kutuya geri verilir ki Enter/Esc gelsin.
+            // Panel kutuyu izlemeye devam eder (odaktaki metin kutusuna yazar).
+            foreach (var delay in new[] { 400, 900 })
+            {
+                await Task.Delay(delay, cancellationToken);
+                if (_voiceController?.State != VoiceState.Editing || _voiceWindow is not { } target)
+                    return;
+                target.Window.FocusVoiceConfirmation();
+            }
         }
         catch (OperationCanceledException)
         {

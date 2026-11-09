@@ -264,7 +264,8 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
     }
 
     /// <param name="detail">Tek satıra sığmayan tam açıklama (hata), fareyle üzerine gelince.</param>
-    public void ShowVoice(VoiceState state, string statusText, string prompt, string? detail = null)
+    /// <param name="linger">Tıklanınca açılacak bir yanıt var: okumaya ve tıklamaya zaman kalsın diye daha uzun görünür.</param>
+    public void ShowVoice(VoiceState state, string statusText, string prompt, string? detail = null, bool linger = false)
     {
         RunOnUi(() =>
         {
@@ -293,7 +294,7 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
 
             if (state is VoiceState.Completed or VoiceState.Failed)
             {
-                ResetTimer(TimeSpan.FromSeconds(state == VoiceState.Failed ? 6 : 3));
+                ResetTimer(TimeSpan.FromSeconds(linger ? 10 : state == VoiceState.Failed ? 6 : 3));
             }
             else
             {

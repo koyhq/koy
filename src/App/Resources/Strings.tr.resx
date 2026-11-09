@@ -2247,5 +2247,8 @@
   <data name="VoiceEditing" xml:space="preserve">
     <value>Konuş ya da yaz · Enter çalıştırır, Esc iptal</value>
   </data>
+  <data name="VoiceReplyOpen" xml:space="preserve">
+    <value>Tamamlandı · yanıtın tamamı için tıkla</value>
+  </data>
 </root>
 
