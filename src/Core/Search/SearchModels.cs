@@ -184,6 +184,9 @@ public interface ISearchShell
 
     void Run(string executable, string? arguments);
 
+    /// <summary>Kabuksuz çalıştırır; her argüman olduğu gibi tek parça gider (tırnak kaçışı gerekmez).</summary>
+    void RunWithArguments(string executable, IReadOnlyList<string> arguments);
+
     void RunInTerminal(string commandLine);
 
     void OpenContainingFolder(string path);

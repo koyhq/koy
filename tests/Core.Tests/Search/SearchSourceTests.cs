@@ -34,6 +34,7 @@ public class SearchSourceTests
         public string? GetEnvironmentVariable(string name) => Env.GetValueOrDefault(name);
         public void Open(string target) => Log.Add("open " + target);
         public void Run(string executable, string? arguments) => Log.Add($"run {executable} {arguments}".TrimEnd());
+        public void RunWithArguments(string executable, IReadOnlyList<string> arguments) => Log.Add($"run {executable} [{string.Join("|", arguments)}]");
         public void RunInTerminal(string commandLine) => Log.Add("term " + commandLine);
         public void OpenContainingFolder(string path) => Log.Add("folder " + path);
         public void CopyText(string text) => Log.Add("copy " + text);
@@ -585,6 +586,28 @@ public class SearchSourceTests
 
     [Fact]
     public void Unknown_web_key_gives_nothing() => Assert.Empty(new WebShortcutSearchSource(WebShortcutSearchSource.Defaults, new FakeShell(), T).Search(Q("zz:kedi")));
+
+    [Fact]
+    public void Web_fallback_searches_in_default_chromium_browser_with_its_own_engine()
+    {
+        var shell = new FakeShell();
+        var chrome = DefaultBrowserSearch.FromOpenCommand(@"""C:\Chrome\chrome.exe"" --single-argument %1");
+
+        var row = new WebShortcutSearchSource(WebShortcutSearchSource.Defaults, shell, T, () => chrome).Fallback(Q("kedi"))!;
+        row.Execute();
+
+        Assert.Equal([@"run C:\Chrome\chrome.exe [--single-argument|? kedi]"], shell.Log);
+    }
+
+    [Fact]
+    public void Web_fallback_uses_duckduckgo_when_browser_is_unknown()
+    {
+        var shell = new FakeShell();
+
+        new WebShortcutSearchSource(WebShortcutSearchSource.Defaults, shell, T, () => null).Fallback(Q("kedi"))!.Execute();
+
+        Assert.Equal(["open https://duckduckgo.com/?q=kedi"], shell.Log);
+    }
 
     [Fact]
     public void Web_fallback_uses_duckduckgo()
