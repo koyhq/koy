@@ -11,6 +11,8 @@ using Koy.Core.Visibility;
 using Koy.Core.Voice;
 using Koy.Core.Weather;
 
+using Koy.Core.Dock.Items;
+
 namespace Koy.Core.Settings;
 
 // Ayar bölümleri (settings.json v4). Hepsi sealed record: eşitlik ve değer kopyası (with) ücretsiz gelir, elle Equals yok.
@@ -240,6 +242,12 @@ public sealed record DockItemsSettings
     /// ve kısayol adlarından (.lnk) oluşan uygulama listesi (Items) içerir.
     /// </summary>
     public ValueList<DockFolder> Folders { get; set; } = [];
+
+    /// <summary>
+    /// Dock öğe dizisi (ayırıcı, boşluk, saat, çöp kutusu, özel düğme, uygulama, klasör). Boşsa hiçbir şey değişmez;
+    /// okunan kayıtlar <see cref="Koy.Core.Dock.Items.DockItemRules.Normalize"/> ile doğrulanır. Henüz hiçbir yerde çizilmez.
+    /// </summary>
+    public ValueList<DockItemEntry> Items { get; set; } = [];
 }
 
 /// <summary>Çentik ayarları.</summary>

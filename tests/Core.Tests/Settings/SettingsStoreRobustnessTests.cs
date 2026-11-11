@@ -1,3 +1,4 @@
+using Koy.Core.Dock.Items;
 using Koy.Core.Settings;
 
 namespace Koy.Core.Tests.Settings;
@@ -16,6 +17,17 @@ public class SettingsStoreRobustnessTests : IDisposable
     }
 
     private string PathFor(string name = "settings.json") => Path.Combine(_dir, name);
+
+    [Fact]
+    public void Dock_items_beyond_MaxItemCount_are_cut_on_load_keeping_order()
+    {
+        // 40 öğe: yüklenen model yalnız ilk 32'yi, aynı sırayla tutmalı (Normalize çağrılmadan da).
+        var items = string.Join(",", Enumerable.Range(0, 40).Select(i => $$"""{ "Kind": "app", "Id": "app{{i}}.lnk" }"""));
+        var loaded = SettingsFile.Load($$"""{ "Version": 4, "DockItems": { "Items": [{{items}}] } }""");
+
+        Assert.Equal(DockItemRules.MaxItemCount, loaded.DockItems.Items.Count);
+        Assert.Equal(Enumerable.Range(0, DockItemRules.MaxItemCount).Select(i => $"app{i}.lnk"), loaded.DockItems.Items.Select(e => e.Id));
+    }
 
     [Fact]
     public void Null_sections_are_replaced_with_defaults()

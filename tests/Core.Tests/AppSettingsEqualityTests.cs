@@ -160,6 +160,7 @@ public class AppSettingsEqualityTests
         if (element == typeof(string)) return "yeni";
         if (element == typeof(DockFolder)) return new DockFolder("yeni", "Yeni", ["x.lnk"]);
         if (element == typeof(HomeCard)) return HomeCard.Timers;
+        if (element == typeof(Koy.Core.Dock.Items.DockItemEntry)) return new Koy.Core.Dock.Items.DockItemEntry { Kind = "spacer" };
         throw new NotSupportedException(element.Name);
     }
 

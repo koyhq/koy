@@ -1,4 +1,5 @@
 using Koy.Core.Dock;
+using Koy.Core.Dock.Items;
 
 namespace Koy.Core.Settings;
 
@@ -59,12 +60,20 @@ public sealed record AppSettings
         DockLayoutLimits.Sanitize(Dock);
         DockItems.PinnedOrder ??= [];
         DockItems.Folders ??= [];
+        DockItems.Items ??= [];
         Notch.EnabledPanels ??= new NotchSettings().EnabledPanels;
         Notch.ControlCenterLayout ??= new NotchSettings().ControlCenterLayout;
         Displays.Monitors ??= new();
         Dock.TrayAppVisibility ??= new();
         Search.DisabledSources ??= [];
         QuickLaunch.Items ??= [];
+
+        // Üst sınır yükleme anında uygulanır: Normalize çağırmayan tüketici de 32'den fazla öğe görmesin.
+        // Sıra korunur, fazlası sondan atılır (Normalize'ın "ilk gelenler kalır" kuralıyla aynı).
+        var extra = DockItems.Items.Count - DockItemRules.MaxItemCount;
+        if (extra > 0)
+            DockItems.Items.RemoveRange(DockItemRules.MaxItemCount, extra);
+
         return this;
     }
 }

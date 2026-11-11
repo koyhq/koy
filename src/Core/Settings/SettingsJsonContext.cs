@@ -3,6 +3,7 @@ using Koy.Core.Display;
 using Koy.Core.Dock;
 using Koy.Core.Notch;
 using Koy.Core.Tray;
+using Koy.Core.Dock.Items;
 
 namespace Koy.Core.Settings;
 
@@ -31,4 +32,6 @@ namespace Koy.Core.Settings;
 [JsonSerializable(typeof(ValueDictionary<string>))]
 [JsonSerializable(typeof(DockFolder))]
 [JsonSerializable(typeof(ValueDictionary<TrayIconVisibility>))]
+[JsonSerializable(typeof(ValueList<DockItemEntry>))]
+[JsonSerializable(typeof(DockItemEntry))]
 internal sealed partial class SettingsJsonContext : JsonSerializerContext;
