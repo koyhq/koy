@@ -67,19 +67,40 @@ public sealed class SettingsStore(string path)
 
     private static bool DropAt(JsonObject root, string path)
     {
-        // "$.Appearance.Motion.Osd" → ["Appearance", "Motion", "Osd"]; yalnız son alan düşer.
+        // "$.Displays.Monitors.DISPLAY1.x.NotchEnabled": sözlük anahtarları noktalı olabilir; her adımda en uzun
+        // eşleşen anahtar seçilir. Yol çözülemezse üst düzey bölüm düşer.
         var parts = path.TrimStart('$').TrimStart('.').Split('.');
         if (parts.Any(p => p.Contains('[')))
             return root.Remove(parts[0].Split('[')[0]);
 
         var parent = root;
-        for (var i = 0; i < parts.Length - 1; i++)
+        var i = 0;
+        while (i < parts.Length)
         {
-            if (parent[parts[i]] is not JsonObject next)
+            string? key = null;
+            var end = -1;
+            for (var j = parts.Length; j > i; j--)
+            {
+                var candidate = string.Join('.', parts[i..j]);
+                if (parent.ContainsKey(candidate))
+                {
+                    key = candidate;
+                    end = j;
+                    break;
+                }
+            }
+
+            if (key is null)
                 return root.Remove(parts[0]);
+            if (end == parts.Length)
+                return parent.Remove(key);
+            if (parent[key] is not JsonObject next)
+                return root.Remove(parts[0]);
+
             parent = next;
+            i = end;
         }
-        return parent.Remove(parts[^1]);
+        return false;
     }
 
     // Yedek yazılamazsa (kilit, yetki) açılış durmasın; yedek bir kolaylıktır, ayarların kendisi değil.

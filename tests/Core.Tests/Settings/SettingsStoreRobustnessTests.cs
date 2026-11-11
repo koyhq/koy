@@ -127,4 +127,15 @@ public class SettingsStoreRobustnessTests : IDisposable
         Assert.False(loaded.Notch.Enabled);
         Assert.Equal(new DockSettings().Style, loaded.Dock.Style);
     }
+
+    [Fact]
+    public void Invalid_value_inside_a_dictionary_resets_that_dictionary_but_keeps_other_sections()
+    {
+        // Sınırlama: JsonException.Path sözlüğün kendisini gösterir (girdiyi değil), bu yüzden sözlüğün tamamı sıfırlanır.
+        // Diğer bölümler (burada Language) korunur.
+        var loaded = SettingsFile.Load("""{ "Version": 4, "General": { "Language": "tr" }, "Displays": { "Monitors": { "DISPLAY1.x": { "NotchEnabled": "yanlis" } } } }""");
+
+        Assert.Equal("tr", loaded.General.Language);
+        Assert.Empty(loaded.Displays.Monitors);
+    }
 }
