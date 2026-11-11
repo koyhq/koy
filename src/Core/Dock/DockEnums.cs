@@ -6,7 +6,8 @@ namespace Koy.Core.Dock;
 public enum DockIndicatorStyle
 {
     Dot,
-    Line
+    Line,
+    Highlight
 }
 
 /// <summary>Dock simgesine orta tık: uygulamanın yeni penceresini aç (varsayılan) ya da pencereyi kapat.</summary>

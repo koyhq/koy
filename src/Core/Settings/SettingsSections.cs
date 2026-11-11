@@ -112,6 +112,33 @@ public sealed record DockSettings
     public double IconSize { get; set; } = 28.0;
     public DockIndicatorStyle IndicatorStyle { get; set; } = DockIndicatorStyle.Dot;
 
+    /// <summary>Gösterge rengi: Windows vurgu rengi (varsayılan), nötr ya da <see cref="IndicatorCustomColor"/>.</summary>
+    public DockColorSource IndicatorColor { get; set; } = DockColorSource.Accent;
+
+    /// <summary>Özel gösterge rengi (#RRGGBB). Geçersizse vurgu rengi kullanılır.</summary>
+    public string IndicatorCustomColor { get; set; } = "";
+
+    /// <summary>Nokta kipinde her açık pencere için ayrı bir nokta (en çok üç).</summary>
+    public bool IndicatorOnePerWindow { get; set; }
+
+    /// <summary>Rozet rengi (bildirim sayısı vb.).</summary>
+    public DockColorSource BadgeColor { get; set; } = DockColorSource.Accent;
+
+    /// <summary>Özel rozet rengi (#RRGGBB). Geçersizse vurgu rengi kullanılır.</summary>
+    public string BadgeCustomColor { get; set; } = "";
+
+    public DockBadgeCorner BadgeCorner { get; set; } = DockBadgeCorner.TopRight;
+    public DockBadgeStyle BadgeStyle { get; set; } = DockBadgeStyle.Number;
+
+    /// <summary>Gizli dock'un çıkma tetikleyicisi: kenara dokunmak (varsayılan), kenarda basılı tutmak ya da yalnız kısayol.</summary>
+    public DockRevealTrigger RevealTrigger { get; set; } = DockRevealTrigger.EdgeTouch;
+
+    /// <summary>Kenarda basılı tutma süresi (ms, EdgeHold iken). Varsayılan mevcut 300 ms kenar gecikmesi.</summary>
+    public int RevealDelayMs { get; set; } = 300;
+
+    /// <summary>Dock gizliyken alt kenarda ince bir çizgi görünsün mü.</summary>
+    public bool HiddenEdgeLine { get; set; }
+
     /// <summary>Dock simgesine orta tık: yeni pencere (varsayılan) ya da kapat.</summary>
     public MiddleClickAction MiddleClickAction { get; set; } = MiddleClickAction.NewWindow;
 }
