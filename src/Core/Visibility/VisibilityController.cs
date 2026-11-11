@@ -63,6 +63,7 @@ public sealed class VisibilityController : IDisposable
     public bool IsMouseAtEdge { get; private set; }
     public bool IsMouseOver { get; private set; }
     public bool IsExpanded { get; private set; }
+    public bool IsHeld { get; private set; }
     public bool IsVisible { get; private set; }
     public bool IsClickThrough => !IsVisible;
     public bool IsMediaPeekActive => _isMediaPeekActive;
@@ -128,6 +129,18 @@ public sealed class VisibilityController : IDisposable
         Evaluate();
     }
 
+    /// <summary>
+    /// Çentiği görünür tutar (ör. düğmeli kart süresince: Akıllı/Fareyle modunda 3 sn sonra gizlenmesin).
+    /// Zamanlayıcı yok; sahibi kart kapanınca false verir. Tam ekran gizlemesini aşmaz.
+    /// </summary>
+    public void SetHold(bool hold)
+    {
+        if (IsHeld == hold)
+            return;
+        IsHeld = hold;
+        Evaluate();
+    }
+
     public void OnMediaActivity()
     {
         _isMediaPeekActive = true;
@@ -164,7 +177,7 @@ public sealed class VisibilityController : IDisposable
             return false;
 
         // 2. Fare çentiğin üstünde, kenarda veya çentik genişletilmiş durumdaysa görünür.
-        if (IsMouseOver || IsMouseAtEdge || IsExpanded)
+        if (IsMouseOver || IsMouseAtEdge || IsExpanded || IsHeld)
             return true;
 
         // 3. Görünürlük moduna göre karar.

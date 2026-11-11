@@ -279,11 +279,14 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     {
         // Akıllı/Fareyle modunda çentik gizli olabilir; gösterge süresince (3 sn) görünür kalsın.
         _visibility.OnMediaActivity();
+        // Kart (güncelleme, bildirim) gösterildiği sürece çentik gizlenmez; başka OSD kartın yerini alırsa bırakılır.
+        _visibility.SetHold(Osd.Type == OsdType.Card);
         UpdateTargetSize();
     }
 
     private void OnOsdStateChanged(object? sender, EventArgs e)
     {
+        _visibility.SetHold(false);
         UpdateTargetSize();
     }
 
