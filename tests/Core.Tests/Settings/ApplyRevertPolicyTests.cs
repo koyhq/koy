@@ -63,4 +63,13 @@ public class ApplyRevertPolicyTests
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             ApplyRevertPolicy.Remaining(AppliedAt, AppliedAt, TimeSpan.FromSeconds(-1)));
     }
+
+    [Fact]
+    public void Remaining_never_exceeds_the_timeout_when_the_clock_moves_backward()
+    {
+        var applied = new DateTimeOffset(2026, 11, 11, 12, 0, 0, TimeSpan.Zero);
+        var earlier = applied.AddSeconds(-5);
+
+        Assert.Equal(TimeSpan.FromSeconds(15), ApplyRevertPolicy.Remaining(applied, earlier, TimeSpan.FromSeconds(15)));
+    }
 }

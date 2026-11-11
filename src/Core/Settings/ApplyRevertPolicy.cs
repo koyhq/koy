@@ -48,7 +48,9 @@ public static class ApplyRevertPolicy
     {
         ValidateTimeout(timeout);
 
+        // Saat geriye giderse (now < appliedAt) kalan süre zaman aşımını aşmasın.
         var left = timeout - (now - appliedAt);
+        if (left > timeout) return timeout;
         return left > TimeSpan.Zero ? left : TimeSpan.Zero;
     }
 
