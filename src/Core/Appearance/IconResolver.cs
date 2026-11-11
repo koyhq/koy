@@ -20,7 +20,7 @@ public static class IconResolver
     /// <param name="appKey">Kısayol adı (dock öğesi); null ise uygulama değişimi denenmez.</param>
     /// <param name="appOverrides">Uygulama başına değişimler (<see cref="AppIconOverrides"/>).</param>
     /// <param name="pack">Seçili simge paketi.</param>
-    /// <param name="packIcon">Paketin bu anahtar için sunduğu dosya adı; paket yoksa ya da dosya yoksa null.</param>
+    /// <param name="packIcon">Paketin bu anahtar için sunduğu dosya adı (yalnız ad, yol değil); paket yoksa ya da dosya yoksa null.</param>
     public static IconChoice Resolve(
         string? appKey,
         IReadOnlyDictionary<string, string>? appOverrides,
@@ -30,7 +30,7 @@ public static class IconResolver
         var overridden = AppIconOverrides.Lookup(appOverrides, appKey);
         if (overridden is not null) return new IconChoice(IconSourceKind.AppOverride, overridden);
 
-        if (pack == IconPack.Folder && AppIconOverrides.TryValidateSource(packIcon, out var packFile))
+        if (pack == IconPack.Folder && AppIconOverrides.TryValidatePackFile(packIcon, out var packFile))
             return new IconChoice(IconSourceKind.Pack, packFile);
 
         return new IconChoice(IconSourceKind.Default, null);

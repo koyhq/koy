@@ -41,6 +41,16 @@ public class AppIconOverrideTests : IDisposable
     [InlineData("C:\\app.exe", false, null)]
     [InlineData("C:\\run.ps1", false, null)]
     [InlineData("icon.png|calc", false, null)]
+    [InlineData("//server/share/a.png", false, null)]
+    [InlineData("\\\\server\\share\\a.png", false, null)]
+    [InlineData("\\\\?\\C:\\a.png", false, null)]
+    [InlineData("\\\\.\\C:\\a.png", false, null)]
+    [InlineData("C:\\x.exe:evil.png", false, null)]
+    [InlineData("C:\\a.png:x.png", false, null)]
+    [InlineData("C:\\.\\a.png", false, null)]
+    [InlineData("C:\\icons\\.\\app.png", false, null)]
+    [InlineData("C:/icons/app.png", false, null)]
+    [InlineData("C:app.png", false, null)]
     [InlineData("", false, null)]
     [InlineData(null, false, null)]
     public void Value_must_be_an_image_path_or_name_and_never_a_script(string? value, bool expected, string? normalized)
@@ -49,6 +59,20 @@ public class AppIconOverrideTests : IDisposable
 
         Assert.Equal(expected, ok);
         if (expected) Assert.Equal(normalized, result);
+    }
+
+    [Theory]
+    [InlineData("calc.svg", true)]
+    [InlineData("C:\\icons\\calc.svg", false)]
+    [InlineData("\\\\server\\share\\calc.svg", false)]
+    [InlineData("//server/share/calc.svg", false)]
+    [InlineData("..\\calc.svg", false)]
+    [InlineData("icons/calc.svg", false)]
+    [InlineData("calc.svg:evil.png", false)]
+    [InlineData("C:\\icons\\.\\calc.svg", false)]
+    public void Pack_entry_must_be_a_bare_file_name(string value, bool expected)
+    {
+        Assert.Equal(expected, AppIconOverrides.TryValidatePackFile(value, out _));
     }
 
     [Fact]
@@ -106,6 +130,14 @@ public class AppIconOverrideTests : IDisposable
 
         var fallback = IconResolver.Resolve("calc.lnk", overrides, IconPack.Folder, null);
         Assert.Equal(new IconChoice(IconSourceKind.Default, null), fallback);
+    }
+
+    [Fact]
+    public void Pack_entry_with_absolute_path_falls_back_to_default()
+    {
+        var choice = IconResolver.Resolve("calc.lnk", null, IconPack.Folder, "C:\\Tools\\calc.svg");
+
+        Assert.Equal(new IconChoice(IconSourceKind.Default, null), choice);
     }
 
     [Fact]

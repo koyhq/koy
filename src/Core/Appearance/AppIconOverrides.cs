@@ -40,9 +40,12 @@ public static class AppIconOverrides
 
         if (Path.IsPathRooted(candidate))
         {
-            // Mutlak yol: sürücülü olmalı ve ".." bileşeni içermemeli.
-            if (!Path.IsPathFullyQualified(candidate)) return false;
-            if (candidate.Split('\\', '/').Any(part => part == "..")) return false;
+            // Mutlak yol yalnız <harf>:\ biçiminde. UNC (ağ, SMB/NTLM tetikler), ADS (iki nokta: gizli akış)
+            // ve nokta bileşenleri (".", "..") kaçış yolu olduğu için reddedilir.
+            if (IsUncPath(candidate)) return false;
+            if (!IsDriveRootedPath(candidate)) return false;
+            if (candidate.IndexOf(':', 2) >= 0) return false;
+            if (candidate.Split('\\', '/').Any(part => part is "." or "..")) return false;
         }
         else if (candidate.Contains('\\') || candidate.Contains('/') || candidate.Contains(':'))
         {
@@ -53,6 +56,29 @@ public static class AppIconOverrides
         normalized = candidate;
         return true;
     }
+
+    /// <summary>
+    /// Simge paketi girdisi: yalnız dosya adı (klasör, sürücü ya da UNC yok). Uzantı ve yasak karakter kuralları
+    /// <see cref="TryValidateSource"/> ile aynıdır.
+    /// </summary>
+    public static bool TryValidatePackFile(string? value, out string normalized)
+    {
+        normalized = string.Empty;
+        if (!TryValidateSource(value, out var candidate)) return false;
+        if (candidate.IndexOfAny(['\\', '/', ':']) >= 0) return false;
+
+        normalized = candidate;
+        return true;
+    }
+
+    // Ağ ve aygıt yolu önekleri. "\\" ve "//" zaten "\\?\" ile "\\.\" önekini de kapsar; yine de açık listelenir.
+    private static readonly string[] UncPrefixes = ["\\\\", "//", "\\\\?\\", "\\\\.\\"];
+
+    private static bool IsUncPath(string candidate) =>
+        UncPrefixes.Any(prefix => candidate.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+
+    private static bool IsDriveRootedPath(string candidate) =>
+        candidate.Length >= 3 && char.IsAsciiLetter(candidate[0]) && candidate[1] == ':' && candidate[2] == '\\';
 
     /// <summary>Geçerli bir simge kaydeder. Geçersiz anahtar ya da değerde harita değişmez ve false döner.</summary>
     public static bool TrySet(IDictionary<string, string> overrides, string appKey, string value)
