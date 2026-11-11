@@ -237,6 +237,49 @@ public class DockItemRulesTests
         Assert.Equal(["A.lnk", "folder:f1"], DockItemRules.ToPinnedOrder(items));
     }
 
+    [Theory]
+    [InlineData("folder:f1")]
+    [InlineData("FOLDER:f1")]
+    [InlineData("a/b.lnk")]
+    public void Normalize_dosya_adi_olamayan_uygulama_kimligini_atar(string id)
+    {
+        // "folder:f1" uygulaması PinnedOrder'a yazılınca klasöre dönüşürdü.
+        Assert.Empty(DockItemRules.Normalize([E("app", id)]));
+    }
+
+    [Fact]
+    public void Resolve_kayit_yoksa_PinnedOrder_den_turetir_ve_sirayi_korur()
+    {
+        var result = DockItemRules.Resolve([], ["Obsidian.lnk", "folder:f1", "Code.lnk"]);
+
+        Assert.Equal([DockItemKind.App, DockItemKind.Folder, DockItemKind.App], result.Select(r => r.Kind));
+        Assert.Equal(["Obsidian.lnk", "f1", "Code.lnk"], result.Select(r => r.Id));
+    }
+
+    [Fact]
+    public void Resolve_kayit_varsa_PinnedOrder_i_yok_sayar()
+    {
+        var result = DockItemRules.Resolve([E("clock")], ["Obsidian.lnk"]);
+
+        Assert.Equal(DockItemKind.Clock, Assert.Single(result).Kind);
+    }
+
+    [Fact]
+    public void Resolve_kayitlar_var_ama_hepsi_gecersizse_bos_doner()
+    {
+        Assert.Empty(DockItemRules.Resolve([E("battery")], ["Obsidian.lnk"]));
+    }
+
+    [Fact]
+    public void Resolve_gecis_de_ust_siniri_uygular()
+    {
+        var pinned = Enumerable.Range(0, DockItemRules.MaxItemCount + 3).Select(i => $"app{i}.lnk").ToList();
+
+        var result = DockItemRules.Resolve([], pinned);
+
+        Assert.Equal(pinned.Take(DockItemRules.MaxItemCount), result.Select(r => r.Id));
+    }
+
     private static IReadOnlyList<DockItemSpec> Specs(params string[] ids) =>
         ids.Select(id => new DockItemSpec(DockItemKind.App, id, "")).ToList();
 }

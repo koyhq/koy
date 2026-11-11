@@ -41,6 +41,27 @@ public class SettingsStoreRobustnessTests : IDisposable
     }
 
     [Fact]
+    public void Null_dock_item_entries_are_dropped_before_the_cap()
+    {
+        // Boş girdiler geçerli öğenin yerini yememeli; listede null kalırsa okuyan her tüketici çöker.
+        var nulls = string.Join(",", Enumerable.Repeat("null", DockItemRules.MaxItemCount));
+        var loaded = SettingsFile.Load($$"""{ "Version": 4, "DockItems": { "Items": [{{nulls}}, { "Kind": "app", "Id": "a.lnk" }, null] } }""");
+
+        Assert.All(loaded.DockItems.Items, e => Assert.NotNull(e));
+        Assert.Equal("a.lnk", Assert.Single(loaded.DockItems.Items).Id);
+    }
+
+    [Fact]
+    public void Dock_item_entry_with_null_fields_does_not_break_normalize()
+    {
+        var loaded = SettingsFile.Load("""{ "Version": 4, "DockItems": { "Items": [{ "Kind": null, "Id": null, "Command": null }, { "Kind": "spacer", "Id": null }] } }""");
+
+        var specs = DockItemRules.Normalize(loaded.DockItems.Items);
+
+        Assert.Equal(DockItemKind.Spacer, Assert.Single(specs).Kind);
+    }
+
+    [Fact]
     public void Null_sections_are_replaced_with_defaults()
     {
         var loaded = SettingsFile.Load("""{ "Version": 4, "Dock": null, "Notch": null, "DockItems": null }""");
