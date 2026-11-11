@@ -130,11 +130,11 @@ public sealed record DockSettings
     public DockBadgeCorner BadgeCorner { get; set; } = DockBadgeCorner.TopRight;
     public DockBadgeStyle BadgeStyle { get; set; } = DockBadgeStyle.Number;
 
-    /// <summary>Gizli dock'un çıkma tetikleyicisi: kenara dokunmak (varsayılan), kenarda basılı tutmak ya da yalnız kısayol.</summary>
-    public DockRevealTrigger RevealTrigger { get; set; } = DockRevealTrigger.EdgeTouch;
+    /// <summary>Gizli dock'un çıkma tetikleyicisi: kenarda beklemek (varsayılan, bugünkü davranış), kenara dokunmak ya da yalnız kısayol.</summary>
+    public DockRevealTrigger RevealTrigger { get; set; } = DockRevealTrigger.EdgeHold;
 
-    /// <summary>Kenarda basılı tutma süresi (ms, EdgeHold iken). Varsayılan mevcut 300 ms kenar gecikmesi.</summary>
-    public int RevealDelayMs { get; set; } = 300;
+    /// <summary>Kenarda bekleme süresi (ms, EdgeHold iken). Varsayılan bugünkü kenar gecikmesi (<see cref="EdgeRevealTracker.DefaultDelay"/>).</summary>
+    public int RevealDelayMs { get; set; } = (int)EdgeRevealTracker.DefaultDelay.TotalMilliseconds;
 
     /// <summary>Dock gizliyken alt kenarda ince bir çizgi görünsün mü.</summary>
     public bool HiddenEdgeLine { get; set; }
