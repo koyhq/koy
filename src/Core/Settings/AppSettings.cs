@@ -39,6 +39,7 @@ public sealed record AppSettings
     {
         General ??= new();
         Appearance ??= new();
+        Appearance.Motion ??= new();
         Dock ??= new();
         DockItems ??= new();
         Notch ??= new();

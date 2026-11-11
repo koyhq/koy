@@ -8,6 +8,7 @@ namespace Koy.Core.Settings;
 [JsonSourceGenerationOptions(WriteIndented = true, UseStringEnumConverter = true)]
 [JsonSerializable(typeof(AppSettings))]
 [JsonSerializable(typeof(GeneralSettings))]
+[JsonSerializable(typeof(MotionSettings))]
 [JsonSerializable(typeof(AppearanceSettings))]
 [JsonSerializable(typeof(DockSettings))]
 [JsonSerializable(typeof(DockItemsSettings))]

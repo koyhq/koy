@@ -33,4 +33,38 @@ public static class MotionPolicy
     /// <summary>Taban süreyi (ms) çarpanla ölçekler; 0 çarpan 0 ms verir.</summary>
     public static int ScaledMilliseconds(double baseMilliseconds, double scale) =>
         scale <= 0 ? 0 : (int)Math.Round(baseMilliseconds * scale);
+
+    /// <summary>Animasyon başına açma/kapama ile ayrılan animasyon türleri (issue #79).</summary>
+    public enum MotionKind
+    {
+        NotchOpenClose,
+        DockMagnify,
+        FolderPanel,
+        Osd,
+        BadgeBounce,
+        TabTransitions,
+    }
+
+    /// <summary>
+    /// Bir animasyon türünün son çarpanı. Kendi anahtarı kapalıysa 0 (son durum anında); açıksa genel çarpan.
+    /// Genel çarpan (azaltılmış hareket, pil tasarrufu, hız) her zaman kendi anahtarının üstündedir: anahtar açık
+    /// olsa da genel çarpan 0 ise animasyon yoktur.
+    /// </summary>
+    public static double ScaleFor(MotionKind kind, Koy.Core.Settings.MotionSettings toggles, double globalScale)
+    {
+        if (globalScale <= 0 || !IsEnabled(kind, toggles))
+            return 0.0;
+        return globalScale;
+    }
+
+    private static bool IsEnabled(MotionKind kind, Koy.Core.Settings.MotionSettings t) => kind switch
+    {
+        MotionKind.NotchOpenClose => t.NotchOpenClose,
+        MotionKind.DockMagnify => t.DockMagnify,
+        MotionKind.FolderPanel => t.FolderPanel,
+        MotionKind.Osd => t.Osd,
+        MotionKind.BadgeBounce => t.BadgeBounce,
+        MotionKind.TabTransitions => t.TabTransitions,
+        _ => true,
+    };
 }
