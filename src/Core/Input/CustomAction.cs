@@ -46,10 +46,11 @@ public static class CustomActionParser
             var id = item.Id?.Trim();
             var target = item.Target?.Trim();
 
+            // Kimlik yalnız kayıt geçerliyse rezerve edilir; geçersiz kayıt sonraki geçerli kaydı düşürmesin.
             if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(target) ||
                 !TryKind(item.Kind, out var kind) ||
-                !ids.Add(id) ||
-                (kind == CustomActionKind.OpenUrl && !IsWebUrl(target)))
+                (kind == CustomActionKind.OpenUrl && !IsWebUrl(target)) ||
+                !ids.Add(id))
             {
                 dropped++;
                 continue;

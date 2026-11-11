@@ -81,4 +81,17 @@ public class CustomActionParserTests
         Assert.Empty(result.Accepted);
         Assert.Equal(0, result.Dropped);
     }
+
+    [Fact]
+    public void Gecersiz_kayit_kimligi_rezerve_etmez_sonraki_gecerli_kayit_kabul_edilir()
+    {
+        var result = CustomActionParser.Parse([
+            Data("link", "OpenUrl", "ftp://ornek.example/x"),
+            Data("link", "OpenUrl", "https://ornek.example/x"),
+        ]);
+
+        var action = Assert.Single(result.Accepted);
+        Assert.Equal("https://ornek.example/x", action.Target);
+        Assert.Equal(1, result.Dropped);
+    }
 }
