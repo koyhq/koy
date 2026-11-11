@@ -565,3 +565,10 @@ Tasarım ve doğrulama: `docs/ARASTIRMA-SARKI-SOZLERI.md`.
 - [x] Hero'daki çentik fareyle açılır olsun (Dock bölümündeki demo gibi: üst kenara gelince yayla açılır, çıkınca 400 ms sonra kapanır; dokunmatikte dokununca).
 - [ ] İngilizce sürüm (şimdilik yalnız Türkçe).
 - [ ] Uygulamadaki Hakkında sayfasına teşekkür ve tanıtım kartı (Nectar ve Seelen UI esinlenmesi, site bağlantısı; TR ve EN).
+
+## Çentik kartı altyapısı ve güncelleme kartı (#65)
+- [x] **Core (testli):** `Core/Notch/NotchCard.cs` (içerik türünden bağımsız kart modeli: `Kind`, `Title`, `Subtitle`, `PrimaryActionLabel`, `AppName`, `Timestamp`, `Icon`; `NotchLayout.CardWidth/CardHeight` 380×72, tuvalin içinde) ve `Core/Updates/UpdateCardPolicy.cs` (sürüm başına oturumda bir kez, × sonrası bir daha yok, farklı sürüm yeniden, çentik açıkken bekler, 15 sn sonra kapanır).
+- [x] **App:** `OsdType.Card`, `OsdIndicatorViewModel.ShowCard` + `PrimaryActionRequested` / `DismissRequested`, `OSD/NotchCardView.xaml` (36 px daire içinde indirme simgesi, iki satır metin, hap "Güncelle" düğmesi ve ×; düğmeler `Border` + `MouseLeftButtonUp`, çentik odak almaz ve karta basmak çentiği açmaz). Çentik kart ölçüsüne mevcut `Spring` ile büyür; yeni animasyon yok.
+- [x] **Bağlama:** `NotchFeature`, `UpdateStatus.Changed` ile yalnız birincil ekranın çentiğinde kartı gösterir; çentik açıksa kapanınca gösterir; "Güncelle" Koy penceresini açıp var olan `OpenUpdateOverlay` akışını çağırır (görev çubuğu güvenliği `StartUpdateAsync` içinde, AGENTS #7). Metinler `UpdateCard*` anahtarlarıyla iki dilde. Yeni ayar yok.
+- [ ] Elle sınama (proje sahibi): kart yayla açıldı mı, × kapattı mı (aynı sürüm bir daha çıkmıyor), Güncelle Koy penceresini ve onay katmanını açtı mı, 15 sn sonra kapanıyor mu, çentik açıkken bekleyip kapanınca çıkıyor mu, ikinci ekranda çıkmıyor mu, hareket azaltmada yay kısa mı.
+- [ ] Bellek ölçümü (AGENTS #1): kart görünmezken ek nesne yok; ölçüm `docs/MEMORY.md`.

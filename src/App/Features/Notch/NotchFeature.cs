@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Windows;
@@ -9,6 +10,7 @@ using Koy.App.Features.ControlCenter;
 using Koy.App.Features.Focus;
 using Koy.App.Features.Home;
 using Koy.App.Features.Search;
+using Koy.App.Features.Settings;
 using Koy.App.Features.Music;
 using Koy.App.Features.Shelf;
 using Koy.App.Features.Status;
@@ -25,6 +27,7 @@ using Koy.Core.Privacy;
 using Koy.Core.Search;
 using Koy.Core.Settings;
 using Koy.Core.Timers;
+using Koy.Core.Updates;
 using Koy.Core.Shell;
 using Koy.Core.Visibility;
 using Koy.Core.Voice;
@@ -165,6 +168,10 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         _edgePeekTimer.Tick += (_, _) => CheckEdgePeek();
 
         StartOsdServices();
+
+        UpdateStatus.Changed += OnUpdateStatusChanged;
+        // Özellik yeniden kurulduğunda (ayar değişimi) denetim sonucu zaten gelmiş olabilir.
+        Application.Current?.Dispatcher.InvokeAsync(TryShowUpdateCard);
 
         _windowTracker.ForegroundWindowChanged += OnForegroundWindowChanged;
 
@@ -880,9 +887,113 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         });
     }
 
+    // Güncelleme kartı kararı oturum boyunca korunur: çentik yeniden kurulsa da aynı sürüm ikinci kez çıkmaz.
+    private static readonly UpdateCardPolicy s_updateCardPolicy = new();
+    private OsdIndicatorViewModel? _cardOsd;
+    private NotchViewModel? _cardWaitViewModel;
+    private string? _cardVersion;
+
+    private void OnUpdateStatusChanged()
+    {
+        // Denetim arka plan iş parçacığından bildirir.
+        Application.Current?.Dispatcher.InvokeAsync(TryShowUpdateCard);
+    }
+
+    /// <summary>Yeni sürüm kartını yalnız birincil ekranın çentiğinde gösterir; çentik açıksa kapanınca dener.</summary>
+    private void TryShowUpdateCard()
+    {
+        if (_stopped || _windowStates.Count == 0)
+            return;
+
+        var target = _windowStates.Values.FirstOrDefault(s => s.Monitor.IsPrimary) ?? _windowStates.Values.First();
+        var version = UpdateStatus.AvailableVersion;
+        var viewModel = target.ViewModel;
+        var expanded = viewModel.State == NotchState.Expanded;
+
+        if (!s_updateCardPolicy.ShouldShow(UpdateStatus.HasAvailableUpdate, version, expanded))
+        {
+            // Çentik açık olduğu için bekleyen kart: kapanınca yeniden sorulur (OSD'nin CanShow kalıbı).
+            if (expanded && UpdateStatus.HasAvailableUpdate && !string.IsNullOrWhiteSpace(version)
+                && !ReferenceEquals(_cardWaitViewModel, viewModel))
+            {
+                StopWaitingForCollapse();
+                _cardWaitViewModel = viewModel;
+                viewModel.PropertyChanged += OnCardWaitViewModelChanged;
+            }
+
+            return;
+        }
+
+        StopWaitingForCollapse();
+        var card = new NotchCard(
+            NotchCardKind.Update,
+            string.Format(CultureInfo.CurrentCulture, Strings.Get("UpdateCardTitle"), version),
+            Strings.Get("UpdateCardSubtitle"),
+            Strings.Get("UpdateCardAction"));
+
+        DetachCardOsd();
+        _cardOsd = viewModel.Osd;
+        _cardOsd.PrimaryActionRequested += OnUpdateCardAction;
+        _cardOsd.DismissRequested += OnUpdateCardDismissed;
+
+        if (_cardOsd.ShowCard(card, UpdateCardPolicy.AutoDismissAfter))
+        {
+            _cardVersion = version;
+            s_updateCardPolicy.MarkShown(version!);
+        }
+        else
+        {
+            DetachCardOsd();
+        }
+    }
+
+    private void OnCardWaitViewModelChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(NotchViewModel.State) && sender is NotchViewModel { State: not NotchState.Expanded })
+        {
+            StopWaitingForCollapse();
+            TryShowUpdateCard();
+        }
+    }
+
+    private void StopWaitingForCollapse()
+    {
+        if (_cardWaitViewModel is null)
+            return;
+
+        _cardWaitViewModel.PropertyChanged -= OnCardWaitViewModelChanged;
+        _cardWaitViewModel = null;
+    }
+
+    private void DetachCardOsd()
+    {
+        if (_cardOsd is null)
+            return;
+
+        _cardOsd.PrimaryActionRequested -= OnUpdateCardAction;
+        _cardOsd.DismissRequested -= OnUpdateCardDismissed;
+        _cardOsd = null;
+    }
+
+    // Onay, indirme ve görev çubuğunu geri getirip yeniden başlatma (AGENTS #7) KoyWindowViewModel.StartUpdateAsync içinde; kart yalnız çağırır.
+    private void OnUpdateCardAction()
+    {
+        KoyWindow.ShowInstance();
+        KoyWindow.Instance.ViewModel.OpenUpdateOverlay();
+    }
+
+    private void OnUpdateCardDismissed()
+    {
+        if (_cardVersion is not null)
+            s_updateCardPolicy.Dismiss(_cardVersion);
+    }
+
     public void Stop()
     {
         _stopped = true;
+        UpdateStatus.Changed -= OnUpdateStatusChanged;
+        StopWaitingForCollapse();
+        DetachCardOsd();
         _edgePeekTimer?.Stop();
         _edgePeekTimer = null;
 

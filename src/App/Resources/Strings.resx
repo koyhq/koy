@@ -2007,6 +2007,18 @@
   <data name="UpdateAvailableBadge" xml:space="preserve">
     <value>New version: {0}</value>
   </data>
+  <data name="UpdateCardTitle" xml:space="preserve">
+    <value>Koy {0} available</value>
+  </data>
+  <data name="UpdateCardSubtitle" xml:space="preserve">
+    <value>Ready to update</value>
+  </data>
+  <data name="UpdateCardAction" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="UpdateCardDismiss" xml:space="preserve">
+    <value>Dismiss</value>
+  </data>
   <data name="UpdateModalTitle" xml:space="preserve">
     <value>New Version Available</value>
   </data>

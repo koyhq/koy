@@ -326,7 +326,30 @@
               </Style.Triggers>
             </Style>
           </Grid.Style>
-          <osd:OsdView x:Name="OsdHost" DataContext="{Binding Osd}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          <osd:OsdView x:Name="OsdHost" DataContext="{Binding Osd}" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <osd:OsdView.Style>
+              <Style TargetType="osd:OsdView">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding Type}" Value="{x:Static osd:OsdType.Card}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </osd:OsdView.Style>
+          </osd:OsdView>
+          <!-- Kart (güncelleme, bildirim): 380x72, HUD'dan ayrı yüzey -->
+          <osd:NotchCardView x:Name="CardHost" DataContext="{Binding Osd}" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <osd:NotchCardView.Style>
+              <Style TargetType="osd:NotchCardView">
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding Type}" Value="{x:Static osd:OsdType.Card}">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </osd:NotchCardView.Style>
+          </osd:NotchCardView>
         </Grid>
 
         <!-- 2. Peek Durumu -->

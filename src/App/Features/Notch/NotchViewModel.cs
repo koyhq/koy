@@ -403,6 +403,9 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private void ApplyState(NotchState newState)
     {
         State = newState;
+        // Kart çentik açılınca kalkar (açık çentik kartın yerine geçer).
+        if (newState == NotchState.Expanded && Osd.Type == OsdType.Card)
+            Osd.Dismiss();
         UpdateTargetSize();
         UpdateActivePanels();
         _visibility.SetExpanded(State == NotchState.Expanded);
@@ -476,9 +479,10 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     {
         if (Osd.IsActive)
         {
-            TargetWidth = 260;
-            TargetHeight = 40;
-            TargetCornerRadius = 20;
+            var isCard = Osd.Type == OsdType.Card;
+            TargetWidth = isCard ? NotchLayout.CardWidth : 260;
+            TargetHeight = isCard ? NotchLayout.CardHeight : 40;
+            TargetCornerRadius = isCard ? 28 : 20;
         }
         else
         {

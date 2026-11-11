@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Koy.App.Resources;
 using Koy.Core.Audio;
 using Koy.Core.Display;
+using Koy.Core.Notch;
 using Koy.Core.Power;
 using Koy.Core.Voice;
 
@@ -87,6 +88,16 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
     /// <summary>Tek satıra sığmayan tam açıklama (fareyle üzerine gelince).</summary>
     [ObservableProperty]
     private string? _voiceDetail;
+
+    /// <summary>Kart türündeki OSD'nin içeriği (<see cref="OsdType.Card"/>).</summary>
+    [ObservableProperty]
+    private NotchCard? _card;
+
+    /// <summary>Kartın birincil düğmesine ("Güncelle") basıldı.</summary>
+    public event Action? PrimaryActionRequested;
+
+    /// <summary>Kartın × düğmesine basıldı.</summary>
+    public event Action? DismissRequested;
 
     public GridLength FillStarWidth => new(Math.Clamp(Percent, 0, 100), GridUnitType.Star);
     public GridLength RemainingStarWidth => new(Math.Max(0, 100 - Math.Clamp(Percent, 0, 100)), GridUnitType.Star);
@@ -305,6 +316,44 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
         });
     }
 
+    /// <summary>
+    /// Çentikte düğmeli bir kart gösterir. Çentik açıkken (<see cref="CanShow"/>) gösterilmez ve false döner;
+    /// çağıran çentik kapanınca yeniden dener. <paramref name="lifetime"/> sonunda kendiliğinden kapanır.
+    /// </summary>
+    public bool ShowCard(NotchCard card, TimeSpan lifetime)
+    {
+        if (_disposed || !(CanShow?.Invoke() ?? true))
+            return false;
+
+        Card = card;
+        Type = OsdType.Card;
+        IsActive = true;
+
+        ResetTimer(lifetime);
+        Activated?.Invoke(this, EventArgs.Empty);
+        return true;
+    }
+
+    /// <summary>Kartın birincil düğmesi: kart kapanır, sahibi eylemi yürütür.</summary>
+    public void RequestPrimaryAction()
+    {
+        if (Type != OsdType.Card)
+            return;
+
+        Dismiss();
+        PrimaryActionRequested?.Invoke();
+    }
+
+    /// <summary>Kartın × düğmesi: kart kapanır, sahibi bunu "bu oturumda gösterme" diye kaydeder.</summary>
+    public void RequestDismiss()
+    {
+        if (Type != OsdType.Card)
+            return;
+
+        Dismiss();
+        DismissRequested?.Invoke();
+    }
+
     public void Dismiss()
     {
         if (!IsActive)
@@ -322,6 +371,7 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
         VoiceDetail = null;
         VoiceStatusText = "";
         VoiceState = VoiceState.Idle;
+        Card = null;
         Dismissed?.Invoke(this, EventArgs.Empty);
     }
 

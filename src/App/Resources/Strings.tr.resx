@@ -2007,6 +2007,18 @@
   <data name="UpdateAvailableBadge" xml:space="preserve">
     <value>Yeni sürüm: {0}</value>
   </data>
+  <data name="UpdateCardTitle" xml:space="preserve">
+    <value>Koy {0} hazır</value>
+  </data>
+  <data name="UpdateCardSubtitle" xml:space="preserve">
+    <value>Güncellemeye hazır</value>
+  </data>
+  <data name="UpdateCardAction" xml:space="preserve">
+    <value>Güncelle</value>
+  </data>
+  <data name="UpdateCardDismiss" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
   <data name="UpdateModalTitle" xml:space="preserve">
     <value>Yeni Sürüm Mevcut</value>
   </data>
