@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Koy.Core.Background;
 
 /// <summary>
@@ -13,7 +15,8 @@ public enum BackgroundSourceError
     NotLocalPath = 4,
     UnknownExtension = 5,
     KindMismatch = 6,
-    ReservedDeviceName = 7
+    ReservedDeviceName = 7,
+    NonCanonicalPath = 8
 }
 
 /// <summary>
@@ -23,8 +26,8 @@ public enum BackgroundSourceError
 /// </summary>
 public static class BackgroundSourceValidator
 {
-    /// <summary>En uzun kabul edilen yol (Windows MAX_PATH).</summary>
-    public const int MaxPathLength = 260;
+    /// <summary>En uzun kabul edilen yol: MAX_PATH (260) sonlandırıcı null'ı da sayar, metin en çok 259 karakter olur.</summary>
+    public const int MaxPathLength = 259;
 
     private static readonly string[] StillExtensions = [".png", ".jpg", ".jpeg", ".webp", ".bmp"];
     private static readonly string[] AnimatedExtensions = [".gif"];
@@ -35,12 +38,21 @@ public static class BackgroundSourceValidator
     [
         "CON", "PRN", "AUX", "NUL",
         "COM0", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
-        "LPT0", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
+        "LPT0", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+        "COM¹", "COM²", "COM³", "LPT¹", "LPT²", "LPT³",
+        "CONIN$", "CONOUT$"
     ];
+
+    // Dosya adında geçersiz (joker ve yönlendirme) karakterler; Core platformdan bağımsız kalsın diye elle yazıldı.
+    private static readonly char[] InvalidNameChars = ['<', '>', '"', '|', '?', '*'];
 
     /// <summary>Kaynağı denetler ve ilk bulunan hatayı döner.</summary>
     public static BackgroundSourceError Validate(BackgroundSource source)
     {
+        // Ayar dosyasından gelen tanımsız sayı da (örn. 99) geçerli tür sayılmaz.
+        if (!Enum.IsDefined(source.Kind))
+            return BackgroundSourceError.KindMismatch;
+
         if (source.Kind == BackgroundKind.None)
             return string.IsNullOrEmpty(source.Path) ? BackgroundSourceError.None : BackgroundSourceError.KindMismatch;
 
@@ -53,7 +65,8 @@ public static class BackgroundSourceValidator
             return BackgroundSourceError.PathTooLong;
 
         // Denetim karakterleri ve satır sonu, log ve ayar dosyasında yol enjeksiyonuna açıktır.
-        if (path.Any(char.IsControl))
+        // Biçim karakterleri (sağdan sola geçersiz kılma U+202E gibi) uzantıyı görünürde değiştirip kullanıcıyı yanıltır.
+        if (path.Any(c => char.IsControl(c) || char.GetUnicodeCategory(c) == UnicodeCategory.Format))
             return BackgroundSourceError.InvalidCharacters;
 
         // Uzak kaynak (URL, UNC, \\?\ ve \\.\ önekleri) ve göreli yol bu özelliğin kapsamı dışında.
@@ -66,7 +79,17 @@ public static class BackgroundSourceValidator
         if (path.IndexOf(':', 2) >= 0)
             return BackgroundSourceError.InvalidCharacters;
 
-        if (IsReservedDeviceName(path))
+        // Joker ve yönlendirme karakterleri (* ? < > " |) dosya adı olamaz; arama gibi davranabilir.
+        if (path.IndexOfAny(InvalidNameChars) >= 0)
+            return BackgroundSourceError.InvalidCharacters;
+
+        // "." ve ".." parçaları, çift ters eğik çizgi, sondaki nokta/boşluk: Windows bunları sessizce
+        // normalleştirir, yani kullanıcının gördüğü yol ile açılan yol ayrışır.
+        var segments = path[3..].Split('\\');
+        if (segments.Any(IsNonCanonicalSegment))
+            return BackgroundSourceError.NonCanonicalPath;
+
+        if (segments.Any(IsReservedDeviceName))
             return BackgroundSourceError.ReservedDeviceName;
 
         var extension = Extension(path);
@@ -100,14 +123,17 @@ public static class BackgroundSourceValidator
         return path[lastDot..];
     }
 
+    private static bool IsNonCanonicalSegment(string segment) =>
+        segment.Length == 0 || segment is "." or ".." || segment[^1] is '.' or ' ';
+
     /// <summary>
-    /// Dosya adının ilk noktaya kadarki kısmı aygıt adıysa (NUL.png, com1.gif) true.
-    /// Windows sondaki boşlukları yok sayar; "CONsole.png" aygıt değildir.
+    /// Yol parçasının ilk noktaya kadarki kısmı aygıt adıysa (NUL.png, com1.gif) true. Klasör adları da sayılır:
+    /// Windows aygıt adlı klasörlü yolları (C:\nul\a.png) aygıt olarak çözer. Sondaki boşluklar yok sayılır;
+    /// "CONsole.png" aygıt değildir.
     /// </summary>
-    private static bool IsReservedDeviceName(string path)
+    private static bool IsReservedDeviceName(string segment)
     {
-        var fileName = path[(path.LastIndexOf('\\') + 1)..];
-        var stem = fileName.Split('.')[0].TrimEnd(' ').ToUpperInvariant();
+        var stem = segment.Split('.')[0].TrimEnd(' ').ToUpperInvariant();
         return DeviceNames.Contains(stem);
     }
 

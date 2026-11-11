@@ -170,11 +170,90 @@ public class BackgroundSourceValidatorTests
             BackgroundSourceValidator.Validate(new BackgroundSource(BackgroundKind.StillImage, Dir + "CONsole.png")));
     }
 
+    [Theory]
+    [InlineData(@"C:\Pictures\..\a.png")]
+    [InlineData(@"C:\Pictures\.\a.png")]
+    [InlineData(@"C:\Pictures\\a.png")]
+    [InlineData(@"C:\Pictures\a.png.")]
+    [InlineData(@"C:\Pictures\a.png ")]
+    [InlineData(@"C:\Pictures \a.png")]
+    [InlineData(@"C:\Pictures\")]
+    public void Non_canonical_paths_are_rejected(string path)
+    {
+        // Windows bu yolları sessizce normalleştirir; görünen ile açılan yol ayrışır.
+        Assert.Equal(BackgroundSourceError.NonCanonicalPath,
+            BackgroundSourceValidator.Validate(new BackgroundSource(BackgroundKind.StillImage, path)));
+    }
+
+    [Theory]
+    [InlineData(@"C:\Pictures\*.png")]
+    [InlineData(@"C:\Pictures\a?.png")]
+    [InlineData(@"C:\Pictures\a<b>.png")]
+    [InlineData("C:\\Pictures\\a\"b.png")]
+    [InlineData(@"C:\Pictures\a|b.png")]
+    [InlineData("C:\\Pictures\\a\u202Egnp.png")]
+    public void Wildcards_and_format_characters_are_rejected(string path)
+    {
+        Assert.Equal(BackgroundSourceError.InvalidCharacters,
+            BackgroundSourceValidator.Validate(new BackgroundSource(BackgroundKind.StillImage, path)));
+    }
+
+    [Theory]
+    [InlineData(@"C:\nul\a.png")]
+    [InlineData(@"C:\Pictures\NUL .png")]
+    [InlineData(@"C:\Pictures\CONIN$.png")]
+    [InlineData(@"C:\Pictures\CONOUT$.png")]
+    [InlineData("C:\\Pictures\\COM\u00B9.png")]
+    public void Device_names_in_any_segment_are_rejected(string path)
+    {
+        Assert.Equal(BackgroundSourceError.ReservedDeviceName,
+            BackgroundSourceValidator.Validate(new BackgroundSource(BackgroundKind.StillImage, path)));
+    }
+
+    [Theory]
+    [InlineData(99)]
+    [InlineData(-1)]
+    public void Undefined_kind_is_rejected(int raw)
+    {
+        Assert.Equal(BackgroundSourceError.KindMismatch,
+            BackgroundSourceValidator.Validate(new BackgroundSource((BackgroundKind)raw, Dir + "a.png")));
+        Assert.Equal(BackgroundSourceError.KindMismatch,
+            BackgroundSourceValidator.Validate(new BackgroundSource((BackgroundKind)raw, string.Empty)));
+    }
+
+    [Fact]
+    public void Null_path_from_deserialization_is_handled()
+    {
+        Assert.Equal(BackgroundSourceError.MissingPath,
+            BackgroundSourceValidator.Validate(new BackgroundSource(BackgroundKind.Video, null!)));
+        Assert.Equal(BackgroundSourceError.None,
+            BackgroundSourceValidator.Validate(new BackgroundSource(BackgroundKind.None, null!)));
+    }
+
+    [Fact]
+    public void Max_path_length_leaves_room_for_the_terminating_null()
+    {
+        // MAX_PATH 260 null'ı da sayar; 260 karakterlik metin klasik API'lerde açılmaz.
+        Assert.Equal(259, BackgroundSourceValidator.MaxPathLength);
+    }
+
+    [Fact]
+    public void Extension_check_is_case_insensitive_for_every_kind()
+    {
+        Assert.Equal(BackgroundSourceError.None,
+            BackgroundSourceValidator.Validate(new BackgroundSource(BackgroundKind.Video, Dir + "a.MP4")));
+        Assert.Equal(BackgroundSourceError.None,
+            BackgroundSourceValidator.Validate(new BackgroundSource(BackgroundKind.AnimatedImage, Dir + "a.GiF")));
+        Assert.Equal(BackgroundSourceError.None,
+            BackgroundSourceValidator.Validate(new BackgroundSource(BackgroundKind.StillImage, Dir + "a.WEBP")));
+    }
+
     [Fact]
     public void Enum_values_are_pinned_for_persistence()
     {
         // Bu değerler ayar dosyasında saklanabilir; değiştirmek mevcut kayıtları bozar.
         Assert.Equal(3, (int)BackgroundKind.Video);
         Assert.Equal(7, (int)BackgroundSourceError.ReservedDeviceName);
+        Assert.Equal(8, (int)BackgroundSourceError.NonCanonicalPath);
     }
 }
