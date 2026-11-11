@@ -114,6 +114,18 @@ public sealed record DockSettings
 
     /// <summary>Dock simgesine orta tık: yeni pencere (varsayılan) ya da kapat.</summary>
     public MiddleClickAction MiddleClickAction { get; set; } = MiddleClickAction.NewWindow;
+
+    /// <summary>Aynı uygulamanın pencereleri tek simgede: hiç (varsayılan), her zaman ya da yalnız yer kalmayınca.</summary>
+    public DockGroupingMode GroupingMode { get; set; } = DockGroupingMode.Never;
+
+    /// <summary>Dock'ta gösterilen pencereler: tüm monitörler (varsayılan) ya da yalnız dock'un monitörü.</summary>
+    public DockWindowMonitorScope WindowMonitorScope { get; set; } = DockWindowMonitorScope.AllMonitors;
+
+    /// <summary>Dock simgesine sol tık: öne getir (varsayılan) ya da başka bir pencere eylemi.</summary>
+    public DockLeftClickAction LeftClickAction { get; set; } = DockLeftClickAction.BringToFront;
+
+    /// <summary>Dock simgelerinin altındaki uygulama adı etiketi: hiç (varsayılan), her zaman ya da üzerine gelince.</summary>
+    public DockLabelMode LabelMode { get; set; } = DockLabelMode.Never;
 }
 
 /// <summary>
