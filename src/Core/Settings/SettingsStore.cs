@@ -38,12 +38,42 @@ public sealed class SettingsStore(string path)
             if (originalVersion < AppSettings.CurrentVersion)
                 BackupOriginalFile();
 
-            return (root.Deserialize(SettingsJsonContext.Default.AppSettings) ?? new AppSettings()).FillMissingSections();
+            return DeserializeTolerant(root).FillMissingSections();
         }
         catch (JsonException)
         {
             return new AppSettings();
         }
+    }
+
+    // Tanınmayan bir değer (örn. "Style": "Bogus") yalnız kendi alanını varsayılana döndürür; geri kalan ayarlar korunur.
+    // Hata yolu JsonException.Path'ten okunur; yol çözülemezse o üst düzey bölüm düşer.
+    private const int MaxRepairs = 200;
+
+    private static AppSettings DeserializeTolerant(JsonObject root)
+    {
+        for (var attempt = 0; attempt < MaxRepairs; attempt++)
+        {
+            try
+            {
+                return root.Deserialize(SettingsJsonContext.Default.AppSettings) ?? new AppSettings();
+            }
+            catch (JsonException ex) when (ex.Path is not null && DropAt(root, ex.Path))
+            {
+            }
+        }
+        return new AppSettings();
+    }
+
+    private static bool DropAt(JsonObject root, string path)
+    {
+        // "$.Dock.Style" → ["Dock", "Style"]
+        var parts = path.TrimStart('$').TrimStart('.').Split('.');
+        if (parts.Length == 2 && !parts[1].Contains('[') && root[parts[0]] is JsonObject section)
+            return section.Remove(parts[1]);
+
+        var top = parts[0].Split('[')[0];
+        return root.Remove(top);
     }
 
     // Yedek yazılamazsa (kilit, yetki) açılış durmasın; yedek bir kolaylıktır, ayarların kendisi değil.

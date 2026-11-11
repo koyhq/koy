@@ -107,4 +107,24 @@ public class SettingsStoreRobustnessTests : IDisposable
         Assert.Contains("\"Dock\": {", text);
         Assert.False(System.Text.Json.Nodes.JsonNode.Parse(text)!.AsObject().ContainsKey("DockEnabled"));
     }
+
+    [Fact]
+    public void Invalid_enum_value_resets_only_its_own_field()
+    {
+        var loaded = SettingsFile.Load("""{ "Version": 4, "General": { "Language": "tr" }, "Dock": { "Enabled": false, "Style": "Bogus" } }""");
+
+        Assert.Equal("tr", loaded.General.Language);
+        Assert.False(loaded.Dock.Enabled);
+        Assert.Equal(new DockSettings().Style, loaded.Dock.Style);
+    }
+
+    [Fact]
+    public void Invalid_value_in_a_migrated_v3_file_keeps_the_other_settings()
+    {
+        var loaded = SettingsFile.Load("""{ "Version": 3, "Language": "tr", "NotchEnabled": false, "DockStyle": "Bogus" }""");
+
+        Assert.Equal("tr", loaded.General.Language);
+        Assert.False(loaded.Notch.Enabled);
+        Assert.Equal(new DockSettings().Style, loaded.Dock.Style);
+    }
 }
