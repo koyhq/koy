@@ -38,7 +38,7 @@
             </Style>
           </Path.Style>
         </Path>
-        <Image Source="{Binding CardIcon}" Width="24" Height="24" Stretch="Uniform"
+        <Image Source="{Binding CardIcon}" Width="26" Height="26" Stretch="Uniform"
                HorizontalAlignment="Center" VerticalAlignment="Center"
                RenderOptions.BitmapScalingMode="HighQuality">
           <Image.Style>

@@ -42,4 +42,38 @@ public class IconBlankCheckTests
         Assert.Same(b, cardB.Icon);
         Assert.Null(cardB.FallbackIcon);
     }
+
+    private static byte[] Image(int w, int h, params (int x, int y)[] opaque)
+    {
+        var px = new byte[w * h * 4];
+        foreach (var (x, y) in opaque)
+            px[(y * w + x) * 4 + 3] = 255;
+        return px;
+    }
+
+    [Fact]
+    public void BoundsCoverOnlyVisiblePixels()
+    {
+        var bounds = IconBlankCheck.GetVisibleBounds(Image(10, 8, (2, 1), (6, 5), (4, 3)), 10, 8);
+        Assert.Equal(new IconBounds(2, 1, 5, 5), bounds);
+    }
+
+    [Fact]
+    public void BoundsOfFullyOpaqueImageAreTheWholeImage()
+    {
+        var px = Image(2, 2, (0, 0), (1, 0), (0, 1), (1, 1));
+        Assert.Equal(new IconBounds(0, 0, 2, 2), IconBlankCheck.GetVisibleBounds(px, 2, 2));
+    }
+
+    [Fact]
+    public void BoundsOfBlankOrMalformedImageAreNull()
+    {
+        Assert.Null(IconBlankCheck.GetVisibleBounds(new byte[16], 2, 2));
+        Assert.Null(IconBlankCheck.GetVisibleBounds(new byte[4], 2, 2));
+        Assert.Null(IconBlankCheck.GetVisibleBounds([], 0, 0));
+    }
+
+    [Fact]
+    public void BoundsOfSinglePixel() =>
+        Assert.Equal(new IconBounds(3, 2, 1, 1), IconBlankCheck.GetVisibleBounds(Image(5, 4, (3, 2)), 5, 4));
 }

@@ -383,7 +383,7 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
             image.StreamSource = stream;
             image.EndInit();
             image.Freeze();
-            return IsBlank(image) ? null : image;
+            return CropToVisible(image);
         }
         catch
         {
@@ -391,17 +391,28 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
         }
     }
 
-    // Tamamen saydam (ya da boyutsuz) resim "simge var" sayılmaz: boş daire yerine zil çıksın.
-    private static bool IsBlank(BitmapSource image)
+    // Tamamen saydam resim "simge var" sayılmaz (boş daire yerine zil çıksın). Saydam kenar boşluğu kırpılır:
+    // bildirim logoları boşlukla gelir ve 36 px dairede küçük görünür. Sonuç dondurulur (AGENTS #9).
+    private static ImageSource? CropToVisible(BitmapSource image)
     {
         if (image.PixelWidth == 0 || image.PixelHeight == 0)
-            return true;
+            return null;
 
         var converted = new FormatConvertedBitmap(image, PixelFormats.Bgra32, null, 0);
+        converted.Freeze();
         var stride = converted.PixelWidth * 4;
         var pixels = new byte[stride * converted.PixelHeight];
         converted.CopyPixels(pixels, stride, 0);
-        return IconBlankCheck.IsBlank(pixels);
+
+        if (IconBlankCheck.GetVisibleBounds(pixels, converted.PixelWidth, converted.PixelHeight) is not { } b)
+            return null;
+
+        if (b.X == 0 && b.Y == 0 && b.Width == converted.PixelWidth && b.Height == converted.PixelHeight)
+            return image;
+
+        var cropped = new CroppedBitmap(converted, new Int32Rect(b.X, b.Y, b.Width, b.Height));
+        cropped.Freeze();
+        return cropped;
     }
 
     public void Dismiss()
