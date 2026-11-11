@@ -14,11 +14,18 @@ public class NotchOptionsTests
     [InlineData(NotchOpenBehavior.Click, NotchPointerEvent.Click, false, NotchOpenAction.Open, 0)]
     [InlineData(NotchOpenBehavior.Click, NotchPointerEvent.Click, true, NotchOpenAction.Close, 0)]
     [InlineData(NotchOpenBehavior.Click, NotchPointerEvent.Enter, false, NotchOpenAction.None, 0)]
-    [InlineData(NotchOpenBehavior.Click, NotchPointerEvent.Leave, true, NotchOpenAction.None, 0)]
+    // Bugünkü davranış: açık çentik her kipte imleç çıkınca kapanır.
+    [InlineData(NotchOpenBehavior.Click, NotchPointerEvent.Leave, true, NotchOpenAction.Close, 300)]
+    [InlineData(NotchOpenBehavior.DragOver, NotchPointerEvent.Leave, true, NotchOpenAction.Close, 300)]
     [InlineData(NotchOpenBehavior.DragOver, NotchPointerEvent.DragEnter, false, NotchOpenAction.Open, 120)]
     [InlineData(NotchOpenBehavior.DragOver, NotchPointerEvent.DragEnter, true, NotchOpenAction.None, 0)]
     [InlineData(NotchOpenBehavior.DragOver, NotchPointerEvent.DragLeave, true, NotchOpenAction.Close, 300)]
     [InlineData(NotchOpenBehavior.DragOver, NotchPointerEvent.Enter, false, NotchOpenAction.None, 0)]
+    [InlineData(NotchOpenBehavior.DragOver, NotchPointerEvent.Click, false, NotchOpenAction.None, 0)]
+    // Bugünkü davranış: dosya sürüklenince çentik her kipte Raf için hemen açılır; gecikme yalnız DragOver kipinin.
+    [InlineData(NotchOpenBehavior.Hover, NotchPointerEvent.DragEnter, false, NotchOpenAction.Open, 0)]
+    [InlineData(NotchOpenBehavior.Click, NotchPointerEvent.DragEnter, false, NotchOpenAction.Open, 0)]
+    [InlineData(NotchOpenBehavior.Hover, NotchPointerEvent.DragLeave, true, NotchOpenAction.Close, 300)]
     public void Open_policy_maps_event_to_action(NotchOpenBehavior behavior, NotchPointerEvent ev, bool isOpen, NotchOpenAction action, int expectedDelay)
     {
         var decision = NotchOpenPolicy.Decide(behavior, ev, isOpen, openDelayMs: 120, closeDelayMs: 300);
@@ -46,6 +53,23 @@ public class NotchOptionsTests
         var decision = NotchOpenPolicy.Decide(NotchOpenBehavior.Hover, NotchPointerEvent.Enter, false, openDelayMs: requested, closeDelayMs: 0);
 
         Assert.Equal(expected, decision.DelayMs);
+    }
+
+    [Fact]
+    public void Null_lists_in_the_file_are_restored()
+    {
+        var loaded = SettingsFile.Load("""{ "Version": 4, "Notch": { "PanelOrder": null, "HomeCards": null } }""");
+
+        Assert.Empty(loaded.Notch.PanelOrder);
+        Assert.Equal(HomeCardLayout.Default, loaded.Notch.HomeCards);
+    }
+
+    [Fact]
+    public void Default_home_cards_are_a_copy_not_the_shared_default()
+    {
+        new NotchSettings().HomeCards.Clear();
+
+        Assert.Equal(HomeCardLayout.Default, new NotchSettings().HomeCards);
     }
 
     [Theory]
@@ -99,7 +123,7 @@ public class NotchOptionsTests
 
         Assert.Equal(NotchTabBarStyle.IconOnly, notch.TabBarStyle);
         Assert.Equal(0, notch.OpenDelayMs);
-        Assert.Equal(0, notch.CloseDelayMs);
+        Assert.Equal(NotchOpenPolicy.DefaultCloseDelayMs, notch.CloseDelayMs);
         Assert.Empty(notch.PanelOrder);
         Assert.Equal(HomeCardLayout.Default, notch.HomeCards);
         Assert.Equal(NotchVisualizerStyle.Bars, music.VisualizerStyle);

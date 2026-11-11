@@ -1,3 +1,5 @@
+using Koy.Core.Notch;
+
 namespace Koy.Core.Settings;
 
 /// <summary>
@@ -56,6 +58,8 @@ public sealed record AppSettings
         DockItems.Folders ??= [];
         Notch.EnabledPanels ??= new NotchSettings().EnabledPanels;
         Notch.ControlCenterLayout ??= new NotchSettings().ControlCenterLayout;
+        Notch.PanelOrder ??= [];
+        Notch.HomeCards ??= new(HomeCardLayout.Default);
         Displays.Monitors ??= new();
         Search.DisabledSources ??= [];
         QuickLaunch.Items ??= [];
