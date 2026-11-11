@@ -56,16 +56,41 @@ public class RuleSetValidatorTests
     }
 
     [Fact]
-    public void UnknownConditionKind_IsDropped_AndRuleKeepsRemainingConditions()
+    public void UnknownConditionKind_IsDropped_AndWholeRuleIsDropped_FailClosed()
     {
         var result = RuleSetValidator.Validate([
             Draft("Kod", "work", new RuleConditionDraft("wifiSsid"), Process("code")),
         ]);
 
-        var rule = Assert.Single(result.Rules);
-        Assert.Single(rule.Conditions);
+        Assert.Empty(result.Rules);
         Assert.Equal(1, result.DroppedConditions);
-        Assert.Equal(0, result.DroppedRules);
+        Assert.Equal(1, result.DroppedRules);
+    }
+
+    [Fact]
+    public void InvalidTimeWindowAlongsideValidProcess_DropsWholeRule_NotOnlyProcessCondition()
+    {
+        // Yalnız "süreç=oyun" kalırsa kural gün boyu tetiklenir; bu yüzden tüm kural atılmalı.
+        var result = RuleSetValidator.Validate([
+            Draft("Oyun", "game", Process("game"), new RuleConditionDraft("timeWindow", From: "25:00", To: "06:00")),
+        ]);
+
+        Assert.Empty(result.Rules);
+        Assert.Equal(1, result.DroppedConditions);
+        Assert.Equal(1, result.DroppedRules);
+    }
+
+    [Fact]
+    public void DroppedRule_DoesNotAffectOtherValidRules()
+    {
+        var result = RuleSetValidator.Validate([
+            Draft("Birinci", "work", Process("code")),
+            Draft("Bozuk", "game", Process("game"), new RuleConditionDraft("battery")),
+            Draft("Üçüncü", "sleep", new RuleConditionDraft("timeWindow", From: "22:00", To: "06:30")),
+        ]);
+
+        Assert.Equal(new[] { "Birinci", "Üçüncü" }, result.Rules.Select(r => r.Name).ToArray());
+        Assert.Equal(1, result.DroppedRules);
     }
 
     [Fact]

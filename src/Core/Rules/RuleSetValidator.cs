@@ -6,9 +6,10 @@ namespace Koy.Core.Rules;
 public sealed record RuleSetValidation(IReadOnlyList<AutoRule> Rules, int DroppedRules, int DroppedConditions);
 
 /// <summary>
-/// Ham kuralları doğrular. Geçersiz koşul tek tek atılır; geçersiz kural (ad ya da profil yok,
-/// hiç geçerli koşulu kalmamış) tamamen atılır. Koşulsuz kural her şeyle eşleşeceği için
-/// bu tür bir kural asla kabul edilmez. Fazla kurallar (üst sınır) listenin sonundan atılır.
+/// Ham kuralları doğrular. Kurala fail-closed davranılır: bir kuralın koşullarından biri bile geçersiz
+/// ya da bilinmeyen türdeyse kural tamamen atılır, kalan koşullarıyla tutulmaz. Geçerli koşullar
+/// kalsa da kural ancak tam hâliyle anlamlıdır. Koşulsuz kural her şeyle eşleşeceği için de kabul
+/// edilmez. Fazla kurallar (üst sınır) listenin sonundan atılır ve yine raporlanır.
 /// </summary>
 public static class RuleSetValidator
 {
@@ -29,16 +30,24 @@ public static class RuleSetValidator
             }
 
             var conditions = new List<RuleCondition>();
+            var hasInvalidCondition = false;
             foreach (var conditionDraft in draft.Conditions)
             {
                 var condition = ParseCondition(conditionDraft);
                 if (condition is null)
+                {
                     droppedConditions++;
+                    hasInvalidCondition = true;
+                }
                 else
+                {
                     conditions.Add(condition);
+                }
             }
 
-            if (conditions.Count == 0 || rules.Count >= RuleLimits.MaxRules)
+            // Bir koşul bile geçersizse kalanlarla kurmak yanlış tetiklemeye yol açar:
+            // "süreç=oyun VE saat=25:00-06:00" yalnız "süreç=oyun" olursa gün boyu uygulanır.
+            if (hasInvalidCondition || conditions.Count == 0 || rules.Count >= RuleLimits.MaxRules)
             {
                 droppedRules++;
                 continue;
