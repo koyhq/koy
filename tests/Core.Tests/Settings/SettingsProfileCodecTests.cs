@@ -1,6 +1,7 @@
 using Koy.Core.Appearance;
 using Koy.Core.Dock;
 using Koy.Core.Settings;
+using System.Text.Json.Nodes;
 using Koy.Core.Settings.Profiles;
 
 namespace Koy.Core.Tests.Settings;
@@ -28,7 +29,17 @@ public class SettingsProfileCodecTests
         Assert.Equal("Sunum", result.Profile!.Name);
         Assert.Equal([ProfileSection.Appearance, ProfileSection.Dock], result.Profile.Sections);
         Assert.Equal(Source().Appearance, result.Profile.Settings.Appearance);
-        Assert.Equal(Source().Dock, result.Profile.Settings.Dock);
+        Assert.Equal(Source().Dock with { StartIconPath = "" }, result.Profile.Settings.Dock);
+    }
+
+    [Fact]
+    public void Export_clears_the_local_start_icon_path_from_the_file()
+    {
+        var json = SettingsProfileCodec.Export(Source(), "Sunum", [ProfileSection.Dock]);
+
+        Assert.Equal("", JsonNode.Parse(json)!["Settings"]!["Dock"]!["StartIconPath"]!.GetValue<string>());
+        Assert.DoesNotContain("simge.png", json);
+        Assert.DoesNotContain("ornek", json);
     }
 
     [Fact]

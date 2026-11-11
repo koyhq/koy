@@ -42,7 +42,9 @@ public static class SettingsProfileCodec
         if (chosen.Count == 0)
             throw new ArgumentException("En az bir bölüm seçilmeli.", nameof(sections));
 
-        var full = (JsonObject)JsonSerializer.SerializeToNode(current, SettingsJsonContext.Default.AppSettings)!;
+        // Dock başlat simgesinin yolu bu makineye özgü: paylaşılan dosyaya yazılmaz (içe aktarmada yerel değer korunur).
+        var shareable = current with { Dock = current.Dock with { StartIconPath = "" } };
+        var full = (JsonObject)JsonSerializer.SerializeToNode(shareable, SettingsJsonContext.Default.AppSettings)!;
         var settings = new JsonObject { ["Version"] = AppSettings.CurrentVersion };
         foreach (var section in chosen)
         {
@@ -123,7 +125,17 @@ public static class SettingsProfileCodec
                 scoped[key] = sectionNode.DeepClone();
         }
 
-        var settings = SettingsStore.ParseTolerant(scoped, out var dropped).FillMissingSections();
+        AppSettings settings;
+        int dropped;
+        try
+        {
+            settings = SettingsStore.ParseTolerant(scoped, out dropped).FillMissingSections();
+        }
+        catch (JsonException)
+        {
+            // Hata yolu çözülemezse ParseTolerant onarmaz ve istisna çıkar: dosya temiz biçimde reddedilir, hiçbir şey yazılmaz.
+            return Fail(ProfileImportError.InvalidValues);
+        }
         if (dropped > 0)
             return Fail(ProfileImportError.InvalidValues);
 
