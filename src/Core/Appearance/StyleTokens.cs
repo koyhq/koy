@@ -19,7 +19,8 @@ public sealed record StyleToken(string Name, StyleValueKind Kind, double Min = 0
 
 /// <summary>
 /// Güvenlik sınırı: yalnız bu listedeki tokenlar geçersiz kılınabilir. XAML, yol, tip adı ya da kod burada yoktur,
-/// dolayısıyla kullanıcı dosyası ne XamlReader'a ne de bir türe ulaşır.
+/// dolayısıyla kullanıcı dosyası ne XamlReader'a ne de bir türe ulaşır. Hiçbir token pencere ya da tuval boyutu
+/// değildir (kural #13); sayı token'ları yalnız içerideki şeklin köşe, kenarlık ve yazı ölçüsünü etkiler.
 /// </summary>
 public static class StyleTokens
 {

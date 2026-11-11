@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Globalization;
 using Koy.Core.Appearance;
 
 namespace Koy.Core.Tests;
@@ -251,5 +252,88 @@ public class StyleOverrideSanitizerTests
         var drop = Assert.Single(result.Dropped);
         Assert.Equal(64, drop.Name.Length);
         Assert.Equal(StyleDropReason.UnknownToken, drop.Reason);
+    }
+
+    [Theory]
+    [InlineData("tr-TR")]
+    [InlineData("de-DE")]
+    [InlineData("fr-FR")]
+    public void Number_parsing_ignores_current_culture(string cultureName)
+    {
+        var previous = CultureInfo.CurrentCulture;
+        CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(cultureName);
+        try
+        {
+            var ok = Run(("CornerRadius", "12.5"));
+            Assert.Equal("12.5", ok.Accepted.Values["CornerRadius"]);
+
+            // Ondalık virgül ve binlik ayracı hiçbir kültürde kabul edilmez.
+            var comma = Run(("CornerRadius", "12,5"));
+            Assert.Equal([new DroppedStyleOverride("CornerRadius", StyleDropReason.MalformedNumber)], comma.Dropped);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previous;
+        }
+    }
+
+    [Theory]
+    [InlineData("1E400")]
+    [InlineData("-1E400")]
+    [InlineData("-Infinity")]
+    [InlineData("1,000")]
+    [InlineData("0x10")]
+    [InlineData("١٢")] // Arapça-Hint rakamları
+    public void Overflowing_or_exotic_numbers_are_dropped(string value)
+    {
+        var result = Run(("FontSize", value));
+
+        Assert.Empty(result.Accepted.Values);
+        Assert.Single(result.Dropped);
+    }
+
+    [Fact]
+    public void Exponent_and_leading_plus_are_canonicalized()
+    {
+        Assert.Equal("12", Run(("FontSize", "1.2E1")).Accepted.Values["FontSize"]);
+        Assert.Equal("5", Run(("CornerRadius", " +5 ")).Accepted.Values["CornerRadius"]);
+    }
+
+    [Fact]
+    public void Accepted_values_cannot_be_mutated_through_a_cast_and_empty_stays_empty()
+    {
+        var accepted = (IDictionary<string, string>)Run(("Accent", "#FFFFFF")).Accepted.Values;
+        Assert.Throws<NotSupportedException>(() => accepted["Evil"] = "x");
+
+        var empty = (IDictionary<string, string>)StyleOverrides.Empty.Values;
+        Assert.Throws<NotSupportedException>(() => empty["Accent"] = "#000000");
+        Assert.Empty(StyleOverrides.Empty.Values);
+    }
+
+    [Fact]
+    public void Report_is_capped_for_huge_unknown_key_sets_and_omitted_ones_are_counted()
+    {
+        var raw = Enumerable.Range(0, 10_000)
+            .Select(i => new KeyValuePair<string, string?>("junk" + i, "#FFFFFF"))
+            .Append(new KeyValuePair<string, string?>("Accent", "#123456"));
+
+        var result = StyleOverrideSanitizer.Sanitize(raw);
+
+        Assert.Equal(64, result.Dropped.Count);
+        Assert.Equal(10_000 - 64, result.OmittedDropCount);
+        // Rapor dolsa bile geçerli giriş kaybolmaz.
+        Assert.Equal("#123456", result.Accepted.Values["Accent"]);
+    }
+
+    [Fact]
+    public void Small_input_reports_no_omitted_drops()
+    {
+        Assert.Equal(0, Run(("Evil", "x")).OmittedDropCount);
+    }
+
+    [Fact]
+    public void Value_with_surrounding_whitespace_is_trimmed_before_validation()
+    {
+        Assert.Equal("#AABBCC", Run(("Accent", "  #aabbcc	")).Accepted.Values["Accent"]);
     }
 }
