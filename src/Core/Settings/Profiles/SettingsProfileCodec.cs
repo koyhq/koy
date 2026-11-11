@@ -168,16 +168,20 @@ public static class SettingsProfileCodec
 
         AppSettings settings;
         int dropped;
+        bool badDockLayout;
         try
         {
-            settings = SettingsStore.ParseTolerant(scoped, out dropped).FillMissingSections();
+            var parsed = SettingsStore.ParseTolerant(scoped, out dropped);
+            // FillMissingSections dock yerleşimini (DockLayoutLimits.Sanitize) sessizce onarır; profil bozuk değeri reddeder.
+            badDockLayout = sections.Contains(ProfileSection.Dock) && parsed.Dock is { } rawDock && HasInvalidDockLayout(rawDock);
+            settings = parsed.FillMissingSections();
         }
         catch (JsonException)
         {
             // Hata yolu çözülemezse ParseTolerant onarmaz ve istisna çıkar: dosya temiz biçimde reddedilir, hiçbir şey yazılmaz.
             return Fail(ProfileImportError.InvalidValues);
         }
-        if (dropped > 0 || HasInvalidValues(settings, sections))
+        if (dropped > 0 || badDockLayout || HasInvalidValues(settings, sections))
             return Fail(ProfileImportError.InvalidValues);
 
         return new ProfileImportResult(ProfileImportError.None, new ImportedProfile(name!.Trim(), sections, settings));
@@ -197,16 +201,27 @@ public static class SettingsProfileCodec
             {
                 ProfileSection.Appearance =>
                     !Enum.IsDefined(s.Appearance.Theme) || !Enum.IsDefined(s.Appearance.AnimationSpeed)
-                    || !Enum.IsDefined(s.Appearance.Material) || !double.IsFinite(s.Appearance.CornerRadius),
+                    || !Enum.IsDefined(s.Appearance.Material) || !double.IsFinite(s.Appearance.CornerRadius)
+                    || !Enum.IsDefined(s.Appearance.IconPack) || !double.IsFinite(s.Appearance.BaseFontSize),
                 ProfileSection.Dock =>
                     !Enum.IsDefined(s.Dock.Visibility) || !Enum.IsDefined(s.Dock.Style) || !Enum.IsDefined(s.Dock.IconAlignment)
                     || !Enum.IsDefined(s.Dock.Proximity) || !Enum.IsDefined(s.Dock.StartIcon) || !Enum.IsDefined(s.Dock.IndicatorStyle)
-                    || !Enum.IsDefined(s.Dock.MiddleClickAction) || !double.IsFinite(s.Dock.IconSize),
+                    || !Enum.IsDefined(s.Dock.MiddleClickAction) || !double.IsFinite(s.Dock.IconSize)
+                    || !Enum.IsDefined(s.Dock.IndicatorColor) || !Enum.IsDefined(s.Dock.BadgeColor)
+                    || !Enum.IsDefined(s.Dock.BadgeCorner) || !Enum.IsDefined(s.Dock.BadgeStyle) || !Enum.IsDefined(s.Dock.RevealTrigger)
+                    || !Enum.IsDefined(s.Dock.GroupingMode) || !Enum.IsDefined(s.Dock.WindowMonitorScope)
+                    || !Enum.IsDefined(s.Dock.LeftClickAction) || !Enum.IsDefined(s.Dock.LabelMode)
+                    || !Enum.IsDefined(s.Dock.NewTrayIconVisibility),
                 ProfileSection.Notch =>
                     !Enum.IsDefined(s.Notch.Visibility) || !Enum.IsDefined(s.Notch.Style) || !Enum.IsDefined(s.Notch.OpenBehavior)
                     || !Enum.IsDefined(s.Notch.IdleDisplay) || !Enum.IsDefined(s.Notch.WheelAction)
-                    || !IsSaneList(s.Notch.EnabledPanels) || !IsSaneList(s.Notch.ControlCenterLayout),
-                ProfileSection.Music => !Enum.IsDefined(s.Music.CardStyle),
+                    || !IsSaneList(s.Notch.EnabledPanels) || !IsSaneList(s.Notch.ControlCenterLayout)
+                    || !Enum.IsDefined(s.Notch.TabBarStyle) || !IsSaneList(s.Notch.PanelOrder)
+                    || s.Notch.HomeCards is null || s.Notch.HomeCards.Count > MaxListItems || !s.Notch.HomeCards.All(Enum.IsDefined)
+                    || !Enum.IsDefined(s.Notch.ClockHourFormat) || !Enum.IsDefined(s.Notch.ClockFirstDayOfWeek),
+                ProfileSection.Music =>
+                    !Enum.IsDefined(s.Music.CardStyle) || !Enum.IsDefined(s.Music.VisualizerStyle)
+                    || !Enum.IsDefined(s.Music.VisualizerColorSource),
                 ProfileSection.Shortcuts => HasInvalidShortcut(s),
                 ProfileSection.Focus =>
                     !IsPomodoroMinutes(s.Focus.PomodoroWorkMinutes) || !IsPomodoroMinutes(s.Focus.PomodoroShortBreakMinutes)
@@ -218,6 +233,10 @@ public static class SettingsProfileCodec
         }
         return false;
     }
+
+    private static bool HasInvalidDockLayout(DockSettings dock) =>
+        !Enum.IsDefined(dock.Edge) || !double.IsFinite(dock.EdgeOffsetDip)
+        || !double.IsFinite(dock.InnerPaddingDip) || !double.IsFinite(dock.IconSpacingDip);
 
     private static bool IsSaneList(ValueList<string> list) => list.Count <= MaxListItems && !list.Contains(null!);
 
