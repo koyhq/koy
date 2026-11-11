@@ -30,12 +30,15 @@ public sealed record CustomActionData(
 /// <summary>
 /// Özel eylemleri doğrular. Kimlik zorunlu ve tekil (büyük-küçük harf duyarsız; ilk gelen kalır), tür bilinmeli,
 /// hedef boş olmamalı. URL yalnız mutlak http/https olabilir. Geçersiz kayıt sessizce düşer ve sayılır.
+/// En çok <see cref="MaxActions"/> eylem tutulur; fazlası düşer (elle bozulmuş dosya listeyi şişirmesin).
 /// </summary>
 public static class CustomActionParser
 {
+    public const int MaxActions = 32;
+
     public sealed record Result(IReadOnlyList<CustomAction> Accepted, int Dropped);
 
-    public static Result Parse(IEnumerable<CustomActionData> items)
+    public static Result Parse(IEnumerable<CustomActionData?> items)
     {
         var accepted = new List<CustomAction>();
         var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -43,11 +46,13 @@ public static class CustomActionParser
 
         foreach (var item in items)
         {
-            var id = item.Id?.Trim();
-            var target = item.Target?.Trim();
+            // JSON'daki null öğe okunurken null olarak gelir; bütün listeyi çökertmesin.
+            var id = item?.Id?.Trim();
+            var target = item?.Target?.Trim();
 
             // Kimlik yalnız kayıt geçerliyse rezerve edilir; geçersiz kayıt sonraki geçerli kaydı düşürmesin.
-            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(target) ||
+            if (item is null || accepted.Count >= MaxActions ||
+                string.IsNullOrEmpty(id) || string.IsNullOrEmpty(target) ||
                 !TryKind(item.Kind, out var kind) ||
                 (kind == CustomActionKind.OpenUrl && !IsWebUrl(target)) ||
                 !ids.Add(id))

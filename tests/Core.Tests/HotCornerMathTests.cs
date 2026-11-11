@@ -73,4 +73,64 @@ public class HotCornerMathTests
     {
         Assert.False(HotCornerMath.IsDwellComplete(2000, 1000, 0));
     }
+
+    [Fact]
+    public void HitTest_NegatifKoordinatliSolMonitor()
+    {
+        var left = new ScreenRect(-1920, 0, 1920, 1080);
+
+        Assert.Equal(ScreenCorner.TopLeft, HotCornerMath.HitTest(-1920, 0, left, 4));
+        Assert.Equal(ScreenCorner.BottomRight, HotCornerMath.HitTest(-1, 1079, left, 4));
+        Assert.Null(HotCornerMath.HitTest(0, 0, left, 4));
+    }
+
+    [Fact]
+    public void HitTest_CokEkran_OrtakKenardakiKoseSayilmaz()
+    {
+        ScreenRect[] screens = [new(-1920, 0, 1920, 1080), new(0, 0, 1920, 1080)];
+
+        // Ortak kenar: imleç komşuya geçebilir, köşe değil.
+        Assert.Null(HotCornerMath.HitTest(-1, 0, screens, 4));
+        Assert.Null(HotCornerMath.HitTest(0, 1079, screens, 4));
+
+        // Dış köşeler çalışır ve doğru ekranı bildirir.
+        Assert.Equal(new CornerHit(0, ScreenCorner.TopLeft), HotCornerMath.HitTest(-1920, 0, screens, 4));
+        Assert.Equal(new CornerHit(1, ScreenCorner.BottomRight), HotCornerMath.HitTest(1919, 1079, screens, 4));
+    }
+
+    [Fact]
+    public void HitTest_CokEkran_KaymisKomsuIcinOrtakOlmayanKoseCalisir()
+    {
+        // Sağdaki monitör 500 px aşağıda: soldakinin sağ üst köşesi komşuya açık değil.
+        ScreenRect[] screens = [new(0, 0, 1920, 1080), new(1920, 500, 1920, 1080)];
+
+        Assert.Equal(new CornerHit(0, ScreenCorner.TopRight), HotCornerMath.HitTest(1919, 0, screens, 4));
+        Assert.Null(HotCornerMath.HitTest(1919, 1079, screens, 4));
+    }
+
+    [Fact]
+    public void HitTest_CokEkran_UstUsteKomsuAltKenar()
+    {
+        ScreenRect[] screens = [new(0, 0, 1920, 1080), new(0, 1080, 1920, 1080)];
+
+        Assert.Null(HotCornerMath.HitTest(0, 1079, screens, 4));
+        Assert.Null(HotCornerMath.HitTest(0, 1080, screens, 4));
+        Assert.Equal(new CornerHit(1, ScreenCorner.BottomRight), HotCornerMath.HitTest(1919, 2159, screens, 4));
+    }
+
+    [Fact]
+    public void HitTest_CokEkran_BosListeVeSifirBoyutluEkran()
+    {
+        Assert.Null(HotCornerMath.HitTest(0, 0, Array.Empty<ScreenRect>(), 4));
+
+        // Sıfır boyutlu ekran komşu sayılmaz.
+        ScreenRect[] screens = [new(0, 0, 1920, 1080), new(1920, 0, 0, 0)];
+        Assert.Equal(new CornerHit(0, ScreenCorner.TopRight), HotCornerMath.HitTest(1919, 0, screens, 4));
+    }
+
+    [Fact]
+    public void IsDwellComplete_NegatifSureSifirGibi()
+    {
+        Assert.True(HotCornerMath.IsDwellComplete(1000, 1000, -50));
+    }
 }
