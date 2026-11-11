@@ -643,4 +643,5 @@ Fikir kaynağı: Nusa incelemesi (`arastirma/nusa/RAPOR.md`, git dışı). Kod v
 - [x] **Core (testli):** `Spring.Damping` ayarlanabilir, `CriticalDamping` (2·√(sertlik·kütle)) ve `Kick(hız)` eklendi.
 - [x] **Kapanış:** `NotchWindow.Retarget` küçülen eksende kritik sönüm, büyüyen eksende eski hafif sekme (26). Eskiden 620→236 kapanışta ~8,5 DIP içe çöküyordu.
 - [x] **Raf darbesi:** dosya ya da metin bırakılınca çentik üst ortadan esneyip seker (`_gulp`, 260/14, darbe 30; yatay +%2,5, dikey −%5; yatay esneme tuvali aşmaz). Hareket azaltma ve Animasyon: Kapalı iken yok.
-- [ ] Elle sınama: kapanışın oturması, rafa dosya bırakınca esneme, hareket azaltmada darbenin çıkmaması.
+- [x] **Saat:** çentik saati 15 sn yerine dakika başına hizalı zamanlayıcıyla yenilenir (`Core/Notch/ClockTick`, testli: dakika dönünce +30 ms, en az 100 ms). Saat ya da saat dilimi elle değişince `SystemEvents.TimeChanged` hemen düzeltir.
+- [ ] Elle sınama: kapanışın oturması, rafa dosya bırakınca esneme, hareket azaltmada darbenin çıkmaması, saatin dakika döner dönmez ve elle saat değişince güncellenmesi.
