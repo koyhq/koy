@@ -1,3 +1,5 @@
+using Koy.Core.Dock.Items;
+
 namespace Koy.Core.Settings;
 
 /// <summary>
@@ -60,6 +62,13 @@ public sealed record AppSettings
         Displays.Monitors ??= new();
         Search.DisabledSources ??= [];
         QuickLaunch.Items ??= [];
+
+        // Üst sınır yükleme anında uygulanır: Normalize çağırmayan tüketici de 32'den fazla öğe görmesin.
+        // Sıra korunur, fazlası sondan atılır (Normalize'ın "ilk gelenler kalır" kuralıyla aynı).
+        var extra = DockItems.Items.Count - DockItemRules.MaxItemCount;
+        if (extra > 0)
+            DockItems.Items.RemoveRange(DockItemRules.MaxItemCount, extra);
+
         return this;
     }
 }
