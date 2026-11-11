@@ -82,6 +82,23 @@ public sealed class DockWindowGroupingTests
     }
 
     [Fact]
+    public void Undefined_mode_from_the_file_keeps_windows_separate()
+    {
+        var groups = DockWindowGrouping.Group(Sample, (DockGroupingMode)7, availableSlots: 0);
+
+        Assert.Equal(5, groups.Count);
+    }
+
+    [Fact]
+    public void Missing_process_name_reads_as_empty_in_every_mode()
+    {
+        DockWindowFact[] windows = [new(null!, 1, 1), new(null!, 1, 2)];
+
+        Assert.All(DockWindowGrouping.Group(windows, DockGroupingMode.Never, 0), g => Assert.Equal("", g.ProcessName));
+        Assert.Equal("", Assert.Single(DockWindowGrouping.Group(windows, DockGroupingMode.Always, 0)).ProcessName);
+    }
+
+    [Fact]
     public void Negative_slot_count_is_rejected()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>

@@ -36,15 +36,19 @@ public static class DockWindowGrouping
         ArgumentOutOfRangeException.ThrowIfNegative(availableSlots);
 
         // Yer varken gruplamak pencereleri gereksiz yere saklar; WhenSpaceRunsOut bu yüzden yalnız sığmayınca birleştirir.
-        var effective = mode == DockGroupingMode.WhenSpaceRunsOut
-            ? (windows.Count <= availableSlots ? DockGroupingMode.Never : DockGroupingMode.Always)
-            : mode;
+        // Dosyadan gelen tanımsız sayı (örn. 7) bugünkü davranışa, yani gruplamasıza düşer.
+        var group = mode switch
+        {
+            DockGroupingMode.Always => true,
+            DockGroupingMode.WhenSpaceRunsOut => windows.Count > availableSlots,
+            _ => false
+        };
 
         var groups = new List<DockWindowGroup>();
-        if (effective == DockGroupingMode.Never)
+        if (!group)
         {
             foreach (var w in windows)
-                groups.Add(new DockWindowGroup(w.ProcessName, [w.Handle]));
+                groups.Add(new DockWindowGroup(w.ProcessName ?? "", [w.Handle]));
             return groups;
         }
 
