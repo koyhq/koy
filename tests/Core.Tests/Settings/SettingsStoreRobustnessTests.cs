@@ -30,6 +30,17 @@ public class SettingsStoreRobustnessTests : IDisposable
     }
 
     [Fact]
+    public void Unknown_value_in_an_enum_list_drops_only_that_value()
+    {
+        var loaded = SettingsFile.Load("""
+            { "Version": 4, "Notch": { "HideInFullscreen": false, "HomeCards": ["Weather", "Gelecek", "Music"] } }
+            """);
+
+        Assert.False(loaded.Notch.HideInFullscreen);
+        Assert.Equal([Koy.Core.Notch.HomeCard.Weather, Koy.Core.Notch.HomeCard.Music], loaded.Notch.HomeCards);
+    }
+
+    [Fact]
     public void Null_sections_are_replaced_with_defaults()
     {
         var loaded = SettingsFile.Load("""{ "Version": 4, "Dock": null, "Notch": null, "DockItems": null }""");
