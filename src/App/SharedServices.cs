@@ -439,11 +439,11 @@ public sealed class SharedServices : IDisposable
             {
                 var store = new SettingsStore(SettingsStore.DefaultPath);
                 _quickLaunch = new QuickLaunchService(
-                    store.Load().QuickLaunchItems,
+                    store.Load().QuickLaunch.Items,
                     items =>
                     {
                         var settings = store.Load();
-                        settings.QuickLaunchItems = items.ToList();
+                        settings.QuickLaunch.Items = new ValueList<string>(items);
                         store.Save(settings);
                     },
                     new ShellActionService());

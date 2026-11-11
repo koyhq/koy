@@ -58,7 +58,7 @@ public static class ThemeManager
         Install(app);
         _last = settings;
 
-        var theme = ThemeSetting.Resolve(settings.Theme, systemUsesLightOverride ?? SystemUsesLightTheme());
+        var theme = ThemeSetting.Resolve(settings.Appearance.Theme, systemUsesLightOverride ?? SystemUsesLightTheme());
         Current = theme;
 
         var merged = app.Resources.MergedDictionaries;
@@ -83,7 +83,7 @@ public static class ThemeManager
             };
         }
 
-        if (ThemeSetting.Normalize(settings.Theme) == ThemeSetting.System)
+        if (settings.Appearance.Theme == AppTheme.System)
             WatchSystemTheme(app);
 
         Applied?.Invoke();
@@ -95,7 +95,7 @@ public static class ThemeManager
         o.Clear();
 
         // Köşeler
-        var r = CornerRadii.For(CornerSetting.Resolve(settings.CornerRadius));
+        var r = CornerRadii.For(CornerSetting.Resolve(settings.Appearance.CornerRadius));
         o["KoyRadiusWindow"] = new CornerRadius(r.Window);
         o["KoyRadiusWindowTop"] = new CornerRadius(Math.Max(0, r.Window - 1), Math.Max(0, r.Window - 1), 0, 0);
         o["KoyRadiusWindowBottomLeft"] = new CornerRadius(0, 0, 0, Math.Max(0, r.Window - 1));
@@ -104,7 +104,7 @@ public static class ThemeManager
         o["KoyRadiusSmall"] = new CornerRadius(r.Small);
 
         // Vurgu: Windows vurgusu ya da seçilen renk; varsayılan Koy mavisi tema sözlüğünden gelir.
-        string? accentHex = settings.UseWindowsAccent ? WindowsAccentHex() : settings.AccentColor;
+        string? accentHex = settings.Appearance.UseWindowsAccent ? WindowsAccentHex() : settings.Appearance.AccentColor;
         if (!string.IsNullOrWhiteSpace(accentHex))
         {
             var surface = palette["KoyBgRow"] is SolidColorBrush b ? ToHex(b.Color) : "#1F1F23";
@@ -126,7 +126,7 @@ public static class ThemeManager
         // satırlar duvar kağıdını hafifçe gösteren beyaz katman (koyu %5, açık %62). Okunabilirlik koruması açık duvar
         // kağıdında seviyeyi kendiliğinden yükseltir (MaterialState).
         var windowLevel = MaterialState.ForWindow(settings, theme);
-        if (windowLevel != MaterialSetting.Solid)
+        if (windowLevel != MaterialLevel.Solid)
         {
             // Başlık çubuğu ve kenar menüsü (KoyBgShell) içerikle aynı tonda: demoda kendi zeminleri yok, pencere tek
             // yüzey. Ayrı tonlar akriliğin üstünde iki farklı gri gibi duruyordu (proje sahibi, 2026-11-11).
@@ -149,7 +149,7 @@ public static class ThemeManager
 
         // Açık çentik camlaşınca kartlar opak gri yerine beyaz katman olur (CamCentik.dc.html: kart %6, vurgulu %9);
         // opak zeminde bu değerler bugünkü #141416 / #1F1F23 ile neredeyse aynı tonu verir.
-        if (MaterialState.ForNotch(settings) != MaterialSetting.Solid)
+        if (MaterialState.ForNotch(settings) != MaterialLevel.Solid)
         {
             o["KoyNotchCard"] = new SolidColorBrush(Color.FromArgb(0x0F, 0xFF, 0xFF, 0xFF));
             o["KoyNotchChip"] = new SolidColorBrush(Color.FromArgb(0x17, 0xFF, 0xFF, 0xFF));
@@ -192,7 +192,7 @@ public static class ThemeManager
                 return;
             app.Dispatcher.BeginInvoke(() =>
             {
-                if (_last is { } s && (ThemeSetting.Normalize(s.Theme) == ThemeSetting.System || s.UseWindowsAccent))
+                if (_last is { } s && (s.Appearance.Theme == AppTheme.System || s.Appearance.UseWindowsAccent))
                     Apply(app, s);
             });
         };

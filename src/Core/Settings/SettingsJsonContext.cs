@@ -1,21 +1,37 @@
 using System.Text.Json.Serialization;
 using Koy.Core.Display;
 using Koy.Core.Dock;
+using Koy.Core.Notch;
+using Koy.Core.Tray;
+using Koy.Core.Dock.Items;
 
 namespace Koy.Core.Settings;
 
 // Kaynak üreticili serileştirme: yansıma yok, açılış ve bellek dostu.
 [JsonSourceGenerationOptions(WriteIndented = true, UseStringEnumConverter = true)]
 [JsonSerializable(typeof(AppSettings))]
-[JsonSerializable(typeof(DockStyleMode))]
-[JsonSerializable(typeof(DockIconAlignment))]
-[JsonSerializable(typeof(DockProximityMode))]
-[JsonSerializable(typeof(DockStartIcon))]
-[JsonSerializable(typeof(Koy.Core.Search.SearchHistoryMode))]
-[JsonSerializable(typeof(Koy.Core.Voice.VoiceHarnessType))]
-[JsonSerializable(typeof(Koy.Core.Voice.VoiceClaudePermission))]
-[JsonSerializable(typeof(List<string>))]
+[JsonSerializable(typeof(GeneralSettings))]
+[JsonSerializable(typeof(MotionSettings))]
+[JsonSerializable(typeof(AppearanceSettings))]
+[JsonSerializable(typeof(DockSettings))]
+[JsonSerializable(typeof(DockItemsSettings))]
+[JsonSerializable(typeof(NotchSettings))]
+[JsonSerializable(typeof(MusicSettings))]
+[JsonSerializable(typeof(DisplaysSettings))]
+[JsonSerializable(typeof(ShortcutsSettings))]
+[JsonSerializable(typeof(VoiceSettings))]
+[JsonSerializable(typeof(SearchSettings))]
+[JsonSerializable(typeof(FocusSettings))]
+[JsonSerializable(typeof(WeatherSettings))]
+[JsonSerializable(typeof(ClipboardSettings))]
+[JsonSerializable(typeof(QuickLaunchSettings))]
+[JsonSerializable(typeof(ValueList<string>))]
+[JsonSerializable(typeof(ValueList<DockFolder>))]
+[JsonSerializable(typeof(ValueList<HomeCard>))]
+[JsonSerializable(typeof(ValueDictionary<MonitorSettings>))]
+[JsonSerializable(typeof(ValueDictionary<string>))]
 [JsonSerializable(typeof(DockFolder))]
-[JsonSerializable(typeof(List<DockFolder>))]
-[JsonSerializable(typeof(Dictionary<string, MonitorSettings>))]
+[JsonSerializable(typeof(ValueDictionary<TrayIconVisibility>))]
+[JsonSerializable(typeof(ValueList<DockItemEntry>))]
+[JsonSerializable(typeof(DockItemEntry))]
 internal sealed partial class SettingsJsonContext : JsonSerializerContext;

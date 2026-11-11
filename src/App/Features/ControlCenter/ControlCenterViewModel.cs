@@ -52,11 +52,12 @@ public sealed partial class ControlCenterViewModel : ObservableObject, IDisposab
             return;
 
         TileOrder = order.ToList();
-        _settings.ControlCenterLayout = order.ToList();
+        _settings.Notch.ControlCenterLayout = new ValueList<string>(order);
         try
         {
             var store = _store ?? new SettingsStore(SettingsStore.DefaultPath);
-            store.Save(store.Load() with { ControlCenterLayout = order.ToList() });
+            var current = store.Load();
+            store.Save(current with { Notch = current.Notch with { ControlCenterLayout = new ValueList<string>(order) } });
         }
         catch (Exception ex)
         {
@@ -141,7 +142,7 @@ public sealed partial class ControlCenterViewModel : ObservableObject, IDisposab
         BluetoothDevicesViewModel? bluetoothDevices = null)
     {
         _store = store;
-        TileOrder = ControlCenterTiles.Resolve(settings.ControlCenterLayout);
+        TileOrder = ControlCenterTiles.Resolve(settings.Notch.ControlCenterLayout);
         _audioFactory = audioFactory;
         _radioFactory = radioFactory;
         _radioRelease = radioRelease;

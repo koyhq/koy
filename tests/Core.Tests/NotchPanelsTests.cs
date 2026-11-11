@@ -8,7 +8,7 @@ public sealed class NotchPanelsTests
     [Fact]
     public void DefaultSettings_EnableAllPanels_InTabOrder()
     {
-        Assert.Equal(NotchPanels.Order, NotchPanels.ParseEnabled(new AppSettings().EnabledPanels));
+        Assert.Equal(NotchPanels.Order, NotchPanels.ParseEnabled(new AppSettings().Notch.EnabledPanels));
     }
 
     [Fact]
@@ -78,10 +78,10 @@ public sealed class NotchPanelsTests
     [Fact]
     public void DefaultSettings_IncludeClipboardAndSystem()
     {
-        var keys = new AppSettings().EnabledPanels;
+        var keys = new AppSettings().Notch.EnabledPanels;
         Assert.Contains("clipboard", keys);
         Assert.Contains("system", keys);
-        Assert.True(new AppSettings().ClipboardHistoryEnabled);
+        Assert.True(new AppSettings().Clipboard.HistoryEnabled);
     }
 
     [Fact]
@@ -96,11 +96,11 @@ public sealed class NotchPanelsTests
 
             var loaded = new SettingsStore(path).Load();
 
-            Assert.Equal(["home", "focus", "shelf", "controlcenter"], loaded.EnabledPanels);
-            Assert.True(loaded.ClipboardHistoryEnabled);
+            Assert.Equal(["home", "focus", "shelf", "controlcenter"], loaded.Notch.EnabledPanels);
+            Assert.True(loaded.Clipboard.HistoryEnabled);
             Assert.Equal(
                 [NotchPanel.Home, NotchPanel.Focus, NotchPanel.Shelf, NotchPanel.ControlCenter],
-                NotchPanels.ParseEnabled(loaded.EnabledPanels, loaded.ClipboardHistoryEnabled));
+                NotchPanels.ParseEnabled(loaded.Notch.EnabledPanels, loaded.Clipboard.HistoryEnabled));
         }
         finally
         {

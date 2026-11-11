@@ -160,7 +160,7 @@ public sealed partial class DisplaysViewModel(SettingsStore store) : ObservableO
         }
 
         var settings = store.Load();
-        _newScreenMode = settings.NewScreenDefault;
+        _newScreenMode = settings.Displays.NewScreenDefault;
         OnPropertyChanged(nameof(NewScreenBoth));
         OnPropertyChanged(nameof(NewScreenNotchOnly));
         OnPropertyChanged(nameof(NewScreenNone));
@@ -168,7 +168,7 @@ public sealed partial class DisplaysViewModel(SettingsStore store) : ObservableO
         var layout = DisplaySchema.Compute(_monitors, SchemaMaxWidth, SchemaMaxHeight);
         var byId = _monitors.ToDictionary(m => m.Id, StringComparer.OrdinalIgnoreCase);
 
-        var assignments = MonitorPolicy.Resolve(settings.Monitors, settings.NewScreenDefault, _monitors);
+        var assignments = MonitorPolicy.Resolve(settings.Displays.Monitors, settings.Displays.NewScreenDefault, _monitors);
 
         Cards.Clear();
         foreach (var tile in layout.Tiles)
@@ -229,7 +229,7 @@ public sealed partial class DisplaysViewModel(SettingsStore store) : ObservableO
             }
 
             var settings = store.Load();
-            var assignment = MonitorPolicy.Resolve(settings.Monitors, settings.NewScreenDefault, [card.Monitor])[0];
+            var assignment = MonitorPolicy.Resolve(settings.Displays.Monitors, settings.Displays.NewScreenDefault, [card.Monitor])[0];
             NotchOn = assignment.NotchEnabled;
             DockOn = assignment.DockEnabled;
 
@@ -272,7 +272,10 @@ public sealed partial class DisplaysViewModel(SettingsStore store) : ObservableO
         var current = store.Load();
         store.Save(current with
         {
-            Monitors = MonitorPolicy.Update(current.Monitors, current.NewScreenDefault, monitor, change)
+            Displays = current.Displays with
+            {
+                Monitors = MonitorPolicy.Update(current.Displays.Monitors, current.Displays.NewScreenDefault, monitor, change)
+            }
         });
     }
 
@@ -290,7 +293,8 @@ public sealed partial class DisplaysViewModel(SettingsStore store) : ObservableO
         if (_loading)
             return;
 
-        store.Save(store.Load() with { NewScreenDefault = mode });
+        var current = store.Load();
+        store.Save(current with { Displays = current.Displays with { NewScreenDefault = mode } });
 
         // Çalışan özellikler ayarı kurulurken okur; kayıtsız ekran varsa yeni varsayılan hemen uygulansın.
         if (Application.Current is App app)

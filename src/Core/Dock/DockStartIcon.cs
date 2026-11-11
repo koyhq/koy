@@ -64,5 +64,5 @@ public static class DockStartIconResolver
     }
 
     public static DockStartIconSource Resolve(Koy.Core.Settings.AppSettings settings, Func<string, bool>? fileExists = null)
-        => Resolve(settings.DockStartIcon, settings.DockStartIconPath, fileExists);
+        => Resolve(settings.Dock.StartIcon, settings.Dock.StartIconPath, fileExists);
 }

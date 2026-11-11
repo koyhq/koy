@@ -13,9 +13,9 @@ public static class WeatherLocationPolicy
 
     /// <summary>Hava durumu gösterilebilir mi: kaynak var ve koordinat geçerli (0,0 "boş" sayılır).</summary>
     public static bool HasLocation(AppSettings settings) =>
-        settings.WeatherLocationSource != WeatherLocationSource.None &&
-        OpenMeteoParser.IsValidCoordinate(settings.WeatherLatitude, settings.WeatherLongitude) &&
-        !(settings.WeatherLatitude == 0 && settings.WeatherLongitude == 0);
+        settings.Weather.LocationSource != WeatherLocationSource.None &&
+        OpenMeteoParser.IsValidCoordinate(settings.Weather.Latitude, settings.Weather.Longitude) &&
+        !(settings.Weather.Latitude == 0 && settings.Weather.Longitude == 0);
 
     /// <summary>
     /// Açılışta cihaz konumu sorulsun mu: kullanıcı izin verdiyse ve koordinat henüz cihazdan alınmamışsa ya da
@@ -23,13 +23,13 @@ public static class WeatherLocationPolicy
     /// </summary>
     public static bool ShouldRefreshDeviceLocation(AppSettings settings, DateTimeOffset now)
     {
-        if (!settings.WeatherUseLocation)
+        if (!settings.Weather.UseLocation)
             return false;
 
-        if (settings.WeatherLocationSource != WeatherLocationSource.Device || !HasLocation(settings))
+        if (settings.Weather.LocationSource != WeatherLocationSource.Device || !HasLocation(settings))
             return true;
 
-        var updated = DateTimeOffset.FromUnixTimeSeconds(Math.Max(0, settings.WeatherLocationUpdatedUnix));
+        var updated = DateTimeOffset.FromUnixTimeSeconds(Math.Max(0, settings.Weather.LocationUpdatedUnix));
         var age = now - updated;
         return age < TimeSpan.Zero || age >= DeviceRefreshInterval;
     }
@@ -42,23 +42,29 @@ public static class WeatherLocationPolicy
 
         return settings with
         {
-            WeatherLocationSource = WeatherLocationSource.Device,
-            WeatherLatitude = result.Latitude,
-            WeatherLongitude = result.Longitude,
-            WeatherCity = "",
-            WeatherLocationUpdatedUnix = now.ToUnixTimeSeconds()
+            Weather = settings.Weather with
+            {
+                LocationSource = WeatherLocationSource.Device,
+                Latitude = result.Latitude,
+                Longitude = result.Longitude,
+                City = "",
+                LocationUpdatedUnix = now.ToUnixTimeSeconds()
+            }
         };
     }
 
     /// <summary>Şehir seçildi: cihaz konumu kullanımı kapanır (açık bir seçim, konumdan önce gelir).</summary>
     public static AppSettings ApplyCity(AppSettings settings, GeoPlace place, DateTimeOffset now) => settings with
     {
-        WeatherLocationSource = WeatherLocationSource.City,
-        WeatherUseLocation = false,
-        WeatherLatitude = place.Latitude,
-        WeatherLongitude = place.Longitude,
-        WeatherCity = place.DisplayName,
-        WeatherLocationUpdatedUnix = now.ToUnixTimeSeconds()
+        Weather = settings.Weather with
+        {
+            LocationSource = WeatherLocationSource.City,
+            UseLocation = false,
+            Latitude = place.Latitude,
+            Longitude = place.Longitude,
+            City = place.DisplayName,
+            LocationUpdatedUnix = now.ToUnixTimeSeconds()
+        }
     };
 
     /// <summary>
@@ -68,20 +74,22 @@ public static class WeatherLocationPolicy
     public static AppSettings SetUseLocation(AppSettings settings, bool use)
     {
         if (use)
-            return settings with { WeatherUseLocation = true };
+            return settings with { Weather = settings.Weather with { UseLocation = true } };
 
-        return settings.WeatherLocationSource == WeatherLocationSource.Device
-            ? Cleared(settings) with { WeatherUseLocation = false }
-            : settings with { WeatherUseLocation = false };
+        var baseSettings = settings.Weather.LocationSource == WeatherLocationSource.Device ? Cleared(settings) : settings;
+        return baseSettings with { Weather = baseSettings.Weather with { UseLocation = false } };
     }
 
     /// <summary>Konum bilgisini siler; hava durumu gösterilmez.</summary>
     public static AppSettings Cleared(AppSettings settings) => settings with
     {
-        WeatherLocationSource = WeatherLocationSource.None,
-        WeatherLatitude = 0,
-        WeatherLongitude = 0,
-        WeatherCity = "",
-        WeatherLocationUpdatedUnix = 0
+        Weather = settings.Weather with
+        {
+            LocationSource = WeatherLocationSource.None,
+            Latitude = 0,
+            Longitude = 0,
+            City = "",
+            LocationUpdatedUnix = 0
+        }
     };
 }

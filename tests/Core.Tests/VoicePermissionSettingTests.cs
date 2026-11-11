@@ -7,7 +7,7 @@ public class VoicePermissionSettingTests
 {
     [Fact]
     public void Default_permission_is_read_only() =>
-        Assert.Equal(VoiceClaudePermission.Default, new AppSettings().VoiceClaudePermission);
+        Assert.Equal(VoiceClaudePermission.Default, new AppSettings().Voice.ClaudePermission);
 
     [Fact]
     public void Settings_file_without_the_key_stays_read_only()
@@ -22,7 +22,7 @@ public class VoicePermissionSettingTests
 
             var loaded = new SettingsStore(path).Load();
 
-            Assert.Equal(VoiceClaudePermission.Default, loaded.VoiceClaudePermission);
+            Assert.Equal(VoiceClaudePermission.Default, loaded.Voice.ClaudePermission);
         }
         finally
         {
@@ -40,13 +40,13 @@ public class VoicePermissionSettingTests
         try
         {
             var store = new SettingsStore(Path.Combine(dir, "settings.json"));
-            var settings = new AppSettings { VoiceClaudePermission = permission, VoiceModel = "sonnet" };
+            var settings = new AppSettings { Voice = new VoiceSettings { ClaudePermission = permission, Model = "sonnet" } };
 
             store.Save(settings);
             var loaded = store.Load();
 
-            Assert.Equal(permission, loaded.VoiceClaudePermission);
-            Assert.Equal("sonnet", loaded.VoiceModel);
+            Assert.Equal(permission, loaded.Voice.ClaudePermission);
+            Assert.Equal("sonnet", loaded.Voice.Model);
             Assert.Equal(settings, loaded);
         }
         finally

@@ -12,6 +12,7 @@ using Koy.Core.Settings;
 using Koy.Core.Uninstall;
 using Koy.Core.Updates;
 using Koy.Core.Visibility;
+using Koy.Core.Weather;
 using Koy.Core.Voice;
 using Koy.App.Features.Notch;
 using Koy.Core.Notifications;
@@ -51,7 +52,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _autoCheckUpdates = true;
 
     [ObservableProperty]
-    private string _updateChannel = "Kararlı";
+    private UpdateChannel _updateChannel = UpdateChannel.Stable;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(LastCheckText), nameof(AboutStatusText), nameof(CheckButtonText), nameof(CanCheckUpdates))]
@@ -93,10 +94,10 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _notchHideInFullscreen = true;
 
     [ObservableProperty]
-    private int _idleDisplayMode; // 0: Saat ve pil, 1: Yalnız saat, 2: Hiçbiri
+    private IdleDisplayMode _idleDisplayMode;
 
     [ObservableProperty]
-    private string _notchStyle = Koy.Core.Notch.NotchStyle.Pinned; // "Yapışık" ya da "Yüzen"
+    private NotchStyleMode _notchStyle = NotchStyleMode.Pinned;
 
     [ObservableProperty]
     private bool _musicShowWaveform = true;
@@ -105,7 +106,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _musicLyricsEnabled;
 
     [ObservableProperty]
-    private string _musicCardStyle = MusicCardStyleSetting.Tinted;
+    private MusicCardStyle _musicCardStyle = MusicCardStyle.Tinted;
 
     [ObservableProperty]
     private bool _showVolumeOsd = true;
@@ -153,7 +154,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _clipboardHistoryEnabled = true;
 
     [ObservableProperty]
-    private int _notchOpenBehavior = 1; // 0: Üzerine gelince, 1: Tıklayınca
+    private NotchOpenBehavior _notchOpenBehavior = NotchOpenBehavior.Click;
 
     // --- DOCK ---
     [ObservableProperty]
@@ -194,7 +195,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _dockHoverMagnify = true;
 
     [ObservableProperty]
-    private int _dockIndicatorStyle; // 0: Nokta, 1: Çizgi
+    private DockIndicatorStyle _dockIndicatorStyle;
 
     [ObservableProperty]
     private bool _dockShowBadges = true;
@@ -280,7 +281,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     // --- GÖRÜNÜM ---
     [ObservableProperty]
-    private string _theme = "Dark";
+    private AppTheme _theme = AppTheme.Dark;
 
     [ObservableProperty]
     private string _accentColor = "#3B82F6";
@@ -289,7 +290,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _useWindowsAccent;
 
     [ObservableProperty]
-    private string _material = "Katı";
+    private MaterialLevel _material = MaterialLevel.Solid;
 
     /// <summary>Okunabilirlik koruması: açık duvar kağıdında saydam malzeme daha opak seviyeye çıkar.</summary>
     [ObservableProperty]
@@ -303,17 +304,17 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private double _cornerRadius = 12.0;
 
     [ObservableProperty]
-    private string _animationSpeed = "Normal";
+    private AnimationSpeed _animationSpeed = AnimationSpeed.Normal;
 
     [ObservableProperty]
     private bool _respectReduceMotion = true;
 
     // --- KISAYOLLAR ---
     [ObservableProperty]
-    private int _wheelAction; // 0: Panel değiştir, 1: Ses
+    private WheelAction _wheelAction;
 
     [ObservableProperty]
-    private int _middleClickAction; // 0: Yeni pencere, 1: Kapat
+    private MiddleClickAction _middleClickAction;
 
     // --- PERFORMANS ---
     [ObservableProperty]
@@ -338,7 +339,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _batterySaverReduceMotion = true;
 
     [ObservableProperty]
-    private string _weatherRefreshInterval = "30m"; // 30m, 1h, startup
+    private WeatherRefreshInterval _weatherRefreshInterval = WeatherRefreshInterval.Every30Minutes;
 
     [ObservableProperty]
     private int _pomodoroWorkMinutes = 25;
@@ -479,88 +480,88 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             var s = _store.Load();
 
             RunAtStartup = StartupService.IsEnabled;
-            HideWindowsTaskbar = s.HideWindowsTaskbar;
-            Language = s.Language;
-            AutoCheckUpdates = s.AutoCheckUpdates;
-            UpdateChannel = s.UpdateChannel;
+            HideWindowsTaskbar = s.Dock.HideWindowsTaskbar;
+            Language = s.General.Language;
+            AutoCheckUpdates = s.General.AutoCheckUpdates;
+            UpdateChannel = s.General.UpdateChannel;
 
-            NotchEnabled = s.NotchEnabled;
-            NotchVisibility = s.NotchVisibility;
-            DockEnabled = s.DockEnabled;
-            DockStyle = s.DockStyle;
-            DockIconAlignment = s.DockIconAlignment;
-            DockProximity = s.DockProximity;
-            DockHideInFullscreen = s.DockHideInFullscreen;
-            DockEdgeReveal = s.DockEdgeReveal;
-            DockHoverMagnify = s.DockHoverMagnify;
-            DockShowStartButton = s.DockShowStartButton;
-            DockStartIcon = s.DockStartIcon;
-            DockStartIconPath = s.DockStartIconPath ?? "";
-            DockShowFolders = s.DockShowFolders;
-            DockShowRecents = s.DockShowRecents;
-            DockShowTray = s.DockShowTray;
-            DockSmallTray = s.DockSmallTray;
-            DockShowBadges = s.DockShowBadges;
-            DockThumbnailPreview = s.DockThumbnailPreview;
-            DockThumbnailDelayMs = s.DockThumbnailDelayMs;
-            DockDodgeDelayMs = s.DockDodgeDelayMs;
-            DockIconSize = s.DockIconSize > 0 ? s.DockIconSize : 28.0;
-            DockIndicatorStyle = s.DockIndicatorStyle;
+            NotchEnabled = s.Notch.Enabled;
+            NotchVisibility = s.Notch.Visibility;
+            DockEnabled = s.Dock.Enabled;
+            DockStyle = s.Dock.Style;
+            DockIconAlignment = s.Dock.IconAlignment;
+            DockProximity = s.Dock.Proximity;
+            DockHideInFullscreen = s.Dock.HideInFullscreen;
+            DockEdgeReveal = s.Dock.EdgeReveal;
+            DockHoverMagnify = s.Dock.HoverMagnify;
+            DockShowStartButton = s.Dock.ShowStartButton;
+            DockStartIcon = s.Dock.StartIcon;
+            DockStartIconPath = s.Dock.StartIconPath ?? "";
+            DockShowFolders = s.Dock.ShowFolders;
+            DockShowRecents = s.Dock.ShowRecents;
+            DockShowTray = s.Dock.ShowTray;
+            DockSmallTray = s.Dock.SmallTray;
+            DockShowBadges = s.Dock.ShowBadges;
+            DockThumbnailPreview = s.Dock.ThumbnailPreview;
+            DockThumbnailDelayMs = s.Dock.ThumbnailDelayMs;
+            DockDodgeDelayMs = s.Dock.DodgeDelayMs;
+            DockIconSize = s.Dock.IconSize > 0 ? s.Dock.IconSize : 28.0;
+            DockIndicatorStyle = s.Dock.IndicatorStyle;
             // Tam genişlikte seçilemeyen mod ayar ekranında geçerli karşılığıyla görünür (çalışma anındaki eşlemeyle aynı).
             DockProximity = DockProximityMapping.Effective(DockStyle, DockProximity);
 
-            NotchHideInFullscreen = s.NotchHideInFullscreen;
-            ShowVolumeOsd = s.ShowVolumeOsd;
-            ShowBrightnessOsd = s.ShowBrightnessOsd;
-            ShowPrivacyIndicator = s.ShowPrivacyIndicator;
-            NotchShowNotifications = s.NotchShowNotifications;
-            NotchNotificationsHideBody = s.NotchNotificationsHideBody;
-            MusicShowWaveform = s.MusicShowWaveform;
-            MusicCardStyle = MusicCardStyleSetting.Normalize(s.MusicCardStyle);
-            MusicLyricsEnabled = s.MusicLyricsEnabled;
-            IdleDisplayMode = s.IdleDisplayMode;
-            NotchStyle = Koy.Core.Notch.NotchStyle.Normalize(s.NotchStyle);
-            NotchOpenBehavior = s.NotchOpenBehavior;
+            NotchHideInFullscreen = s.Notch.HideInFullscreen;
+            ShowVolumeOsd = s.Notch.ShowVolumeOsd;
+            ShowBrightnessOsd = s.Notch.ShowBrightnessOsd;
+            ShowPrivacyIndicator = s.Notch.ShowPrivacyIndicator;
+            NotchShowNotifications = s.Notch.ShowNotifications;
+            NotchNotificationsHideBody = s.Notch.NotificationsHideBody;
+            MusicShowWaveform = s.Music.ShowWaveform;
+            MusicCardStyle = s.Music.CardStyle;
+            MusicLyricsEnabled = s.Music.LyricsEnabled;
+            IdleDisplayMode = s.Notch.IdleDisplay;
+            NotchStyle = s.Notch.Style;
+            NotchOpenBehavior = s.Notch.OpenBehavior;
 
             // Eski sürümlerin karışık değerleri ("Koyu", 18 vb.) seçenek değerlerine indirilir.
-            Theme = ThemeSetting.Normalize(s.Theme);
-            AccentColor = s.AccentColor ?? AccentPalette.DefaultHex;
-            UseWindowsAccent = s.UseWindowsAccent;
-            Material = MaterialSetting.Normalize(s.Material);
-            MaterialReadabilityGuard = s.MaterialReadabilityGuard;
-            NotchFollowsMaterial = s.NotchFollowsMaterial;
-            CornerRadius = CornerSetting.ToStored(CornerSetting.Resolve(s.CornerRadius));
-            AnimationSpeed = MotionPolicy.NormalizeSpeed(s.AnimationSpeed);
-            RespectReduceMotion = s.RespectReduceMotion;
-            BatterySaverReduceMotion = s.BatterySaverReduceMotion;
-            WeatherRefreshInterval = s.WeatherRefreshInterval;
-            PomodoroWorkMinutes = s.PomodoroWorkMinutes;
-            PomodoroShortBreakMinutes = s.PomodoroShortBreakMinutes;
-            PomodoroLongBreakMinutes = s.PomodoroLongBreakMinutes;
+            Theme = s.Appearance.Theme;
+            AccentColor = s.Appearance.AccentColor ?? AccentPalette.DefaultHex;
+            UseWindowsAccent = s.Appearance.UseWindowsAccent;
+            Material = s.Appearance.Material;
+            MaterialReadabilityGuard = s.Appearance.MaterialReadabilityGuard;
+            NotchFollowsMaterial = s.Notch.FollowsMaterial;
+            CornerRadius = CornerSetting.ToStored(CornerSetting.Resolve(s.Appearance.CornerRadius));
+            AnimationSpeed = s.Appearance.AnimationSpeed;
+            RespectReduceMotion = s.Appearance.RespectReduceMotion;
+            BatterySaverReduceMotion = s.Appearance.BatterySaverReduceMotion;
+            WeatherRefreshInterval = s.Weather.RefreshInterval;
+            PomodoroWorkMinutes = s.Focus.PomodoroWorkMinutes;
+            PomodoroShortBreakMinutes = s.Focus.PomodoroShortBreakMinutes;
+            PomodoroLongBreakMinutes = s.Focus.PomodoroLongBreakMinutes;
 
-            VoiceHarness = s.VoiceHarness.ToString();
-            VoiceClaudePermission = s.VoiceClaudePermission.ToString();
-            VoiceModel = string.IsNullOrWhiteSpace(s.VoiceModel) ? "default" : s.VoiceModel;
-            VoiceCustomCommand = s.VoiceCustomCommand;
-            VoiceWorkingDirectory = s.VoiceWorkingDirectory;
-            VoiceTimeoutSeconds = s.VoiceTimeoutSeconds;
+            VoiceHarness = s.Voice.Harness.ToString();
+            VoiceClaudePermission = s.Voice.ClaudePermission.ToString();
+            VoiceModel = string.IsNullOrWhiteSpace(s.Voice.Model) ? "default" : s.Voice.Model;
+            VoiceCustomCommand = s.Voice.CustomCommand;
+            VoiceWorkingDirectory = s.Voice.WorkingDirectory;
+            VoiceTimeoutSeconds = s.Voice.TimeoutSeconds;
 
-            WheelAction = s.WheelAction;
-            MiddleClickAction = s.MiddleClickAction;
+            WheelAction = s.Notch.WheelAction;
+            MiddleClickAction = s.Dock.MiddleClickAction;
             Shortcuts.Load(s);
             Weather.Load(s);
 
-            var panels = NotchPanels.ParseEnabled(s.EnabledPanels ?? ["home", "focus", "calendar", "shelf", "clipboard", "system", "controlcenter"]);
+            var panels = NotchPanels.ParseEnabled(s.Notch.EnabledPanels ?? ["home", "focus", "calendar", "shelf", "clipboard", "system", "controlcenter"]);
             PanelFocus = panels.Contains(NotchPanel.Focus);
             PanelShelf = panels.Contains(NotchPanel.Shelf);
             PanelCalendar = panels.Contains(NotchPanel.Calendar);
             PanelControlCenter = panels.Contains(NotchPanel.ControlCenter);
             PanelClipboard = panels.Contains(NotchPanel.Clipboard);
             PanelSystem = panels.Contains(NotchPanel.System);
-            ClipboardHistoryEnabled = s.ClipboardHistoryEnabled;
-            SearchRetainPrior = s.SearchRetainPrior;
-            SearchHistoryMode = s.SearchHistoryMode;
-            LoadSearchSources(s.SearchDisabledSources);
+            ClipboardHistoryEnabled = s.Clipboard.HistoryEnabled;
+            SearchRetainPrior = s.Search.RetainPrior;
+            SearchHistoryMode = s.Search.HistoryMode;
+            LoadSearchSources(s.Search.DisabledSources);
 
             RefreshMemory();
 
@@ -599,8 +600,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     public void SyncFromDisk()
     {
         var disk = _store.Load();
-        var reconciled = FeatureStateSyncPolicy.Reconcile(disk, disk.NotchEnabled, disk.DockEnabled);
-        SyncExternalState(reconciled.NotchEnabled, reconciled.DockEnabled);
+        var reconciled = FeatureStateSyncPolicy.Reconcile(disk, disk.Notch.Enabled, disk.Dock.Enabled);
+        SyncExternalState(reconciled.Notch.Enabled, reconciled.Dock.Enabled);
     }
 
     public void RefreshMemory()
@@ -763,71 +764,101 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         var current = _store.Load();
         var updated = current with
         {
-            Language = Language,
-            HideWindowsTaskbar = HideWindowsTaskbar,
-            AutoCheckUpdates = AutoCheckUpdates,
-            UpdateChannel = UpdateChannel,
-            NotchEnabled = NotchEnabled,
-            NotchVisibility = NotchVisibility,
-            DockEnabled = DockEnabled,
-            DockStyle = DockStyle,
-            DockIconAlignment = DockIconAlignment,
-            DockProximity = DockProximity,
-            DockHideInFullscreen = DockHideInFullscreen,
-            DockEdgeReveal = DockEdgeReveal,
-            DockHoverMagnify = DockHoverMagnify,
-            DockShowStartButton = DockShowStartButton,
-            DockStartIcon = DockStartIcon,
-            DockStartIconPath = DockStartIconPath,
-            DockShowFolders = DockShowFolders,
-            DockShowRecents = DockShowRecents,
-            DockShowTray = DockShowTray,
-            DockSmallTray = DockSmallTray,
-            DockShowBadges = DockShowBadges,
-            DockThumbnailPreview = DockThumbnailPreview,
-            DockThumbnailDelayMs = DockThumbnailDelayMs,
-            DockDodgeDelayMs = DockDodgeDelayMs,
-            DockIconSize = DockIconSize,
-            DockIndicatorStyle = DockIndicatorStyle,
-            NotchHideInFullscreen = NotchHideInFullscreen,
-            ShowVolumeOsd = ShowVolumeOsd,
-            ShowBrightnessOsd = ShowBrightnessOsd,
-            ShowPrivacyIndicator = ShowPrivacyIndicator,
-            NotchShowNotifications = NotchShowNotifications,
-            NotchNotificationsHideBody = NotchNotificationsHideBody,
-            MusicShowWaveform = MusicShowWaveform,
-            MusicCardStyle = MusicCardStyle,
-            MusicLyricsEnabled = MusicLyricsEnabled,
-            IdleDisplayMode = IdleDisplayMode,
-            NotchStyle = NotchStyle,
-            NotchOpenBehavior = NotchOpenBehavior,
-            Theme = Theme,
-            AccentColor = AccentColor,
-            UseWindowsAccent = UseWindowsAccent,
-            Material = Material,
-            MaterialReadabilityGuard = MaterialReadabilityGuard,
-            NotchFollowsMaterial = NotchFollowsMaterial,
-            CornerRadius = CornerRadius,
-            AnimationSpeed = AnimationSpeed,
-            RespectReduceMotion = RespectReduceMotion,
-            BatterySaverReduceMotion = BatterySaverReduceMotion,
-            WeatherRefreshInterval = WeatherRefreshInterval,
-            PomodoroWorkMinutes = PomodoroWorkMinutes,
-            PomodoroShortBreakMinutes = PomodoroShortBreakMinutes,
-            PomodoroLongBreakMinutes = PomodoroLongBreakMinutes,
-            VoiceHarness = Enum.TryParse<VoiceHarnessType>(VoiceHarness, out var vh) ? vh : VoiceHarnessType.Claude,
-            VoiceClaudePermission = Enum.TryParse<VoiceClaudePermission>(VoiceClaudePermission, out var vp) ? vp : Koy.Core.Voice.VoiceClaudePermission.Default,
-            VoiceModel = string.IsNullOrWhiteSpace(VoiceModel) ? "default" : VoiceModel,
-            VoiceCustomCommand = VoiceCustomCommand,
-            VoiceWorkingDirectory = VoiceWorkingDirectory,
-            VoiceTimeoutSeconds = VoiceTimeoutSeconds,
-            WheelAction = WheelAction,
-            MiddleClickAction = MiddleClickAction,
-            ClipboardHistoryEnabled = ClipboardHistoryEnabled,
-            SearchRetainPrior = SearchRetainPrior,
-            SearchHistoryMode = SearchHistoryMode,
-            SearchDisabledSources = SearchSources.Where(s => !s.IsEnabled).Select(s => s.Id).ToList(),
-            EnabledPanels = enabledPanels
+            General = current.General with
+            {
+                Language = Language,
+                AutoCheckUpdates = AutoCheckUpdates,
+                UpdateChannel = UpdateChannel
+            },
+            Dock = current.Dock with
+            {
+                HideWindowsTaskbar = HideWindowsTaskbar,
+                Enabled = DockEnabled,
+                Style = DockStyle,
+                IconAlignment = DockIconAlignment,
+                Proximity = DockProximity,
+                HideInFullscreen = DockHideInFullscreen,
+                EdgeReveal = DockEdgeReveal,
+                HoverMagnify = DockHoverMagnify,
+                ShowStartButton = DockShowStartButton,
+                StartIcon = DockStartIcon,
+                StartIconPath = DockStartIconPath,
+                ShowFolders = DockShowFolders,
+                ShowRecents = DockShowRecents,
+                ShowTray = DockShowTray,
+                SmallTray = DockSmallTray,
+                ShowBadges = DockShowBadges,
+                ThumbnailPreview = DockThumbnailPreview,
+                ThumbnailDelayMs = DockThumbnailDelayMs,
+                DodgeDelayMs = DockDodgeDelayMs,
+                IconSize = DockIconSize,
+                IndicatorStyle = DockIndicatorStyle,
+                MiddleClickAction = MiddleClickAction
+            },
+            Notch = current.Notch with
+            {
+                Enabled = NotchEnabled,
+                Visibility = NotchVisibility,
+                HideInFullscreen = NotchHideInFullscreen,
+                ShowVolumeOsd = ShowVolumeOsd,
+                ShowBrightnessOsd = ShowBrightnessOsd,
+                ShowPrivacyIndicator = ShowPrivacyIndicator,
+                ShowNotifications = NotchShowNotifications,
+                NotificationsHideBody = NotchNotificationsHideBody,
+                IdleDisplay = IdleDisplayMode,
+                Style = NotchStyle,
+                OpenBehavior = NotchOpenBehavior,
+                FollowsMaterial = NotchFollowsMaterial,
+                WheelAction = WheelAction,
+                EnabledPanels = new ValueList<string>(enabledPanels)
+            },
+            Music = current.Music with
+            {
+                ShowWaveform = MusicShowWaveform,
+                CardStyle = MusicCardStyle,
+                LyricsEnabled = MusicLyricsEnabled
+            },
+            Appearance = current.Appearance with
+            {
+                Theme = Theme,
+                AccentColor = AccentColor,
+                UseWindowsAccent = UseWindowsAccent,
+                Material = Material,
+                MaterialReadabilityGuard = MaterialReadabilityGuard,
+                CornerRadius = CornerRadius,
+                AnimationSpeed = AnimationSpeed,
+                RespectReduceMotion = RespectReduceMotion,
+                BatterySaverReduceMotion = BatterySaverReduceMotion
+            },
+            Weather = current.Weather with
+            {
+                RefreshInterval = WeatherRefreshInterval
+            },
+            Focus = current.Focus with
+            {
+                PomodoroWorkMinutes = PomodoroWorkMinutes,
+                PomodoroShortBreakMinutes = PomodoroShortBreakMinutes,
+                PomodoroLongBreakMinutes = PomodoroLongBreakMinutes
+            },
+            Voice = current.Voice with
+            {
+                Harness = Enum.TryParse<VoiceHarnessType>(VoiceHarness, out var vh) ? vh : VoiceHarnessType.Claude,
+                ClaudePermission = Enum.TryParse<VoiceClaudePermission>(VoiceClaudePermission, out var vp) ? vp : Koy.Core.Voice.VoiceClaudePermission.Default,
+                Model = string.IsNullOrWhiteSpace(VoiceModel) ? "default" : VoiceModel,
+                CustomCommand = VoiceCustomCommand,
+                WorkingDirectory = VoiceWorkingDirectory,
+                TimeoutSeconds = VoiceTimeoutSeconds
+            },
+            Clipboard = current.Clipboard with
+            {
+                HistoryEnabled = ClipboardHistoryEnabled
+            },
+            Search = current.Search with
+            {
+                RetainPrior = SearchRetainPrior,
+                HistoryMode = SearchHistoryMode,
+                DisabledSources = new ValueList<string>(SearchSources.Where(s => !s.IsEnabled).Select(s => s.Id))
+            }
         };
 
         _store.Save(updated);
@@ -939,7 +970,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         IsCheckingUpdates = true;
         try
         {
-            var mgr = new Velopack.UpdateManager(new Velopack.Sources.GithubSource("https://github.com/koyhq/koy", null, UpdateChannel == "Önizleme"));
+            var mgr = new Velopack.UpdateManager(new Velopack.Sources.GithubSource("https://github.com/koyhq/koy", null, UpdateChannel == UpdateChannel.Preview));
             if (!mgr.IsInstalled)
             {
                 // Geliştirme çalıştırmasında denetim yapılamaz; başarı gibi gösterilmez.
@@ -1013,7 +1044,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
         try
         {
-            var mgr = new Velopack.UpdateManager(new Velopack.Sources.GithubSource("https://github.com/koyhq/koy", null, UpdateChannel == "Önizleme"));
+            var mgr = new Velopack.UpdateManager(new Velopack.Sources.GithubSource("https://github.com/koyhq/koy", null, UpdateChannel == UpdateChannel.Preview));
             var dispatcher = System.Windows.Application.Current.Dispatcher;
             await mgr.DownloadUpdatesAsync(update, progress =>
             {
@@ -1056,9 +1087,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     {
         IsWhatsNewOverlayOpen = false;
         var current = _store.Load();
-        if (current.LastSeenVersion != AppVersion)
+        if (current.General.LastSeenVersion != AppVersion)
         {
-            _store.Save(current with { LastSeenVersion = AppVersion });
+            _store.Save(current with { General = current.General with { LastSeenVersion = AppVersion } });
         }
     }
 

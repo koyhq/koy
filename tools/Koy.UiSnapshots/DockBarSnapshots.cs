@@ -110,14 +110,20 @@ internal static class DockBarSnapshots
     {
         var settings = new AppSettings
         {
-            DockStyle = fullWidth ? DockStyleMode.FullWidth : DockStyleMode.FloatingCapsule,
-            DockIconAlignment = alignment,
-            DockStartIcon = startIcon,
-            DockStartIconPath = startIconPath,
-            DockSmallTray = smallTray,
-            DockShowFolders = true,
-            DockShowRecents = false,
-            Material = Program.Material
+            Dock = new DockSettings
+            {
+                Style = fullWidth ? DockStyleMode.FullWidth : DockStyleMode.FloatingCapsule,
+                IconAlignment = alignment,
+                StartIcon = startIcon,
+                StartIconPath = startIconPath,
+                SmallTray = smallTray,
+                ShowFolders = true,
+                ShowRecents = false
+            },
+            Appearance = new AppearanceSettings
+            {
+                Material = Program.Material
+            }
         };
 
         var vm = new DockViewModel(settings, DockFolderSnapshots.SharedController, new DockFolderSnapshots.FakeShellActionService(), trayService: new FakeTray());

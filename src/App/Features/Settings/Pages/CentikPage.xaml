@@ -86,10 +86,10 @@
                 <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [NotchStylePinned], Source={x:Static res:Loc.Instance}}" GroupName="NotchStyle"
-                                     IsChecked="{Binding NotchStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Yapışık}"
+                                     IsChecked="{Binding NotchStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Pinned}"
                                      Style="{StaticResource SegRadioStyle}" />
                         <RadioButton Content="{Binding [NotchStyleFloating], Source={x:Static res:Loc.Instance}}" GroupName="NotchStyle"
-                                     IsChecked="{Binding NotchStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Yüzen}"
+                                     IsChecked="{Binding NotchStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Floating}"
                                      Style="{StaticResource SegRadioStyle}" />
                     </StackPanel>
                 </Border>
@@ -111,17 +111,17 @@
                 <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [IdleClockBattery], Source={x:Static res:Loc.Instance}}" GroupName="IdleMode"
-                                     IsChecked="{Binding IdleDisplayMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=0}"
+                                     IsChecked="{Binding IdleDisplayMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=ClockAndBattery}"
                                      Style="{StaticResource SegRadioStyle}" />
                         <RadioButton Content="{Binding [IdleClockOnly], Source={x:Static res:Loc.Instance}}" GroupName="IdleMode"
-                                     IsChecked="{Binding IdleDisplayMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=1}"
+                                     IsChecked="{Binding IdleDisplayMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=ClockOnly}"
                                      Style="{StaticResource SegRadioStyle}" />
                         <RadioButton Content="{Binding [IdleRingClockDay], Source={x:Static res:Loc.Instance}}" GroupName="IdleMode"
                                      ToolTip="{Binding [IdleRingClockDayDesc], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding IdleDisplayMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=3}"
+                                     IsChecked="{Binding IdleDisplayMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=RingClockDay}"
                                      Style="{StaticResource SegRadioStyle}" />
                         <RadioButton Content="{Binding [IdleNone], Source={x:Static res:Loc.Instance}}" GroupName="IdleMode"
-                                     IsChecked="{Binding IdleDisplayMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=2}"
+                                     IsChecked="{Binding IdleDisplayMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Nothing}"
                                      Style="{StaticResource SegRadioStyle}" />
                     </StackPanel>
                 </Border>
@@ -361,10 +361,10 @@
                 <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [OpenOnHover], Source={x:Static res:Loc.Instance}}" GroupName="OpenBeh"
-                                     IsChecked="{Binding NotchOpenBehavior, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=0}"
+                                     IsChecked="{Binding NotchOpenBehavior, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Hover}"
                                      Style="{StaticResource SegRadioStyle}" />
                         <RadioButton Content="{Binding [OpenOnClick], Source={x:Static res:Loc.Instance}}" GroupName="OpenBeh"
-                                     IsChecked="{Binding NotchOpenBehavior, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=1}"
+                                     IsChecked="{Binding NotchOpenBehavior, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Click}"
                                      Style="{StaticResource SegRadioStyle}" />
                     </StackPanel>
                 </Border>

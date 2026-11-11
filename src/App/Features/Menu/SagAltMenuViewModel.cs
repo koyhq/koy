@@ -63,8 +63,8 @@ public sealed partial class SagAltMenuViewModel : ObservableObject
     {
         IsExitConfirming = false;
         var settings = _store.Load();
-        NotchEnabled = settings.NotchEnabled;
-        DockEnabled = settings.DockEnabled;
+        NotchEnabled = settings.Notch.Enabled;
+        DockEnabled = settings.Dock.Enabled;
 
         // Duraklatma süresi dolunca uygulama kendiliğinden devam eder; menü gerçek durumu göstermeli.
         if (Application.Current is Koy.App.App app)
@@ -102,8 +102,8 @@ public sealed partial class SagAltMenuViewModel : ObservableObject
     private void ToggleNotch()
     {
         var settings = _store.Load();
-        NotchEnabled = !settings.NotchEnabled;
-        _store.Save(settings with { NotchEnabled = NotchEnabled });
+        NotchEnabled = !settings.Notch.Enabled;
+        _store.Save(settings with { Notch = settings.Notch with { Enabled = NotchEnabled } });
         NotchToggled?.Invoke(NotchEnabled);
     }
 
@@ -111,8 +111,8 @@ public sealed partial class SagAltMenuViewModel : ObservableObject
     private void ToggleDock()
     {
         var settings = _store.Load();
-        DockEnabled = !settings.DockEnabled;
-        _store.Save(settings with { DockEnabled = DockEnabled });
+        DockEnabled = !settings.Dock.Enabled;
+        _store.Save(settings with { Dock = settings.Dock with { Enabled = DockEnabled } });
         DockToggled?.Invoke(DockEnabled);
     }
 

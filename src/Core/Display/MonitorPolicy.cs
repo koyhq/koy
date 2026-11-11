@@ -91,15 +91,13 @@ public static class MonitorPolicy
     /// Bir monitörün ayarını değiştirilmiş yeni sözlük döner (eskisine dokunmaz). Anahtar kararlı kimliğe çevrilir:
     /// eski aygıt adıyla kayıtlı ayar varsa devralınır ve eski anahtar silinir. Bağlı olmayan monitörlerin kayıtları korunur.
     /// </summary>
-    public static Dictionary<string, MonitorSettings> Update(
+    public static Settings.ValueDictionary<MonitorSettings> Update(
         IReadOnlyDictionary<string, MonitorSettings>? saved,
         NewScreenMode newScreenDefault,
         DisplayMonitor monitor,
         Func<MonitorSettings, MonitorSettings> change)
     {
-        var copy = saved is null
-            ? new Dictionary<string, MonitorSettings>(StringComparer.OrdinalIgnoreCase)
-            : new Dictionary<string, MonitorSettings>(saved, StringComparer.OrdinalIgnoreCase);
+        var copy = saved is null ? new Settings.ValueDictionary<MonitorSettings>() : new Settings.ValueDictionary<MonitorSettings>(saved);
 
         var oldKey = FindKey(copy, monitor);
         var current = oldKey is not null ? copy[oldKey] : DefaultFor(newScreenDefault);

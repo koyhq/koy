@@ -94,10 +94,10 @@
                 <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [ChannelStable], Source={x:Static res:Loc.Instance}}" GroupName="UpdateChan"
-                                     IsChecked="{Binding UpdateChannel, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Kararlı}"
+                                     IsChecked="{Binding UpdateChannel, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Stable}"
                                      Style="{StaticResource SegRadioStyle}" />
                         <RadioButton Content="{Binding [ChannelPreview], Source={x:Static res:Loc.Instance}}" GroupName="UpdateChan"
-                                     IsChecked="{Binding UpdateChannel, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Önizleme}"
+                                     IsChecked="{Binding UpdateChannel, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Preview}"
                                      Style="{StaticResource SegRadioStyle}" />
                     </StackPanel>
                 </Border>

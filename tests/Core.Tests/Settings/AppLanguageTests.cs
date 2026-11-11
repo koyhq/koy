@@ -23,8 +23,8 @@ public class AppLanguageTests
         try
         {
             var store = new SettingsStore(path);
-            store.Save(new AppSettings { Language = saved });
-            Assert.Equal(saved, store.Load().Language);
+            store.Save(new AppSettings { General = new GeneralSettings { Language = saved } });
+            Assert.Equal(saved, store.Load().General.Language);
         }
         finally
         {

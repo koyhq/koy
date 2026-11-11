@@ -84,7 +84,7 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     private bool _showSpectrum;
 
     // Albüm rengi: stil Düz değilse ve kapak renkliyse parça değişince bir kez, arka planda hesaplanır.
-    private string _cardStyle = MusicCardStyleSetting.Tinted;
+    private MusicCardStyle _cardStyle = MusicCardStyle.Tinted;
     private CoverFingerprint? _coverKey;
     private int _paletteGeneration;
 
@@ -113,21 +113,20 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private Brush? _backdropBrush;
 
-    /// <summary>Müzik kartı stili ("Neutral", "Tinted", "Artwork"); çentik kurulurken ayardan verilir.</summary>
-    public void SetCardStyle(string? style)
+    /// <summary>Müzik kartı stili; çentik kurulurken ayardan verilir.</summary>
+    public void SetCardStyle(MusicCardStyle style)
     {
-        var normalized = MusicCardStyleSetting.Normalize(style);
-        if (normalized == _cardStyle)
+        if (style == _cardStyle)
             return;
 
-        _cardStyle = normalized;
+        _cardStyle = style;
         _coverKey = null;
         UpdateCoverPalette(_mediaService.Current?.Thumbnail);
     }
 
     private void UpdateCoverPalette(byte[]? bytes)
     {
-        if (_cardStyle == MusicCardStyleSetting.Neutral || bytes is null || bytes.Length == 0)
+        if (_cardStyle == MusicCardStyle.Neutral || bytes is null || bytes.Length == 0)
         {
             _paletteGeneration++;
             _coverKey = null;
@@ -141,7 +140,7 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
 
         _coverKey = key;
         var generation = ++_paletteGeneration;
-        var wantBackdrop = _cardStyle == MusicCardStyleSetting.Artwork;
+        var wantBackdrop = _cardStyle == MusicCardStyle.Artwork;
         // 32 px çözüm ve palet arka planda; sonuç arayüz iş parçacığında uygulanır (parça artık değiştiyse atılır).
         Task.Run(() => CoverSampler.Sample(bytes, wantBackdrop)).ContinueWith(t =>
         {
@@ -212,10 +211,10 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
 
     public MusicViewModel(IMediaService mediaService, Dispatcher? dispatcher = null,
         Func<SpectrumCaptureService>? spectrumAcquire = null, Action? spectrumRelease = null,
-        ILyricsProvider? lyricsProvider = null, string? cardStyle = null)
+        ILyricsProvider? lyricsProvider = null, MusicCardStyle cardStyle = MusicCardStyle.Tinted)
     {
         _mediaService = mediaService;
-        _cardStyle = MusicCardStyleSetting.Normalize(cardStyle);
+        _cardStyle = cardStyle;
         _dispatcher = dispatcher ?? System.Windows.Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
         _spectrumAcquire = spectrumAcquire;
         _spectrumRelease = spectrumRelease;

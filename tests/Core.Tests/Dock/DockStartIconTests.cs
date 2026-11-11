@@ -14,8 +14,8 @@ public sealed class DockStartIconTests : IDisposable
     {
         var s = new AppSettings();
 
-        Assert.Equal(DockStartIcon.Koy, s.DockStartIcon);
-        Assert.Equal("", s.DockStartIconPath);
+        Assert.Equal(DockStartIcon.Koy, s.Dock.StartIcon);
+        Assert.Equal("", s.Dock.StartIconPath);
         Assert.Equal(new DockStartIconSource(DockStartIcon.Koy, null), DockStartIconResolver.Resolve(s));
     }
 
@@ -27,8 +27,8 @@ public sealed class DockStartIconTests : IDisposable
 
         var loaded = new SettingsStore(SettingsPath).Load();
 
-        Assert.Equal(DockStartIcon.Koy, loaded.DockStartIcon);
-        Assert.Equal("", loaded.DockStartIconPath);
+        Assert.Equal(DockStartIcon.Koy, loaded.Dock.StartIcon);
+        Assert.Equal("", loaded.Dock.StartIconPath);
     }
 
     [Theory]
@@ -38,19 +38,19 @@ public sealed class DockStartIconTests : IDisposable
     {
         var store = new SettingsStore(SettingsPath);
 
-        store.Save(new AppSettings { DockStartIcon = icon, DockStartIconPath = @"C:\icons\baslat.png" });
+        store.Save(new AppSettings { Dock = new DockSettings { StartIcon = icon, StartIconPath = @"C:\icons\baslat.png" } });
 
-        Assert.Contains($"\"DockStartIcon\": \"{icon}\"", File.ReadAllText(SettingsPath));
+        Assert.Contains($"\"StartIcon\": \"{icon}\"", File.ReadAllText(SettingsPath));
         var loaded = store.Load();
-        Assert.Equal(icon, loaded.DockStartIcon);
-        Assert.Equal(@"C:\icons\baslat.png", loaded.DockStartIconPath);
+        Assert.Equal(icon, loaded.Dock.StartIcon);
+        Assert.Equal(@"C:\icons\baslat.png", loaded.Dock.StartIconPath);
     }
 
     [Fact]
     public void Icon_and_path_take_part_in_equality()
     {
-        Assert.NotEqual(new AppSettings(), new AppSettings { DockStartIcon = DockStartIcon.Windows });
-        Assert.NotEqual(new AppSettings(), new AppSettings { DockStartIconPath = @"C:\a.png" });
+        Assert.NotEqual(new AppSettings(), new AppSettings { Dock = new DockSettings { StartIcon = DockStartIcon.Windows } });
+        Assert.NotEqual(new AppSettings(), new AppSettings { Dock = new DockSettings { StartIconPath = @"C:\a.png" } });
     }
 
     [Fact]
@@ -114,9 +114,9 @@ public sealed class DockStartIconTests : IDisposable
     {
         foreach (var after in new[]
         {
-            new AppSettings { DockStartIcon = DockStartIcon.Windows },
-            new AppSettings { DockStartIcon = DockStartIcon.Custom, DockStartIconPath = @"C:\a.png" },
-            new AppSettings { DockStartIconPath = @"C:\a.png" }
+            new AppSettings { Dock = new DockSettings { StartIcon = DockStartIcon.Windows } },
+            new AppSettings { Dock = new DockSettings { StartIcon = DockStartIcon.Custom, StartIconPath = @"C:\a.png" } },
+            new AppSettings { Dock = new DockSettings { StartIconPath = @"C:\a.png" } }
         })
         {
             var d = DockSettingsDiff.Compare(new AppSettings(), after);

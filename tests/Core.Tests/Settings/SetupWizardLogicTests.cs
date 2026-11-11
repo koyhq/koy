@@ -1,3 +1,4 @@
+using Koy.Core.Appearance;
 using Koy.Core.Settings;
 
 namespace Koy.Core.Tests.Settings;
@@ -12,14 +13,14 @@ public sealed class SetupWizardLogicTests : IDisposable
     public void AppSettings_Default_FirstRunCompleted_IsFalse()
     {
         var settings = new AppSettings();
-        Assert.False(settings.FirstRunCompleted);
-        Assert.Equal("Dark", settings.Theme);
-        Assert.Equal(12.0, settings.CornerRadius);
-        Assert.Equal("Normal", settings.AnimationSpeed);
-        Assert.True(settings.RespectReduceMotion);
-        Assert.True(settings.HideWindowsTaskbar);
-        Assert.True(settings.AutoCheckUpdates);
-        Assert.Equal("Kararlı", settings.UpdateChannel);
+        Assert.False(settings.General.FirstRunCompleted);
+        Assert.Equal(AppTheme.Dark, settings.Appearance.Theme);
+        Assert.Equal(12.0, settings.Appearance.CornerRadius);
+        Assert.Equal(AnimationSpeed.Normal, settings.Appearance.AnimationSpeed);
+        Assert.True(settings.Appearance.RespectReduceMotion);
+        Assert.True(settings.Dock.HideWindowsTaskbar);
+        Assert.True(settings.General.AutoCheckUpdates);
+        Assert.Equal(UpdateChannel.Stable, settings.General.UpdateChannel);
     }
 
     [Theory]
@@ -30,27 +31,20 @@ public sealed class SetupWizardLogicTests : IDisposable
     {
         var store = NewStore();
         var initial = store.Load();
-        Assert.False(initial.FirstRunCompleted);
+        Assert.False(initial.General.FirstRunCompleted);
 
         var notchEnabled = cardIndex is 0 or 1;
         var dockEnabled = cardIndex is 0 or 2;
 
-        var configured = initial with
-        {
-            FirstRunCompleted = true,
-            Language = "tr",
-            NotchEnabled = notchEnabled,
-            DockEnabled = dockEnabled,
-            HideWindowsTaskbar = dockEnabled
-        };
+        var configured = initial with { General = initial.General with { FirstRunCompleted = true, Language = "tr" }, Notch = initial.Notch with { Enabled = notchEnabled }, Dock = initial.Dock with { Enabled = dockEnabled, HideWindowsTaskbar = dockEnabled } };
 
         store.Save(configured);
 
         var loaded = store.Load();
-        Assert.True(loaded.FirstRunCompleted);
-        Assert.Equal(expectedNotch, loaded.NotchEnabled);
-        Assert.Equal(expectedDock, loaded.DockEnabled);
-        Assert.Equal(dockEnabled, loaded.HideWindowsTaskbar);
+        Assert.True(loaded.General.FirstRunCompleted);
+        Assert.Equal(expectedNotch, loaded.Notch.Enabled);
+        Assert.Equal(expectedDock, loaded.Dock.Enabled);
+        Assert.Equal(dockEnabled, loaded.Dock.HideWindowsTaskbar);
     }
 
     [Fact]
@@ -62,37 +56,37 @@ public sealed class SetupWizardLogicTests : IDisposable
         Assert.Equal(s1, s2);
         Assert.Equal(s1.GetHashCode(), s2.GetHashCode());
 
-        var modifiedFirstRun = s1 with { FirstRunCompleted = true };
+        var modifiedFirstRun = s1 with { General = s1.General with { FirstRunCompleted = true } };
         Assert.NotEqual(s1, modifiedFirstRun);
 
-        var modifiedTheme = s1 with { Theme = "Açık" };
+        var modifiedTheme = s1 with { Appearance = s1.Appearance with { Theme = AppTheme.Light } };
         Assert.NotEqual(s1, modifiedTheme);
 
-        var modifiedRadius = s1 with { CornerRadius = 6.0 };
+        var modifiedRadius = s1 with { Appearance = s1.Appearance with { CornerRadius = 6.0 } };
         Assert.NotEqual(s1, modifiedRadius);
 
-        var modifiedAnim = s1 with { AnimationSpeed = "Hızlı" };
+        var modifiedAnim = s1 with { Appearance = s1.Appearance with { AnimationSpeed = AnimationSpeed.Fast } };
         Assert.NotEqual(s1, modifiedAnim);
 
-        var modifiedMotion = s1 with { RespectReduceMotion = false };
+        var modifiedMotion = s1 with { Appearance = s1.Appearance with { RespectReduceMotion = false } };
         Assert.NotEqual(s1, modifiedMotion);
 
-        var modifiedTaskbar = s1 with { HideWindowsTaskbar = false };
+        var modifiedTaskbar = s1 with { Dock = s1.Dock with { HideWindowsTaskbar = false } };
         Assert.NotEqual(s1, modifiedTaskbar);
 
-        var modifiedUpdates = s1 with { AutoCheckUpdates = false };
+        var modifiedUpdates = s1 with { General = s1.General with { AutoCheckUpdates = false } };
         Assert.NotEqual(s1, modifiedUpdates);
 
-        var modifiedChannel = s1 with { UpdateChannel = "Önizleme" };
+        var modifiedChannel = s1 with { General = s1.General with { UpdateChannel = UpdateChannel.Preview } };
         Assert.NotEqual(s1, modifiedChannel);
 
-        var modifiedSaverMotion = s1 with { BatterySaverReduceMotion = false };
+        var modifiedSaverMotion = s1 with { Appearance = s1.Appearance with { BatterySaverReduceMotion = false } };
         Assert.NotEqual(s1, modifiedSaverMotion);
 
-        var modifiedOsd = s1 with { ShowVolumeOsd = false };
+        var modifiedOsd = s1 with { Notch = s1.Notch with { ShowVolumeOsd = false } };
         Assert.NotEqual(s1, modifiedOsd);
 
-        var modifiedPomodoro = s1 with { PomodoroWorkMinutes = 50 };
+        var modifiedPomodoro = s1 with { Focus = s1.Focus with { PomodoroWorkMinutes = 50 } };
         Assert.NotEqual(s1, modifiedPomodoro);
     }
 

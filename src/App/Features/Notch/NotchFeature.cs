@@ -125,7 +125,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         _mediaService = services.AcquireMediaService();
 
         _focusTimers = new FocusTimers(PomodoroConfig.FromMinutes(
-            settings.PomodoroWorkMinutes, settings.PomodoroShortBreakMinutes, settings.PomodoroLongBreakMinutes));
+            settings.Focus.PomodoroWorkMinutes, settings.Focus.PomodoroShortBreakMinutes, settings.Focus.PomodoroLongBreakMinutes));
 
         _powerService = services.AcquirePowerService();
         _powerService.PowerChanged += OnPowerChanged;
@@ -133,14 +133,14 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         _bluetoothService.DevicesChanged += OnBluetoothDevicesChanged;
         _bluetoothPolicy.Update(_bluetoothService.Devices);
         _networkService = services.AcquireNetworkService();
-        if (settings.ClipboardHistoryEnabled)
+        if (settings.Clipboard.HistoryEnabled)
             _clipboardHistory = services.AcquireClipboardHistory();
-        if (settings.ShowPrivacyIndicator)
+        if (settings.Notch.ShowPrivacyIndicator)
         {
             _privacyMonitor = services.AcquirePrivacyMonitor();
             _privacyMonitor.StateChanged += OnPrivacyStateChanged;
         }
-        _weatherService = new WeatherService(cacheDuration: WeatherRefreshPolicy.CacheDuration(settings.WeatherRefreshInterval));
+        _weatherService = new WeatherService(cacheDuration: WeatherRefreshPolicy.CacheDuration(settings.Weather.RefreshInterval));
         _focusAssistService = new FocusAssistService();
         _shelfService = new ShelfService();
 
@@ -209,11 +209,11 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             var updated = WeatherLocationPolicy.ApplyDeviceLocation(store.Load(), result, DateTimeOffset.UtcNow);
             store.Save(updated);
 
-            settings.WeatherLocationSource = updated.WeatherLocationSource;
-            settings.WeatherLatitude = updated.WeatherLatitude;
-            settings.WeatherLongitude = updated.WeatherLongitude;
-            settings.WeatherCity = updated.WeatherCity;
-            settings.WeatherLocationUpdatedUnix = updated.WeatherLocationUpdatedUnix;
+            settings.Weather.LocationSource = updated.Weather.LocationSource;
+            settings.Weather.Latitude = updated.Weather.Latitude;
+            settings.Weather.Longitude = updated.Weather.Longitude;
+            settings.Weather.City = updated.Weather.City;
+            settings.Weather.LocationUpdatedUnix = updated.Weather.LocationUpdatedUnix;
 
             foreach (var state in _windowStates.Values)
                 state.ViewModel.Status.OnLocationChanged();
@@ -225,22 +225,22 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     }
 
     private IReadOnlyList<DisplayMonitor> ResolveTargetMonitors(IReadOnlyList<DisplayMonitor> monitors) =>
-        MonitorPolicy.NotchMonitors(MonitorPolicy.Resolve(settings.Monitors, settings.NewScreenDefault, monitors));
+        MonitorPolicy.NotchMonitors(MonitorPolicy.Resolve(settings.Displays.Monitors, settings.Displays.NewScreenDefault, monitors));
 
     private void CreateNotchWindow(DisplayMonitor monitor)
     {
         var controller = new NotchController();
-        controller.SetEnabledPanels(NotchPanels.ParseEnabled(settings.EnabledPanels, settings.ClipboardHistoryEnabled));
-        controller.OpenOnHover = settings.NotchOpenBehavior == 0;
+        controller.SetEnabledPanels(NotchPanels.ParseEnabled(settings.Notch.EnabledPanels, settings.Clipboard.HistoryEnabled));
+        controller.OpenOnHover = settings.Notch.OpenBehavior == NotchOpenBehavior.Hover;
 
-        var visibilityController = new VisibilityController(settings.NotchVisibility)
+        var visibilityController = new VisibilityController(settings.Notch.Visibility)
         {
-            HideInFullscreen = settings.NotchHideInFullscreen
+            HideInFullscreen = settings.Notch.HideInFullscreen
         };
 
         // Müzik kartı çubukları: ses yakalama yalnız kart görünür ve müzik çalarken (MusicViewModel.UpdateSpectrum).
         var musicVm = new MusicViewModel(_mediaService!, spectrumAcquire: () => services.AcquireSpectrumService(), spectrumRelease: services.ReleaseSpectrumService,
-            lyricsProvider: _lyricsProvider, cardStyle: settings.MusicCardStyle);
+            lyricsProvider: _lyricsProvider, cardStyle: settings.Music.CardStyle);
         musicVm.Lyrics.EnabledToggled += SaveLyricsEnabled;
         // Parlaklık, çentiğin o anki ekranına bağlanır; ekran düzeni değişince state.Monitor güncellenir.
         NotchWindowState? stateRef = null;
@@ -302,7 +302,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             state.Hwnd = hwnd;
             visibilityController.NotchHandle = hwnd;
             _fullscreenDetector?.IgnoredHandles.Add(hwnd);
-            UpdateNotchBounds(window, visibilityController, monitor, NotchStyle.TopOffsetDip(settings.NotchStyle));
+            UpdateNotchBounds(window, visibilityController, monitor, NotchStyle.TopOffsetDip(settings.Notch.Style));
         };
 
         window.DisplayChangeHandler = () =>
@@ -322,19 +322,19 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         AttachOsd(viewModel);
 
         window.Show();
-        UpdateNotchBounds(window, visibilityController, monitor, NotchStyle.TopOffsetDip(settings.NotchStyle));
+        UpdateNotchBounds(window, visibilityController, monitor, NotchStyle.TopOffsetDip(settings.Notch.Style));
     }
 
     private void StartOsdServices()
     {
-        if (settings.ShowVolumeOsd)
+        if (settings.Notch.ShowVolumeOsd)
         {
             _osdAudio = new AudioService();
             foreach (var state in _windowStates.Values)
                 state.ViewModel.Osd.Attach(_osdAudio);
         }
 
-        if (settings.ShowBrightnessOsd)
+        if (settings.Notch.ShowBrightnessOsd)
             _ = StartBrightnessOsdAsync();
     }
 
@@ -400,7 +400,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
                 existingState.Window.SetTargetMonitor(monitor);
                 // Ekran eklendi/çıkarıldı: parlaklık kaynağı (dahili/harici) yeniden belirlenir.
                 existingState.ViewModel.ControlCenter.RefreshBrightness();
-                UpdateNotchBounds(existingState.Window, existingState.VisibilityController, monitor, NotchStyle.TopOffsetDip(settings.NotchStyle));
+                UpdateNotchBounds(existingState.Window, existingState.VisibilityController, monitor, NotchStyle.TopOffsetDip(settings.Notch.Style));
             }
             else
             {
@@ -442,7 +442,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             state.VisibilityController.UpdateForegroundWindow(info.Handle, info.Bounds);
 
             // Tam ekranda gizlenmiyorsa (ayar kapalı) çentik tam ekran pencerenin üstünde kalmaya çalışır.
-            if ((!isFullscreen || !settings.NotchHideInFullscreen) && state.Hwnd != 0 && info.Handle != state.Hwnd)
+            if ((!isFullscreen || !settings.Notch.HideInFullscreen) && state.Hwnd != 0 && info.Handle != state.Hwnd)
             {
                 if (!FullscreenDetector.IsScreenClippingHost(info.Handle))
                 {
@@ -505,7 +505,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
                     var minX = bounds.Left - 30;
                     var maxX = bounds.Right + 30;
                     // Yüzen adada ekran kenarı ile ada arasındaki 9 DIP boşluk da kenar bölgesidir.
-                    var edgeBottom = top + NotchStyle.EdgeTriggerBottomPixels(settings.NotchStyle, monitor.DpiScaleY);
+                    var edgeBottom = top + NotchStyle.EdgeTriggerBottomPixels(settings.Notch.Style, monitor.DpiScaleY);
                     var isAtEdge = y >= top && y <= edgeBottom && (bounds.IsEmpty || (x >= minX && x <= maxX));
 
                     if (isAtEdge)
@@ -573,16 +573,18 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     // Karttaki düğme ayarı değiştirir: paylaşılan ayar nesnesi (diğer ekranların çentikleri de okur) ve diskteki dosya.
     private void SaveLyricsEnabled(bool enabled)
     {
-        settings.MusicLyricsEnabled = enabled;
+        settings.Music.LyricsEnabled = enabled;
         var store = new SettingsStore(SettingsStore.DefaultPath);
-        store.Save(store.Load() with { MusicLyricsEnabled = enabled });
+        var current = store.Load();
+        store.Save(current with { Music = current.Music with { LyricsEnabled = enabled } });
     }
 
     private void SaveSearchPinned(bool pinned)
     {
-        settings.SearchPinned = pinned;
+        settings.Search.Pinned = pinned;
         var store = new SettingsStore(SettingsStore.DefaultPath);
-        store.Save(store.Load() with { SearchPinned = pinned });
+        var current = store.Load();
+        store.Save(current with { Search = current.Search with { Pinned = pinned } });
     }
 
     private static string? ReadClipboardText()
@@ -626,12 +628,12 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             return;
 
         _voiceController = new VoiceSessionController(new ProcessHarnessRunnerService(), () => new VoiceSessionOptions(
-            HarnessType: settings.VoiceHarness,
-            WorkingDirectory: settings.VoiceWorkingDirectory,
-            TimeoutSeconds: settings.VoiceTimeoutSeconds,
-            CustomExecutable: settings.VoiceCustomCommand,
-            ClaudePermission: settings.VoiceClaudePermission,
-            Model: settings.VoiceModel));
+            HarnessType: settings.Voice.Harness,
+            WorkingDirectory: settings.Voice.WorkingDirectory,
+            TimeoutSeconds: settings.Voice.TimeoutSeconds,
+            CustomExecutable: settings.Voice.CustomCommand,
+            ClaudePermission: settings.Voice.ClaudePermission,
+            Model: settings.Voice.Model));
 
         _voiceController.StateChanged += state => Application.Current?.Dispatcher.InvokeAsync(() => UpdateVoiceOsd(state));
     }
@@ -640,7 +642,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     private string VoiceStatusText(VoiceSessionController controller, VoiceState state) => state switch
     {
         VoiceState.Editing => Strings.Get("VoiceEditing"),
-        VoiceState.Running => string.Format(CultureInfo.CurrentCulture, Strings.Get("VoiceRunning"), VoiceHarnessName(settings.VoiceHarness)),
+        VoiceState.Running => string.Format(CultureInfo.CurrentCulture, Strings.Get("VoiceRunning"), VoiceHarnessName(settings.Voice.Harness)),
         VoiceState.Completed => Strings.Get("VoiceCompleted"),
         VoiceState.Failed => VoiceFailureText(controller),
         _ => string.Empty
@@ -676,7 +678,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         {
             var text = new System.Text.StringBuilder()
                 .Append("> ").AppendLine(prompt)
-                .Append('(').Append(VoiceHarnessName(settings.VoiceHarness)).Append(", ")
+                .Append('(').Append(VoiceHarnessName(settings.Voice.Harness)).Append(", ")
                 .Append(result.ExitCode.ToString(CultureInfo.InvariantCulture)).Append(", ")
                 .Append(result.Duration.TotalSeconds.ToString("F1", CultureInfo.CurrentCulture)).AppendLine(" s)")
                 .AppendLine()
@@ -701,7 +703,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         var body = string.IsNullOrWhiteSpace(result.Error)
             ? result.Output
             : string.IsNullOrWhiteSpace(result.Output) ? result.Error : result.Output + Environment.NewLine + Environment.NewLine + result.Error;
-        var info = string.Format(CultureInfo.CurrentCulture, "{0} · {1:F1} s", VoiceHarnessName(settings.VoiceHarness), result.Duration.TotalSeconds);
+        var info = string.Format(CultureInfo.CurrentCulture, "{0} · {1:F1} s", VoiceHarnessName(settings.Voice.Harness), result.Duration.TotalSeconds);
         var window = target.Window;
         VoiceReplyWindow.ShowReply(window.Left + window.Width / 2, window.Top + 72, prompt, info, body, OpenVoiceReplyFile);
     }
@@ -1036,7 +1038,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
 
     private void StartNotifications()
     {
-        if (!settings.NotchShowNotifications || _windowStates.Count == 0 || _notificationListener is not null)
+        if (!settings.Notch.ShowNotifications || _windowStates.Count == 0 || _notificationListener is not null)
             return;
 
         var listener = services.AcquireNotificationListener();
@@ -1112,7 +1114,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         if (item is null)
             return;
 
-        var card = NotificationPresentation.ToCard(item, DateTimeOffset.Now, settings.NotchNotificationsHideBody, GetRelativeTimeLabels());
+        var card = NotificationPresentation.ToCard(item, DateTimeOffset.Now, settings.Notch.NotificationsHideBody, GetRelativeTimeLabels());
         _notificationCard = card;
         if (!viewModel.Osd.ShowCard(card, NotificationQueue.CardDuration))
         {

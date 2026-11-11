@@ -7,13 +7,9 @@ namespace Koy.Core.Tests;
 public class TimerAndWeatherSettingsTests
 {
     [Theory]
-    [InlineData("30m", 30)]
-    [InlineData("1h", 60)]
-    [InlineData("1H", 60)]
-    [InlineData("", 30)]
-    [InlineData("bilinmeyen", 30)]
-    [InlineData(null, 30)]
-    public void Weather_cache_duration_follows_the_setting(string? setting, int minutes)
+    [InlineData(WeatherRefreshInterval.Every30Minutes, 30)]
+    [InlineData(WeatherRefreshInterval.Hourly, 60)]
+    public void Weather_cache_duration_follows_the_setting(WeatherRefreshInterval setting, int minutes)
     {
         Assert.Equal(TimeSpan.FromMinutes(minutes), WeatherRefreshPolicy.CacheDuration(setting));
     }
@@ -21,7 +17,7 @@ public class TimerAndWeatherSettingsTests
     [Fact]
     public void Weather_startup_only_never_expires()
     {
-        var duration = WeatherRefreshPolicy.CacheDuration("startup");
+        var duration = WeatherRefreshPolicy.CacheDuration(WeatherRefreshInterval.OnStartup);
 
         Assert.True(TimeSpan.FromDays(3650) < duration);
     }
@@ -29,14 +25,14 @@ public class TimerAndWeatherSettingsTests
     [Fact]
     public void Weather_default_setting_is_thirty_minutes()
     {
-        Assert.Equal(TimeSpan.FromMinutes(30), WeatherRefreshPolicy.CacheDuration(new AppSettings().WeatherRefreshInterval));
+        Assert.Equal(TimeSpan.FromMinutes(30), WeatherRefreshPolicy.CacheDuration(new AppSettings().Weather.RefreshInterval));
     }
 
     [Fact]
     public void Pomodoro_settings_defaults_match_classic_25_5_15()
     {
         var s = new AppSettings();
-        var config = PomodoroConfig.FromMinutes(s.PomodoroWorkMinutes, s.PomodoroShortBreakMinutes, s.PomodoroLongBreakMinutes);
+        var config = PomodoroConfig.FromMinutes(s.Focus.PomodoroWorkMinutes, s.Focus.PomodoroShortBreakMinutes, s.Focus.PomodoroLongBreakMinutes);
 
         Assert.Equal(PomodoroConfig.Default, config);
     }

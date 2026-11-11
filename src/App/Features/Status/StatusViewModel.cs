@@ -180,11 +180,11 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
     private void UpdateLocationState()
     {
         HasWeatherLocation = WeatherLocationPolicy.HasLocation(_settings);
-        City = _settings.WeatherLocationSource switch
+        City = _settings.Weather.LocationSource switch
         {
-            WeatherLocationSource.City => CityShortName(_settings.WeatherCity),
+            WeatherLocationSource.City => CityShortName(_settings.Weather.City),
             WeatherLocationSource.Device when _devicePlace is not null &&
-                _devicePlaceFor == PlaceNameParser.Round(_settings.WeatherLatitude, _settings.WeatherLongitude) => _devicePlace,
+                _devicePlaceFor == PlaceNameParser.Round(_settings.Weather.Latitude, _settings.Weather.Longitude) => _devicePlace,
             _ => ""
         };
     }
@@ -196,17 +196,17 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
     /// <summary>Cihaz konumu kullanılıyorsa yer adını çözer (servis aynı koordinat için tek istek atar).</summary>
     private async void RequestDevicePlaceName()
     {
-        if (_placeNameService is null || _settings.WeatherLocationSource != WeatherLocationSource.Device)
+        if (_placeNameService is null || _settings.Weather.LocationSource != WeatherLocationSource.Device)
             return;
 
-        var coordinate = PlaceNameParser.Round(_settings.WeatherLatitude, _settings.WeatherLongitude);
+        var coordinate = PlaceNameParser.Round(_settings.Weather.Latitude, _settings.Weather.Longitude);
         if (_devicePlace is not null && _devicePlaceFor == coordinate)
             return;
 
         string? name;
         try
         {
-            name = await _placeNameService.GetPlaceNameAsync(_settings.WeatherLatitude, _settings.WeatherLongitude, _settings.Language);
+            name = await _placeNameService.GetPlaceNameAsync(_settings.Weather.Latitude, _settings.Weather.Longitude, _settings.General.Language);
         }
         catch
         {
@@ -215,8 +215,8 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
 
         // await sonrası arayüz iş parçacığındayız (SetActive/OnLocationChanged oradan çağrılır).
         if (_disposed || string.IsNullOrEmpty(name) ||
-            _settings.WeatherLocationSource != WeatherLocationSource.Device ||
-            PlaceNameParser.Round(_settings.WeatherLatitude, _settings.WeatherLongitude) != coordinate)
+            _settings.Weather.LocationSource != WeatherLocationSource.Device ||
+            PlaceNameParser.Round(_settings.Weather.Latitude, _settings.Weather.Longitude) != coordinate)
             return;
 
         _devicePlace = name;
@@ -236,7 +236,7 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
         if (!HasWeatherLocation)
             return;
 
-        _ = _weatherService.GetCurrentWeatherAsync(_settings.WeatherLatitude, _settings.WeatherLongitude);
+        _ = _weatherService.GetCurrentWeatherAsync(_settings.Weather.Latitude, _settings.Weather.Longitude);
         RequestDevicePlaceName();
     }
 
@@ -262,7 +262,7 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
     private void UpdateClock()
     {
         var now = DateTime.Now;
-        var culture = new CultureInfo(_settings.Language == "en" ? "en-US" : "tr-TR");
+        var culture = new CultureInfo(_settings.General.Language == "en" ? "en-US" : "tr-TR");
         CurrentTime = now.ToString("HH:mm", culture);
         CurrentDate = now.ToString("d MMMM dddd", culture);
         ShortDate = now.ToString("d MMM ddd", culture);
@@ -362,7 +362,7 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
         if (!HasWeatherLocation)
             return;
 
-        await _weatherService.RefreshAsync(_settings.WeatherLatitude, _settings.WeatherLongitude);
+        await _weatherService.RefreshAsync(_settings.Weather.Latitude, _settings.Weather.Longitude);
     }
 
     public void Dispose()

@@ -17,7 +17,7 @@ public static class ReadabilityGuard
     /// </summary>
     public readonly record struct Surface(Rgb Base, Rgb Text, double SecondaryAlpha, bool Layered = false)
     {
-        public double OpacityOf(string level) =>
+        public double OpacityOf(MaterialLevel level) =>
             Layered ? MaterialSetting.LayeredOpacity(level) : MaterialSetting.SurfaceOpacity(level);
     }
 
@@ -42,10 +42,9 @@ public static class ReadabilityGuard
     /// Etkin malzeme. Koruma kapalıysa ya da duvar kağıdı bilinmiyorsa (okunamadı) seçilen değer aynen döner.
     /// Aksi halde seçilenden başlayıp opağa doğru eşiği geçen ilk seviye; hiçbiri geçmezse Katı. Opaklık hiç düşmez.
     /// </summary>
-    public static string Effective(string? requested, bool enabled, Rgb? wallpaper, Surface surface)
+    public static MaterialLevel Effective(MaterialLevel level, bool enabled, Rgb? wallpaper, Surface surface)
     {
-        var level = MaterialSetting.Normalize(requested);
-        if (!enabled || wallpaper is not { } wall || level == MaterialSetting.Solid)
+        if (!enabled || wallpaper is not { } wall || level == MaterialLevel.Solid)
             return level;
 
         var levels = MaterialSetting.Levels;
@@ -60,7 +59,7 @@ public static class ReadabilityGuard
                 return candidate;
         }
 
-        return MaterialSetting.Solid;
+        return MaterialLevel.Solid;
     }
 
     /// <summary>BGRA piksel dizisinin (WinRT çözücü çıktısı) ortalama rengi; alfa yok sayılır. Tam piksel yoksa null.</summary>

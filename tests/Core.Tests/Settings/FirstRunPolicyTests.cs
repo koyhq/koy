@@ -11,15 +11,15 @@ public class FirstRunPolicyTests
 
         var result = FirstRunPolicy.ApplySafeDefaultsIfIncomplete(settings);
 
-        Assert.False(result.DockEnabled);
-        Assert.False(result.HideWindowsTaskbar);
-        Assert.True(result.NotchEnabled);
+        Assert.False(result.Dock.Enabled);
+        Assert.False(result.Dock.HideWindowsTaskbar);
+        Assert.True(result.Notch.Enabled);
     }
 
     [Fact]
     public void SihirbazTamamlandiysaAyarlarDegismez()
     {
-        var settings = new AppSettings { FirstRunCompleted = true, DockEnabled = true, HideWindowsTaskbar = true };
+        var settings = new AppSettings { General = new GeneralSettings { FirstRunCompleted = true }, Dock = new DockSettings { Enabled = true, HideWindowsTaskbar = true } };
 
         var result = FirstRunPolicy.ApplySafeDefaultsIfIncomplete(settings);
 
@@ -33,31 +33,25 @@ public class FirstRunPolicyTests
 
         FirstRunPolicy.ApplySafeDefaultsIfIncomplete(settings);
 
-        Assert.True(settings.DockEnabled);
+        Assert.True(settings.Dock.Enabled);
     }
 
     [Fact]
     public void CreateReset_keeps_FirstRunCompleted_and_restores_defaults()
     {
-        var current = new AppSettings
-        {
-            FirstRunCompleted = true,
-            NotchEnabled = false,
-            DockProximity = Koy.Core.Dock.DockProximityMode.Dodge,
-            Language = "en"
-        };
+        var current = new AppSettings { General = new GeneralSettings { FirstRunCompleted = true, Language = "en" }, Notch = new NotchSettings { Enabled = false }, Dock = new DockSettings { Proximity = Koy.Core.Dock.DockProximityMode.Dodge } };
 
         var reset = FirstRunPolicy.CreateReset(current);
 
-        Assert.True(reset.FirstRunCompleted);
-        Assert.Equal(new AppSettings { FirstRunCompleted = true }, reset);
+        Assert.True(reset.General.FirstRunCompleted);
+        Assert.Equal(new AppSettings { General = new GeneralSettings { FirstRunCompleted = true } }, reset);
     }
 
     [Fact]
     public void CreateReset_does_not_mark_unfinished_setup_as_completed()
     {
-        var reset = FirstRunPolicy.CreateReset(new AppSettings { FirstRunCompleted = false });
+        var reset = FirstRunPolicy.CreateReset(new AppSettings { General = new GeneralSettings { FirstRunCompleted = false } });
 
-        Assert.False(reset.FirstRunCompleted);
+        Assert.False(reset.General.FirstRunCompleted);
     }
 }

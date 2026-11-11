@@ -81,7 +81,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         // Platform servislerini başlat
         _pinnedAppsService = new OrderedPinnedAppsService(
             new PinnedAppsService(),
-            () => settings.DockPinnedOrder,
+            () => settings.DockItems.PinnedOrder,
             SavePinnedOrder,
             TaskbandFavoritesReader.Read);
         _windowTracker = services.AcquireWindowTracker();
@@ -112,7 +112,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         _mediaService = services.AcquireMediaService();
 
         // Pil tasarrufu için güç durumu; ayar kapalıysa servis kurulmaz.
-        if (settings.BatterySaverReduceMotion)
+        if (settings.Appearance.BatterySaverReduceMotion)
         {
             _powerService = services.AcquirePowerService();
             _powerService.PowerChanged += OnPowerChanged;
@@ -168,16 +168,16 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     {
         var store = new SettingsStore(SettingsStore.DefaultPath);
         var current = store.Load();
-        var updated = current with { DockPinnedOrder = [.. order] };
+        var updated = current with { DockItems = current.DockItems with { PinnedOrder = [.. order] } };
         if (folders is not null)
         {
-            updated = updated with { DockFolders = [.. folders] };
+            updated = updated with { DockItems = updated.DockItems with { Folders = [.. folders] } };
             if (inMemorySettings is not null)
-                inMemorySettings.DockFolders = [.. folders];
+                inMemorySettings.DockItems.Folders = [.. folders];
         }
         store.Save(updated);
         if (inMemorySettings is not null)
-            inMemorySettings.DockPinnedOrder = [.. order];
+            inMemorySettings.DockItems.PinnedOrder = [.. order];
     }
 
     private void SavePinnedOrder(IReadOnlyList<string> order) =>
@@ -193,7 +193,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         if (_windowStates.Count == 0)
             return;
 
-        if (settings.HideWindowsTaskbar)
+        if (settings.Dock.HideWindowsTaskbar)
         {
             TaskbarService.Hide();
             // Yeni Gezgin kendi tepsisini oluşturdu: Koy'unki yeniden öne alınır, uygulamalar simgelerini yeniden kaydeder.
@@ -249,7 +249,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         if (_appBarService is null)
             return;
 
-        var owns = AppBarOwnership.OwnsBottomEdge(settings.HideWindowsTaskbar, _taskbarHidden, _trayReleasedByUser);
+        var owns = AppBarOwnership.OwnsBottomEdge(settings.Dock.HideWindowsTaskbar, _taskbarHidden, _trayReleasedByUser);
         if (_appBarService.OwnsBottomEdge == owns)
             return;
 
@@ -297,14 +297,14 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     private static readonly int[] AppBarSettleDelaysMs = [1500, 3000, 5000];
 
     /// <summary>Stile göre geçerli yakınlık modu (tam genişlikte Aşağı yapış/Çekil sadeleşir; bkz. DockProximityMapping).</summary>
-    private DockProximityMode EffectiveProximity => DockProximityMapping.Effective(settings.DockStyle, settings.DockProximity);
+    private DockProximityMode EffectiveProximity => DockProximityMapping.Effective(settings.Dock.Style, settings.Dock.Proximity);
 
     private void EnsureTaskbarHidden()
     {
         if (_stopping)
             return;
 
-        if (settings.HideWindowsTaskbar && _windowStates.Count > 0)
+        if (settings.Dock.HideWindowsTaskbar && _windowStates.Count > 0)
         {
             // Görev çubuğu yeniden göründüyse gizlendi: tepsi sahipliği (elle geri getirmede bırakılmıştı) geri alınır.
             if (TaskbarService.EnsureHidden() && _trayReleasedByUser)
@@ -346,7 +346,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     /// </summary>
     private void ApplyTaskbarPolicy()
     {
-        if (!settings.HideWindowsTaskbar)
+        if (!settings.Dock.HideWindowsTaskbar)
             return;
 
         if (_windowStates.Count > 0)
@@ -382,7 +382,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             return;
 
         var shouldHost = !_trayReleasedByUser
-            && TrayHostPolicy.ShouldHost(settings.HideWindowsTaskbar, settings.DockShowTray, _windowStates.Count);
+            && TrayHostPolicy.ShouldHost(settings.Dock.HideWindowsTaskbar, settings.Dock.ShowTray, _windowStates.Count);
 
         var now = DateTime.UtcNow;
         var action = _trayRecovery.Decide(shouldHost, _trayService is not null, _trayService is { IsRunning: true }, now);
@@ -452,11 +452,11 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     }
 
     private IReadOnlyList<DisplayMonitor> ResolveTargetMonitors(IReadOnlyList<DisplayMonitor> monitors) =>
-        MonitorPolicy.DockMonitors(MonitorPolicy.Resolve(settings.Monitors, settings.NewScreenDefault, monitors));
+        MonitorPolicy.DockMonitors(MonitorPolicy.Resolve(settings.Displays.Monitors, settings.Displays.NewScreenDefault, monitors));
 
     private void CreateDockWindow(DisplayMonitor monitor)
     {
-        var visibilityController = new VisibilityController(settings.DockVisibility);
+        var visibilityController = new VisibilityController(settings.Dock.Visibility);
         var viewModel = CreateViewModel(visibilityController);
 
         var window = new DockWindow { DataContext = viewModel };
@@ -593,7 +593,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         {
             // Görev çubuğu geri getirilmeden önce Koy'un tepsi penceresi bırakılır; gizlenirken önce tepsi kurulur.
             ApplyTrayPolicy();
-            if (settings.HideWindowsTaskbar)
+            if (settings.Dock.HideWindowsTaskbar)
             {
                 ApplyTaskbarPolicy();
             }
@@ -617,7 +617,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         var oldViewModel = state.ViewModel;
         var oldVisibility = state.VisibilityController;
 
-        var visibility = new VisibilityController(settings.DockVisibility) { NotchHandle = state.Hwnd };
+        var visibility = new VisibilityController(settings.Dock.Visibility) { NotchHandle = state.Hwnd };
         var viewModel = CreateViewModel(visibility);
         viewModel.EdgeWatchChanged += (_, _) => UpdateEdgeTimer();
 
@@ -663,13 +663,13 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
     private void ReconcilePower()
     {
-        if (settings.BatterySaverReduceMotion && _powerService is null)
+        if (settings.Appearance.BatterySaverReduceMotion && _powerService is null)
         {
             _powerService = services.AcquirePowerService();
             _powerService.PowerChanged += OnPowerChanged;
             ApplyReduceMotion();
         }
-        else if (!settings.BatterySaverReduceMotion && _powerService is not null)
+        else if (!settings.Appearance.BatterySaverReduceMotion && _powerService is not null)
         {
             _powerService.PowerChanged -= OnPowerChanged;
             _powerService = null;
@@ -694,7 +694,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             return;
 
         _reduceMotion = BatterySaverPolicy.ShouldReduceMotion(
-            settings.BatterySaverReduceMotion, _powerService.HasBattery, _powerService.Status);
+            settings.Appearance.BatterySaverReduceMotion, _powerService.HasBattery, _powerService.Status);
         foreach (var state in _windowStates.Values)
             state.ViewModel.ReduceMotion = _reduceMotion;
     }
@@ -954,9 +954,9 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         // (NeedsEdgeWatch) ve kenardan açma açıksa yalnız o sürede izlenir.
         var shouldRun = _windowStates.Values.Any(s =>
             ((EffectiveProximity is DockProximityMode.Dodge or DockProximityMode.AlwaysHidden ||
-              settings.DockVisibility != VisibilityMode.Fixed) &&
+              settings.Dock.Visibility != VisibilityMode.Fixed) &&
              EffectiveProximity != DockProximityMode.ReserveSpace) ||
-            (settings.DockEdgeReveal && s.ViewModel.NeedsEdgeWatch));
+            (settings.Dock.EdgeReveal && s.ViewModel.NeedsEdgeWatch));
 
         if (shouldRun)
         {

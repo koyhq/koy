@@ -8,6 +8,7 @@ using Koy.Core.Animation;
 using Koy.App.Resources;
 using Koy.App.Features.Notch.OSD;
 using Koy.Core.Display;
+using Koy.Core.Notch;
 using Koy.Platform.Shell;
 
 namespace Koy.App.Features.Notch;
@@ -322,8 +323,8 @@ public partial class NotchWindow : Window
         if (ViewModel is null || ViewModel.IsSearchOpen)
             return;
 
-        // Tekerlek eylemi ayardan: 0 = panel değiştir, 1 = sistem sesi (yukarı = yükselt).
-        if (ViewModel.Settings.WheelAction == 1)
+        // Tekerlek eylemi ayardan: panel değiştir ya da sistem sesi (yukarı = yükselt).
+        if (ViewModel.Settings.Notch.WheelAction == WheelAction.Volume)
         {
             if (e.Delta != 0)
                 ViewModel.ControlCenter.AdjustVolume(e.Delta > 0 ? WheelVolumeStepPercent : -WheelVolumeStepPercent);

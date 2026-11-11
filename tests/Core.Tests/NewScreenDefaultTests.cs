@@ -19,7 +19,7 @@ public class NewScreenDefaultTests
     public void Varsayilan_yeni_ekran_modu_cenik_ve_dock_acik()
     {
         Assert.Equal(NewScreenMode.NotchAndDock, MonitorPolicy.DefaultNewScreenMode);
-        Assert.Equal(NewScreenMode.NotchAndDock, new AppSettings().NewScreenDefault);
+        Assert.Equal(NewScreenMode.NotchAndDock, new AppSettings().Displays.NewScreenDefault);
     }
 
     [Fact]
@@ -28,7 +28,7 @@ public class NewScreenDefaultTests
         var settings = new AppSettings();
 
         var result = MonitorPolicy.Resolve(
-            settings.Monitors, settings.NewScreenDefault,
+            settings.Displays.Monitors, settings.Displays.NewScreenDefault,
             [Mon(IdMain, "A", true, 0), Mon(IdSide, "B", false, 1920)]);
 
         Assert.All(result, a => Assert.True(a.NotchEnabled && a.DockEnabled));
@@ -43,11 +43,11 @@ public class NewScreenDefaultTests
         var side = Mon(IdSide, "B", false, 1920);
 
         // Kullanıcı Ekranlar sayfasında yan ekranın dock'unu kapatır.
-        var monitors = MonitorPolicy.Update(settings.Monitors, settings.NewScreenDefault, side, s => s with { DockEnabled = false });
+        var monitors = MonitorPolicy.Update(settings.Displays.Monitors, settings.Displays.NewScreenDefault, side, s => s with { DockEnabled = false });
         Assert.Single(monitors);
 
         // Sonra üçüncü bir ekran (TV) takılır: kaydı yok, varsayılan açık uygulanır; yan ekran kapalı kalır.
-        var result = MonitorPolicy.Resolve(monitors, settings.NewScreenDefault,
+        var result = MonitorPolicy.Resolve(monitors, settings.Displays.NewScreenDefault,
             [Mon(IdMain, "A", true, 0), side, Mon(IdTv, "TV", false, 3840)]);
 
         Assert.True(result[0].DockEnabled && !result[0].IsKnown);
@@ -61,12 +61,12 @@ public class NewScreenDefaultTests
     {
         foreach (var target in new[] { "Primary", "All", "" })
         {
-            var migrated = SettingsMigration.Migrate(new AppSettings { Version = 2, MonitorTarget = target });
+            var migrated = SettingsFile.Load("{ \"Version\": 2, \"MonitorTarget\": \"" + target + "\" }");
 
-            Assert.Empty(migrated.Monitors);
-            Assert.Equal(NewScreenMode.NotchAndDock, migrated.NewScreenDefault);
+            Assert.Empty(migrated.Displays.Monitors);
+            Assert.Equal(NewScreenMode.NotchAndDock, migrated.Displays.NewScreenDefault);
 
-            var result = MonitorPolicy.Resolve(migrated.Monitors, migrated.NewScreenDefault,
+            var result = MonitorPolicy.Resolve(migrated.Displays.Monitors, migrated.Displays.NewScreenDefault,
                 [Mon(IdMain, "A", true, 0), Mon(IdSide, "B", false, 1920)]);
             Assert.All(result, a => Assert.True(a.NotchEnabled && a.DockEnabled));
         }

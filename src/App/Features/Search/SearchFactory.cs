@@ -67,7 +67,7 @@ public static class SearchFactory
 
         void Add(ISearchSource source)
         {
-            if (!settings.SearchDisabledSources.Contains(source.Id))
+            if (!settings.Search.DisabledSources.Contains(source.Id))
                 sources.Add(source);
         }
 
@@ -151,11 +151,11 @@ public static class SearchFactory
             T("SearchRecentQueries"),
             T("SearchActRemove"))
         {
-            RetainPriorSearch = settings.SearchRetainPrior,
-            HistoryMode = settings.SearchHistoryMode
+            RetainPriorSearch = settings.Search.RetainPrior,
+            HistoryMode = settings.Search.HistoryMode
         };
 
-        return new SearchViewModel(panel, dispatcher, settings.SearchPinned, savePinned);
+        return new SearchViewModel(panel, dispatcher, settings.Search.Pinned, savePinned);
     }
 
     /// <summary>Kayıtlı arama geçmişini siler (Ayarlar).</summary>

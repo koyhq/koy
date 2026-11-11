@@ -1,0 +1,137 @@
+{
+  "Version": 3,
+  "Language": "tr",
+  "NotchEnabled": false,
+  "DockEnabled": false,
+  "NotchVisibility": "Peek",
+  "DockVisibility": "Smart",
+  "DockHoverMagnify": false,
+  "DockStyle": "FullWidth",
+  "DockIconAlignment": "Right",
+  "DockProximity": "Dodge",
+  "DockHideInFullscreen": false,
+  "DockEdgeReveal": false,
+  "DockShowStartButton": false,
+  "DockStartIcon": "Custom",
+  "DockStartIconPath": "C:\\Icons\\start.png",
+  "DockShowFolders": false,
+  "DockShowRecents": false,
+  "DockShowTray": false,
+  "DockSmallTray": false,
+  "DockShowBadges": false,
+  "DockPinnedOrder": [
+    "Obsidian.lnk",
+    "Firefox.lnk",
+    "Terminal.lnk"
+  ],
+  "DockFolders": [
+    {
+      "Id": "f1a2b3c4",
+      "Name": "Ara\u00E7lar",
+      "Items": [
+        "calc.lnk",
+        "notepad.lnk"
+      ]
+    },
+    {
+      "Id": "d5e6f7a8",
+      "Name": "Oyunlar",
+      "Items": [
+        "steam.lnk"
+      ]
+    }
+  ],
+  "DockThumbnailPreview": false,
+  "DockThumbnailDelayMs": 650,
+  "DockDodgeDelayMs": 275,
+  "MonitorTarget": "\\\\.\\DISPLAY2",
+  "Monitors": {
+    "kimlik-1": {
+      "NotchEnabled": true,
+      "DockEnabled": false,
+      "Name": "Ofis"
+    },
+    "kimlik-2": {
+      "NotchEnabled": false,
+      "DockEnabled": true,
+      "Name": "Salon"
+    }
+  },
+  "NewScreenDefault": "NotchOnly",
+  "AccentColor": "#FF8800",
+  "UseWindowsAccent": true,
+  "FirstRunCompleted": true,
+  "LastSeenVersion": "0.2.5",
+  "Theme": "Light",
+  "CornerRadius": 17,
+  "AnimationSpeed": "H\u0131zl\u0131",
+  "RespectReduceMotion": false,
+  "HideWindowsTaskbar": false,
+  "AutoCheckUpdates": false,
+  "UpdateChannel": "\u00D6nizleme",
+  "BatterySaverReduceMotion": false,
+  "WeatherRefreshInterval": "1h",
+  "DockIconSize": 36,
+  "IdleDisplayMode": 3,
+  "NotchOpenBehavior": 1,
+  "Material": "Cam",
+  "MaterialReadabilityGuard": false,
+  "NotchFollowsMaterial": false,
+  "NotchStyle": "Y\u00FCzen",
+  "WheelAction": 1,
+  "MiddleClickAction": 1,
+  "DockIndicatorStyle": 1,
+  "ShortcutToggleNotch": "Ctrl\u002BAlt\u002B1",
+  "ShortcutOpenShelf": "Ctrl\u002BAlt\u002B2",
+  "ShortcutToggleDock": "Ctrl\u002BAlt\u002B3",
+  "ShortcutOpenMenu": "Ctrl\u002BAlt\u002B4",
+  "ShortcutPlayPause": "Ctrl\u002BAlt\u002B5",
+  "ShortcutOpenSearch": "Ctrl\u002BAlt\u002B6",
+  "ShortcutOpenSearchClipboard": "Ctrl\u002BAlt\u002B7",
+  "ShortcutVoiceCommand": "Ctrl\u002BAlt\u002B8",
+  "VoiceHarness": "Codex",
+  "VoiceClaudePermission": "AcceptEdits",
+  "VoiceModel": "opus",
+  "VoiceCustomCommand": "my-ai {prompt}",
+  "VoiceWorkingDirectory": "C:\\Workspace",
+  "VoiceTimeoutSeconds": 120,
+  "SearchRetainPrior": false,
+  "SearchHistoryMode": "ImmediateCompletion",
+  "SearchDisabledSources": [
+    "bookmarks",
+    "files"
+  ],
+  "SearchPinned": true,
+  "PomodoroLongBreakMinutes": 20,
+  "PomodoroShortBreakMinutes": 7,
+  "PomodoroWorkMinutes": 40,
+  "ShowBrightnessOsd": false,
+  "ShowVolumeOsd": false,
+  "MusicShowWaveform": false,
+  "MusicCardStyle": "Artwork",
+  "MusicLyricsEnabled": true,
+  "NotchHideInFullscreen": false,
+  "ShowPrivacyIndicator": false,
+  "NotchShowNotifications": false,
+  "NotchNotificationsHideBody": true,
+  "ControlCenterLayout": [
+    "bluetooth",
+    "wifi"
+  ],
+  "EnabledPanels": [
+    "home",
+    "calendar",
+    "system"
+  ],
+  "WeatherLatitude": 41.0082,
+  "WeatherLongitude": 28.9784,
+  "WeatherCity": "\u0130stanbul",
+  "WeatherLocationSource": "City",
+  "WeatherUseLocation": true,
+  "WeatherLocationUpdatedUnix": 1762800000,
+  "ClipboardHistoryEnabled": false,
+  "QuickLaunchItems": [
+    "C:\\Apps\\a.exe",
+    "C:\\Docs"
+  ]
+}

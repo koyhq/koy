@@ -26,7 +26,7 @@ public static class Program
         ["genel", "centik", "dock", "ekranlar", "gorunum", "kisayollar", "dikte", "performans", "hakkinda"];
 
     /// <summary>Görüntülerde kullanılan malzeme (Katı / Buzlu / Cam).</summary>
-    internal static string Material { get; private set; } = "Katı";
+    internal static Koy.Core.Appearance.MaterialLevel Material { get; private set; } = Koy.Core.Appearance.MaterialLevel.Solid;
 
     /// <summary>Çizimin arkasındaki zemin; saydam yüzeyler bunu gösterir.</summary>
     private static Color Backdrop = Color.FromRgb(0x7A, 0x80, 0x8C);
@@ -40,12 +40,12 @@ public static class Program
         var scene = (Arg(args, "--scene") ?? "all").ToLowerInvariant();
         // Malzeme (kati | buzlu | cam) ve saydam yüzeyin arkasındaki duvar kağıdı (light | dark; verilmezse orta gri).
         // Duvar kağıdı hiçbir zaman gerçek masaüstünden okunmaz; verilen renk okunabilirlik korumasına da girer.
-        Material = Koy.Core.Appearance.MaterialSetting.Normalize(Arg(args, "--material") switch
+        Material = Arg(args, "--material") switch
         {
-            "buzlu" or "frosted" => "Buzlu",
-            "cam" or "glass" => "Cam",
-            _ => "Katı"
-        });
+            "buzlu" or "frosted" => Koy.Core.Appearance.MaterialLevel.Frosted,
+            "cam" or "glass" => Koy.Core.Appearance.MaterialLevel.Glass,
+            _ => Koy.Core.Appearance.MaterialLevel.Solid
+        };
         Koy.Core.Appearance.Rgb? wallpaper = (Arg(args, "--wallpaper") ?? "").ToLowerInvariant() switch
         {
             "light" => new Koy.Core.Appearance.Rgb(236, 240, 246),
@@ -101,7 +101,7 @@ public static class Program
         // Ayarlar geçici bir dosyada: gerçek %AppData%\Koy\settings.json'a dokunulmaz.
         var tempSettings = Path.Combine(Path.GetTempPath(), "koy-uisnap-" + Guid.NewGuid().ToString("N") + ".json");
         var store = new SettingsStore(tempSettings);
-        store.Save(new AppSettings { FirstRunCompleted = true, Material = Material });
+        store.Save(new AppSettings { General = new GeneralSettings { FirstRunCompleted = true }, Appearance = new AppearanceSettings { Material = Material } });
 
         try
         {
@@ -181,7 +181,7 @@ public static class Program
         var tempDir = Path.Combine(Path.GetTempPath(), "koy-uisnap-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempDir);
         var store = new SettingsStore(Path.Combine(tempDir, "settings.json"));
-        store.Save(new AppSettings { FirstRunCompleted = true, Material = Material });
+        store.Save(new AppSettings { General = new GeneralSettings { FirstRunCompleted = true }, Appearance = new AppearanceSettings { Material = Material } });
 
         try
         {
@@ -224,23 +224,35 @@ public static class Program
 
     private static NotchSet MakeNotch(bool music, IReadOnlyList<Koy.Core.Shelf.ShelfItem>? shelf = null, List<string>? tileOrder = null,
         bool locationBlocked = false, bool audioConnected = true, Func<Koy.Core.SystemStats.ISystemStatsService>? statsFactory = null,
-        bool brightnessSupported = true, bool wideCover = false, string notchStyle = Koy.Core.Notch.NotchStyle.Pinned,
-        int idleMode = Koy.Core.Notch.IdleDisplay.ClockAndBattery, FakePower? power = null, string? language = null)
+        bool brightnessSupported = true, bool wideCover = false, Koy.Core.Notch.NotchStyleMode notchStyle = Koy.Core.Notch.NotchStyleMode.Pinned,
+        Koy.Core.Notch.IdleDisplayMode idleMode = Koy.Core.Notch.IdleDisplayMode.ClockAndBattery, FakePower? power = null, string? language = null)
     {
         var settings = new AppSettings
         {
-            FirstRunCompleted = true,
-            NotchStyle = notchStyle,
-            IdleDisplayMode = idleMode,
-            Material = Material,
-            WeatherLocationSource = Koy.Core.Weather.WeatherLocationSource.City,
-            WeatherCity = "İstanbul, Türkiye",
-            WeatherLatitude = 41.01,
-            WeatherLongitude = 28.97,
-            ControlCenterLayout = tileOrder ?? new AppSettings().ControlCenterLayout
+            General = new GeneralSettings
+            {
+                FirstRunCompleted = true
+            },
+            Notch = new NotchSettings
+            {
+                Style = notchStyle,
+                IdleDisplay = idleMode,
+                ControlCenterLayout = tileOrder is null ? new AppSettings().Notch.ControlCenterLayout : new Koy.Core.Settings.ValueList<string>(tileOrder)
+            },
+            Appearance = new AppearanceSettings
+            {
+                Material = Material
+            },
+            Weather = new WeatherSettings
+            {
+                LocationSource = Koy.Core.Weather.WeatherLocationSource.City,
+                City = "İstanbul, Türkiye",
+                Latitude = 41.01,
+                Longitude = 28.97
+            }
         };
         if (language is not null)
-            settings.Language = language;
+            settings.General.Language = language;
 
         var controller = new Koy.Core.Notch.NotchController();
         controller.SetEnabledPanels(Koy.Core.Notch.NotchPanels.Order);
@@ -343,14 +355,14 @@ public static class Program
         {
             shape.Width = Koy.Core.Notch.NotchLayout.ExpandedWidth;
             shape.Height = Koy.Core.Notch.NotchLayout.ExpandedHeight;
-            shape.CornerRadius = Koy.Core.Notch.NotchStyle.CornerRadius(set.Vm.Settings.NotchStyle, Koy.Core.Notch.NotchSurface.Expanded, shape.Height, 34);
+            shape.CornerRadius = Koy.Core.Notch.NotchStyle.CornerRadius(set.Vm.Settings.Notch.Style, Koy.Core.Notch.NotchSurface.Expanded, shape.Height, 34);
         }
         else
         {
             var peek = set.Vm.State == Koy.Core.Notch.NotchState.Peek;
             shape.Width = peek ? 300 : set.Vm.IsMusicPlaying ? 280 : 236;
             shape.Height = peek ? 38 : 34;
-            shape.CornerRadius = Koy.Core.Notch.NotchStyle.CornerRadius(set.Vm.Settings.NotchStyle, Koy.Core.Notch.NotchSurface.Closed, shape.Height, 18);
+            shape.CornerRadius = Koy.Core.Notch.NotchStyle.CornerRadius(set.Vm.Settings.Notch.Style, Koy.Core.Notch.NotchSurface.Closed, shape.Height, 18);
         }
 
         Settle();
@@ -386,7 +398,7 @@ public static class Program
         set.Vm.Dispose();
 
         // Halka pil ve gün/saat (#63): %43, düşük pil, şarjda, pilsiz kasa, zamanlayıcı, Peek, İngilizce.
-        var ring = Koy.Core.Notch.IdleDisplay.RingClockDay;
+        var ring = Koy.Core.Notch.IdleDisplayMode.RingClockDay;
         set = MakeNotch(music: false, idleMode: ring, power: new FakePower(43));
         ShotNotch(set, name("halka"), expanded: false);
         set.Vm.Controller.OnMouseEnter();
@@ -412,7 +424,7 @@ public static class Program
         set.Vm.Dispose();
 
         // Yüzen ada: kulaksız kapsül (pencerenin 9 DIP kayması canlı pencerede; burada yalnız şekil).
-        set = MakeNotch(music: false, notchStyle: Koy.Core.Notch.NotchStyle.Floating);
+        set = MakeNotch(music: false, notchStyle: Koy.Core.Notch.NotchStyleMode.Floating);
         ShotNotch(set, name("yuzen-kapali"), expanded: false);
         set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
         ShotNotch(set, name("yuzen-acik"), expanded: true);
@@ -431,15 +443,15 @@ public static class Program
         set.Vm.Dispose();
 
         // Müzik kartı stilleri (#66): Albüm kapağı (küçük ve büyük kart) ve Düz.
-        foreach (var style in new[] { "Artwork", "Neutral" })
+        foreach (var style in new[] { Koy.Core.Media.MusicCardStyle.Artwork, Koy.Core.Media.MusicCardStyle.Neutral })
         {
             set = MakeNotch(music: true);
             set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
             set.Vm.Music.SetCardStyle(style);
             Flush();
-            ShotNotch(set, name("ana-muzik-" + style.ToLowerInvariant()), expanded: true);
+            ShotNotch(set, name("ana-muzik-" + style.ToString().ToLowerInvariant()), expanded: true);
             set.Vm.Home.ToggleMusicExpandedCommand.Execute(null);
-            ShotNotch(set, name("ana-muzik-" + style.ToLowerInvariant() + "-buyuk"), expanded: true);
+            ShotNotch(set, name("ana-muzik-" + style.ToString().ToLowerInvariant() + "-buyuk"), expanded: true);
             set.Vm.Dispose();
         }
 
@@ -648,7 +660,7 @@ public static class Program
     {
         var tempSettings = Path.Combine(Path.GetTempPath(), "koy-uisnap-" + Guid.NewGuid().ToString("N") + ".json");
         var store = new SettingsStore(tempSettings);
-        store.Save(new AppSettings { FirstRunCompleted = true, Material = Material });
+        store.Save(new AppSettings { General = new GeneralSettings { FirstRunCompleted = true }, Appearance = new AppearanceSettings { Material = Material } });
 
         try
         {

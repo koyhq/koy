@@ -51,10 +51,10 @@ public static class WindowFrame
 
         var settings = ThemeManager.LastSettings ?? new AppSettings();
         var level = MaterialState.ForWindow(settings, ThemeManager.Current);
-        var sharp = CornerSetting.Resolve(settings.CornerRadius) == CornerStyle.Sharp;
+        var sharp = CornerSetting.Resolve(settings.Appearance.CornerRadius) == CornerStyle.Sharp;
         BackdropService.ApplyWindowFrame(
             hwnd,
-            level == MaterialSetting.Solid ? WindowBackdropType.None : WindowBackdropType.Acrylic,
+            level == MaterialLevel.Solid ? WindowBackdropType.None : WindowBackdropType.Acrylic,
             ThemeManager.Current == ResolvedTheme.Dark,
             sharp ? WindowCornerStyle.RoundSmall : WindowCornerStyle.Round);
     }

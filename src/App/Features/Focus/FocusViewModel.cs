@@ -114,7 +114,7 @@ public sealed partial class FocusViewModel : ObservableObject, IDisposable
         _dispatcher = dispatcher ?? Dispatcher.CurrentDispatcher;
 
         DurationsText = string.Format(
-            Strings.Get("FocusDurations"), settings.PomodoroWorkMinutes, settings.PomodoroShortBreakMinutes, settings.PomodoroLongBreakMinutes);
+            Strings.Get("FocusDurations"), settings.Focus.PomodoroWorkMinutes, settings.Focus.PomodoroShortBreakMinutes, settings.Focus.PomodoroLongBreakMinutes);
 
         Tabs =
         [

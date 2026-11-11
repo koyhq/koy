@@ -12,8 +12,8 @@ public class WeatherLocationTests
     {
         var settings = new AppSettings();
 
-        Assert.Equal(WeatherLocationSource.None, settings.WeatherLocationSource);
-        Assert.False(settings.WeatherUseLocation);
+        Assert.Equal(WeatherLocationSource.None, settings.Weather.LocationSource);
+        Assert.False(settings.Weather.UseLocation);
         Assert.False(WeatherLocationPolicy.HasLocation(settings));
     }
 
@@ -21,7 +21,7 @@ public class WeatherLocationTests
     public void Old_hardcoded_istanbul_without_a_source_is_not_a_location()
     {
         // Eski ayar dosyaları İstanbul'u varsayılan olarak yazmıştı; kaynak yoksa yok sayılır.
-        var settings = new AppSettings { WeatherLatitude = 41.01, WeatherLongitude = 28.97, WeatherCity = "İstanbul" };
+        var settings = new AppSettings { Weather = new WeatherSettings { Latitude = 41.01, Longitude = 28.97, City = "İstanbul" } };
 
         Assert.False(WeatherLocationPolicy.HasLocation(settings));
     }
@@ -32,7 +32,7 @@ public class WeatherLocationTests
     [InlineData(10, 181)]
     public void Invalid_coordinates_are_not_a_location(double lat, double lon)
     {
-        var settings = new AppSettings { WeatherLocationSource = WeatherLocationSource.City, WeatherLatitude = lat, WeatherLongitude = lon };
+        var settings = new AppSettings { Weather = new WeatherSettings { LocationSource = WeatherLocationSource.City, Latitude = lat, Longitude = lon } };
 
         Assert.False(WeatherLocationPolicy.HasLocation(settings));
     }
@@ -46,7 +46,7 @@ public class WeatherLocationTests
     [Fact]
     public void Refresh_is_asked_when_allowed_but_no_device_location_yet()
     {
-        var settings = new AppSettings { WeatherUseLocation = true };
+        var settings = new AppSettings { Weather = new WeatherSettings { UseLocation = true } };
 
         Assert.True(WeatherLocationPolicy.ShouldRefreshDeviceLocation(settings, Now));
     }
@@ -68,7 +68,7 @@ public class WeatherLocationTests
     public void Device_location_is_refreshed_at_most_once_a_day(int hoursAgo, bool expected)
     {
         var settings = WeatherLocationPolicy.ApplyDeviceLocation(
-            new AppSettings { WeatherUseLocation = true },
+            new AppSettings { Weather = new WeatherSettings { UseLocation = true } },
             new LocationResult(LocationStatus.Success, 41.0, 29.0),
             Now.AddHours(-hoursAgo));
 
@@ -79,7 +79,7 @@ public class WeatherLocationTests
     public void A_record_dated_in_the_future_is_refreshed()
     {
         var settings = WeatherLocationPolicy.ApplyDeviceLocation(
-            new AppSettings { WeatherUseLocation = true },
+            new AppSettings { Weather = new WeatherSettings { UseLocation = true } },
             new LocationResult(LocationStatus.Success, 41.0, 29.0),
             Now.AddHours(5));
 
@@ -89,15 +89,15 @@ public class WeatherLocationTests
     [Fact]
     public void Successful_device_location_sets_coordinates_and_clears_the_city()
     {
-        var before = new AppSettings { WeatherUseLocation = true, WeatherCity = "Eski" };
+        var before = new AppSettings { Weather = new WeatherSettings { UseLocation = true, City = "Eski" } };
 
         var after = WeatherLocationPolicy.ApplyDeviceLocation(before, new LocationResult(LocationStatus.Success, 40.5, 29.5), Now);
 
-        Assert.Equal(WeatherLocationSource.Device, after.WeatherLocationSource);
-        Assert.Equal(40.5, after.WeatherLatitude);
-        Assert.Equal(29.5, after.WeatherLongitude);
-        Assert.Equal("", after.WeatherCity);
-        Assert.Equal(Now.ToUnixTimeSeconds(), after.WeatherLocationUpdatedUnix);
+        Assert.Equal(WeatherLocationSource.Device, after.Weather.LocationSource);
+        Assert.Equal(40.5, after.Weather.Latitude);
+        Assert.Equal(29.5, after.Weather.Longitude);
+        Assert.Equal("", after.Weather.City);
+        Assert.Equal(Now.ToUnixTimeSeconds(), after.Weather.LocationUpdatedUnix);
         Assert.True(WeatherLocationPolicy.HasLocation(after));
     }
 
@@ -108,9 +108,9 @@ public class WeatherLocationTests
     [InlineData(LocationStatus.Error)]
     public void Failed_device_location_leaves_settings_untouched(LocationStatus status)
     {
-        var before = WeatherLocationPolicy.ApplyCity(new AppSettings { WeatherUseLocation = true },
+        var before = WeatherLocationPolicy.ApplyCity(new AppSettings { Weather = new WeatherSettings { UseLocation = true } },
             new GeoPlace("Ankara", null, null, 39.9, 32.8), Now);
-        before = before with { WeatherUseLocation = true };
+        before = before with { Weather = before.Weather with { UseLocation = true } };
 
         var after = WeatherLocationPolicy.ApplyDeviceLocation(before, new LocationResult(status), Now.AddDays(1));
 
@@ -120,7 +120,7 @@ public class WeatherLocationTests
     [Fact]
     public void Out_of_range_device_coordinates_are_rejected()
     {
-        var before = new AppSettings { WeatherUseLocation = true };
+        var before = new AppSettings { Weather = new WeatherSettings { UseLocation = true } };
 
         Assert.Equal(before, WeatherLocationPolicy.ApplyDeviceLocation(before, new LocationResult(LocationStatus.Success, 120, 10), Now));
     }
@@ -128,31 +128,31 @@ public class WeatherLocationTests
     [Fact]
     public void Choosing_a_city_turns_device_location_off()
     {
-        var before = new AppSettings { WeatherUseLocation = true, WeatherLocationSource = WeatherLocationSource.Device, WeatherLatitude = 41, WeatherLongitude = 29 };
+        var before = new AppSettings { Weather = new WeatherSettings { UseLocation = true, LocationSource = WeatherLocationSource.Device, Latitude = 41, Longitude = 29 } };
 
         var after = WeatherLocationPolicy.ApplyCity(before, new GeoPlace("İzmir", "İzmir", "Türkiye", 38.4, 27.1), Now);
 
-        Assert.Equal(WeatherLocationSource.City, after.WeatherLocationSource);
-        Assert.False(after.WeatherUseLocation);
-        Assert.Equal("İzmir, Türkiye", after.WeatherCity);
-        Assert.Equal(38.4, after.WeatherLatitude);
+        Assert.Equal(WeatherLocationSource.City, after.Weather.LocationSource);
+        Assert.False(after.Weather.UseLocation);
+        Assert.Equal("İzmir, Türkiye", after.Weather.City);
+        Assert.Equal(38.4, after.Weather.Latitude);
     }
 
     [Fact]
     public void Turning_location_off_drops_device_coordinates_but_keeps_a_chosen_city()
     {
         var device = WeatherLocationPolicy.ApplyDeviceLocation(
-            new AppSettings { WeatherUseLocation = true }, new LocationResult(LocationStatus.Success, 41, 29), Now);
+            new AppSettings { Weather = new WeatherSettings { UseLocation = true } }, new LocationResult(LocationStatus.Success, 41, 29), Now);
         var city = WeatherLocationPolicy.ApplyCity(new AppSettings(), new GeoPlace("Bursa", null, null, 40.2, 29.0), Now);
 
         var offDevice = WeatherLocationPolicy.SetUseLocation(device, false);
-        var offCity = WeatherLocationPolicy.SetUseLocation(city with { WeatherUseLocation = true }, false);
+        var offCity = WeatherLocationPolicy.SetUseLocation(city with { Weather = city.Weather with { UseLocation = true } }, false);
 
         Assert.False(WeatherLocationPolicy.HasLocation(offDevice));
-        Assert.Equal(0, offDevice.WeatherLatitude);
-        Assert.False(offDevice.WeatherUseLocation);
+        Assert.Equal(0, offDevice.Weather.Latitude);
+        Assert.False(offDevice.Weather.UseLocation);
         Assert.True(WeatherLocationPolicy.HasLocation(offCity));
-        Assert.Equal(WeatherLocationSource.City, offCity.WeatherLocationSource);
+        Assert.Equal(WeatherLocationSource.City, offCity.Weather.LocationSource);
     }
 
     [Fact]
@@ -171,15 +171,15 @@ public class WeatherLocationTests
         {
             var store = new SettingsStore(Path.Combine(dir, "settings.json"));
             var saved = WeatherLocationPolicy.ApplyDeviceLocation(
-                new AppSettings { WeatherUseLocation = true }, new LocationResult(LocationStatus.Success, 41.25, 29.75), Now);
+                new AppSettings { Weather = new WeatherSettings { UseLocation = true } }, new LocationResult(LocationStatus.Success, 41.25, 29.75), Now);
             store.Save(saved);
 
             var loaded = store.Load();
 
-            Assert.Equal(WeatherLocationSource.Device, loaded.WeatherLocationSource);
-            Assert.True(loaded.WeatherUseLocation);
-            Assert.Equal(41.25, loaded.WeatherLatitude);
-            Assert.Equal(Now.ToUnixTimeSeconds(), loaded.WeatherLocationUpdatedUnix);
+            Assert.Equal(WeatherLocationSource.Device, loaded.Weather.LocationSource);
+            Assert.True(loaded.Weather.UseLocation);
+            Assert.Equal(41.25, loaded.Weather.Latitude);
+            Assert.Equal(Now.ToUnixTimeSeconds(), loaded.Weather.LocationUpdatedUnix);
         }
         finally
         {

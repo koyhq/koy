@@ -8,11 +8,11 @@ public static class FirstRunPolicy
 {
     public static AppSettings ApplySafeDefaultsIfIncomplete(AppSettings settings)
     {
-        if (settings.FirstRunCompleted)
+        if (settings.General.FirstRunCompleted)
             return settings;
 
         // Dock görev çubuğunu gizler (AGENTS.md #12); kullanıcı henüz seçim yapmadığı için kapalı kalır.
-        return settings with { DockEnabled = false, HideWindowsTaskbar = false };
+        return settings with { Dock = settings.Dock with { Enabled = false, HideWindowsTaskbar = false } };
     }
 
     /// <summary>
@@ -20,5 +20,5 @@ public static class FirstRunPolicy
     /// <see cref="AppSettings.FirstRunCompleted"/> korunur; yoksa sıfırlama sihirbazı yeniden açardı.
     /// </summary>
     public static AppSettings CreateReset(AppSettings current) =>
-        new() { FirstRunCompleted = current.FirstRunCompleted };
+        new() { General = new GeneralSettings { FirstRunCompleted = current.General.FirstRunCompleted } };
 }
