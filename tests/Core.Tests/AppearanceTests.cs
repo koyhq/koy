@@ -6,27 +6,22 @@ namespace Koy.Core.Tests;
 public class AppearanceTests
 {
     [Theory]
-    [InlineData("Dark", false, ResolvedTheme.Dark)]
-    [InlineData("Koyu", true, ResolvedTheme.Dark)]
-    [InlineData("Light", false, ResolvedTheme.Light)]
-    [InlineData("Açık", false, ResolvedTheme.Light)]
-    [InlineData("System", true, ResolvedTheme.Light)]
-    [InlineData("Sistem", false, ResolvedTheme.Dark)]
-    [InlineData(null, true, ResolvedTheme.Dark)]
-    [InlineData("saçma", true, ResolvedTheme.Dark)]
-    public void Theme_setting_resolves_legacy_and_system_values(string? value, bool systemLight, ResolvedTheme expected)
+    [InlineData(AppTheme.Dark, false, ResolvedTheme.Dark)]
+    [InlineData(AppTheme.Dark, true, ResolvedTheme.Dark)]
+    [InlineData(AppTheme.Light, false, ResolvedTheme.Light)]
+    [InlineData(AppTheme.System, true, ResolvedTheme.Light)]
+    [InlineData(AppTheme.System, false, ResolvedTheme.Dark)]
+    public void Theme_setting_resolves_system_and_fixed_values(AppTheme value, bool systemLight, ResolvedTheme expected)
     {
         Assert.Equal(expected, ThemeSetting.Resolve(value, systemLight));
     }
 
     [Theory]
-    [InlineData("Sakin", 1.5)]
-    [InlineData("Normal", 1.0)]
-    [InlineData("Hızlı", 0.65)]
-    [InlineData("Kapalı", 0.0)]
-    [InlineData("fast", 0.65)]
-    [InlineData("bilinmeyen", 1.0)]
-    public void Speed_factor_follows_setting(string speed, double expected)
+    [InlineData(AnimationSpeed.Calm, 1.5)]
+    [InlineData(AnimationSpeed.Normal, 1.0)]
+    [InlineData(AnimationSpeed.Fast, 0.65)]
+    [InlineData(AnimationSpeed.Off, 0.0)]
+    public void Speed_factor_follows_setting(AnimationSpeed speed, double expected)
     {
         Assert.Equal(expected, MotionPolicy.SpeedFactor(speed));
     }
@@ -34,11 +29,11 @@ public class AppearanceTests
     [Fact]
     public void Reduce_motion_and_battery_saver_turn_motion_off()
     {
-        Assert.Equal(1.0, MotionPolicy.Scale("Normal", true, true, false));
-        Assert.Equal(0.0, MotionPolicy.Scale("Normal", true, false, false));
-        Assert.Equal(1.0, MotionPolicy.Scale("Normal", false, false, false));
-        Assert.Equal(0.0, MotionPolicy.Scale("Sakin", false, true, true));
-        Assert.Equal(0.0, MotionPolicy.Scale("Kapalı", false, true, false));
+        Assert.Equal(1.0, MotionPolicy.Scale(AnimationSpeed.Normal, true, true, false));
+        Assert.Equal(0.0, MotionPolicy.Scale(AnimationSpeed.Normal, true, false, false));
+        Assert.Equal(1.0, MotionPolicy.Scale(AnimationSpeed.Normal, false, false, false));
+        Assert.Equal(0.0, MotionPolicy.Scale(AnimationSpeed.Calm, false, true, true));
+        Assert.Equal(0.0, MotionPolicy.Scale(AnimationSpeed.Off, false, true, false));
     }
 
     [Fact]

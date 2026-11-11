@@ -1,3 +1,4 @@
+using Koy.Core.Appearance;
 using Koy.Core.Display;
 using Koy.Core.Dock;
 using Koy.Core.Settings;
@@ -124,8 +125,8 @@ public class DockSettingsDiffTests
         var after = new AppSettings();
         switch (field)
         {
-            case "Material": after.Material = "Yarı saydam"; break;
-            default: after.AnimationSpeed = "Hızlı"; break;
+            case "Material": after.Material = MaterialLevel.Frosted; break;
+            default: after.AnimationSpeed = AnimationSpeed.Fast; break;
         }
 
         var d = DockSettingsDiff.Compare(new AppSettings(), after);

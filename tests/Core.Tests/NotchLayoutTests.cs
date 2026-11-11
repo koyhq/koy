@@ -31,10 +31,10 @@ public class NotchLayoutTests
     }
 
     [Theory]
-    [InlineData(IdleDisplay.ClockAndBattery, true)]
-    [InlineData(IdleDisplay.ClockOnly, false)]
-    [InlineData(IdleDisplay.Nothing, false)]
-    public void Peek_details_follow_the_idle_display_setting(int mode, bool expected)
+    [InlineData(IdleDisplayMode.ClockAndBattery, true)]
+    [InlineData(IdleDisplayMode.ClockOnly, false)]
+    [InlineData(IdleDisplayMode.Nothing, false)]
+    public void Peek_details_follow_the_idle_display_setting(IdleDisplayMode mode, bool expected)
     {
         Assert.Equal(expected, IdleDisplay.ShowPeekDetails(mode));
     }

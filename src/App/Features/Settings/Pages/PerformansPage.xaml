@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:Koy.App.Features.Settings"
              xmlns:res="clr-namespace:Koy.App.Resources"
+             xmlns:weather="clr-namespace:Koy.Core.Weather;assembly=Koy.Core"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:KoyWindowViewModel}">
 
@@ -87,9 +88,9 @@
                 </StackPanel>
                 <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [WeatherRefreshTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="180" SelectedValuePath="Tag"
                           SelectedValue="{Binding WeatherRefreshInterval}" Style="{StaticResource SettingComboBoxStyle}">
-                    <ComboBoxItem Content="{Binding [Interval30m], Source={x:Static res:Loc.Instance}}" Tag="30m" />
-                    <ComboBoxItem Content="{Binding [Interval1h], Source={x:Static res:Loc.Instance}}" Tag="1h" />
-                    <ComboBoxItem Content="{Binding [IntervalStartupOnly], Source={x:Static res:Loc.Instance}}" Tag="startup" />
+                    <ComboBoxItem Content="{Binding [Interval30m], Source={x:Static res:Loc.Instance}}" Tag="{x:Static weather:WeatherRefreshInterval.Every30Minutes}" />
+                    <ComboBoxItem Content="{Binding [Interval1h], Source={x:Static res:Loc.Instance}}" Tag="{x:Static weather:WeatherRefreshInterval.Hourly}" />
+                    <ComboBoxItem Content="{Binding [IntervalStartupOnly], Source={x:Static res:Loc.Instance}}" Tag="{x:Static weather:WeatherRefreshInterval.OnStartup}" />
                 </ComboBox>
             </Grid>
         </Border>

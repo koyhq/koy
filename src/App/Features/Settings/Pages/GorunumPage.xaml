@@ -134,13 +134,13 @@
                     <StackPanel Orientation="Horizontal">
                         <RadioButton GroupName="Material" Style="{StaticResource SegRadioStyle}"
                                      Content="{Binding [MaterialSolid], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding Material, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Katı}" />
+                                     IsChecked="{Binding Material, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Solid}" />
                         <RadioButton GroupName="Material" Style="{StaticResource SegRadioStyle}"
                                      Content="{Binding [MaterialFrosted], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding Material, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Buzlu}" />
+                                     IsChecked="{Binding Material, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Frosted}" />
                         <RadioButton GroupName="Material" Style="{StaticResource SegRadioStyle}"
                                      Content="{Binding [MaterialGlass], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding Material, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Cam}" />
+                                     IsChecked="{Binding Material, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Glass}" />
                     </StackPanel>
                 </Border>
             </Grid>
@@ -219,16 +219,16 @@
                     <StackPanel Orientation="Horizontal">
                         <RadioButton GroupName="Anim" Style="{StaticResource SegRadioStyle}"
                                      Content="{Binding [AnimGentle], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding AnimationSpeed, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Sakin}" />
+                                     IsChecked="{Binding AnimationSpeed, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Calm}" />
                         <RadioButton GroupName="Anim" Style="{StaticResource SegRadioStyle}"
                                      Content="{Binding [AnimNormal], Source={x:Static res:Loc.Instance}}"
                                      IsChecked="{Binding AnimationSpeed, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Normal}" />
                         <RadioButton GroupName="Anim" Style="{StaticResource SegRadioStyle}"
                                      Content="{Binding [AnimFast], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding AnimationSpeed, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Hızlı}" />
+                                     IsChecked="{Binding AnimationSpeed, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Fast}" />
                         <RadioButton GroupName="Anim" Style="{StaticResource SegRadioStyle}"
                                      Content="{Binding [AnimOff], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding AnimationSpeed, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Kapalı}" />
+                                     IsChecked="{Binding AnimationSpeed, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Off}" />
                     </StackPanel>
                 </Border>
             </Grid>

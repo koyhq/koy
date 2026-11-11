@@ -12,6 +12,7 @@ using Koy.Core.Settings;
 using Koy.Core.Uninstall;
 using Koy.Core.Updates;
 using Koy.Core.Visibility;
+using Koy.Core.Weather;
 using Koy.Core.Voice;
 using Koy.App.Features.Notch;
 using Koy.Core.Notifications;
@@ -51,7 +52,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _autoCheckUpdates = true;
 
     [ObservableProperty]
-    private string _updateChannel = "Kararlı";
+    private UpdateChannel _updateChannel = UpdateChannel.Stable;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(LastCheckText), nameof(AboutStatusText), nameof(CheckButtonText), nameof(CanCheckUpdates))]
@@ -93,10 +94,10 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _notchHideInFullscreen = true;
 
     [ObservableProperty]
-    private int _idleDisplayMode; // 0: Saat ve pil, 1: Yalnız saat, 2: Hiçbiri
+    private IdleDisplayMode _idleDisplayMode;
 
     [ObservableProperty]
-    private string _notchStyle = Koy.Core.Notch.NotchStyle.Pinned; // "Yapışık" ya da "Yüzen"
+    private NotchStyleMode _notchStyle = NotchStyleMode.Pinned;
 
     [ObservableProperty]
     private bool _musicShowWaveform = true;
@@ -105,7 +106,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _musicLyricsEnabled;
 
     [ObservableProperty]
-    private string _musicCardStyle = MusicCardStyleSetting.Tinted;
+    private MusicCardStyle _musicCardStyle = MusicCardStyle.Tinted;
 
     [ObservableProperty]
     private bool _showVolumeOsd = true;
@@ -153,7 +154,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _clipboardHistoryEnabled = true;
 
     [ObservableProperty]
-    private int _notchOpenBehavior = 1; // 0: Üzerine gelince, 1: Tıklayınca
+    private NotchOpenBehavior _notchOpenBehavior = NotchOpenBehavior.Click;
 
     // --- DOCK ---
     [ObservableProperty]
@@ -194,7 +195,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _dockHoverMagnify = true;
 
     [ObservableProperty]
-    private int _dockIndicatorStyle; // 0: Nokta, 1: Çizgi
+    private DockIndicatorStyle _dockIndicatorStyle;
 
     [ObservableProperty]
     private bool _dockShowBadges = true;
@@ -280,7 +281,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     // --- GÖRÜNÜM ---
     [ObservableProperty]
-    private string _theme = "Dark";
+    private AppTheme _theme = AppTheme.Dark;
 
     [ObservableProperty]
     private string _accentColor = "#3B82F6";
@@ -289,7 +290,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _useWindowsAccent;
 
     [ObservableProperty]
-    private string _material = "Katı";
+    private MaterialLevel _material = MaterialLevel.Solid;
 
     /// <summary>Okunabilirlik koruması: açık duvar kağıdında saydam malzeme daha opak seviyeye çıkar.</summary>
     [ObservableProperty]
@@ -303,17 +304,17 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private double _cornerRadius = 12.0;
 
     [ObservableProperty]
-    private string _animationSpeed = "Normal";
+    private AnimationSpeed _animationSpeed = AnimationSpeed.Normal;
 
     [ObservableProperty]
     private bool _respectReduceMotion = true;
 
     // --- KISAYOLLAR ---
     [ObservableProperty]
-    private int _wheelAction; // 0: Panel değiştir, 1: Ses
+    private WheelAction _wheelAction;
 
     [ObservableProperty]
-    private int _middleClickAction; // 0: Yeni pencere, 1: Kapat
+    private MiddleClickAction _middleClickAction;
 
     // --- PERFORMANS ---
     [ObservableProperty]
@@ -338,7 +339,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _batterySaverReduceMotion = true;
 
     [ObservableProperty]
-    private string _weatherRefreshInterval = "30m"; // 30m, 1h, startup
+    private WeatherRefreshInterval _weatherRefreshInterval = WeatherRefreshInterval.Every30Minutes;
 
     [ObservableProperty]
     private int _pomodoroWorkMinutes = 25;
@@ -516,21 +517,21 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             NotchShowNotifications = s.NotchShowNotifications;
             NotchNotificationsHideBody = s.NotchNotificationsHideBody;
             MusicShowWaveform = s.MusicShowWaveform;
-            MusicCardStyle = MusicCardStyleSetting.Normalize(s.MusicCardStyle);
+            MusicCardStyle = s.MusicCardStyle;
             MusicLyricsEnabled = s.MusicLyricsEnabled;
             IdleDisplayMode = s.IdleDisplayMode;
-            NotchStyle = Koy.Core.Notch.NotchStyle.Normalize(s.NotchStyle);
+            NotchStyle = s.NotchStyle;
             NotchOpenBehavior = s.NotchOpenBehavior;
 
             // Eski sürümlerin karışık değerleri ("Koyu", 18 vb.) seçenek değerlerine indirilir.
-            Theme = ThemeSetting.Normalize(s.Theme);
+            Theme = s.Theme;
             AccentColor = s.AccentColor ?? AccentPalette.DefaultHex;
             UseWindowsAccent = s.UseWindowsAccent;
-            Material = MaterialSetting.Normalize(s.Material);
+            Material = s.Material;
             MaterialReadabilityGuard = s.MaterialReadabilityGuard;
             NotchFollowsMaterial = s.NotchFollowsMaterial;
             CornerRadius = CornerSetting.ToStored(CornerSetting.Resolve(s.CornerRadius));
-            AnimationSpeed = MotionPolicy.NormalizeSpeed(s.AnimationSpeed);
+            AnimationSpeed = s.AnimationSpeed;
             RespectReduceMotion = s.RespectReduceMotion;
             BatterySaverReduceMotion = s.BatterySaverReduceMotion;
             WeatherRefreshInterval = s.WeatherRefreshInterval;
@@ -939,7 +940,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         IsCheckingUpdates = true;
         try
         {
-            var mgr = new Velopack.UpdateManager(new Velopack.Sources.GithubSource("https://github.com/koyhq/koy", null, UpdateChannel == "Önizleme"));
+            var mgr = new Velopack.UpdateManager(new Velopack.Sources.GithubSource("https://github.com/koyhq/koy", null, UpdateChannel == UpdateChannel.Preview));
             if (!mgr.IsInstalled)
             {
                 // Geliştirme çalıştırmasında denetim yapılamaz; başarı gibi gösterilmez.
@@ -1013,7 +1014,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
         try
         {
-            var mgr = new Velopack.UpdateManager(new Velopack.Sources.GithubSource("https://github.com/koyhq/koy", null, UpdateChannel == "Önizleme"));
+            var mgr = new Velopack.UpdateManager(new Velopack.Sources.GithubSource("https://github.com/koyhq/koy", null, UpdateChannel == UpdateChannel.Preview));
             var dispatcher = System.Windows.Application.Current.Dispatcher;
             await mgr.DownloadUpdatesAsync(update, progress =>
             {

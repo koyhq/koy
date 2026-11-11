@@ -1,3 +1,4 @@
+using Koy.Core.Appearance;
 using Koy.Core.Settings;
 
 namespace Koy.Core.Tests.Settings;
@@ -13,13 +14,13 @@ public sealed class SetupWizardLogicTests : IDisposable
     {
         var settings = new AppSettings();
         Assert.False(settings.FirstRunCompleted);
-        Assert.Equal("Dark", settings.Theme);
+        Assert.Equal(AppTheme.Dark, settings.Theme);
         Assert.Equal(12.0, settings.CornerRadius);
-        Assert.Equal("Normal", settings.AnimationSpeed);
+        Assert.Equal(AnimationSpeed.Normal, settings.AnimationSpeed);
         Assert.True(settings.RespectReduceMotion);
         Assert.True(settings.HideWindowsTaskbar);
         Assert.True(settings.AutoCheckUpdates);
-        Assert.Equal("Kararlı", settings.UpdateChannel);
+        Assert.Equal(UpdateChannel.Stable, settings.UpdateChannel);
     }
 
     [Theory]
@@ -65,13 +66,13 @@ public sealed class SetupWizardLogicTests : IDisposable
         var modifiedFirstRun = s1 with { FirstRunCompleted = true };
         Assert.NotEqual(s1, modifiedFirstRun);
 
-        var modifiedTheme = s1 with { Theme = "Açık" };
+        var modifiedTheme = s1 with { Theme = AppTheme.Light };
         Assert.NotEqual(s1, modifiedTheme);
 
         var modifiedRadius = s1 with { CornerRadius = 6.0 };
         Assert.NotEqual(s1, modifiedRadius);
 
-        var modifiedAnim = s1 with { AnimationSpeed = "Hızlı" };
+        var modifiedAnim = s1 with { AnimationSpeed = AnimationSpeed.Fast };
         Assert.NotEqual(s1, modifiedAnim);
 
         var modifiedMotion = s1 with { RespectReduceMotion = false };
@@ -83,7 +84,7 @@ public sealed class SetupWizardLogicTests : IDisposable
         var modifiedUpdates = s1 with { AutoCheckUpdates = false };
         Assert.NotEqual(s1, modifiedUpdates);
 
-        var modifiedChannel = s1 with { UpdateChannel = "Önizleme" };
+        var modifiedChannel = s1 with { UpdateChannel = UpdateChannel.Preview };
         Assert.NotEqual(s1, modifiedChannel);
 
         var modifiedSaverMotion = s1 with { BatterySaverReduceMotion = false };

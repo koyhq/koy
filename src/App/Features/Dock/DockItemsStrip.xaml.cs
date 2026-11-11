@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Koy.Core.Dock;
 
 namespace Koy.App.Features.Dock;
 
@@ -74,8 +75,7 @@ public partial class DockItemsStrip : UserControl
             sender is FrameworkElement { DataContext: DockItemViewModel item })
         {
             ViewModel?.ClosePreviewNow();
-            // Ayar: 0 = yeni pencere, 1 = kapat
-            if (ViewModel?.Settings.MiddleClickAction == 1)
+            if (ViewModel?.Settings.MiddleClickAction == MiddleClickAction.Close)
                 item.CloseCommand.Execute(null);
             else
                 item.MiddleClickCommand.Execute(null);

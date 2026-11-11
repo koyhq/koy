@@ -1,3 +1,4 @@
+using Koy.Core.Appearance;
 using Koy.Core.Settings;
 
 namespace Koy.Core.Tests.Settings;
@@ -34,7 +35,7 @@ public sealed class FeatureStateSyncTests : IDisposable
         var complex = new AppSettings
         {
             Language = "en",
-            Theme = "Light",
+            Theme = AppTheme.Light,
             CornerRadius = 18.0,
             DockIconSize = 36.0,
             HideWindowsTaskbar = false,
@@ -47,7 +48,7 @@ public sealed class FeatureStateSyncTests : IDisposable
         Assert.False(reconciled.DockEnabled);
         Assert.True(reconciled.NotchEnabled);
         Assert.Equal("en", reconciled.Language);
-        Assert.Equal("Light", reconciled.Theme);
+        Assert.Equal(AppTheme.Light, reconciled.Theme);
         Assert.Equal(18.0, reconciled.CornerRadius);
         Assert.Equal(36.0, reconciled.DockIconSize);
         Assert.False(reconciled.HideWindowsTaskbar);
@@ -57,7 +58,7 @@ public sealed class FeatureStateSyncTests : IDisposable
     public void SimulatedExternalToggle_PreventsStaleOverwrite()
     {
         var store = NewStore();
-        store.Save(new AppSettings { NotchEnabled = true, DockEnabled = true, Theme = "Dark" });
+        store.Save(new AppSettings { NotchEnabled = true, DockEnabled = true, Theme = AppTheme.Dark });
 
         // 1. Bellek kopyası başlangıç ayarlarını yükler
         var inMemoryCopy = store.Load();
@@ -68,7 +69,7 @@ public sealed class FeatureStateSyncTests : IDisposable
         store.Save(currentDisk with { DockEnabled = false });
 
         // 3. Kullanıcı arayüzde Theme ayarını "Light" olarak değiştirir
-        inMemoryCopy = inMemoryCopy with { Theme = "Light" };
+        inMemoryCopy = inMemoryCopy with { Theme = AppTheme.Light };
 
         // 4. Kapanışta diski ezmeden önce disk durumuyla uzlaştırılır
         var diskStateOnClose = store.Load();
@@ -81,7 +82,7 @@ public sealed class FeatureStateSyncTests : IDisposable
 
         // 5. Sonuç: Tema "Light" olur, ancak DockEnabled false kalır (ezilmez)
         var finalDisk = store.Load();
-        Assert.Equal("Light", finalDisk.Theme);
+        Assert.Equal(AppTheme.Light, finalDisk.Theme);
         Assert.False(finalDisk.DockEnabled);
         Assert.True(finalDisk.NotchEnabled);
     }

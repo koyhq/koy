@@ -7,24 +7,22 @@ namespace Koy.Core.Tests;
 public class NotchBehaviorSettingsTests
 {
     [Theory]
-    [InlineData(0, true, true)]
-    [InlineData(1, true, false)]
-    [InlineData(2, false, false)]
-    [InlineData(3, true, true)] // halka pil ve gün/saat
-    [InlineData(99, true, true)] // bilinmeyen değer varsayılana düşer
-    public void IdleDisplay_maps_mode_to_clock_and_battery(int mode, bool clock, bool battery)
+    [InlineData(IdleDisplayMode.ClockAndBattery, true, true)]
+    [InlineData(IdleDisplayMode.ClockOnly, true, false)]
+    [InlineData(IdleDisplayMode.Nothing, false, false)]
+    [InlineData(IdleDisplayMode.RingClockDay, true, true)] // halka pil ve gün/saat
+    public void IdleDisplay_maps_mode_to_clock_and_battery(IdleDisplayMode mode, bool clock, bool battery)
     {
         Assert.Equal(clock, IdleDisplay.ShowClock(mode));
         Assert.Equal(battery, IdleDisplay.ShowBattery(mode));
     }
 
     [Theory]
-    [InlineData(0, true)]
-    [InlineData(1, false)]
-    [InlineData(2, false)]
-    [InlineData(3, true)] // halka modunda Peek'te
-    [InlineData(99, true)] // bilinmeyen değer varsayılana düşer
-    public void IdleDisplay_shows_radio_icons_only_in_clock_and_battery_mode(int mode, bool radio)
+    [InlineData(IdleDisplayMode.ClockAndBattery, true)]
+    [InlineData(IdleDisplayMode.ClockOnly, false)]
+    [InlineData(IdleDisplayMode.Nothing, false)]
+    [InlineData(IdleDisplayMode.RingClockDay, true)] // halka modunda Peek'te
+    public void IdleDisplay_shows_radio_icons_only_in_clock_and_battery_mode(IdleDisplayMode mode, bool radio)
     {
         Assert.Equal(radio, IdleDisplay.ShowRadio(mode));
     }
@@ -66,7 +64,7 @@ public class NotchBehaviorSettingsTests
     [Fact]
     public void Default_open_behavior_setting_is_hover()
     {
-        Assert.Equal(0, new AppSettings().NotchOpenBehavior);
+        Assert.Equal(NotchOpenBehavior.Hover, new AppSettings().NotchOpenBehavior);
     }
 
     [Fact]
@@ -76,8 +74,8 @@ public class NotchBehaviorSettingsTests
         try
         {
             var store = new SettingsStore(path);
-            store.Save(new AppSettings { NotchOpenBehavior = 1 });
-            Assert.Equal(1, store.Load().NotchOpenBehavior);
+            store.Save(new AppSettings { NotchOpenBehavior = NotchOpenBehavior.Click });
+            Assert.Equal(NotchOpenBehavior.Click, store.Load().NotchOpenBehavior);
         }
         finally
         {
@@ -124,14 +122,14 @@ public class NotchBehaviorSettingsTests
         try
         {
             var store = new SettingsStore(Path.Combine(dir, "settings.json"));
-            var settings = new AppSettings { NotchHideInFullscreen = false, MusicShowWaveform = false, IdleDisplayMode = 2 };
+            var settings = new AppSettings { NotchHideInFullscreen = false, MusicShowWaveform = false, IdleDisplayMode = IdleDisplayMode.Nothing };
 
             store.Save(settings);
             var loaded = store.Load();
 
             Assert.False(loaded.NotchHideInFullscreen);
             Assert.False(loaded.MusicShowWaveform);
-            Assert.Equal(2, loaded.IdleDisplayMode);
+            Assert.Equal(IdleDisplayMode.Nothing, loaded.IdleDisplayMode);
             Assert.Equal(settings, loaded);
         }
         finally

@@ -1,5 +1,8 @@
+using Koy.Core.Appearance;
 using Koy.Core.Display;
 using Koy.Core.Dock;
+using Koy.Core.Media;
+using Koy.Core.Notch;
 using Koy.Core.Visibility;
 using Koy.Core.Voice;
 using Koy.Core.Weather;
@@ -14,8 +17,11 @@ namespace Koy.Core.Settings;
 /// </summary>
 public sealed record AppSettings
 {
-    /// <summary>Şema sürümü. 3: monitör başına ayar (<see cref="Monitors"/>), eski <see cref="MonitorTarget"/> göçle taşınır.</summary>
-    public const int CurrentVersion = 3;
+    /// <summary>
+    /// Şema sürümü. 3: monitör başına ayar (<see cref="Monitors"/>), eski <see cref="MonitorTarget"/> göçle taşınır.
+    /// 4: sayı ve dile bağlı metin değerleri enum adı olarak yazılır.
+    /// </summary>
+    public const int CurrentVersion = 4;
 
     public int Version { get; set; } = CurrentVersion;
     public string Language { get; set; } = AppLanguage.SystemDefault;
@@ -111,30 +117,32 @@ public sealed record AppSettings
     /// <summary>Kullanıcının gördüğü en son Koy sürümü (güncelleme sonrası 'Neler Geldi' ekranı için).</summary>
     public string LastSeenVersion { get; set; } = "";
 
-    public string Theme { get; set; } = "Dark";
+    public AppTheme Theme { get; set; } = AppTheme.Dark;
     /// <summary>Koy penceresinin köşe seçimi (bkz. CornerSetting): 6 Keskin, 12 Standart, 17 Yuvarlak. Eski varsayılan 18 Standart sayılır.</summary>
     public double CornerRadius { get; set; } = 12.0;
-    public string AnimationSpeed { get; set; } = "Normal";
+    public AnimationSpeed AnimationSpeed { get; set; } = AnimationSpeed.Normal;
     public bool RespectReduceMotion { get; set; } = true;
     public bool HideWindowsTaskbar { get; set; } = true;
     public bool AutoCheckUpdates { get; set; } = true;
-    public string UpdateChannel { get; set; } = "Kararlı";
+    public UpdateChannel UpdateChannel { get; set; } = UpdateChannel.Stable;
     public bool BatterySaverReduceMotion { get; set; } = true;
-    public string WeatherRefreshInterval { get; set; } = "30m";
+    public WeatherRefreshInterval WeatherRefreshInterval { get; set; } = WeatherRefreshInterval.Every30Minutes;
     public double DockIconSize { get; set; } = 28.0;
-    public int IdleDisplayMode { get; set; }
-    /// <summary>Çentiğin açılması: 0 = üzerine gelince (varsayılan), 1 = tıklayınca.</summary>
-    public int NotchOpenBehavior { get; set; }
-    public string Material { get; set; } = "Katı";
+    public IdleDisplayMode IdleDisplayMode { get; set; } = IdleDisplayMode.ClockAndBattery;
+    /// <summary>Çentiğin açılması: üzerine gelince (varsayılan) ya da tıklayınca.</summary>
+    public NotchOpenBehavior NotchOpenBehavior { get; set; } = NotchOpenBehavior.Hover;
+    public MaterialLevel Material { get; set; } = MaterialLevel.Solid;
     /// <summary>Okunabilirlik koruması: açık duvar kağıdında saydam malzeme kendiliğinden daha opak seviyeye çıkar.</summary>
     public bool MaterialReadabilityGuard { get; set; } = true;
     /// <summary>Açık çentik ve kartlar malzemeyi izlesin; kapalıysa açık çentik hep opak kalır.</summary>
     public bool NotchFollowsMaterial { get; set; } = true;
-    /// <summary>Çentik biçimi: "Yapışık" (varsayılan, ekran kenarına bitişik, kulaklı) ya da "Yüzen" (kulaksız kapsül, üstten 9 DIP boşluk).</summary>
-    public string NotchStyle { get; set; } = Koy.Core.Notch.NotchStyle.Pinned;
-    public int WheelAction { get; set; }
-    public int MiddleClickAction { get; set; }
-    public int DockIndicatorStyle { get; set; }
+    /// <summary>Çentik biçimi: Pinned (varsayılan, ekran kenarına bitişik, kulaklı) ya da Floating (kulaksız kapsül, üstten 9 DIP boşluk).</summary>
+    public NotchStyleMode NotchStyle { get; set; } = NotchStyleMode.Pinned;
+    /// <summary>Çentik üstünde tekerlek: panel değiştir (varsayılan) ya da ses.</summary>
+    public WheelAction WheelAction { get; set; } = WheelAction.SwitchPanel;
+    /// <summary>Dock simgesine orta tık: yeni pencere (varsayılan) ya da kapat.</summary>
+    public MiddleClickAction MiddleClickAction { get; set; } = MiddleClickAction.NewWindow;
+    public DockIndicatorStyle DockIndicatorStyle { get; set; } = DockIndicatorStyle.Dot;
 
     /// <summary>
     /// Genel kısayollar, "Ctrl+Alt+N" biçiminde metin; boş metin = atanmamış.
@@ -181,8 +189,8 @@ public sealed record AppSettings
     public bool ShowVolumeOsd { get; set; } = true;
     /// <summary>Müzik çalarken çentikte dalga simgesi görünsün.</summary>
     public bool MusicShowWaveform { get; set; } = true;
-    /// <summary>Müzik kartı stili: "Neutral" (düz), "Tinted" (albüm rengi, varsayılan), "Artwork" (kapak arka plan). Bkz. <c>MusicCardStyleSetting</c>.</summary>
-    public string MusicCardStyle { get; set; } = "Tinted";
+    /// <summary>Müzik kartı stili: Neutral (düz), Tinted (albüm rengi, varsayılan), Artwork (kapak arka plan).</summary>
+    public MusicCardStyle MusicCardStyle { get; set; } = MusicCardStyle.Tinted;
     /// <summary>
     /// Ana sayfadaki müzik kartında eşzamanlı sözler. Varsayılan kapalı: açıkken çalan parçanın (tarayıcı videosu dahil) adı
     /// LRCLIB'e gider, bu yüzden kullanıcı kartındaki düğmeyle ya da ayardan kendisi açar. İstek yalnız Ana görünürken, parça başına bir kez.

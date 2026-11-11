@@ -1255,7 +1255,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                 {
                     IconSize = IconSize,
                     ItemSize = ItemSize,
-                    UseLineIndicator = _settings.DockIndicatorStyle == 1
+                    UseLineIndicator = _settings.DockIndicatorStyle == DockIndicatorStyle.Line
                 };
                 itemVmCache[m.Id] = vm;
                 itemVmCache[PinnedOrder.IdOf(m.Id)] = vm;
@@ -1299,7 +1299,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                                 {
                                     IconSize = IconSize,
                                     ItemSize = ItemSize,
-                                    UseLineIndicator = _settings.DockIndicatorStyle == 1
+                                    UseLineIndicator = _settings.DockIndicatorStyle == DockIndicatorStyle.Line
                                 };
                                 folderItems.Add(fallbackVm);
                             }
@@ -1320,7 +1320,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                             {
                                 IconSize = IconSize,
                                 ItemSize = ItemSize,
-                                UseLineIndicator = _settings.DockIndicatorStyle == 1
+                                UseLineIndicator = _settings.DockIndicatorStyle == DockIndicatorStyle.Line
                             };
                             desiredEntries.Add(newFolderVm);
                         }

@@ -48,7 +48,7 @@ public class SettingsMigrationTests
     [Fact]
     public void Current_version_is_untouched()
     {
-        var root = JsonNode.Parse("""{ "Version": 3, "MonitorTarget": "Elle", "NewScreenDefault": "NotchOnly" }""")!.AsObject();
+        var root = JsonNode.Parse("""{ "Version": 4, "MonitorTarget": "Elle", "NewScreenDefault": "NotchOnly" }""")!.AsObject();
 
         var original = SettingsMigration.Migrate(root);
 
@@ -143,17 +143,20 @@ public class SettingsMigrationTests
     }
 
     [Fact]
-    public void Golden_v3_fixture_is_read_and_written_without_losing_a_single_value()
+    public void Golden_v3_fixture_survives_migration_save_and_reload_unchanged()
     {
         var path = TempPath();
         try
         {
             File.WriteAllText(path, SettingsFile.FixtureV3);
             var store = new SettingsStore(path);
+            var migrated = store.Load();
 
-            store.Save(store.Load());
+            store.Save(migrated);
 
-            Assert.Equal(SettingsFile.FixtureV3.ReplaceLineEndings("\n"), File.ReadAllText(path).ReplaceLineEndings("\n"));
+            // Yazılan dosya v4'tür ve yeniden okununca hiçbir değer kaybolmaz ya da kaymaz.
+            Assert.Equal(AppSettings.CurrentVersion, migrated.Version);
+            Assert.Equal(migrated, store.Load());
         }
         finally
         {

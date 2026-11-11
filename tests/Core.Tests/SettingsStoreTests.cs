@@ -1,3 +1,6 @@
+using Koy.Core.Notch;
+using Koy.Core.Dock;
+using Koy.Core.Appearance;
 using Koy.Core.Settings;
 using Koy.Core.Visibility;
 
@@ -117,9 +120,9 @@ public sealed class SettingsStoreTests : IDisposable
         var settings = new AppSettings
         {
             FirstRunCompleted = true,
-            Theme = "Light",
+            Theme = AppTheme.Light,
             CornerRadius = 14.0,
-            AnimationSpeed = "Fast"
+            AnimationSpeed = AnimationSpeed.Fast
         };
 
         store.Save(settings);
@@ -127,7 +130,7 @@ public sealed class SettingsStoreTests : IDisposable
 
         Assert.Equal(settings, loaded);
         Assert.True(loaded.FirstRunCompleted);
-        Assert.Equal("Light", loaded.Theme);
+        Assert.Equal(AppTheme.Light, loaded.Theme);
         Assert.Equal(14.0, loaded.CornerRadius);
     }
 
@@ -138,12 +141,12 @@ public sealed class SettingsStoreTests : IDisposable
         var settings = new AppSettings
         {
             DockIconSize = 24.0,
-            IdleDisplayMode = 1,
-            NotchOpenBehavior = 0,
-            Material = "Translucent",
-            WheelAction = 1,
-            MiddleClickAction = 1,
-            DockIndicatorStyle = 1
+            IdleDisplayMode = IdleDisplayMode.ClockOnly,
+            NotchOpenBehavior = NotchOpenBehavior.Hover,
+            Material = MaterialLevel.Frosted,
+            WheelAction = WheelAction.Volume,
+            MiddleClickAction = MiddleClickAction.Close,
+            DockIndicatorStyle = DockIndicatorStyle.Line
         };
 
         store.Save(settings);
@@ -151,12 +154,12 @@ public sealed class SettingsStoreTests : IDisposable
 
         Assert.Equal(settings, loaded);
         Assert.Equal(24.0, loaded.DockIconSize);
-        Assert.Equal(1, loaded.IdleDisplayMode);
-        Assert.Equal(0, loaded.NotchOpenBehavior);
-        Assert.Equal("Translucent", loaded.Material);
-        Assert.Equal(1, loaded.WheelAction);
-        Assert.Equal(1, loaded.MiddleClickAction);
-        Assert.Equal(1, loaded.DockIndicatorStyle);
+        Assert.Equal(IdleDisplayMode.ClockOnly, loaded.IdleDisplayMode);
+        Assert.Equal(NotchOpenBehavior.Hover, loaded.NotchOpenBehavior);
+        Assert.Equal(MaterialLevel.Frosted, loaded.Material);
+        Assert.Equal(WheelAction.Volume, loaded.WheelAction);
+        Assert.Equal(MiddleClickAction.Close, loaded.MiddleClickAction);
+        Assert.Equal(DockIndicatorStyle.Line, loaded.DockIndicatorStyle);
     }
 
     [Fact]

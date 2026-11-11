@@ -24,15 +24,15 @@ public static class MaterialState
     public static event Action? Changed;
 
     /// <summary>Koy penceresi, sağ alt menü ve sihirbaz için etkin seviye.</summary>
-    public static string ForWindow(AppSettings settings, ResolvedTheme theme) =>
+    public static MaterialLevel ForWindow(AppSettings settings, ResolvedTheme theme) =>
         Resolve(settings, theme == ResolvedTheme.Light ? ReadabilityGuard.WindowLight : ReadabilityGuard.WindowDark);
 
     /// <summary>Açık çentik ve kartlar için etkin seviye. "Açık çentik malzemeyi izlesin" kapalıysa hep Katı.</summary>
-    public static string ForNotch(AppSettings settings) =>
-        settings.NotchFollowsMaterial ? Resolve(settings, ReadabilityGuard.Notch) : MaterialSetting.Solid;
+    public static MaterialLevel ForNotch(AppSettings settings) =>
+        settings.NotchFollowsMaterial ? Resolve(settings, ReadabilityGuard.Notch) : MaterialLevel.Solid;
 
     /// <summary>Dock yüzeyi için etkin seviye (çentikle aynı koyu taban).</summary>
-    public static string ForDock(AppSettings settings) => Resolve(settings, ReadabilityGuard.Notch);
+    public static MaterialLevel ForDock(AppSettings settings) => Resolve(settings, ReadabilityGuard.Notch);
 
     /// <summary>Görüntü aracı ve testler: duvar kağıdını okumadan sabit bir renk ver.</summary>
     public static void SetWallpaperForPreview(Rgb? wallpaper)
@@ -42,10 +42,10 @@ public static class MaterialState
         _watching = true;
     }
 
-    private static string Resolve(AppSettings settings, ReadabilityGuard.Surface surface)
+    private static MaterialLevel Resolve(AppSettings settings, ReadabilityGuard.Surface surface)
     {
-        var requested = MaterialSetting.Normalize(settings.Material);
-        if (requested != MaterialSetting.Solid && settings.MaterialReadabilityGuard)
+        var requested = settings.Material;
+        if (requested != MaterialLevel.Solid && settings.MaterialReadabilityGuard)
             EnsureSampled();
         return ReadabilityGuard.Effective(requested, settings.MaterialReadabilityGuard, Wallpaper, surface);
     }

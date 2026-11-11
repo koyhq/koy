@@ -7,13 +7,9 @@ namespace Koy.Core.Tests;
 public class TimerAndWeatherSettingsTests
 {
     [Theory]
-    [InlineData("30m", 30)]
-    [InlineData("1h", 60)]
-    [InlineData("1H", 60)]
-    [InlineData("", 30)]
-    [InlineData("bilinmeyen", 30)]
-    [InlineData(null, 30)]
-    public void Weather_cache_duration_follows_the_setting(string? setting, int minutes)
+    [InlineData(WeatherRefreshInterval.Every30Minutes, 30)]
+    [InlineData(WeatherRefreshInterval.Hourly, 60)]
+    public void Weather_cache_duration_follows_the_setting(WeatherRefreshInterval setting, int minutes)
     {
         Assert.Equal(TimeSpan.FromMinutes(minutes), WeatherRefreshPolicy.CacheDuration(setting));
     }
@@ -21,7 +17,7 @@ public class TimerAndWeatherSettingsTests
     [Fact]
     public void Weather_startup_only_never_expires()
     {
-        var duration = WeatherRefreshPolicy.CacheDuration("startup");
+        var duration = WeatherRefreshPolicy.CacheDuration(WeatherRefreshInterval.OnStartup);
 
         Assert.True(TimeSpan.FromDays(3650) < duration);
     }

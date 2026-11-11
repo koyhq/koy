@@ -33,9 +33,31 @@ public static class SettingsMigration
 
         if (original < 3)
             MigrateV2ToV3(root);
+        if (original < 4)
+            MigrateV3ToV4(root);
 
         root["Version"] = AppSettings.CurrentVersion;
         return original;
+    }
+
+    /// <summary>
+    /// Sürüm 3 → 4: sayı ve dile bağlı metin değerleri enum adına çevrilir (<see cref="LegacyValueTranslator"/>).
+    /// Tanınmayan değerin anahtarı düşer, alan varsayılanını alır; dosyanın tamamı sıfırlanmaz.
+    /// </summary>
+    private static void MigrateV3ToV4(JsonObject root)
+    {
+        foreach (var (key, translate) in LegacyValueTranslator.ByKey)
+        {
+            if (!root.ContainsKey(key))
+                continue;
+
+            // Açık null değer enum'a okunamaz; tanınmayan sayılır.
+            var translated = root[key] is { } node ? translate(node) : null;
+            if (translated is null)
+                root.Remove(key);
+            else
+                root[key] = translated;
+        }
     }
 
     private static int ReadVersion(JsonObject root)

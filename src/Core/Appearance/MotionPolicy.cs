@@ -6,31 +6,13 @@ namespace Koy.Core.Appearance;
 /// </summary>
 public static class MotionPolicy
 {
-    public const string Calm = "Sakin";
-    public const string Normal = "Normal";
-    public const string Fast = "Hızlı";
-    public const string Off = "Kapalı";
-
-    /// <summary>Ayar metnini (Türkçe ya da İngilizce) tek biçime indirir; bilinmeyen değer Normal olur.</summary>
-    public static string NormalizeSpeed(string? value)
-    {
-        var v = (value ?? "").Trim().ToLowerInvariant();
-        return v switch
-        {
-            "sakin" or "calm" or "slow" => Calm,
-            "hızlı" or "hizli" or "fast" => Fast,
-            "kapalı" or "kapali" or "off" or "none" => Off,
-            _ => Normal
-        };
-    }
-
     /// <summary>Hız ayarının kendi çarpanı (azaltılmış hareket hesaba katılmadan).</summary>
-    public static double SpeedFactor(string? value) =>
-        NormalizeSpeed(value) switch
+    public static double SpeedFactor(AnimationSpeed value) =>
+        value switch
         {
-            Calm => 1.5,
-            Fast => 0.65,
-            Off => 0.0,
+            AnimationSpeed.Calm => 1.5,
+            AnimationSpeed.Fast => 0.65,
+            AnimationSpeed.Off => 0.0,
             _ => 1.0
         };
 
@@ -39,7 +21,7 @@ public static class MotionPolicy
     /// <param name="respectReduceMotion">"Windows'un animasyonları azalt ayarına uy" açık mı.</param>
     /// <param name="systemAnimationsEnabled">Windows istemci alanı animasyonları açık mı (SystemParameters.ClientAreaAnimation).</param>
     /// <param name="batterySaverReduceMotion">Pil tasarrufu politikası şu an hareketi azaltmayı istiyor mu (BatterySaverPolicy).</param>
-    public static double Scale(string? speed, bool respectReduceMotion, bool systemAnimationsEnabled, bool batterySaverReduceMotion)
+    public static double Scale(AnimationSpeed speed, bool respectReduceMotion, bool systemAnimationsEnabled, bool batterySaverReduceMotion)
     {
         if (batterySaverReduceMotion)
             return 0.0;

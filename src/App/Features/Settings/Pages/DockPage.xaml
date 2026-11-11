@@ -256,10 +256,10 @@
                 <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [IndicatorDot], Source={x:Static res:Loc.Instance}}" GroupName="IndStyle"
-                                     IsChecked="{Binding DockIndicatorStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=0}"
+                                     IsChecked="{Binding DockIndicatorStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Dot}"
                                      Style="{StaticResource SegRadioStyle}" />
                         <RadioButton Content="{Binding [IndicatorLine], Source={x:Static res:Loc.Instance}}" GroupName="IndStyle"
-                                     IsChecked="{Binding DockIndicatorStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=1}"
+                                     IsChecked="{Binding DockIndicatorStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Line}"
                                      Style="{StaticResource SegRadioStyle}" />
                     </StackPanel>
                 </Border>

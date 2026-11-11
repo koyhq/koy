@@ -25,7 +25,7 @@ internal static class AutoUpdater
             // Açılış yükü (ağ, TLS, disk) kullanıcı çentik ve dock'u kullanmaya başladıktan sonra binsin.
             await Task.Delay(StartupDelay);
 
-            var source = new GithubSource("https://github.com/koyhq/koy", null, settings.UpdateChannel == "Önizleme");
+            var source = new GithubSource("https://github.com/koyhq/koy", null, settings.UpdateChannel == UpdateChannel.Preview);
             var manager = new UpdateManager(source);
             if (!manager.IsInstalled)
                 return;

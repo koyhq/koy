@@ -142,10 +142,10 @@
                 <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [WheelSwitchPanel], Source={x:Static res:Loc.Instance}}" GroupName="WheelAction"
-                                     IsChecked="{Binding WheelAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=0}"
+                                     IsChecked="{Binding WheelAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=SwitchPanel}"
                                      Style="{StaticResource SegRadioStyle}" />
                         <RadioButton Content="{Binding [WheelVolume], Source={x:Static res:Loc.Instance}}" GroupName="WheelAction"
-                                     IsChecked="{Binding WheelAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=1}"
+                                     IsChecked="{Binding WheelAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Volume}"
                                      Style="{StaticResource SegRadioStyle}" />
                     </StackPanel>
                 </Border>
@@ -164,10 +164,10 @@
                 <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="{Binding [MidClickNewWindow], Source={x:Static res:Loc.Instance}}" GroupName="MidClickAction"
-                                     IsChecked="{Binding MiddleClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=0}"
+                                     IsChecked="{Binding MiddleClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=NewWindow}"
                                      Style="{StaticResource SegRadioStyle}" />
                         <RadioButton Content="{Binding [MidClickClose], Source={x:Static res:Loc.Instance}}" GroupName="MidClickAction"
-                                     IsChecked="{Binding MiddleClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=1}"
+                                     IsChecked="{Binding MiddleClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Close}"
                                      Style="{StaticResource SegRadioStyle}" />
                     </StackPanel>
                 </Border>

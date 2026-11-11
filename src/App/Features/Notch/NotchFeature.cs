@@ -231,7 +231,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     {
         var controller = new NotchController();
         controller.SetEnabledPanels(NotchPanels.ParseEnabled(settings.EnabledPanels, settings.ClipboardHistoryEnabled));
-        controller.OpenOnHover = settings.NotchOpenBehavior == 0;
+        controller.OpenOnHover = settings.NotchOpenBehavior == NotchOpenBehavior.Hover;
 
         var visibilityController = new VisibilityController(settings.NotchVisibility)
         {

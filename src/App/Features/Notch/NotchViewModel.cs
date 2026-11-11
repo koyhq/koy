@@ -627,7 +627,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private void UpdateGlassSurface()
     {
         var level = MaterialState.ForNotch(Settings);
-        _glassSurface = level == Koy.Core.Appearance.MaterialSetting.Solid
+        _glassSurface = level == Koy.Core.Appearance.MaterialLevel.Solid
             ? OpaqueSurface
             : FrozenArgb(Koy.Core.Appearance.MaterialSetting.LayeredAlpha(level), 0x0A, 0x0A, 0x0B);
         // Albüm rengi müzik kartı da aynı opaklıkta (kart yalnız açık çentikte görünür).
