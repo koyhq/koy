@@ -616,4 +616,5 @@ Karar (2026-11-11): paketsiz süreçte `NotificationChanged` aboneliği 0x800704
 - [x] **P6-App, kapak arka planı:** `Artwork` modunda 32 px bitmap `UniformToFill` + `Linear`, üstünde Card tonu (0,30) ve `#0A0A0B` 0,55 → 0,85 perde; `BlurEffect` yok; küçük ve büyütülmüş kart aynı katmanı kullanır (`HomePanel.xaml`).
 - [ ] **P6-App, elle sınama:** Spotify'da renkli, koyu ve siyah-beyaz kapaklar; YouTube'da kapaksız video; parça değişince geçiş; üç mod ve büyütülmüş kart; açık tema; Ayarlar'dan stil değişince çentik yeniden kurulur.
 - [ ] **P6-App, bellek:** şarkı çalarken önce/sonra ölçüm (`measure-memory.ps1`), `docs/MEMORY.md`.
-- [ ] **P6-App, cam uyumu:** P4B birleşince kart zemini `MaterialSetting.SurfaceOpacity` ile (bu pakette yapılmadı).
+- [x] **P6-App, cam uyumu (demo `CamMuzikKarti.dc.html`):** Albüm rengi kart zemini çentiğin etkin malzemesinin alfasında (`MusicViewModel.SetCardAlpha`, `NotchViewModel` malzeme değişince verir; Katı 255 / Buzlu 219 / Cam 184); Kapak resmi opak kalır (okunurluk perdeden); palet yokken (Düz, gri ya da kapaksız) camda `KoyNotchMusicCard/Sub/Spectrum` nötr cam tonlarına döner (kart beyaz %6, ikincil metin beyaz %62, çubuklar beyaz %60). Katı'da Düz stil bugünkü yeşil tonlarda kaldı. UiSnapshots ile Cam'da üç stil kontrol edildi.
+- [ ] **P6-App, cam elle sınama:** üç stil × üç malzeme, açık duvar kağıdında koruma ile.

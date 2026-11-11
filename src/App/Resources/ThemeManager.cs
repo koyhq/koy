@@ -142,6 +142,11 @@ public static class ThemeManager
         {
             o["KoyNotchCard"] = new SolidColorBrush(Color.FromArgb(0x0F, 0xFF, 0xFF, 0xFF));
             o["KoyNotchChip"] = new SolidColorBrush(Color.FromArgb(0x17, 0xFF, 0xFF, 0xFF));
+            // Müzik kartı, palet yokken (Düz stil, gri ya da kapaksız parça): demodaki "Düz nötr" — cam kart tonu,
+            // ikincil metin beyaz %62, çubuklar beyaz %60. Albüm rengi ve kapak resmi MusicViewModel fırçalarından gelir.
+            o["KoyNotchMusicCard"] = new SolidColorBrush(Color.FromArgb(0x0F, 0xFF, 0xFF, 0xFF));
+            o["KoyNotchMusicSub"] = new SolidColorBrush(Color.FromArgb(0x9E, 0xF4, 0xF4, 0xF5));
+            o["KoyNotchMusicSpectrum"] = new SolidColorBrush(Color.FromArgb(0x99, 0xF4, 0xF4, 0xF5));
         }
     }
 

@@ -154,8 +154,25 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
         }, TaskScheduler.Default);
     }
 
+    // Albüm rengi stilinde kart zemini çentiğin etkin malzemesinin opaklığında (onaylı demo CamMuzikKarti.dc.html):
+    // Katı 255, Buzlu 219, Cam 184. Kapak resmi stili opak kalır; okunurluğu koyu perde sağlar.
+    private byte _cardAlpha = 255;
+    private CoverPalette? _palette;
+
+    /// <summary>Albüm rengi kart zemininin alfası; çentik malzemesi değişince çentik verir.</summary>
+    public void SetCardAlpha(byte alpha)
+    {
+        if (alpha == _cardAlpha)
+            return;
+
+        _cardAlpha = alpha;
+        if (_palette is not null)
+            CardBrush = Solid(_palette.Card, _cardAlpha);
+    }
+
     private void ApplyPalette(CoverPalette? palette, BitmapSource? small)
     {
+        _palette = palette;
         if (palette is null)
         {
             HasTint = false;
@@ -164,7 +181,7 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
             return;
         }
 
-        CardBrush = Solid(palette.Card, 255);
+        CardBrush = Solid(palette.Card, _cardAlpha);
         SubTextBrush = Solid(palette.SubText, 255);
         SpectrumBrush = Solid(palette.Spectrum, 0xBF); // alfa 0,75
         if (small is not null)
