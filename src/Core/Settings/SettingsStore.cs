@@ -68,39 +68,89 @@ public sealed class SettingsStore(string path)
     private static bool DropAt(JsonObject root, string path)
     {
         // "$.Displays.Monitors.DISPLAY1.x.NotchEnabled": sözlük anahtarları noktalı olabilir; her adımda en uzun
-        // eşleşen anahtar seçilir. Yol çözülemezse üst düzey bölüm düşer.
+        // eşleşen anahtar seçilir. "$.DockItems.Folders[1].Id": yol bir listeden geçiyorsa en içteki liste öğesi düşer;
+        // bozuk tek kayıt listenin geri kalanını ve bölümdeki diğer alanları götürmesin. Yol çözülemezse üst düzey bölüm düşer.
         var parts = path.TrimStart('$').TrimStart('.').Split('.');
-        if (parts.Any(p => p.Contains('[')))
-            return root.Remove(parts[0].Split('[')[0]);
+        var top = parts[0].Split('[')[0];
+        if (path.Contains("['", StringComparison.Ordinal))
+            return root.Remove(top);
 
-        var parent = root;
+        JsonObject parent = root;
+        (JsonArray Array, int Index)? innermost = null;
         var i = 0;
         while (i < parts.Length)
         {
             string? key = null;
+            int[] indices = [];
             var end = -1;
             for (var j = parts.Length; j > i; j--)
             {
-                var candidate = string.Join('.', parts[i..j]);
-                if (parent.ContainsKey(candidate))
+                var (name, idx) = SplitIndices(string.Join('.', parts[i..j]));
+                if (name is not null && parent.ContainsKey(name))
                 {
-                    key = candidate;
+                    key = name;
+                    indices = idx;
                     end = j;
                     break;
                 }
             }
 
             if (key is null)
-                return root.Remove(parts[0]);
+                return root.Remove(top);
+
+            var node = parent[key];
+            foreach (var index in indices)
+            {
+                if (node is not JsonArray array || index >= array.Count)
+                    return root.Remove(top);
+                innermost = (array, index);
+                node = array[index];
+            }
+
             if (end == parts.Length)
+            {
+                if (innermost is { } hit)
+                {
+                    hit.Array.RemoveAt(hit.Index);
+                    return true;
+                }
                 return parent.Remove(key);
-            if (parent[key] is not JsonObject next)
-                return root.Remove(parts[0]);
+            }
+
+            if (node is not JsonObject next)
+                return innermost is { } at ? RemoveElement(at) : root.Remove(top);
 
             parent = next;
             i = end;
         }
         return false;
+
+        static bool RemoveElement((JsonArray Array, int Index) at)
+        {
+            at.Array.RemoveAt(at.Index);
+            return true;
+        }
+    }
+
+    // "Folders[1][0]" → ("Folders", [1, 0]); indissiz ad olduğu gibi döner. Biçim bozuksa ad null olur.
+    private static (string? Name, int[] Indices) SplitIndices(string segment)
+    {
+        var open = segment.IndexOf('[');
+        if (open < 0)
+            return (segment, []);
+
+        var indices = new List<int>();
+        var rest = segment.AsSpan(open);
+        while (rest.Length > 0)
+        {
+            var close = rest.IndexOf(']');
+            if (rest[0] != '[' || close < 2 || !int.TryParse(rest[1..close], System.Globalization.NumberStyles.None,
+                    System.Globalization.CultureInfo.InvariantCulture, out var index))
+                return (null, []);
+            indices.Add(index);
+            rest = rest[(close + 1)..];
+        }
+        return (segment[..open], indices.ToArray());
     }
 
     // Yedek yazılamazsa (kilit, yetki) açılış durmasın; yedek bir kolaylıktır, ayarların kendisi değil.
