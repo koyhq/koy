@@ -19,10 +19,13 @@ public static class FontScalePolicy
     public const int MaxFontWeight = 900;
     public const int DefaultFontWeight = 400;
 
+    /// <summary>Windows'ta yazı tipi ailesi adı en çok 31 karakterdir (LF_FACESIZE - 1); pay bırakılarak 64'te kesilir.</summary>
+    public const int MaxFontFamilyLength = 64;
+
     /// <summary>Ayarda boş ya da yüklü olmayan yazı tipi adı için kullanılan Koy varsayılanı.</summary>
     public const string DefaultFontFamily = "Segoe UI";
 
-    /// <summary>Koy ölçeği yüzde olarak 80-150 aralığına sıkıştırılır. Sayı değilse varsayılana döner.</summary>
+    /// <summary>Koy ölçeği yüzde olarak 80-150 aralığına sıkıştırılır.</summary>
     public static int ClampUiScale(int percent) => Math.Clamp(percent, MinUiScale, MaxUiScale);
 
     /// <summary>Taban yazı boyu (DIP) sınırlanır. NaN ya da sonsuz değer varsayılana döner.</summary>
@@ -43,7 +46,8 @@ public static class FontScalePolicy
     public static string ResolveFontFamily(string? requested, IEnumerable<string> installed, string fallback = DefaultFontFamily)
     {
         var name = requested?.Trim();
-        if (string.IsNullOrEmpty(name))
+        // Yazı tipi adları kısadır; elle düzenlenmiş dosyadaki dev bir metni yüklü listeyle karşılaştırmaya gerek yok.
+        if (string.IsNullOrEmpty(name) || name.Length > MaxFontFamilyLength)
             return fallback;
 
         foreach (var font in installed)
@@ -67,7 +71,8 @@ public static class FontScalePolicy
     /// <summary>
     /// Koy ölçeğini bir DIP değerine uygular (yazı boyu, ikon, boşluk). Ölçek sınırlandıktan sonra çarpılır;
     /// monitör DPI'si WPF tarafından ayrıca uygulandığı için burada yalnız Koy'un kendi yüzdesi vardır.
+    /// Sayı olmayan DIP 0 döner: NaN bir genişlik WPF yerleşimini bozar.
     /// </summary>
     public static double ScaleDip(double dip, int uiScalePercent) =>
-        dip * ClampUiScale(uiScalePercent) / 100.0;
+        double.IsFinite(dip) ? dip * ClampUiScale(uiScalePercent) / 100.0 : 0;
 }
