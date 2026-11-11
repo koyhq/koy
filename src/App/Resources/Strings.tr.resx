@@ -2289,5 +2289,17 @@
   <data name="FocusOn" xml:space="preserve">
     <value>Odaklanma açık</value>
   </data>
+  <data name="NotchStyleTitle" xml:space="preserve">
+    <value>Çentik biçimi</value>
+  </data>
+  <data name="NotchStyleDesc" xml:space="preserve">
+    <value>Yapışık, ekranın üst kenarına bitişir; yüzen ada üstte küçük bir boşluk bırakan yuvarlak bir adadır.</value>
+  </data>
+  <data name="NotchStylePinned" xml:space="preserve">
+    <value>Ekrana yapışık</value>
+  </data>
+  <data name="NotchStyleFloating" xml:space="preserve">
+    <value>Yüzen ada</value>
+  </data>
 </root>
 

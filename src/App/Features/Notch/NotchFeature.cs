@@ -302,7 +302,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             state.Hwnd = hwnd;
             visibilityController.NotchHandle = hwnd;
             _fullscreenDetector?.IgnoredHandles.Add(hwnd);
-            UpdateNotchBounds(window, visibilityController, monitor);
+            UpdateNotchBounds(window, visibilityController, monitor, NotchStyle.TopOffsetDip(settings.NotchStyle));
         };
 
         window.DisplayChangeHandler = () =>
@@ -322,7 +322,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         AttachOsd(viewModel);
 
         window.Show();
-        UpdateNotchBounds(window, visibilityController, monitor);
+        UpdateNotchBounds(window, visibilityController, monitor, NotchStyle.TopOffsetDip(settings.NotchStyle));
     }
 
     private void StartOsdServices()
@@ -400,7 +400,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
                 existingState.Window.SetTargetMonitor(monitor);
                 // Ekran eklendi/çıkarıldı: parlaklık kaynağı (dahili/harici) yeniden belirlenir.
                 existingState.ViewModel.ControlCenter.RefreshBrightness();
-                UpdateNotchBounds(existingState.Window, existingState.VisibilityController, monitor);
+                UpdateNotchBounds(existingState.Window, existingState.VisibilityController, monitor, NotchStyle.TopOffsetDip(settings.NotchStyle));
             }
             else
             {
@@ -411,7 +411,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         UpdateEdgeTimer();
     }
 
-    private static void UpdateNotchBounds(NotchWindow window, VisibilityController visibilityController, DisplayMonitor monitor)
+    private static void UpdateNotchBounds(NotchWindow window, VisibilityController visibilityController, DisplayMonitor monitor, double topOffsetDip)
     {
         var source = PresentationSource.FromVisual(window);
         var dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? monitor.DpiScaleX;
@@ -420,11 +420,12 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         var monitorBounds = monitor.Bounds;
         var notchWidth = NotchLayout.ExpandedWidth * dpiX;
         var notchHeight = 140 * dpiY;
+        var topOffset = WindowPlacementMath.ToPixels(topOffsetDip, monitor.DpiScaleY);
         var monitorWidth = monitorBounds.Right - monitorBounds.Left;
         var left = (int)(monitorBounds.Left + (monitorWidth - notchWidth) / 2);
         var right = (int)(left + notchWidth);
 
-        visibilityController.NotchBounds = new WindowRect(left, monitorBounds.Top, right, (int)(monitorBounds.Top + notchHeight));
+        visibilityController.NotchBounds = new WindowRect(left, monitorBounds.Top + topOffset, right, (int)(monitorBounds.Top + topOffset + notchHeight));
     }
 
     private void OnForegroundWindowChanged(object? sender, WindowInfo info)
@@ -503,7 +504,9 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
                     var bounds = vc.NotchBounds;
                     var minX = bounds.Left - 30;
                     var maxX = bounds.Right + 30;
-                    var isAtEdge = y >= top && y <= top + 2 && (bounds.IsEmpty || (x >= minX && x <= maxX));
+                    // Yüzen adada ekran kenarı ile ada arasındaki 9 DIP boşluk da kenar bölgesidir.
+                    var edgeBottom = top + NotchStyle.EdgeTriggerBottomPixels(settings.NotchStyle, monitor.DpiScaleY);
+                    var isAtEdge = y >= top && y <= edgeBottom && (bounds.IsEmpty || (x >= minX && x <= maxX));
 
                     if (isAtEdge)
                     {

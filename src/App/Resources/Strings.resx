@@ -2289,5 +2289,17 @@
   <data name="FocusOn" xml:space="preserve">
     <value>Focus on</value>
   </data>
+  <data name="NotchStyleTitle" xml:space="preserve">
+    <value>Notch style</value>
+  </data>
+  <data name="NotchStyleDesc" xml:space="preserve">
+    <value>Pinned touches the top edge of the screen; Floating is a rounded island with a small gap above.</value>
+  </data>
+  <data name="NotchStylePinned" xml:space="preserve">
+    <value>Pinned to screen</value>
+  </data>
+  <data name="NotchStyleFloating" xml:space="preserve">
+    <value>Floating island</value>
+  </data>
 </root>
 

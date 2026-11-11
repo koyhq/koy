@@ -95,4 +95,32 @@ public class WindowPlacementMathTests
     [InlineData(48, 0, 48)]      // geçersiz ölçek 1 sayılır
     public void ToPixels_rounds_half_up_and_guards_invalid_scale(double dip, double scale, int expected)
         => Assert.Equal(expected, WindowPlacementMath.ToPixels(dip, scale));
+
+    [Theory]
+    [InlineData(1.0, 0, 0)]
+    [InlineData(1.0, 9, 9)]
+    [InlineData(1.5, 0, 0)]
+    [InlineData(1.5, 9, 14)]   // 13.5 yukarı yuvarlanır
+    [InlineData(2.0, 9, 18)]
+    public void TopCenter_offset_is_scaled_by_the_target_monitor_and_keeps_the_size(double scale, double offsetDip, int expectedOffsetPx)
+    {
+        var monitor = new DisplayMonitor("m", "M", new WindowRect(100, -50, 3940, 2110), new WindowRect(100, -50, 3940, 2070), false, scale, scale);
+
+        var rect = WindowPlacementMath.TopCenter(monitor, 640, 364, offsetDip);
+
+        Assert.Equal(-50 + expectedOffsetPx, rect.Top);
+        Assert.Equal(WindowPlacementMath.ToPixels(364, scale), rect.Height);
+        Assert.Equal(WindowPlacementMath.ToPixels(640, scale), rect.Width);
+        Assert.Equal(WindowPlacementMath.TopCenter(monitor, 640, 364).Left, rect.Left);
+    }
+
+    [Fact]
+    public void TopCenter_offset_uses_the_second_monitors_own_scale_not_the_main_one()
+    {
+        var onMain = WindowPlacementMath.TopCenter(Main, 640, 364, 9);
+        var onSide = WindowPlacementMath.TopCenter(Side, 640, 364, 9);
+
+        Assert.Equal(9, onMain.Top - Main.Bounds.Top);
+        Assert.Equal(14, onSide.Top - Side.Bounds.Top);
+    }
 }

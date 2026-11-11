@@ -126,6 +126,8 @@ public sealed record AppSettings
     /// <summary>Çentiğin açılması: 0 = üzerine gelince (varsayılan), 1 = tıklayınca.</summary>
     public int NotchOpenBehavior { get; set; }
     public string Material { get; set; } = "Katı";
+    /// <summary>Çentik biçimi: "Yapışık" (varsayılan, ekran kenarına bitişik, kulaklı) ya da "Yüzen" (kulaksız kapsül, üstten 9 DIP boşluk).</summary>
+    public string NotchStyle { get; set; } = Koy.Core.Notch.NotchStyle.Pinned;
     public int WheelAction { get; set; }
     public int MiddleClickAction { get; set; }
     public int DockIndicatorStyle { get; set; }
@@ -257,6 +259,7 @@ public sealed record AppSettings
                IdleDisplayMode == other.IdleDisplayMode &&
                NotchOpenBehavior == other.NotchOpenBehavior &&
                Material == other.Material &&
+               NotchStyle == other.NotchStyle &&
                WheelAction == other.WheelAction &&
                MiddleClickAction == other.MiddleClickAction &&
                DockIndicatorStyle == other.DockIndicatorStyle &&
@@ -347,6 +350,7 @@ public sealed record AppSettings
         hash.Add(IdleDisplayMode);
         hash.Add(NotchOpenBehavior);
         hash.Add(Material);
+        hash.Add(NotchStyle);
         hash.Add(WheelAction);
         hash.Add(MiddleClickAction);
         hash.Add(DockIndicatorStyle);

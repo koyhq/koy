@@ -85,6 +85,15 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     public string IdleTimerText => _focus.RunningText;
 
     /// <summary>Pil tasarrufu: pille çalışırken çentik animasyonsuz (anında) geçer.</summary>
+    /// <summary>Çentik biçimi yüzen ada mı. Ayar değişince çentik yeniden kurulduğundan ömür boyu sabittir.</summary>
+    public bool IsFloating => NotchStyle.IsFloating(Settings.NotchStyle);
+
+    /// <summary>Üst köşe kulağı: yapışıkta 12, yüzen adada 0 (kulaksız, bütün hâllerde).</summary>
+    public double EarRadius => NotchStyle.EarRadius(Settings.NotchStyle);
+
+    /// <summary>Pencerenin ekran üstünden uzaklığı (DIP): yapışıkta 0, yüzen adada 9. Tuval boyutu değişmez (AGENTS #13).</summary>
+    public double TopOffsetDip => NotchStyle.TopOffsetDip(Settings.NotchStyle);
+
     public bool ReduceMotion => Settings.BatterySaverReduceMotion && _status.IsOnBattery;
 
     /// <summary>Müzik çalarken dalga simgesi gösterilsin mi.</summary>
@@ -485,7 +494,8 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
             var isCard = Osd.Type == OsdType.Card;
             TargetWidth = isCard ? NotchLayout.CardWidth : 260;
             TargetHeight = isCard ? NotchLayout.CardHeight : 40;
-            TargetCornerRadius = isCard ? 28 : 20;
+            TargetCornerRadius = NotchStyle.CornerRadius(Settings.NotchStyle, isCard ? NotchSurface.Card : NotchSurface.Closed,
+                TargetHeight, isCard ? 28 : 20);
         }
         else
         {
@@ -497,6 +507,8 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
                 NotchState.Expanded => (NotchLayout.ExpandedWidth, NotchLayout.ExpandedHeight, 34),
                 _ => (236, 34, 18)
             };
+            TargetCornerRadius = NotchStyle.CornerRadius(Settings.NotchStyle,
+                State == NotchState.Expanded ? NotchSurface.Expanded : NotchSurface.Closed, TargetHeight, TargetCornerRadius);
         }
 
         TargetSizeChanged?.Invoke(TargetWidth, TargetHeight);

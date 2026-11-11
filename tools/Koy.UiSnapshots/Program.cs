@@ -200,11 +200,12 @@ public static class Program
 
     private static NotchSet MakeNotch(bool music, IReadOnlyList<Koy.Core.Shelf.ShelfItem>? shelf = null, List<string>? tileOrder = null,
         bool locationBlocked = false, bool audioConnected = true, Func<Koy.Core.SystemStats.ISystemStatsService>? statsFactory = null,
-        bool brightnessSupported = true, bool wideCover = false)
+        bool brightnessSupported = true, bool wideCover = false, string notchStyle = Koy.Core.Notch.NotchStyle.Pinned)
     {
         var settings = new AppSettings
         {
             FirstRunCompleted = true,
+            NotchStyle = notchStyle,
             WeatherLocationSource = Koy.Core.Weather.WeatherLocationSource.City,
             WeatherCity = "İstanbul, Türkiye",
             WeatherLatitude = 41.01,
@@ -313,13 +314,13 @@ public static class Program
         {
             shape.Width = Koy.Core.Notch.NotchLayout.ExpandedWidth;
             shape.Height = Koy.Core.Notch.NotchLayout.ExpandedHeight;
-            shape.CornerRadius = 34;
+            shape.CornerRadius = Koy.Core.Notch.NotchStyle.CornerRadius(set.Vm.Settings.NotchStyle, Koy.Core.Notch.NotchSurface.Expanded, shape.Height, 34);
         }
         else
         {
             shape.Width = set.Vm.IsMusicPlaying ? 280 : 236;
             shape.Height = 34;
-            shape.CornerRadius = 18;
+            shape.CornerRadius = Koy.Core.Notch.NotchStyle.CornerRadius(set.Vm.Settings.NotchStyle, Koy.Core.Notch.NotchSurface.Closed, shape.Height, 18);
         }
 
         Settle();
@@ -352,6 +353,13 @@ public static class Program
         set = MakeNotch(music: false);
         set.Vm.UpdatePrivacyState(new Koy.Core.Privacy.PrivacyState(true, true, "CameraApp", "MicApp"));
         ShotNotch(set, name("kapali-gizlilik"), expanded: false);
+        set.Vm.Dispose();
+
+        // Yüzen ada: kulaksız kapsül (pencerenin 9 DIP kayması canlı pencerede; burada yalnız şekil).
+        set = MakeNotch(music: false, notchStyle: Koy.Core.Notch.NotchStyle.Floating);
+        ShotNotch(set, name("yuzen-kapali"), expanded: false);
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+        ShotNotch(set, name("yuzen-acik"), expanded: true);
         set.Vm.Dispose();
 
         // Ana: müzik çalıyor / çalmıyor + çalışan zamanlayıcı satırı.

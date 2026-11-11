@@ -95,6 +95,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private int _idleDisplayMode; // 0: Saat ve pil, 1: Yalnız saat, 2: Hiçbiri
 
     [ObservableProperty]
+    private string _notchStyle = Koy.Core.Notch.NotchStyle.Pinned; // "Yapışık" ya da "Yüzen"
+
+    [ObservableProperty]
     private bool _musicShowWaveform = true;
 
     [ObservableProperty]
@@ -497,6 +500,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             MusicShowWaveform = s.MusicShowWaveform;
             MusicLyricsEnabled = s.MusicLyricsEnabled;
             IdleDisplayMode = s.IdleDisplayMode;
+            NotchStyle = Koy.Core.Notch.NotchStyle.Normalize(s.NotchStyle);
             NotchOpenBehavior = s.NotchOpenBehavior;
 
             // Eski sürümlerin karışık değerleri ("Koyu", 18 vb.) seçenek değerlerine indirilir.
@@ -679,7 +683,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     private static bool AffectsNotch(string? name) =>
         name is nameof(NotchVisibility) or nameof(NotchHideInFullscreen) or nameof(MusicShowWaveform) or nameof(MusicLyricsEnabled)
-            or nameof(ShowVolumeOsd) or nameof(ShowBrightnessOsd) or nameof(ShowPrivacyIndicator) or nameof(NotchShowNotifications) or nameof(NotchNotificationsHideBody) or nameof(IdleDisplayMode)
+            or nameof(ShowVolumeOsd) or nameof(ShowBrightnessOsd) or nameof(ShowPrivacyIndicator) or nameof(NotchShowNotifications) or nameof(NotchNotificationsHideBody) or nameof(IdleDisplayMode) or nameof(NotchStyle)
             or nameof(NotchOpenBehavior) or nameof(WheelAction) or nameof(BatterySaverReduceMotion)
             or nameof(WeatherRefreshInterval) or nameof(PomodoroWorkMinutes) or nameof(PomodoroShortBreakMinutes) or nameof(PomodoroLongBreakMinutes)
             or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
@@ -768,6 +772,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             MusicShowWaveform = MusicShowWaveform,
             MusicLyricsEnabled = MusicLyricsEnabled,
             IdleDisplayMode = IdleDisplayMode,
+            NotchStyle = NotchStyle,
             NotchOpenBehavior = NotchOpenBehavior,
             Theme = Theme,
             AccentColor = AccentColor,

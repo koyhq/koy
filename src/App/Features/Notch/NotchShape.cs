@@ -5,9 +5,9 @@ using System.Windows.Media;
 namespace Koy.App.Features.Notch;
 
 /// <summary>
-/// Ekrana sıfır yapışık çentik şekli.
-/// Üst sol ve sağda ekrana yumuşak geçiş sağlayan içbükey (concave) kulaklar,
-/// altta ise yuvarlatılmış dışbükey (convex) köşeler çizer.
+/// Çentik şekli. Ekrana yapışıkken üst sol ve sağda ekrana yumuşak geçiş sağlayan içbükey (concave) kulaklar,
+/// altta yuvarlatılmış dışbükey (convex) köşeler çizer. Kulak yarıçapı 0 iken (yüzen ada) üst köşeler de
+/// <see cref="CornerRadius"/> ile dışbükey yuvarlanır ve şekil kapsüle döner.
 /// </summary>
 public class NotchShape : ContentControl
 {
@@ -102,13 +102,13 @@ public class NotchShape : ContentControl
 
         using (var ctx = geometry.Open())
         {
-            ctx.BeginFigure(new Point(0, 0), isFilled: true, isClosed: true);
+            // Kulaksız (yüzen ada) şekilde üst köşeler de alt köşeler gibi dışbükey yuvarlanır (kapsül).
+            var top = ear > 0.01 ? 0 : bot;
+            ctx.BeginFigure(new Point(0, top), isFilled: true, isClosed: true);
 
             // 1. Sol üst içbükey kulak (ekrandan aşağı yumuşak kavis)
             if (ear > 0.01)
                 ctx.ArcTo(new Point(ear, ear), new Size(ear, ear), 0, false, SweepDirection.Clockwise, true, true);
-            else
-                ctx.LineTo(new Point(0, 0), true, true);
 
             // 2. Sol dikey kenar
             ctx.LineTo(new Point(ear, height - bot), true, true);
@@ -125,14 +125,23 @@ public class NotchShape : ContentControl
                 ctx.ArcTo(new Point(width - ear, height - bot), new Size(bot, bot), 0, false, SweepDirection.Counterclockwise, true, true);
 
             // 6. Sağ dikey kenar
-            ctx.LineTo(new Point(width - ear, ear), true, true);
+            ctx.LineTo(new Point(width - ear, ear > 0.01 ? ear : top), true, true);
 
-            // 7. Sağ üst içbükey kulak (ekrana doğru yumuşak kavis)
+            // 7. Sağ üst içbükey kulak (ekrana doğru yumuşak kavis) ya da kulaksızken dışbükey yuvarlak köşe
             if (ear > 0.01)
                 ctx.ArcTo(new Point(width, 0), new Size(ear, ear), 0, false, SweepDirection.Clockwise, true, true);
+            else if (top > 0.01)
+                ctx.ArcTo(new Point(width - top, 0), new Size(top, top), 0, false, SweepDirection.Counterclockwise, true, true);
 
-            // 8. Üst kenar boyunca başlangıç noktasına (0, 0)
-            ctx.LineTo(new Point(0, 0), true, true);
+            // 8. Üst kenar boyunca başlangıca; kulaksızken sol üst köşe yayı (top, 0) → (0, top)
+            if (ear > 0.01)
+                ctx.LineTo(new Point(0, 0), true, true);
+            else
+            {
+                ctx.LineTo(new Point(top, 0), true, true);
+                if (top > 0.01)
+                    ctx.ArcTo(new Point(0, top), new Size(top, top), 0, false, SweepDirection.Counterclockwise, true, true);
+            }
         }
 
         geometry.Freeze();
