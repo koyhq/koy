@@ -1,6 +1,6 @@
 """Gri zemine çekilmiş çentik ekran görüntülerini saydam zemine çevirir ve boşluğu kırpar.
 
-Site çentiği kendi duvar kâğıdının (site/img/bay.svg) üstünde gösterir; görüntünün gri zemini orada kutu gibi
+Site çentiği gece mavisi zeminin (.aurora) üstünde gösterir; görüntünün gri zemini orada kutu gibi
 görünür. Zemin kenardan taşmayla (flood fill) bulunur; zemine değen kenar pikselleri gri ile çentik siyahının
 karışımından alfa alır, böylece kulaklar ve köşeler yumuşak kalır. Çentiğin içi olduğu gibi kalır.
 

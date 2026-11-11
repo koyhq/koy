@@ -24,6 +24,8 @@
 
       'hero.openAlt': 'The open Koy notch: now playing, headphone battery, CPU and memory, network speed and quick launch',
       'hero.zone': 'Open or close the notch',
+      'hero.hint': 'Point at the top edge',
+      'hero.hintTouch': 'Tap the notch',
       'badge.notes': 'See the release notes',
       'hero.line1': 'Your desktop,',
       'hero.line2': 'a lighter touch.',
@@ -127,6 +129,8 @@
 
       'hero.openAlt': 'Açık Koy çentiği: çalan müzik, kulaklık pili, işlemci ve bellek, ağ hızı ve hızlı başlat',
       'hero.zone': 'Çentiği aç ya da kapat',
+      'hero.hint': 'Fareyi üst kenara götür',
+      'hero.hintTouch': 'Çentiğe dokun',
       'badge.notes': 'Sürüm notlarına bak',
       'hero.line1': 'Masaüstünü',
       'hero.line2': 'hafifçe değiştir.',
@@ -252,7 +256,11 @@
     setMeta('meta[name="twitter:title"]', 'meta.title');
     setMeta('meta[name="twitter:description"]', 'meta.ogDescription');
 
-    document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
+    // Sözlükte olmayan anahtar sayfadaki metni bozmaz (eski önbellekle yeni sayfa karışırsa).
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const key = el.dataset.i18n;
+      if (key in dict[current] || key in dict.en) el.textContent = t(key);
+    });
     // Yalnız yukarıdaki sözlükten gelir, dışarıdan metin girmez.
     document.querySelectorAll('[data-i18n-html]').forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); });
     document.querySelectorAll('[data-i18n-attr]').forEach((el) => {
