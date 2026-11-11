@@ -35,7 +35,8 @@ public sealed class NotificationQueue(TimeProvider? clock = null, string ownAppN
         if (doNotDisturb || IsOwn(item) || IsEmpty(item))
             return false;
 
-        if (Current?.Id == item.Id || _pending.Any(p => p.Id == item.Id))
+        // Aynı kimlik ama ilerlemiş zaman = yerine konan yeni bildirim (kuyruğa girer); aynı damga = yinelenen okuma.
+        if (IsSame(Current, item) || _pending.Any(p => IsSame(p, item)))
             return false;
 
         _pending.Add(item);
@@ -72,6 +73,8 @@ public sealed class NotificationQueue(TimeProvider? clock = null, string ownAppN
         _pending.Clear();
         Current = null;
     }
+
+    private static bool IsSame(NotificationItem? a, NotificationItem b) => a is not null && a.Id == b.Id && a.Time == b.Time;
 
     private bool IsOwn(NotificationItem item) =>
         string.Equals(item.AppName.Trim(), ownAppName, StringComparison.OrdinalIgnoreCase);

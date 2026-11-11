@@ -72,17 +72,18 @@ public sealed class WinRtNotificationListener : INotificationListener
         _ => NotificationAccessStatus.Unavailable
     };
 
-    // known null: temel çizgi okuması, yalnız kimlikler. Aksi halde ayrıntı (simge dahil) yalnız yeni kimlikler için üretilir.
-    private static async Task<NotificationSnapshot> ReadAsync(IReadOnlySet<uint>? known, CancellationToken token)
+    // known null: temel çizgi okuması, yalnız kimlikler. Aksi halde ayrıntı (simge dahil) yalnız yeni ya da güncellenmiş bildirimler için üretilir.
+    private static async Task<NotificationSnapshot> ReadAsync(IReadOnlyDictionary<uint, DateTimeOffset>? known, CancellationToken token)
     {
         var list = await UserNotificationListener.Current.GetNotificationsAsync(NotificationKinds.Toast).AsTask(token).ConfigureAwait(false);
 
-        var ids = new List<uint>(list.Count);
+        var stamps = new List<NotificationStamp>(list.Count);
         var items = new List<NotificationItem>();
         foreach (var notification in list)
         {
-            ids.Add(notification.Id);
-            if (known is null || known.Contains(notification.Id))
+            stamps.Add(new NotificationStamp(notification.Id, notification.CreationTime));
+            // Aynı kimlikle yerine konan bildirimin CreationTime'ı ilerler: o da yeni sayılır.
+            if (known is null || (known.TryGetValue(notification.Id, out var knownTime) && notification.CreationTime <= knownTime))
                 continue;
 
             var item = await TryBuildAsync(notification).ConfigureAwait(false);
@@ -90,7 +91,7 @@ public sealed class WinRtNotificationListener : INotificationListener
                 items.Add(item);
         }
 
-        return new NotificationSnapshot(ids, items);
+        return new NotificationSnapshot(stamps, items);
     }
 
     private static async Task<NotificationItem?> TryBuildAsync(UserNotification notification)

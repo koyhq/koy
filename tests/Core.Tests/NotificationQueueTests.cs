@@ -73,6 +73,20 @@ public class NotificationQueueTests
     }
 
     [Fact]
+    public void SameIdWithNewerTimeIsQueuedAgain()
+    {
+        var clock = new FakeClock();
+        var queue = new NotificationQueue(clock);
+        var t = clock.GetUtcNow();
+        Assert.True(queue.Enqueue(Item(1, time: t), false));
+        queue.TryTakeNext(false);
+        queue.Complete();
+
+        Assert.True(queue.Enqueue(Item(1, time: t.AddSeconds(20)), false));
+        Assert.False(queue.Enqueue(Item(1, time: t.AddSeconds(20)), false));
+    }
+
+    [Fact]
     public void KeepsAtMostFivePendingDroppingTheOldest()
     {
         var queue = new NotificationQueue(new FakeClock());

@@ -8,10 +8,10 @@ namespace Koy.Core.Notifications;
 /// </summary>
 /// <param name="read">
 /// Listeyi okur. <c>known</c> null ise temel çizgi okumasıdır: kaynak yalnız kimlikleri döner, ayrıntı üretmez.
-/// Aksi halde en azından <c>known</c> içinde olmayan kimliklerin ayrıntısını verir.
+/// Aksi halde en azından <c>known</c> içinde olmayan ya da zamanı ilerlemiş kimliklerin ayrıntısını verir.
 /// </param>
 public sealed class NotificationPoller(
-    Func<IReadOnlySet<uint>?, CancellationToken, Task<NotificationSnapshot>> read,
+    Func<IReadOnlyDictionary<uint, DateTimeOffset>?, CancellationToken, Task<NotificationSnapshot>> read,
     TimeProvider? clock = null) : IDisposable
 {
     /// <summary>

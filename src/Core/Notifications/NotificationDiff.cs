@@ -1,21 +1,26 @@
 namespace Koy.Core.Notifications;
 
-/// <summary>Bir yoklamanın sonucu: şu an listede olan bütün kimlikler ve (en az) daha önce görülmemiş kimliklerin ayrıntısı.</summary>
-public sealed record NotificationSnapshot(IReadOnlyList<uint> Ids, IReadOnlyList<NotificationItem> Items);
+/// <summary>Listedeki bir bildirimin kimliği ve oluşturulma zamanı. Aynı kimlik güncellenirse zaman ilerler.</summary>
+public readonly record struct NotificationStamp(uint Id, DateTimeOffset Time);
+
+/// <summary>Bir yoklamanın sonucu: şu an listede olan bütün bildirimlerin damgası ve (en az) yeni ya da güncellenmiş olanların ayrıntısı.</summary>
+public sealed record NotificationSnapshot(IReadOnlyList<NotificationStamp> Stamps, IReadOnlyList<NotificationItem> Items);
 
 /// <summary>
-/// Yoklama sonuçlarından yeni gelen bildirimleri bulur (kimlik kümesi farkı). İlk okuma "temel çizgi" sayılır:
-/// açılışta aksiyon merkezinde duran eski bildirimler kart olarak yağmasın. Saf C#; tek iş parçacığında kullanılır.
+/// Yoklama sonuçlarından yeni gelen bildirimleri bulur. Yeni = bilinmeyen kimlik, ya da bilinen kimlik ama
+/// <c>CreationTime</c> ilerlemiş (aynı etiket/grupla eski bildirimini değiştiren uygulamalar kimliği korur).
+/// İlk okuma "temel çizgi" sayılır: açılışta aksiyon merkezinde duran eski bildirimler kart olarak yağmasın.
+/// Saf C#; tek iş parçacığında kullanılır.
 /// </summary>
 public sealed class NotificationDiff
 {
-    private HashSet<uint> _known = [];
+    private Dictionary<uint, DateTimeOffset> _known = [];
 
     /// <summary>İlk okuma yapıldı mı. Yapılmadıysa kaynak ayrıntıları okumak zorunda değildir.</summary>
     public bool HasBaseline { get; private set; }
 
-    /// <summary>Daha önce görülen kimlikler; kaynak ayrıntı üretirken bunları atlayabilir.</summary>
-    public IReadOnlySet<uint> Known => _known;
+    /// <summary>Daha önce görülen kimlikler ve zamanları; kaynak, zamanı ilerlememiş olanlar için ayrıntı üretmeyebilir.</summary>
+    public IReadOnlyDictionary<uint, DateTimeOffset> Known => _known;
 
     /// <summary>
     /// Yeni gelenleri zaman sırasıyla döner. Bilinen küme her seferinde güncel listeyle değişir (kapanan bildirimlerin
@@ -23,7 +28,9 @@ public sealed class NotificationDiff
     /// </summary>
     public IReadOnlyList<NotificationItem> Apply(NotificationSnapshot snapshot)
     {
-        var current = new HashSet<uint>(snapshot.Ids);
+        var current = new Dictionary<uint, DateTimeOffset>();
+        foreach (var stamp in snapshot.Stamps)
+            current[stamp.Id] = stamp.Time;
 
         if (!HasBaseline)
         {
@@ -33,7 +40,8 @@ public sealed class NotificationDiff
         }
 
         var arrived = snapshot.Items
-            .Where(i => current.Contains(i.Id) && !_known.Contains(i.Id))
+            .Where(i => current.TryGetValue(i.Id, out var time)
+                        && (!_known.TryGetValue(i.Id, out var knownTime) || time > knownTime))
             .DistinctBy(i => i.Id)
             .OrderBy(i => i.Time)
             .ThenBy(i => i.Id)

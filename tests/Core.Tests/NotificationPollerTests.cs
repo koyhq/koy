@@ -6,6 +6,9 @@ public class NotificationPollerTests
 {
     private static NotificationItem Item(uint id) => NotificationDiffTests.Item(id);
 
+    private static NotificationSnapshot Snap(NotificationItem[] items, bool withDetails = true) =>
+        new(items.Select(i => new NotificationStamp(i.Id, i.Time)).ToList(), withDetails ? items : []);
+
     private static async Task WaitUntil(Func<bool> condition)
     {
         var deadline = DateTime.UtcNow.AddSeconds(5);
@@ -20,11 +23,11 @@ public class NotificationPollerTests
     [Fact]
     public async Task PollOnce_FirstReadAsksForBaselineThenPassesKnownIds()
     {
-        var seen = new List<IReadOnlySet<uint>?>();
+        var seen = new List<IReadOnlyDictionary<uint, DateTimeOffset>?>();
         var poller = new NotificationPoller((known, _) =>
         {
             seen.Add(known);
-            return Task.FromResult(new NotificationSnapshot([1], [Item(1)]));
+            return Task.FromResult(Snap([Item(1)]));
         });
         var diff = new NotificationDiff();
         var arrived = new List<uint>();
@@ -34,7 +37,7 @@ public class NotificationPollerTests
         await poller.PollOnceAsync(diff, CancellationToken.None);
 
         Assert.Null(seen[0]);
-        Assert.Contains(1u, seen[1]!);
+        Assert.True(seen[1]!.ContainsKey(1));
         Assert.Empty(arrived);
     }
 
@@ -46,8 +49,8 @@ public class NotificationPollerTests
         {
             round++;
             return Task.FromResult(round == 1
-                ? new NotificationSnapshot([1], [])
-                : new NotificationSnapshot([1, 2], [Item(2)]));
+                ? Snap([Item(1)], withDetails: false)
+                : Snap([Item(1), Item(2)]));
         });
         var diff = new NotificationDiff();
         var arrived = new List<uint>();
@@ -123,7 +126,7 @@ public class NotificationPollerTests
         var poller = new NotificationPoller((_, _) =>
         {
             Interlocked.Increment(ref round);
-            return Task.FromResult(new NotificationSnapshot([7], [Item(7)]));
+            return Task.FromResult(Snap([Item(7)]));
         }, clock);
         poller.Arrived += i => arrived.Add(i.Id);
 

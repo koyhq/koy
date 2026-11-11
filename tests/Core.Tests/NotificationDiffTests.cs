@@ -10,7 +10,7 @@ public class NotificationDiffTests
         new(id, app, title, body, T0.AddSeconds(secondsAfter));
 
     private static NotificationSnapshot Snap(params NotificationItem[] items) =>
-        new(items.Select(i => i.Id).ToList(), items);
+        new(items.Select(i => new NotificationStamp(i.Id, i.Time)).ToList(), items);
 
     [Fact]
     public void FirstReadIsBaselineAndYieldsNothing()
@@ -22,8 +22,8 @@ public class NotificationDiffTests
 
         Assert.Empty(arrived);
         Assert.True(diff.HasBaseline);
-        Assert.Contains(1u, diff.Known);
-        Assert.Contains(2u, diff.Known);
+        Assert.True(diff.Known.ContainsKey(1));
+        Assert.True(diff.Known.ContainsKey(2));
     }
 
     [Fact]
@@ -66,8 +66,8 @@ public class NotificationDiffTests
         diff.Apply(Snap(Item(1), Item(2)));
         diff.Apply(Snap(Item(2)));
 
-        Assert.DoesNotContain(1u, diff.Known);
-        Assert.Contains(2u, diff.Known);
+        Assert.False(diff.Known.ContainsKey(1));
+        Assert.True(diff.Known.ContainsKey(2));
     }
 
     [Fact]
@@ -88,9 +88,50 @@ public class NotificationDiffTests
         var diff = new NotificationDiff();
         diff.Apply(Snap());
 
-        var arrived = diff.Apply(new NotificationSnapshot([4], []));
+        var arrived = diff.Apply(new NotificationSnapshot([new(4, T0)], []));
 
         Assert.Empty(arrived);
-        Assert.Contains(4u, diff.Known);
+        Assert.True(diff.Known.ContainsKey(4));
+    }
+
+    [Fact]
+    public void SameIdWithAdvancedCreationTimeIsNew()
+    {
+        var diff = new NotificationDiff();
+        diff.Apply(Snap(Item(1, secondsAfter: 0)));
+
+        // Lightshot gibi: aynı etiketle bildirimini değiştirir, kimlik aynı kalır, zaman ilerler.
+        var arrived = diff.Apply(Snap(Item(1, title: "Second", secondsAfter: 30)));
+
+        Assert.Equal("Second", Assert.Single(arrived).Title);
+    }
+
+    [Fact]
+    public void SameIdWithSameTimeIsNotNew()
+    {
+        var diff = new NotificationDiff();
+        diff.Apply(Snap(Item(1, secondsAfter: 5)));
+
+        Assert.Empty(diff.Apply(Snap(Item(1, secondsAfter: 5))));
+    }
+
+    [Fact]
+    public void ReplacedNotificationIsReportedOncePerReplacement()
+    {
+        var diff = new NotificationDiff();
+        diff.Apply(Snap());
+
+        Assert.Single(diff.Apply(Snap(Item(1, secondsAfter: 1))));
+        Assert.Empty(diff.Apply(Snap(Item(1, secondsAfter: 1))));
+        Assert.Single(diff.Apply(Snap(Item(1, secondsAfter: 9))));
+    }
+
+    [Fact]
+    public void OlderTimeUnderTheSameIdIsNotNew()
+    {
+        var diff = new NotificationDiff();
+        diff.Apply(Snap(Item(1, secondsAfter: 10)));
+
+        Assert.Empty(diff.Apply(Snap(Item(1, secondsAfter: 3))));
     }
 }
