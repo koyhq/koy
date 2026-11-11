@@ -236,4 +236,16 @@ public class DockLayoutMathTests
             if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true);
         }
     }
+
+    [Fact]
+    public void Thickness_and_offset_stay_inside_a_small_work_area()
+    {
+        var small = new DockRectDip(0, 0, 1280, 40);
+
+        var result = DockLayoutMath.Compute(DockEdge.Bottom, 100, 96, 0, 60, small);
+
+        Assert.True(result.Outer.Top >= small.Top, "üst kenar çalışma alanının dışına taşmamalı");
+        Assert.True(result.Outer.Top + result.Outer.Height <= small.Top + small.Height + 1e-9);
+        Assert.True(result.Outer.Height <= small.Height);
+    }
 }

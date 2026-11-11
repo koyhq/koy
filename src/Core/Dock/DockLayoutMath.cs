@@ -37,6 +37,10 @@ public static class DockLayoutMath
         var offset = DockLayoutLimits.ClampEdgeOffsetDip(edgeOffsetDip);
         var padding = DockLayoutLimits.ClampInnerPaddingDip(innerPaddingDip);
         var thickness = Math.Max(0.0, thicknessDip);
+        // Kalınlık ve ofset çalışma alanının dışına taşamaz (küçük ekranda negatif konum olmasın).
+        var across = edge is DockEdge.Bottom or DockEdge.Top ? workArea.Height : workArea.Width;
+        thickness = Math.Min(thickness, Math.Max(0.0, across));
+        offset = Math.Min(offset, Math.Max(0.0, across - thickness));
 
         DockRectDip outer;
         if (edge is DockEdge.Bottom or DockEdge.Top)
