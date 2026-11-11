@@ -2,6 +2,7 @@ using System.Collections;
 using System.Reflection;
 using Koy.Core.Display;
 using Koy.Core.Dock;
+using Koy.Core.Notch;
 using Koy.Core.Settings;
 
 namespace Koy.Core.Tests;
@@ -158,6 +159,7 @@ public class AppSettingsEqualityTests
         var element = listType.GetGenericArguments()[0];
         if (element == typeof(string)) return "yeni";
         if (element == typeof(DockFolder)) return new DockFolder("yeni", "Yeni", ["x.lnk"]);
+        if (element == typeof(HomeCard)) return HomeCard.Timers;
         throw new NotSupportedException(element.Name);
     }
 

@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Koy.Core.Display;
 using Koy.Core.Dock;
+using Koy.Core.Notch;
 
 namespace Koy.Core.Settings;
 
@@ -23,6 +24,7 @@ namespace Koy.Core.Settings;
 [JsonSerializable(typeof(QuickLaunchSettings))]
 [JsonSerializable(typeof(ValueList<string>))]
 [JsonSerializable(typeof(ValueList<DockFolder>))]
+[JsonSerializable(typeof(ValueList<HomeCard>))]
 [JsonSerializable(typeof(ValueDictionary<MonitorSettings>))]
 [JsonSerializable(typeof(DockFolder))]
 internal sealed partial class SettingsJsonContext : JsonSerializerContext;

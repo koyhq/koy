@@ -28,6 +28,32 @@ public static class NotchPanels
         [NotchPanel.Home, NotchPanel.Focus, NotchPanel.Calendar, NotchPanel.Shelf, NotchPanel.Clipboard, NotchPanel.System, NotchPanel.ControlCenter];
 
     /// <summary>
+    /// Kullanıcının sekme sırası (<see cref="Settings.NotchSettings.PanelOrder"/>). Geçerli, tekrarsız anahtarlar
+    /// verilen sırayla başa gelir; eksik paneller varsayılan sıranın sonuna eklenir. Boş ya da <c>null</c> girdi
+    /// varsayılan sırayı verir. Görünürlük bu listeyi etkilemez.
+    /// </summary>
+    public static List<NotchPanel> NormalizeOrder(IEnumerable<string>? keys)
+    {
+        var result = new List<NotchPanel>();
+        if (keys is not null)
+        {
+            foreach (var key in keys)
+            {
+                if (TryParse(key, out var panel) && !result.Contains(panel))
+                    result.Add(panel);
+            }
+        }
+
+        foreach (var panel in Order)
+        {
+            if (!result.Contains(panel))
+                result.Add(panel);
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// <see cref="Settings.AppSettings.EnabledPanels"/> anahtarlarından açık paneller, sekme sırasıyla.
     /// Ana her zaman açıktır. Eski anahtarlar taşınır: "music" Ana, "calendar" Takvim olur (H öncesi dosyalarda Odak da açılır); "status" artık ayrı
     /// bir panel değil (saat, hava ve pil üstteki durum satırında), yok sayılır. Eski ayar dosyalarında "clipboard"
