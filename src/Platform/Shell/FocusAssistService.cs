@@ -31,6 +31,34 @@ public sealed class FocusAssistService : IFocusAssistService
         }
     }
 
+    /// <summary>
+    /// Rahatsız Etme (Sessiz saatler) ya da sunum modu açık mı: bildirim kartı bu durumda gösterilmez.
+    /// <see cref="IsActive"/> bunu kapsamaz (o tam ekran "meşgul" durumunu okur); QUNS_QUIET_TIME burada ayrıca denetlenir.
+    /// </summary>
+    public bool IsDoNotDisturb
+    {
+        get
+        {
+            try
+            {
+                unsafe
+                {
+                    QUERY_USER_NOTIFICATION_STATE state;
+                    var hr = PInvoke.SHQueryUserNotificationState(&state);
+                    if (hr.Succeeded)
+                    {
+                        return state is QUERY_USER_NOTIFICATION_STATE.QUNS_QUIET_TIME or
+                                       QUERY_USER_NOTIFICATION_STATE.QUNS_PRESENTATION_MODE;
+                    }
+                }
+            }
+            catch
+            {
+            }
+            return false;
+        }
+    }
+
     public event EventHandler<bool>? StateChanged
     {
         add { }
