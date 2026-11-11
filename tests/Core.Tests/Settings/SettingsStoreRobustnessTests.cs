@@ -150,4 +150,28 @@ public class SettingsStoreRobustnessTests : IDisposable
         Assert.Equal("tr", loaded.General.Language);
         Assert.Empty(loaded.Displays.Monitors);
     }
+    [Fact]
+    public void Invalid_list_entry_drops_only_that_entry_and_keeps_the_section()
+    {
+        // Tek bozuk klasör kaydı, aynı bölümdeki sabitlenmiş sırayı ve diğer klasörleri silmemeli.
+        var loaded = SettingsFile.Load("""
+            { "Version": 4,
+              "DockItems": { "PinnedOrder": ["code.exe"],
+                             "Folders": [ { "Id": "a", "Name": "A", "Items": [] }, { "Id": 5, "Name": "B", "Items": [] }, { "Id": "c", "Name": "C", "Items": [] } ] } }
+            """);
+
+        Assert.Equal(["code.exe"], loaded.DockItems.PinnedOrder);
+        Assert.Equal(["a", "c"], loaded.DockItems.Folders.Select(f => f.Id));
+    }
+
+    [Fact]
+    public void Invalid_value_inside_a_nested_list_drops_the_innermost_entry()
+    {
+        var loaded = SettingsFile.Load("""
+            { "Version": 4,
+              "DockItems": { "Folders": [ { "Id": "a", "Name": "A", "Items": ["x.exe", 7, "y.exe"] } ] } }
+            """);
+
+        Assert.Equal(["x.exe", "y.exe"], Assert.Single(loaded.DockItems.Folders).Items);
+    }
 }
