@@ -212,10 +212,51 @@ public sealed partial class ControlCenterViewModel : ObservableObject, IDisposab
         return true;
     }
 
+    /// <summary>Rahatsız Etme döşemesinin alt satırı: "Açık" / "Kapalı" (görünürken okunur), okunamazsa "Ayarlarda aç".</summary>
+    [ObservableProperty]
+    private string _doNotDisturbStatus = Strings.OpenInSettings;
+
+    private bool _dndWatching;
+
+    private void RefreshDoNotDisturb() =>
+        DoNotDisturbStatus = _focusAssistService.IsDoNotDisturb ? Strings.Get("DoNotDisturbOn") : Strings.Get("DoNotDisturbOff");
+
+    // Olay arka plan iş parçacığından gelir.
+    private void OnFocusAssistStateChanged(object? sender, bool active) =>
+        _dispatcher.BeginInvoke(() =>
+        {
+            if (!_disposed && _dndWatching)
+                RefreshDoNotDisturb();
+        });
+
+    private void SetDoNotDisturbActive(bool active)
+    {
+        if (active)
+        {
+            // Sekme açılınca tek okuma; Odaklanma oturumu için olay da dinlenir (zamanlayıcı yok).
+            RefreshDoNotDisturb();
+            if (!_dndWatching)
+            {
+                _dndWatching = true;
+                _focusAssistService.StateChanged += OnFocusAssistStateChanged;
+            }
+
+            return;
+        }
+
+        if (_dndWatching)
+        {
+            _dndWatching = false;
+            _focusAssistService.StateChanged -= OnFocusAssistStateChanged;
+        }
+    }
+
     public void SetActive(bool active)
     {
         if (_disposed)
             return;
+
+        SetDoNotDisturbActive(active);
 
         // Sekme değişince ya da çentik kapanınca liste sayfaları kapanır; servisler yalnız görünürken çalışır.
         BluetoothDevices.SetViewing("control", active);
@@ -418,8 +459,8 @@ public sealed partial class ControlCenterViewModel : ObservableObject, IDisposab
     }
 
     /// <summary>
-    /// Rahatsız Etme'yi açıp kapatan ve durumunu güvenilir okuyan resmi bir API yok; döşeme yalnız
-    /// Windows'taki ayarı açar ve açık/kapalı durumu uydurmaz.
+    /// Rahatsız Etme'yi kodla açıp kapatmak yok; döşeme Windows'taki ayarı açar. Alt satır durumu gösterir
+    /// (<see cref="DoNotDisturbStatus"/>, yalnız sekme görünürken okunur).
     /// </summary>
     [RelayCommand]
     private void OpenDoNotDisturbSettings() => _focusAssistService.OpenSettings();
@@ -456,6 +497,7 @@ public sealed partial class ControlCenterViewModel : ObservableObject, IDisposab
 
         _disposed = true;
 
+        SetDoNotDisturbActive(false);
         Wifi.Dispose();
         BluetoothDevices.PropertyChanged -= OnBluetoothDevicesChanged;
         BluetoothDevices.Dispose();

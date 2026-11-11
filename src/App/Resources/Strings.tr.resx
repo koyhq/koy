@@ -2286,5 +2286,11 @@
   <data name="NotificationTimeHoursAgo" xml:space="preserve">
     <value>{0} sa önce</value>
   </data>
+  <data name="DoNotDisturbOn" xml:space="preserve">
+    <value>Açık</value>
+  </data>
+  <data name="DoNotDisturbOff" xml:space="preserve">
+    <value>Kapalı</value>
+  </data>
 </root>
 

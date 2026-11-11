@@ -2286,5 +2286,11 @@
   <data name="NotificationTimeHoursAgo" xml:space="preserve">
     <value>{0} h ago</value>
   </data>
+  <data name="DoNotDisturbOn" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="DoNotDisturbOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
 </root>
 
