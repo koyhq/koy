@@ -22,7 +22,7 @@ public sealed class SettingsStoreTests : IDisposable
     public void Round_trips()
     {
         var store = NewStore();
-        var settings = new AppSettings { Language = "en", DockVisibility = VisibilityMode.Peek, AccentColor = "#FF8800" };
+        var settings = new AppSettings { General = new GeneralSettings { Language = "en" }, Dock = new DockSettings { Visibility = VisibilityMode.Peek }, Appearance = new AppearanceSettings { AccentColor = "#FF8800" } };
 
         store.Save(settings);
 
@@ -38,7 +38,7 @@ public sealed class SettingsStoreTests : IDisposable
 
         var loaded = NewStore().Load();
 
-        Assert.Equal(new AppSettings { DockEnabled = true }, loaded);
+        Assert.Equal(new AppSettings { Dock = new DockSettings { Enabled = true } }, loaded);
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public sealed class SettingsStoreTests : IDisposable
     public void Enums_are_written_as_text()
     {
         var store = NewStore();
-        store.Save(new AppSettings { DockVisibility = VisibilityMode.Smart });
+        store.Save(new AppSettings { Dock = new DockSettings { Visibility = VisibilityMode.Smart } });
 
         Assert.Contains("\"Smart\"", File.ReadAllText(store.Path));
     }
@@ -64,48 +64,35 @@ public sealed class SettingsStoreTests : IDisposable
     public void Round_trips_with_custom_panels()
     {
         var store = NewStore();
-        var settings = new AppSettings
-        {
-            Language = "en",
-            EnabledPanels = ["music", "calendar"],
-            ControlCenterLayout = ["bluetooth", "wifi"]
-        };
+        var settings = new AppSettings { General = new GeneralSettings { Language = "en" }, Notch = new NotchSettings { EnabledPanels = ["music", "calendar"], ControlCenterLayout = ["bluetooth", "wifi"] } };
 
         store.Save(settings);
         var loaded = store.Load();
 
         Assert.Equal(settings, loaded);
-        Assert.Equal(["music", "calendar"], loaded.EnabledPanels);
+        Assert.Equal(["music", "calendar"], loaded.Notch.EnabledPanels);
     }
 
     [Fact]
     public void Round_trips_with_dock_and_monitor_settings()
     {
         var store = NewStore();
-        var settings = new AppSettings
-        {
-            DockEnabled = true,
-            DockVisibility = VisibilityMode.Fixed,
-            DockHoverMagnify = false,
-            DockHideInFullscreen = false,
-            MonitorTarget = "All"
-        };
+        var settings = new AppSettings { Dock = new DockSettings { Enabled = true, Visibility = VisibilityMode.Fixed, HoverMagnify = false, HideInFullscreen = false } };
 
         store.Save(settings);
         var loaded = store.Load();
 
         Assert.Equal(settings, loaded);
-        Assert.True(loaded.DockEnabled);
-        Assert.Equal(VisibilityMode.Fixed, loaded.DockVisibility);
-        Assert.False(loaded.DockHoverMagnify);
-        Assert.False(loaded.DockHideInFullscreen);
-        Assert.Equal("All", loaded.MonitorTarget);
+        Assert.True(loaded.Dock.Enabled);
+        Assert.Equal(VisibilityMode.Fixed, loaded.Dock.Visibility);
+        Assert.False(loaded.Dock.HoverMagnify);
+        Assert.False(loaded.Dock.HideInFullscreen);
     }
 
     [Fact]
     public void Equals_HandlesNullListsGracefully()
     {
-        var s1 = new AppSettings { ControlCenterLayout = null!, EnabledPanels = null! };
+        var s1 = new AppSettings { Notch = new NotchSettings { ControlCenterLayout = null!, EnabledPanels = null! } };
         var s2 = new AppSettings();
 
         Assert.False(s1.Equals(s2));
@@ -117,56 +104,41 @@ public sealed class SettingsStoreTests : IDisposable
     public void Round_trips_with_first_run_completed_and_theme()
     {
         var store = NewStore();
-        var settings = new AppSettings
-        {
-            FirstRunCompleted = true,
-            Theme = AppTheme.Light,
-            CornerRadius = 14.0,
-            AnimationSpeed = AnimationSpeed.Fast
-        };
+        var settings = new AppSettings { General = new GeneralSettings { FirstRunCompleted = true }, Appearance = new AppearanceSettings { Theme = AppTheme.Light, CornerRadius = 14.0, AnimationSpeed = AnimationSpeed.Fast } };
 
         store.Save(settings);
         var loaded = store.Load();
 
         Assert.Equal(settings, loaded);
-        Assert.True(loaded.FirstRunCompleted);
-        Assert.Equal(AppTheme.Light, loaded.Theme);
-        Assert.Equal(14.0, loaded.CornerRadius);
+        Assert.True(loaded.General.FirstRunCompleted);
+        Assert.Equal(AppTheme.Light, loaded.Appearance.Theme);
+        Assert.Equal(14.0, loaded.Appearance.CornerRadius);
     }
 
     [Fact]
     public void Round_trips_with_new_ui_settings()
     {
         var store = NewStore();
-        var settings = new AppSettings
-        {
-            DockIconSize = 24.0,
-            IdleDisplayMode = IdleDisplayMode.ClockOnly,
-            NotchOpenBehavior = NotchOpenBehavior.Hover,
-            Material = MaterialLevel.Frosted,
-            WheelAction = WheelAction.Volume,
-            MiddleClickAction = MiddleClickAction.Close,
-            DockIndicatorStyle = DockIndicatorStyle.Line
-        };
+        var settings = new AppSettings { Dock = new DockSettings { IconSize = 24.0, MiddleClickAction = MiddleClickAction.Close, IndicatorStyle = DockIndicatorStyle.Line }, Notch = new NotchSettings { IdleDisplay = IdleDisplayMode.ClockOnly, OpenBehavior = NotchOpenBehavior.Hover, WheelAction = WheelAction.Volume }, Appearance = new AppearanceSettings { Material = MaterialLevel.Frosted } };
 
         store.Save(settings);
         var loaded = store.Load();
 
         Assert.Equal(settings, loaded);
-        Assert.Equal(24.0, loaded.DockIconSize);
-        Assert.Equal(IdleDisplayMode.ClockOnly, loaded.IdleDisplayMode);
-        Assert.Equal(NotchOpenBehavior.Hover, loaded.NotchOpenBehavior);
-        Assert.Equal(MaterialLevel.Frosted, loaded.Material);
-        Assert.Equal(WheelAction.Volume, loaded.WheelAction);
-        Assert.Equal(MiddleClickAction.Close, loaded.MiddleClickAction);
-        Assert.Equal(DockIndicatorStyle.Line, loaded.DockIndicatorStyle);
+        Assert.Equal(24.0, loaded.Dock.IconSize);
+        Assert.Equal(IdleDisplayMode.ClockOnly, loaded.Notch.IdleDisplay);
+        Assert.Equal(NotchOpenBehavior.Hover, loaded.Notch.OpenBehavior);
+        Assert.Equal(MaterialLevel.Frosted, loaded.Appearance.Material);
+        Assert.Equal(WheelAction.Volume, loaded.Notch.WheelAction);
+        Assert.Equal(MiddleClickAction.Close, loaded.Dock.MiddleClickAction);
+        Assert.Equal(DockIndicatorStyle.Line, loaded.Dock.IndicatorStyle);
     }
 
     [Fact]
     public void Default_dock_proximity_is_ReserveSpace()
     {
-        Assert.Equal(Koy.Core.Dock.DockProximityMode.ReserveSpace, new AppSettings().DockProximity);
-        Assert.Equal(Koy.Core.Dock.DockProximityMode.ReserveSpace, NewStore().Load().DockProximity);
+        Assert.Equal(Koy.Core.Dock.DockProximityMode.ReserveSpace, new AppSettings().Dock.Proximity);
+        Assert.Equal(Koy.Core.Dock.DockProximityMode.ReserveSpace, NewStore().Load().Dock.Proximity);
     }
 
     [Fact]
@@ -176,7 +148,7 @@ public sealed class SettingsStoreTests : IDisposable
         Directory.CreateDirectory(_dir);
         File.WriteAllText(store.Path, """{ "DockEnabled": true }""");
 
-        Assert.Equal(Koy.Core.Dock.DockProximityMode.ReserveSpace, store.Load().DockProximity);
+        Assert.Equal(Koy.Core.Dock.DockProximityMode.ReserveSpace, store.Load().Dock.Proximity);
     }
 
     [Fact]
@@ -189,7 +161,7 @@ public sealed class SettingsStoreTests : IDisposable
 
         var loaded = store.Load();
 
-        Assert.Equal(Koy.Core.Dock.DockProximityMode.DockDown, loaded.DockProximity);
+        Assert.Equal(Koy.Core.Dock.DockProximityMode.DockDown, loaded.Dock.Proximity);
         Assert.Equal(json, File.ReadAllText(store.Path));
     }
 
@@ -197,9 +169,9 @@ public sealed class SettingsStoreTests : IDisposable
     public void Dodge_stays_selectable()
     {
         var store = NewStore();
-        store.Save(new AppSettings { DockProximity = Koy.Core.Dock.DockProximityMode.Dodge });
+        store.Save(new AppSettings { Dock = new DockSettings { Proximity = Koy.Core.Dock.DockProximityMode.Dodge } });
 
-        Assert.Equal(Koy.Core.Dock.DockProximityMode.Dodge, store.Load().DockProximity);
+        Assert.Equal(Koy.Core.Dock.DockProximityMode.Dodge, store.Load().Dock.Proximity);
     }
 
     [Fact]
@@ -207,10 +179,10 @@ public sealed class SettingsStoreTests : IDisposable
     {
         // Enum ADIYLA yazılır (UseStringEnumConverter): yeni değerin sayısı eski dosyaları etkilemez.
         var store = NewStore();
-        store.Save(new AppSettings { DockProximity = Koy.Core.Dock.DockProximityMode.AlwaysFloating });
+        store.Save(new AppSettings { Dock = new DockSettings { Proximity = Koy.Core.Dock.DockProximityMode.AlwaysFloating } });
 
-        Assert.Contains("\"DockProximity\": \"AlwaysFloating\"", File.ReadAllText(store.Path));
-        Assert.Equal(Koy.Core.Dock.DockProximityMode.AlwaysFloating, store.Load().DockProximity);
+        Assert.Contains("\"Proximity\": \"AlwaysFloating\"", File.ReadAllText(store.Path));
+        Assert.Equal(Koy.Core.Dock.DockProximityMode.AlwaysFloating, store.Load().Dock.Proximity);
     }
 
     [Theory]
@@ -227,7 +199,7 @@ public sealed class SettingsStoreTests : IDisposable
         var json = "{ \"DockProximity\": \"" + name + "\" }";
         File.WriteAllText(store.Path, json);
 
-        Assert.Equal(expected, store.Load().DockProximity);
+        Assert.Equal(expected, store.Load().Dock.Proximity);
         Assert.Equal(json, File.ReadAllText(store.Path));
     }
 
@@ -249,12 +221,12 @@ public sealed class SettingsStoreTests : IDisposable
         var store = NewStore();
         Directory.CreateDirectory(_dir);
         File.WriteAllText(store.Path, """{ "DockEnabled": true }""");
-        Assert.True(store.Load().DockShowTray);
+        Assert.True(store.Load().Dock.ShowTray);
 
-        store.Save(new AppSettings { DockShowTray = false });
+        store.Save(new AppSettings { Dock = new DockSettings { ShowTray = false } });
         var loaded = store.Load();
 
-        Assert.False(loaded.DockShowTray);
+        Assert.False(loaded.Dock.ShowTray);
         Assert.NotEqual(new AppSettings(), loaded);
     }
 
@@ -262,24 +234,17 @@ public sealed class SettingsStoreTests : IDisposable
     public void VoiceSettings_RoundTrips_WithJsonContext()
     {
         var store = NewStore();
-        var original = new AppSettings
-        {
-            ShortcutVoiceCommand = "Ctrl+Shift+V",
-            VoiceHarness = Koy.Core.Voice.VoiceHarnessType.Codex,
-            VoiceCustomCommand = "my-ai {prompt}",
-            VoiceWorkingDirectory = @"C:\Workspace",
-            VoiceTimeoutSeconds = 120
-        };
+        var original = new AppSettings { Shortcuts = new ShortcutsSettings { VoiceCommand = "Ctrl+Shift+V" }, Voice = new VoiceSettings { Harness = Koy.Core.Voice.VoiceHarnessType.Codex, CustomCommand = "my-ai {prompt}", WorkingDirectory = @"C:\Workspace", TimeoutSeconds = 120 } };
 
         store.Save(original);
         var loaded = store.Load();
 
         Assert.Equal(original, loaded);
-        Assert.Equal("Ctrl+Shift+V", loaded.ShortcutVoiceCommand);
-        Assert.Equal(Koy.Core.Voice.VoiceHarnessType.Codex, loaded.VoiceHarness);
-        Assert.Equal("my-ai {prompt}", loaded.VoiceCustomCommand);
-        Assert.Equal(@"C:\Workspace", loaded.VoiceWorkingDirectory);
-        Assert.Equal(120, loaded.VoiceTimeoutSeconds);
+        Assert.Equal("Ctrl+Shift+V", loaded.Shortcuts.VoiceCommand);
+        Assert.Equal(Koy.Core.Voice.VoiceHarnessType.Codex, loaded.Voice.Harness);
+        Assert.Equal("my-ai {prompt}", loaded.Voice.CustomCommand);
+        Assert.Equal(@"C:\Workspace", loaded.Voice.WorkingDirectory);
+        Assert.Equal(120, loaded.Voice.TimeoutSeconds);
     }
 
     public void Dispose()

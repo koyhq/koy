@@ -317,28 +317,24 @@ public class DockFoldersTests
             var store = new Koy.Core.Settings.SettingsStore(Path.Combine(dir, "settings.json"));
 
             // 1. Serileştirme ve geri yükleme (roundtrip)
-            var original = new Koy.Core.Settings.AppSettings
-            {
-                DockFolders =
-                [
+            var original = new Koy.Core.Settings.AppSettings { DockItems = new Koy.Core.Settings.DockItemsSettings { Folders = [
                     new DockFolder("f1", "Araçlar", ["calc.lnk", "notepad.lnk"]),
                     new DockFolder("f2", "Medya", ["spotify.lnk", "vlc.lnk"])
-                ]
-            };
+                ] } };
 
             store.Save(original);
             var restored = store.Load();
 
             Assert.Equal(original, restored);
-            Assert.Equal(2, restored.DockFolders.Count);
-            Assert.Equal("Araçlar", restored.DockFolders[0].Name);
-            Assert.Equal(["calc.lnk", "notepad.lnk"], restored.DockFolders[0].Items);
+            Assert.Equal(2, restored.DockItems.Folders.Count);
+            Assert.Equal("Araçlar", restored.DockItems.Folders[0].Name);
+            Assert.Equal(["calc.lnk", "notepad.lnk"], restored.DockItems.Folders[0].Items);
 
             // 2. Eski ayar dosyasında DockFolders alanı yoksa boş liste olarak yüklenmeli
             File.WriteAllText(Path.Combine(dir, "settings.json"), """{ "DockEnabled": true }""");
             var legacy = store.Load();
-            Assert.NotNull(legacy.DockFolders);
-            Assert.Empty(legacy.DockFolders);
+            Assert.NotNull(legacy.DockItems.Folders);
+            Assert.Empty(legacy.DockItems.Folders);
         }
         finally
         {

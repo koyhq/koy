@@ -647,7 +647,7 @@ public sealed class SearchPanelTests : IDisposable
 
     [Fact]
     public void History_is_off_by_default_for_new_settings() =>
-        Assert.Equal(SearchHistoryMode.Disabled, new Koy.Core.Settings.AppSettings().SearchHistoryMode);
+        Assert.Equal(SearchHistoryMode.Disabled, new Koy.Core.Settings.AppSettings().Search.HistoryMode);
 
     [Fact]
     public void Clipboard_query_is_not_saved_to_history()

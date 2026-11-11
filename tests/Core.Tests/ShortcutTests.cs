@@ -145,8 +145,8 @@ public class ShortcutDefaultsTests
             store.Save(settings);
             var loaded = store.Load();
 
-            Assert.Equal("Ctrl+Shift+F9", loaded.ShortcutPlayPause);
-            Assert.Equal("", loaded.ShortcutOpenMenu);
+            Assert.Equal("Ctrl+Shift+F9", loaded.Shortcuts.PlayPause);
+            Assert.Equal("", loaded.Shortcuts.OpenMenu);
             Assert.Equal(settings, loaded);
         }
         finally

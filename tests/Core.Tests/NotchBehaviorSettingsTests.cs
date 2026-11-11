@@ -64,7 +64,7 @@ public class NotchBehaviorSettingsTests
     [Fact]
     public void Default_open_behavior_setting_is_hover()
     {
-        Assert.Equal(NotchOpenBehavior.Hover, new AppSettings().NotchOpenBehavior);
+        Assert.Equal(NotchOpenBehavior.Hover, new AppSettings().Notch.OpenBehavior);
     }
 
     [Fact]
@@ -74,8 +74,8 @@ public class NotchBehaviorSettingsTests
         try
         {
             var store = new SettingsStore(path);
-            store.Save(new AppSettings { NotchOpenBehavior = NotchOpenBehavior.Click });
-            Assert.Equal(NotchOpenBehavior.Click, store.Load().NotchOpenBehavior);
+            store.Save(new AppSettings { Notch = new NotchSettings { OpenBehavior = NotchOpenBehavior.Click } });
+            Assert.Equal(NotchOpenBehavior.Click, store.Load().Notch.OpenBehavior);
         }
         finally
         {
@@ -122,14 +122,14 @@ public class NotchBehaviorSettingsTests
         try
         {
             var store = new SettingsStore(Path.Combine(dir, "settings.json"));
-            var settings = new AppSettings { NotchHideInFullscreen = false, MusicShowWaveform = false, IdleDisplayMode = IdleDisplayMode.Nothing };
+            var settings = new AppSettings { Notch = new NotchSettings { HideInFullscreen = false, IdleDisplay = IdleDisplayMode.Nothing }, Music = new MusicSettings { ShowWaveform = false } };
 
             store.Save(settings);
             var loaded = store.Load();
 
-            Assert.False(loaded.NotchHideInFullscreen);
-            Assert.False(loaded.MusicShowWaveform);
-            Assert.Equal(IdleDisplayMode.Nothing, loaded.IdleDisplayMode);
+            Assert.False(loaded.Notch.HideInFullscreen);
+            Assert.False(loaded.Music.ShowWaveform);
+            Assert.Equal(IdleDisplayMode.Nothing, loaded.Notch.IdleDisplay);
             Assert.Equal(settings, loaded);
         }
         finally

@@ -8,7 +8,7 @@ public class ControlCenterTilesTests
     [Fact]
     public void Default_settings_resolve_to_the_default_order()
     {
-        Assert.Equal(ControlCenterTiles.DefaultOrder, ControlCenterTiles.Resolve(new AppSettings().ControlCenterLayout));
+        Assert.Equal(ControlCenterTiles.DefaultOrder, ControlCenterTiles.Resolve(new AppSettings().Notch.ControlCenterLayout));
     }
 
     [Fact]
@@ -96,9 +96,9 @@ public class ControlCenterTilesTests
         try
         {
             var store = new SettingsStore(Path.Combine(dir, "settings.json"));
-            store.Save(new AppSettings { ControlCenterLayout = ControlCenterTiles.Move(ControlCenterTiles.DefaultOrder, "donotdisturb", 0) });
+            store.Save(new AppSettings { Notch = new NotchSettings { ControlCenterLayout = new ValueList<string>(ControlCenterTiles.Move(ControlCenterTiles.DefaultOrder, "donotdisturb", 0)) } });
 
-            Assert.Equal(["donotdisturb", "wifi", "bluetooth"], ControlCenterTiles.Resolve(store.Load().ControlCenterLayout));
+            Assert.Equal(["donotdisturb", "wifi", "bluetooth"], ControlCenterTiles.Resolve(store.Load().Notch.ControlCenterLayout));
         }
         finally
         {

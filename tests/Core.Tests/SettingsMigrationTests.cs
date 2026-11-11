@@ -19,8 +19,8 @@ public class SettingsMigrationTests
         var migrated = SettingsFile.Load("{ \"Version\": 2, \"MonitorTarget\": \"" + target + "\" }");
 
         Assert.Equal(AppSettings.CurrentVersion, migrated.Version);
-        Assert.Empty(migrated.Monitors);
-        Assert.Equal(NewScreenMode.NotchAndDock, migrated.NewScreenDefault);
+        Assert.Empty(migrated.Displays.Monitors);
+        Assert.Equal(NewScreenMode.NotchAndDock, migrated.Displays.NewScreenDefault);
     }
 
     [Fact]
@@ -28,9 +28,9 @@ public class SettingsMigrationTests
     {
         var migrated = SettingsFile.Load("""{ "Version": 2, "MonitorTarget": "\\\\.\\DISPLAY2" }""");
 
-        Assert.True(migrated.Monitors[@"\\.\DISPLAY2"].NotchEnabled);
-        Assert.True(migrated.Monitors[@"\\.\DISPLAY2"].DockEnabled);
-        Assert.Equal(NewScreenMode.None, migrated.NewScreenDefault);
+        Assert.True(migrated.Displays.Monitors[@"\\.\DISPLAY2"].NotchEnabled);
+        Assert.True(migrated.Displays.Monitors[@"\\.\DISPLAY2"].DockEnabled);
+        Assert.Equal(NewScreenMode.None, migrated.Displays.NewScreenDefault);
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public class SettingsMigrationTests
               "Monitors": { "OFIS": { "NotchEnabled": false, "DockEnabled": false, "Name": "Eski" } } }
             """);
 
-        var record = Assert.Single(migrated.Monitors);
+        var record = Assert.Single(migrated.Displays.Monitors);
         Assert.True(record.Value.NotchEnabled && record.Value.DockEnabled);
     }
 
@@ -71,8 +71,8 @@ public class SettingsMigrationTests
     {
         var migrated = SettingsFile.Load("""{ "Version": 2, "Language": "en", "DockIconSize": 55 }""");
 
-        Assert.Equal("en", migrated.Language);
-        Assert.Equal(55, migrated.DockIconSize);
+        Assert.Equal("en", migrated.General.Language);
+        Assert.Equal(55, migrated.Dock.IconSize);
     }
 
     [Fact]
@@ -86,7 +86,7 @@ public class SettingsMigrationTests
             var loaded = new SettingsStore(path).Load();
 
             Assert.Equal(AppSettings.CurrentVersion, loaded.Version);
-            Assert.True(loaded.Monitors.ContainsKey(@"\\.\DISPLAY2"));
+            Assert.True(loaded.Displays.Monitors.ContainsKey(@"\\.\DISPLAY2"));
         }
         finally
         {
@@ -101,22 +101,18 @@ public class SettingsMigrationTests
         try
         {
             var store = new SettingsStore(path);
-            var settings = new AppSettings
-            {
-                NewScreenDefault = NewScreenMode.None,
-                Monitors = new(StringComparer.OrdinalIgnoreCase)
+            var settings = new AppSettings { Displays = new DisplaysSettings { NewScreenDefault = NewScreenMode.None, Monitors = new()
                 {
                     ["kimlik-1"] = new MonitorSettings { NotchEnabled = true, DockEnabled = false, Name = "Ofis" },
                     ["kimlik-2"] = new MonitorSettings { NotchEnabled = false, DockEnabled = true }
-                }
-            };
+                } } };
             store.Save(settings);
 
             var loaded = store.Load();
 
             Assert.Equal(settings, loaded);
-            Assert.Equal("Ofis", loaded.Monitors["kimlik-1"].Name);
-            Assert.Equal(NewScreenMode.None, loaded.NewScreenDefault);
+            Assert.Equal("Ofis", loaded.Displays.Monitors["kimlik-1"].Name);
+            Assert.Equal(NewScreenMode.None, loaded.Displays.NewScreenDefault);
         }
         finally
         {
@@ -134,7 +130,7 @@ public class SettingsMigrationTests
         foreach (var property in typeof(AppSettings).GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
             // Version zaten güncel; Language varsayılanı makinenin diline bağlı (aynı değere denk gelebilir).
-            if (property.Name is nameof(AppSettings.Version) or nameof(AppSettings.Language))
+            if (property.Name is nameof(AppSettings.Version) or nameof(AppSettings.General.Language))
                 continue;
             var value = property.GetValue(loaded);
             var def = property.GetValue(defaults);

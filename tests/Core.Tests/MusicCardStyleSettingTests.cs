@@ -7,7 +7,7 @@ public class MusicCardStyleSettingTests
 {
     [Fact]
     public void Default_setting_is_tinted() =>
-        Assert.Equal(MusicCardStyle.Tinted, new AppSettings().MusicCardStyle);
+        Assert.Equal(MusicCardStyle.Tinted, new AppSettings().Music.CardStyle);
 
     [Fact]
     public void Style_survives_a_save_and_load_round_trip()
@@ -16,12 +16,12 @@ public class MusicCardStyleSettingTests
         try
         {
             var store = new SettingsStore(Path.Combine(dir, "settings.json"));
-            var settings = new AppSettings { MusicCardStyle = MusicCardStyle.Artwork };
+            var settings = new AppSettings { Music = new MusicSettings { CardStyle = MusicCardStyle.Artwork } };
 
             store.Save(settings);
             var loaded = store.Load();
 
-            Assert.Equal(MusicCardStyle.Artwork, loaded.MusicCardStyle);
+            Assert.Equal(MusicCardStyle.Artwork, loaded.Music.CardStyle);
             Assert.Equal(settings, loaded);
             Assert.NotEqual(new AppSettings(), loaded);
         }

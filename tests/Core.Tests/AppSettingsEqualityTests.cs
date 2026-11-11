@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Reflection;
 using Koy.Core.Display;
 using Koy.Core.Dock;
@@ -6,55 +7,89 @@ using Koy.Core.Settings;
 namespace Koy.Core.Tests;
 
 /// <summary>
-/// AppSettings.Equals ve GetHashCode elle yazılı (listeler için). Yeni bir alan eklenip karşılaştırmaya
-/// eklenmezse ayarlar "değişmedi" sanılır; bu test her alanı tek tek değiştirerek bunu yakalar.
+/// Ayar bölümleri record'dur; eşitlik alanlarından gelir. Yine de yeni bir alan ValueList ya da ValueDictionary
+/// gibi elle yazılmış bir tipse, ya da eşitlik dışında bırakılırsa "değişmedi" sanılır. Bu testler her bölümdeki her
+/// alanı tek tek değiştirir ve eşitliğin ve hash değerinin bunu gördüğünü doğrular.
 /// </summary>
 public class AppSettingsEqualityTests
 {
-    public static IEnumerable<object[]> ScalarProperties() =>
-        typeof(AppSettings).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .Where(p => p.CanWrite && p.PropertyType != typeof(List<string>) &&
-                        p.PropertyType != typeof(List<DockFolder>) &&
-                        p.PropertyType != typeof(Dictionary<string, MonitorSettings>))
-            .Select(p => new object[] { p.Name });
+    /// <summary>Her bölüm (General, Dock ...) ve bölümdeki her yazılabilir skaler alan.</summary>
+    public static IEnumerable<object[]> ScalarFields() =>
+        AllLeafFields().Where(f => IsScalar(f.Field.PropertyType)).Select(f => new object[] { f.Section, f.Field.Name });
+
+    public static IEnumerable<object[]> ListFields() =>
+        AllLeafFields().Where(f => IsList(f.Field.PropertyType)).Select(f => new object[] { f.Section, f.Field.Name });
+
+    [Fact]
+    public void Two_default_instances_are_equal_with_equal_hashes()
+    {
+        var a = new AppSettings();
+        var b = new AppSettings();
+
+        Assert.Equal(a, b);
+        Assert.Equal(a.GetHashCode(), b.GetHashCode());
+    }
 
     [Theory]
-    [MemberData(nameof(ScalarProperties))]
-    public void Changing_any_field_makes_settings_unequal_and_changes_the_hash(string propertyName)
+    [MemberData(nameof(ScalarFields))]
+    public void Changing_any_scalar_field_makes_settings_unequal_and_changes_the_hash(string section, string fieldName)
     {
-        var property = typeof(AppSettings).GetProperty(propertyName)!;
         var original = new AppSettings();
         var changed = new AppSettings();
-        property.SetValue(changed, Different(property.PropertyType, property.GetValue(changed)));
+        var sectionInstance = SectionOf(changed, section);
+        var field = sectionInstance.GetType().GetProperty(fieldName)!;
+        field.SetValue(sectionInstance, Different(field.PropertyType, field.GetValue(sectionInstance)));
 
         Assert.NotEqual(original, changed);
         Assert.NotEqual(original.GetHashCode(), changed.GetHashCode());
     }
 
     [Theory]
-    [InlineData(nameof(AppSettings.EnabledPanels))]
-    [InlineData(nameof(AppSettings.ControlCenterLayout))]
-    [InlineData(nameof(AppSettings.DockPinnedOrder))]
-    [InlineData(nameof(AppSettings.QuickLaunchItems))]
-    public void Changing_a_list_field_makes_settings_unequal(string propertyName)
+    [MemberData(nameof(ListFields))]
+    public void Changing_any_list_field_makes_settings_unequal_and_changes_the_hash(string section, string fieldName)
     {
-        var property = typeof(AppSettings).GetProperty(propertyName)!;
+        var original = new AppSettings();
         var changed = new AppSettings();
-        property.SetValue(changed, new List<string> { "yeni" });
+        var sectionInstance = SectionOf(changed, section);
+        var field = sectionInstance.GetType().GetProperty(fieldName)!;
+        var list = (IList)Activator.CreateInstance(field.PropertyType)!;
+        list.Add(SampleItem(field.PropertyType));
+        field.SetValue(sectionInstance, list);
 
-        Assert.NotEqual(new AppSettings(), changed);
+        Assert.NotEqual(original, changed);
+        Assert.NotEqual(original.GetHashCode(), changed.GetHashCode());
+    }
+
+    [Fact]
+    public void Same_list_content_in_another_instance_is_equal()
+    {
+        var a = new AppSettings { QuickLaunch = new QuickLaunchSettings { Items = ["a.exe", "docs"] } };
+        var b = new AppSettings { QuickLaunch = new QuickLaunchSettings { Items = ["a.exe", "docs"] } };
+
+        Assert.Equal(a, b);
+        Assert.Equal(a.GetHashCode(), b.GetHashCode());
+    }
+
+    [Fact]
+    public void List_order_matters()
+    {
+        var a = new AppSettings { DockItems = new DockItemsSettings { PinnedOrder = ["a.lnk", "b.lnk"] } };
+        var b = new AppSettings { DockItems = new DockItemsSettings { PinnedOrder = ["b.lnk", "a.lnk"] } };
+
+        Assert.NotEqual(a, b);
     }
 
     [Fact]
     public void Changing_monitor_settings_makes_settings_unequal_and_changes_the_hash()
     {
-        var changed = new AppSettings { Monitors = new() { ["a"] = new MonitorSettings { DockEnabled = false } } };
-        var other = new AppSettings { Monitors = new() { ["a"] = new MonitorSettings { DockEnabled = true } } };
+        var changed = new AppSettings { Displays = new() { Monitors = new() { ["a"] = new MonitorSettings { DockEnabled = false } } } };
+        var other = new AppSettings { Displays = new() { Monitors = new() { ["a"] = new MonitorSettings { DockEnabled = true } } } };
 
         Assert.NotEqual(new AppSettings(), changed);
         Assert.NotEqual(new AppSettings().GetHashCode(), changed.GetHashCode());
         Assert.NotEqual(changed, other);
-        Assert.Equal(changed, new AppSettings { Monitors = new() { ["A"] = new MonitorSettings { DockEnabled = false } } });
+        // Monitör kimliği büyük ve küçük harf duyarsız: aynı ekran tek kayıt sayılır.
+        Assert.Equal(changed, new AppSettings { Displays = new() { Monitors = new() { ["A"] = new MonitorSettings { DockEnabled = false } } } });
     }
 
     [Fact]
@@ -63,7 +98,7 @@ public class AppSettingsEqualityTests
         var original = new AppSettings();
         var changed = new AppSettings
         {
-            DockFolders = [new DockFolder("f1", "Araçlar", ["calc.lnk", "notepad.lnk"])]
+            DockItems = new DockItemsSettings { Folders = [new DockFolder("f1", "Araçlar", ["calc.lnk", "notepad.lnk"])] }
         };
 
         Assert.NotEqual(original, changed);
@@ -71,22 +106,59 @@ public class AppSettingsEqualityTests
 
         var same = new AppSettings
         {
-            DockFolders = [new DockFolder("f1", "Araçlar", ["calc.lnk", "notepad.lnk"])]
+            DockItems = new DockItemsSettings { Folders = [new DockFolder("f1", "Araçlar", ["calc.lnk", "notepad.lnk"])] }
         };
         Assert.Equal(changed, same);
         Assert.Equal(changed.GetHashCode(), same.GetHashCode());
 
         var differentName = new AppSettings
         {
-            DockFolders = [new DockFolder("f1", "Farklı", ["calc.lnk", "notepad.lnk"])]
+            DockItems = new DockItemsSettings { Folders = [new DockFolder("f1", "Farklı", ["calc.lnk", "notepad.lnk"])] }
         };
         Assert.NotEqual(changed, differentName);
 
         var differentItems = new AppSettings
         {
-            DockFolders = [new DockFolder("f1", "Araçlar", ["calc.lnk"])]
+            DockItems = new DockItemsSettings { Folders = [new DockFolder("f1", "Araçlar", ["calc.lnk"])] }
         };
         Assert.NotEqual(changed, differentItems);
+    }
+
+    [Fact]
+    public void Changing_the_schema_version_makes_settings_unequal()
+        => Assert.NotEqual(new AppSettings(), new AppSettings { Version = AppSettings.CurrentVersion - 1 });
+
+    // ---- yardımcılar ----
+
+    private static IEnumerable<(string Section, PropertyInfo Field)> AllLeafFields()
+    {
+        foreach (var section in typeof(AppSettings).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                     .Where(p => p.CanWrite && p.PropertyType.Namespace == typeof(AppSettings).Namespace && p.PropertyType.IsClass))
+        {
+            foreach (var field in section.PropertyType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                         .Where(p => p.CanWrite))
+            {
+                yield return (section.Name, field);
+            }
+        }
+    }
+
+    private static object SectionOf(AppSettings settings, string section) =>
+        typeof(AppSettings).GetProperty(section)!.GetValue(settings)!;
+
+    private static bool IsScalar(Type type) =>
+        type == typeof(bool) || type == typeof(int) || type == typeof(long) || type == typeof(double)
+        || type == typeof(string) || type.IsEnum;
+
+    private static bool IsList(Type type) =>
+        type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ValueList<>);
+
+    private static object SampleItem(Type listType)
+    {
+        var element = listType.GetGenericArguments()[0];
+        if (element == typeof(string)) return "yeni";
+        if (element == typeof(DockFolder)) return new DockFolder("yeni", "Yeni", ["x.lnk"]);
+        throw new NotSupportedException(element.Name);
     }
 
     private static object? Different(Type type, object? value)

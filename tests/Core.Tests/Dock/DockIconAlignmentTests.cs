@@ -11,7 +11,7 @@ public sealed class DockIconAlignmentTests : IDisposable
 
     [Fact]
     public void Default_is_center()
-        => Assert.Equal(DockIconAlignment.Center, new AppSettings().DockIconAlignment);
+        => Assert.Equal(DockIconAlignment.Center, new AppSettings().Dock.IconAlignment);
 
     [Fact]
     public void Old_settings_file_without_the_field_stays_centered()
@@ -19,7 +19,7 @@ public sealed class DockIconAlignmentTests : IDisposable
         Directory.CreateDirectory(_dir);
         File.WriteAllText(SettingsPath, """{ "DockStyle": "FullWidth" }""");
 
-        Assert.Equal(DockIconAlignment.Center, new SettingsStore(SettingsPath).Load().DockIconAlignment);
+        Assert.Equal(DockIconAlignment.Center, new SettingsStore(SettingsPath).Load().Dock.IconAlignment);
     }
 
     [Theory]
@@ -29,20 +29,20 @@ public sealed class DockIconAlignmentTests : IDisposable
     {
         var store = new SettingsStore(SettingsPath);
 
-        store.Save(new AppSettings { DockIconAlignment = alignment });
+        store.Save(new AppSettings { Dock = new DockSettings { IconAlignment = alignment } });
 
-        Assert.Contains($"\"DockIconAlignment\": \"{alignment}\"", File.ReadAllText(SettingsPath));
-        Assert.Equal(alignment, store.Load().DockIconAlignment);
+        Assert.Contains($"\"IconAlignment\": \"{alignment}\"", File.ReadAllText(SettingsPath));
+        Assert.Equal(alignment, store.Load().Dock.IconAlignment);
     }
 
     [Fact]
     public void Alignment_takes_part_in_equality()
-        => Assert.NotEqual(new AppSettings(), new AppSettings { DockIconAlignment = DockIconAlignment.Left });
+        => Assert.NotEqual(new AppSettings(), new AppSettings { Dock = new DockSettings { IconAlignment = DockIconAlignment.Left } });
 
     [Fact]
     public void Changing_alignment_only_rebuilds_view_models()
     {
-        var d = DockSettingsDiff.Compare(new AppSettings(), new AppSettings { DockIconAlignment = DockIconAlignment.Right });
+        var d = DockSettingsDiff.Compare(new AppSettings(), new AppSettings { Dock = new DockSettings { IconAlignment = DockIconAlignment.Right } });
 
         Assert.True(d.RebuildViewModels);
         Assert.False(d.ReconcileAppBar);

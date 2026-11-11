@@ -25,14 +25,14 @@ public class TimerAndWeatherSettingsTests
     [Fact]
     public void Weather_default_setting_is_thirty_minutes()
     {
-        Assert.Equal(TimeSpan.FromMinutes(30), WeatherRefreshPolicy.CacheDuration(new AppSettings().WeatherRefreshInterval));
+        Assert.Equal(TimeSpan.FromMinutes(30), WeatherRefreshPolicy.CacheDuration(new AppSettings().Weather.RefreshInterval));
     }
 
     [Fact]
     public void Pomodoro_settings_defaults_match_classic_25_5_15()
     {
         var s = new AppSettings();
-        var config = PomodoroConfig.FromMinutes(s.PomodoroWorkMinutes, s.PomodoroShortBreakMinutes, s.PomodoroLongBreakMinutes);
+        var config = PomodoroConfig.FromMinutes(s.Focus.PomodoroWorkMinutes, s.Focus.PomodoroShortBreakMinutes, s.Focus.PomodoroLongBreakMinutes);
 
         Assert.Equal(PomodoroConfig.Default, config);
     }
