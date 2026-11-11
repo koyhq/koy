@@ -1,9 +1,12 @@
 using Koy.Core.Appearance;
+using Koy.Core.Clock;
 using Koy.Core.Display;
 using Koy.Core.Dock;
 using Koy.Core.Media;
 using Koy.Core.Notch;
 using Koy.Core.Search;
+using Koy.Core.Tray;
+using Koy.Core.Units;
 using Koy.Core.Visibility;
 using Koy.Core.Voice;
 using Koy.Core.Weather;
@@ -28,6 +31,15 @@ public sealed record GeneralSettings
 
     public bool AutoCheckUpdates { get; set; } = true;
     public UpdateChannel UpdateChannel { get; set; } = UpdateChannel.Stable;
+
+    /// <summary>Sıcaklık birimi (hava durumu). Değer Core'da dönüştürülür, birim adı App'te yazılır (bkz. UnitConversion).</summary>
+    public TemperatureUnit TemperatureUnit { get; set; } = TemperatureUnit.Celsius;
+
+    /// <summary>Rüzgâr hızı birimi (hava durumu).</summary>
+    public WindSpeedUnit WindSpeedUnit { get; set; } = WindSpeedUnit.KilometersPerHour;
+
+    /// <summary>Ağ hızı birimi: bayt ya da bit.</summary>
+    public NetworkSpeedUnit NetworkSpeedUnit { get; set; } = NetworkSpeedUnit.Bytes;
 }
 
 /// <summary>Görünüm: tema, vurgu, köşe, hareket ve malzeme.</summary>
@@ -114,6 +126,12 @@ public sealed record DockSettings
 
     /// <summary>Dock simgesine orta tık: yeni pencere (varsayılan) ya da kapat.</summary>
     public MiddleClickAction MiddleClickAction { get; set; } = MiddleClickAction.NewWindow;
+
+    /// <summary>Yeni bir tepsi simgesinin varsayılan yeri (uygulamanın kendi kaydı yoksa). Varsayılan taşma menüsü.</summary>
+    public TrayIconVisibility NewTrayIconVisibility { get; set; } = TrayIconVisibilityPolicy.DefaultNewIcon;
+
+    /// <summary>Uygulama başına tepsi simgesi yeri. Anahtar küçük harfli exe adı; kaydı olmayan simge <see cref="NewTrayIconVisibility"/>'i alır.</summary>
+    public ValueDictionary<TrayIconVisibility> TrayAppVisibility { get; set; } = new();
 }
 
 /// <summary>
@@ -179,6 +197,27 @@ public sealed record NotchSettings
 
     public ValueList<string> EnabledPanels { get; set; } = ["home", "focus", "calendar", "shelf", "clipboard", "system", "controlcenter"];
     public ValueList<string> ControlCenterLayout { get; set; } = ["wifi", "bluetooth", "donotdisturb"];
+
+    /// <summary>Boştayken çentikteki saat: biçim (12/24 saat, Auto kültürü izler). Kararlar <see cref="ClockFormatPolicy"/>'de.</summary>
+    public ClockHourFormat ClockHourFormat { get; set; } = ClockHourFormat.Auto;
+
+    /// <summary>Saat saniyeyi göstersin.</summary>
+    public bool ClockShowSeconds { get; set; }
+
+    /// <summary>Saatin yanında tarih görünsün.</summary>
+    public bool ClockShowDate { get; set; }
+
+    /// <summary>Takvimde hafta numarası görünsün.</summary>
+    public bool ClockShowWeekNumber { get; set; }
+
+    /// <summary>Takvimde haftanın ilk günü (System: kültürün ilk günü).</summary>
+    public WeekStartSetting ClockFirstDayOfWeek { get; set; } = WeekStartSetting.System;
+
+    /// <summary>Boşsa yerleşik tarih biçimi kullanılır; doluysa <see cref="ClockFormatPolicy.IsValidCustomDateFormat"/> geçmelidir.</summary>
+    public string ClockCustomDateFormat { get; set; } = "";
+
+    /// <summary>İkinci saatin saat dilimi kimliği (Windows kimliği, örn. "Tokyo Standard Time"). Boşsa ikinci saat kapalı.</summary>
+    public string ClockSecondTimeZoneId { get; set; } = "";
 }
 
 /// <summary>Müzik kartı.</summary>
