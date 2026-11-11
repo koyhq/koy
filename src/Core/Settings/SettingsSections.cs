@@ -80,6 +80,21 @@ public sealed record DockSettings
 
     public bool HideWindowsTaskbar { get; set; } = true;
 
+    /// <summary>Dock'un ekran kenarı. Varsayılan alt (bugünkü davranış). Dikey kenarlarda çizim henüz bağlanmadı (bkz. issue #73).</summary>
+    public DockEdge Edge { get; set; } = DockEdge.Bottom;
+
+    /// <summary>Kenara paralel uzunluk yüzdesi (%10-%100). Varsayılan %100. Aralık dışı değerler kenetlenir (<see cref="DockLayoutLimits"/>).</summary>
+    public int LengthPercent { get; set; } = DockLayoutLimits.DefaultLengthPercent;
+
+    /// <summary>Dock'un ekran kenarından uzaklığı (DIP). Varsayılan 0.</summary>
+    public double EdgeOffsetDip { get; set; } = DockLayoutLimits.DefaultEdgeOffsetDip;
+
+    /// <summary>Dock içi dolgu (DIP). Varsayılan 0.</summary>
+    public double InnerPaddingDip { get; set; } = DockLayoutLimits.DefaultInnerPaddingDip;
+
+    /// <summary>Simgeler arası boşluk (DIP, yuva başına). Varsayılan 2.</summary>
+    public double IconSpacingDip { get; set; } = DockLayoutLimits.DefaultIconSpacingDip;
+
     /// <summary>
     /// Eski görünürlük kipi (Fixed / Smart / Peek). Ayarlar'da ARAYÜZÜ YOK, Proximity yerine geçmedi: yakınlık modu "Yer ayır"
     /// dışındayken VisibilityController.IsVisible ile birlikte kararı daraltır ve kenar izlemeyi açar (DockViewModel,
