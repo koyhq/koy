@@ -137,8 +137,9 @@ public sealed record DockItemsSettings
     public ValueList<DockFolder> Folders { get; set; } = [];
 
     /// <summary>
-    /// Dock öğe dizisi (ayırıcı, boşluk, saat, çöp kutusu, özel düğme, uygulama, klasör). Boşsa hiçbir şey değişmez;
-    /// okunan kayıtlar <see cref="Koy.Core.Dock.Items.DockItemRules.Normalize"/> ile doğrulanır. Henüz hiçbir yerde çizilmez.
+    /// Dock öğe dizisi (ayırıcı, boşluk, saat, çöp kutusu, özel düğme, uygulama, klasör). Yükleme anında en çok 32 kayıt kalır;
+    /// kayıtlar <see cref="Koy.Core.Dock.Items.DockItemRules.Resolve"/> ile doğrulanır. Boşsa dock PinnedOrder'dan türetilir
+    /// (kullanıcı sırasını kaybetmez). Henüz hiçbir yerde çizilmez.
     /// </summary>
     public ValueList<DockItemEntry> Items { get; set; } = [];
 }

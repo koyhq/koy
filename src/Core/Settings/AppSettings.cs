@@ -63,6 +63,9 @@ public sealed record AppSettings
         Search.DisabledSources ??= [];
         QuickLaunch.Items ??= [];
 
+        // "Items": [null, ...] boş kayıt bırakır; null girdiler sınırdan önce atılır ki boş yuvalar geçerli öğenin yerini yemesin.
+        DockItems.Items.RemoveAll(entry => entry is null);
+
         // Üst sınır yükleme anında uygulanır: Normalize çağırmayan tüketici de 32'den fazla öğe görmesin.
         // Sıra korunur, fazlası sondan atılır (Normalize'ın "ilk gelenler kalır" kuralıyla aynı).
         var extra = DockItems.Items.Count - DockItemRules.MaxItemCount;

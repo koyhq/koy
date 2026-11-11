@@ -51,6 +51,28 @@ public class DockItemSettingsTests
     }
 
     [Fact]
+    public void Eski_PinnedOrder_kullanicisi_Items_olmadan_ayni_docku_gorur()
+    {
+        const string json = """{ "Version": 4, "DockItems": { "PinnedOrder": ["Obsidian.lnk", "folder:f1", "Code.lnk"] } }""";
+
+        var loaded = SettingsFile.Load(json);
+        var specs = DockItemRules.Resolve(loaded.DockItems.Items, loaded.DockItems.PinnedOrder);
+
+        Assert.Equal(["Obsidian.lnk", "f1", "Code.lnk"], specs.Select(s => s.Id));
+    }
+
+    [Fact]
+    public void Items_eslitligi_icerige_gore_ve_sira_duyarlidir()
+    {
+        var a = new Koy.Core.Settings.DockItemsSettings { Items = [new DockItemEntry { Kind = "spacer" }, new DockItemEntry { Kind = "clock" }] };
+        var same = new Koy.Core.Settings.DockItemsSettings { Items = [new DockItemEntry { Kind = "spacer" }, new DockItemEntry { Kind = "clock" }] };
+        var swapped = new Koy.Core.Settings.DockItemsSettings { Items = [new DockItemEntry { Kind = "clock" }, new DockItemEntry { Kind = "spacer" }] };
+
+        Assert.Equal(a, same);
+        Assert.NotEqual(a, swapped);
+    }
+
+    [Fact]
     public void Varsayilan_ayarlarda_Items_bos_ve_PinnedOrder_degismemistir()
     {
         var settings = new Koy.Core.Settings.AppSettings();

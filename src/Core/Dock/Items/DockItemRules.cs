@@ -9,6 +9,8 @@ public static class DockItemRules
     /// <summary>Dock'taki en çok öğe. Bellek ve çizim bütçesi için (AGENTS #1).</summary>
     public const int MaxItemCount = 32;
 
+    private static readonly char[] InvalidFileNameChars = Path.GetInvalidFileNameChars();
+
     /// <summary>Özel komut uzunluk sınırı; bunu aşan komutlu öğe atılır.</summary>
     public const int MaxCommandLength = 2048;
 
@@ -29,7 +31,8 @@ public static class DockItemRules
     }
 
     /// <summary>
-    /// Ham kayıtları doğrular ve sırasını korur. Bilinmeyen tür, boş kimlik, boş ya da çok uzun özel komut atılır.
+    /// Ham kayıtları doğrular ve sırasını korur. Bilinmeyen tür, boş kimlik, dosya adı olamayan uygulama kimliği,
+    /// boş ya da çok uzun özel komut atılır.
     /// Tekilleştirme: App, Folder ve Custom kendi türünde kimliğe göre (büyük/küçük harf duyarsız) tekildir;
     /// Clock ve Trash en fazla bir kez bulunur; Separator ve Spacer tekrarlanabilir.
     /// Sınır aşılınca kalan kayıtlar atılır (ilk gelenler kalır).
@@ -55,6 +58,10 @@ public static class DockItemRules
                 case DockItemKind.App:
                 case DockItemKind.Folder:
                     if (id.Length == 0)
+                        continue;
+                    // Uygulama kimliği .lnk dosya adıdır; "folder:x" ya da yol/geçersiz karakter PinnedOrder'a yazılınca
+                    // başka bir şeye (klasöre) dönüşür ya da hiçbir kısayolla eşleşmez.
+                    if (kind == DockItemKind.App && (PinnedOrder.IsFolderId(id) || id.IndexOfAny(InvalidFileNameChars) >= 0))
                         continue;
                     command = "";
                     key = $"{kind}:{id}";
@@ -130,6 +137,16 @@ public static class DockItemRules
         }
         return entries;
     }
+
+    /// <summary>
+    /// Dock'un gösterecek öğe listesi. Kayıtlı <paramref name="items"/> varsa o doğrulanıp kullanılır; hiç kayıt yoksa
+    /// (ilk geçiş) bugünkü dock korunsun diye <paramref name="pinnedOrder"/> öğelere çevrilir. Kayıtlar var ama hepsi
+    /// geçersizse kullanıcının sırası sessizce yeniden türetilmez: sonuç boş döner.
+    /// Üst sınır geçişte de uygulanır: 32'den fazla sabitli uygulaması olan kullanıcı fazlasını bu listede görmez
+    /// (PinnedOrder ayarı yine dokunulmaz kalır).
+    /// </summary>
+    public static IReadOnlyList<DockItemSpec> Resolve(IReadOnlyList<DockItemEntry> items, IEnumerable<string> pinnedOrder, int maxCount = MaxItemCount) =>
+        Normalize(items.Count > 0 ? items : FromPinnedOrder(pinnedOrder), maxCount);
 
     /// <summary>
     /// Öğe listesinden PinnedOrder biçimindeki sırayı üretir: uygulamalar kısayol adı, klasörler "folder:" belirteciyle.
