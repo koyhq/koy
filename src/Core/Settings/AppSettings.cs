@@ -42,6 +42,7 @@ public sealed record AppSettings
         General ??= new();
         Appearance ??= new();
         Appearance.AppIconOverrides ??= new();
+        Appearance.Motion ??= new();
         Dock ??= new();
         DockItems ??= new();
         Notch ??= new();

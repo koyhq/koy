@@ -53,6 +53,9 @@ public sealed record AppearanceSettings
     public bool BatterySaverReduceMotion { get; set; } = true;
     public MaterialLevel Material { get; set; } = MaterialLevel.Solid;
 
+    /// <summary>Animasyon başına açma/kapama. Kapalı bir animasyonun son durumu hiç kare çizilmeden anında uygulanır. Henüz bağlı değil: animasyonlar bu anahtarları okumuyor (bkz. MotionPolicy.ScaleFor).</summary>
+    public MotionSettings Motion { get; set; } = new();
+
     /// <summary>Okunabilirlik koruması: açık duvar kağıdında saydam malzeme kendiliğinden daha opak seviyeye çıkar.</summary>
     public bool MaterialReadabilityGuard { get; set; } = true;
 
@@ -70,6 +73,17 @@ public sealed record AppearanceSettings
 
     /// <summary>Koy'un kendi ölçeği (yüzde, 80-150), monitör DPI'sinin üstüne uygulanır.</summary>
     public int UiScalePercent { get; set; } = FontScalePolicy.DefaultUiScale;
+}
+
+/// <summary>Animasyon başına açma/kapama (issue #79). Azaltılmış hareket ve pil tasarrufu hepsini ezer.</summary>
+public sealed record MotionSettings
+{
+    public bool NotchOpenClose { get; set; } = true;
+    public bool DockMagnify { get; set; } = true;
+    public bool FolderPanel { get; set; } = true;
+    public bool Osd { get; set; } = true;
+    public bool BadgeBounce { get; set; } = true;
+    public bool TabTransitions { get; set; } = true;
 }
 
 /// <summary>Dock ayarları. Dock'un kendi yazdığı veriler (sıra, klasörler) <see cref="DockItemsSettings"/> bölümündedir.</summary>
