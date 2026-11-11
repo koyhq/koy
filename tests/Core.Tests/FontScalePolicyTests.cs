@@ -69,6 +69,22 @@ public class FontScalePolicyTests
     }
 
     [Fact]
+    public void Overlong_font_family_falls_back_without_matching()
+    {
+        var huge = new string('a', FontScalePolicy.MaxFontFamilyLength + 1);
+
+        Assert.Equal(FontScalePolicy.DefaultFontFamily, FontScalePolicy.ResolveFontFamily(huge, [huge]));
+    }
+
+    [Theory]
+    [InlineData(double.NaN)]
+    [InlineData(double.PositiveInfinity)]
+    public void Non_finite_dip_scales_to_zero(double dip)
+    {
+        Assert.Equal(0.0, FontScalePolicy.ScaleDip(dip, 100));
+    }
+
+    [Fact]
     public void Custom_fallback_is_used_when_font_is_missing()
     {
         Assert.Equal("Consolas", FontScalePolicy.ResolveFontFamily("Yok", Installed, "Consolas"));
