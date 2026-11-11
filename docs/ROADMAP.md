@@ -201,7 +201,7 @@ Kod incelemesinden çıkan işler paketlere bölündü.
 - [x] Koy kapanır / duraklatılır / dock kapanır / ayar kapanır → pencere kapanır ve Windows tepsisi geri gelir; çökme işleyicileri görev çubuğunu ve tepsi penceresini birlikte kapatır.
 - [x] Sağ tıkta açılır pencere kapanmaz: uygulamanın bağlam menüsü açıkken açık kalır; menüden seçim yapılınca ya da pencere ve menünün dışına tıklanınca yay animasyonuyla kapanır (`TrayPopupDismissPolicy`, odak kaybı kapatma sebebi değil).
 - [x] **Elle sınama** (proje sahibi): Discord/Steam/Tailscale tıklama ve menü; Görev Yöneticisi'nden süreci öldür → Windows tepsisi ve görev çubuğu geri; Explorer'ı yeniden başlat → simgeler geri; çok monitör. **Proje sahibi sınadı (2026-11-07), sorun yok.**
-- [ ] Bellek ölçümü (AGENTS #1): main ile main + tepsi karşılaştırması, `docs/MEMORY.md`.
+- [x] Bellek ölçümü (AGENTS #1): main ile main + tepsi karşılaştırması, `docs/MEMORY.md`.
 
 ## Dock ve tepsi paketi (2026-11-06)
 - [x] **Gözcü süreç:** `src/Watchdog/` (`Koy.Watchdog.exe`, Native AOT, pencere yok). Dock görev çubuğunu gizlediği sürece tek gözcü çalışır, Koy'un PID'ini bekler; Koy öldürülürse görev çubuğunu geri getirir (`taskbar-state.json`), temiz çıkışta dokunmaz. Görev çubuğu mantığı `TaskbarService.cs` / `ShellTrayLocator.cs` dosyalarını bağlayarak paylaşılır; karar mantığı `Core/Shell/WatchdogPolicy.cs`. `scripts/pack.ps1` ve `release.yml` exe'yi Koy'un klasörüne koyar. **AOT yayın bu makinede (C++ araçları yok) üretilemedi; elle sınama bekliyor.**
@@ -574,7 +574,8 @@ Tasarım ve doğrulama: `docs/ARASTIRMA-SARKI-SOZLERI.md`.
 - [x] **Core (testli):** `Core/Notch/NotchCard.cs` (içerik türünden bağımsız kart modeli: `Kind`, `Title`, `Subtitle`, `PrimaryActionLabel`, `AppName`, `Timestamp`, `Icon`; `NotchLayout.CardWidth/CardHeight` 380×72, tuvalin içinde) ve `Core/Updates/UpdateCardPolicy.cs` (sürüm başına oturumda bir kez, × sonrası bir daha yok, farklı sürüm yeniden, çentik açıkken bekler, 15 sn sonra kapanır).
 - [x] **App:** `OsdType.Card`, `OsdIndicatorViewModel.ShowCard` + `PrimaryActionRequested` / `DismissRequested`, `OSD/NotchCardView.xaml` (36 px daire içinde indirme simgesi, iki satır metin, hap "Güncelle" düğmesi ve ×; düğmeler `Border` + `MouseLeftButtonUp`, çentik odak almaz ve karta basmak çentiği açmaz). Çentik kart ölçüsüne mevcut `Spring` ile büyür; yeni animasyon yok.
 - [x] **Bağlama:** `NotchFeature`, `UpdateStatus.Changed` ile yalnız birincil ekranın çentiğinde kartı gösterir; çentik açıksa kapanınca gösterir; "Güncelle" Koy penceresini açıp var olan `OpenUpdateOverlay` akışını çağırır (görev çubuğu güvenliği `StartUpdateAsync` içinde, AGENTS #7). Metinler `UpdateCard*` anahtarlarıyla iki dilde. Yeni ayar yok.
-- [ ] Elle sınama (proje sahibi): kart yayla açıldı mı, × kapattı mı (aynı sürüm bir daha çıkmıyor), Güncelle Koy penceresini ve onay katmanını açtı mı, 15 sn sonra kapanıyor mu, çentik açıkken bekleyip kapanınca çıkıyor mu, ikinci ekranda çıkmıyor mu, hareket azaltmada yay kısa mı.
+- [x] Elle sınama (proje sahibi, 2026-11-11, geçici sahte güncelleme kancasıyla, tek monitör): kart yayla açılıyor, 15 sn sonra kapanıyor, aynı sürüm ikinci kez çıkmıyor, yeni sürüm çıkıyor, çentik açıkken bekleyip kapanınca çıkıyor, × kapatıyor, Güncelle Koy penceresini ve onay katmanını açıyor.
+- [ ] Denenmedi: ikinci ekranda çıkmaması (tek monitör), hareket azaltmada yay, Akıllı/Fareyle modunda kartın 15 sn görünür kalması.
 - [ ] Bellek ölçümü (AGENTS #1): kart görünmezken ek nesne yok; ölçüm `docs/MEMORY.md`.
 
 ## Windows bildirimleri çentikte (#64)
