@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMax slice">
+  <!-- Koy duvar kâğıdı: şafakta iki burun arasında bir koy. Sitenin kendi çizimi. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#070F26"/>
+      <stop offset=".42" stop-color="#0F2766"/>
+      <stop offset=".7" stop-color="#2556CF"/>
+      <stop offset=".786" stop-color="#8DB8FF"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#E6F0FF" stop-opacity=".9"/>
+      <stop offset=".45" stop-color="#93C5FD" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#93C5FD" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5B95F5"/>
+      <stop offset=".35" stop-color="#2459D6"/>
+      <stop offset="1" stop-color="#0D2470"/>
+    </linearGradient>
+    <linearGradient id="landL" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0C1A40"/>
+      <stop offset="1" stop-color="#050B1F"/>
+    </linearGradient>
+    <linearGradient id="landR" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0E1E4A"/>
+      <stop offset="1" stop-color="#060D24"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <ellipse cx="800" cy="790" rx="540" ry="84" fill="url(#glow)"/>
+  <path d="M0 772C260 748 470 766 690 780C900 792 1120 760 1340 752C1450 748 1540 756 1600 762V790H0Z" fill="#1E3A8A" opacity=".55"/>
+  <rect y="786" width="1600" height="214" fill="url(#sea)"/>
+  <g fill="#E6F0FF">
+    <rect x="610" y="800" width="380" height="2" rx="1" opacity=".35"/>
+    <rect x="690" y="816" width="220" height="2" rx="1" opacity=".22"/>
+    <rect x="560" y="834" width="160" height="2" rx="1" opacity=".14"/>
+    <rect x="900" y="846" width="140" height="2" rx="1" opacity=".12"/>
+  </g>
+  <path d="M0 610C190 626 350 676 470 742C560 792 616 852 660 1000H0Z" fill="url(#landL)"/>
+  <path d="M1600 584C1400 610 1250 674 1140 752C1060 810 1010 880 980 1000H1600Z" fill="url(#landR)"/>
+</svg>

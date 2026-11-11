@@ -2,7 +2,7 @@
 // kapanırken 400 ms tolerans tanır. Dokunmatikte dokununca açılıp kapanır, dışarı dokununca kapanır.
 // Klavyede düğme gibi çalışır: odaklanınca açılır, Esc kapatır.
 // data-notch="demo": kapalı başlar, görünür olunca bir kez kendiliğinden açılıp kapanır.
-// data-notch="hero": girişte açık gelir (ilk izlenim, JS yoksa da böyle), kimse dokunmazsa bir süre sonra kapanır.
+// data-notch="hero": sayfa hazır olunca yayla açılır ve açık kalır (JS yoksa da açık).
 const CLOSE_DELAY = 400;
 
 export function initNotch(root) {
@@ -58,11 +58,8 @@ export function initNotch(root) {
     set(false);
   });
 
-  if (hero) {
-    if (reduceMotion) return; // hareket istemeyene çentik açık kalır, fareyle ayrılınca kapanır
-    autoTimer = setTimeout(() => { if (!touched) set(false); }, 4800);
-    return;
-  }
+  // Hero açık kalır: ürünün kendisi ilk ekranda görünsün. Fareyle girip çıkınca kapanır.
+  if (hero) return;
 
   if (reduceMotion || !('IntersectionObserver' in window)) return;
   const io = new IntersectionObserver((entries) => {

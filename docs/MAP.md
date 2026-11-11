@@ -134,6 +134,7 @@ dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix <ad> --th
 - Sahneler `tools/Koy.UiSnapshots/Program.cs` içinde: `all`, `uninstall`, `centik`, `dockbar`, `dock`, `jumplist`, `startmenu`.
 - Araç Win32 kancası, AppBar ya da görev çubuğu servisi başlatmaz; ayarları geçici dosyada tutar.
 - README görselleri `docs/screenshots/` altındadır. Site için WebP'ye çevrilip `site/img/` içine konur.
+- Sitedeki çentik görüntüleri saydam zeminlidir (duvar kâğıdı `site/img/bay.svg` üstünde durur). Yeni görüntüyü WebP'ye çevirdikten sonra `python scripts/cut-notch-shots.py site/img/<dosya>.webp` ile gri zeminden ayır.
 
 ## Sürüm çıkarmak
 Sürümler release-please ile otomatiktir, elle etiket atılmaz. Ayrıntı: `CONTRIBUTING.md`.

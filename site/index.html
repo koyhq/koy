@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Koy: notch and dock for Windows 11</title>
   <meta name="description" content="Koy is a spring-animated notch and a dock that replaces the taskbar on Windows 11. One process, no browser engine, easy on the CPU at idle. Free and open source.">
-  <meta name="theme-color" content="#f5f5f8" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0a0a0b" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#070f26">
   <link rel="canonical" href="https://koyhq.github.io/koy/">
   <link rel="alternate" hreflang="en" href="https://koyhq.github.io/koy/?lang=en">
   <link rel="alternate" hreflang="tr" href="https://koyhq.github.io/koy/?lang=tr">
@@ -35,7 +34,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=Inter:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="style.css">
   <script>document.documentElement.classList.add('js')</script>
 </head>
@@ -45,10 +44,7 @@
   <header class="nav">
     <div class="nav__start">
       <a class="brand" href="./" aria-label="Koy, home" data-i18n-attr="aria-label:brand.home">
-        <picture>
-          <source media="(prefers-color-scheme: dark)" srcset="img/koy-horizontal-white.svg">
-          <img src="img/koy-horizontal-color.svg" alt="Koy" width="106" height="40">
-        </picture>
+        <img src="img/koy-horizontal-white.svg" alt="Koy" width="96" height="36">
       </a>
       <div class="lang" role="group" aria-label="Language" data-i18n-attr="aria-label:nav.language">
         <button class="lang__btn" type="button" lang="en" data-lang="en" aria-pressed="true">EN</button>
@@ -56,46 +52,47 @@
       </div>
     </div>
     <nav class="nav__links" aria-label="Sections" data-i18n-attr="aria-label:nav.sections">
-      <a href="#centik" data-i18n="nav.notch">Notch</a>
-      <a href="#dock" data-i18n="nav.dock">Dock</a>
-      <a href="#kurulum" data-i18n="nav.install">Install</a>
-      <a class="btn btn--primary btn--sm" href="https://github.com/koyhq/koy/releases/latest" data-i18n="nav.download">Download</a>
+      <a class="nav__link" href="#centik" data-i18n="nav.notch">Notch</a>
+      <a class="nav__link" href="#dock" data-i18n="nav.dock">Dock</a>
+      <a class="nav__link" href="#kurulum" data-i18n="nav.install">Install</a>
+      <a class="btn btn--light btn--sm" href="https://github.com/koyhq/koy/releases/latest" data-i18n="nav.download">Download</a>
     </nav>
   </header>
 
   <main id="icerik">
-    <!-- HERO -->
-    <section class="hero" data-hero>
-      <div class="screen screen--hero is-open" data-notch="hero">
-        <img class="hero__closed" src="img/centik-kapali.webp" width="418" height="57" alt="">
-        <img class="hero__dock" src="img/dock.webp" width="494" height="48" alt="">
-        <img class="hero__open" id="hero-open" src="img/centik-ana.webp" width="1008" height="570" fetchpriority="high"
+    <!-- HERO: sayfanın tepesi bir masaüstü; çentik en üstten sarkar, dock altta durur. -->
+    <section class="hero wall">
+      <div class="stage stage--hero is-open" data-notch="hero">
+        <img class="stage__closed" src="img/centik-kapali.webp" width="415" height="51" alt="">
+        <img class="stage__open" id="hero-open" src="img/centik-ana.webp" width="926" height="528" fetchpriority="high"
              alt="The open Koy notch: now playing, headphone battery, CPU and memory, network speed and quick launch" data-i18n-attr="alt:hero.openAlt">
-        <button class="hero__zone" type="button" data-notch-zone aria-expanded="true" aria-controls="hero-open" aria-label="Open or close the notch" data-i18n-attr="aria-label:hero.zone"></button>
+        <button class="stage__zone" type="button" data-notch-zone aria-expanded="true" aria-controls="hero-open" aria-label="Open or close the notch" data-i18n-attr="aria-label:hero.zone"></button>
       </div>
 
-      <a class="badge" id="surum" href="https://github.com/koyhq/koy/releases/latest" hidden>
-        <span class="badge__chip" id="surum-no"></span>
-        <span data-i18n="badge.notes">See the release notes</span>
-      </a>
-
-      <h1 class="hero__title">
-        <span class="line"><span data-i18n="hero.line1">Your desktop,</span></span>
-        <span class="line line--muted"><span data-i18n="hero.line2">a lighter touch.</span></span>
-      </h1>
-      <p class="hero__sub" data-i18n="hero.sub">A spring-animated notch and a dock that replaces the taskbar. One process, no browser engine, easy on the CPU at idle.</p>
-
-      <div class="hero__cta">
-        <a class="btn btn--primary" href="https://github.com/koyhq/koy/releases/latest">
-          <span data-i18n="cta.download">Download Koy</span>
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      <div class="hero__body">
+        <a class="badge" id="surum" href="https://github.com/koyhq/koy/releases/latest" hidden>
+          <span class="badge__chip" id="surum-no"></span>
+          <span data-i18n="badge.notes">See the release notes</span>
         </a>
-        <a class="link" href="https://github.com/koyhq/koy">
-          <span data-i18n="cta.source">Source code</span>
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
-        </a>
+        <h1 class="hero__title">
+          <span class="line"><span data-i18n="hero.line1">Your desktop,</span></span>
+          <span class="line line--muted"><span data-i18n="hero.line2">a lighter touch.</span></span>
+        </h1>
+        <p class="hero__sub" data-i18n="hero.sub">A spring-animated notch and a dock that replaces the taskbar. One process, no browser engine, easy on the CPU at idle.</p>
+        <div class="cta">
+          <a class="btn btn--light" href="https://github.com/koyhq/koy/releases/latest">
+            <span data-i18n="cta.download">Download Koy</span>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a class="link link--light" href="https://github.com/koyhq/koy">
+            <span data-i18n="cta.source">Source code</span>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
+          </a>
+        </div>
+        <p class="hero__facts" data-i18n="hero.facts">Windows 11 · Free and open source (GPLv3)</p>
       </div>
-      <p class="hero__facts" data-i18n="hero.facts">Windows 11 · Free and open source (GPLv3)</p>
+
+      <img class="dock-img hero__dock" src="img/dock.webp" width="494" height="48" alt="">
     </section>
 
     <!-- ÇENTİK -->
@@ -107,29 +104,32 @@
         </div>
 
         <div class="showcase" data-tabs data-reveal style="--d:.1s">
-          <div class="tablist" role="tablist" aria-label="Notch pages" data-i18n-attr="aria-label:notch.tablist">
-            <button class="tab" role="tab" id="tab-ana" aria-controls="panel-ana" aria-selected="true" data-key="ana" data-i18n="tab.home">Home</button>
-            <button class="tab" role="tab" id="tab-takvim" aria-controls="panel-takvim" aria-selected="false" tabindex="-1" data-key="takvim" data-i18n="tab.calendar">Calendar</button>
-            <button class="tab" role="tab" id="tab-kontrol" aria-controls="panel-kontrol" aria-selected="false" tabindex="-1" data-key="kontrol" data-i18n="tab.control">Control Center</button>
-            <button class="tab" role="tab" id="tab-wifi" aria-controls="panel-wifi" aria-selected="false" tabindex="-1" data-key="wifi" data-i18n="tab.wifi">Wi-Fi</button>
-            <button class="tab" role="tab" id="tab-kapali" aria-controls="panel-kapali" aria-selected="false" tabindex="-1" data-key="kapali" data-i18n="tab.closed">When closed</button>
+          <div class="showcase__side">
+            <div class="tablist" role="tablist" aria-label="Notch pages" data-i18n-attr="aria-label:notch.tablist">
+              <button class="tab" role="tab" id="tab-ana" aria-controls="panel-ana" aria-selected="true" data-key="ana" data-i18n="tab.home">Home</button>
+              <button class="tab" role="tab" id="tab-takvim" aria-controls="panel-takvim" aria-selected="false" tabindex="-1" data-key="takvim" data-i18n="tab.calendar">Calendar</button>
+              <button class="tab" role="tab" id="tab-kontrol" aria-controls="panel-kontrol" aria-selected="false" tabindex="-1" data-key="kontrol" data-i18n="tab.control">Control Center</button>
+              <button class="tab" role="tab" id="tab-wifi" aria-controls="panel-wifi" aria-selected="false" tabindex="-1" data-key="wifi" data-i18n="tab.wifi">Wi-Fi</button>
+              <button class="tab" role="tab" id="tab-kapali" aria-controls="panel-kapali" aria-selected="false" tabindex="-1" data-key="kapali" data-i18n="tab.closed">When closed</button>
+            </div>
+            <div class="panels">
+              <p class="panel" role="tabpanel" id="panel-ana" aria-labelledby="tab-ana" data-key="ana" data-i18n="panel.home">Now playing, headphone battery, CPU and memory, network speed and quick launch at a glance. Music comes from Spotify, your browser or Windows Media Player.</p>
+              <p class="panel" role="tabpanel" id="panel-takvim" aria-labelledby="tab-takvim" data-key="takvim" data-i18n="panel.calendar" hidden>Month, week and day views, a timer, stopwatch and Pomodoro. Events stay on your computer. When time is up, the notch shakes to let you know.</p>
+              <p class="panel" role="tabpanel" id="panel-kontrol" aria-labelledby="tab-kontrol" data-key="kontrol" data-i18n="panel.control" hidden>Wi-Fi, Bluetooth, Do Not Disturb, volume and brightness. Drag the tiles into any order you like.</p>
+              <p class="panel" role="tabpanel" id="panel-wifi" aria-labelledby="tab-wifi" data-key="wifi" data-i18n="panel.wifi" hidden>Pick a network from the notch, just like in Windows. Connect to Bluetooth devices here too.</p>
+              <p class="panel" role="tabpanel" id="panel-kapali" aria-labelledby="tab-kapali" data-key="kapali" data-i18n="panel.closed" hidden>When closed, the notch stays small: cover art and a waveform if music is playing, otherwise the clock and battery. A brief indicator appears when volume or brightness changes.</p>
+              <p class="panels__note" data-i18n="panel.note">There are also Focus, Shelf (drag and drop files and text), Clipboard and System pages.</p>
+            </div>
           </div>
 
-          <div class="panels">
-            <p class="panel" role="tabpanel" id="panel-ana" aria-labelledby="tab-ana" data-key="ana" data-i18n="panel.home">Now playing, headphone battery, CPU and memory, network speed and quick launch at a glance. Music comes from Spotify, your browser or Windows Media Player.</p>
-            <p class="panel" role="tabpanel" id="panel-takvim" aria-labelledby="tab-takvim" data-key="takvim" data-i18n="panel.calendar" hidden>Month, week and day views, a timer, stopwatch and Pomodoro. Events stay on your computer. When time is up, the notch shakes to let you know.</p>
-            <p class="panel" role="tabpanel" id="panel-kontrol" aria-labelledby="tab-kontrol" data-key="kontrol" data-i18n="panel.control" hidden>Wi-Fi, Bluetooth, Do Not Disturb, volume and brightness. Drag the tiles into any order you like.</p>
-            <p class="panel" role="tabpanel" id="panel-wifi" aria-labelledby="tab-wifi" data-key="wifi" data-i18n="panel.wifi" hidden>Pick a network from the notch, just like in Windows. Connect to Bluetooth devices here too.</p>
-            <p class="panel" role="tabpanel" id="panel-kapali" aria-labelledby="tab-kapali" data-key="kapali" data-i18n="panel.closed" hidden>When closed, the notch stays small: cover art and a waveform if music is playing, otherwise the clock and battery. A brief indicator appears when volume or brightness changes.</p>
-            <p class="panels__note" data-i18n="panel.note">There are also Focus, Shelf (drag and drop files and text), Clipboard and System pages.</p>
-          </div>
-
-          <div class="screen screen--tabs">
-            <img class="shot is-active" data-key="ana" src="img/centik-ana.webp" width="1008" height="570" loading="lazy" alt="Notch Home page: music, headphones, system and quick launch" data-i18n-attr="alt:shot.home">
-            <img class="shot" data-key="takvim" src="img/centik-takvim.webp" width="1008" height="570" loading="lazy" alt="Notch Calendar page: month view, timer and events" data-i18n-attr="alt:shot.calendar">
-            <img class="shot" data-key="kontrol" src="img/centik-kontrol.webp" width="1008" height="570" loading="lazy" alt="Control Center: Wi-Fi, Bluetooth, volume and brightness" data-i18n-attr="alt:shot.control">
-            <img class="shot" data-key="wifi" src="img/centik-wifi.webp" width="1008" height="570" loading="lazy" alt="Wi-Fi network list in the notch" data-i18n-attr="alt:shot.wifi">
-            <img class="shot shot--closed" data-key="kapali" src="img/centik-kapali.webp" width="418" height="57" loading="lazy" alt="Closed notch: cover art and waveform while music plays" data-i18n-attr="alt:shot.closed">
+          <div class="scene wall">
+            <div class="stage stage--shots">
+              <img class="shot is-active" data-key="ana" src="img/centik-ana.webp" width="926" height="528" loading="lazy" alt="Notch Home page: music, headphones, system and quick launch" data-i18n-attr="alt:shot.home">
+              <img class="shot" data-key="takvim" src="img/centik-takvim.webp" width="926" height="528" loading="lazy" alt="Notch Calendar page: month view, timer and events" data-i18n-attr="alt:shot.calendar">
+              <img class="shot" data-key="kontrol" src="img/centik-kontrol.webp" width="926" height="528" loading="lazy" alt="Control Center: Wi-Fi, Bluetooth, volume and brightness" data-i18n-attr="alt:shot.control">
+              <img class="shot" data-key="wifi" src="img/centik-wifi.webp" width="926" height="528" loading="lazy" alt="Wi-Fi network list in the notch" data-i18n-attr="alt:shot.wifi">
+              <img class="shot shot--closed" data-key="kapali" src="img/centik-kapali.webp" width="415" height="51" loading="lazy" alt="Closed notch: cover art and waveform while music plays" data-i18n-attr="alt:shot.closed">
+            </div>
           </div>
         </div>
       </div>
@@ -148,15 +148,17 @@
             <li data-i18n-html="dock.f4"><strong>Drag to reorder.</strong> The order of pinned apps is yours and survives restarts.</li>
           </ul>
         </div>
-        <div data-reveal style="--d:.12s">
-          <div class="screen screen--desktop" data-notch="demo">
-            <img class="desktop__notch" src="img/centik-kapali.webp" width="418" height="57" loading="lazy" alt="">
-            <img class="desktop__open" id="desktop-open" src="img/centik-ana.webp" width="1008" height="570" loading="lazy" alt="The opened notch: music, headphone battery, system and quick launch" data-i18n-attr="alt:demo.openAlt">
-            <img class="desktop__dock" src="img/dock.webp" width="494" height="48" loading="lazy" alt="The Koy dock at the bottom of the screen: pinned apps and open windows" data-i18n-attr="alt:demo.dockAlt">
-            <button class="desktop__zone" type="button" data-notch-zone aria-expanded="false" aria-controls="desktop-open" aria-label="Open or close the notch" data-i18n-attr="aria-label:hero.zone"></button>
+        <figure class="demo" data-reveal style="--d:.12s">
+          <div class="scene scene--tall wall">
+            <div class="stage stage--demo" data-notch="demo">
+              <img class="stage__closed" src="img/centik-kapali.webp" width="415" height="51" loading="lazy" alt="">
+              <img class="stage__open" id="demo-open" src="img/centik-ana.webp" width="926" height="528" loading="lazy" alt="The opened notch: music, headphone battery, system and quick launch" data-i18n-attr="alt:demo.openAlt">
+              <button class="stage__zone" type="button" data-notch-zone aria-expanded="false" aria-controls="demo-open" aria-label="Open or close the notch" data-i18n-attr="aria-label:hero.zone"></button>
+            </div>
+            <img class="dock-img scene__dock" src="img/dock.webp" width="494" height="48" loading="lazy" alt="The Koy dock at the bottom of the screen: pinned apps and open windows" data-i18n-attr="alt:demo.dockAlt">
           </div>
-          <p class="hint" data-i18n="demo.hint">Move the mouse over the notch and it springs open. On touch screens, tap it.</p>
-        </div>
+          <figcaption class="hint" data-i18n="demo.hint">Move the mouse over the notch and it springs open. On touch screens, tap it.</figcaption>
+        </figure>
       </div>
     </section>
 
@@ -173,15 +175,15 @@
             <dt>0</dt>
             <dd data-i18n="stat.browser">browser engines. No WebView2, Electron or Tauri.</dd>
           </div>
-          <div class="stat" data-reveal style="--d:.1s">
+          <div class="stat" data-reveal style="--d:.08s">
             <dt>1</dt>
             <dd data-i18n="stat.process">process. Notch, dock and settings share one process; only a small watchdog runs alongside while the dock is on.</dd>
           </div>
-          <div class="stat" data-reveal style="--d:.2s">
+          <div class="stat" data-reveal style="--d:.16s">
             <dt data-i18n="stat.cpuValue">~0%</dt>
             <dd data-i18n="stat.cpu">idle CPU. Animations draw frames only while something moves, and hidden panels run nothing.</dd>
           </div>
-          <div class="stat" data-reveal style="--d:.3s">
+          <div class="stat" data-reveal style="--d:.24s">
             <dt>100–150<small>MB</small></dt>
             <dd data-i18n-html="stat.memory">memory target. 99–100 MB measured with two monitors on v0.1.1. <a href="https://github.com/koyhq/koy/blob/main/docs/MEMORY.md">Measurement log</a></dd>
           </div>
@@ -190,38 +192,38 @@
     </section>
 
     <!-- DETAYLAR -->
-    <section class="section section--tint" id="detay">
+    <section class="section" id="detay">
       <div class="wrap">
         <div class="section__head" data-reveal>
           <h2 data-i18n="details.title">We sweated the small stuff.</h2>
         </div>
         <div class="details">
-          <article data-reveal>
+          <article class="card" data-reveal>
             <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
             <h3 data-i18n="details.multi.title">Multiple displays</h3>
             <p data-i18n="details.multi.text">A separate notch and dock on each monitor, each at its own DPI. Fullscreen video on a side display doesn't hide Koy on the main one.</p>
           </article>
-          <article data-reveal style="--d:.08s">
+          <article class="card" data-reveal style="--d:.06s">
             <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
             <h3 data-i18n="details.taskbar.title">Taskbar guarantee</h3>
             <p data-i18n="details.taskbar.text">Even if Koy closes or crashes, the Windows taskbar comes back within seconds.</p>
           </article>
-          <article data-reveal style="--d:.16s">
+          <article class="card" data-reveal style="--d:.12s">
             <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 8h.01M12 12h.01M14 8h.01M16 12h.01M18 8h.01M6 8h.01M7 16h10M8 12h.01"/><rect width="20" height="16" x="2" y="4" rx="2"/></svg></span>
             <h3 data-i18n="details.shortcuts.title">Shortcuts</h3>
             <p data-i18n="details.shortcuts.text">All global shortcuts can be customized. If two shortcuts clash, Koy tells you.</p>
           </article>
-          <article data-reveal>
+          <article class="card" data-reveal>
             <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></span>
             <h3 data-i18n="details.theme.title">Dark and light themes</h3>
             <p data-i18n="details.theme.text">Follows the Windows theme, or pick one yourself. The accent color is yours too.</p>
           </article>
-          <article data-reveal style="--d:.08s">
+          <article class="card" data-reveal style="--d:.06s">
             <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg></span>
             <h3 data-i18n="details.lang.title">English and Turkish</h3>
             <p data-i18n="details.lang.text">The language changes instantly, without restarting the app.</p>
           </article>
-          <article data-reveal style="--d:.16s">
+          <article class="card" data-reveal style="--d:.12s">
             <span class="tile"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/></svg></span>
             <h3 data-i18n="details.uninstall.title">Clean uninstall</h3>
             <p data-i18n="details.uninstall.text">Uninstall from inside Koy in one step. Keep your settings if you like; your taskbar goes back to normal.</p>
@@ -231,29 +233,29 @@
     </section>
 
     <!-- KURULUM -->
-    <section class="section" id="kurulum">
+    <section class="section section--tint" id="kurulum">
       <div class="wrap">
         <div class="section__head" data-reveal>
           <h2 data-i18n="install.title">Setup takes a minute.</h2>
           <p class="lead" data-i18n="install.lead">Requires Windows 11 (22H2 or later). Koy is free, and every release is built on GitHub Actions after the tests pass.</p>
         </div>
         <ol class="steps">
-          <li data-reveal>
+          <li class="card" data-reveal>
             <h3 data-i18n="install.s1.title">Download</h3>
             <p data-i18n="install.s1.text">Setup installs in one click and updates itself. Prefer no install? There's a portable zip.</p>
             <div class="steps__actions">
-              <a class="btn btn--primary" href="https://github.com/koyhq/koy/releases/latest/download/Koy-win-Setup.exe">
+              <a class="btn btn--dark" href="https://github.com/koyhq/koy/releases/latest/download/Koy-win-Setup.exe">
                 Koy-win-Setup.exe
                 <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
               </a>
               <a class="link" href="https://github.com/koyhq/koy/releases/latest/download/Koy-win-Portable.zip" data-i18n="install.s1.zip">Portable zip</a>
             </div>
           </li>
-          <li data-reveal style="--d:.1s">
+          <li class="card" data-reveal style="--d:.08s">
             <h3 data-i18n="install.s2.title">If SmartScreen warns you</h3>
             <p data-i18n-html="install.s2.text">Koy isn't code-signed yet. If you downloaded the file only from GitHub Releases, choose <em>More info</em>, then <em>Run anyway</em>. Don't run a Koy file that came from anywhere else.</p>
           </li>
-          <li data-reveal style="--d:.2s">
+          <li class="card" data-reveal style="--d:.16s">
             <h3 data-i18n="install.s3.title">Verify it if you like</h3>
             <p data-i18n-html="install.s3.text">Compare the resulting hash with <a href="https://github.com/koyhq/koy/releases/latest/download/SHA256SUMS.txt">SHA256SUMS.txt</a> in the release.</p>
             <div class="code">
@@ -268,17 +270,16 @@
     </section>
   </main>
 
-  <footer class="footer section--dark">
-    <span class="ghost ghost--word" aria-hidden="true">Koy</span>
+  <footer class="footer wall">
     <div class="wrap footer__cta" data-reveal>
       <h2 data-i18n="footer.title">Try it in a minute.</h2>
       <p class="lead" data-i18n="footer.lead">Free, open source, for Windows 11. Don't like it? Uninstall in one step.</p>
-      <div class="hero__cta footer__buttons">
-        <a class="btn btn--primary" href="https://github.com/koyhq/koy/releases/latest">
+      <div class="cta">
+        <a class="btn btn--light" href="https://github.com/koyhq/koy/releases/latest">
           <span data-i18n="cta.download">Download Koy</span>
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
-        <a class="link" href="https://github.com/koyhq/koy" data-i18n="cta.source">Source code</a>
+        <a class="link link--light" href="https://github.com/koyhq/koy" data-i18n="cta.source">Source code</a>
       </div>
     </div>
     <div class="wrap footer__grid">
