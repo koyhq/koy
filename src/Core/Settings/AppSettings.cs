@@ -1,3 +1,5 @@
+using Koy.Core.Dock;
+
 namespace Koy.Core.Settings;
 
 /// <summary>
@@ -52,6 +54,7 @@ public sealed record AppSettings
         Clipboard ??= new();
         QuickLaunch ??= new();
 
+        DockLayoutLimits.Sanitize(Dock);
         DockItems.PinnedOrder ??= [];
         DockItems.Folders ??= [];
         Notch.EnabledPanels ??= new NotchSettings().EnabledPanels;
