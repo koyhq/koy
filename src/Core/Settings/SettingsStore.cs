@@ -38,7 +38,7 @@ public sealed class SettingsStore(string path)
             if (originalVersion < AppSettings.CurrentVersion)
                 BackupOriginalFile();
 
-            return DeserializeTolerant(root).FillMissingSections();
+            return ParseTolerant(root, out _).FillMissingSections();
         }
         catch (JsonException)
         {
@@ -50,8 +50,13 @@ public sealed class SettingsStore(string path)
     // Hata yolu JsonException.Path'ten okunur; yol çözülemezse o üst düzey bölüm düşer.
     private const int MaxRepairs = 200;
 
-    private static AppSettings DeserializeTolerant(JsonObject root)
+    /// <summary>
+    /// Toleranslı okuma. <paramref name="dropped"/> kaç alanın varsayılana döndüğünü verir; içe aktarma bunu
+    /// kullanarak geçersiz değer içeren dosyayı reddeder (dosyadan yalnız bu sayı 0 ise kabul edilir).
+    /// </summary>
+    internal static AppSettings ParseTolerant(JsonObject root, out int dropped)
     {
+        dropped = 0;
         for (var attempt = 0; attempt < MaxRepairs; attempt++)
         {
             try
@@ -60,8 +65,10 @@ public sealed class SettingsStore(string path)
             }
             catch (JsonException ex) when (ex.Path is not null && DropAt(root, ex.Path))
             {
+                dropped++;
             }
         }
+        dropped = MaxRepairs;
         return new AppSettings();
     }
 
