@@ -8,8 +8,8 @@ public interface IFocusAssistService : IDisposable
     bool IsActive { get; }
 
     /// <summary>
-    /// Rahatsız etmeyin / Odaklanma / Sessiz saatler / sunum modu açık mı. Tek seferlik okuma (zamanlayıcı yok);
-    /// çağıran ihtiyaç anında sorar (bildirim geldiğinde, Kontrol sekmesi açılınca).
+    /// Odaklanma oturumu / Sessiz saatler / sunum modu açık mı. Windows 11 "Rahatsız etmeyin" düğmesi tek başına
+    /// okunamaz (false döner). Tek seferlik okuma (zamanlayıcı yok); çağıran ihtiyaç anında sorar.
     /// </summary>
     bool IsDoNotDisturb { get; }
 

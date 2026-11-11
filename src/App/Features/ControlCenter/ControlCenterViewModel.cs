@@ -212,14 +212,15 @@ public sealed partial class ControlCenterViewModel : ObservableObject, IDisposab
         return true;
     }
 
-    /// <summary>Rahatsız Etme döşemesinin alt satırı: "Açık" / "Kapalı" (görünürken okunur), okunamazsa "Ayarlarda aç".</summary>
+    /// <summary>Rahatsız Etme döşemesinin alt satırı: Odaklanma/sunum modu algılanırsa "Odaklanma açık", yoksa "Ayarlarda aç"
+    /// (Windows 11 Rahatsız etmeyin düğmesi okunamadığı için "Kapalı" yazılmaz).</summary>
     [ObservableProperty]
     private string _doNotDisturbStatus = Strings.OpenInSettings;
 
     private bool _dndWatching;
 
     private void RefreshDoNotDisturb() =>
-        DoNotDisturbStatus = _focusAssistService.IsDoNotDisturb ? Strings.Get("DoNotDisturbOn") : Strings.Get("DoNotDisturbOff");
+        DoNotDisturbStatus = _focusAssistService.IsDoNotDisturb ? Strings.Get("FocusOn") : Strings.OpenInSettings;
 
     // Olay arka plan iş parçacığından gelir.
     private void OnFocusAssistStateChanged(object? sender, bool active) =>
@@ -459,7 +460,7 @@ public sealed partial class ControlCenterViewModel : ObservableObject, IDisposab
     }
 
     /// <summary>
-    /// Rahatsız Etme'yi kodla açıp kapatmak yok; döşeme Windows'taki ayarı açar. Alt satır durumu gösterir
+    /// Rahatsız Etme'yi kodla açıp kapatmak yok; döşeme Windows'taki ayarı açar. Alt satır yalnız Odaklanma/sunum modunu gösterir
     /// (<see cref="DoNotDisturbStatus"/>, yalnız sekme görünürken okunur).
     /// </summary>
     [RelayCommand]
