@@ -23,7 +23,8 @@ public sealed record NotchCard(
     string AppName = "",
     DateTimeOffset? Timestamp = null,
     byte[]? Icon = null,
-    string Header = "")
+    string Header = "",
+    byte[]? FallbackIcon = null)
 {
     public bool HasPrimaryAction => !string.IsNullOrEmpty(PrimaryActionLabel);
     public bool HasHeader => !string.IsNullOrEmpty(Header);

@@ -10,6 +10,7 @@ using Koy.App.Resources;
 using Koy.Core.Audio;
 using Koy.Core.Display;
 using Koy.Core.Notch;
+using Koy.Core.Notifications;
 using Koy.Core.Power;
 using Koy.Core.Voice;
 
@@ -336,7 +337,8 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
             return false;
 
         Card = card;
-        CardIcon = DecodeIcon(card.Icon);
+        // Simge yalnız bu kartın kendi baytlarından çözülür; boş/saydam/bozuksa kabuk simgesi, o da yoksa görünüm zil çizer.
+        CardIcon = DecodeIcon(card.Icon) ?? DecodeIcon(card.FallbackIcon);
         Type = OsdType.Card;
         IsActive = true;
 
@@ -381,12 +383,25 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
             image.StreamSource = stream;
             image.EndInit();
             image.Freeze();
-            return image;
+            return IsBlank(image) ? null : image;
         }
         catch
         {
             return null;
         }
+    }
+
+    // Tamamen saydam (ya da boyutsuz) resim "simge var" sayılmaz: boş daire yerine zil çıksın.
+    private static bool IsBlank(BitmapSource image)
+    {
+        if (image.PixelWidth == 0 || image.PixelHeight == 0)
+            return true;
+
+        var converted = new FormatConvertedBitmap(image, PixelFormats.Bgra32, null, 0);
+        var stride = converted.PixelWidth * 4;
+        var pixels = new byte[stride * converted.PixelHeight];
+        converted.CopyPixels(pixels, stride, 0);
+        return IconBlankCheck.IsBlank(pixels);
     }
 
     public void Dismiss()

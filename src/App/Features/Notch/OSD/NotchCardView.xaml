@@ -31,7 +31,7 @@
                 <DataTrigger Binding="{Binding Card.Kind}" Value="Notification">
                   <Setter Property="Data" Value="{StaticResource IconBell}" />
                 </DataTrigger>
-                <DataTrigger Binding="{Binding HasCardIcon}" Value="False">
+                <DataTrigger Binding="{Binding HasCardIcon}" Value="True">
                   <Setter Property="Visibility" Value="Collapsed" />
                 </DataTrigger>
               </Style.Triggers>

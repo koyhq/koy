@@ -36,6 +36,7 @@ public static class NotificationPresentation
             AppName: app,
             Timestamp: item.Time,
             Icon: item.Icon,
+            FallbackIcon: item.FallbackIcon,
             Header: header);
     }
 

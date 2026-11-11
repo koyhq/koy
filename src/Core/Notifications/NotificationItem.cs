@@ -11,7 +11,10 @@ public enum NotificationAccessStatus
     Unavailable
 }
 
-/// <summary>Aksiyon merkezindeki bir Windows bildirimi. <paramref name="Icon"/> kodlanmış resim ya da null (simgesiz uygulama).</summary>
+/// <summary>
+/// Aksiyon merkezindeki bir Windows bildirimi. <paramref name="Icon"/> kodlanmış uygulama logosu ya da null;
+/// <paramref name="FallbackIcon"/> logo yoksa/boşsa kullanılacak kabuk simgesi (klasik Win32 uygulamalar için).
+/// </summary>
 /// <param name="Id">Windows'un verdiği artan kimlik; yeni gelen bildirim bununla ayırt edilir.</param>
 public sealed record NotificationItem(
     uint Id,
@@ -19,7 +22,8 @@ public sealed record NotificationItem(
     string Title,
     string Body,
     DateTimeOffset Time,
-    byte[]? Icon = null);
+    byte[]? Icon = null,
+    byte[]? FallbackIcon = null);
 
 /// <summary>
 /// Windows bildirimlerini okuyan kaynak. Paketsiz süreçte olay yok (UserNotificationListener.NotificationChanged

@@ -99,11 +99,15 @@ public sealed class WinRtNotificationListener : INotificationListener
         {
             var appName = "";
             byte[]? icon = null;
+            byte[]? fallback = null;
             try
             {
-                var display = notification.AppInfo.DisplayInfo;
+                var info = notification.AppInfo;
+                var display = info.DisplayInfo;
                 appName = display.DisplayName ?? "";
+                // Her simge bu bildirimin kendi AppInfo'sundan okunur; öğeler arasında paylaşılan durum yok.
                 icon = await ReadLogoAsync(display).ConfigureAwait(false);
+                fallback = ReadShellIcon(info.AppUserModelId);
             }
             catch
             {
@@ -126,7 +130,23 @@ public sealed class WinRtNotificationListener : INotificationListener
                 }
             }
 
-            return new NotificationItem(notification.Id, appName, title, string.Join(" ", body), notification.CreationTime, icon);
+            return new NotificationItem(notification.Id, appName, title, string.Join(" ", body), notification.CreationTime, icon, fallback);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    // Klasik Win32 uygulamaların AppDisplayInfo logosu çoğu zaman boştur: kabuğun uygulama simgesi (AUMID anahtarlı önbellek).
+    private static byte[]? ReadShellIcon(string? appUserModelId)
+    {
+        if (string.IsNullOrWhiteSpace(appUserModelId))
+            return null;
+
+        try
+        {
+            return Koy.Platform.Shell.IconHelper.GetIconBytes("shell:AppsFolder\\" + appUserModelId);
         }
         catch
         {
