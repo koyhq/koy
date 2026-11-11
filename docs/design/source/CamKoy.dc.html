@@ -12,20 +12,20 @@
 body{margin:0}
 </style>
 </helmet>
-<div style="width: 1240px; height: 900px; box-sizing: border-box; font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif; display: flex; flex-direction: column;">
+<div style="{{tokens}} width: 1240px; height: 900px; box-sizing: border-box; font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif; display: flex; flex-direction: column;">
 
   <div style="flex-grow: 1; background: {{wallBg}}; display: flex; align-items: center; justify-content: center; position: relative;">
 
     <!-- Koy penceresi: 880 px -->
-    <div style="width: 880px; height: 660px; background: {{win}}; backdrop-filter: {{blurCss}}; border: 1px solid {{winEdge}}; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; color: {{t1}};">
+    <div style="width: 880px; height: 660px; background: var(--win); border: 1px solid var(--win-edge); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; color: var(--text-1);">
 
       <!-- Başlık çubuğu: ayrı zemin yok, pencereyle aynı yüzey -->
       <div style="height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 4px 0 16px;">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span style="width: 16px; height: 16px; border-radius: 4px; background: #3B82F6; display: flex; align-items: center; justify-content: center;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 6c0 3 2 4 5 4s5-1 5-4M4 18h16"></path></svg></span>
-          <span style="font-size: 12px; color: {{t2}};">Koy</span>
+          <span style="font-size: 12px; color: var(--text-2);">Koy</span>
         </div>
-        <div style="display: flex; color: {{t2}};">
+        <div style="display: flex; color: var(--text-2);">
           <button aria-label="Küçült" style="width: 44px; height: 32px; border: none; background: transparent; color: inherit; display: flex; align-items: center; justify-content: center; padding: 0;"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M0 5h10" stroke="currentColor" stroke-width="1"></path></svg></button>
           <button aria-label="Pencereyi kapat, Koy çalışmaya devam eder" style="width: 44px; height: 32px; border: none; background: transparent; color: inherit; display: flex; align-items: center; justify-content: center; padding: 0;"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M0 0l10 10M10 0L0 10" stroke="currentColor" stroke-width="1"></path></svg></button>
         </div>
@@ -42,25 +42,25 @@ body{margin:0}
             </button>
           </sc-for>
           <div style="flex-grow: 1;"></div>
-          <button style="height: 36px; border: 1px solid {{line}}; background: transparent; color: {{danger}}; border-radius: 8px; font-size: 13.5px; font-family: inherit; display: flex; align-items: center; gap: 10px; padding: 0 12px;">
+          <button style="height: 36px; border: 1px solid var(--line); background: transparent; color: var(--danger); border-radius: 8px; font-size: 13.5px; font-family: inherit; display: flex; align-items: center; gap: 10px; padding: 0 12px;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v9"></path><path d="M6.3 7a8 8 0 1 0 11.4 0"></path></svg>
             Koy'dan çık
           </button>
         </nav>
 
         <!-- İçerik: hafifçe daha opak bir katman, okunurluk için -->
-        <main style="flex-grow: 1; min-width: 0; background: {{content}}; border-top-left-radius: 12px; border-top: 1px solid {{line}}; border-left: 1px solid {{line}}; padding: 22px 28px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; gap: 4px;">
+        <main style="flex-grow: 1; min-width: 0; background: var(--win-content); border-top-left-radius: 12px; border-top: 1px solid var(--line); border-left: 1px solid var(--line); padding: 22px 28px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; gap: 4px;">
           <h1 style="margin: 0; font-size: 20px; font-weight: 600;">{{title}}</h1>
-          <span style="font-size: 13px; color: {{t2}}; padding-bottom: 8px;">{{sub}}</span>
+          <span style="font-size: 13px; color: var(--text-2); padding-bottom: 8px;">{{sub}}</span>
 
           <sc-for list="{{sections}}" as="sec">
-            <span style="font-size: 12px; font-weight: 600; color: {{t2}}; margin: 12px 0 6px; display: flex; align-items: center; gap: 8px;">{{sec.h}}<sc-if value="{{sec.isNew}}"><span style="font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 8px; background: rgba(59,130,246,0.18); color: {{accentText}};">Yeni</span></sc-if></span>
+            <span style="font-size: 12px; font-weight: 600; color: var(--text-2); margin: 12px 0 6px; display: flex; align-items: center; gap: 8px;">{{sec.h}}<sc-if value="{{sec.isNew}}"><span style="font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 8px; background: rgba(59,130,246,0.18); color: var(--accent-text);">Yeni</span></sc-if></span>
             <div style="display: flex; flex-direction: column; gap: 3px;">
               <sc-for list="{{sec.rows}}" as="r">
-                <div style="min-height: 46px; border-radius: 8px; background: {{card}}; border: 1px solid {{cardLine}}; padding: 8px 14px; box-sizing: border-box; display: flex; align-items: center; gap: 16px;">
+                <div style="min-height: 46px; border-radius: 8px; background: var(--card); border: 1px solid var(--card-line); padding: 8px 14px; box-sizing: border-box; display: flex; align-items: center; gap: 16px;">
                   <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px;">
                     <span style="font-size: 13.5px;">{{r.t}}</span>
-                    <sc-if value="{{r.d}}"><span style="font-size: 12px; color: {{t2}}; line-height: 1.35;">{{r.d}}</span></sc-if>
+                    <sc-if value="{{r.d}}"><span style="font-size: 12px; color: var(--text-2); line-height: 1.35;">{{r.d}}</span></sc-if>
                   </span>
 
                   <sc-if value="{{r.isToggle}}">
@@ -68,13 +68,13 @@ body{margin:0}
                   </sc-if>
 
                   <sc-if value="{{r.isSeg}}">
-                    <span style="display: flex; gap: 2px; background: {{segBg}}; border: 1px solid {{cardLine}}; border-radius: 7px; padding: 2px; flex-shrink: 0;">
+                    <span style="display: flex; gap: 2px; background: var(--seg-bg); border: 1px solid var(--card-line); border-radius: 7px; padding: 2px; flex-shrink: 0;">
                       <sc-for list="{{r.opts}}" as="o"><button style="height: 26px; padding: 0 11px; border: none; border-radius: 5px; background: {{o.bg}}; color: {{o.fg}}; font-family: inherit; font-size: 12px; font-weight: {{o.w}}; cursor: pointer;" onClick="{{o.pick}}">{{o.l}}</button></sc-for>
                     </span>
                   </sc-if>
 
                   <sc-if value="{{r.isSelect}}">
-                    <span style="height: 28px; min-width: 130px; padding: 0 10px; border-radius: 6px; background: {{segBg}}; border: 1px solid {{cardLine}}; font-size: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-shrink: 0;">{{r.v}}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></span>
+                    <span style="height: 28px; min-width: 130px; padding: 0 10px; border-radius: 6px; background: var(--seg-bg); border: 1px solid var(--card-line); font-size: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-shrink: 0;">{{r.v}}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></span>
                   </sc-if>
 
                   <sc-if value="{{r.isButton}}">
@@ -82,16 +82,29 @@ body{margin:0}
                   </sc-if>
 
                   <sc-if value="{{r.isKey}}">
-                    <span style="display: flex; gap: 4px; flex-shrink: 0;"><sc-for list="{{r.keys}}" as="k"><span style="height: 24px; min-width: 24px; padding: 0 7px; box-sizing: border-box; border-radius: 5px; background: {{segBg}}; border: 1px solid {{cardLine}}; border-bottom-width: 2px; font-size: 11.5px; display: flex; align-items: center; justify-content: center;">{{k}}</span></sc-for></span>
+                    <span style="display: flex; gap: 4px; flex-shrink: 0;"><sc-for list="{{r.keys}}" as="k"><span style="height: 24px; min-width: 24px; padding: 0 7px; box-sizing: border-box; border-radius: 5px; background: var(--seg-bg); border: 1px solid var(--card-line); border-bottom-width: 2px; font-size: 11.5px; display: flex; align-items: center; justify-content: center;">{{k}}</span></sc-for></span>
                   </sc-if>
 
                   <sc-if value="{{r.isSwatch}}">
                     <span style="display: flex; gap: 6px; flex-shrink: 0;"><sc-for list="{{swatches}}" as="w"><span style="width: 20px; height: 20px; border-radius: 10px; background: {{w.c}}; box-shadow: {{w.ring}};"></span></sc-for></span>
                   </sc-if>
 
+                  <sc-if value="{{r.isGuard}}">
+                    <span style="display: flex; gap: 8px; flex-shrink: 0;">
+                      <sc-for list="{{guardTiles}}" as="g">
+                        <span style="width: 112px; height: 64px; border-radius: 8px; background: {{wallBg}}; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                          <span style="width: 96px; height: 48px; border-radius: 6px; background: {{g.surf}}; border: 1px solid {{g.edge}}; display: flex; flex-direction: column; justify-content: center; padding: 0 8px; box-sizing: border-box; color: var(--text-1);">
+                            <span style="font-size: 11px; font-weight: 600;">{{g.name}}</span>
+                            <span style="font-size: 10px; color: var(--text-2);">ikincil {{g.ratio}}</span>
+                          </span>
+                        </span>
+                      </sc-for>
+                    </span>
+                  </sc-if>
+
                   <sc-if value="{{r.isMeter}}">
-                    <span style="width: 220px; display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; font-size: 11px; color: {{t2}};">
-                      <span style="position: relative; height: 6px; border-radius: 3px; background: {{segBg}};"><span style="display: block; width: 39%; height: 6px; border-radius: 3px; background: #34D399;"></span><span style="position: absolute; left: 50%; top: -3px; width: 1px; height: 12px; background: {{t2}};"></span></span>
+                    <span style="width: 220px; display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; font-size: 11px; color: var(--text-2);">
+                      <span style="position: relative; height: 6px; border-radius: 3px; background: var(--seg-bg);"><span style="display: block; width: 39%; height: 6px; border-radius: 3px; background: #34D399;"></span><span style="position: absolute; left: 50%; top: -3px; width: 1px; height: 12px; background: var(--text-2);"></span></span>
                       <span style="display: flex; justify-content: space-between;"><span>118 MB</span><span>hedef 150 · sınır 200</span></span>
                     </span>
                   </sc-if>
@@ -107,7 +120,7 @@ body{margin:0}
   </div>
 
   <!-- Önizleme denetimi (tasarımın parçası değil) -->
-  <div style="height: 76px; flex-shrink: 0; background: #0F0F11; border-top: 1px solid #2E2E33; padding: 0 24px; box-sizing: border-box; display: flex; align-items: center; gap: 28px; font-size: 12px; color: #A1A1AA;">
+  <div style="height: 96px; flex-shrink: 0; background: #0F0F11; border-top: 1px solid #2E2E33; padding: 0 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-content: center; align-items: center; gap: 6px 24px; font-size: 12px; color: #A1A1AA;">
     <sc-for list="{{groups}}" as="g">
       <span style="display: flex; align-items: center; gap: 8px;">{{g.l}}
         <span style="display: flex; gap: 2px; background: #18181B; border: 1px solid #2E2E33; border-radius: 10px; padding: 2px;">
@@ -115,7 +128,7 @@ body{margin:0}
         </span>
       </span>
     </sc-for>
-    <span style="font-size: 11px; color: #71717A;">Sol menüye tıkla. Görünüm sayfasındaki Tema ve Malzeme düğmeleri de önizlemeyi değiştirir.</span>
+    <span style="width: 100%; font-size: 11px; color: #71717A;">Sol menüye tıkla. Görünüm sayfasındaki Tema ve Malzeme düğmeleri de önizlemeyi değiştirir. Bulanıklık yok: saydamlık saf alfa.</span>
   </div>
 </div>
 </x-dc>
@@ -123,28 +136,59 @@ body{margin:0}
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { page: 'gorunum', theme: 'koyu', material: 'buzlu', wall: 'renkli', protect: true, notchSame: true, blur: false };
+    this.state = { page: 'gorunum', theme: 'koyu', material: 'cam', wall: 'renkli', protect: true, notchSame: true };
   }
   renderVals() {
     const s = this.state;
     const dark = s.theme !== 'acik';
     const walls = {
-      renkli: 'radial-gradient(circle at 15% 25%, #F97316 0, transparent 35%), radial-gradient(circle at 80% 18%, #8B5CF6 0, transparent 40%), radial-gradient(circle at 70% 85%, #06B6D4 0, transparent 40%), radial-gradient(circle at 25% 85%, #EC4899 0, transparent 35%), #1E1B4B',
-      koyu: 'linear-gradient(160deg, #0F172A, #111827 60%, #1F2937)',
-      acik: 'radial-gradient(circle at 30% 20%, #FDE68A 0, transparent 45%), radial-gradient(circle at 80% 70%, #BFDBFE 0, transparent 50%), #F1F5F9'
+      renkli: { bg: 'radial-gradient(circle at 15% 25%, #F97316 0, transparent 35%), radial-gradient(circle at 80% 18%, #8B5CF6 0, transparent 40%), radial-gradient(circle at 70% 85%, #06B6D4 0, transparent 40%), radial-gradient(circle at 25% 85%, #EC4899 0, transparent 35%), #1E1B4B', avg: [78, 62, 120] },
+      koyu: { bg: 'linear-gradient(160deg, #0F172A, #111827 60%, #1F2937)', avg: [24, 30, 44] },
+      acik: { bg: 'radial-gradient(circle at 30% 20%, #FDE68A 0, transparent 45%), radial-gradient(circle at 80% 70%, #BFDBFE 0, transparent 50%), #F1F5F9', avg: [236, 240, 246] },
+      foto: { bg: 'linear-gradient(180deg, rgba(255,214,170,0.9) 0%, rgba(255,150,110,0.55) 26%, rgba(60,80,130,0) 52%), radial-gradient(ellipse at 18% 108%, #1F2A37 0 34%, transparent 35%), radial-gradient(ellipse at 72% 112%, #2B3544 0 42%, transparent 43%), linear-gradient(180deg, #5B7DB1, #3C5A86 60%, #20344F)', avg: [104, 116, 142] }
     };
+    const wall = walls[s.wall];
     const alphas = { kati: 1, buzlu: 0.86, cam: 0.72 };
-    const a = alphas[s.material];
-    const solid = s.material === 'kati';
+
+    // Okunabilirlik koruması: ikincil metin 4,5:1 altına inmeyecek en şeffaf seviye seçilir (Cam, Buzlu, Katı sırası).
+    const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    const lum = (c) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+    const ratio = (x, y) => { const a1 = lum(x), b1 = lum(y); return (Math.max(a1, b1) + 0.05) / (Math.min(a1, b1) + 0.05); };
+    const blend = (top, bottom, t) => top.map((v, i) => v * t + bottom[i] * (1 - t));
+    const baseRgb = dark ? [22, 22, 25] : [243, 243, 245];
+    const textRgb = dark ? [244, 244, 245] : [24, 24, 27];
+    const t2Alpha = dark ? 0.60 : 0.62;
+    const ratio2At = (al) => { const sf = blend(baseRgb, wall.avg, al); return ratio(blend(textRgb, sf, t2Alpha), sf); };
+    const fmt = (n) => n.toFixed(1).replace('.', ',') + ':1';
+    const order = ['cam', 'buzlu', 'kati'];
+    const effective = (req) => {
+      if (!s.protect) return req;
+      for (const lv of order.slice(order.indexOf(req))) { if (ratio2At(alphas[lv]) >= 4.5) return lv; }
+      return 'kati';
+    };
+    const matEff = effective(s.material);
+    const a = alphas[matEff];
+    const solid = matEff === 'kati';
+    const shortName = { kati: 'Katı', buzlu: 'Buzlu', cam: 'Cam' };
+    const winRgba = (al) => 'rgba(' + baseRgb.join(',') + ',' + al + ')';
+    const guardTiles = ['kati', 'buzlu', 'cam'].map((req) => {
+      const eff = effective(req);
+      return {
+        name: eff === req ? shortName[req] : shortName[req] + ' → ' + shortName[eff],
+        surf: winRgba(alphas[eff]),
+        edge: eff === 'kati' ? 'transparent' : (dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)'),
+        ratio: fmt(ratio2At(alphas[eff]))
+      };
+    });
     const accent = '#3B82F6';
     const c = dark ? {
-      win: 'rgba(22,22,25,' + a + ')', content: solid ? '#1B1B1F' : 'rgba(30,30,34,0.55)',
+      win: winRgba(a), content: solid ? '#1B1B1F' : 'rgba(30,30,34,0.55)',
       t1: '#F4F4F5', t2: 'rgba(244,244,245,0.60)', line: 'rgba(255,255,255,0.08)',
       card: solid ? '#232327' : 'rgba(255,255,255,0.05)', cardLine: solid ? 'transparent' : 'rgba(255,255,255,0.06)',
       segBg: 'rgba(0,0,0,0.22)', segOn: 'rgba(255,255,255,0.14)', navOn: 'rgba(255,255,255,0.08)',
       danger: '#FCA5A5', accentText: '#93C5FD', off: 'rgba(244,244,245,0.55)'
     } : {
-      win: 'rgba(243,243,245,' + a + ')', content: solid ? '#FAFAFA' : 'rgba(255,255,255,0.50)',
+      win: winRgba(a), content: solid ? '#FAFAFA' : 'rgba(255,255,255,0.50)',
       t1: '#18181B', t2: 'rgba(24,24,27,0.62)', line: 'rgba(0,0,0,0.08)',
       card: solid ? '#FFFFFF' : 'rgba(255,255,255,0.62)', cardLine: solid ? 'rgba(0,0,0,0.06)' : 'rgba(0,0,0,0.05)',
       segBg: 'rgba(0,0,0,0.05)', segOn: '#FFFFFF', navOn: 'rgba(0,0,0,0.06)',
@@ -181,7 +225,8 @@ class Component extends DCLogic {
       ]],
       centik: ['Çentik', 'Görünürlük, açık paneller ve çentik davranışı', [
         { h: 'Genel', rows: [toggle('Çentik etkin'), seg('Görünürlük', 'Akıllı: üstüne pencere gelince gizlenir.', [['a', 'Sabit'], ['b', 'Akıllı'], ['c', 'Gözetleme']]), toggle('Tam ekranda gizle')] },
-        { h: 'Boştayken', rows: [seg('Ne gösterilsin', null, [['a', 'Saat ve pil'], ['b', 'Yalnız saat'], ['c', 'Hiçbiri']])] },
+        { h: 'Boştayken', rows: [seg('Ne gösterilsin', 'Halka seçeneği: solda halka ve yüzde, sağda "Sal 19:21".', [['a', 'Saat ve pil'], ['b', 'Yalnız saat'], ['c', 'Hiçbiri'], ['d', 'Halka pil ve gün/saat']], null, 3)] },
+        { h: 'Biçim', isNew: true, rows: [seg('Çentik biçimi', 'Yüzen ada ekranın üst kenarından 9 px aşağıda durur, kulaksızdır.', [['a', 'Ekrana yapışık'], ['b', 'Yüzen ada']], null, 0), seg('Müzik kartı', 'Albüm rengi: kart zemini ve alt metin kapaktan türetilir; Albüm kapağı: kapak arka plan olur.', [['a', 'Düz'], ['b', 'Albüm rengi'], ['c', 'Albüm kapağı']], null, 1)] },
         { h: 'Paneller', rows: [toggle('Odak'), toggle('Takvim'), toggle('Raf (sürükle-bırak)'), toggle('Pano', 'Pano geçmişi açık olmalı.')] }
       ]],
       dock: ['Dock', 'Biçim, davranış ve simgeler', [
@@ -197,8 +242,8 @@ class Component extends DCLogic {
         { h: 'Saydamlık', isNew: true, rows: [
           seg('Malzeme', 'Katı opak; Buzlu %86; Cam %72. Koy penceresi, açık çentik, dock ve menüler aynı ayarı izler.', [['kati', 'Katı'], ['buzlu', 'Buzlu'], ['cam', 'Cam']], 'material'),
           toggle('Açık çentik malzemeyi izlesin', 'Kapatılırsa açık çentik hep opak kalır; pencere ve dock saydam olabilir.', 'notchSame'),
-          toggle('Okunabilirlik koruması', 'Duvar kağıdı açık renkliyse Cam kendiliğinden Buzlu\'ya çıkar. Duvar kağıdı değişince bir kez ölçülür.', 'protect'),
-          toggle('Arka planı bulanıklaştır (deneysel)', 'Windows sürümüne göre çalışmayabilir; çalışmazsa bulanıklıksız saydamlık kalır.', 'blur')
+          toggle('Okunabilirlik koruması', 'Duvar kağıdı açık renkliyse ikincil metin 4,5:1 altına inmesin diye Cam kendiliğinden Buzlu\'ya (gerekirse Katı\'ya) çıkar. Duvar kağıdı değişince bir kez ölçülür.', 'protect'),
+          { t: 'Koruma önizlemesi', d: 'Seçili duvar kağıdında üç seviye; ok işareti koruma devreye girdiğini gösterir.', isGuard: true }
         ] },
         { h: 'Biçim ve hareket', rows: [seg('Köşe yuvarlaklığı', null, [['a', 'Az'], ['b', 'Normal'], ['c', 'Çok']], null, 1), seg('Animasyon', null, [['a', 'Sakin'], ['b', 'Normal'], ['c', 'Hızlı'], ['d', 'Kapalı']], null, 1), toggle('Windows\'un "animasyonları azalt" ayarına uy')] }
       ]],
@@ -238,19 +283,24 @@ class Component extends DCLogic {
       opts: opts.map(([v, l]) => ({ l, bg: s[key] === v ? '#F4F4F5' : 'transparent', fg: s[key] === v ? '#0A0A0B' : '#D4D4D8', pick: () => this.setState({ [key]: v }) }))
     });
     const matNames = { kati: 'Katı', buzlu: 'Buzlu %86', cam: 'Cam %72' };
+    const winEdge = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)';
+    const tokens = [
+      '--win: ' + c.win, '--win-content: ' + c.content, '--win-edge: ' + winEdge,
+      '--text-1: ' + c.t1, '--text-2: ' + c.t2, '--line: ' + c.line,
+      '--card: ' + c.card, '--card-line: ' + c.cardLine, '--seg-bg: ' + c.segBg,
+      '--danger: ' + c.danger, '--accent: ' + accent, '--accent-text: ' + c.accentText
+    ].join('; ') + ';';
     return {
-      wallBg: walls[s.wall],
-      win: c.win, content: c.content, t1: c.t1, t2: c.t2, line: c.line, card: c.card, cardLine: c.cardLine,
-      segBg: c.segBg, danger: c.danger, accentText: c.accentText,
-      winEdge: dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)',
-      blurCss: s.blur && !solid ? 'blur(30px) saturate(150%)' : 'none',
+      tokens, guardTiles,
+      wallBg: wall.bg,
       nav, title: p[0], sub: p[1], sections: p[2],
       swatches: ['#3B82F6', '#8B5CF6', '#EC4899', '#F97316', '#10B981', '#71717A'].map((col, i) => ({ c: col, ring: i === 0 ? '0 0 0 2px ' + (dark ? '#18181B' : '#FFFFFF') + ', 0 0 0 4px ' + col : 'none' })),
-      caption: 'Tema: ' + (dark ? 'Koyu' : 'Açık') + ' · Malzeme: ' + matNames[s.material] + (s.blur && !solid ? ' + bulanıklık (deneysel)' : '') + ' · örnek veri',
+      caption: 'Tema: ' + (dark ? 'Koyu' : 'Açık') + ' · Malzeme: ' + matNames[s.material] + (matEff !== s.material ? ' → ' + matNames[matEff] + ' (okunabilirlik koruması)' : '') + ' · ikincil metin ' + fmt(ratio2At(a)) + ' · örnek veri',
       groups: [
         ctrl('theme', 'Tema', [['koyu', 'Koyu'], ['acik', 'Açık']]),
         ctrl('material', 'Malzeme', [['kati', 'Katı'], ['buzlu', 'Buzlu'], ['cam', 'Cam']]),
-        ctrl('wall', 'Duvar kağıdı', [['renkli', 'Renkli'], ['koyu', 'Koyu'], ['acik', 'Açık']])
+        ctrl('wall', 'Duvar kağıdı', [['renkli', 'Renkli'], ['koyu', 'Koyu'], ['acik', 'Açık'], ['foto', 'Fotoğraf']]),
+        ctrl('protect', 'Okunabilirlik koruması', [[true, 'Açık'], [false, 'Kapalı']])
       ]
     };
   }
