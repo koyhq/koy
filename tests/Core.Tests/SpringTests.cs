@@ -45,4 +45,45 @@ public class SpringTests
         Assert.Equal(0, spring.Velocity);
         Assert.True(spring.IsAtRest);
     }
+
+    [Fact]
+    public void Default_damping_overshoots_when_closing()
+    {
+        var spring = new Spring(620) { Target = 236 };
+
+        Assert.True(MinimumWhileSettling(spring) < 235);
+    }
+
+    [Fact]
+    public void Critical_damping_closes_without_overshoot()
+    {
+        var spring = new Spring(620) { Target = 236 };
+        spring.Damping = spring.CriticalDamping;
+
+        Assert.True(MinimumWhileSettling(spring) > 235.99);
+        Assert.Equal(236, spring.Value);
+    }
+
+    [Fact]
+    public void Kick_moves_away_and_returns_to_target()
+    {
+        var spring = new Spring(0) { Stiffness = 260, Damping = 14 };
+
+        spring.Kick(30);
+        var peak = 0.0;
+        for (var i = 0; i < 240 && spring.Step(1.0 / 60); i++)
+            peak = Math.Max(peak, spring.Value);
+
+        Assert.InRange(peak, 0.8, 1.2);
+        Assert.True(spring.IsAtRest);
+        Assert.Equal(0, spring.Value);
+    }
+
+    private static double MinimumWhileSettling(Spring spring)
+    {
+        var min = spring.Value;
+        for (var i = 0; i < 240 && spring.Step(1.0 / 60); i++)
+            min = Math.Min(min, spring.Value);
+        return min;
+    }
 }

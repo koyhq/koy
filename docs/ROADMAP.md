@@ -637,3 +637,10 @@ Karar (2026-11-11): paketsiz süreçte `NotificationChanged` aboneliği 0x800704
 - [x] Testler: altın dosya (`Fixtures/settings-v3.json`) her alanın doğru bölüme geldiğini doğrular; anahtar kapsam testi her v3 anahtarının eşlendiğini ya da bilerek atıldığını (`MonitorTarget`) denetler; boş bölüm ve null liste testleri; tam kayıt/okuma döngüsü.
 - [x] `DockItems` (sıra, klasörler) değişince dock yeniden kurulmaz (`DockSettingsDiff`).
 - [ ] Sahip doğrulaması (uygulama çalıştırılarak): gerçek v0.2.6 `settings.json` ile her sayfa değerlerini korur mu; görev çubuğu kill → geri gelir (AGENTS #7); `scripts/measure-memory.ps1` ve `docs/MEMORY.md` satırı.
+
+## Çentik hareketi: sekmesiz kapanış ve raf darbesi (2026-11-11)
+Fikir kaynağı: Nusa incelemesi (`arastirma/nusa/RAPOR.md`, git dışı). Kod ve değerler bizim.
+- [x] **Core (testli):** `Spring.Damping` ayarlanabilir, `CriticalDamping` (2·√(sertlik·kütle)) ve `Kick(hız)` eklendi.
+- [x] **Kapanış:** `NotchWindow.Retarget` küçülen eksende kritik sönüm, büyüyen eksende eski hafif sekme (26). Eskiden 620→236 kapanışta ~8,5 DIP içe çöküyordu.
+- [x] **Raf darbesi:** dosya ya da metin bırakılınca çentik üst ortadan esneyip seker (`_gulp`, 260/14, darbe 30; yatay +%2,5, dikey −%5; yatay esneme tuvali aşmaz). Hareket azaltma ve Animasyon: Kapalı iken yok.
+- [ ] Elle sınama: kapanışın oturması, rafa dosya bırakınca esneme, hareket azaltmada darbenin çıkmaması.
