@@ -1,5 +1,8 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Koy.Core.Shortcuts;
+using Koy.Core.Timers;
 
 namespace Koy.Core.Settings.Profiles;
 
@@ -18,16 +21,31 @@ public static class SettingsProfileCodec
 
     public const int MaxNameLength = 60;
 
+    /// <summary>
+    /// Ayar listelerinin (açık paneller, Kontrol Merkezi sırası) içe aktarmada kabul edilen en çok öğe sayısı. Gerçek
+    /// listeler 7 öğeyi geçmez; 1 MB'lık bir dosya yüzbinlerce öğeyi settings.json'a kalıcı yazdırabilirdi.
+    /// </summary>
+    public const int MaxListItems = 32;
+
     private static readonly JsonSerializerOptions WriteOptions = new() { WriteIndented = true };
 
-    /// <summary>Ad boş olmamalı, en fazla 60 karakter olmalı ve denetim karakteri içermemeli.</summary>
+    /// <summary>
+    /// Ad boş olmamalı, en fazla 60 karakter olmalı; denetim karakteri, satır/paragraf ayırıcı (U+2028/2029) ve
+    /// yön geçersiz kılma karakteri (U+202A-202E, U+2066-2069) içermemeli: sonuncusu önizlemede adı yanıltıcı gösterir.
+    /// ZWJ gibi diğer biçim karakterleri (emoji dizileri) serbesttir.
+    /// </summary>
     public static bool IsValidName(string? name)
     {
         if (name is null)
             return false;
         var trimmed = name.Trim();
-        return trimmed.Length is > 0 and <= MaxNameLength && !trimmed.Any(char.IsControl);
+        return trimmed.Length is > 0 and <= MaxNameLength && !trimmed.Any(IsForbiddenNameChar);
     }
+
+    private static bool IsForbiddenNameChar(char c) =>
+        char.IsControl(c)
+        || CharUnicodeInfo.GetUnicodeCategory(c) is UnicodeCategory.LineSeparator or UnicodeCategory.ParagraphSeparator
+        || (int)c is (>= 0x202A and <= 0x202E) or (>= 0x2066 and <= 0x2069);
 
     /// <summary>
     /// Seçili bölümleri içeren profil metnini üretir. Seçilmeyen bölümler dosyaya hiç yazılmaz. Makineye özgü
@@ -41,6 +59,9 @@ public static class SettingsProfileCodec
         var chosen = sections.Distinct().OrderBy(s => (int)s).ToList();
         if (chosen.Count == 0)
             throw new ArgumentException("En az bir bölüm seçilmeli.", nameof(sections));
+        // Tanımsız sayı ("99") dosyaya "99": null olarak yazılır ve dosya geri okunamazdı.
+        if (!chosen.All(Enum.IsDefined))
+            throw new ArgumentException("Bilinmeyen bölüm.", nameof(sections));
 
         // Dock başlat simgesinin yolu bu makineye özgü: paylaşılan dosyaya yazılmaz (içe aktarmada yerel değer korunur).
         var shareable = current with { Dock = current.Dock with { StartIconPath = "" } };
@@ -67,6 +88,8 @@ public static class SettingsProfileCodec
     /// <summary>
     /// Profil metnini doğrular. Bilinmeyen biçim, daha yeni biçim sürümü, geçersiz ad, bilinmeyen ya da makineye özgü
     /// bölüm, boş bölüm listesi ve tolerantlı okumada düzeltilmesi gereken (geçersiz değerli) alan reddedilir.
+    /// Tolerantlı okumanın kaçırdığı değerler de reddedilir (<see cref="HasInvalidValues"/>): tanımsız enum sayısı,
+    /// sonsuz sayı, aralık dışı Pomodoro süresi, çözülemeyen ya da çakışan kısayol, aşırı uzun liste.
     /// Bölüm İÇİNDEKİ bilinmeyen anahtarlar sessizce yok sayılır: ileri sürümün eklediği alan bu sürüme taşınmaz.
     /// </summary>
     public static ProfileImportResult Read(string json)
@@ -76,6 +99,20 @@ public static class SettingsProfileCodec
         if (json.Length > MaxLength)
             return Fail(ProfileImportError.TooLarge);
 
+        try
+        {
+            return ReadCore(json);
+        }
+        catch (ArgumentException)
+        {
+            // JsonNode aynı anahtarı iki kez içeren nesnede JsonException değil ArgumentException atar (ağaç tembel
+            // kurulur, atış ilk erişimde olur): kötü niyetli ya da bozuk dosya uygulamayı düşürmesin.
+            return Fail(ProfileImportError.MalformedJson);
+        }
+    }
+
+    private static ProfileImportResult ReadCore(string json)
+    {
         JsonNode? node;
         try
         {
@@ -136,10 +173,66 @@ public static class SettingsProfileCodec
             // Hata yolu çözülemezse ParseTolerant onarmaz ve istisna çıkar: dosya temiz biçimde reddedilir, hiçbir şey yazılmaz.
             return Fail(ProfileImportError.InvalidValues);
         }
-        if (dropped > 0)
+        if (dropped > 0 || HasInvalidValues(settings, sections))
             return Fail(ProfileImportError.InvalidValues);
 
         return new ProfileImportResult(ProfileImportError.None, new ImportedProfile(name!.Trim(), sections, settings));
+    }
+
+    /// <summary>
+    /// Tolerantlı okumanın hata saymadığı ama uygulanırsa ayarları bozacak değerler. Yalnız bildirilen bölümlere bakılır.
+    /// Enum sayıları (<c>"Style": 99</c>) tanımsız değerle okunur; JSON sonsuz sayıyı (1e400) kabul eder; kısayol
+    /// metni olduğu gibi saklanır ve geçersizse mevcut çalışan kısayolun üzerine yazılıp onu sessizce öldürürdü.
+    /// Yeni enum / double / liste alanı eklenince buraya da eklenir (test bunu reflection ile zorlar).
+    /// </summary>
+    private static bool HasInvalidValues(AppSettings s, IReadOnlyList<ProfileSection> sections)
+    {
+        foreach (var section in sections)
+        {
+            var bad = section switch
+            {
+                ProfileSection.Appearance =>
+                    !Enum.IsDefined(s.Appearance.Theme) || !Enum.IsDefined(s.Appearance.AnimationSpeed)
+                    || !Enum.IsDefined(s.Appearance.Material) || !double.IsFinite(s.Appearance.CornerRadius),
+                ProfileSection.Dock =>
+                    !Enum.IsDefined(s.Dock.Visibility) || !Enum.IsDefined(s.Dock.Style) || !Enum.IsDefined(s.Dock.IconAlignment)
+                    || !Enum.IsDefined(s.Dock.Proximity) || !Enum.IsDefined(s.Dock.StartIcon) || !Enum.IsDefined(s.Dock.IndicatorStyle)
+                    || !Enum.IsDefined(s.Dock.MiddleClickAction) || !double.IsFinite(s.Dock.IconSize),
+                ProfileSection.Notch =>
+                    !Enum.IsDefined(s.Notch.Visibility) || !Enum.IsDefined(s.Notch.Style) || !Enum.IsDefined(s.Notch.OpenBehavior)
+                    || !Enum.IsDefined(s.Notch.IdleDisplay) || !Enum.IsDefined(s.Notch.WheelAction)
+                    || !IsSaneList(s.Notch.EnabledPanels) || !IsSaneList(s.Notch.ControlCenterLayout),
+                ProfileSection.Music => !Enum.IsDefined(s.Music.CardStyle),
+                ProfileSection.Shortcuts => HasInvalidShortcut(s),
+                ProfileSection.Focus =>
+                    !IsPomodoroMinutes(s.Focus.PomodoroWorkMinutes) || !IsPomodoroMinutes(s.Focus.PomodoroShortBreakMinutes)
+                    || !IsPomodoroMinutes(s.Focus.PomodoroLongBreakMinutes),
+                _ => true,
+            };
+            if (bad)
+                return true;
+        }
+        return false;
+    }
+
+    private static bool IsSaneList(ValueList<string> list) => list.Count <= MaxListItems && !list.Contains(null!);
+
+    // Çalışma zamanı bu aralığa sıkıştırır ama Ayarlar sayfası ham değeri gösterir ve kaydederken geri yazar.
+    private static bool IsPomodoroMinutes(int minutes) => minutes is >= PomodoroConfig.MinMinutes and <= PomodoroConfig.MaxMinutes;
+
+    // Ayarlar sayfasının kaydetme denetimiyle aynı kural (ShortcutConflicts.Check): boş = atanmamış, geri kalanı çözülmeli,
+    // sistemce ayrılmış olmamalı ve profilin kendi içinde çakışmamalı.
+    private static bool HasInvalidShortcut(AppSettings s)
+    {
+        var all = ShortcutBindings.ReadAll(s);
+        foreach (var (action, text) in all)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                continue;
+            if (!Hotkey.TryParse(text, out var hotkey) || ShortcutConflicts.Check(hotkey, action, all) is not null)
+                return true;
+        }
+        return false;
     }
 
     /// <summary>
@@ -154,7 +247,9 @@ public static class SettingsProfileCodec
     /// <summary>
     /// Seçili ve profilde bildirilmiş bölümleri mevcut ayarların üzerine uygular. Dosyada olmayan bölüm değişmez.
     /// Dock başlat simgesinin dosya yolu makineye özgüdür: içe aktarmada yerel değer korunur.
-    /// Girdi değiştirilmez; sonuç yeni bir kayıttır.
+    /// Girdi değiştirilmez; sonuç yeni bir kayıttır ve profille nesne paylaşmaz: ayar bölümlerinin alanları
+    /// yerinde değiştirilebilir (<c>settings.Notch.ControlCenterLayout = ...</c>), paylaşılsa uygulanmış ayardaki
+    /// değişiklik profili (ve ikinci kez uygulamayı) bozardı.
     /// </summary>
     public static AppSettings Apply(AppSettings current, ImportedProfile profile, IEnumerable<ProfileSection> chosen)
     {
@@ -166,15 +261,22 @@ public static class SettingsProfileCodec
 
             result = section switch
             {
-                ProfileSection.Appearance => result with { Appearance = profile.Settings.Appearance },
+                ProfileSection.Appearance => result with { Appearance = profile.Settings.Appearance with { } },
                 ProfileSection.Dock => result with
                 {
                     Dock = profile.Settings.Dock with { StartIconPath = current.Dock.StartIconPath },
                 },
-                ProfileSection.Notch => result with { Notch = profile.Settings.Notch },
-                ProfileSection.Music => result with { Music = profile.Settings.Music },
-                ProfileSection.Shortcuts => result with { Shortcuts = profile.Settings.Shortcuts },
-                ProfileSection.Focus => result with { Focus = profile.Settings.Focus },
+                ProfileSection.Notch => result with
+                {
+                    Notch = profile.Settings.Notch with
+                    {
+                        EnabledPanels = new ValueList<string>(profile.Settings.Notch.EnabledPanels),
+                        ControlCenterLayout = new ValueList<string>(profile.Settings.Notch.ControlCenterLayout),
+                    },
+                },
+                ProfileSection.Music => result with { Music = profile.Settings.Music with { } },
+                ProfileSection.Shortcuts => result with { Shortcuts = profile.Settings.Shortcuts with { } },
+                ProfileSection.Focus => result with { Focus = profile.Settings.Focus with { } },
                 _ => result,
             };
         }
