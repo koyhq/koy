@@ -8,6 +8,15 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 ---
 
 ## [0.2.6](https://github.com/koyhq/koy/compare/v0.2.5...v0.2.6) (2026-11-11)
+Highlights:
+- **Glass:** Appearance › Material is now Solid, Frosted or Glass. The Koy window, the tray menu and the setup wizard use the Windows acrylic blur; the open notch and the dock become slightly see-through. On a bright wallpaper Koy steps the level up on its own so text stays readable.
+- **Notifications on the notch:** Windows notifications show briefly as cards on the notch (for example a coding agent saying it is done). You can hide the message text, and nothing shows during Focus or presentations.
+- **Update card:** when a new version is out, the notch shows it once with an Update button.
+- **Floating island and ring battery:** the notch can float just below the top edge as a capsule, and a new idle display shows the battery as a ring with the day and time.
+- **Album colors:** the music card takes its color from the album cover, or uses the cover itself as the background. Plain cards are now neutral grey.
+- **Dictation tab:** voice command settings have their own tab. Choose Claude's permission (read-only by default, Edits or Auto) and its model; the full reply opens in a card under the notch.
+- **Dock:** middle-click a window preview to close that window.
+
 
 
 ### Added
@@ -15,7 +24,6 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 * **appearance:** add frosted and glass material levels ([e4aad69](https://github.com/koyhq/koy/commit/e4aad69f5e398d1d2383005a5945482a570dea87))
 * **appearance:** give the tray menu and setup wizard the system acrylic frame ([f1705f1](https://github.com/koyhq/koy/commit/f1705f19cbb6e22ce470123a4309ddfcf7630d27))
 * **appearance:** use the system acrylic backdrop for the Koy window ([75b3ac9](https://github.com/koyhq/koy/commit/75b3ac940ff538aeb43c5b3d37424c556b622f04))
-* glass material, notch cards and notifications, floating island, album colors ([182d7ae](https://github.com/koyhq/koy/commit/182d7aeea74adc77fb32fc6a5eef8f065e751672))
 * **media:** add the music card style setting and a cover fingerprint ([857e99a](https://github.com/koyhq/koy/commit/857e99a1c01a6fc6d04a239d182e4ae3ad47bb5d))
 * **media:** extract an accent palette from album artwork ([fc2c492](https://github.com/koyhq/koy/commit/fc2c4921cf532f94e70ac24feb78dfb3d1763a9a))
 * **music:** follow the glass material on the music card ([333a801](https://github.com/koyhq/koy/commit/333a801a08bc3e87dbb9ad265e4dbd985b2ecfe0))
@@ -29,7 +37,6 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 * **notifications:** add notification diff, poller, queue and card presentation ([62d5455](https://github.com/koyhq/koy/commit/62d545545fabc72f2db76f187fdc8bd46777f854))
 * **notifications:** poll the Windows notification list without package identity ([08bbe41](https://github.com/koyhq/koy/commit/08bbe4188ed78752e662fc926d553dfc49a2b1e1))
 * **voice:** add Dictation tab with Claude permission mode, model choice and reply card ([dee5f8b](https://github.com/koyhq/koy/commit/dee5f8be3a1c9fda2b6c58778f85fa355e304d48))
-* **voice:** Dictation tab with Claude permission mode, model choice and reply card ([0e32d97](https://github.com/koyhq/koy/commit/0e32d97226cb103aaffa29ef2e10cd9f16a3a78c))
 
 
 ### Fixed

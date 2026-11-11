@@ -5,6 +5,48 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.6](https://github.com/koyhq/koy/compare/v0.2.5...v0.2.6) (2026-11-11)
+Öne çıkanlar:
+- **Cam:** Görünüm › Malzeme artık Katı, Buzlu ya da Cam. Koy penceresi, sağ alt menü ve kurulum sihirbazı Windows'un akrilik bulanıklığını kullanıyor; açık çentik ve dock hafifçe saydamlaşıyor. Açık renkli duvar kağıdında yazılar okunur kalsın diye Koy seviyeyi kendiliğinden yükseltiyor.
+- **Bildirimler çentikte:** Windows bildirimleri çentikte kısa süre kart olarak görünüyor (ör. bir kodlama ajanının "iş bitti" bildirimi). Mesaj metnini gizleyebilirsin; odak ve sunum sırasında hiçbir şey çıkmıyor.
+- **Güncelleme kartı:** yeni sürüm çıkınca çentik bunu bir kez, Güncelle düğmesiyle gösteriyor.
+- **Yüzen ada ve halka pil:** çentik üst kenarın biraz altında kapsül olarak durabiliyor; yeni boşta görünümü pili halka olarak, yanında gün ve saatle gösteriyor.
+- **Albüm renkleri:** müzik kartı rengini albüm kapağından alıyor ya da kapağın kendisini zemin yapıyor. Düz kart artık nötr gri.
+- **Dikte sekmesi:** sesli komut ayarları kendi sekmesinde. Claude'un iznini (varsayılan salt okunur, Düzenleme ya da Otomatik) ve modelini seçebilirsin; yanıtın tamamı çentiğin altındaki kartta açılıyor.
+- **Dock:** pencere önizlemesine orta tıklamak o pencereyi kapatıyor.
+
+
+### Eklenenler
+
+* **appearance:** Buzlu ve Cam malzeme seviyeleri ([e4aad69](https://github.com/koyhq/koy/commit/e4aad69f5e398d1d2383005a5945482a570dea87))
+* **appearance:** sağ alt menü ve kurulum sihirbazı sistem akrilik çerçevesinde ([f1705f1](https://github.com/koyhq/koy/commit/f1705f19cbb6e22ce470123a4309ddfcf7630d27))
+* **appearance:** Koy penceresi sistem akrilik zeminini kullanıyor ([75b3ac9](https://github.com/koyhq/koy/commit/75b3ac940ff538aeb43c5b3d37424c556b622f04))
+* **media:** müzik kartı stili ayarı ve kapak parmak izi ([857e99a](https://github.com/koyhq/koy/commit/857e99a1c01a6fc6d04a239d182e4ae3ad47bb5d))
+* **media:** albüm kapağından vurgu paleti çıkarma ([fc2c492](https://github.com/koyhq/koy/commit/fc2c4921cf532f94e70ac24feb78dfb3d1763a9a))
+* **music:** müzik kartı cam malzemeyi izliyor ([333a801](https://github.com/koyhq/koy/commit/333a801a08bc3e87dbb9ad265e4dbd985b2ecfe0))
+* **music:** müzik kartı albüm rengini alıyor, kapak zemin olabiliyor ([e7b9f6f](https://github.com/koyhq/koy/commit/e7b9f6faf0e04a0b0200c879b79068fa941a8ad2))
+* **music:** düz müzik kartı nötr tonlarda ([f0f44a1](https://github.com/koyhq/koy/commit/f0f44a1e8805652d1f2f03052166f2758e5344e8))
+* **notch:** yüzen ada stili ([f528d5a](https://github.com/koyhq/koy/commit/f528d5a7bdeba14c6afd06602afdcd28db78b02f))
+* **notch:** halka pil ve gün-saat boşta görünümü ([70ab63e](https://github.com/koyhq/koy/commit/70ab63e0670855b3855bf655fe2ede19802da027))
+* **notch:** yeni sürüm çıkınca çentikte güncelleme kartı ([887b95a](https://github.com/koyhq/koy/commit/887b95ab1d4f01280ec0029ef57de8320092e4a7))
+* **notch:** Rahatsız Etmeyin durumu kontrol kutucuğunda ([611af88](https://github.com/koyhq/koy/commit/611af885f3933ef2cad9192941236063a8beada5))
+* **notch:** Windows bildirimleri çentikte kart olarak ([09f3217](https://github.com/koyhq/koy/commit/09f32178726af9206de60a810de04352699942df))
+* **notifications:** bildirim farkı, yoklayıcı, kuyruk ve kart sunumu ([62d5455](https://github.com/koyhq/koy/commit/62d545545fabc72f2db76f187fdc8bd46777f854))
+* **notifications:** Windows bildirim listesi paket kimliği olmadan okunuyor ([08bbe41](https://github.com/koyhq/koy/commit/08bbe4188ed78752e662fc926d553dfc49a2b1e1))
+* **voice:** Dikte sekmesi, Claude izin modu, model seçimi ve yanıt kartı ([dee5f8b](https://github.com/koyhq/koy/commit/dee5f8be3a1c9fda2b6c58778f85fa355e304d48))
+
+
+### Düzeltmeler
+
+* **dock:** önizlemeye orta tıklama pencereyi kapatıyor ([66d4bc0](https://github.com/koyhq/koy/commit/66d4bc05146b50981cca15e1bccea8308f00f0b5))
+* **notch:** bildirim logoları saydam kenarları kırpılıp simge dairesini dolduruyor ([b243c5d](https://github.com/koyhq/koy/commit/b243c5d6e12104d701de094d17e9f51617f74986))
+* **notch:** kart gösterilirken çentik görünür kalıyor ([2ca6ea1](https://github.com/koyhq/koy/commit/2ca6ea12909a830b4c8bc5c71a3a287270d2ad6e))
+* **notch:** bildirim kartlarında doğru uygulama simgesi ([6c72ad6](https://github.com/koyhq/koy/commit/6c72ad61c1cd0e5e6b1831a8fd77e48fc64afaa9))
+* **notifications:** Windows 11'de Rahatsız Etmeyin ve odak oturumu algılanıyor ([123f4c0](https://github.com/koyhq/koy/commit/123f4c045de48894d03a690efdad5132ffd06b77))
+* **notifications:** Rahatsız Etmeyin için güvenilmez kayıt defteri denetimi kaldırıldı ([b0fdc4e](https://github.com/koyhq/koy/commit/b0fdc4ea8fbe229831fa791891aacde50dc8f083))
+* **notifications:** aynı kimlikle değiştirilen bildirim yeni sayılıyor ([2cae303](https://github.com/koyhq/koy/commit/2cae303041fcc857b71bad474226a7e6349c4279))
+* **voice:** varsayılan izin salt okunur, model listesi ve geçersiz model hatası yerelleştirildi ([980eb09](https://github.com/koyhq/koy/commit/980eb098c113e163642b44b585cc4ab7fc9d6cde))
+
 ## [0.2.5](https://github.com/koyhq/koy/compare/v0.2.4...v0.2.5) (2026-11-09)
 Öne çıkanlar:
 - **Türkçe ve İngilizce sesli komut:** Ctrl+Alt+V artık çentikte bir kutu açıp Windows sesle yazmayı (Win+H) başlatıyor; klavye dilinde yazdığı için Türkçe, konuşma dili kurmadan çalışıyor. Komutu elle de yazabilirsin. Enter çalıştırır, Esc iptal eder; yanıtın ilk satırı çentikte görünür, tıklayınca tamamı açılır.
