@@ -120,11 +120,14 @@ public static class ThemeManager
         var windowLevel = MaterialState.ForWindow(settings, theme);
         if (windowLevel != MaterialSetting.Solid)
         {
+            // Başlık çubuğu ve kenar menüsü (KoyBgShell) içerikle aynı tonda: demoda kendi zeminleri yok, pencere tek
+            // yüzey. Ayrı tonlar akriliğin üstünde iki farklı gri gibi duruyordu (proje sahibi, 2026-11-11).
             var alpha = MaterialSetting.SurfaceAlpha(windowLevel);
-            foreach (var key in new[] { "KoyBgWindow", "KoyBgShell" })
+            if (palette["KoyBgWindow"] is SolidColorBrush src)
             {
-                if (palette[key] is SolidColorBrush src)
-                    o[key] = new SolidColorBrush(Color.FromArgb(alpha, src.Color.R, src.Color.G, src.Color.B));
+                var surface = Color.FromArgb(alpha, src.Color.R, src.Color.G, src.Color.B);
+                o["KoyBgWindow"] = new SolidColorBrush(surface);
+                o["KoyBgShell"] = new SolidColorBrush(surface);
             }
             o["KoyBgRow"] = new SolidColorBrush(theme == ResolvedTheme.Dark
                 ? Color.FromArgb(0x0D, 0xFF, 0xFF, 0xFF)

@@ -45,8 +45,10 @@ public partial class KoyWindow : Window
     /// <summary>Sayfa değişince yeni sayfa kısa bir solmayla girer; hareket kapalıysa anında geçer.</summary>
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(KoyWindowViewModel.Material))
-            ApplyBackdrop();
+        // ThemeManager önce uygulansın (Current teması ve yüzeyler), çerçeve ardından.
+        if (e.PropertyName is nameof(KoyWindowViewModel.Material) or nameof(KoyWindowViewModel.MaterialReadabilityGuard)
+            or nameof(KoyWindowViewModel.Theme) or nameof(KoyWindowViewModel.CornerRadius))
+            Dispatcher.BeginInvoke(DispatcherPriority.Background, ApplyFrame);
 
         if (e.PropertyName == nameof(KoyWindowViewModel.IsUninstallConfirming) && ViewModel.IsUninstallConfirming && IsVisible)
         {
@@ -108,19 +110,40 @@ public partial class KoyWindow : Window
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
-        ApplyBackdrop();
+        // Katmansız pencerede WPF yüzeyi siyahla temizler; DWM arka planı görünsün diye saydam temizlenir.
+        if (PresentationSource.FromVisual(this) is System.Windows.Interop.HwndSource source && source.CompositionTarget is not null)
+            source.CompositionTarget.BackgroundColor = System.Windows.Media.Colors.Transparent;
+        ApplyFrame();
+        MaterialState.Changed += ApplyFrame;
+        Closed += (_, _) => MaterialState.Changed -= ApplyFrame;
     }
 
     /// <summary>
-    /// Buzlu ve Cam'da DWM acrylic istenir. AllowsTransparency penceresinde sistem bunu yok sayar; etki ThemeManager'ın
-    /// %86 / %72 opak yüzeyleriyle sınırlı kalır (hata vermez, bulanıklık yok).
+    /// Pencere çerçevesi DWM'den: Buzlu ve Cam'da sistem akriliği (gerçek bulanıklık; ThemeManager'ın yarı saydam
+    /// yüzeyleri onun üstünde ton verir), Katı'da arka plan yok. Koyu / açık çerçeve temaya, köşe "Köşe yuvarlaklığı"na
+    /// uyar (Keskin küçük yuvarlak, diğerleri Windows'un standart yuvarlağı). Tema, malzeme, köşe ya da duvar kağıdı
+    /// değişince yeniden uygulanır.
     /// </summary>
-    private void ApplyBackdrop()
+    private void ApplyFrame()
     {
         var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-        var translucent = Koy.Core.Appearance.MaterialSetting.IsTranslucent(ViewModel.Material);
-        Koy.Platform.Shell.BackdropService.ApplyBackdrop(
-            hwnd, translucent ? Koy.Platform.Shell.WindowBackdropType.Acrylic : Koy.Platform.Shell.WindowBackdropType.None);
+        if (hwnd == 0)
+            return;
+
+        var settings = new Koy.Core.Settings.AppSettings
+        {
+            Material = ViewModel.Material,
+            MaterialReadabilityGuard = ViewModel.MaterialReadabilityGuard
+        };
+        var level = MaterialState.ForWindow(settings, ThemeManager.Current);
+        var sharp = Koy.Core.Appearance.CornerSetting.Resolve(ViewModel.CornerRadius) == Koy.Core.Appearance.CornerStyle.Sharp;
+        Koy.Platform.Shell.BackdropService.ApplyWindowFrame(
+            hwnd,
+            level == Koy.Core.Appearance.MaterialSetting.Solid
+                ? Koy.Platform.Shell.WindowBackdropType.None
+                : Koy.Platform.Shell.WindowBackdropType.Acrylic,
+            ThemeManager.Current == Koy.Core.Appearance.ResolvedTheme.Dark,
+            sharp ? Koy.Platform.Shell.WindowCornerStyle.RoundSmall : Koy.Platform.Shell.WindowCornerStyle.Round);
     }
 
     private void KeepSettingsLabel_Click(object sender, MouseButtonEventArgs e)

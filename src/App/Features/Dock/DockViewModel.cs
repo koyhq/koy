@@ -253,11 +253,11 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     private void UpdateMaterialSurfaces()
     {
         var level = MaterialState.ForDock(_materialSettings);
-        var full = new SolidColorBrush(Color.FromArgb(MaterialSetting.SurfaceAlpha(level), 0x12, 0x12, 0x16));
+        var full = new SolidColorBrush(Color.FromArgb(MaterialSetting.LayeredAlpha(level), 0x12, 0x12, 0x16));
         full.Freeze();
         FullWidthSurface = full;
 
-        var capsuleAlpha = level == MaterialSetting.Solid ? (byte)0xE6 : MaterialSetting.SurfaceAlpha(level);
+        var capsuleAlpha = Math.Min((byte)0xE6, MaterialSetting.LayeredAlpha(level)); // kapsül Katı'da da %90; daha opak olmaz
         var capsule = new SolidColorBrush(Color.FromArgb(capsuleAlpha, 0x18, 0x18, 0x1B));
         capsule.Freeze();
         CapsuleSurface = capsule;

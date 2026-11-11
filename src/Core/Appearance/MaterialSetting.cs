@@ -41,4 +41,21 @@ public static class MaterialSetting
 
     /// <summary>Opaklığın 0–255 alfa karşılığı.</summary>
     public static byte SurfaceAlpha(string? value) => (byte)Math.Round(255 * SurfaceOpacity(value));
+
+    // Bulanıklıksız yüzeyler (çentik, dock): katmanlı pencere oldukları için DWM bulanıklığı alamazlar. Demodaki %86 / %72
+    // gerçek masaüstünde arkadaki metni okunur bırakıyordu (proje sahibi elle sınaması, 2026-11-11: "fazla saydam");
+    // bu yüzden aynı seviyeler burada daha opaktır. Koy penceresi gerçek akrilik aldığı için SurfaceOpacity'de kalır.
+    public const double LayeredFrostedOpacity = 0.94;
+    public const double LayeredGlassOpacity = 0.88;
+
+    /// <summary>Bulanıklıksız yüzeyin (çentik, dock) opaklığı: Katı 1, Buzlu 0,94, Cam 0,88.</summary>
+    public static double LayeredOpacity(string? value) => Normalize(value) switch
+    {
+        Glass => LayeredGlassOpacity,
+        Frosted => LayeredFrostedOpacity,
+        _ => 1.0
+    };
+
+    /// <summary>Bulanıklıksız yüzey opaklığının 0–255 alfa karşılığı.</summary>
+    public static byte LayeredAlpha(string? value) => (byte)Math.Round(255 * LayeredOpacity(value));
 }

@@ -47,10 +47,34 @@ public class MaterialTests
     [Fact]
     public void Guard_raises_glass_to_frosted_on_light_wallpaper_like_the_demo()
     {
-        // Onay notu: açık duvar kağıdında Cam → Buzlu.
-        Assert.True(ReadabilityGuard.SecondaryContrast(MaterialSetting.GlassOpacity, LightWall, ReadabilityGuard.Notch) < 4.5);
-        Assert.True(ReadabilityGuard.SecondaryContrast(MaterialSetting.FrostedOpacity, LightWall, ReadabilityGuard.Notch) >= 4.5);
-        Assert.Equal(MaterialSetting.Frosted, ReadabilityGuard.Effective("Cam", true, LightWall, ReadabilityGuard.Notch));
+        // Onay notu: açık duvar kağıdında Cam → Buzlu (demodaki %72 / %86, bugün Koy penceresinin değerleri).
+        Assert.True(ReadabilityGuard.SecondaryContrast(MaterialSetting.GlassOpacity, LightWall, ReadabilityGuard.WindowDark) < 4.5);
+        Assert.True(ReadabilityGuard.SecondaryContrast(MaterialSetting.FrostedOpacity, LightWall, ReadabilityGuard.WindowDark) >= 4.5);
+        Assert.Equal(MaterialSetting.Frosted, ReadabilityGuard.Effective("Cam", true, LightWall, ReadabilityGuard.WindowDark));
+    }
+
+    [Theory]
+    [InlineData("Katı", 1.0, 255)]
+    [InlineData("Buzlu", 0.94, 240)]
+    [InlineData("Cam", 0.88, 224)]
+    public void Layered_surfaces_are_more_opaque_than_the_window(string value, double opacity, byte alpha)
+    {
+        // Çentik ve dock bulanıklık alamaz; elle sınamada %72 arkadaki metni okunur bırakıyordu.
+        Assert.Equal(opacity, MaterialSetting.LayeredOpacity(value));
+        Assert.Equal(alpha, MaterialSetting.LayeredAlpha(value));
+        Assert.True(MaterialSetting.LayeredOpacity(value) >= MaterialSetting.SurfaceOpacity(value));
+    }
+
+    [Fact]
+    public void Notch_guard_uses_layered_opacity()
+    {
+        Assert.True(ReadabilityGuard.Notch.Layered);
+        Assert.Equal(MaterialSetting.LayeredGlassOpacity, ReadabilityGuard.Notch.OpacityOf(MaterialSetting.Glass));
+        Assert.Equal(MaterialSetting.GlassOpacity, ReadabilityGuard.WindowDark.OpacityOf(MaterialSetting.Glass));
+        // Açık duvar kağıdında çentik yine eşiği geçen bir seviyede kalır.
+        var level = ReadabilityGuard.Effective("Cam", true, LightWall, ReadabilityGuard.Notch);
+        Assert.True(level == MaterialSetting.Solid
+            || ReadabilityGuard.SecondaryContrast(ReadabilityGuard.Notch.OpacityOf(level), LightWall, ReadabilityGuard.Notch) >= 4.5);
     }
 
     [Fact]
@@ -61,7 +85,7 @@ public class MaterialTests
         {
             var effective = ReadabilityGuard.Effective("Cam", true, white, surface);
             Assert.True(effective == MaterialSetting.Solid
-                || ReadabilityGuard.SecondaryContrast(MaterialSetting.SurfaceOpacity(effective), white, surface) >= 4.5);
+                || ReadabilityGuard.SecondaryContrast(surface.OpacityOf(effective), white, surface) >= 4.5);
         }
     }
 

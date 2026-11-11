@@ -11,11 +11,18 @@ public static class ReadabilityGuard
     /// <summary>WCAG AA normal metin eşiği.</summary>
     public const double MinSecondaryContrast = 4.5;
 
-    /// <summary>Bir yüzeyin taban rengi, birincil metin rengi ve ikincil metnin alfası.</summary>
-    public readonly record struct Surface(Rgb Base, Rgb Text, double SecondaryAlpha);
+    /// <summary>
+    /// Bir yüzeyin taban rengi, birincil metin rengi, ikincil metnin alfası ve bulanıklıksız (katmanlı) olup olmadığı.
+    /// Bulanıklıksız yüzey <see cref="MaterialSetting.LayeredOpacity"/>, diğerleri <see cref="MaterialSetting.SurfaceOpacity"/> kullanır.
+    /// </summary>
+    public readonly record struct Surface(Rgb Base, Rgb Text, double SecondaryAlpha, bool Layered = false)
+    {
+        public double OpacityOf(string level) =>
+            Layered ? MaterialSetting.LayeredOpacity(level) : MaterialSetting.SurfaceOpacity(level);
+    }
 
-    /// <summary>Çentik ve dock: #0A0A0B taban, %62 beyaz ikincil metin.</summary>
-    public static Surface Notch { get; } = new(new Rgb(10, 10, 11), new Rgb(244, 244, 245), 0.62);
+    /// <summary>Çentik ve dock: #0A0A0B taban, %62 beyaz ikincil metin, bulanıklıksız.</summary>
+    public static Surface Notch { get; } = new(new Rgb(10, 10, 11), new Rgb(244, 244, 245), 0.62, Layered: true);
 
     /// <summary>Koy penceresi, koyu tema.</summary>
     public static Surface WindowDark { get; } = new(new Rgb(22, 22, 25), new Rgb(244, 244, 245), 0.60);
@@ -49,7 +56,7 @@ public static class ReadabilityGuard
         for (var i = start; i < levels.Count; i++)
         {
             var candidate = levels[i];
-            if (SecondaryContrast(MaterialSetting.SurfaceOpacity(candidate), wall, surface) >= MinSecondaryContrast)
+            if (SecondaryContrast(surface.OpacityOf(candidate), wall, surface) >= MinSecondaryContrast)
                 return candidate;
         }
 
