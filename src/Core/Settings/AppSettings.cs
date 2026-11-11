@@ -176,6 +176,8 @@ public sealed record AppSettings
     public bool ShowVolumeOsd { get; set; } = true;
     /// <summary>Müzik çalarken çentikte dalga simgesi görünsün.</summary>
     public bool MusicShowWaveform { get; set; } = true;
+    /// <summary>Müzik kartı stili: "Neutral" (düz), "Tinted" (albüm rengi, varsayılan), "Artwork" (kapak arka plan). Bkz. <c>MusicCardStyleSetting</c>.</summary>
+    public string MusicCardStyle { get; set; } = "Tinted";
     /// <summary>
     /// Ana sayfadaki müzik kartında eşzamanlı sözler. Varsayılan kapalı: açıkken çalan parçanın (tarayıcı videosu dahil) adı
     /// LRCLIB'e gider, bu yüzden kullanıcı kartındaki düğmeyle ya da ayardan kendisi açar. İstek yalnız Ana görünürken, parça başına bir kez.
@@ -291,6 +293,7 @@ public sealed record AppSettings
                ShowBrightnessOsd == other.ShowBrightnessOsd &&
                ShowVolumeOsd == other.ShowVolumeOsd &&
                MusicShowWaveform == other.MusicShowWaveform &&
+               MusicCardStyle == other.MusicCardStyle &&
                MusicLyricsEnabled == other.MusicLyricsEnabled &&
                NotchHideInFullscreen == other.NotchHideInFullscreen &&
                ShowPrivacyIndicator == other.ShowPrivacyIndicator &&
@@ -383,6 +386,7 @@ public sealed record AppSettings
         hash.Add(ShowBrightnessOsd);
         hash.Add(ShowVolumeOsd);
         hash.Add(MusicShowWaveform);
+        hash.Add(MusicCardStyle);
         hash.Add(MusicLyricsEnabled);
         hash.Add(NotchHideInFullscreen);
         hash.Add(ShowPrivacyIndicator);
