@@ -140,3 +140,11 @@ Sürümler release-please ile otomatiktir, elle etiket atılmaz. Ayrıntı: `CON
 - Ayar: `release-please-config.json`. Akışlar: `.github/workflows/release-please.yml`, `.github/workflows/release.yml`.
 - `main`'e birleşen commit öneki sürümü belirler; release-please bir sürüm PR'ı açar. O PR birleşince etiket, GitHub release ve kurulum dosyaları oluşur.
 - Yerelde paket: `powershell -ExecutionPolicy Bypass -File scripts\pack.ps1`.
+
+## Çentik biçimi (yüzen ada)
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Notch/NotchStyle.cs` | Biçim kuralları: kulak yarıçapı, üst boşluk (9 DIP), köşe yarıçapı, kenar açma bölgesi |
+| Core | `src/Core/Display/WindowPlacementMath.cs` | `TopCenter` ofset aşırı yüklemesi (tuval sabit, yalnız pencere Top'u kayar) |
+| App | `src/App/Features/Notch/NotchShape.cs`, `NotchWindow.xaml(.cs)`, `NotchViewModel.cs` | Kulaksız şekil, ofsetli yerleşim, biçime göre köşe yarıçapı |
+| App | `src/App/Features/Notch/NotchFeature.cs` | `NotchBounds` ve fare kenar bölgesi (`CheckEdgePeek`) ofseti sayar |
