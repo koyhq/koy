@@ -10,6 +10,8 @@ public partial class SetupWizardWindow : Window
     public SetupWizardWindow(SetupWizardViewModel? viewModel = null)
     {
         InitializeComponent();
+        // Gerçek bulanıklık, koyu çerçeve, gölge ve köşeler DWM'den (Koy penceresiyle aynı).
+        Koy.App.Resources.WindowFrame.Attach(this);
         DataContext = viewModel ?? new SetupWizardViewModel();
 
         ViewModel.Completed += () =>

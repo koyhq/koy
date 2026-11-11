@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Cam çentik: kapalı hâller, yüzen ada, boşta, kart (taslak)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="{{tokens}} width: 1240px; height: 2990px; box-sizing: border-box; padding: 28px; background: #0F0F11; font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif; color: #F4F4F5; display: flex; flex-direction: column; gap: 26px;">
+
+  <div style="display: flex; flex-direction: column; gap: 4px;">
+    <span style="font-size: 18px; font-weight: 600;">Kapalı çentik koyu kalır, yalnız açılınca cama döner</span>
+    <span style="font-size: 13px; color: #A1A1AA;">Kapalı çentik ekranın üst kenarındaki fiziksel çentik yanılsamasını sürdürür: dolgusu opak #0A0A0B, kenarlıksız. Saydamlık yalnız açık çentikte (620×352) ve kartta (380×72) devreye girer. Bulanıklık yok: katmanlı pencerede DWM bulanıklığı uygulanmıyor, saydamlık saf alfa.</span>
+  </div>
+
+  <!-- Önizleme denetimi (tasarımın parçası değil) -->
+  <div style="background: #18181B; border: 1px solid #2E2E33; border-radius: 12px; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 10px 28px; font-size: 12px; color: #A1A1AA;">
+    <sc-for list="{{groups}}" as="g">
+      <span style="display: flex; align-items: center; gap: 8px;">{{g.l}}
+        <span style="display: flex; gap: 2px; background: #0F0F11; border: 1px solid #2E2E33; border-radius: 10px; padding: 2px;">
+          <sc-for list="{{g.opts}}" as="o"><button style="height: 26px; padding: 0 11px; border: none; border-radius: 8px; background: {{o.bg}}; color: {{o.fg}}; font-family: inherit; font-size: 12px; cursor: pointer;" onClick="{{o.pick}}">{{o.l}}</button></sc-for>
+        </span>
+      </span>
+    </sc-for>
+    <span style="width: 100%; font-size: 11px; color: #71717A;">Denetimler yalnız önizleme içindir. Çentik biçimi kapalı hâller, boşta ve kart bölümlerini etkiler; "Yüzen ada ve ekrana yapışık" bölümü ikisini hep yan yana gösterir.</span>
+  </div>
+
+  <!-- A. Kapalı hâller -->
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <span style="font-size: 14px; font-weight: 600;">Kapalı hâller</span>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
+      <sc-for list="{{states}}" as="s">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="height: 120px; border-radius: 12px; background: {{wall}}; display: flex; justify-content: center; align-items: flex-start; overflow: hidden;">
+            <div style="position: relative; margin-top: {{s.top}}px; width: {{s.w}}px; height: {{s.h}}px; background: var(--notch-closed); border-radius: {{s.rad}}; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; box-sizing: border-box; font-size: 12px; gap: 8px;">
+              <sc-if value="{{s.ears}}">
+                <span style="position: absolute; left: -12px; top: 0; width: 12px; height: 12px; background: radial-gradient(circle at 0 100%, transparent 11.5px, var(--notch-closed) 12px);"></span>
+                <span style="position: absolute; right: -12px; top: 0; width: 12px; height: 12px; background: radial-gradient(circle at 100% 100%, transparent 11.5px, var(--notch-closed) 12px);"></span>
+              </sc-if>
+              <span style="display: flex; align-items: center; gap: 6px;">
+                <sc-if value="{{s.cover}}"><span style="width: 20px; height: 20px; border-radius: 5px; background: linear-gradient(135deg, #C026D3, #6366F1 60%, #0EA5E9);"></span></sc-if>
+                <sc-if value="{{s.icon}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{s.ic}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{s.d}}"></path></svg></sc-if>
+                <span style="font-weight: 600;">{{s.left}}</span><span style="color: #A1A1AA;">{{s.left2}}</span>
+              </span>
+              <sc-if value="{{s.bar}}"><span style="flex-grow: 1; height: 4px; border-radius: 2px; background: var(--track);"><span style="display: block; width: {{s.bv}}; height: 4px; border-radius: 2px; background: {{s.bc}};"></span></span></sc-if>
+              <span style="display: flex; align-items: center; gap: 6px; color: {{s.rc}}; font-weight: {{s.rw}};">{{s.right}}</span>
+            </div>
+          </div>
+          <span style="font-size: 12.5px; font-weight: 600;">{{s.t}}</span>
+          <span style="font-size: 11.5px; color: #A1A1AA; line-height: 1.4;">{{s.n}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- B. Yüzen ada ve ekrana yapışık (#63) -->
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <span style="font-size: 14px; font-weight: 600;">Yüzen ada ve ekrana yapışık (#63)</span>
+    <span style="font-size: 12px; color: #A1A1AA; line-height: 1.5; margin-top: -6px;">Yüzen ada: ekranın üst kenarından 9 px aşağıda, kulaksız, dört köşesi yuvarlak kapsül; tuval (640×364) aynı kalır, yalnız pencere Top'u 9 px kayar. Kapalı, Peek ve OSD opak #0A0A0B; açık çentik seçili malzemede. Açık çentik burada yarı ölçekte (620×352 gerçek). Ayar: Ayarlar › Çentik › Çentik biçimi.</span>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+      <sc-for list="{{cols}}" as="col">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <span style="font-size: 12.5px; font-weight: 600;">{{col.t}} <span style="font-weight: 400; color: #A1A1AA;">· {{col.n}}</span></span>
+          <sc-for list="{{col.rows}}" as="r">
+            <div style="height: {{r.cellH}}px; border-radius: 12px; background: {{wall}}; display: flex; justify-content: center; align-items: flex-start; overflow: hidden; position: relative;">
+              <span style="position: absolute; left: 10px; bottom: 6px; font-size: 10.5px; padding: 2px 8px; border-radius: 8px; background: rgba(10,10,11,0.8); color: #D4D4D8;">{{r.l}}</span>
+
+              <sc-if value="{{r.isClosed}}">
+                <div style="position: relative; margin-top: {{col.top}}px; width: {{r.w}}px; height: {{r.h}}px; background: var(--notch-closed); border-radius: {{r.rad}}; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; box-sizing: border-box; font-size: 12px;">
+                  <sc-if value="{{col.ears}}">
+                    <span style="position: absolute; left: -12px; top: 0; width: 12px; height: 12px; background: radial-gradient(circle at 0 100%, transparent 11.5px, var(--notch-closed) 12px);"></span>
+                    <span style="position: absolute; right: -12px; top: 0; width: 12px; height: 12px; background: radial-gradient(circle at 100% 100%, transparent 11.5px, var(--notch-closed) 12px);"></span>
+                  </sc-if>
+                  <span style="font-weight: 600;">14:36</span><span style="color: #F4F4F5;">%86</span>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{r.isPeek}}">
+                <div style="position: relative; margin-top: {{col.top}}px; width: {{r.w}}px; height: {{r.h}}px; background: var(--notch-closed); border-radius: {{r.rad}}; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; box-sizing: border-box; font-size: 12px;">
+                  <sc-if value="{{col.ears}}">
+                    <span style="position: absolute; left: -12px; top: 0; width: 12px; height: 12px; background: radial-gradient(circle at 0 100%, transparent 11.5px, var(--notch-closed) 12px);"></span>
+                    <span style="position: absolute; right: -12px; top: 0; width: 12px; height: 12px; background: radial-gradient(circle at 100% 100%, transparent 11.5px, var(--notch-closed) 12px);"></span>
+                  </sc-if>
+                  <span><b style="font-weight: 600;">14:36</b><span style="color: #A1A1AA;"> · Per 6 Kas</span></span><span>Wi-Fi · BT · %86</span>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{r.isHud}}">
+                <div style="position: relative; margin-top: {{col.top}}px; width: {{r.w}}px; height: {{r.h}}px; background: var(--notch-closed); border-radius: {{r.rad}}; display: flex; align-items: center; gap: 8px; padding: 0 14px; box-sizing: border-box; font-size: 12px;">
+                  <sc-if value="{{col.ears}}">
+                    <span style="position: absolute; left: -12px; top: 0; width: 12px; height: 12px; background: radial-gradient(circle at 0 100%, transparent 11.5px, var(--notch-closed) 12px);"></span>
+                    <span style="position: absolute; right: -12px; top: 0; width: 12px; height: 12px; background: radial-gradient(circle at 100% 100%, transparent 11.5px, var(--notch-closed) 12px);"></span>
+                  </sc-if>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F4F4F5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7"></path></svg>
+                  <span style="flex-grow: 1; height: 4px; border-radius: 2px; background: var(--track);"><span style="display: block; width: 42%; height: 4px; border-radius: 2px; background: var(--text-1);"></span></span>
+                  <span>42</span>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{r.isOpen}}">
+                <div style="margin-top: {{r.halfTop}}px; width: 310px; height: 176px; position: relative;">
+                  <div style="position: absolute; left: 0; top: 0; width: 620px; height: 352px; transform: scale(0.5); transform-origin: 0 0;">
+                    <div style="position: relative; width: 620px; height: 352px; background: var(--surface); border: 1px solid var(--edge); border-top: {{r.bt}}; border-radius: {{r.rad}}; padding: 10px 16px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px;">
+                      <sc-if value="{{col.ears}}">
+                        <span style="position: absolute; left: -12px; top: 0; width: 12px; height: 12px; background: radial-gradient(circle at 0 100%, transparent 11.5px, var(--surface) 12px);"></span>
+                        <span style="position: absolute; right: -12px; top: 0; width: 12px; height: 12px; background: radial-gradient(circle at 100% 100%, transparent 11.5px, var(--surface) 12px);"></span>
+                      </sc-if>
+                      <div style="height: 26px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; padding: 0 4px;"><span><b style="font-weight: 600;">14:36</b><span style="color: var(--text-2);"> · Perşembe, 6 Kasım</span></span><span style="color: var(--text-2);">14° İstanbul · %86</span></div>
+                      <div style="height: 236px; display: flex; gap: 8px;">
+                        <div style="width: 268px; flex-shrink: 0; border-radius: 20px; background: var(--card); border: 1px solid var(--line);"></div>
+                        <div style="flex-grow: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); gap: 8px;">
+                          <div style="grid-column: 1 / 3; border-radius: 16px; background: var(--card); border: 1px solid var(--line);"></div>
+                          <div style="border-radius: 16px; background: var(--card); border: 1px solid var(--line);"></div>
+                          <div style="border-radius: 16px; background: var(--card); border: 1px solid var(--line);"></div>
+                          <div style="grid-column: 1 / 3; border-radius: 16px; background: var(--card); border: 1px solid var(--line);"></div>
+                        </div>
+                      </div>
+                      <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;">
+                        <span style="height: 44px; border-radius: 13px; background: var(--card-hi);"></span><span style="height: 44px;"></span><span style="height: 44px;"></span><span style="height: 44px;"></span><span style="height: 44px;"></span><span style="height: 44px;"></span><span style="height: 44px;"></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- C. Boşta: dairesel pil + gün/saat (#63) -->
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <span style="font-size: 14px; font-weight: 600;">Boşta: halka pil ve gün/saat (#63)</span>
+    <span style="font-size: 12px; color: #A1A1AA; line-height: 1.5; margin-top: -6px;">Dördüncü seçenek "Halka pil ve gün/saat" (Ayarlar › Çentik › Boştayken), mevcut "Saat ve pil" yanına. Halka 18 px, kalınlık 2,5, dolu kısım pil rengi (#4ADE80), kalan kısım açık gri; yalnız pil yüzdesi değişince yeniden çizilir. Gün adı ve saat dile göre ("Sal 19:21" / "Tue 19:21"). Kapalı çentik 236×34, Peek 300×34.</span>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
+      <sc-for list="{{idles}}" as="c">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="height: 76px; border-radius: 12px; background: {{wall}}; display: flex; justify-content: center; align-items: flex-start; overflow: hidden;">
+            <div style="position: relative; margin-top: {{c.top}}px; width: {{c.w}}px; height: {{c.h}}px; background: var(--notch-closed); border-radius: {{c.rad}}; display: flex; align-items: center; justify-content: {{c.just}}; padding: 0 12px; box-sizing: border-box; font-size: 12px; gap: 8px;">
+              <sc-if value="{{c.ears}}">
+                <span style="position: absolute; left: -12px; top: 0; width: 12px; height: 12px; background: radial-gradient(circle at 0 100%, transparent 11.5px, var(--notch-closed) 12px);"></span>
+                <span style="position: absolute; right: -12px; top: 0; width: 12px; height: 12px; background: radial-gradient(circle at 100% 100%, transparent 11.5px, var(--notch-closed) 12px);"></span>
+              </sc-if>
+
+              <sc-if value="{{c.isOld}}">
+                <span style="font-weight: 600;">14:36</span>
+                <span style="display: flex; align-items: center; gap: 6px;">%86<span style="width: 22px; height: 11px; border: 1.5px solid #F4F4F5; border-radius: 3px; padding: 1px; box-sizing: border-box;"><span style="display: block; width: 86%; height: 100%; background: var(--battery); border-radius: 1px;"></span></span></span>
+              </sc-if>
+
+              <sc-if value="{{c.hasRing}}">
+                <span style="display: flex; align-items: center; gap: 6px;">
+                  <span style="position: relative; width: {{c.rs}}px; height: {{c.rs}}px; display: flex; align-items: center; justify-content: center;">
+                    <svg width="{{c.rs}}" height="{{c.rs}}" viewBox="0 0 18 18" aria-hidden="true" style="position: absolute; left: 0; top: 0;"><circle cx="9" cy="9" r="7.25" fill="none" stroke="var(--ring-track)" stroke-width="2.5"></circle><circle cx="9" cy="9" r="7.25" fill="none" stroke="{{c.rc}}" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="{{c.dash}} 100" transform="rotate(-90 9 9)"></circle></svg>
+                    <sc-if value="{{c.inside}}"><span style="position: relative; font-size: 8px; font-weight: 700;">{{c.pct}}</span></sc-if>
+                  </span>
+                  <sc-if value="{{c.beside}}"><span style="font-weight: 600;">%{{c.pct}}</span></sc-if>
+                  <sc-if value="{{c.bolt}}"><svg width="11" height="11" viewBox="0 0 24 24" fill="{{c.rc}}" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"></path></svg></sc-if>
+                </span>
+              </sc-if>
+
+              <sc-if value="{{c.hasRight}}">
+                <span style="display: flex; align-items: center; gap: 6px; font-weight: {{c.rw}};">{{c.right}}<span style="color: #A1A1AA; font-weight: 400;">{{c.right2}}</span>
+                  <sc-if value="{{c.radios}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F4F4F5" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"></path></svg><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F4F4F5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10-5 5V2l5 5L7 17"></path></svg></sc-if>
+                </span>
+              </sc-if>
+            </div>
+          </div>
+          <span style="font-size: 12.5px; font-weight: 600;">{{c.t}}</span>
+          <span style="font-size: 11.5px; color: #A1A1AA; line-height: 1.4;">{{c.n}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- D. Çentik kartı (P2 / P3) -->
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <span style="font-size: 14px; font-weight: 600;">Çentik kartı: güncelleme ve Windows bildirimi (#65, #64)</span>
+    <span style="font-size: 12px; color: #A1A1AA; line-height: 1.5; margin-top: -6px;">380×72, tuval içinde, HUD'dan (260×40) ayrı boyut. Sol 36 px daire içinde simge, ortada iki satır, sağda hap düğme ve küçük ×. Kart camsıdır (HUD ve kısa bildirim opak kalır). Üç malzemede aynı duvar kağıdının üstünde okunabilirlik karşılaştırması; sayılar o duvar kağıdının ortalama rengine göre hesaplanır.</span>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+      <sc-for list="{{cardCells}}" as="k">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="height: 112px; border-radius: 12px; background: {{wall}}; display: flex; justify-content: center; align-items: flex-start; overflow: hidden;">
+            <div style="position: relative; margin-top: {{k.top}}px; width: 380px; height: 72px; background: {{k.surf}}; border: 1px solid {{k.edge}}; border-top: {{k.bt}}; border-radius: {{k.rad}}; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 14px; box-sizing: border-box;">
+              <sc-if value="{{k.ears}}">
+                <span style="position: absolute; left: -13px; top: 0; width: 12px; height: 12px; background: radial-gradient(circle at 0 100%, transparent 11.5px, {{k.surf}} 12px);"></span>
+                <span style="position: absolute; right: -13px; top: 0; width: 12px; height: 12px; background: radial-gradient(circle at 100% 100%, transparent 11.5px, {{k.surf}} 12px);"></span>
+              </sc-if>
+
+              <sc-if value="{{k.isUpdate}}">
+                <span style="width: 36px; height: 36px; border-radius: 18px; background: {{k.circle}}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F4F4F5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"></path></svg></span>
+                <span style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0;"><span style="font-size: 13.5px; font-weight: 600;">Koy 0.2.6 hazır</span><span style="font-size: 12px; color: var(--text-2);">Güncellemeye hazır</span></span>
+                <span style="height: 28px; padding: 0 14px; border-radius: 14px; background: var(--btn-bg); color: #0A0A0B; font-size: 12px; font-weight: 600; display: flex; align-items: center; flex-shrink: 0;">Güncelle</span>
+                <span style="width: 22px; height: 22px; border-radius: 11px; color: var(--text-2); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0;" aria-label="Kapat">×</span>
+              </sc-if>
+
+              <sc-if value="{{k.isNote}}">
+                <span style="width: 36px; height: 36px; border-radius: 10px; background: #93C5FD; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #0A0A0B; font-size: 12px; font-weight: 700;">Ta</span>
+                <span style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0;"><span style="font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Sunum provası 16:00</span><span style="font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Takvim · şimdi · Konferans odası 2</span></span>
+                <span style="width: 22px; height: 22px; border-radius: 11px; color: var(--text-2); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0;" aria-label="Kapat">×</span>
+              </sc-if>
+            </div>
+          </div>
+          <span style="font-size: 11.5px; color: #A1A1AA;"><b style="color: #F4F4F5; font-weight: 600;">{{k.t}}</b> · {{k.m}} · beyaz metin {{k.c1}} · ikincil {{k.c2}}<sc-if value="{{k.raised}}"><span style="color: #FDE68A;"> · koruma {{k.raisedTo}}'ya çıkardı</span></sc-if></span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- E. Açılış geçişi -->
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <span style="font-size: 14px; font-weight: 600;">Açılış geçişi (yay animasyonu)</span>
+    <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; color: #A1A1AA;">
+      <button style="height: 28px; padding: 0 14px; border: 1px solid #2E2E33; border-radius: 8px; background: #F4F4F5; color: #0A0A0B; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer;" onClick="{{doOpen}}">Aç</button>
+      <button style="height: 28px; padding: 0 14px; border: 1px solid #2E2E33; border-radius: 8px; background: #18181B; color: #F4F4F5; font-family: inherit; font-size: 12px; cursor: pointer;" onClick="{{doClose}}">Kapat</button>
+      <button style="height: 28px; padding: 0 14px; border: 1px solid #2E2E33; border-radius: 8px; background: #18181B; color: #F4F4F5; font-family: inherit; font-size: 12px; cursor: pointer;" onClick="{{doMid}}">%40'a götür</button>
+      <span>{{progLabel}}</span>
+    </div>
+    <div style="height: 392px; border-radius: 12px; background: {{wall}}; display: flex; justify-content: center; align-items: flex-start; overflow: hidden;">
+      <div style="position: relative; margin-top: {{tr.top}}px; width: {{tr.w}}px; height: {{tr.h}}px; background: {{tr.bg}}; border: 1px solid {{tr.bd}}; border-top: {{tr.bt}}; border-radius: {{tr.rad}}; box-sizing: border-box; overflow: hidden; padding: 10px 16px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="opacity: {{tr.inner}}; display: flex; flex-direction: column; gap: 10px;">
+          <div style="height: 26px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; padding: 0 4px;"><span><b style="font-weight: 600;">14:36</b><span style="color: var(--text-2);"> · Perşembe, 6 Kasım</span></span><span style="color: var(--text-2);">14° İstanbul · %86</span></div>
+          <div style="height: 200px; display: flex; gap: 8px;">
+            <div style="width: 268px; border-radius: 20px; background: var(--card); border: 1px solid var(--line);"></div>
+            <div style="flex-grow: 1; border-radius: 16px; background: var(--card); border: 1px solid var(--line);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span style="font-size: 11.5px; color: #A1A1AA; line-height: 1.5;">Dolgunun opaklığı şeklin boyutuyla birlikte yaydan okunur (ek animasyon saati yok): ilerleme 0'da opak #0A0A0B, 1'de seçili malzeme (şu an {{matName}}); içerik ilerleme 0,55'ten sonra belirir. Kapanırken tersi. Hareket kapalıysa ("Kapalı" hız ya da Windows "animasyonları azalt") doğrudan son değer atanır: yukarıdaki "Hareket: Azalt" ile dene, düğmeler yaysız atlar.</span>
+  </div>
+
+  <!-- F. Koda geçecek değerler -->
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <span style="font-size: 14px; font-weight: 600;">Koda geçecek değerler</span>
+    <span style="font-size: 12px; color: #A1A1AA; margin-top: -4px;">Bu demodaki bütün renkler ve ölçüler aşağıdaki CSS değişkenlerinden okunur. P4B bunları Theme.*.xaml / Tokens.xaml fırçalarına birebir geçirir.</span>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px 18px;">
+      <sc-for list="{{tokenRows}}" as="t">
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 11.5px; min-height: 24px;">
+          <span style="width: 22px; height: 16px; border-radius: 4px; background: {{t.sw}}; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.14); flex-shrink: 0;"></span>
+          <span style="font-family: Consolas, monospace; color: #E4E4E7; min-width: 138px;">{{t.n}}</span>
+          <span style="font-family: Consolas, monospace; color: #A1A1AA;">{{t.v}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1240,"height":2860}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mat: 'cam', wall: 'renkli', protect: true, style: 'yapisik', motion: 'normal', p: 0 };
+    this._raf = null;
+    this._v = 0;
+  }
+
+  // Yay: sertlik 220, sönüm 22 (hafif aşım). "Azalt" açıksa doğrudan son değer.
+  go(target) {
+    if (this._raf) cancelAnimationFrame(this._raf);
+    this._v = 0;
+    if (this.state.motion === 'azalt') { this.setState({ p: target }); return; }
+    let last = performance.now();
+    const step = (now) => {
+      const dt = Math.min(0.032, (now - last) / 1000);
+      last = now;
+      let x = this.state.p;
+      this._v += (-220 * (x - target) - 22 * this._v) * dt;
+      x += this._v * dt;
+      if (Math.abs(x - target) < 0.002 && Math.abs(this._v) < 0.02) { this._raf = null; this.setState({ p: target }); return; }
+      this.setState({ p: x });
+      this._raf = requestAnimationFrame(step);
+    };
+    this._raf = requestAnimationFrame(step);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const fl = s.style === 'yuzen';
+    const walls = {
+      renkli: { bg: 'radial-gradient(circle at 18% 40%, #F97316 0, transparent 40%), radial-gradient(circle at 70% 30%, #8B5CF6 0, transparent 45%), radial-gradient(circle at 50% 120%, #06B6D4 0, transparent 50%), #1E1B4B', avg: [78, 62, 120] },
+      koyu: { bg: 'linear-gradient(160deg, #0F172A, #111827 60%, #1F2937)', avg: [24, 30, 44] },
+      acik: { bg: 'radial-gradient(circle at 30% 20%, #FDE68A 0, transparent 45%), radial-gradient(circle at 80% 70%, #BFDBFE 0, transparent 50%), #F1F5F9', avg: [236, 240, 246] },
+      foto: { bg: 'linear-gradient(180deg, rgba(255,214,170,0.9) 0%, rgba(255,150,110,0.55) 26%, rgba(60,80,130,0) 52%), radial-gradient(ellipse at 18% 108%, #1F2A37 0 34%, transparent 35%), radial-gradient(ellipse at 72% 112%, #2B3544 0 42%, transparent 43%), linear-gradient(180deg, #5B7DB1, #3C5A86 60%, #20344F)', avg: [104, 116, 142] }
+    };
+    const wall = walls[s.wall];
+    const alphas = { kati: 1, buzlu: 0.86, cam: 0.72 };
+    const names = { kati: 'Katı', buzlu: 'Buzlu %86', cam: 'Cam %72' };
+    const short = { kati: 'Katı', buzlu: 'Buzlu', cam: 'Cam' };
+    const surfVar = { kati: 'var(--surface-solid)', buzlu: 'var(--surface-frosted)', cam: 'var(--surface-glass)' };
+
+    // Okunabilirlik: ikincil metin (%62 beyaz) 4,5:1 altına inmesin. Cam yetmezse Buzlu, o da yetmezse Katı.
+    const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    const lum = (c) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+    const ratio = (x, y) => { const a1 = lum(x), b1 = lum(y); return (Math.max(a1, b1) + 0.05) / (Math.min(a1, b1) + 0.05); };
+    const base = [10, 10, 11], white = [244, 244, 245];
+    const blend = (top, bottom, t) => top.map((v, i) => v * t + bottom[i] * (1 - t));
+    const contrastAt = (al) => {
+      const surfRgb = blend(base, wall.avg, al);
+      return { c1: ratio(white, surfRgb), c2: ratio(blend(white, surfRgb, 0.62), surfRgb) };
+    };
+    const fmt = (n) => n.toFixed(1).replace('.', ',') + ':1';
+    const order = ['cam', 'buzlu', 'kati'];
+    const effective = (req) => {
+      if (!s.protect) return req;
+      for (const lv of order.slice(order.indexOf(req))) { if (contrastAt(alphas[lv]).c2 >= 4.5) return lv; }
+      return 'kati';
+    };
+
+    const matEff = effective(s.mat);
+    const a = alphas[matEff];
+    const solid = matEff === 'kati';
+    const surface = solid ? 'rgb(10,10,11)' : 'rgba(10,10,11,' + a + ')';
+    const edge = solid ? 'transparent' : 'rgba(255,255,255,0.10)';
+    const tokenList = [
+      ['--notch-closed', '#0A0A0B'],
+      ['--surface-solid', 'rgb(10,10,11)'],
+      ['--surface-frosted', 'rgba(10,10,11,0.86)'],
+      ['--surface-glass', 'rgba(10,10,11,0.72)'],
+      ['--surface', surface],
+      ['--edge', edge],
+      ['--card', solid ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.06)'],
+      ['--card-hi', 'rgba(255,255,255,0.09)'],
+      ['--line', solid ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.08)'],
+      ['--text-1', '#F4F4F5'],
+      ['--text-2', 'rgba(244,244,245,0.62)'],
+      ['--text-3', 'rgba(244,244,245,0.40)'],
+      ['--track', 'rgba(255,255,255,0.16)'],
+      ['--btn-bg', '#F4F4F5'],
+      ['--focus', '#FB7185'],
+      ['--battery', '#4ADE80'],
+      ['--battery-low', '#FB7185'],
+      ['--brightness', '#FACC15'],
+      ['--ring-track', 'rgba(255,255,255,0.28)']
+    ];
+    const tokens = tokenList.map(([n, v]) => n + ': ' + v).join('; ') + ';';
+    const tokenRows = tokenList.map(([n, v]) => ({ n, v, sw: 'var(' + n + ')' })).concat([
+      { n: 'açık çentik', v: '620×352 (tuval 640×364)', sw: 'transparent' },
+      { n: 'kart', v: '380×72, radius 26', sw: 'transparent' },
+      { n: 'HUD', v: '260×40', sw: 'transparent' },
+      { n: 'yüzen ada üst boşluk', v: '9 px (pencere Top)', sw: 'transparent' },
+      { n: 'kulak (yapışık)', v: 'EarRadius 12; yüzende 0', sw: 'transparent' },
+      { n: 'malzeme opaklığı', v: 'Katı 1 · Buzlu 0,86 · Cam 0,72', sw: 'transparent' }
+    ]);
+
+    // Çentik şekli: yapışık = üstte kulak (12 px), alt köşeler yuvarlak; yüzen = kulaksız, 4 köşe yuvarlak, üstten 9 px.
+    const shape = (floating, h, rb) => ({
+      top: floating ? 9 : 0,
+      ears: !floating,
+      rad: floating ? Math.min(rb, h / 2) + 'px' : '0 0 ' + rb + 'px ' + rb + 'px'
+    });
+    const closedR = (h, floating) => (floating ? h / 2 : 16);
+    // Üst kenarlık yalnız yüzen adada çizilir (yapışıkta çentik ekran kenarına bitişik).
+    const btFor = (floating, color) => (floating ? '1px solid ' + color : 'none');
+
+    // A. Kapalı hâller
+    const wifi = 'M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0';
+    const batt = '%86';
+    const baseSt = { cover: false, icon: false, bar: false, left2: '', rc: '#F4F4F5', rw: 400, ic: '#F4F4F5', d: '' };
+    const st = (o) => {
+      const x = Object.assign({}, baseSt, o);
+      return Object.assign(x, shape(fl, x.h, closedR(x.h, fl)));
+    };
+    const states = [
+      st({ t: 'Boşta', n: '236×34. Solda saat, sağda pil. Değişmedi.', w: 236, h: 34, left: '14:36', right: batt }),
+      st({ t: 'Peek (üzerine gelince)', n: 'Tarih ve ağ simgesi eklenir. Hâlâ opak; cam yalnız açık çentikte.', w: 300, h: 34, left: '14:36', left2: '· Per 6 Kas', right: 'Wi-Fi · BT · ' + batt }),
+      st({ t: 'Müzik çalarken', n: 'Solda kapak, sağda hareketsiz dalga simgesi.', w: 236, h: 34, cover: true, left: '', right: '▮▮▮' }),
+      st({ t: 'Zamanlayıcı çalışırken', n: 'Kalan süre Odak rengiyle; saniyede bir metin tazelenir, animasyon yok.', w: 236, h: 34, left: '14:36', right: '18:24', rc: '#FB7185', rw: 600 }),
+      st({ t: 'Ses göstergesi', n: '260×40, 1,5 sn. Çubuk beyaz.', w: 260, h: 40, icon: true, d: 'M11 5L6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7', left: '', bar: true, bv: '42%', bc: '#F4F4F5', right: '42' }),
+      st({ t: 'Parlaklık göstergesi', n: '260×40, 1,5 sn. Çubuk sarı #FACC15.', w: 260, h: 40, icon: true, ic: '#FACC15', d: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M2 12h2M20 12h2', left: '', bar: true, bv: '64%', bc: '#FACC15', right: '64' }),
+      st({ t: 'Kısa bildirim', n: '"Pomodoro bitti", "Şarj tamamlandı" gibi. Opak kalır, okunurluk önce.', w: 300, h: 40, icon: true, ic: '#FB7185', d: 'M12 8v5l3 2M12 22a9 9 0 1 0 0-18 9 9 0 0 0 0 18z', left: 'Pomodoro bitti', right: 'Mola 5 dk', rc: '#A1A1AA' }),
+      st({ t: 'Wi-Fi bağlandı', n: 'Bağlantı değişince kısa Peek. Simge beyaz, metin ikincil.', w: 300, h: 34, icon: true, d: wifi, left: 'Ev Ağı', right: 'Bağlandı', rc: '#A1A1AA' })
+    ];
+
+    // B. Yüzen ada ve ekrana yapışık: yan yana
+    const mkCol = (floating) => {
+      const top = floating ? 9 : 0;
+      const open = Object.assign({ bt: btFor(floating, 'var(--edge)') }, shape(floating, 352, 30));
+      return {
+        t: floating ? 'Yüzen ada' : 'Ekrana yapışık (mevcut)',
+        n: floating ? 'kulaksız, üstten 9 px' : 'kulaklı, üst kenara bitişik',
+        top, ears: !floating,
+        rows: [
+          Object.assign({ l: 'Kapalı · 236×34', w: 236, h: 34, isClosed: true, cellH: 34 + top + 14 }, shape(floating, 34, closedR(34, floating))),
+          Object.assign({ l: 'Peek · 300×34', w: 300, h: 34, isPeek: true, cellH: 34 + top + 14 }, shape(floating, 34, closedR(34, floating))),
+          Object.assign({ l: 'OSD HUD · 260×40', w: 260, h: 40, isHud: true, cellH: 40 + top + 14 }, shape(floating, 40, closedR(40, floating))),
+          Object.assign({ l: 'Açık · 620×352 (yarı ölçek)', isOpen: true, halfTop: top / 2, cellH: 176 + top / 2 + 14 }, open)
+        ]
+      };
+    };
+    const cols = [mkCol(false), mkCol(true)];
+
+    // C. Boşta: halka pil ve gün/saat
+    const circ = 2 * Math.PI * 7.25;
+    const ring = (pct) => (pct / 100 * circ).toFixed(2);
+    const idleBase = Object.assign({ hasRight: true, hasRing: false, isOld: false, beside: true, inside: false, bolt: false, radios: false, rs: 18, rc: '#4ADE80', rw: 600, right2: '', just: 'space-between' }, shape(fl, 34, closedR(34, fl)));
+    const idle = (o) => Object.assign({}, idleBase, { w: 236, h: 34 }, o);
+    const idles = [
+      idle({ t: 'Mevcut: saat ve pil', n: 'Mod 0. Solda saat, sağda yüzde ve pil kutusu.', isOld: true, hasRight: false }),
+      idle({ t: 'Halka %43', n: 'Solda halka + yüzde, sağda gün ve saat.', hasRing: true, pct: 43, dash: ring(43), right: 'Sal 19:21' }),
+      idle({ t: 'Halka %100', n: 'Tam halka; yüzde "100" sığar.', hasRing: true, pct: 100, dash: ring(100), right: 'Sal 19:21' }),
+      idle({ t: 'Şarj oluyor', n: 'Halka aynı, yüzdenin yanında küçük şimşek.', hasRing: true, pct: 43, dash: ring(43), bolt: true, right: 'Sal 19:21' }),
+      idle({ t: 'Pil düşük %12', n: 'Eşik ve renk varsayım: ≤%20 iken --battery-low.', hasRing: true, pct: 12, dash: ring(12), rc: '#FB7185', right: 'Sal 19:21' }),
+      idle({ t: 'Pilsiz masaüstü', n: 'Halka gizli, yalnız gün ve saat ortada.', just: 'center', right: 'Sal 19:21' }),
+      idle({ t: 'Peek (halka modu)', n: 'Halka modunda tarih ve radyo simgeleri Peek\'te görünür, kapalıyken görünmez.', w: 300, hasRing: true, pct: 43, dash: ring(43), right: 'Sal 19:21', right2: '· 18 Kas', radios: true }),
+      idle({ t: 'Seçenek B: yüzde halkada', n: 'Plan "halka ortasında yüzde" diyor; 18 px\'te okunmaz, bu yüzden 24 px halka ve 8 pt yazı. Karar sahibinde.', hasRing: true, pct: 43, dash: ring(43), rs: 24, beside: false, inside: true, right: 'Sal 19:21' })
+    ];
+
+    // D. Çentik kartı: 2 tür x 3 malzeme
+    const cardShape = Object.assign({ bt: btFor(fl, 'var(--edge)') }, shape(fl, 72, 26));
+    const cardCells = [];
+    ['kati', 'buzlu', 'cam'].forEach((req) => {
+      const eff = effective(req);
+      const cx = contrastAt(alphas[eff]);
+      ['u', 'n'].forEach((kind) => {
+        cardCells.push(Object.assign({
+          isUpdate: kind === 'u', isNote: kind === 'n',
+          t: kind === 'u' ? 'Güncelleme' : 'Bildirim', m: names[req],
+          surf: surfVar[eff], edge: eff === 'kati' ? 'transparent' : 'var(--edge)',
+          circle: 'var(--card-hi)',
+          c1: fmt(cx.c1), c2: fmt(cx.c2),
+          raised: eff !== req, raisedTo: short[eff]
+        }, cardShape));
+      });
+    });
+
+    // E. Açılış geçişi
+    const p = s.p;
+    const pc = Math.max(0, Math.min(1, p));
+    const ps = Math.max(0, Math.min(1.05, p));
+    const trAlpha = 1 - (1 - a) * pc;
+    const trShape = shape(fl, 352, 16 + 14 * pc);
+    const tr = {
+      w: Math.round(236 + (620 - 236) * ps), h: Math.round(34 + (352 - 34) * ps),
+      bg: pc === 0 ? 'var(--notch-closed)' : 'rgba(10,10,11,' + trAlpha.toFixed(3) + ')',
+      bd: 'rgba(255,255,255,' + (0.10 * pc).toFixed(3) + ')',
+      inner: Math.max(0, Math.min(1, (p - 0.55) / 0.45)).toFixed(2),
+      top: trShape.top,
+      bt: btFor(fl, 'rgba(255,255,255,' + (0.10 * pc).toFixed(3) + ')'),
+      rad: fl ? (16 + 14 * pc) + 'px' : '0 0 ' + (16 + 14 * pc) + 'px ' + (16 + 14 * pc) + 'px'
+    };
+
+    const seg = (key, label, opts) => ({
+      l: label,
+      opts: opts.map(([v, l]) => ({
+        l,
+        bg: s[key] === v ? '#F4F4F5' : 'transparent',
+        fg: s[key] === v ? '#0A0A0B' : '#D4D4D8',
+        pick: () => { this.setState({ [key]: v }); }
+      }))
+    });
+
+    return {
+      tokens, wall: wall.bg, states, cols, idles, cardCells, tr, tokenRows,
+      matName: names[matEff] + (matEff !== s.mat ? ' (koruma ile)' : ''),
+      progLabel: 'ilerleme ' + p.toFixed(2).replace('.', ',') + ' · opaklık ' + trAlpha.toFixed(2).replace('.', ','),
+      doOpen: () => this.go(1),
+      doClose: () => this.go(0),
+      doMid: () => this.go(0.4),
+      groups: [
+        seg('mat', 'Malzeme', [['kati', 'Katı'], ['buzlu', 'Buzlu'], ['cam', 'Cam']]),
+        seg('wall', 'Duvar kağıdı', [['renkli', 'Renkli'], ['koyu', 'Koyu'], ['acik', 'Açık'], ['foto', 'Fotoğraf']]),
+        seg('protect', 'Okunabilirlik koruması', [[true, 'Açık'], [false, 'Kapalı']]),
+        seg('style', 'Çentik biçimi', [['yapisik', 'Ekrana yapışık'], ['yuzen', 'Yüzen ada']]),
+        seg('motion', 'Hareket', [['normal', 'Normal'], ['azalt', 'Azalt']])
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

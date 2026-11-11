@@ -117,7 +117,7 @@ internal static class DockBarSnapshots
             DockSmallTray = smallTray,
             DockShowFolders = true,
             DockShowRecents = false,
-            Material = "Katı"
+            Material = Program.Material
         };
 
         var vm = new DockViewModel(settings, DockFolderSnapshots.SharedController, new DockFolderSnapshots.FakeShellActionService(), trayService: new FakeTray());

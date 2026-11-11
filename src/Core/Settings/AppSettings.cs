@@ -126,6 +126,12 @@ public sealed record AppSettings
     /// <summary>Çentiğin açılması: 0 = üzerine gelince (varsayılan), 1 = tıklayınca.</summary>
     public int NotchOpenBehavior { get; set; }
     public string Material { get; set; } = "Katı";
+    /// <summary>Okunabilirlik koruması: açık duvar kağıdında saydam malzeme kendiliğinden daha opak seviyeye çıkar.</summary>
+    public bool MaterialReadabilityGuard { get; set; } = true;
+    /// <summary>Açık çentik ve kartlar malzemeyi izlesin; kapalıysa açık çentik hep opak kalır.</summary>
+    public bool NotchFollowsMaterial { get; set; } = true;
+    /// <summary>Çentik biçimi: "Yapışık" (varsayılan, ekran kenarına bitişik, kulaklı) ya da "Yüzen" (kulaksız kapsül, üstten 9 DIP boşluk).</summary>
+    public string NotchStyle { get; set; } = Koy.Core.Notch.NotchStyle.Pinned;
     public int WheelAction { get; set; }
     public int MiddleClickAction { get; set; }
     public int DockIndicatorStyle { get; set; }
@@ -170,6 +176,8 @@ public sealed record AppSettings
     public bool ShowVolumeOsd { get; set; } = true;
     /// <summary>Müzik çalarken çentikte dalga simgesi görünsün.</summary>
     public bool MusicShowWaveform { get; set; } = true;
+    /// <summary>Müzik kartı stili: "Neutral" (düz), "Tinted" (albüm rengi, varsayılan), "Artwork" (kapak arka plan). Bkz. <c>MusicCardStyleSetting</c>.</summary>
+    public string MusicCardStyle { get; set; } = "Tinted";
     /// <summary>
     /// Ana sayfadaki müzik kartında eşzamanlı sözler. Varsayılan kapalı: açıkken çalan parçanın (tarayıcı videosu dahil) adı
     /// LRCLIB'e gider, bu yüzden kullanıcı kartındaki düğmeyle ya da ayardan kendisi açar. İstek yalnız Ana görünürken, parça başına bir kez.
@@ -179,6 +187,13 @@ public sealed record AppSettings
     public bool NotchHideInFullscreen { get; set; } = true;
     /// <summary>Kamera ve mikrofon kullanımında çentikte gizlilik noktaları görünsün.</summary>
     public bool ShowPrivacyIndicator { get; set; } = true;
+    /// <summary>
+    /// Windows bildirimleri çentikte kart olarak görünsün. Yalnız açıkken ve izin verilmişse bildirim listesi yoklanır
+    /// (paketsiz süreçte olay yok); kapalıyken hiçbir zamanlayıcı çalışmaz.
+    /// </summary>
+    public bool NotchShowNotifications { get; set; } = true;
+    /// <summary>Bildirim kartında yalnız uygulama adı ve başlık görünsün, gövde gizlensin (gizlilik).</summary>
+    public bool NotchNotificationsHideBody { get; set; }
 
     public List<string> ControlCenterLayout { get; set; } = ["wifi", "bluetooth", "donotdisturb"];
     public List<string> EnabledPanels { get; set; } = ["home", "focus", "calendar", "shelf", "clipboard", "system", "controlcenter"];
@@ -250,6 +265,9 @@ public sealed record AppSettings
                IdleDisplayMode == other.IdleDisplayMode &&
                NotchOpenBehavior == other.NotchOpenBehavior &&
                Material == other.Material &&
+               MaterialReadabilityGuard == other.MaterialReadabilityGuard &&
+               NotchFollowsMaterial == other.NotchFollowsMaterial &&
+               NotchStyle == other.NotchStyle &&
                WheelAction == other.WheelAction &&
                MiddleClickAction == other.MiddleClickAction &&
                DockIndicatorStyle == other.DockIndicatorStyle &&
@@ -275,9 +293,12 @@ public sealed record AppSettings
                ShowBrightnessOsd == other.ShowBrightnessOsd &&
                ShowVolumeOsd == other.ShowVolumeOsd &&
                MusicShowWaveform == other.MusicShowWaveform &&
+               MusicCardStyle == other.MusicCardStyle &&
                MusicLyricsEnabled == other.MusicLyricsEnabled &&
                NotchHideInFullscreen == other.NotchHideInFullscreen &&
                ShowPrivacyIndicator == other.ShowPrivacyIndicator &&
+               NotchShowNotifications == other.NotchShowNotifications &&
+               NotchNotificationsHideBody == other.NotchNotificationsHideBody &&
                WeatherLatitude.Equals(other.WeatherLatitude) &&
                WeatherLongitude.Equals(other.WeatherLongitude) &&
                WeatherCity == other.WeatherCity &&
@@ -338,6 +359,9 @@ public sealed record AppSettings
         hash.Add(IdleDisplayMode);
         hash.Add(NotchOpenBehavior);
         hash.Add(Material);
+        hash.Add(MaterialReadabilityGuard);
+        hash.Add(NotchFollowsMaterial);
+        hash.Add(NotchStyle);
         hash.Add(WheelAction);
         hash.Add(MiddleClickAction);
         hash.Add(DockIndicatorStyle);
@@ -362,9 +386,12 @@ public sealed record AppSettings
         hash.Add(ShowBrightnessOsd);
         hash.Add(ShowVolumeOsd);
         hash.Add(MusicShowWaveform);
+        hash.Add(MusicCardStyle);
         hash.Add(MusicLyricsEnabled);
         hash.Add(NotchHideInFullscreen);
         hash.Add(ShowPrivacyIndicator);
+        hash.Add(NotchShowNotifications);
+        hash.Add(NotchNotificationsHideBody);
         hash.Add(WeatherLatitude);
         hash.Add(WeatherLongitude);
         hash.Add(WeatherCity);

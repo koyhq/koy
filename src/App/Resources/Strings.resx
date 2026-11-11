@@ -360,6 +360,12 @@
   <data name="IdleClockOnly" xml:space="preserve">
     <value>Clock only</value>
   </data>
+  <data name="IdleRingClockDay" xml:space="preserve">
+    <value>Ring &amp; day</value>
+  </data>
+  <data name="IdleRingClockDayDesc" xml:space="preserve">
+    <value>Battery ring on the left, day and time on the right. Date and connections appear when you hover.</value>
+  </data>
   <data name="IdleNone" xml:space="preserve">
     <value>None</value>
   </data>
@@ -531,6 +537,21 @@
   <data name="MusicWaveformTitle" xml:space="preserve">
     <value>Show album art and waveform when playing</value>
   </data>
+  <data name="MusicCardStyleTitle" xml:space="preserve">
+    <value>Music card style</value>
+  </data>
+  <data name="MusicCardStyleDesc" xml:space="preserve">
+    <value>Plain keeps the fixed card. Album color tints it from the cover. Album art uses the cover as a dimmed backdrop. Grey covers always use the plain card.</value>
+  </data>
+  <data name="MusicCardStyleNeutral" xml:space="preserve">
+    <value>Plain</value>
+  </data>
+  <data name="MusicCardStyleTinted" xml:space="preserve">
+    <value>Album color</value>
+  </data>
+  <data name="MusicCardStyleArtwork" xml:space="preserve">
+    <value>Album art</value>
+  </data>
   <data name="IndicatorsHeader" xml:space="preserve">
     <value>Indicators</value>
   </data>
@@ -601,13 +622,28 @@
     <value>Material</value>
   </data>
   <data name="MaterialDesc" xml:space="preserve">
-    <value>Translucent makes window surfaces 88% opaque so the desktop shows through slightly.</value>
+    <value>Frosted is 86% opaque, Glass 72%; there is no blur. The Koy window, the open notch, the dock and menus follow it. The closed notch always stays solid.</value>
+  </data>
+  <data name="MaterialFrosted" xml:space="preserve">
+    <value>Frosted</value>
+  </data>
+  <data name="MaterialGlass" xml:space="preserve">
+    <value>Glass</value>
+  </data>
+  <data name="NotchFollowsMaterialTitle" xml:space="preserve">
+    <value>Open notch follows the material</value>
+  </data>
+  <data name="NotchFollowsMaterialDesc" xml:space="preserve">
+    <value>When off, the open notch stays solid while the window and dock can be see-through.</value>
+  </data>
+  <data name="ReadabilityGuardTitle" xml:space="preserve">
+    <value>Readability guard</value>
+  </data>
+  <data name="ReadabilityGuardDesc" xml:space="preserve">
+    <value>On a light wallpaper, Glass moves up to Frosted (or Solid if needed) so secondary text keeps 4.5:1 contrast. The wallpaper is measured once, and again when it changes.</value>
   </data>
   <data name="MaterialSolid" xml:space="preserve">
     <value>Solid</value>
-  </data>
-  <data name="MaterialTranslucent" xml:space="preserve">
-    <value>Translucent</value>
   </data>
   <data name="CornerRadiusTitle" xml:space="preserve">
     <value>Corner radius</value>
@@ -2007,6 +2043,18 @@
   <data name="UpdateAvailableBadge" xml:space="preserve">
     <value>New version: {0}</value>
   </data>
+  <data name="UpdateCardTitle" xml:space="preserve">
+    <value>Koy {0} available</value>
+  </data>
+  <data name="UpdateCardSubtitle" xml:space="preserve">
+    <value>Ready to update</value>
+  </data>
+  <data name="UpdateCardAction" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="UpdateCardDismiss" xml:space="preserve">
+    <value>Dismiss</value>
+  </data>
   <data name="UpdateModalTitle" xml:space="preserve">
     <value>New Version Available</value>
   </data>
@@ -2249,6 +2297,45 @@
   </data>
   <data name="VoiceReplyOpen" xml:space="preserve">
     <value>Done · click for the full reply</value>
+  </data>
+  <data name="NotificationsTitle" xml:space="preserve">
+    <value>Show notifications on the notch</value>
+  </data>
+  <data name="NotificationsDesc" xml:space="preserve">
+    <value>Windows notifications appear as a card on the notch. Koy checks the notification list every 2 seconds while this is on.</value>
+  </data>
+  <data name="NotificationsNeedPermission" xml:space="preserve">
+    <value>Windows permission needed: allow Koy in Settings › Privacy &amp; security › Notifications.</value>
+  </data>
+  <data name="NotificationsHideBodyTitle" xml:space="preserve">
+    <value>Hide notification content</value>
+  </data>
+  <data name="NotificationsHideBodyDesc" xml:space="preserve">
+    <value>Cards show only the app name and the title, not the message text.</value>
+  </data>
+  <data name="NotificationTimeNow" xml:space="preserve">
+    <value>just now</value>
+  </data>
+  <data name="NotificationTimeMinutesAgo" xml:space="preserve">
+    <value>{0} min ago</value>
+  </data>
+  <data name="NotificationTimeHoursAgo" xml:space="preserve">
+    <value>{0} h ago</value>
+  </data>
+  <data name="FocusOn" xml:space="preserve">
+    <value>Focus on</value>
+  </data>
+  <data name="NotchStyleTitle" xml:space="preserve">
+    <value>Notch style</value>
+  </data>
+  <data name="NotchStyleDesc" xml:space="preserve">
+    <value>Pinned touches the top edge of the screen; Floating is a rounded island with a small gap above.</value>
+  </data>
+  <data name="NotchStylePinned" xml:space="preserve">
+    <value>Pinned to screen</value>
+  </data>
+  <data name="NotchStyleFloating" xml:space="preserve">
+    <value>Floating island</value>
   </data>
 </root>
 

@@ -1,11 +1,16 @@
 using System.Globalization;
 using Koy.Core.SystemStats;
 using System.Windows;
+using System.IO;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Koy.App.Resources;
 using Koy.Core.Audio;
 using Koy.Core.Display;
+using Koy.Core.Notch;
+using Koy.Core.Notifications;
 using Koy.Core.Power;
 using Koy.Core.Voice;
 
@@ -87,6 +92,23 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
     /// <summary>Tek satıra sığmayan tam açıklama (fareyle üzerine gelince).</summary>
     [ObservableProperty]
     private string? _voiceDetail;
+
+    /// <summary>Kart türündeki OSD'nin içeriği (<see cref="OsdType.Card"/>).</summary>
+    [ObservableProperty]
+    private NotchCard? _card;
+
+    /// <summary>Kartta gösterilecek uygulama simgesi (bildirim kartı); yoksa görünüm genel simge çizer.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCardIcon))]
+    private ImageSource? _cardIcon;
+
+    public bool HasCardIcon => CardIcon is not null;
+
+    /// <summary>Kartın birincil düğmesine ("Güncelle") basıldı; kapanan kartı verir (aynı gösterge birden çok kartın sahibi olabilir).</summary>
+    public event Action<NotchCard>? PrimaryActionRequested;
+
+    /// <summary>Kartın × düğmesine basıldı; kapanan kartı verir.</summary>
+    public event Action<NotchCard>? DismissRequested;
 
     public GridLength FillStarWidth => new(Math.Clamp(Percent, 0, 100), GridUnitType.Star);
     public GridLength RemainingStarWidth => new(Math.Max(0, 100 - Math.Clamp(Percent, 0, 100)), GridUnitType.Star);
@@ -305,6 +327,94 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
         });
     }
 
+    /// <summary>
+    /// Çentikte düğmeli bir kart gösterir. Çentik açıkken (<see cref="CanShow"/>) gösterilmez ve false döner;
+    /// çağıran çentik kapanınca yeniden dener. <paramref name="lifetime"/> sonunda kendiliğinden kapanır.
+    /// </summary>
+    public bool ShowCard(NotchCard card, TimeSpan lifetime)
+    {
+        if (_disposed || !(CanShow?.Invoke() ?? true))
+            return false;
+
+        Card = card;
+        // Simge yalnız bu kartın kendi baytlarından çözülür; boş/saydam/bozuksa kabuk simgesi, o da yoksa görünüm zil çizer.
+        CardIcon = DecodeIcon(card.Icon) ?? DecodeIcon(card.FallbackIcon);
+        Type = OsdType.Card;
+        IsActive = true;
+
+        ResetTimer(lifetime);
+        Activated?.Invoke(this, EventArgs.Empty);
+        return true;
+    }
+
+    /// <summary>Kartın birincil düğmesi: kart kapanır, sahibi eylemi yürütür.</summary>
+    public void RequestPrimaryAction()
+    {
+        if (Type != OsdType.Card || Card is not { } card)
+            return;
+
+        Dismiss();
+        PrimaryActionRequested?.Invoke(card);
+    }
+
+    /// <summary>Kartın × düğmesi: kart kapanır, sahibi bunu "bu oturumda gösterme" diye kaydeder.</summary>
+    public void RequestDismiss()
+    {
+        if (Type != OsdType.Card || Card is not { } card)
+            return;
+
+        Dismiss();
+        DismissRequested?.Invoke(card);
+    }
+
+    // Simge gösterilecek boyutta çözülür ve dondurulur (AGENTS #9); çözülemeyen simge kartı engellemez.
+    private static ImageSource? DecodeIcon(byte[]? data)
+    {
+        if (data is not { Length: > 0 })
+            return null;
+
+        try
+        {
+            using var stream = new MemoryStream(data);
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.DecodePixelWidth = 48;
+            image.StreamSource = stream;
+            image.EndInit();
+            image.Freeze();
+            return CropToVisible(image);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    // Tamamen saydam resim "simge var" sayılmaz (boş daire yerine zil çıksın). Saydam kenar boşluğu kırpılır:
+    // bildirim logoları boşlukla gelir ve 36 px dairede küçük görünür. Sonuç dondurulur (AGENTS #9).
+    private static ImageSource? CropToVisible(BitmapSource image)
+    {
+        if (image.PixelWidth == 0 || image.PixelHeight == 0)
+            return null;
+
+        var converted = new FormatConvertedBitmap(image, PixelFormats.Bgra32, null, 0);
+        converted.Freeze();
+        var stride = converted.PixelWidth * 4;
+        var pixels = new byte[stride * converted.PixelHeight];
+        converted.CopyPixels(pixels, stride, 0);
+
+        if (IconBlankCheck.GetVisibleBounds(pixels, converted.PixelWidth, converted.PixelHeight) is not { } b)
+            return null;
+
+        if (b.X == 0 && b.Y == 0 && b.Width == converted.PixelWidth && b.Height == converted.PixelHeight)
+            return image;
+
+        var cropped = new CroppedBitmap(converted, new Int32Rect(b.X, b.Y, b.Width, b.Height));
+        cropped.Freeze();
+        return cropped;
+    }
+
     public void Dismiss()
     {
         if (!IsActive)
@@ -322,6 +432,8 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
         VoiceDetail = null;
         VoiceStatusText = "";
         VoiceState = VoiceState.Idle;
+        Card = null;
+        CardIcon = null;
         Dismissed?.Invoke(this, EventArgs.Empty);
     }
 

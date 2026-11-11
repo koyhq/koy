@@ -57,6 +57,7 @@ public readonly record struct DockSettingsDiff(
                       || before.DockIndicatorStyle != after.DockIndicatorStyle
                       || before.MiddleClickAction != after.MiddleClickAction
                       || before.Material != after.Material
+                      || before.MaterialReadabilityGuard != after.MaterialReadabilityGuard
                       || before.AnimationSpeed != after.AnimationSpeed
                       || before.RespectReduceMotion != after.RespectReduceMotion
                       || power;

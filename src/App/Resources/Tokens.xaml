@@ -92,10 +92,13 @@
     <SolidColorBrush x:Key="KoyNotchAccentClipboard" Color="#A78BFA" />
     <SolidColorBrush x:Key="KoyNotchAccentSystem" Color="#34D399" />
     <SolidColorBrush x:Key="KoyNotchAccentControl" Color="#3B82F6" />
-    <!-- Ana: müzik kartı ve hava kartı -->
-    <SolidColorBrush x:Key="KoyNotchMusicCard" Color="#0E2A18" />
-    <SolidColorBrush x:Key="KoyNotchMusicCover" Color="#22C55E" />
-    <SolidColorBrush x:Key="KoyNotchMusicSub" Color="#BBF7D0" />
+    <!-- Ana: müzik kartı ve hava kartı. Müzik kartı palet yokken (Düz stil, gri ya da kapaksız parça) nötrdür: demodaki
+         "Düz nötr" (CamMuzikKarti.dc.html; proje sahibi kararı 2026-11-11, eskiden yeşildi). Kart KoyNotchCard tonunda,
+         ikincil metin beyaz %62, çubuklar beyaz %60, kapaksız yer tutucu nötr gri. Cam'da kart tonunu ThemeManager ezer. -->
+    <SolidColorBrush x:Key="KoyNotchMusicCard" Color="#141416" />
+    <SolidColorBrush x:Key="KoyNotchMusicCover" Color="#27272A" />
+    <SolidColorBrush x:Key="KoyNotchMusicSub" Color="#9EF4F4F5" />
+    <SolidColorBrush x:Key="KoyNotchMusicSpectrum" Color="#99F4F4F5" />
     <SolidColorBrush x:Key="KoyNotchWeatherCard" Color="#121A2B" />
     <SolidColorBrush x:Key="KoyNotchWeatherSoft" Color="#BFDBFE" />
     <SolidColorBrush x:Key="KoyNotchWeatherIconBg" Color="#223B82F6" />

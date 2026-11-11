@@ -201,7 +201,7 @@ Kod incelemesinden çıkan işler paketlere bölündü.
 - [x] Koy kapanır / duraklatılır / dock kapanır / ayar kapanır → pencere kapanır ve Windows tepsisi geri gelir; çökme işleyicileri görev çubuğunu ve tepsi penceresini birlikte kapatır.
 - [x] Sağ tıkta açılır pencere kapanmaz: uygulamanın bağlam menüsü açıkken açık kalır; menüden seçim yapılınca ya da pencere ve menünün dışına tıklanınca yay animasyonuyla kapanır (`TrayPopupDismissPolicy`, odak kaybı kapatma sebebi değil).
 - [x] **Elle sınama** (proje sahibi): Discord/Steam/Tailscale tıklama ve menü; Görev Yöneticisi'nden süreci öldür → Windows tepsisi ve görev çubuğu geri; Explorer'ı yeniden başlat → simgeler geri; çok monitör. **Proje sahibi sınadı (2026-11-07), sorun yok.**
-- [ ] Bellek ölçümü (AGENTS #1): main ile main + tepsi karşılaştırması, `docs/MEMORY.md`.
+- [x] Bellek ölçümü (AGENTS #1): main ile main + tepsi karşılaştırması, `docs/MEMORY.md`.
 
 ## Dock ve tepsi paketi (2026-11-06)
 - [x] **Gözcü süreç:** `src/Watchdog/` (`Koy.Watchdog.exe`, Native AOT, pencere yok). Dock görev çubuğunu gizlediği sürece tek gözcü çalışır, Koy'un PID'ini bekler; Koy öldürülürse görev çubuğunu geri getirir (`taskbar-state.json`), temiz çıkışta dokunmaz. Görev çubuğu mantığı `TaskbarService.cs` / `ShellTrayLocator.cs` dosyalarını bağlayarak paylaşılır; karar mantığı `Core/Shell/WatchdogPolicy.cs`. `scripts/pack.ps1` ve `release.yml` exe'yi Koy'un klasörüne koyar. **AOT yayın bu makinede (C++ araçları yok) üretilemedi; elle sınama bekliyor.**
@@ -520,6 +520,10 @@ Proje sahibi istedi. Kod yazılmadı.
 - [x] **Arayüz (App):** `Ctrl+Alt+V` varsayılan kısayolu, çentikte 260×40 OSD ses göstergesi, onaylama için geçici pencere odak yönetimi (Enter/Esc veya çentiğe tıklama), Ayarlar › Çentik altında Harness ve onaylama ayarları.
 - [ ] Elle sınama (proje sahibi): `Ctrl+Alt+V` ile konuşma, metni onaylayıp çalıştırma, model çıktısının çentikte görünmesi.
 
+## Dock önizlemesine orta tık pencereyi kapatır (#61)
+- [x] Önizlemedeki küçük resme (tek pencere ve grup) orta tık o pencereyi kapatır, önizleme kapanır; gruptaki diğer pencereler kalır. `MiddleClickAction` ayarına bakılmaz. `DockWindow.xaml(.cs)`.
+- [x] Elle sınama (proje sahibi, 2026-11-11, hepsi geçti): tek pencereli uygulamada kapanma; üç pencereli Not Defteri'nde yalnız ortadaki; kaydedilmemiş belgede "kaydet?" sorusu ve Koy donmaması; orta tık simgede eski davranış; sol tık önizlemede pencereyi öne getirir.
+
 ## Şarkı sözleri (#57) sonrası karar
 - [x] Sözler varsayılan kapalı (çalan başlık, tarayıcı videoları dahil, LRCLIB'e gider). Ana sayfadaki müzik kartında küçük düğmeyle açılıp kapanır, ayar kalıcı kaydedilir; Ayarlar › Çentik'teki seçenek aynı ayar.
 
@@ -565,3 +569,62 @@ Tasarım ve doğrulama: `docs/ARASTIRMA-SARKI-SOZLERI.md`.
 - [x] Hero'daki çentik fareyle açılır olsun (Dock bölümündeki demo gibi: üst kenara gelince yayla açılır, çıkınca 400 ms sonra kapanır; dokunmatikte dokununca).
 - [ ] İngilizce sürüm (şimdilik yalnız Türkçe).
 - [ ] Uygulamadaki Hakkında sayfasına teşekkür ve tanıtım kartı (Nectar ve Seelen UI esinlenmesi, site bağlantısı; TR ve EN).
+
+## Çentik kartı altyapısı ve güncelleme kartı (#65)
+- [x] **Core (testli):** `Core/Notch/NotchCard.cs` (içerik türünden bağımsız kart modeli: `Kind`, `Title`, `Subtitle`, `PrimaryActionLabel`, `AppName`, `Timestamp`, `Icon`; `NotchLayout.CardWidth/CardHeight` 380×72, tuvalin içinde) ve `Core/Updates/UpdateCardPolicy.cs` (sürüm başına oturumda bir kez, × sonrası bir daha yok, farklı sürüm yeniden, çentik açıkken bekler, 15 sn sonra kapanır).
+- [x] **App:** `OsdType.Card`, `OsdIndicatorViewModel.ShowCard` + `PrimaryActionRequested` / `DismissRequested`, `OSD/NotchCardView.xaml` (36 px daire içinde indirme simgesi, iki satır metin, hap "Güncelle" düğmesi ve ×; düğmeler `Border` + `MouseLeftButtonUp`, çentik odak almaz ve karta basmak çentiği açmaz). Çentik kart ölçüsüne mevcut `Spring` ile büyür; yeni animasyon yok.
+- [x] **Bağlama:** `NotchFeature`, `UpdateStatus.Changed` ile yalnız birincil ekranın çentiğinde kartı gösterir; çentik açıksa kapanınca gösterir; "Güncelle" Koy penceresini açıp var olan `OpenUpdateOverlay` akışını çağırır (görev çubuğu güvenliği `StartUpdateAsync` içinde, AGENTS #7). Metinler `UpdateCard*` anahtarlarıyla iki dilde. Yeni ayar yok.
+- [x] Elle sınama (proje sahibi, 2026-11-11, geçici sahte güncelleme kancasıyla, tek monitör): kart yayla açılıyor, 15 sn sonra kapanıyor, aynı sürüm ikinci kez çıkmıyor, yeni sürüm çıkıyor, çentik açıkken bekleyip kapanınca çıkıyor, × kapatıyor, Güncelle Koy penceresini ve onay katmanını açıyor.
+- [ ] Denenmedi: ikinci ekranda çıkmaması (tek monitör), hareket azaltmada yay, Akıllı/Fareyle modunda kartın 15 sn görünür kalması.
+- [ ] Bellek ölçümü (AGENTS #1): kart görünmezken ek nesne yok; ölçüm `docs/MEMORY.md`.
+
+## Windows bildirimleri çentikte (#64)
+Karar (2026-11-11): paketsiz süreçte `NotificationChanged` aboneliği 0x80070490 ile reddedilir, liste okuması çalışır; bu yüzden olay değil **yoklama**. Deneme sonucu: `arastirma/23-bildirim-dinleyici-denemesi.md` (depo dışı).
+- [x] **Core (testli):** `Core/Notifications/` : `NotificationItem` + `INotificationListener` (WinRT tipi yok: simge `byte[]?`, kimlik `uint`), `NotificationDiff` (ilk okuma temel çizgi, açılışta eski bildirim yağmaz), `NotificationPoller` (2 sn aralık, tek görevli döngü, hata sonrası 10 sn), `NotificationQueue` (tek kart, 6 sn, en çok 5 bekleyen, çentik açıkken bekler, Koy ve Rahatsız Etme süzgeci), `NotificationPresentation` ("UYGULAMA · şimdi", kısaltma). `NotchCard.Header` eklendi.
+- [x] **Platform:** `Platform/Notifications/WinRtNotificationListener.cs` (liste yoklama; ayrıntı ve simge yalnız yeni kimlikler için okunur, simge null olabilir); `FocusAssistService.IsDoNotDisturb`.
+- [x] **App:** `SharedServices.AcquireNotificationListener` (sayaçlı); `NotchFeature` dinleyiciyi yalnız ayar açık + çentik var + izin `Allowed` iken başlatır (durum belirsizse izin istenir), kuyruktan birincil ekranın çentiğine `ShowCard`; `NotchCardView` simge/üst satır; ayarlar `NotchShowNotifications` (varsayılan açık), `NotchNotificationsHideBody` (varsayılan kapalı), `CentikPage` satırları ve "Windows izni gerekiyor" açıklaması; metinler iki dilde.
+- [x] Yoklama istisnası `AGENTS.md` kural 5 ve `docs/MAP.md` içinde belgelendi.
+- [x] Elle sınama (proje sahibiyle, 2026-11-11, geçti): Claude ve PowerShell bildirimleri kart oldu; simge yedeği (boş daire yerine uygulama simgesi); × ve sıradaki kart; art arda kartlar 6 sn aralıkla; çentik açıkken bekleyip kapanınca çıkma; "İçeriği gizle"; Odaklanma oturumunda susma.
+- [x] Son derlemede sınandı (2026-11-11): Lightshot'ın yenilenen bildirimi kart olarak çıkıyor (Lightshot logo ve kabuk simgesi vermiyor, zil yedeği görünüyor); Kontrol döşemesi Odaklanma kapalıyken "Ayarlarda aç", açıkken "Odaklanma açık".
+- [ ] Henüz sınanmadı: logo kırpma (Claude bildirimi yeni derlemede gelmedi); izin diyaloğu (izin zaten verilmişti); ayar kapanınca yoklamanın durması.
+- [x] Bellek ve CPU ölçümü (2026-11-11, `docs/MEMORY.md`): Release, açılıştan 25 sn sonra 70,3 MB (60 sn sonra 66,0 MB); boşta CPU 60 sn'de tek çekirdeğin %0,96'sı (578 ms). Yoklama maliyeti ölçüm saçılmasının altında.
+- Bilinen kısıt: Windows 11 Rahatsız etmeyin düğmesi tek başına algılanmıyor (belgelenmiş API yok); kartlar Odaklanma oturumunda ve sunum modunda susar. Kontrol sekmesindeki Rahatsız Etme döşemesi bu yüzden yalnız "Odaklanma açık" gösterir, aksi halde "Ayarlarda aç" kalır.
+
+## Yüzen ada çentik (#63, P5A)
+- [x] **Core (testli):** `Core/Notch/NotchStyle.cs` (`Yapışık` varsayılan / `Yüzen`; `Normalize`, `EarRadius` 12 / 0, `TopOffsetDip` 0 / 9, `CornerRadius` yüzen adada kapalı hâllerde yükseklik/2, açıkta 30, kartta 26; `EdgeTriggerBottomPixels`), `WindowPlacementMath.TopCenter(..., topOffsetDip)` aşırı yüklemesi (ofset hedef monitörün kendi DPI'ıyla piksele çevrilir; %100/150/200 testli), `AppSettings.NotchStyle` (Equals/hash dahil).
+- [x] **App:** `NotchShape` kulak yarıçapı 0 iken üst köşeleri de dışbükey yuvarlar; `NotchWindow` `EarRadius` ve Top ofsetini ViewModel'den alır (tuval 640×364 değişmez, yalnız pencere Top'u kayar); kulaksız şekil Collapsed, Peek, Expanded, OSD HUD ve kartta aynı `NotchShape`'ten gelir; kenar açma bölgesi (`CheckEdgePeek`) ve `NotchBounds` 9 DIP boşluğu hesaba katar.
+- [x] **Ayar:** Ayarlar › Çentik › "Çentik biçimi: Ekrana yapışık / Yüzen ada"; değişince çentik `ReloadNotch` ile yeniden kurulup yerleşir. Metinler `NotchStyle*` anahtarlarıyla iki dilde.
+- [x] Elle sınama (proje sahibi, 2026-11-11, tek monitör, hepsi geçti): yüzen ada kapalı hâlde kulaksız kapsül ve üstten boşluklu; açık hâl kulaksız; ses göstergesi kulaksız; üst kenara gelince açılıyor; Ekrana yapışık'a dönünce hemen yerine oturuyor.
+- [ ] Denenmedi: iki ekran ve karışık DPI, tam ekranda gizlenme, hareket azaltma, bildirim/güncelleme kartı yüzen biçimde.
+- [x] Bellek ölçümü (AGENTS #1): 59,0 MB private, fark yok (`docs/MEMORY.md`).
+
+## Halka pil ve gün/saat boşta görünümü (#63, P5B)
+- [x] **Core (testli):** `IdleDisplay.RingClockDay = 3`, `IsRing`, `ShowRadioWhenCollapsed` (halka modunda Wi-Fi / Bluetooth yalnız Peek'te; radyo izleyicisi yine açılışta kurulur). `Core/Notch/IdleDisplayFormat.cs`: kısa gün + saat ("Sal 19:21" / "Tue 19:21"), Peek tarihi ("17 Kas" / "Nov 17"), dile göre yüzde ("%43" / "43%"), düşük pil kararı (≤%20 ve şarjda değil), halka yay noktası ve yol verisi (%0 boş, %100 iki yarım yay, kültürden bağımsız).
+- [x] **App:** kapalı çentikte halka modu: solda 18 px halka (kalınlık 2,5, iz beyaz %28, dolu kısım `#4ADE80`, düşük pilde `#FB7185`), yanında yüzde, şarjda şimşek; sağda gün ve saat, Peek'te "· 17 Kas" ve radyo simgeleri. Pilsiz kasada yalnız gün/saat ortada; zamanlayıcı çalışırken süre halkanın yerine. Halka yalnız yüzde değişince yeniden kurulur (dondurulmuş `Geometry`), saat mevcut 15 sn zamanlayıcıyı kullanır.
+- [x] **Ayar:** Ayarlar › Çentik › Boştayken › "Halka ve gün" (`IdleRingClockDay`, açıklaması ipucunda). UiSnapshots sahneleri: `halka`, `halka-peek`, `halka-zamanlayici`, `halka-dusuk`, `halka-sarj`, `halka-pilsiz`, `halka-en`.
+- [x] Elle sınama (proje sahibi, 2026-11-11): kapalı çentikte halka, yüzde ve "Çar 18:xx"; Peek'te tarih ve Wi-Fi / Bluetooth simgeleri çıkıp kayboluyor. Şarja takınca pil göstergesi (HUD) çıktı.
+- [ ] Henüz sınanmadı: HUD kaybolunca halkanın yanındaki şimşek, İngilizce, iki ekran.
+- [ ] Bellek ölçümü (AGENTS #1): ölçülmedi (uygulama çalıştırılmadı). Beklenen fark yok: yeni servis ya da zamanlayıcı eklenmedi.
+
+## Cam malzeme (P4B, onaylı tasarım `CamKoy.dc.html` / `CamCentik.dc.html`)
+- [x] **Core (testli):** `MaterialSetting` üç seviye: Katı 1 / Buzlu 0,86 / Cam 0,72 (`Normalize`, `SurfaceOpacity`, `SurfaceAlpha`); eski "Yarı saydam" Buzlu'ya düşer (`Normalize` yükleme sırasında çevirir, ilk kayıtta yeni adla yazılır; şema sürümü değişmedi). `ReadabilityGuard`: duvar kağıdı ortalamasından ikincil metin kontrastı, Cam → Buzlu → Katı (demodaki hesapla aynı), BGRA ortalaması. `AppSettings.MaterialReadabilityGuard` ve `NotchFollowsMaterial` (varsayılan açık).
+- [x] **Platform:** `Display/WallpaperSampler`: `HKCU\Control Panel\Desktop\WallPaper` (yoksa `TranscodedWallpaper`, düz renkte `Colors\Background`) WinRT çözücüyle 16 px genişlikte okunur. `App/Resources/MaterialState` yalnız saydam seviye + koruma açıkken ilk istekte bir kez ve `UserPreferenceChanged(Desktop)` ile okur; yoklama yok.
+- [x] **App:** `ThemeManager` pencere, kenar menüsü, satır, segment (`KoyBgSegment`, yeni token) ve çentik kart (`KoyNotchCard`, `KoyNotchChip`) tonları; `NotchViewModel.SurfaceBrush` (açık çentik ve kart camsı, kapalı / Peek / HUD opak; `NotchShape` zemin değişince yeniden çizer); `DockViewModel.FullWidthSurface` ve yeni `CapsuleSurface`; Görünüm sayfasında üç seviye + iki anahtar. Metinler iki dilde.
+- [x] UiSnapshots: `--material kati|buzlu|cam` ve `--wallpaper light|dark` (gerçek duvar kağıdı okunmaz). Cam koyu ve açık duvar kağıdında, açık ve koyu temada Koy penceresi, açık çentik ve dock kontrol edildi; açık duvar kağıdında koruma Cam'ı Buzlu'ya çıkarıyor.
+- [x] Elle sınama (proje sahibi, 2026-11-11), ilk tur: dock geçti; Koy penceresinde bulanıksız Cam "gerçekten rezalet" bulundu (arkadaki pencereler çamur griye karışıyor, köşelerde açık renk sızıyor); açık çentikte %72 arkadaki metni okunur bırakıyordu ("fazla saydam").
+- [x] **Düzeltme (proje sahibi kararı "Gerçek bulanıklık"):** Koy penceresi katmansız pencereye geçti (`WindowChrome`, `GlassFrameThickness=-1`, `CompositionTarget.BackgroundColor` saydam) ve DWM'den sistem akriliği, koyu / açık çerçeve ve köşe tercihi alıyor (`BackdropService.ApplyWindowFrame`); başlık ve kenar menüsü içerikle aynı ton. Çentik ve dock için ayrı opaklık: `MaterialSetting.LayeredOpacity` Buzlu 0,94 / Cam 0,88; koruma her yüzeyi kendi opaklığıyla hesaplar (`ReadabilityGuard.Surface.Layered`).
+- [x] Elle sınama (proje sahibi, 2026-11-11), ikinci tur: Koy penceresi ("tamam kalsın böyle") ve açık çentik geçti.
+- [ ] Henüz sınanmadı: açık tema, duvar kağıdını değiştirince korumanın güncellenmesi, "Açık çentik malzemeyi izlesin" kapalıyken, hareket azalt, iki ekran.
+- [x] **Sağ alt menü ve kurulum sihirbazı da DWM akriliğe geçti** (proje sahibi kararı): ortak `App/Resources/WindowFrame` (katmansız pencere + `WindowChrome`; tema, malzeme, köşe ya da duvar kağıdı değişince `ThemeManager.Applied` ile yenilenir); menünün elle çizilen gölgesi ve 16 px kenar boşluğu kalktı, gölge ve köşe DWM'den. Elle sınama (2026-11-11): sağ alt menü geçti. Sihirbaz canlıda sınanmadı (yalnız ilk kurulumda açılır, o anda malzeme Katı).
+- [x] Bellek ve CPU ölçümü (AGENTS #1, 2026-11-11, `docs/MEMORY.md`): Cam + halka + albüm rengi birlikte, Release, boşta 71,9–72,1 MB private, durağan boşta CPU tek çekirdeğin %1,25'i (bildirim yoklaması dahil). Katı ile ayrı karşılaştırma yapılmadı.
+- Kapsam dışı (demoda vardı): "Pil tasarrufunda saydamlığı kapat"; renkli Ana kartları (müzik, ağ, sistem) opak kalır, müzik kartı P6-App'te.
+
+## Müzik kartı: albüm rengi (#66)
+- [x] **P6-Core (`Core/Media/CoverPaletteExtractor`, `Core/Appearance/ColorMath` HSL, testli):** küçük BGRA kapaktan tek geçişte 24 ton kovalı baskın ton; gri/monokrom kapakta (aday piksel < %10) null. Çıktı `CoverPalette(Card, SubText, Spectrum)`; Card beyaz başlıkla en az 7:1 kontrastlı.
+- [x] **P6-App, ayar:** `MusicCardStyle` (`Neutral` Düz, `Tinted` Albüm rengi varsayılan, `Artwork` Albüm kapağı); Core'da `MusicCardStyleSetting.Normalize` + testler; Ayarlar › Çentik'te üç seçenek (TR/EN).
+- [x] **P6-App, palet:** `MusicViewModel` parça değişince bir kez, arka planda 32 px ikinci çözüm + `CoverPaletteExtractor`; `CardBrush/SubTextBrush/SpectrumBrush` (Spectrum alfa 0,75) dondurulmuş; aynı kapak için `CoverFingerprint` ile yeniden hesaplanmaz; gri/kapaksız parçada Tokens fırçaları.
+- [x] **P6-App, kapak arka planı:** `Artwork` modunda 32 px bitmap `UniformToFill` + `Linear`, üstünde Card tonu (0,30) ve `#0A0A0B` 0,55 → 0,85 perde; `BlurEffect` yok; küçük ve büyütülmüş kart aynı katmanı kullanır (`HomePanel.xaml`).
+- [ ] **P6-App, elle sınama:** Spotify'da renkli, koyu ve siyah-beyaz kapaklar; YouTube'da kapaksız video; parça değişince geçiş; üç mod ve büyütülmüş kart; açık tema; Ayarlar'dan stil değişince çentik yeniden kurulur.
+- [ ] **P6-App, bellek:** şarkı çalarken önce/sonra ölçüm (`measure-memory.ps1`), `docs/MEMORY.md`.
+- [x] **P6-App, cam uyumu (demo `CamMuzikKarti.dc.html`):** Albüm rengi kart zemini çentiğin etkin malzemesinin alfasında (`MusicViewModel.SetCardAlpha`, `NotchViewModel` malzeme değişince verir; Katı 255 / Buzlu 219 / Cam 184); Kapak resmi opak kalır (okunurluk perdeden); palet yokken (Düz, gri ya da kapaksız) kart her malzemede nötr: demodaki "Düz nötr" (proje sahibi kararı 2026-11-11, eski yeşil `#0E2A18` bırakıldı); `KoyNotchMusicCard` Katı'da `#141416`, camda beyaz %6, ikincil metin beyaz %62, çubuklar beyaz %60, kapaksız yer tutucu (kart ve kapalı çentik) `#27272A`. UiSnapshots ile Katı ve Cam'da üç stil kontrol edildi.
+- [x] **P6-App, elle sınama (proje sahibi, 2026-11-11):** parça değişince renk değişiyor, büyütülmüş kart aynı renkte; siyah-beyaz kapakta kart nötr griye dönüyor (Spotify). Kapaksız video ve Albüm kapağı stili ayrıca denenmedi.

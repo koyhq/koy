@@ -30,6 +30,9 @@ public readonly record struct Rgb(byte R, byte G, byte B)
         TryParse(hex, out var c) ? c : throw new FormatException($"Geçersiz renk: {hex}");
 }
 
+/// <summary>HSL renk: H derece (0 ile 360 arası), S ve L 0 ile 1 arası.</summary>
+public readonly record struct Hsl(double H, double S, double L);
+
 public static class ColorMath
 {
     /// <summary>WCAG göreli parlaklık (0 siyah, 1 beyaz).</summary>
@@ -62,4 +65,53 @@ public static class ColorMath
         byte M(byte x, byte y) => (byte)Math.Round(x + (y - x) * t);
         return new Rgb(M(a.R, b.R), M(a.G, b.G), M(a.B, b.B));
     }
+
+    /// <summary>sRGB'yi HSL'e çevirir. Gri tonlarda H 0 ve S 0 döner.</summary>
+    public static Hsl ToHsl(Rgb c) => ToHsl(c.R, c.G, c.B);
+
+    /// <summary>Bayt kanallarından doğrudan HSL (ayırma yapmaz; piksel döngüleri için).</summary>
+    public static Hsl ToHsl(byte r8, byte g8, byte b8)
+    {
+        double r = r8 / 255.0, g = g8 / 255.0, b = b8 / 255.0;
+        var max = Math.Max(r, Math.Max(g, b));
+        var min = Math.Min(r, Math.Min(g, b));
+        var l = (max + min) / 2;
+        var d = max - min;
+        if (d <= 0)
+            return new Hsl(0, 0, l);
+
+        var s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        double h;
+        if (max == r)
+            h = (g - b) / d + (g < b ? 6 : 0);
+        else if (max == g)
+            h = (b - r) / d + 2;
+        else
+            h = (r - g) / d + 4;
+        return new Hsl(h * 60, s, l);
+    }
+
+    /// <summary>HSL'i sRGB'ye çevirir; H 360'a sarılır, S ve L 0..1'e kıskaçlanır.</summary>
+    public static Rgb FromHsl(double h, double s, double l)
+    {
+        h = ((h % 360) + 360) % 360;
+        s = Math.Clamp(s, 0, 1);
+        l = Math.Clamp(l, 0, 1);
+        var c = (1 - Math.Abs(2 * l - 1)) * s;
+        var x = c * (1 - Math.Abs(h / 60 % 2 - 1));
+        var m = l - c / 2;
+        var (r, g, b) = (int)(h / 60) switch
+        {
+            0 => (c, x, 0.0),
+            1 => (x, c, 0.0),
+            2 => (0.0, c, x),
+            3 => (0.0, x, c),
+            4 => (x, 0.0, c),
+            _ => (c, 0.0, x),
+        };
+        static byte B(double v) => (byte)Math.Clamp(Math.Round(v * 255), 0, 255);
+        return new Rgb(B(r + m), B(g + m), B(b + m));
+    }
+
+    public static Rgb FromHsl(Hsl hsl) => FromHsl(hsl.H, hsl.S, hsl.L);
 }

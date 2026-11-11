@@ -12,6 +12,8 @@
     <SolidColorBrush x:Key="KoyBgShell" Color="#111113" />
     <SolidColorBrush x:Key="KoyBgRow" Color="#1F1F23" />
     <SolidColorBrush x:Key="KoyBgControl" Color="#27272A" />
+    <!-- Segment kutusu (SegmentContainerStyle); saydam malzemede ThemeManager ezer. -->
+    <SolidColorBrush x:Key="KoyBgSegment" Color="#27272A" />
     <SolidColorBrush x:Key="KoyBgHover" Color="#2E2E35" />
     <SolidColorBrush x:Key="KoyBgActive" Color="#3F3F46" />
     <SolidColorBrush x:Key="KoyBgNavHover" Color="#1B1B1E" />

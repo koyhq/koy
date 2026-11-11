@@ -360,6 +360,12 @@
   <data name="IdleClockOnly" xml:space="preserve">
     <value>Yalnız saat</value>
   </data>
+  <data name="IdleRingClockDay" xml:space="preserve">
+    <value>Halka ve gün</value>
+  </data>
+  <data name="IdleRingClockDayDesc" xml:space="preserve">
+    <value>Solda pil halkası, sağda gün ve saat. Tarih ve bağlantılar üzerine gelince çıkar.</value>
+  </data>
   <data name="IdleNone" xml:space="preserve">
     <value>Hiçbiri</value>
   </data>
@@ -531,6 +537,21 @@
   <data name="MusicWaveformTitle" xml:space="preserve">
     <value>Müzik çalarken kapak ve dalga</value>
   </data>
+  <data name="MusicCardStyleTitle" xml:space="preserve">
+    <value>Müzik kartı stili</value>
+  </data>
+  <data name="MusicCardStyleDesc" xml:space="preserve">
+    <value>Düz, sabit kartı korur. Albüm rengi kartı kapaktan boyar. Albüm kapağı, kapağı koyulaştırılmış arka plan yapar. Gri kapakta her zaman düz kart kullanılır.</value>
+  </data>
+  <data name="MusicCardStyleNeutral" xml:space="preserve">
+    <value>Düz</value>
+  </data>
+  <data name="MusicCardStyleTinted" xml:space="preserve">
+    <value>Albüm rengi</value>
+  </data>
+  <data name="MusicCardStyleArtwork" xml:space="preserve">
+    <value>Albüm kapağı</value>
+  </data>
   <data name="IndicatorsHeader" xml:space="preserve">
     <value>Göstergeler</value>
   </data>
@@ -601,13 +622,28 @@
     <value>Malzeme</value>
   </data>
   <data name="MaterialDesc" xml:space="preserve">
-    <value>Yarı saydam, pencere yüzeylerini %88 opak yapar ve arkasındaki masaüstünü hafifçe gösterir.</value>
+    <value>Buzlu %86, Cam %72 opaktır; bulanıklık yoktur. Koy penceresi, açık çentik, dock ve menüler aynı ayarı izler. Kapalı çentik hep opak kalır.</value>
+  </data>
+  <data name="MaterialFrosted" xml:space="preserve">
+    <value>Buzlu</value>
+  </data>
+  <data name="MaterialGlass" xml:space="preserve">
+    <value>Cam</value>
+  </data>
+  <data name="NotchFollowsMaterialTitle" xml:space="preserve">
+    <value>Açık çentik malzemeyi izlesin</value>
+  </data>
+  <data name="NotchFollowsMaterialDesc" xml:space="preserve">
+    <value>Kapatılırsa açık çentik hep opak kalır; pencere ve dock saydam olabilir.</value>
+  </data>
+  <data name="ReadabilityGuardTitle" xml:space="preserve">
+    <value>Okunabilirlik koruması</value>
+  </data>
+  <data name="ReadabilityGuardDesc" xml:space="preserve">
+    <value>Duvar kağıdı açık renkliyse ikincil metin 4,5:1 altına inmesin diye Cam kendiliğinden Buzlu’ya (gerekirse Katı’ya) çıkar. Duvar kağıdı bir kez, değişince yeniden ölçülür.</value>
   </data>
   <data name="MaterialSolid" xml:space="preserve">
     <value>Katı</value>
-  </data>
-  <data name="MaterialTranslucent" xml:space="preserve">
-    <value>Yarı saydam</value>
   </data>
   <data name="CornerRadiusTitle" xml:space="preserve">
     <value>Köşe yuvarlaklığı</value>
@@ -2007,6 +2043,18 @@
   <data name="UpdateAvailableBadge" xml:space="preserve">
     <value>Yeni sürüm: {0}</value>
   </data>
+  <data name="UpdateCardTitle" xml:space="preserve">
+    <value>Koy {0} hazır</value>
+  </data>
+  <data name="UpdateCardSubtitle" xml:space="preserve">
+    <value>Güncellemeye hazır</value>
+  </data>
+  <data name="UpdateCardAction" xml:space="preserve">
+    <value>Güncelle</value>
+  </data>
+  <data name="UpdateCardDismiss" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
   <data name="UpdateModalTitle" xml:space="preserve">
     <value>Yeni Sürüm Mevcut</value>
   </data>
@@ -2249,6 +2297,45 @@
   </data>
   <data name="VoiceReplyOpen" xml:space="preserve">
     <value>Tamamlandı · yanıtın tamamı için tıkla</value>
+  </data>
+  <data name="NotificationsTitle" xml:space="preserve">
+    <value>Bildirimleri çentikte göster</value>
+  </data>
+  <data name="NotificationsDesc" xml:space="preserve">
+    <value>Windows bildirimleri çentikte kart olarak görünür. Bu açıkken Koy bildirim listesini 2 saniyede bir kontrol eder.</value>
+  </data>
+  <data name="NotificationsNeedPermission" xml:space="preserve">
+    <value>Windows izni gerekiyor: Ayarlar › Gizlilik ve güvenlik › Bildirimler bölümünden Koy'a izin ver.</value>
+  </data>
+  <data name="NotificationsHideBodyTitle" xml:space="preserve">
+    <value>Bildirim içeriğini gizle</value>
+  </data>
+  <data name="NotificationsHideBodyDesc" xml:space="preserve">
+    <value>Kartta yalnız uygulama adı ve başlık görünür, mesaj metni görünmez.</value>
+  </data>
+  <data name="NotificationTimeNow" xml:space="preserve">
+    <value>şimdi</value>
+  </data>
+  <data name="NotificationTimeMinutesAgo" xml:space="preserve">
+    <value>{0} dk önce</value>
+  </data>
+  <data name="NotificationTimeHoursAgo" xml:space="preserve">
+    <value>{0} sa önce</value>
+  </data>
+  <data name="FocusOn" xml:space="preserve">
+    <value>Odaklanma açık</value>
+  </data>
+  <data name="NotchStyleTitle" xml:space="preserve">
+    <value>Çentik biçimi</value>
+  </data>
+  <data name="NotchStyleDesc" xml:space="preserve">
+    <value>Yapışık, ekranın üst kenarına bitişir; yüzen ada üstte küçük bir boşluk bırakan yuvarlak bir adadır.</value>
+  </data>
+  <data name="NotchStylePinned" xml:space="preserve">
+    <value>Ekrana yapışık</value>
+  </data>
+  <data name="NotchStyleFloating" xml:space="preserve">
+    <value>Yüzen ada</value>
   </data>
 </root>
 

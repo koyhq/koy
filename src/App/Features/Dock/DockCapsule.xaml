@@ -8,7 +8,7 @@
              xmlns:folder="clr-namespace:Koy.App.Features.Dock.Folder">
 
     <!-- Seelen UI Yüzen Kapsül Tabanı: 60 px yükseklik (aşağı yapışınca 46 px), 18 px köşe yuvarlama (yapışınca 14,14,0,0) -->
-    <Border Background="#E618181B"
+    <Border Background="{Binding CapsuleSurface}"
             BorderBrush="#1AFFFFFF"
             BorderThickness="1"
             CornerRadius="{Binding CapsuleCornerRadius}"
