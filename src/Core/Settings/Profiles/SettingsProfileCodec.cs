@@ -43,7 +43,11 @@ public static class SettingsProfileCodec
             throw new ArgumentException("En az bir bölüm seçilmeli.", nameof(sections));
 
         // Dock başlat simgesinin yolu bu makineye özgü: paylaşılan dosyaya yazılmaz (içe aktarmada yerel değer korunur).
-        var shareable = current with { Dock = current.Dock with { StartIconPath = "" } };
+        var shareable = current with
+        {
+            Appearance = current.Appearance with { AppIconOverrides = new() },
+            Dock = current.Dock with { StartIconPath = "" },
+        };
         var full = (JsonObject)JsonSerializer.SerializeToNode(shareable, SettingsJsonContext.Default.AppSettings)!;
         var settings = new JsonObject { ["Version"] = AppSettings.CurrentVersion };
         foreach (var section in chosen)
@@ -166,7 +170,10 @@ public static class SettingsProfileCodec
 
             result = section switch
             {
-                ProfileSection.Appearance => result with { Appearance = profile.Settings.Appearance },
+                ProfileSection.Appearance => result with
+                {
+                    Appearance = profile.Settings.Appearance with { AppIconOverrides = current.Appearance.AppIconOverrides },
+                },
                 ProfileSection.Dock => result with
                 {
                     Dock = profile.Settings.Dock with { StartIconPath = current.Dock.StartIconPath },

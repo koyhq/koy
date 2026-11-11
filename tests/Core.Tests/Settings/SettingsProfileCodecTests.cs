@@ -227,6 +227,35 @@ public class SettingsProfileCodecTests
     }
 
     [Fact]
+    public void Export_clears_local_app_icon_override_paths_from_the_file()
+    {
+        var source = Source() with
+        {
+            Appearance = Source().Appearance with { AppIconOverrides = new() { ["notepad"] = @"C:\Users\ornek\not.png" } },
+        };
+
+        var json = SettingsProfileCodec.Export(source, "Sunum", [ProfileSection.Appearance]);
+
+        Assert.DoesNotContain("not.png", json);
+        Assert.DoesNotContain("ornek", json);
+    }
+
+    [Fact]
+    public void Apply_keeps_the_local_app_icon_overrides()
+    {
+        var profile = Profile(SettingsProfileCodec.Export(Source(), "P", [ProfileSection.Appearance]));
+        var current = new AppSettings
+        {
+            Appearance = new AppearanceSettings { AppIconOverrides = new() { ["notepad"] = @"D:\yerel.png" } },
+        };
+
+        var applied = SettingsProfileCodec.Apply(current, profile, [ProfileSection.Appearance]);
+
+        Assert.Equal(AppTheme.Light, applied.Appearance.Theme);
+        Assert.Equal(@"D:\yerel.png", applied.Appearance.AppIconOverrides["notepad"]);
+    }
+
+    [Fact]
     public void Apply_does_not_mutate_the_current_settings()
     {
         var profile = Profile(SettingsProfileCodec.Export(Source(), "P", [ProfileSection.Appearance]));
