@@ -12,6 +12,12 @@ public sealed class SettingsStore(string path)
 
     public string Path { get; } = path;
 
+    /// <summary>
+    /// v3 → v4 göçünün ilk çalışmasında eski dosyanın kopyası. v4 dosyasını eski sürüm (v0.2.6) okursa bütün düz alanları
+    /// eksik görüp varsayılana döner ve ilk kayıtta ayarlar kalıcı gider; geri dönüşte bu dosya geri konur.
+    /// </summary>
+    public string BackupPath { get; } = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(path) ?? "", "settings.v3.json");
+
     /// <summary>Dosya yoksa ya da JSON'u bozuksa varsayılan ayarları döner. Okuma sırasındaki G/Ç hataları (kilitli dosya vb.) yakalanmaz.</summary>
     public AppSettings Load()
     {
@@ -28,12 +34,31 @@ public sealed class SettingsStore(string path)
                 return new AppSettings();
 
             // Göç tipli okumadan önce JSON ağacında yapılır: şema ya da değer biçimi değişse de dosya okunabilir kalır.
-            SettingsMigration.Migrate(root);
-            return root.Deserialize(SettingsJsonContext.Default.AppSettings) ?? new AppSettings();
+            var originalVersion = SettingsMigration.Migrate(root);
+            if (originalVersion < AppSettings.CurrentVersion)
+                BackupOriginalFile();
+
+            return (root.Deserialize(SettingsJsonContext.Default.AppSettings) ?? new AppSettings()).FillMissingSections();
         }
         catch (JsonException)
         {
             return new AppSettings();
+        }
+    }
+
+    // Yedek yazılamazsa (kilit, yetki) açılış durmasın; yedek bir kolaylıktır, ayarların kendisi değil.
+    private void BackupOriginalFile()
+    {
+        try
+        {
+            if (!File.Exists(BackupPath))
+                File.Copy(Path, BackupPath, overwrite: false);
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
         }
     }
 

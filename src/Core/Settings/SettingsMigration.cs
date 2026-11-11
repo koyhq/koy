@@ -41,23 +41,44 @@ public static class SettingsMigration
     }
 
     /// <summary>
-    /// Sürüm 3 → 4: sayı ve dile bağlı metin değerleri enum adına çevrilir (<see cref="LegacyValueTranslator"/>).
-    /// Tanınmayan değerin anahtarı düşer, alan varsayılanını alır; dosyanın tamamı sıfırlanmaz.
+    /// Sürüm 3 → 4: (1) sayı ve dile bağlı metin değerleri enum adına çevrilir (<see cref="LegacyValueTranslator"/>),
+    /// (2) düz anahtarlar bölümlere taşınır (<see cref="SettingsKeyMap"/>). Tanınmayan değerin anahtarı düşer, alan
+    /// varsayılanını alır; tanınmayan üst düzey anahtar (elle yazılmış ya da gelecek sürüm) atılır. Dosyanın tamamı sıfırlanmaz.
     /// </summary>
     private static void MigrateV3ToV4(JsonObject root)
     {
-        foreach (var (key, translate) in LegacyValueTranslator.ByKey)
+        var sections = new Dictionary<string, JsonObject>();
+
+        foreach (var (key, node) in root.ToList())
         {
-            if (!root.ContainsKey(key))
+            if (!SettingsKeyMap.V3ToV4.TryGetValue(key, out var target))
                 continue;
 
-            // Açık null değer enum'a okunamaz; tanınmayan sayılır.
-            var translated = root[key] is { } node ? translate(node) : null;
-            if (translated is null)
-                root.Remove(key);
+            var value = node;
+            if (LegacyValueTranslator.ByKey.TryGetValue(key, out var translate))
+            {
+                // Açık null değer enum'a okunamaz; tanınmayan sayılır.
+                var translated = node is null ? null : translate(node);
+                if (translated is null)
+                    continue;
+                value = JsonValue.Create(translated);
+            }
             else
-                root[key] = translated;
+            {
+                // Düğüm eski kökün çocuğu; yenisine geçmeden önce ayrılmalı.
+                value = node?.DeepClone();
+            }
+
+            if (!sections.TryGetValue(target.Section, out var section))
+                sections[target.Section] = section = new JsonObject();
+            section[target.Name] = value;
         }
+
+        var version = root["Version"]?.DeepClone();
+        root.Clear();
+        root["Version"] = version;
+        foreach (var (name, section) in sections)
+            root[name] = section;
     }
 
     private static int ReadVersion(JsonObject root)

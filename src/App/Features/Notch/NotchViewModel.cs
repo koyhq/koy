@@ -72,17 +72,17 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     public OsdIndicatorViewModel Osd { get; }
 
     /// <summary>Boşta saat gösterilsin mi (ayar: Saat ve pil / Yalnız saat / Hiçbiri).</summary>
-    public bool ShowIdleClock => IdleDisplay.ShowClock(Settings.IdleDisplayMode);
+    public bool ShowIdleClock => IdleDisplay.ShowClock(Settings.Notch.IdleDisplay);
 
     /// <summary>
     /// Boşta pil gösterilsin mi (ayar izin veriyorsa ve bilgisayarda pil varsa). Bir zamanlayıcı çalışırken pilin yerine
     /// kalan süre yazılır.
     /// </summary>
-    public bool ShowIdleBattery => HasBattery && IdleDisplay.ShowBattery(Settings.IdleDisplayMode)
-        && !IdleDisplay.IsRing(Settings.IdleDisplayMode) && !_focus.HasRunning;
+    public bool ShowIdleBattery => HasBattery && IdleDisplay.ShowBattery(Settings.Notch.IdleDisplay)
+        && !IdleDisplay.IsRing(Settings.Notch.IdleDisplay) && !_focus.HasRunning;
 
     /// <summary>Boşta görünüm "halka pil ve gün/saat" mi. Ayar değişince çentik yeniden kurulduğundan ömür boyu sabittir.</summary>
-    public bool IsIdleRing => IdleDisplay.IsRing(Settings.IdleDisplayMode);
+    public bool IsIdleRing => IdleDisplay.IsRing(Settings.Notch.IdleDisplay);
 
     /// <summary>Klasik yerleşimde soldaki saat (halka modunda saat sağda, gün adıyla birlikte).</summary>
     public bool ShowIdleClassicClock => ShowIdleClock && !IsIdleRing;
@@ -123,7 +123,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         return brush;
     }
 
-    private CultureInfo IdleCulture => new(Settings.Language == AppLanguage.English ? "en-US" : "tr-TR");
+    private CultureInfo IdleCulture => new(Settings.General.Language == AppLanguage.English ? "en-US" : "tr-TR");
 
     /// <summary>Kapalı çentikte pil / Wi-Fi / Bluetooth yerine zamanlayıcının süresi görünsün mü.</summary>
     public bool ShowIdleTimer => _focus.HasRunning;
@@ -133,18 +133,18 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     /// <summary>Pil tasarrufu: pille çalışırken çentik animasyonsuz (anında) geçer.</summary>
     /// <summary>Çentik biçimi yüzen ada mı. Ayar değişince çentik yeniden kurulduğundan ömür boyu sabittir.</summary>
-    public bool IsFloating => NotchStyle.IsFloating(Settings.NotchStyle);
+    public bool IsFloating => NotchStyle.IsFloating(Settings.Notch.Style);
 
     /// <summary>Üst köşe kulağı: yapışıkta 12, yüzen adada 0 (kulaksız, bütün hâllerde).</summary>
-    public double EarRadius => NotchStyle.EarRadius(Settings.NotchStyle);
+    public double EarRadius => NotchStyle.EarRadius(Settings.Notch.Style);
 
     /// <summary>Pencerenin ekran üstünden uzaklığı (DIP): yapışıkta 0, yüzen adada 9. Tuval boyutu değişmez (AGENTS #13).</summary>
-    public double TopOffsetDip => NotchStyle.TopOffsetDip(Settings.NotchStyle);
+    public double TopOffsetDip => NotchStyle.TopOffsetDip(Settings.Notch.Style);
 
-    public bool ReduceMotion => Settings.BatterySaverReduceMotion && _status.IsOnBattery;
+    public bool ReduceMotion => Settings.Appearance.BatterySaverReduceMotion && _status.IsOnBattery;
 
     /// <summary>Müzik çalarken dalga simgesi gösterilsin mi.</summary>
-    public bool ShowMusicWaveform => Settings.MusicShowWaveform;
+    public bool ShowMusicWaveform => Settings.Music.ShowWaveform;
 
     /// <summary>Açık çentiğin üstündeki sekmeler; ayarlarda açık paneller, ayardaki sırayla.</summary>
     public ObservableCollection<NotchTabViewModel> Tabs { get; } = [];
@@ -154,8 +154,8 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     /// <summary>Boşta Wi-Fi / Bluetooth simgeleri gösterilsin mi (Kontrol paneli açık ve boşta görünüm "saat, pil ve bağlantılar").</summary>
     public bool ShowIdleRadio => ShowRadioStatus && !_focus.HasRunning
-        && (IdleDisplay.ShowRadioWhenCollapsed(Settings.IdleDisplayMode)
-            || (IdleDisplay.ShowRadio(Settings.IdleDisplayMode) && State == NotchState.Peek));
+        && (IdleDisplay.ShowRadioWhenCollapsed(Settings.Notch.IdleDisplay)
+            || (IdleDisplay.ShowRadio(Settings.Notch.IdleDisplay) && State == NotchState.Peek));
 
     /// <summary>"Çentiği açık tut" açık: fare çıkınca kapanmaz.</summary>
     public bool IsPinned => _controller.IsPinned;
@@ -174,7 +174,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     public void UpdatePrivacyState(Koy.Core.Privacy.PrivacyState state)
     {
-        if (!Settings.ShowPrivacyIndicator)
+        if (!Settings.Notch.ShowPrivacyIndicator)
         {
             IsCameraActive = false;
             IsMicrophoneActive = false;
@@ -303,7 +303,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         Home = new HomeViewModel(music, status, focus, systemStats, quickLaunch, shellActions, () => _controller.GoToPanel(NotchPanel.Focus),
             controlCenter.BluetoothDevices);
         quickLaunch.HoldOpen = HoldOpenForPicker;
-        _visibility = visibility ?? new VisibilityController(settings.NotchVisibility);
+        _visibility = visibility ?? new VisibilityController(settings.Notch.Visibility);
         _dispatcher = dispatcher ?? (System.Windows.Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher);
         Osd = osd ?? new OsdIndicatorViewModel(_dispatcher);
 
@@ -328,7 +328,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
         // Windows tepsisi gizli olduğu için Wi-Fi ve Bluetooth'un durumunu gösteren tek yer çentik.
         ShowRadioStatus = _controller.EnabledPanels.Contains(NotchPanel.ControlCenter);
-        if (ShowRadioStatus && IdleDisplay.ShowRadio(Settings.IdleDisplayMode))
+        if (ShowRadioStatus && IdleDisplay.ShowRadio(Settings.Notch.IdleDisplay))
             _controlCenter.StartRadioStatus();
 
         UpdateClock();
@@ -540,8 +540,8 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         // Arama açıkken sayfalar görünmez; servisleri de çalışmaz.
         var isExpanded = State == NotchState.Expanded && !IsSearchOpen;
         // Ses çubukları "kapak ve dalga" ayarına bağlı; pil tasarrufu hareketi kısarken hiç yakalanmaz.
-        _music.SetSpectrumAllowed(Settings.MusicShowWaveform && !ReduceMotion);
-        _music.Lyrics.SetAllowed(Settings.MusicLyricsEnabled);
+        _music.SetSpectrumAllowed(Settings.Music.ShowWaveform && !ReduceMotion);
+        _music.Lyrics.SetAllowed(Settings.Music.LyricsEnabled);
         _music.SetActive(isExpanded && CurrentPanel == NotchPanel.Home);
         // Saat, hava ve pil her sekmede üstteki durum satırında görünür.
         _status.SetActive(isExpanded);
@@ -585,7 +585,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
             var isCard = Osd.Type == OsdType.Card;
             TargetWidth = isCard ? NotchLayout.CardWidth : 260;
             TargetHeight = isCard ? NotchLayout.CardHeight : 40;
-            TargetCornerRadius = NotchStyle.CornerRadius(Settings.NotchStyle, isCard ? NotchSurface.Card : NotchSurface.Closed,
+            TargetCornerRadius = NotchStyle.CornerRadius(Settings.Notch.Style, isCard ? NotchSurface.Card : NotchSurface.Closed,
                 TargetHeight, isCard ? 28 : 20);
         }
         else
@@ -598,7 +598,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
                 NotchState.Expanded => (NotchLayout.ExpandedWidth, NotchLayout.ExpandedHeight, 34),
                 _ => (236, 34, 18)
             };
-            TargetCornerRadius = NotchStyle.CornerRadius(Settings.NotchStyle,
+            TargetCornerRadius = NotchStyle.CornerRadius(Settings.Notch.Style,
                 State == NotchState.Expanded ? NotchSurface.Expanded : NotchSurface.Closed, TargetHeight, TargetCornerRadius);
         }
 

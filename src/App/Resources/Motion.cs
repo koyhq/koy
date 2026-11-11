@@ -29,8 +29,8 @@ public static class Motion
     {
         var offline = SystemParameters.PowerLineStatus == PowerLineStatus.Offline;
         var batteryReduce = BatterySaverPolicy.ShouldReduceMotion(
-            settings.BatterySaverReduceMotion, offline, offline ? BatteryStatus.Discharging : BatteryStatus.Idle);
-        Scale = MotionPolicy.Scale(settings.AnimationSpeed, settings.RespectReduceMotion, SystemParameters.ClientAreaAnimation, batteryReduce);
+            settings.Appearance.BatterySaverReduceMotion, offline, offline ? BatteryStatus.Discharging : BatteryStatus.Idle);
+        Scale = MotionPolicy.Scale(settings.Appearance.AnimationSpeed, settings.Appearance.RespectReduceMotion, SystemParameters.ClientAreaAnimation, batteryReduce);
     }
 
     private static Duration D(double ms) => new(TimeSpan.FromMilliseconds(MotionPolicy.ScaledMilliseconds(ms, Scale)));

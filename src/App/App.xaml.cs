@@ -85,7 +85,7 @@ public partial class App : Application
         ThemeManager.Apply(this, settings);
 
         // İlk açılış sihirbazı: Ayar henüz tamamlanmadıysa 3 adımlı sihirbazı başlat
-        bool isFirstRun = !settings.FirstRunCompleted;
+        bool isFirstRun = !settings.General.FirstRunCompleted;
         if (isFirstRun)
         {
             var wizard = new SetupWizardWindow();
@@ -96,7 +96,7 @@ public partial class App : Application
         // Sihirbaz X ile kapatıldıysa (tamamlanmadıysa) dock açılıp görev çubuğu gizlenmesin.
         settings = FirstRunPolicy.ApplySafeDefaultsIfIncomplete(settings);
 
-        var culture = new System.Globalization.CultureInfo(settings.Language == "en" ? "en-US" : "tr-TR");
+        var culture = new System.Globalization.CultureInfo(settings.General.Language == "en" ? "en-US" : "tr-TR");
         System.Globalization.CultureInfo.CurrentUICulture = culture;
         System.Globalization.CultureInfo.CurrentCulture = culture;
         Thread.CurrentThread.CurrentUICulture = culture;
@@ -110,13 +110,13 @@ public partial class App : Application
         _trayIconManager.ExplorerRestarted += OnExplorerRestarted;
         // Dock açılacaksa Koy simgesi dock'un sağ ucunda olacağı için bildirim alanı simgesi hiç eklenmez
         // (dock hiç pencere açamazsa özellikler başlayınca RefreshNotificationAreaIcon simgeyi geri getirir).
-        _trayIconManager.Start(showIcon: !settings.DockEnabled);
+        _trayIconManager.Start(showIcon: !settings.Dock.Enabled);
 
         // Yalnız açık özellikler başlatılır. Dock kapalıyken görev çubuğuna hiç dokunulmaz.
-        if (settings.NotchEnabled)
+        if (settings.Notch.Enabled)
             _features.Add(new NotchFeature(settings, _services));
 
-        if (settings.DockEnabled)
+        if (settings.Dock.Enabled)
             _features.Add(CreateDockFeature(settings));
 
         foreach (var feature in _features)
@@ -135,7 +135,7 @@ public partial class App : Application
         {
             KoyWindow.ShowInstance();
         }
-        else if (UpdateFlowPolicy.ShouldShowWhatsNew(AppInfo.Version, settings.LastSeenVersion, settings.FirstRunCompleted))
+        else if (UpdateFlowPolicy.ShouldShowWhatsNew(AppInfo.Version, settings.General.LastSeenVersion, settings.General.FirstRunCompleted))
         {
             KoyWindow.ShowInstance();
             KoyWindow.Instance.ViewModel.OpenWhatsNewOverlay();
@@ -201,7 +201,7 @@ public partial class App : Application
     {
         var store = new SettingsStore(SettingsStore.DefaultPath);
         var current = store.Load();
-        UpdateDockState(!current.DockEnabled);
+        UpdateDockState(!current.Dock.Enabled);
     }
 
     private async Task PlayPauseAsync()
@@ -297,8 +297,8 @@ public partial class App : Application
 
         var store = new SettingsStore(SettingsStore.DefaultPath);
         var current = store.Load();
-        if (current.NotchEnabled != enabled)
-            store.Save(current with { NotchEnabled = enabled });
+        if (current.Notch.Enabled != enabled)
+            store.Save(current with { Notch = current.Notch with { Enabled = enabled } });
 
         if (KoyWindow.IsCreated)
             KoyWindow.SyncFeatureStates(notchEnabled: enabled);
@@ -335,8 +335,8 @@ public partial class App : Application
 
         var store = new SettingsStore(SettingsStore.DefaultPath);
         var current = store.Load();
-        if (current.DockEnabled != enabled)
-            store.Save(current with { DockEnabled = enabled });
+        if (current.Dock.Enabled != enabled)
+            store.Save(current with { Dock = current.Dock with { Enabled = enabled } });
 
         if (KoyWindow.IsCreated)
             KoyWindow.SyncFeatureStates(dockEnabled: enabled);
@@ -371,7 +371,7 @@ public partial class App : Application
 
         var existingDock = _features.OfType<DockFeature>().FirstOrDefault();
         var settings = new SettingsStore(SettingsStore.DefaultPath).Load();
-        if (existingDock is not null && settings.DockEnabled)
+        if (existingDock is not null && settings.Dock.Enabled)
         {
             existingDock.ApplySettings(settings);
             return;
@@ -383,7 +383,7 @@ public partial class App : Application
             _features.Remove(existingDock);
         }
 
-        if (settings.DockEnabled)
+        if (settings.Dock.Enabled)
         {
             var dock = CreateDockFeature(settings);
             _features.Add(dock);
@@ -405,7 +405,7 @@ public partial class App : Application
         }
 
         var settings = new SettingsStore(SettingsStore.DefaultPath).Load();
-        if (settings.NotchEnabled)
+        if (settings.Notch.Enabled)
         {
             var notch = new NotchFeature(settings, _services);
             _features.Add(notch);

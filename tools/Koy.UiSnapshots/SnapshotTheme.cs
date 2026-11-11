@@ -16,6 +16,6 @@ internal static class SnapshotTheme
 
     public static void Apply(Application app, string theme)
     {
-        ThemeManager.Apply(app, new AppSettings { Theme = theme == "light" ? Koy.Core.Appearance.AppTheme.Light : Koy.Core.Appearance.AppTheme.Dark, Material = Program.Material }, systemUsesLightOverride: false);
+        ThemeManager.Apply(app, new AppSettings { Appearance = new AppearanceSettings { Theme = theme == "light" ? Koy.Core.Appearance.AppTheme.Light : Koy.Core.Appearance.AppTheme.Dark, Material = Program.Material } }, systemUsesLightOverride: false);
     }
 }

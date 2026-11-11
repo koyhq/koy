@@ -13,7 +13,13 @@ public static class FeatureStateSyncPolicy
     public static AppSettings Reconcile(AppSettings current, bool? notchEnabled = null, bool? dockEnabled = null) =>
         current with
         {
-            NotchEnabled = notchEnabled ?? current.NotchEnabled,
-            DockEnabled = dockEnabled ?? current.DockEnabled
+            Notch = current.Notch with
+            {
+                Enabled = notchEnabled ?? current.Notch.Enabled
+            },
+            Dock = current.Dock with
+            {
+                Enabled = dockEnabled ?? current.Dock.Enabled
+            }
         };
 }

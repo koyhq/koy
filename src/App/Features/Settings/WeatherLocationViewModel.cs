@@ -61,7 +61,7 @@ public sealed partial class WeatherLocationViewModel : ObservableObject
         _loading = true;
         try
         {
-            UseLocation = settings.WeatherUseLocation;
+            UseLocation = settings.Weather.UseLocation;
             HasLocation = WeatherLocationPolicy.HasLocation(settings);
             StatusText = DescribeStatus(settings);
             ShowLocationSettingsLink = false;
@@ -77,9 +77,9 @@ public sealed partial class WeatherLocationViewModel : ObservableObject
         if (!WeatherLocationPolicy.HasLocation(s))
             return Strings.Get("WeatherStatusNone");
 
-        return s.WeatherLocationSource == WeatherLocationSource.Device
+        return s.Weather.LocationSource == WeatherLocationSource.Device
             ? Strings.Get("WeatherStatusDevice")
-            : string.Format(Strings.Get("WeatherStatusCity"), s.WeatherCity);
+            : string.Format(Strings.Get("WeatherStatusCity"), s.Weather.City);
     }
 
     partial void OnUseLocationChanged(bool value)
@@ -109,7 +109,7 @@ public sealed partial class WeatherLocationViewModel : ObservableObject
 
             // Bu arada anahtar kapatıldıysa sonuç yazılmaz.
             var current = _store.Load();
-            if (!current.WeatherUseLocation)
+            if (!current.Weather.UseLocation)
                 return;
 
             var updated = WeatherLocationPolicy.ApplyDeviceLocation(current, result, DateTimeOffset.UtcNow);
@@ -148,7 +148,7 @@ public sealed partial class WeatherLocationViewModel : ObservableObject
         Results.Clear();
         try
         {
-            var language = _store.Load().Language;
+            var language = _store.Load().General.Language;
             foreach (var place in await _geocoding.SearchAsync(Query, language))
                 Results.Add(place);
         }

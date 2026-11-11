@@ -58,7 +58,7 @@ public static class ThemeManager
         Install(app);
         _last = settings;
 
-        var theme = ThemeSetting.Resolve(settings.Theme, systemUsesLightOverride ?? SystemUsesLightTheme());
+        var theme = ThemeSetting.Resolve(settings.Appearance.Theme, systemUsesLightOverride ?? SystemUsesLightTheme());
         Current = theme;
 
         var merged = app.Resources.MergedDictionaries;
@@ -83,7 +83,7 @@ public static class ThemeManager
             };
         }
 
-        if (settings.Theme == AppTheme.System)
+        if (settings.Appearance.Theme == AppTheme.System)
             WatchSystemTheme(app);
 
         Applied?.Invoke();
@@ -95,7 +95,7 @@ public static class ThemeManager
         o.Clear();
 
         // Köşeler
-        var r = CornerRadii.For(CornerSetting.Resolve(settings.CornerRadius));
+        var r = CornerRadii.For(CornerSetting.Resolve(settings.Appearance.CornerRadius));
         o["KoyRadiusWindow"] = new CornerRadius(r.Window);
         o["KoyRadiusWindowTop"] = new CornerRadius(Math.Max(0, r.Window - 1), Math.Max(0, r.Window - 1), 0, 0);
         o["KoyRadiusWindowBottomLeft"] = new CornerRadius(0, 0, 0, Math.Max(0, r.Window - 1));
@@ -104,7 +104,7 @@ public static class ThemeManager
         o["KoyRadiusSmall"] = new CornerRadius(r.Small);
 
         // Vurgu: Windows vurgusu ya da seçilen renk; varsayılan Koy mavisi tema sözlüğünden gelir.
-        string? accentHex = settings.UseWindowsAccent ? WindowsAccentHex() : settings.AccentColor;
+        string? accentHex = settings.Appearance.UseWindowsAccent ? WindowsAccentHex() : settings.Appearance.AccentColor;
         if (!string.IsNullOrWhiteSpace(accentHex))
         {
             var surface = palette["KoyBgRow"] is SolidColorBrush b ? ToHex(b.Color) : "#1F1F23";
@@ -192,7 +192,7 @@ public static class ThemeManager
                 return;
             app.Dispatcher.BeginInvoke(() =>
             {
-                if (_last is { } s && (s.Theme == AppTheme.System || s.UseWindowsAccent))
+                if (_last is { } s && (s.Appearance.Theme == AppTheme.System || s.Appearance.UseWindowsAccent))
                     Apply(app, s);
             });
         };

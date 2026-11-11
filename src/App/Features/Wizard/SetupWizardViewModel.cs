@@ -111,13 +111,25 @@ public sealed partial class SetupWizardViewModel : ObservableObject
 
         var updated = settings with
         {
-            FirstRunCompleted = true,
-            LastSeenVersion = AppInfo.Version,
-            Language = SelectedLanguage,
-            NotchEnabled = notchEnabled,
-            DockEnabled = dockEnabled,
-            HideWindowsTaskbar = dockEnabled,
-            WeatherUseLocation = UseLocation
+            General = settings.General with
+            {
+                FirstRunCompleted = true,
+                LastSeenVersion = AppInfo.Version,
+                Language = SelectedLanguage
+            },
+            Notch = settings.Notch with
+            {
+                Enabled = notchEnabled
+            },
+            Dock = settings.Dock with
+            {
+                Enabled = dockEnabled,
+                HideWindowsTaskbar = dockEnabled
+            },
+            Weather = settings.Weather with
+            {
+                UseLocation = UseLocation
+            }
         };
 
         // Konum alındıysa koordinat ayara yazılır; alınamadıysa hava durumu gizli kalır.

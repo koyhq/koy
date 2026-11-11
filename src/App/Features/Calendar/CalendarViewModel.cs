@@ -39,7 +39,7 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
         _dispatcher = dispatcher ?? Dispatcher.CurrentDispatcher;
         _events = events ?? new SharedEvents();
         _today = today ?? (() => DateOnly.FromDateTime(DateTime.Today));
-        _culture = new CultureInfo(settings.Language == "en" ? "en-US" : "tr-TR");
+        _culture = new CultureInfo(settings.General.Language == "en" ? "en-US" : "tr-TR");
         WeekdayHeaders = _culture.Name.StartsWith("tr", StringComparison.OrdinalIgnoreCase)
             ? ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz"]
             : ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];

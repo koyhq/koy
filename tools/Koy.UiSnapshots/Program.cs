@@ -101,7 +101,7 @@ public static class Program
         // Ayarlar geçici bir dosyada: gerçek %AppData%\Koy\settings.json'a dokunulmaz.
         var tempSettings = Path.Combine(Path.GetTempPath(), "koy-uisnap-" + Guid.NewGuid().ToString("N") + ".json");
         var store = new SettingsStore(tempSettings);
-        store.Save(new AppSettings { FirstRunCompleted = true, Material = Material });
+        store.Save(new AppSettings { General = new GeneralSettings { FirstRunCompleted = true }, Appearance = new AppearanceSettings { Material = Material } });
 
         try
         {
@@ -181,7 +181,7 @@ public static class Program
         var tempDir = Path.Combine(Path.GetTempPath(), "koy-uisnap-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempDir);
         var store = new SettingsStore(Path.Combine(tempDir, "settings.json"));
-        store.Save(new AppSettings { FirstRunCompleted = true, Material = Material });
+        store.Save(new AppSettings { General = new GeneralSettings { FirstRunCompleted = true }, Appearance = new AppearanceSettings { Material = Material } });
 
         try
         {
@@ -229,18 +229,30 @@ public static class Program
     {
         var settings = new AppSettings
         {
-            FirstRunCompleted = true,
-            NotchStyle = notchStyle,
-            IdleDisplayMode = idleMode,
-            Material = Material,
-            WeatherLocationSource = Koy.Core.Weather.WeatherLocationSource.City,
-            WeatherCity = "İstanbul, Türkiye",
-            WeatherLatitude = 41.01,
-            WeatherLongitude = 28.97,
-            ControlCenterLayout = tileOrder ?? new AppSettings().ControlCenterLayout
+            General = new GeneralSettings
+            {
+                FirstRunCompleted = true
+            },
+            Notch = new NotchSettings
+            {
+                Style = notchStyle,
+                IdleDisplay = idleMode,
+                ControlCenterLayout = tileOrder is null ? new AppSettings().Notch.ControlCenterLayout : new Koy.Core.Settings.ValueList<string>(tileOrder)
+            },
+            Appearance = new AppearanceSettings
+            {
+                Material = Material
+            },
+            Weather = new WeatherSettings
+            {
+                LocationSource = Koy.Core.Weather.WeatherLocationSource.City,
+                City = "İstanbul, Türkiye",
+                Latitude = 41.01,
+                Longitude = 28.97
+            }
         };
         if (language is not null)
-            settings.Language = language;
+            settings.General.Language = language;
 
         var controller = new Koy.Core.Notch.NotchController();
         controller.SetEnabledPanels(Koy.Core.Notch.NotchPanels.Order);
@@ -343,14 +355,14 @@ public static class Program
         {
             shape.Width = Koy.Core.Notch.NotchLayout.ExpandedWidth;
             shape.Height = Koy.Core.Notch.NotchLayout.ExpandedHeight;
-            shape.CornerRadius = Koy.Core.Notch.NotchStyle.CornerRadius(set.Vm.Settings.NotchStyle, Koy.Core.Notch.NotchSurface.Expanded, shape.Height, 34);
+            shape.CornerRadius = Koy.Core.Notch.NotchStyle.CornerRadius(set.Vm.Settings.Notch.Style, Koy.Core.Notch.NotchSurface.Expanded, shape.Height, 34);
         }
         else
         {
             var peek = set.Vm.State == Koy.Core.Notch.NotchState.Peek;
             shape.Width = peek ? 300 : set.Vm.IsMusicPlaying ? 280 : 236;
             shape.Height = peek ? 38 : 34;
-            shape.CornerRadius = Koy.Core.Notch.NotchStyle.CornerRadius(set.Vm.Settings.NotchStyle, Koy.Core.Notch.NotchSurface.Closed, shape.Height, 18);
+            shape.CornerRadius = Koy.Core.Notch.NotchStyle.CornerRadius(set.Vm.Settings.Notch.Style, Koy.Core.Notch.NotchSurface.Closed, shape.Height, 18);
         }
 
         Settle();
@@ -648,7 +660,7 @@ public static class Program
     {
         var tempSettings = Path.Combine(Path.GetTempPath(), "koy-uisnap-" + Guid.NewGuid().ToString("N") + ".json");
         var store = new SettingsStore(tempSettings);
-        store.Save(new AppSettings { FirstRunCompleted = true, Material = Material });
+        store.Save(new AppSettings { General = new GeneralSettings { FirstRunCompleted = true }, Appearance = new AppearanceSettings { Material = Material } });
 
         try
         {

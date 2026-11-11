@@ -20,48 +20,31 @@ public readonly record struct DockSettingsDiff(
 
     public static DockSettingsDiff Compare(AppSettings before, AppSettings after)
     {
-        var monitors = before.MonitorTarget != after.MonitorTarget
-                       || before.NewScreenDefault != after.NewScreenDefault
-                       || !new AppSettings { Monitors = before.Monitors }.Equals(new AppSettings { Monitors = after.Monitors });
+        var monitors = before.Displays != after.Displays;
 
-        var appBar = DockProximityMapping.Effective(before.DockStyle, before.DockProximity) == DockProximityMode.ReserveSpace
-                     != (DockProximityMapping.Effective(after.DockStyle, after.DockProximity) == DockProximityMode.ReserveSpace)
-                     || before.DockStyle != after.DockStyle
-                     || before.HideWindowsTaskbar != after.HideWindowsTaskbar;
+        var appBar = DockProximityMapping.Effective(before.Dock.Style, before.Dock.Proximity) == DockProximityMode.ReserveSpace
+                     != (DockProximityMapping.Effective(after.Dock.Style, after.Dock.Proximity) == DockProximityMode.ReserveSpace)
+                     || before.Dock.Style != after.Dock.Style
+                     || before.Dock.HideWindowsTaskbar != after.Dock.HideWindowsTaskbar;
 
-        var taskbar = before.HideWindowsTaskbar != after.HideWindowsTaskbar;
-        var tray = before.DockShowTray != after.DockShowTray || taskbar;
-        var power = before.BatterySaverReduceMotion != after.BatterySaverReduceMotion;
+        var taskbar = before.Dock.HideWindowsTaskbar != after.Dock.HideWindowsTaskbar;
+        var tray = before.Dock.ShowTray != after.Dock.ShowTray || taskbar;
+        var power = before.Appearance.BatterySaverReduceMotion != after.Appearance.BatterySaverReduceMotion;
 
-        // ViewModel / VisibilityController / EdgeTracker ayarı kurulurken okur: bunlardan biri değiştiyse yeniden kurulur
-        // (pencere ve tutamaç aynı kalır).
-        var rebuild = before.DockStyle != after.DockStyle
-                      || before.DockIconAlignment != after.DockIconAlignment
-                      || before.DockProximity != after.DockProximity
-                      || before.DockVisibility != after.DockVisibility
-                      || before.DockHoverMagnify != after.DockHoverMagnify
-                      || before.DockHideInFullscreen != after.DockHideInFullscreen
-                      || before.DockEdgeReveal != after.DockEdgeReveal
-                      || before.DockShowStartButton != after.DockShowStartButton
-                      || before.DockStartIcon != after.DockStartIcon
-                      || before.DockStartIconPath != after.DockStartIconPath
-                      || before.DockShowFolders != after.DockShowFolders
-                      || before.DockShowRecents != after.DockShowRecents
-                      || before.DockShowTray != after.DockShowTray
-                      || before.DockSmallTray != after.DockSmallTray
-                      || before.DockShowBadges != after.DockShowBadges
-                      || before.DockThumbnailPreview != after.DockThumbnailPreview
-                      || before.DockThumbnailDelayMs != after.DockThumbnailDelayMs
-                      || before.DockDodgeDelayMs != after.DockDodgeDelayMs
-                      || before.DockIconSize != after.DockIconSize
-                      || before.DockIndicatorStyle != after.DockIndicatorStyle
-                      || before.MiddleClickAction != after.MiddleClickAction
-                      || before.Material != after.Material
-                      || before.MaterialReadabilityGuard != after.MaterialReadabilityGuard
-                      || before.AnimationSpeed != after.AnimationSpeed
-                      || before.RespectReduceMotion != after.RespectReduceMotion
+        // ViewModel / VisibilityController / EdgeTracker ayarı kurulurken okur: Dock bölümündeki herhangi bir alan
+        // (Enabled ve HideWindowsTaskbar hariç: onları DockFeature ayrıca ele alır) ya da dock'un çizimini etkileyen
+        // görünüm alanları değiştiyse yeniden kurulur (pencere ve tutamaç aynı kalır). DockItems (sıra, klasörler)
+        // bilerek dışarıda: dock sürüklenince kendini yeniden kurmamalı.
+        var rebuild = Rebuildable(before.Dock) != Rebuildable(after.Dock)
+                      || before.Appearance.Material != after.Appearance.Material
+                      || before.Appearance.MaterialReadabilityGuard != after.Appearance.MaterialReadabilityGuard
+                      || before.Appearance.AnimationSpeed != after.Appearance.AnimationSpeed
+                      || before.Appearance.RespectReduceMotion != after.Appearance.RespectReduceMotion
                       || power;
 
         return new DockSettingsDiff(rebuild, monitors, appBar, taskbar, tray, power);
     }
+
+    // Enabled ve HideWindowsTaskbar yeniden kurmayı değil, uzlaştırmayı (görev çubuğu, AppBar) ilgilendirir.
+    private static DockSettings Rebuildable(DockSettings dock) => dock with { Enabled = default, HideWindowsTaskbar = default };
 }

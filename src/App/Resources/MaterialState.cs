@@ -29,7 +29,7 @@ public static class MaterialState
 
     /// <summary>Açık çentik ve kartlar için etkin seviye. "Açık çentik malzemeyi izlesin" kapalıysa hep Katı.</summary>
     public static MaterialLevel ForNotch(AppSettings settings) =>
-        settings.NotchFollowsMaterial ? Resolve(settings, ReadabilityGuard.Notch) : MaterialLevel.Solid;
+        settings.Notch.FollowsMaterial ? Resolve(settings, ReadabilityGuard.Notch) : MaterialLevel.Solid;
 
     /// <summary>Dock yüzeyi için etkin seviye (çentikle aynı koyu taban).</summary>
     public static MaterialLevel ForDock(AppSettings settings) => Resolve(settings, ReadabilityGuard.Notch);
@@ -44,10 +44,10 @@ public static class MaterialState
 
     private static MaterialLevel Resolve(AppSettings settings, ReadabilityGuard.Surface surface)
     {
-        var requested = settings.Material;
-        if (requested != MaterialLevel.Solid && settings.MaterialReadabilityGuard)
+        var requested = settings.Appearance.Material;
+        if (requested != MaterialLevel.Solid && settings.Appearance.MaterialReadabilityGuard)
             EnsureSampled();
-        return ReadabilityGuard.Effective(requested, settings.MaterialReadabilityGuard, Wallpaper, surface);
+        return ReadabilityGuard.Effective(requested, settings.Appearance.MaterialReadabilityGuard, Wallpaper, surface);
     }
 
     private static void EnsureSampled()

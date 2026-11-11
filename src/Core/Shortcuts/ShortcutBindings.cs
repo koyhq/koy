@@ -39,27 +39,27 @@ public static class ShortcutBindings
 
     public static string GetText(AppSettings settings, ShortcutAction action) => action switch
     {
-        ShortcutAction.ToggleNotch => settings.ShortcutToggleNotch,
-        ShortcutAction.OpenShelf => settings.ShortcutOpenShelf,
-        ShortcutAction.ToggleDock => settings.ShortcutToggleDock,
-        ShortcutAction.OpenMenu => settings.ShortcutOpenMenu,
-        ShortcutAction.PlayPause => settings.ShortcutPlayPause,
-        ShortcutAction.OpenSearch => settings.ShortcutOpenSearch,
-        ShortcutAction.OpenSearchClipboard => settings.ShortcutOpenSearchClipboard,
-        ShortcutAction.VoiceCommand => settings.ShortcutVoiceCommand,
+        ShortcutAction.ToggleNotch => settings.Shortcuts.ToggleNotch,
+        ShortcutAction.OpenShelf => settings.Shortcuts.OpenShelf,
+        ShortcutAction.ToggleDock => settings.Shortcuts.ToggleDock,
+        ShortcutAction.OpenMenu => settings.Shortcuts.OpenMenu,
+        ShortcutAction.PlayPause => settings.Shortcuts.PlayPause,
+        ShortcutAction.OpenSearch => settings.Shortcuts.OpenSearch,
+        ShortcutAction.OpenSearchClipboard => settings.Shortcuts.OpenSearchClipboard,
+        ShortcutAction.VoiceCommand => settings.Shortcuts.VoiceCommand,
         _ => ""
     };
 
     public static AppSettings WithText(AppSettings settings, ShortcutAction action, string text) => action switch
     {
-        ShortcutAction.ToggleNotch => settings with { ShortcutToggleNotch = text },
-        ShortcutAction.OpenShelf => settings with { ShortcutOpenShelf = text },
-        ShortcutAction.ToggleDock => settings with { ShortcutToggleDock = text },
-        ShortcutAction.OpenMenu => settings with { ShortcutOpenMenu = text },
-        ShortcutAction.PlayPause => settings with { ShortcutPlayPause = text },
-        ShortcutAction.OpenSearch => settings with { ShortcutOpenSearch = text },
-        ShortcutAction.OpenSearchClipboard => settings with { ShortcutOpenSearchClipboard = text },
-        ShortcutAction.VoiceCommand => settings with { ShortcutVoiceCommand = text },
+        ShortcutAction.ToggleNotch => settings with { Shortcuts = settings.Shortcuts with { ToggleNotch = text } },
+        ShortcutAction.OpenShelf => settings with { Shortcuts = settings.Shortcuts with { OpenShelf = text } },
+        ShortcutAction.ToggleDock => settings with { Shortcuts = settings.Shortcuts with { ToggleDock = text } },
+        ShortcutAction.OpenMenu => settings with { Shortcuts = settings.Shortcuts with { OpenMenu = text } },
+        ShortcutAction.PlayPause => settings with { Shortcuts = settings.Shortcuts with { PlayPause = text } },
+        ShortcutAction.OpenSearch => settings with { Shortcuts = settings.Shortcuts with { OpenSearch = text } },
+        ShortcutAction.OpenSearchClipboard => settings with { Shortcuts = settings.Shortcuts with { OpenSearchClipboard = text } },
+        ShortcutAction.VoiceCommand => settings with { Shortcuts = settings.Shortcuts with { VoiceCommand = text } },
         _ => settings
     };
 

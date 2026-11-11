@@ -324,7 +324,7 @@ public partial class NotchWindow : Window
             return;
 
         // Tekerlek eylemi ayardan: panel değiştir ya da sistem sesi (yukarı = yükselt).
-        if (ViewModel.Settings.WheelAction == WheelAction.Volume)
+        if (ViewModel.Settings.Notch.WheelAction == WheelAction.Volume)
         {
             if (e.Delta != 0)
                 ViewModel.ControlCenter.AdjustVolume(e.Delta > 0 ? WheelVolumeStepPercent : -WheelVolumeStepPercent);

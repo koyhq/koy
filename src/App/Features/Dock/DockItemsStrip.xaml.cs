@@ -75,7 +75,7 @@ public partial class DockItemsStrip : UserControl
             sender is FrameworkElement { DataContext: DockItemViewModel item })
         {
             ViewModel?.ClosePreviewNow();
-            if (ViewModel?.Settings.MiddleClickAction == MiddleClickAction.Close)
+            if (ViewModel?.Settings.Dock.MiddleClickAction == MiddleClickAction.Close)
                 item.CloseCommand.Execute(null);
             else
                 item.MiddleClickCommand.Execute(null);

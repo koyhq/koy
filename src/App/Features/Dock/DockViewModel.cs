@@ -133,7 +133,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     // Sağ bölümün neyi göstereceği Core'daki kuraldan gelir (kapsül ve tam genişlik aynısını kullanır).
     private DockRightSection RightSection =>
-        DockRightSection.Resolve(ShowFolders, ShowRecents, HasTray, _settings.DockSmallTray);
+        DockRightSection.Resolve(ShowFolders, ShowRecents, HasTray, _settings.Dock.SmallTray);
 
     /// <summary>Uygulamalarla Koy menüsü arasındaki ilk ayırıcı: yalnız ortada gösterilecek bir düğme varsa görünür.</summary>
     public bool ShowRightSection => RightSection.ShowFirstSeparator;
@@ -157,7 +157,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     public StartMenuActions? StartContextMenu { get; }
 
     /// <summary>Son kullanılanlar düğmesi görünür mü (ayar açık ve servis var).</summary>
-    public bool ShowRecents => _settings.DockShowRecents && _recentFiles is not null;
+    public bool ShowRecents => _settings.Dock.ShowRecents && _recentFiles is not null;
 
     [ObservableProperty]
     private bool _isRecentsOpen;
@@ -306,10 +306,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     /// <summary>Stile göre geçerli yakınlık modu: tam genişlikte yalnız Yer ayır (hep göster) ve Hep gizli (otomatik gizle).</summary>
     public DockProximityMode EffectiveProximity =>
-        DockProximityMapping.Effective(_settings.DockStyle, _settings.DockProximity);
+        DockProximityMapping.Effective(_settings.Dock.Style, _settings.Dock.Proximity);
 
     /// <summary>Tam genişlikte ikon şeridinin yeri. Ayar değişince ViewModel yeniden kurulur (DockSettingsDiff), bildirim gerekmez.</summary>
-    public HorizontalAlignment StripAlignment => _settings.DockIconAlignment switch
+    public HorizontalAlignment StripAlignment => _settings.Dock.IconAlignment switch
     {
         DockIconAlignment.Left => HorizontalAlignment.Left,
         DockIconAlignment.Right => HorizontalAlignment.Right,
@@ -349,18 +349,18 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _mediaService = mediaService;
         _trayService = trayService;
 
-        _iconSize = settings.DockIconSize > 0 ? settings.DockIconSize : 28.0;
+        _iconSize = settings.Dock.IconSize > 0 ? settings.Dock.IconSize : 28.0;
         _preferredIconSize = _iconSize;
         _itemSize = DockFitMath.ItemSizeFor(_iconSize);
 
-        _magnificationEnabled = settings.DockHoverMagnify;
+        _magnificationEnabled = settings.Dock.HoverMagnify;
 
-        _isFullWidthMode = settings.DockStyle == DockStyleMode.FullWidth;
-        _showStartButton = settings.DockShowStartButton;
+        _isFullWidthMode = settings.Dock.Style == DockStyleMode.FullWidth;
+        _showStartButton = settings.Dock.ShowStartButton;
         // Düğme gizliyken dosya okunmaz.
-        StartIcon = settings.DockShowStartButton ? DockStartIconLoader.Load(settings) : null;
-        _showFolders = settings.DockShowFolders;
-        _showBadges = settings.DockShowBadges;
+        StartIcon = settings.Dock.ShowStartButton ? DockStartIconLoader.Load(settings) : null;
+        _showFolders = settings.Dock.ShowFolders;
+        _showBadges = settings.Dock.ShowBadges;
 
         _materialSettings = settings;
         UpdateMaterialSurfaces();
@@ -371,7 +371,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
         _thumbnailHoverTimer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromMilliseconds(Math.Max(50, settings.DockThumbnailDelayMs))
+            Interval = TimeSpan.FromMilliseconds(Math.Max(50, settings.Dock.ThumbnailDelayMs))
         };
         _thumbnailHoverTimer.Tick += OnThumbnailTimerTick;
 
@@ -383,7 +383,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
         _dodgeHoverTimer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromMilliseconds(Math.Max(50, settings.DockDodgeDelayMs))
+            Interval = TimeSpan.FromMilliseconds(Math.Max(50, settings.Dock.DodgeDelayMs))
         };
         _dodgeHoverTimer.Tick += OnDodgeHoverTimerTick;
 
@@ -685,7 +685,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         double icon;
         double maxWidth;
 
-        if (_settings.DockStyle == DockStyleMode.FullWidth)
+        if (_settings.Dock.Style == DockStyleMode.FullWidth)
         {
             if (_centerWidth <= 0)
                 return;
@@ -834,7 +834,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
         var resolved = DockPositionResolver.Resolve(
             _currentMonitor,
-            _settings.DockStyle,
+            _settings.Dock.Style,
             EffectiveProximity,
             _lastContentWidth,
             _foregroundWindowBounds,
@@ -842,8 +842,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             _isMouseAtBottomEdge,
             effectiveMouseOver,
             _isForegroundWindowFullscreen,
-            _settings.DockHideInFullscreen,
-            _settings.DockEdgeReveal);
+            _settings.Dock.HideInFullscreen,
+            _settings.Dock.EdgeReveal);
 
         resolved = StabilizeSnap(resolved);
 
@@ -874,7 +874,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
         // Tam ekran bu monitör için hesaplanır (yan ekrandaki oyun bu ekrandaki dock'u gizlemez; denetleyicinin
         // sistem geneli bayrağı bilerek kullanılmaz).
-        var isBlockedByFullscreen = _settings.DockHideInFullscreen && _isForegroundWindowFullscreen;
+        var isBlockedByFullscreen = _settings.Dock.HideInFullscreen && _isForegroundWindowFullscreen;
         var shouldShow = !resolved.IsHidden && !isBlockedByFullscreen;
         if (_visibilityController is not null && EffectiveProximity != DockProximityMode.ReserveSpace)
         {
@@ -918,7 +918,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     {
         _previewCloseTimer.Stop();
 
-        if (!_settings.DockThumbnailPreview || !item.HasOpenWindows)
+        if (!_settings.Dock.ThumbnailPreview || !item.HasOpenWindows)
         {
             _thumbnailHoverTimer.Stop();
             IsPreviewPopupOpen = false;
@@ -1103,8 +1103,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             }
             else if (dragged is DockFolderViewModel folderVm)
             {
-                var newOrder = PinnedOrder.Move(_settings.DockPinnedOrder, folderVm.Id, target);
-                DockFeature.SavePinnedOrder(newOrder, _settings.DockFolders, _settings);
+                var newOrder = PinnedOrder.Move(_settings.DockItems.PinnedOrder, folderVm.Id, target);
+                DockFeature.SavePinnedOrder(newOrder, _settings.DockItems.Folders, _settings);
             }
         }
 
@@ -1186,15 +1186,15 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     public void DissolveFolder(DockFolderViewModel folderVm)
     {
-        var (order, folders) = DockFolders.Dissolve(_settings.DockPinnedOrder, _settings.DockFolders, folderVm.Folder.Id);
+        var (order, folders) = DockFolders.Dissolve(_settings.DockItems.PinnedOrder, _settings.DockItems.Folders, folderVm.Folder.Id);
         DockFeature.SavePinnedOrder(order, folders, _settings);
         UpdateItems();
     }
 
     public void RenameFolder(DockFolderViewModel folderVm, string newName)
     {
-        var folders = DockFolders.Rename(_settings.DockFolders, folderVm.Folder.Id, newName);
-        DockFeature.SavePinnedOrder(_settings.DockPinnedOrder, folders, _settings);
+        var folders = DockFolders.Rename(_settings.DockItems.Folders, folderVm.Folder.Id, newName);
+        DockFeature.SavePinnedOrder(_settings.DockItems.PinnedOrder, folders, _settings);
         folderVm.Title = newName;
     }
 
@@ -1203,26 +1203,26 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         if (insertIndex < 0)
         {
             var folderToken = PinnedOrder.ToFolderToken(PinnedOrder.ExtractFolderId(folderId));
-            var fIdx = _settings.DockPinnedOrder.FindIndex(x => string.Equals(x, folderToken, StringComparison.OrdinalIgnoreCase));
-            insertIndex = fIdx >= 0 ? fIdx + 1 : _settings.DockPinnedOrder.Count;
+            var fIdx = _settings.DockItems.PinnedOrder.FindIndex(x => string.Equals(x, folderToken, StringComparison.OrdinalIgnoreCase));
+            insertIndex = fIdx >= 0 ? fIdx + 1 : _settings.DockItems.PinnedOrder.Count;
         }
 
-        var (order, folders) = DockFolders.RemoveFromFolder(_settings.DockPinnedOrder, _settings.DockFolders, folderId, itemId, insertIndex);
+        var (order, folders) = DockFolders.RemoveFromFolder(_settings.DockItems.PinnedOrder, _settings.DockItems.Folders, folderId, itemId, insertIndex);
         DockFeature.SavePinnedOrder(order, folders, _settings);
         UpdateItems();
     }
 
     public void CreateFolderFromDrop(string draggedId, string targetId)
     {
-        var defaultName = DockFolders.NextDefaultName(_settings.DockFolders, Resources.Strings.Get("DockFolder"));
-        var (order, folders) = DockFolders.CreateFromDrop(_settings.DockPinnedOrder, _settings.DockFolders, draggedId, targetId, defaultName);
+        var defaultName = DockFolders.NextDefaultName(_settings.DockItems.Folders, Resources.Strings.Get("DockFolder"));
+        var (order, folders) = DockFolders.CreateFromDrop(_settings.DockItems.PinnedOrder, _settings.DockItems.Folders, draggedId, targetId, defaultName);
         DockFeature.SavePinnedOrder(order, folders, _settings);
         UpdateItems();
     }
 
     public void AddAppToFolder(string draggedId, string folderId)
     {
-        var (order, folders) = DockFolders.AddToFolder(_settings.DockPinnedOrder, _settings.DockFolders, draggedId, folderId);
+        var (order, folders) = DockFolders.AddToFolder(_settings.DockItems.PinnedOrder, _settings.DockItems.Folders, draggedId, folderId);
         DockFeature.SavePinnedOrder(order, folders, _settings);
         UpdateItems();
     }
@@ -1234,8 +1234,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         Application.Current?.Dispatcher.InvokeAsync(() =>
         {
             var models = _controller.Items;
-            var folders = _settings.DockFolders ?? [];
-            var pinnedOrder = _settings.DockPinnedOrder ?? [];
+            var folders = _settings.DockItems.Folders ?? [];
+            var pinnedOrder = _settings.DockItems.PinnedOrder ?? [];
 
             // 1. Klasörlerdeki uygulamaları tespit et (bunlar ana dock sırasında ayrıca görünmez)
             var folderAppMap = new Dictionary<string, DockFolder>(StringComparer.OrdinalIgnoreCase);
@@ -1255,7 +1255,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                 {
                     IconSize = IconSize,
                     ItemSize = ItemSize,
-                    UseLineIndicator = _settings.DockIndicatorStyle == DockIndicatorStyle.Line
+                    UseLineIndicator = _settings.Dock.IndicatorStyle == DockIndicatorStyle.Line
                 };
                 itemVmCache[m.Id] = vm;
                 itemVmCache[PinnedOrder.IdOf(m.Id)] = vm;
@@ -1299,7 +1299,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                                 {
                                     IconSize = IconSize,
                                     ItemSize = ItemSize,
-                                    UseLineIndicator = _settings.DockIndicatorStyle == DockIndicatorStyle.Line
+                                    UseLineIndicator = _settings.Dock.IndicatorStyle == DockIndicatorStyle.Line
                                 };
                                 folderItems.Add(fallbackVm);
                             }
@@ -1320,7 +1320,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                             {
                                 IconSize = IconSize,
                                 ItemSize = ItemSize,
-                                UseLineIndicator = _settings.DockIndicatorStyle == DockIndicatorStyle.Line
+                                UseLineIndicator = _settings.Dock.IndicatorStyle == DockIndicatorStyle.Line
                             };
                             desiredEntries.Add(newFolderVm);
                         }
