@@ -592,3 +592,10 @@ Karar (2026-11-11): paketsiz süreçte `NotificationChanged` aboneliği 0x800704
 - [x] Elle sınama (proje sahibi, 2026-11-11, tek monitör, hepsi geçti): yüzen ada kapalı hâlde kulaksız kapsül ve üstten boşluklu; açık hâl kulaksız; ses göstergesi kulaksız; üst kenara gelince açılıyor; Ekrana yapışık'a dönünce hemen yerine oturuyor.
 - [ ] Denenmedi: iki ekran ve karışık DPI, tam ekranda gizlenme, hareket azaltma, bildirim/güncelleme kartı yüzen biçimde.
 - [x] Bellek ölçümü (AGENTS #1): 59,0 MB private, fark yok (`docs/MEMORY.md`).
+
+## Halka pil ve gün/saat boşta görünümü (#63, P5B)
+- [x] **Core (testli):** `IdleDisplay.RingClockDay = 3`, `IsRing`, `ShowRadioWhenCollapsed` (halka modunda Wi-Fi / Bluetooth yalnız Peek'te; radyo izleyicisi yine açılışta kurulur). `Core/Notch/IdleDisplayFormat.cs`: kısa gün + saat ("Sal 19:21" / "Tue 19:21"), Peek tarihi ("17 Kas" / "Nov 17"), dile göre yüzde ("%43" / "43%"), düşük pil kararı (≤%20 ve şarjda değil), halka yay noktası ve yol verisi (%0 boş, %100 iki yarım yay, kültürden bağımsız).
+- [x] **App:** kapalı çentikte halka modu: solda 18 px halka (kalınlık 2,5, iz beyaz %28, dolu kısım `#4ADE80`, düşük pilde `#FB7185`), yanında yüzde, şarjda şimşek; sağda gün ve saat, Peek'te "· 17 Kas" ve radyo simgeleri. Pilsiz kasada yalnız gün/saat ortada; zamanlayıcı çalışırken süre halkanın yerine. Halka yalnız yüzde değişince yeniden kurulur (dondurulmuş `Geometry`), saat mevcut 15 sn zamanlayıcıyı kullanır.
+- [x] **Ayar:** Ayarlar › Çentik › Boştayken › "Halka ve gün" (`IdleRingClockDay`, açıklaması ipucunda). UiSnapshots sahneleri: `halka`, `halka-peek`, `halka-zamanlayici`, `halka-dusuk`, `halka-sarj`, `halka-pilsiz`, `halka-en`.
+- [ ] Elle sınama (proje sahibi): gerçek pilde yüzde değişimi, şarja takma/çıkarma, Peek'te tarih ve simgeler, İngilizce, yüzen ada ile birlikte, iki ekran.
+- [ ] Bellek ölçümü (AGENTS #1): ölçülmedi (uygulama çalıştırılmadı). Beklenen fark yok: yeni servis ya da zamanlayıcı eklenmedi.

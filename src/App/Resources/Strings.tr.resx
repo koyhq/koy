@@ -360,6 +360,12 @@
   <data name="IdleClockOnly" xml:space="preserve">
     <value>Yalnız saat</value>
   </data>
+  <data name="IdleRingClockDay" xml:space="preserve">
+    <value>Halka ve gün</value>
+  </data>
+  <data name="IdleRingClockDayDesc" xml:space="preserve">
+    <value>Solda pil halkası, sağda gün ve saat. Tarih ve bağlantılar üzerine gelince çıkar.</value>
+  </data>
   <data name="IdleNone" xml:space="preserve">
     <value>Hiçbiri</value>
   </data>

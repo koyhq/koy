@@ -360,6 +360,12 @@
   <data name="IdleClockOnly" xml:space="preserve">
     <value>Clock only</value>
   </data>
+  <data name="IdleRingClockDay" xml:space="preserve">
+    <value>Ring &amp; day</value>
+  </data>
+  <data name="IdleRingClockDayDesc" xml:space="preserve">
+    <value>Battery ring on the left, day and time on the right. Date and connections appear when you hover.</value>
+  </data>
   <data name="IdleNone" xml:space="preserve">
     <value>None</value>
   </data>

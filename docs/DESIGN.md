@@ -81,6 +81,7 @@ Koy penceresi, sihirbaz ve sağ alt menü renk, ölçü ve hareketi koda gömmez
 
 ## Çentik
 - **Boşta:** 236×34 px. Solda saat, sağda pil görünür. Bir zamanlayıcı (Pomodoro, sayaç, kronometre) çalışırken pil ve Wi-Fi / Bluetooth simgelerinin yerine kalan süre ("18:24", Odak rengiyle) yazılır; saniyede bir güncellenir, animasyonu yoktur.
+- **Boşta, halka modu (Ayarlar › Çentik › Boştayken › Halka ve gün; onaylı kaynak: `CamDurumlar.dc.html`):** solda 18 px pil halkası (kalınlık 2,5, iz beyaz %28, dolu kısım `#4ADE80`, ≤%20 ve şarjda değilken `#FB7185`) ve yanında yüzde, şarjda küçük şimşek; sağda kısa gün ve saat ("Sal 19:21"). Peek'te (300×38) saatin yanına soluk "· 17 Kas" ve Wi-Fi / Bluetooth simgeleri gelir; kapalıyken simge yoktur. Pilsiz kasada yalnız gün ve saat ortada; zamanlayıcı çalışırken süre halkanın yerine yazılır.
 - **Müzik çalarken:** solda albüm kapağı, sağda hareketsiz bir dalga simgesi.
 - **Göstergeler:** ses ya da parlaklık değişince çentik 260×40 px olur ve gösterge 1,5 sn görünür. Ses göstergesi beyaz, parlaklık göstergesi sarı (`#FACC15`).
 - **Biçim (Ayarlar › Çentik):** Ekrana yapışık (varsayılan): kulaklı, ekran kenarına bitişik. Yüzen ada (onaylı kaynak: `CamDurumlar.dc.html`): kulaksız kapsül, üstten 9 px boşluk; köşe yarıçapı kapalı hâllerde yükseklik/2, açık çentikte 30, kartta 26. Tuval aynı kalır, yalnız pencere Top'u kayar. Her durumda (kapalı, Peek, açık, gösterge, kart) aynı şekil.

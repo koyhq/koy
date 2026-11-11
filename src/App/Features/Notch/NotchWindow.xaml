@@ -111,6 +111,7 @@
               <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="*" />
               <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <!-- Gizlilik noktaları: kamera (yeşil) ve mikrofon (turuncu) -->
@@ -127,15 +128,26 @@
             <!-- Orta-sağ: Wi-Fi ve Bluetooth durumu. Windows tepsisi gizli olduğu için bağlantıları gösteren yer burası;
                  tıklayınca çentik Kontrol sekmesinde açılır. Radyo yoksa (ör. Bluetooth'suz kasa) simgesi çıkmaz.
                  Çentik her zaman koyu yüzey olduğu için renkler KoyNotch* token'larından gelir. -->
-            <Button Grid.Column="1"
-                    HorizontalAlignment="Right"
+            <Button HorizontalAlignment="Right"
                     VerticalAlignment="Center"
-                    Margin="0,0,4,0"
                     Cursor="Hand"
                     FocusVisualStyle="{x:Null}"
                     Foreground="{DynamicResource KoyNotchText}"
                     Command="{Binding OpenControlCenterCommand}"
                     Visibility="{Binding ShowIdleRadio, Converter={StaticResource BoolToVis}}">
+              <!-- Halka modunda simgeler (yalnız Peek'te görünür) gün/saatin sağına geçer: "Sal 19:21 · 18 Kas [Wi-Fi][BT]". -->
+              <Button.Style>
+                <Style TargetType="Button">
+                  <Setter Property="Grid.Column" Value="1" />
+                  <Setter Property="Margin" Value="0,0,4,0" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsIdleRing}" Value="True">
+                      <Setter Property="Grid.Column" Value="3" />
+                      <Setter Property="Margin" Value="6,0,-6,0" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Button.Style>
               <Button.Template>
                 <ControlTemplate TargetType="Button">
                   <Border Background="Transparent" Padding="2,0">
@@ -225,7 +237,7 @@
 
             <!-- Sol: Saat (HH:mm, 13px, font-weight 600, foreground #F4F4F5) -->
             <TextBlock Grid.Column="0"
-                       Visibility="{Binding ShowIdleClock, Converter={StaticResource BoolToVis}}"
+                       Visibility="{Binding ShowIdleClassicClock, Converter={StaticResource BoolToVis}}"
                        Text="{Binding ClockTime}"
                        Foreground="#F4F4F5"
                        FontSize="13"
@@ -233,10 +245,63 @@
                        VerticalAlignment="Center" />
 
             <!-- Sağ: zamanlayıcı çalışırken kalan süre (pil, Wi-Fi ve Bluetooth yerine). Saniyede bir yalnız sayaç çalışırken değişir, animasyon yok. -->
-            <TextBlock Grid.Column="2" Text="{Binding IdleTimerText}"
+            <TextBlock Text="{Binding IdleTimerText}"
                        Foreground="{DynamicResource KoyNotchAccentFocus}"
                        FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"
-                       Visibility="{Binding ShowIdleTimer, Converter={StaticResource BoolToVis}}" />
+                       Visibility="{Binding ShowIdleTimer, Converter={StaticResource BoolToVis}}">
+              <!-- Halka modunda süre halkanın yerine (solda) yazılır; sağda gün ve saat kalır. -->
+              <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                  <Setter Property="Grid.Column" Value="2" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsIdleRing}" Value="True">
+                      <Setter Property="Grid.Column" Value="0" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            </TextBlock>
+
+            <!-- Halka modu, sol: 18 px pil halkası (kalınlık 2,5; iz beyaz %28, dolu kısım pil rengi, ≤%20 ve şarjda değilken
+                 #FB7185) ve yanında yüzde. Halka yalnız pil yüzdesi değişince yeniden kurulur; zamanlayıcı ve animasyon yok. -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center"
+                        Visibility="{Binding ShowIdleRing, Converter={StaticResource BoolToVis}}">
+              <Grid Width="18" Height="18">
+                <Ellipse Width="17" Height="17" Stroke="#47FFFFFF" StrokeThickness="2.5" />
+                <Path Data="{Binding BatteryRingGeometry}" Stroke="{Binding BatteryRingBrush}" StrokeThickness="2.5"
+                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+              </Grid>
+              <TextBlock Text="{Binding BatteryPercentText}" Foreground="#F4F4F5" FontSize="12" FontWeight="SemiBold"
+                         Margin="6,0,0,0" VerticalAlignment="Center" />
+              <Path Data="M13 2L4 14h7l-1 8 9-12h-7z" Fill="{Binding BatteryRingBrush}" Width="11" Height="11" Stretch="Uniform"
+                    Margin="4,0,0,0" VerticalAlignment="Center"
+                    Visibility="{Binding IsCharging, Converter={StaticResource BoolToVis}}" />
+            </StackPanel>
+
+            <!-- Halka modu, sağ: gün ve saat ("Sal 19:21"), Peek'te kısa tarih ("· 18 Kas"). Pil ve süre yoksa ortada. -->
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                        Visibility="{Binding IsIdleRing, Converter={StaticResource BoolToVis}}">
+              <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                  <Setter Property="Grid.Column" Value="2" />
+                  <Setter Property="HorizontalAlignment" Value="Right" />
+                  <Style.Triggers>
+                    <MultiDataTrigger>
+                      <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding ShowIdleRing}" Value="False" />
+                        <Condition Binding="{Binding ShowIdleTimer}" Value="False" />
+                      </MultiDataTrigger.Conditions>
+                      <Setter Property="Grid.Column" Value="0" />
+                      <Setter Property="Grid.ColumnSpan" Value="4" />
+                      <Setter Property="HorizontalAlignment" Value="Center" />
+                    </MultiDataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </StackPanel.Style>
+              <TextBlock Text="{Binding IdleDayTime}" Foreground="#F4F4F5" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+              <TextBlock Text="{Binding IdlePeekDate}" Foreground="#A1A1AA" FontSize="13" Margin="5,0,0,0" VerticalAlignment="Center"
+                         Visibility="{Binding ShowIdlePeekDate, Converter={StaticResource BoolToVis}}" />
+            </StackPanel>
 
             <!-- Sağ: Pil Göstergesi (22x11 px dış gövde #F4F4F5, seviye #4ADE80, terminal uç 2x5).
                  Masaüstü kasada pil yok; boş bir pil çizmek yanıltıcı olur (ShowIdleBattery HasBattery'yi de hesaba katar). -->

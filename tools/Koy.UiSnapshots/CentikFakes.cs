@@ -54,12 +54,12 @@ internal sealed class FakeLyrics : Koy.Core.Lyrics.ILyricsProvider
             Sample.Select((text, i) => new Koy.Core.Lyrics.LyricLine(TimeSpan.FromSeconds(70 + i * 5), text)).ToArray()));
 }
 
-internal sealed class FakePower : IPowerService
+internal sealed class FakePower(int percent = 86, bool charging = false, bool hasBattery = true) : IPowerService
 {
-    public bool HasBattery => true;
-    public int RemainingPercent => 86;
-    public bool IsCharging => false;
-    public BatteryStatus Status => BatteryStatus.Discharging;
+    public bool HasBattery => hasBattery;
+    public int RemainingPercent => percent;
+    public bool IsCharging => charging;
+    public BatteryStatus Status => charging ? BatteryStatus.Charging : BatteryStatus.Discharging;
     public event EventHandler<PowerChangedEventArgs>? PowerChanged { add { } remove { } }
     public void Dispose() { }
 }

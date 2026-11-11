@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
+using System.Windows.Media;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -76,7 +78,52 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     /// Boşta pil gösterilsin mi (ayar izin veriyorsa ve bilgisayarda pil varsa). Bir zamanlayıcı çalışırken pilin yerine
     /// kalan süre yazılır.
     /// </summary>
-    public bool ShowIdleBattery => HasBattery && IdleDisplay.ShowBattery(Settings.IdleDisplayMode) && !_focus.HasRunning;
+    public bool ShowIdleBattery => HasBattery && IdleDisplay.ShowBattery(Settings.IdleDisplayMode)
+        && !IdleDisplay.IsRing(Settings.IdleDisplayMode) && !_focus.HasRunning;
+
+    /// <summary>Boşta görünüm "halka pil ve gün/saat" mi. Ayar değişince çentik yeniden kurulduğundan ömür boyu sabittir.</summary>
+    public bool IsIdleRing => IdleDisplay.IsRing(Settings.IdleDisplayMode);
+
+    /// <summary>Klasik yerleşimde soldaki saat (halka modunda saat sağda, gün adıyla birlikte).</summary>
+    public bool ShowIdleClassicClock => ShowIdleClock && !IsIdleRing;
+
+    /// <summary>Halka modunda soldaki pil halkası ve yüzde. Pilsiz kasada ve zamanlayıcı çalışırken gizli.</summary>
+    public bool ShowIdleRing => HasBattery && IsIdleRing && !_focus.HasRunning;
+
+    /// <summary>Halka modunda Peek'te saatin yanındaki kısa tarih ("· 18 Kas").</summary>
+    public bool ShowIdlePeekDate => IsIdleRing && State == NotchState.Peek;
+
+    /// <summary>Halkanın dolu kısmı; yalnız pil yüzdesi değişince yeniden kurulur (dondurulmuş, zamanlayıcı yok).</summary>
+    [ObservableProperty]
+    private Geometry? _batteryRingGeometry;
+
+    /// <summary>Halka rengi: düşük pilde (≤%20, şarjda değil) kırmızı, aksi halde yeşil.</summary>
+    [ObservableProperty]
+    private Brush _batteryRingBrush = RingNormalBrush;
+
+    /// <summary>Halkanın yanındaki yüzde, dilin yazımıyla ("%43" / "43%").</summary>
+    [ObservableProperty]
+    private string _batteryPercentText = "";
+
+    /// <summary>Halka modunda sağdaki gün ve saat ("Sal 19:21").</summary>
+    [ObservableProperty]
+    private string _idleDayTime = "";
+
+    /// <summary>Halka modunda Peek'teki kısa tarih ("· 18 Kas").</summary>
+    [ObservableProperty]
+    private string _idlePeekDate = "";
+
+    private static readonly Brush RingNormalBrush = Frozen(0x4A, 0xDE, 0x80);
+    private static readonly Brush RingLowBrush = Frozen(0xFB, 0x71, 0x85);
+
+    private static Brush Frozen(byte r, byte g, byte b)
+    {
+        var brush = new SolidColorBrush(Color.FromRgb(r, g, b));
+        brush.Freeze();
+        return brush;
+    }
+
+    private CultureInfo IdleCulture => new(Settings.Language == AppLanguage.English ? "en-US" : "tr-TR");
 
     /// <summary>Kapalı çentikte pil / Wi-Fi / Bluetooth yerine zamanlayıcının süresi görünsün mü.</summary>
     public bool ShowIdleTimer => _focus.HasRunning;
@@ -106,7 +153,9 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     public bool ShowRadioStatus { get; }
 
     /// <summary>Boşta Wi-Fi / Bluetooth simgeleri gösterilsin mi (Kontrol paneli açık ve boşta görünüm "saat, pil ve bağlantılar").</summary>
-    public bool ShowIdleRadio => ShowRadioStatus && IdleDisplay.ShowRadio(Settings.IdleDisplayMode) && !_focus.HasRunning;
+    public bool ShowIdleRadio => ShowRadioStatus && !_focus.HasRunning
+        && (IdleDisplay.ShowRadioWhenCollapsed(Settings.IdleDisplayMode)
+            || (IdleDisplay.ShowRadio(Settings.IdleDisplayMode) && State == NotchState.Peek));
 
     /// <summary>"Çentiği açık tut" açık: fare çıkınca kapanmaz.</summary>
     public bool IsPinned => _controller.IsPinned;
@@ -202,9 +251,18 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     {
         OnPropertyChanged(nameof(ShowCollapsedLayout));
         OnPropertyChanged(nameof(ShowPeekLayout));
+        if (IsIdleRing)
+        {
+            OnPropertyChanged(nameof(ShowIdlePeekDate));
+            OnPropertyChanged(nameof(ShowIdleRadio));
+        }
     }
 
-    partial void OnHasBatteryChanged(bool value) => OnPropertyChanged(nameof(ShowIdleBattery));
+    partial void OnHasBatteryChanged(bool value)
+    {
+        OnPropertyChanged(nameof(ShowIdleBattery));
+        OnPropertyChanged(nameof(ShowIdleRing));
+    }
 
     [ObservableProperty]
     private double _batteryFillWidth = 17;
@@ -315,6 +373,29 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         var pct = Math.Clamp(BatteryPercent, 0, 100);
         // Dış gövde 22 DIP, iç dolgu alanı 17 DIP (22 - 3 - 2)
         BatteryFillWidth = Math.Max(2.0, 17.0 * pct / 100.0);
+
+        if (IsIdleRing)
+            UpdateBatteryRing(pct);
+    }
+
+    private int _ringPercent = -1;
+
+    private void UpdateBatteryRing(int pct)
+    {
+        BatteryRingBrush = IdleDisplayFormat.IsLow(pct, IsCharging) ? RingLowBrush : RingNormalBrush;
+        if (pct == _ringPercent)
+            return;
+
+        _ringPercent = pct;
+        BatteryPercentText = IdleDisplayFormat.Percent(pct, IdleCulture);
+        var data = IdleDisplayFormat.ArcPath(pct);
+        Geometry? geometry = null;
+        if (data.Length > 0)
+        {
+            geometry = Geometry.Parse(data);
+            geometry.Freeze();
+        }
+        BatteryRingGeometry = geometry;
     }
 
     private void StartClockTimer()
@@ -342,7 +423,14 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     private void UpdateClock()
     {
-        ClockTime = DateTime.Now.ToString("HH:mm");
+        var now = DateTime.Now;
+        ClockTime = now.ToString("HH:mm");
+        if (IsIdleRing)
+        {
+            var culture = IdleCulture;
+            IdleDayTime = IdleDisplayFormat.DayTime(now, culture);
+            IdlePeekDate = "· " + IdleDisplayFormat.ShortDate(now, culture);
+        }
     }
 
     private void OnPinnedChanged(object? sender, EventArgs e) => RunOnUi(() => OnPropertyChanged(nameof(IsPinned)));
@@ -354,6 +442,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         {
             OnPropertyChanged(nameof(ShowIdleTimer));
             OnPropertyChanged(nameof(ShowIdleBattery));
+            OnPropertyChanged(nameof(ShowIdleRing));
             OnPropertyChanged(nameof(ShowIdleRadio));
         }
         else if (e.PropertyName == nameof(FocusViewModel.RunningText))

@@ -200,18 +200,22 @@ public static class Program
 
     private static NotchSet MakeNotch(bool music, IReadOnlyList<Koy.Core.Shelf.ShelfItem>? shelf = null, List<string>? tileOrder = null,
         bool locationBlocked = false, bool audioConnected = true, Func<Koy.Core.SystemStats.ISystemStatsService>? statsFactory = null,
-        bool brightnessSupported = true, bool wideCover = false, string notchStyle = Koy.Core.Notch.NotchStyle.Pinned)
+        bool brightnessSupported = true, bool wideCover = false, string notchStyle = Koy.Core.Notch.NotchStyle.Pinned,
+        int idleMode = Koy.Core.Notch.IdleDisplay.ClockAndBattery, FakePower? power = null, string? language = null)
     {
         var settings = new AppSettings
         {
             FirstRunCompleted = true,
             NotchStyle = notchStyle,
+            IdleDisplayMode = idleMode,
             WeatherLocationSource = Koy.Core.Weather.WeatherLocationSource.City,
             WeatherCity = "İstanbul, Türkiye",
             WeatherLatitude = 41.01,
             WeatherLongitude = 28.97,
             ControlCenterLayout = tileOrder ?? new AppSettings().ControlCenterLayout
         };
+        if (language is not null)
+            settings.Language = language;
 
         var controller = new Koy.Core.Notch.NotchController();
         controller.SetEnabledPanels(Koy.Core.Notch.NotchPanels.Order);
@@ -227,7 +231,7 @@ public static class Program
                 () => new FakeAudio(), () => new FakeRadio(), null, () => new FakeBrightness(brightnessSupported), new FakeFocusAssist(), settings,
                 wifiFactory: () => new FakeWifi(locationBlocked),
                 bluetoothDevices: new Koy.App.Features.ControlCenter.BluetoothDevicesViewModel(() => new FakeBluetooth(audioConnected), null)),
-            new Koy.App.Features.Status.StatusViewModel(new FakePower(), new FakeWeather(), settings),
+            new Koy.App.Features.Status.StatusViewModel(power ?? new FakePower(), new FakeWeather(), settings),
             new Koy.App.Features.Focus.FocusViewModel(timers, settings, tasks: MakeTasks()),
             new Koy.App.Features.Shelf.ShelfViewModel(new FakeShelf(shelf ?? [])),
             MakeCalendar(settings),
@@ -318,8 +322,9 @@ public static class Program
         }
         else
         {
-            shape.Width = set.Vm.IsMusicPlaying ? 280 : 236;
-            shape.Height = 34;
+            var peek = set.Vm.State == Koy.Core.Notch.NotchState.Peek;
+            shape.Width = peek ? 300 : set.Vm.IsMusicPlaying ? 280 : 236;
+            shape.Height = peek ? 38 : 34;
             shape.CornerRadius = Koy.Core.Notch.NotchStyle.CornerRadius(set.Vm.Settings.NotchStyle, Koy.Core.Notch.NotchSurface.Closed, shape.Height, 18);
         }
 
@@ -353,6 +358,32 @@ public static class Program
         set = MakeNotch(music: false);
         set.Vm.UpdatePrivacyState(new Koy.Core.Privacy.PrivacyState(true, true, "CameraApp", "MicApp"));
         ShotNotch(set, name("kapali-gizlilik"), expanded: false);
+        set.Vm.Dispose();
+
+        // Halka pil ve gün/saat (#63): %43, düşük pil, şarjda, pilsiz kasa, zamanlayıcı, Peek, İngilizce.
+        var ring = Koy.Core.Notch.IdleDisplay.RingClockDay;
+        set = MakeNotch(music: false, idleMode: ring, power: new FakePower(43));
+        ShotNotch(set, name("halka"), expanded: false);
+        set.Vm.Controller.OnMouseEnter();
+        Flush();
+        ShotNotch(set, name("halka-peek"), expanded: false);
+        set.Vm.Controller.OnMouseLeave();
+        set.Vm.Controller.OnMouseLeaveTimeout();
+        set.Timers.Toggle(Koy.Core.Timers.FocusKind.Focus);
+        Flush();
+        ShotNotch(set, name("halka-zamanlayici"), expanded: false);
+        set.Vm.Dispose();
+        set = MakeNotch(music: false, idleMode: ring, power: new FakePower(12));
+        ShotNotch(set, name("halka-dusuk"), expanded: false);
+        set.Vm.Dispose();
+        set = MakeNotch(music: false, idleMode: ring, power: new FakePower(100, charging: true));
+        ShotNotch(set, name("halka-sarj"), expanded: false);
+        set.Vm.Dispose();
+        set = MakeNotch(music: false, idleMode: ring, power: new FakePower(hasBattery: false));
+        ShotNotch(set, name("halka-pilsiz"), expanded: false);
+        set.Vm.Dispose();
+        set = MakeNotch(music: false, idleMode: ring, power: new FakePower(43), language: "en");
+        ShotNotch(set, name("halka-en"), expanded: false);
         set.Vm.Dispose();
 
         // Yüzen ada: kulaksız kapsül (pencerenin 9 DIP kayması canlı pencerede; burada yalnız şekil).

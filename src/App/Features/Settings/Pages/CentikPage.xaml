@@ -116,6 +116,10 @@
                         <RadioButton Content="{Binding [IdleClockOnly], Source={x:Static res:Loc.Instance}}" GroupName="IdleMode"
                                      IsChecked="{Binding IdleDisplayMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=1}"
                                      Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [IdleRingClockDay], Source={x:Static res:Loc.Instance}}" GroupName="IdleMode"
+                                     ToolTip="{Binding [IdleRingClockDayDesc], Source={x:Static res:Loc.Instance}}"
+                                     IsChecked="{Binding IdleDisplayMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=3}"
+                                     Style="{StaticResource SegRadioStyle}" />
                         <RadioButton Content="{Binding [IdleNone], Source={x:Static res:Loc.Instance}}" GroupName="IdleMode"
                                      IsChecked="{Binding IdleDisplayMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=2}"
                                      Style="{StaticResource SegRadioStyle}" />
