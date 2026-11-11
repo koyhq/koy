@@ -26,5 +26,6 @@ namespace Koy.Core.Settings;
 [JsonSerializable(typeof(ValueList<DockFolder>))]
 [JsonSerializable(typeof(ValueList<HomeCard>))]
 [JsonSerializable(typeof(ValueDictionary<MonitorSettings>))]
+[JsonSerializable(typeof(ValueDictionary<string>))]
 [JsonSerializable(typeof(DockFolder))]
 internal sealed partial class SettingsJsonContext : JsonSerializerContext;

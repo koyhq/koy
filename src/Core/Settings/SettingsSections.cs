@@ -42,6 +42,12 @@ public sealed record AppearanceSettings
     /// <summary>Koy penceresinin köşe seçimi (bkz. CornerSetting): 6 Keskin, 12 Standart, 17 Yuvarlak. Eski varsayılan 18 Standart sayılır.</summary>
     public double CornerRadius { get; set; } = 12.0;
 
+    /// <summary>Arayüz simge kaynağı: yerleşik ya da kullanıcı klasörü (bkz. IconPack).</summary>
+    public IconPack IconPack { get; set; } = IconPack.Builtin;
+
+    /// <summary>Uygulama başına simge değişimi (anahtar: kısayol adı, değer: doğrulanmış simge yolu). Bkz. AppIconOverrides.</summary>
+    public ValueDictionary<string> AppIconOverrides { get; set; } = new();
+
     public AnimationSpeed AnimationSpeed { get; set; } = AnimationSpeed.Normal;
     public bool RespectReduceMotion { get; set; } = true;
     public bool BatterySaverReduceMotion { get; set; } = true;
