@@ -32,37 +32,108 @@ public sealed class FocusAssistService : IFocusAssistService
     }
 
     /// <summary>
-    /// Rahatsız Etme (Sessiz saatler) ya da sunum modu açık mı: bildirim kartı bu durumda gösterilmez.
-    /// <see cref="IsActive"/> bunu kapsamaz (o tam ekran "meşgul" durumunu okur); QUNS_QUIET_TIME burada ayrıca denetlenir.
+    /// Rahatsız etmeyin ya da Odaklanma açık mı. Windows 11'de tek belgeli yol yok, üç işaret birleşir:
+    /// 1) SHQueryUserNotificationState: QUIET_TIME (Win10 Sessiz saatler) ve sunum modu; Win11 "Rahatsız etmeyin"i vermez.
+    /// 2) <c>FocusSessionManager.IsFocusActive</c> (belgeli WinRT): Odaklanma oturumu.
+    /// 3) HKCU\...\Notifications\Settings\NOC_GLOBAL_SETTING_TOASTS_ENABLED = 0: Win11'in Rahatsız etmeyin düğmesi bu değeri
+    ///    yazar (belgesiz, Windows sürümüyle değişebilir; okunamazsa sessizce "kapalı" sayılır).
+    /// <see cref="IsActive"/> bunları kapsamaz (o tam ekran "meşgul" durumunu okur).
     /// </summary>
-    public bool IsDoNotDisturb
+    public bool IsDoNotDisturb => ReadQuns() || ReadFocusSession() || ReadToastsDisabled();
+
+    private static bool ReadQuns()
     {
-        get
+        try
         {
-            try
+            unsafe
             {
-                unsafe
-                {
-                    QUERY_USER_NOTIFICATION_STATE state;
-                    var hr = PInvoke.SHQueryUserNotificationState(&state);
-                    if (hr.Succeeded)
-                    {
-                        return state is QUERY_USER_NOTIFICATION_STATE.QUNS_QUIET_TIME or
-                                       QUERY_USER_NOTIFICATION_STATE.QUNS_PRESENTATION_MODE;
-                    }
-                }
+                QUERY_USER_NOTIFICATION_STATE state;
+                var hr = PInvoke.SHQueryUserNotificationState(&state);
+                return hr.Succeeded && state is QUERY_USER_NOTIFICATION_STATE.QUNS_QUIET_TIME or
+                                                QUERY_USER_NOTIFICATION_STATE.QUNS_PRESENTATION_MODE;
             }
-            catch
-            {
-            }
+        }
+        catch
+        {
             return false;
         }
     }
 
+    private static bool ReadFocusSession()
+    {
+        try
+        {
+            return Windows.UI.Shell.FocusSessionManager.IsSupported && Windows.UI.Shell.FocusSessionManager.GetDefault().IsFocusActive;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static bool ReadToastsDisabled()
+    {
+        try
+        {
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Notifications\Settings");
+            return key?.GetValue("NOC_GLOBAL_SETTING_TOASTS_ENABLED") is int enabled && enabled == 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private EventHandler<bool>? _stateChanged;
+    private Windows.UI.Shell.FocusSessionManager? _focusManager;
+
     public event EventHandler<bool>? StateChanged
     {
-        add { }
-        remove { }
+        add
+        {
+            _stateChanged += value;
+            if (_focusManager is not null)
+                return;
+
+            try
+            {
+                if (!Windows.UI.Shell.FocusSessionManager.IsSupported)
+                    return;
+
+                _focusManager = Windows.UI.Shell.FocusSessionManager.GetDefault();
+                _focusManager.IsFocusActiveChanged += OnFocusActiveChanged;
+            }
+            catch
+            {
+                // Paketsiz süreçte olay kurulamayabilir (NotificationChanged gibi): çağıran açılışta okumaya düşer.
+                _focusManager = null;
+            }
+        }
+        remove
+        {
+            _stateChanged -= value;
+            if (_stateChanged is not null)
+                return;
+
+            DetachFocusManager();
+        }
+    }
+
+    private void OnFocusActiveChanged(Windows.UI.Shell.FocusSessionManager sender, object args) =>
+        _stateChanged?.Invoke(this, IsDoNotDisturb);
+
+    private void DetachFocusManager()
+    {
+        try
+        {
+            if (_focusManager is not null)
+                _focusManager.IsFocusActiveChanged -= OnFocusActiveChanged;
+        }
+        catch
+        {
+        }
+
+        _focusManager = null;
     }
 
     public void OpenSettings()
@@ -85,5 +156,7 @@ public sealed class FocusAssistService : IFocusAssistService
 
     public void Dispose()
     {
+        _stateChanged = null;
+        DetachFocusManager();
     }
 }

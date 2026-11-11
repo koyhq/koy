@@ -127,6 +127,7 @@ internal sealed class FakeRadio : IRadioService
 internal sealed class FakeFocusAssist : IFocusAssistService
 {
     public bool IsActive => false;
+    public bool IsDoNotDisturb => false;
     public event EventHandler<bool>? StateChanged { add { } remove { } }
     public void OpenSettings() { }
     public void Dispose() { }
