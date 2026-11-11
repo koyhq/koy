@@ -48,11 +48,12 @@ public static class MotionPolicy
     /// <summary>
     /// Bir animasyon türünün son çarpanı. Kendi anahtarı kapalıysa 0 (son durum anında); açıksa genel çarpan.
     /// Genel çarpan (azaltılmış hareket, pil tasarrufu, hız) her zaman kendi anahtarının üstündedir: anahtar açık
-    /// olsa da genel çarpan 0 ise animasyon yoktur.
+    /// olsa da genel çarpan 0 ise animasyon yoktur. Sayı olmayan çarpan (NaN) da 0 sayılır: aksi halde
+    /// <see cref="ScaledMilliseconds"/> int.MinValue ms üretirdi.
     /// </summary>
     public static double ScaleFor(MotionKind kind, Koy.Core.Settings.MotionSettings toggles, double globalScale)
     {
-        if (globalScale <= 0 || !IsEnabled(kind, toggles))
+        if (!(globalScale > 0) || !IsEnabled(kind, toggles))
             return 0.0;
         return globalScale;
     }

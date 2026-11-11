@@ -52,6 +52,10 @@ public class MotionTogglesTests : IDisposable
         => Assert.Equal(0.0, MotionPolicy.ScaleFor(MotionPolicy.MotionKind.Osd, new MotionSettings(), 0.0));
 
     [Fact]
+    public void A_nan_global_scale_means_no_animation()
+        => Assert.Equal(0.0, MotionPolicy.ScaleFor(MotionPolicy.MotionKind.Osd, new MotionSettings(), double.NaN));
+
+    [Fact]
     public void Scaled_speed_is_kept_when_the_toggle_is_on()
         => Assert.Equal(1.5, MotionPolicy.ScaleFor(MotionPolicy.MotionKind.NotchOpenClose, new MotionSettings(), 1.5));
 
