@@ -28,7 +28,7 @@ public static class VoiceCommandParser
         string prompt,
         string? customExecutable = null,
         string? customArgumentsTemplate = null,
-        VoiceClaudePermission claudePermission = VoiceClaudePermission.Auto,
+        VoiceClaudePermission claudePermission = VoiceClaudePermission.Default,
         string? model = null)
     {
         var safePrompt = prompt ?? string.Empty;
@@ -62,7 +62,7 @@ public static class VoiceCommandParser
         if (!string.IsNullOrEmpty(trimmed) && !trimmed.Equals(DefaultModel, StringComparison.OrdinalIgnoreCase))
         {
             if (!IsValidModel(trimmed))
-                throw new VoiceCommandException($"Geçersiz model adı: {trimmed}");
+                throw new VoiceCommandException("Invalid model name.", VoiceFailure.InvalidModel, trimmed);
             args.Add("--model");
             args.Add(trimmed);
         }

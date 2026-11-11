@@ -44,6 +44,8 @@ public enum VoiceFailure
 {
     None,
     InvalidCommand,
+    /// <summary>Ayardaki model adı geçersiz; ayrıntı modelin adı.</summary>
+    InvalidModel,
     ScriptNotSupported,
     CommandNotFound,
     Timeout,
@@ -61,7 +63,7 @@ public sealed record HarnessExecutionRequest(
     int TimeoutSeconds = 60,
     string? CustomExecutable = null,
     string? CustomArgumentsTemplate = null,
-    VoiceClaudePermission ClaudePermission = VoiceClaudePermission.Auto,
+    VoiceClaudePermission ClaudePermission = VoiceClaudePermission.Default,
     string? Model = null);
 
 /// <param name="Error">Aracın kendi stderr çıktısı.</param>
@@ -82,8 +84,15 @@ public sealed record VoiceSessionOptions(
     int TimeoutSeconds = 60,
     string? CustomExecutable = null,
     string? CustomArgumentsTemplate = null,
-    VoiceClaudePermission ClaudePermission = VoiceClaudePermission.Auto,
+    VoiceClaudePermission ClaudePermission = VoiceClaudePermission.Default,
     string? Model = null);
 
 /// <summary>Özel harness komutu geçersiz (boş, kabuk yorumlayıcısı ya da kabuk metakarakteri içeriyor).</summary>
-public sealed class VoiceCommandException(string message) : InvalidOperationException(message);
+/// <summary>Komut çözülemedi. <see cref="Failure"/> ve <see cref="Detail"/> kullanıcı metnini App'te seçer; ileti yalnız
+/// geliştirici içindir.</summary>
+public sealed class VoiceCommandException(string message, VoiceFailure failure = VoiceFailure.InvalidCommand, string detail = "")
+    : InvalidOperationException(message)
+{
+    public VoiceFailure Failure { get; } = failure;
+    public string Detail { get; } = detail;
+}

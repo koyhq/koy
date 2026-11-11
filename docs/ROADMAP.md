@@ -518,7 +518,8 @@ Proje sahibi istedi. Kod yazılmadı.
 - [x] **Konuşma (karar 2026-11-09):** `SpeechRecognizer` bırakıldı, yerine Windows sesle yazma (Win+H). Sebep: Windows konuşma tanıma Türkçe desteklemiyor ve ayrı dil paketi istiyordu; sesle yazma klavye dilinde (Türkçe, İngilizce…) yazar. Çentikte komut kutusu açılır, kullanıcı konuşur ya da yazar, Enter çalıştırır. Otomatik onay kaldırıldı: sesle yazmanın "bitti" anı belli değil, yarım komut çalışmasın.
 - [x] **Gizlilik (karar 2026-11-09):** Sesle yazma Microsoft'un çevrimiçi konuşma tanımasını kullanır; ses yalnız kutu açıkken gider ve Ayarlar › Çentik'teki harness açıklamasında yazıyor.
 - [x] **Arayüz (App):** `Ctrl+Alt+V` varsayılan kısayolu, çentikte 260×40 OSD ses göstergesi, onaylama için geçici pencere odak yönetimi (Enter/Esc veya çentiğe tıklama), Ayarlar › Çentik altında Harness ve onaylama ayarları.
-- [ ] Elle sınama (proje sahibi): `Ctrl+Alt+V` ile konuşma, metni onaylayıp çalıştırma, model çıktısının çentikte görünmesi.
+- [x] **Dikte sekmesi, izin modu, model ve yanıt kartı (#62):** sesli komut ayarları Ayarlar › Dikte'ye taşındı; Claude izni Salt okunur / Düzenleme / Otomatik, model Varsayılan / Fable / Opus / Sonnet / Haiku; yanıt çentiğin altındaki kartta okunur. **Varsayılan izin salt okunur** (proje sahibi kararı, 2026-11-11): dikte yanlış duyulsa da onaysız değişiklik olmaz, eski ayar dosyası güncellemeyle izin genişletmez (testli). Geçersiz model adı Core'da `VoiceFailure.InvalidModel` kodu olur, metin App'te.
+- [ ] Elle sınama (proje sahibi): `Ctrl+Alt+V` ile konuşma, metni onaylayıp çalıştırma, model çıktısının çentikte ve yanıt kartında görünmesi, kartın açık çentikle çakışmaması; bellek ölçümü.
 
 ## Dock önizlemesine orta tık pencereyi kapatır (#61)
 - [x] Önizlemedeki küçük resme (tek pencere ve grup) orta tık o pencereyi kapatır, önizleme kapanır; gruptaki diğer pencereler kalır. `MiddleClickAction` ayarına bakılmaz. `DockWindow.xaml(.cs)`.

@@ -56,14 +56,14 @@
                 </StackPanel>
                 <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="{Binding [VoicePermissionAuto], Source={x:Static res:Loc.Instance}}" GroupName="VoicePermissionChoice"
-                                     IsChecked="{Binding VoiceClaudePermission, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Auto}"
-                                     Style="{StaticResource SegRadioStyle}" />
                         <RadioButton Content="{Binding [VoicePermissionReadOnly], Source={x:Static res:Loc.Instance}}" GroupName="VoicePermissionChoice"
                                      IsChecked="{Binding VoiceClaudePermission, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Default}"
                                      Style="{StaticResource SegRadioStyle}" />
                         <RadioButton Content="{Binding [VoicePermissionAcceptEdits], Source={x:Static res:Loc.Instance}}" GroupName="VoicePermissionChoice"
                                      IsChecked="{Binding VoiceClaudePermission, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=AcceptEdits}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [VoicePermissionAuto], Source={x:Static res:Loc.Instance}}" GroupName="VoicePermissionChoice"
+                                     IsChecked="{Binding VoiceClaudePermission, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Auto}"
                                      Style="{StaticResource SegRadioStyle}" />
                     </StackPanel>
                 </Border>
@@ -81,8 +81,14 @@
                     <TextBlock Text="{Binding [VoiceModelDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
                 <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [VoiceModelTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="140" Height="32"
-                          ItemsSource="{Binding VoiceModelOptions}" SelectedItem="{Binding VoiceModel}"
-                          Style="{StaticResource SettingComboBoxStyle}" />
+                          SelectedValuePath="Tag" SelectedValue="{Binding VoiceModel}"
+                          Style="{StaticResource SettingComboBoxStyle}">
+                    <ComboBoxItem Content="{Binding [VoiceModelDefault], Source={x:Static res:Loc.Instance}}" Tag="default" />
+                    <ComboBoxItem Content="Fable" Tag="fable" />
+                    <ComboBoxItem Content="Opus" Tag="opus" />
+                    <ComboBoxItem Content="Sonnet" Tag="sonnet" />
+                    <ComboBoxItem Content="Haiku" Tag="haiku" />
+                </ComboBox>
             </Grid>
         </Border>
 

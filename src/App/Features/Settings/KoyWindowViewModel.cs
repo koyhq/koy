@@ -359,12 +359,10 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private string _voiceHarness = "Claude";
 
     [ObservableProperty]
-    private string _voiceClaudePermission = "Auto";
+    private string _voiceClaudePermission = "Default";
 
     [ObservableProperty]
     private string _voiceModel = "default";
-
-    public string[] VoiceModelOptions { get; } = ["default", "fable", "opus", "sonnet", "haiku"];
 
     [ObservableProperty]
     private string _voiceCustomCommand = "";
@@ -818,7 +816,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             PomodoroShortBreakMinutes = PomodoroShortBreakMinutes,
             PomodoroLongBreakMinutes = PomodoroLongBreakMinutes,
             VoiceHarness = Enum.TryParse<VoiceHarnessType>(VoiceHarness, out var vh) ? vh : VoiceHarnessType.Claude,
-            VoiceClaudePermission = Enum.TryParse<VoiceClaudePermission>(VoiceClaudePermission, out var vp) ? vp : Koy.Core.Voice.VoiceClaudePermission.Auto,
+            VoiceClaudePermission = Enum.TryParse<VoiceClaudePermission>(VoiceClaudePermission, out var vp) ? vp : Koy.Core.Voice.VoiceClaudePermission.Default,
             VoiceModel = string.IsNullOrWhiteSpace(VoiceModel) ? "default" : VoiceModel,
             VoiceCustomCommand = VoiceCustomCommand,
             VoiceWorkingDirectory = VoiceWorkingDirectory,

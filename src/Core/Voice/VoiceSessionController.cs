@@ -163,7 +163,7 @@ public sealed class VoiceSessionController(IHarnessRunnerService runner, Func<Vo
         }
         catch (VoiceCommandException ex)
         {
-            Fail(VoiceFailure.InvalidCommand, ex.Message);
+            Fail(ex.Failure, ex.Detail);
         }
         catch (Exception ex)
         {
