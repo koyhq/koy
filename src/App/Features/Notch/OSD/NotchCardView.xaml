@@ -19,17 +19,71 @@
     </Grid.ColumnDefinitions>
 
     <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" Background="#27272A" VerticalAlignment="Center">
-      <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
-            Stroke="{DynamicResource KoyAccent}" StrokeThickness="2"
-            StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
-            Data="{StaticResource IconDownload}" />
+      <!-- Simge: bildirimde uygulamanın logosu (CardIcon), yoksa genel zil; güncellemede indirme. -->
+      <Grid>
+        <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+              Stroke="{DynamicResource KoyAccent}" StrokeThickness="2"
+              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round">
+          <Path.Style>
+            <Style TargetType="Path">
+              <Setter Property="Data" Value="{StaticResource IconDownload}" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding Card.Kind}" Value="Notification">
+                  <Setter Property="Data" Value="{StaticResource IconBell}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding HasCardIcon}" Value="False">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Path.Style>
+        </Path>
+        <Image Source="{Binding CardIcon}" Width="24" Height="24" Stretch="Uniform"
+               HorizontalAlignment="Center" VerticalAlignment="Center"
+               RenderOptions.BitmapScalingMode="HighQuality">
+          <Image.Style>
+            <Style TargetType="Image">
+              <Setter Property="Visibility" Value="Visible" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasCardIcon}" Value="False">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Image.Style>
+        </Image>
+      </Grid>
     </Border>
 
     <StackPanel Grid.Column="1" Margin="12,0,10,0" VerticalAlignment="Center">
+      <TextBlock Text="{Binding Card.Header}" FontSize="10.5" Foreground="#A1A1AA" Margin="0,0,0,1"
+                 TextTrimming="CharacterEllipsis">
+        <TextBlock.Style>
+          <Style TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Card.HasHeader}" Value="False">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </TextBlock.Style>
+      </TextBlock>
       <TextBlock Text="{Binding Card.Title}" FontSize="13" FontWeight="SemiBold" Foreground="#F4F4F5"
                  TextTrimming="CharacterEllipsis" />
       <TextBlock Text="{Binding Card.Subtitle}" FontSize="11" Foreground="#A1A1AA" Margin="0,2,0,0"
-                 TextTrimming="CharacterEllipsis" />
+                 TextTrimming="CharacterEllipsis">
+        <TextBlock.Style>
+          <Style TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Card.HasSubtitle}" Value="False">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </TextBlock.Style>
+      </TextBlock>
     </StackPanel>
 
     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">

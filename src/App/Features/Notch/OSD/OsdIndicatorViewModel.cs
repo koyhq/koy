@@ -1,6 +1,9 @@
 using System.Globalization;
 using Koy.Core.SystemStats;
 using System.Windows;
+using System.IO;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Koy.App.Resources;
@@ -93,11 +96,18 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
     [ObservableProperty]
     private NotchCard? _card;
 
-    /// <summary>Kartın birincil düğmesine ("Güncelle") basıldı.</summary>
-    public event Action? PrimaryActionRequested;
+    /// <summary>Kartta gösterilecek uygulama simgesi (bildirim kartı); yoksa görünüm genel simge çizer.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCardIcon))]
+    private ImageSource? _cardIcon;
 
-    /// <summary>Kartın × düğmesine basıldı.</summary>
-    public event Action? DismissRequested;
+    public bool HasCardIcon => CardIcon is not null;
+
+    /// <summary>Kartın birincil düğmesine ("Güncelle") basıldı; kapanan kartı verir (aynı gösterge birden çok kartın sahibi olabilir).</summary>
+    public event Action<NotchCard>? PrimaryActionRequested;
+
+    /// <summary>Kartın × düğmesine basıldı; kapanan kartı verir.</summary>
+    public event Action<NotchCard>? DismissRequested;
 
     public GridLength FillStarWidth => new(Math.Clamp(Percent, 0, 100), GridUnitType.Star);
     public GridLength RemainingStarWidth => new(Math.Max(0, 100 - Math.Clamp(Percent, 0, 100)), GridUnitType.Star);
@@ -326,6 +336,7 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
             return false;
 
         Card = card;
+        CardIcon = DecodeIcon(card.Icon);
         Type = OsdType.Card;
         IsActive = true;
 
@@ -337,21 +348,45 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
     /// <summary>Kartın birincil düğmesi: kart kapanır, sahibi eylemi yürütür.</summary>
     public void RequestPrimaryAction()
     {
-        if (Type != OsdType.Card)
+        if (Type != OsdType.Card || Card is not { } card)
             return;
 
         Dismiss();
-        PrimaryActionRequested?.Invoke();
+        PrimaryActionRequested?.Invoke(card);
     }
 
     /// <summary>Kartın × düğmesi: kart kapanır, sahibi bunu "bu oturumda gösterme" diye kaydeder.</summary>
     public void RequestDismiss()
     {
-        if (Type != OsdType.Card)
+        if (Type != OsdType.Card || Card is not { } card)
             return;
 
         Dismiss();
-        DismissRequested?.Invoke();
+        DismissRequested?.Invoke(card);
+    }
+
+    // Simge gösterilecek boyutta çözülür ve dondurulur (AGENTS #9); çözülemeyen simge kartı engellemez.
+    private static ImageSource? DecodeIcon(byte[]? data)
+    {
+        if (data is not { Length: > 0 })
+            return null;
+
+        try
+        {
+            using var stream = new MemoryStream(data);
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.DecodePixelWidth = 48;
+            image.StreamSource = stream;
+            image.EndInit();
+            image.Freeze();
+            return image;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     public void Dismiss()
@@ -372,6 +407,7 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
         VoiceStatusText = "";
         VoiceState = VoiceState.Idle;
         Card = null;
+        CardIcon = null;
         Dismissed?.Invoke(this, EventArgs.Empty);
     }
 

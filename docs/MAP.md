@@ -41,6 +41,20 @@ Unutma:
 - Dock ayarıysa `src/Core/Dock/DockSettingsDiff.cs` neyin yeniden kurulacağına karar verir.
 - Test örnekleri: `tests/Core.Tests/SettingsStoreTests.cs`, `tests/Core.Tests/SettingsMigrationTests.cs`.
 
+## Çentik kartı ve Windows bildirimleri
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Notch/NotchCard.cs`, `src/Core/Notch/NotchLayout.cs` | Kart modeli (güncelleme ve bildirim ortak) ve 380×72 ölçü |
+| Core | `src/Core/Notifications/` | `NotificationDiff` (yeni gelen = kimlik farkı, ilk okuma temel çizgi), `NotificationPoller` (yoklama döngüsü, aralık 2 sn), `NotificationQueue` (tek kart, 6 sn, en çok 5 bekleyen, Koy ve Rahatsız Etme süzgeci), `NotificationPresentation` (üst satır, kısaltma, göreli zaman) |
+| Platform | `src/Platform/Notifications/WinRtNotificationListener.cs` | `UserNotificationListener` okuması; olay yok, yoklama |
+| Platform | `src/Platform/Shell/FocusAssistService.cs` | `IsDoNotDisturb` (Sessiz saatler, sunum modu) |
+| App | `src/App/Features/Notch/NotchFeature.cs` | Dinleyiciyi kurar/söker (ayar açık + çentik var + izin), kuyruk → `Osd.ShowCard` |
+| App | `src/App/Features/Notch/OSD/OsdIndicatorViewModel.cs`, `NotchCardView.xaml` | Kart gösterimi, simge çözme, başlık üstü satırı |
+| App | `src/App/SharedServices.cs` | `AcquireNotificationListener` / `ReleaseNotificationListener` (sayaçlı) |
+| App | `src/App/Features/Settings/Pages/CentikPage.xaml` | `NotchShowNotifications`, `NotchNotificationsHideBody` satırları |
+
+Unutma: Bildirim yoklaması AGENTS #5'in tek yoklama istisnasıdır (paketsiz süreçte olay yok); yalnız ayar açıkken ve çentik varken çalışır, `Stop`'ta sökülür. Core arayüzünde WinRT tipi yok: simge `byte[]?`, kimlik `uint`. Bildirim kartı yalnız birincil ekranın çentiğinde çıkar.
+
 ## Yeni kullanıcı metni ya da çeviri eklemek
 | Katman | Dosya | Ne yapılır |
 |---|---|---|

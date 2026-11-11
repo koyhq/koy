@@ -2262,5 +2262,29 @@
   <data name="VoiceReplyOpen" xml:space="preserve">
     <value>Tamamlandı · yanıtın tamamı için tıkla</value>
   </data>
+  <data name="NotificationsTitle" xml:space="preserve">
+    <value>Bildirimleri çentikte göster</value>
+  </data>
+  <data name="NotificationsDesc" xml:space="preserve">
+    <value>Windows bildirimleri çentikte kart olarak görünür. Bu açıkken Koy bildirim listesini 2 saniyede bir kontrol eder.</value>
+  </data>
+  <data name="NotificationsNeedPermission" xml:space="preserve">
+    <value>Windows izni gerekiyor: Ayarlar › Gizlilik ve güvenlik › Bildirimler bölümünden Koy'a izin ver.</value>
+  </data>
+  <data name="NotificationsHideBodyTitle" xml:space="preserve">
+    <value>Bildirim içeriğini gizle</value>
+  </data>
+  <data name="NotificationsHideBodyDesc" xml:space="preserve">
+    <value>Kartta yalnız uygulama adı ve başlık görünür, mesaj metni görünmez.</value>
+  </data>
+  <data name="NotificationTimeNow" xml:space="preserve">
+    <value>şimdi</value>
+  </data>
+  <data name="NotificationTimeMinutesAgo" xml:space="preserve">
+    <value>{0} dk önce</value>
+  </data>
+  <data name="NotificationTimeHoursAgo" xml:space="preserve">
+    <value>{0} sa önce</value>
+  </data>
 </root>
 

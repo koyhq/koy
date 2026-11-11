@@ -2262,5 +2262,29 @@
   <data name="VoiceReplyOpen" xml:space="preserve">
     <value>Done · click for the full reply</value>
   </data>
+  <data name="NotificationsTitle" xml:space="preserve">
+    <value>Show notifications on the notch</value>
+  </data>
+  <data name="NotificationsDesc" xml:space="preserve">
+    <value>Windows notifications appear as a card on the notch. Koy checks the notification list every 2 seconds while this is on.</value>
+  </data>
+  <data name="NotificationsNeedPermission" xml:space="preserve">
+    <value>Windows permission needed: allow Koy in Settings › Privacy &amp; security › Notifications.</value>
+  </data>
+  <data name="NotificationsHideBodyTitle" xml:space="preserve">
+    <value>Hide notification content</value>
+  </data>
+  <data name="NotificationsHideBodyDesc" xml:space="preserve">
+    <value>Cards show only the app name and the title, not the message text.</value>
+  </data>
+  <data name="NotificationTimeNow" xml:space="preserve">
+    <value>just now</value>
+  </data>
+  <data name="NotificationTimeMinutesAgo" xml:space="preserve">
+    <value>{0} min ago</value>
+  </data>
+  <data name="NotificationTimeHoursAgo" xml:space="preserve">
+    <value>{0} h ago</value>
+  </data>
 </root>
 

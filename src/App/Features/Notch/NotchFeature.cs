@@ -27,6 +27,7 @@ using Koy.Core.Privacy;
 using Koy.Core.Search;
 using Koy.Core.Settings;
 using Koy.Core.Timers;
+using Koy.Core.Notifications;
 using Koy.Core.Updates;
 using Koy.Core.Shell;
 using Koy.Core.Visibility;
@@ -168,6 +169,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         _edgePeekTimer.Tick += (_, _) => CheckEdgePeek();
 
         StartOsdServices();
+        StartNotifications();
 
         UpdateStatus.Changed += OnUpdateStatusChanged;
         // Özellik yeniden kurulduğunda (ayar değişimi) denetim sonucu zaten gelmiş olabilir.
@@ -976,16 +978,204 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     }
 
     // Onay, indirme ve görev çubuğunu geri getirip yeniden başlatma (AGENTS #7) KoyWindowViewModel.StartUpdateAsync içinde; kart yalnız çağırır.
-    private void OnUpdateCardAction()
+    private void OnUpdateCardAction(NotchCard card)
     {
+        // Aynı gösterge bildirim kartlarının da sahibi: yalnız güncelleme kartı bu eylemi tetikler.
+        if (card.Kind != NotchCardKind.Update)
+            return;
+
         KoyWindow.ShowInstance();
         KoyWindow.Instance.ViewModel.OpenUpdateOverlay();
     }
 
-    private void OnUpdateCardDismissed()
+    private void OnUpdateCardDismissed(NotchCard card)
     {
-        if (_cardVersion is not null)
+        if (card.Kind == NotchCardKind.Update && _cardVersion is not null)
             s_updateCardPolicy.Dismiss(_cardVersion);
+    }
+
+    // ---- Windows bildirimleri çentikte (#64) ----
+    // Paketsiz süreçte olay yok; dinleyici bildirim listesini yoklar. Yalnız ayar açıkken, en az bir çentik varken ve
+    // izin Allowed iken kurulur; Stop'ta zamanlayıcı sökülür (AGENTS #5). Kart yalnız birincil ekranın çentiğinde çıkar.
+
+    /// <summary>Bildirim izni durumu değişti (istek sonuçlandı); ayar sayfası satırı yeniler. Arka plan iş parçacığından gelebilir.</summary>
+    public static event Action? NotificationAccessChanged;
+
+    private INotificationListener? _notificationListener;
+    private readonly NotificationQueue _notificationQueue = new();
+    private OsdIndicatorViewModel? _notificationOsd;
+    private NotchCard? _notificationCard;
+    private NotchViewModel? _notificationWaitViewModel;
+
+    private void StartNotifications()
+    {
+        if (!settings.NotchShowNotifications || _windowStates.Count == 0 || _notificationListener is not null)
+            return;
+
+        var listener = services.AcquireNotificationListener();
+        _notificationListener = listener;
+        _ = EnableNotificationsAsync(listener);
+    }
+
+    private async Task EnableNotificationsAsync(INotificationListener listener)
+    {
+        try
+        {
+            var status = listener.AccessStatus;
+            // Windows izin diyaloğu yalnız durum belirsizken ve ayar açıkken çıkar.
+            if (status == NotificationAccessStatus.Unspecified)
+                status = await listener.RequestAccessAsync();
+
+            NotificationAccessChanged?.Invoke();
+
+            if (status != NotificationAccessStatus.Allowed || _stopped || !ReferenceEquals(_notificationListener, listener))
+                return;
+
+            listener.NotificationArrived += OnNotificationArrived;
+            listener.Start();
+        }
+        catch
+        {
+            // İzin okunamadı: bildirim kartı yok, çentiğin geri kalanı etkilenmez.
+        }
+    }
+
+    private void OnNotificationArrived(NotificationItem item)
+    {
+        // Yoklama thread pool'da çalışır; kuyruğa ve çentiğe yalnız UI iş parçacığından dokunulur.
+        Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            if (_stopped || _notificationListener is null)
+                return;
+
+            var doNotDisturb = _focusAssistService?.IsDoNotDisturb ?? false;
+            if (_notificationQueue.Enqueue(item, doNotDisturb))
+                PumpNotifications();
+        });
+    }
+
+    /// <summary>Sıradaki bildirimi gösterir; kart ya da başka bir gösterge sürüyorsa, çentik açıksa bekler.</summary>
+    private void PumpNotifications()
+    {
+        if (_stopped || _windowStates.Count == 0 || _notificationQueue.Current is not null)
+            return;
+
+        var target = _windowStates.Values.FirstOrDefault(s => s.Monitor.IsPrimary) ?? _windowStates.Values.First();
+        var viewModel = target.ViewModel;
+        HookNotificationOsd(viewModel.Osd);
+
+        // Başka gösterge (ses, güncelleme kartı…) sürüyor: Dismissed olayı yeniden dener.
+        if (viewModel.Osd.IsActive)
+            return;
+
+        if (viewModel.State == NotchState.Expanded)
+        {
+            if (_notificationQueue.PendingCount > 0 && !ReferenceEquals(_notificationWaitViewModel, viewModel))
+            {
+                StopWaitingForNotchCollapse();
+                _notificationWaitViewModel = viewModel;
+                viewModel.PropertyChanged += OnNotificationWaitViewModelChanged;
+            }
+
+            return;
+        }
+
+        StopWaitingForNotchCollapse();
+        var item = _notificationQueue.TryTakeNext(notchExpanded: false);
+        if (item is null)
+            return;
+
+        var card = NotificationPresentation.ToCard(item, DateTimeOffset.Now, settings.NotchNotificationsHideBody, GetRelativeTimeLabels());
+        _notificationCard = card;
+        if (!viewModel.Osd.ShowCard(card, NotificationQueue.CardDuration))
+        {
+            _notificationCard = null;
+            _notificationQueue.Complete();
+        }
+    }
+
+    private static RelativeTimeLabels GetRelativeTimeLabels() => new(
+        Strings.Get("NotificationTimeNow"),
+        Strings.Get("NotificationTimeMinutesAgo"),
+        Strings.Get("NotificationTimeHoursAgo"));
+
+    private void HookNotificationOsd(OsdIndicatorViewModel osd)
+    {
+        if (ReferenceEquals(_notificationOsd, osd))
+            return;
+
+        UnhookNotificationOsd();
+        _notificationOsd = osd;
+        osd.Dismissed += OnNotificationOsdDismissed;
+        osd.Activated += OnNotificationOsdActivated;
+    }
+
+    private void UnhookNotificationOsd()
+    {
+        if (_notificationOsd is null)
+            return;
+
+        _notificationOsd.Dismissed -= OnNotificationOsdDismissed;
+        _notificationOsd.Activated -= OnNotificationOsdActivated;
+        _notificationOsd = null;
+        FinishNotificationCard();
+    }
+
+    private void FinishNotificationCard()
+    {
+        _notificationCard = null;
+        _notificationQueue.Complete();
+    }
+
+    // Süre doldu, × ile kapandı ya da çentik açıldı: kart bitti, sıradaki bir sonraki turda gelir (kapanış animasyonu başlasın).
+    private void OnNotificationOsdDismissed(object? sender, EventArgs e)
+    {
+        FinishNotificationCard();
+        Application.Current?.Dispatcher.InvokeAsync(PumpNotifications, DispatcherPriority.Background);
+    }
+
+    // Başka bir gösterge (ses, güncelleme kartı) bildirim kartının yerini aldı: kart düştü, sıradaki o gösterge kapanınca gelir.
+    private void OnNotificationOsdActivated(object? sender, EventArgs e)
+    {
+        if (_notificationQueue.Current is null || _notificationCard is null)
+            return;
+
+        if (sender is OsdIndicatorViewModel { Type: OsdType.Card, Card: { } shown } && ReferenceEquals(shown, _notificationCard))
+            return;
+
+        FinishNotificationCard();
+    }
+
+    private void OnNotificationWaitViewModelChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(NotchViewModel.State) && sender is NotchViewModel { State: not NotchState.Expanded })
+        {
+            StopWaitingForNotchCollapse();
+            PumpNotifications();
+        }
+    }
+
+    private void StopWaitingForNotchCollapse()
+    {
+        if (_notificationWaitViewModel is null)
+            return;
+
+        _notificationWaitViewModel.PropertyChanged -= OnNotificationWaitViewModelChanged;
+        _notificationWaitViewModel = null;
+    }
+
+    private void StopNotifications()
+    {
+        StopWaitingForNotchCollapse();
+        UnhookNotificationOsd();
+        _notificationQueue.Clear();
+
+        if (_notificationListener is null)
+            return;
+
+        _notificationListener.NotificationArrived -= OnNotificationArrived;
+        _notificationListener = null;
+        services.ReleaseNotificationListener();
     }
 
     public void Stop()
@@ -994,6 +1184,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         UpdateStatus.Changed -= OnUpdateStatusChanged;
         StopWaitingForCollapse();
         DetachCardOsd();
+        StopNotifications();
         _edgePeekTimer?.Stop();
         _edgePeekTimer = null;
 

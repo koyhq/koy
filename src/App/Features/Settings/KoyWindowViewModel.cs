@@ -12,6 +12,9 @@ using Koy.Core.Uninstall;
 using Koy.Core.Updates;
 using Koy.Core.Visibility;
 using Koy.Core.Voice;
+using Koy.App.Features.Notch;
+using Koy.Core.Notifications;
+using Koy.Platform.Notifications;
 using Koy.Platform.Shell;
 
 namespace Koy.App.Features.Settings;
@@ -105,6 +108,17 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _showPrivacyIndicator = true;
+
+    /// <summary>Windows bildirimleri çentikte kart olarak görünsün (<c>AppSettings.NotchShowNotifications</c>).</summary>
+    [ObservableProperty]
+    private bool _notchShowNotifications = true;
+
+    [ObservableProperty]
+    private bool _notchNotificationsHideBody;
+
+    /// <summary>Ayar açık ama Windows bildirim izni yok (reddedildi ya da okunamadı): sayfada açıklama satırı çıkar.</summary>
+    [ObservableProperty]
+    private bool _notificationsPermissionMissing;
 
     [ObservableProperty]
     private bool _panelFocus = true;
@@ -412,7 +426,19 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         UpdateStatus.Changed += OnUpdateStatusChanged;
         OnUpdateStatusChanged();
         LoadFromSettings();
+        NotchFeature.NotificationAccessChanged += OnNotificationAccessChanged;
+        RefreshNotificationPermission();
     }
+
+    partial void OnNotchShowNotificationsChanged(bool value) => RefreshNotificationPermission();
+
+    // İzin sonucu çentik özelliği istek yaptıktan sonra gelir (arka plan iş parçacığı olabilir).
+    private void OnNotificationAccessChanged() =>
+        System.Windows.Application.Current?.Dispatcher.InvokeAsync(RefreshNotificationPermission);
+
+    private void RefreshNotificationPermission() =>
+        NotificationsPermissionMissing = NotchShowNotifications &&
+            WinRtNotificationListener.GetAccessStatus() is NotificationAccessStatus.Denied or NotificationAccessStatus.Unavailable;
 
     private void OnUpdateStatusChanged()
     {
@@ -466,6 +492,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             ShowVolumeOsd = s.ShowVolumeOsd;
             ShowBrightnessOsd = s.ShowBrightnessOsd;
             ShowPrivacyIndicator = s.ShowPrivacyIndicator;
+            NotchShowNotifications = s.NotchShowNotifications;
+            NotchNotificationsHideBody = s.NotchNotificationsHideBody;
             MusicShowWaveform = s.MusicShowWaveform;
             MusicLyricsEnabled = s.MusicLyricsEnabled;
             IdleDisplayMode = s.IdleDisplayMode;
@@ -651,7 +679,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     private static bool AffectsNotch(string? name) =>
         name is nameof(NotchVisibility) or nameof(NotchHideInFullscreen) or nameof(MusicShowWaveform) or nameof(MusicLyricsEnabled)
-            or nameof(ShowVolumeOsd) or nameof(ShowBrightnessOsd) or nameof(ShowPrivacyIndicator) or nameof(IdleDisplayMode)
+            or nameof(ShowVolumeOsd) or nameof(ShowBrightnessOsd) or nameof(ShowPrivacyIndicator) or nameof(NotchShowNotifications) or nameof(NotchNotificationsHideBody) or nameof(IdleDisplayMode)
             or nameof(NotchOpenBehavior) or nameof(WheelAction) or nameof(BatterySaverReduceMotion)
             or nameof(WeatherRefreshInterval) or nameof(PomodoroWorkMinutes) or nameof(PomodoroShortBreakMinutes) or nameof(PomodoroLongBreakMinutes)
             or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
@@ -735,6 +763,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             ShowVolumeOsd = ShowVolumeOsd,
             ShowBrightnessOsd = ShowBrightnessOsd,
             ShowPrivacyIndicator = ShowPrivacyIndicator,
+            NotchShowNotifications = NotchShowNotifications,
+            NotchNotificationsHideBody = NotchNotificationsHideBody,
             MusicShowWaveform = MusicShowWaveform,
             MusicLyricsEnabled = MusicLyricsEnabled,
             IdleDisplayMode = IdleDisplayMode,
