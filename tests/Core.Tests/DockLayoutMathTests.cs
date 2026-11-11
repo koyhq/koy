@@ -120,6 +120,89 @@ public class DockLayoutMathTests
     }
 
     [Fact]
+    public void Content_stays_inside_outer_when_padding_exceeds_half_the_thickness()
+    {
+        var result = DockLayoutMath.Compute(DockEdge.Bottom, 100, 0, 24, 20, Screen1080p);
+
+        Assert.True(result.Content.Top >= result.Outer.Top);
+        Assert.True(result.Content.Bottom <= result.Outer.Bottom);
+        Assert.Equal(result.Outer.Top + 10, result.Content.Top);
+    }
+
+    [Fact]
+    public void Monitor_with_negative_coordinates_is_respected()
+    {
+        // Birincil monitörün solundaki ve üstündeki ekran negatif koordinatta durur.
+        var left = new DockRectDip(-1920, -200, 1920, 1080);
+
+        var bottom = DockLayoutMath.Compute(DockEdge.Bottom, 50, 4, 0, 48, left);
+        Assert.Equal(new DockRectDip(-1920 + 480, -200 + 1080 - 4 - 48, 960, 48), bottom.Outer);
+
+        var right = DockLayoutMath.Compute(DockEdge.Right, 100, 0, 0, 48, left);
+        Assert.Equal(new DockRectDip(-48, -200, 48, 1080), right.Outer);
+    }
+
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(-100, -50)]
+    [InlineData(double.NaN, double.NaN)]
+    [InlineData(double.PositiveInfinity, 100)]
+    public void Degenerate_work_area_never_gives_negative_or_non_finite_sizes(double width, double height)
+    {
+        foreach (var edge in Enum.GetValues<DockEdge>())
+        {
+            var r = DockLayoutMath.Compute(edge, 100, 10, 6, 48, new DockRectDip(0, 0, width, height));
+
+            foreach (var v in new[] { r.Outer.Left, r.Outer.Top, r.Outer.Width, r.Outer.Height, r.Content.Width, r.Content.Height })
+                Assert.True(double.IsFinite(v), $"{edge}: sonlu olmalı");
+            Assert.True(r.Outer.Width >= 0 && r.Outer.Height >= 0 && r.Content.Width >= 0 && r.Content.Height >= 0);
+        }
+    }
+
+    [Theory]
+    [InlineData(double.NaN)]
+    [InlineData(-30.0)]
+    public void Invalid_thickness_gives_zero_thickness_not_NaN(double thickness)
+    {
+        var r = DockLayoutMath.Compute(DockEdge.Bottom, 100, 0, 0, thickness, Screen1080p);
+
+        Assert.Equal(0.0, r.Outer.Height);
+        Assert.Equal(1080.0, r.Outer.Top);
+    }
+
+    [Theory]
+    [InlineData(7)]
+    [InlineData(-1)]
+    public void Undefined_edge_number_is_treated_as_bottom(int raw)
+    {
+        var undefined = DockLayoutMath.Compute((DockEdge)raw, 100, 5, 0, 48, Screen1080p);
+        var bottom = DockLayoutMath.Compute(DockEdge.Bottom, 100, 5, 0, 48, Screen1080p);
+
+        Assert.Equal(bottom, undefined);
+    }
+
+    [Fact]
+    public void Undefined_edge_number_in_settings_json_loads_as_bottom()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "koy-dock-layout-" + Guid.NewGuid());
+        try
+        {
+            Directory.CreateDirectory(dir);
+            var path = Path.Combine(dir, "settings.json");
+            File.WriteAllText(path, "{ \"Version\": 4, \"Dock\": { \"Edge\": 7, \"LengthPercent\": 40 } }");
+
+            var back = new SettingsStore(path).Load().Dock;
+
+            Assert.Equal(DockEdge.Bottom, back.Edge);
+            Assert.Equal(40, back.LengthPercent);
+        }
+        finally
+        {
+            if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    [Fact]
     public void Out_of_range_length_is_clamped_into_limits()
     {
         var tooShort = DockLayoutMath.Compute(DockEdge.Bottom, 0, 0, 0, 48, Screen1080p);
@@ -224,7 +307,7 @@ public class DockLayoutMathTests
         {
             Directory.CreateDirectory(dir);
             var path = Path.Combine(dir, "settings.json");
-            File.WriteAllText(path, "{ \"Dock\": { \"Enabled\": true } }");
+            File.WriteAllText(path, "{ \"Version\": 4, \"Dock\": { \"Enabled\": true } }");
 
             var back = new SettingsStore(path).Load().Dock;
 
