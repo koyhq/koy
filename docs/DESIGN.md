@@ -96,6 +96,7 @@ Koy penceresi, sihirbaz ve sağ alt menü renk, ölçü ve hareketi koda gömmez
   - Eski Müzik ve Durum sekmeleri kalktı (müzik ve durum Ana ile durum satırına girdi). Eski Takvim sekmesi H içinde yeniden geldi; eski paneldeki Pomodoro, zamanlayıcı ve kronometre araçları artık yalnız Odak sayfasındadır.
 - **Kapalı ve Peek:** kapalı çentikte yalnız saat ve pil durur; üzerine gelince (Peek) tarih ve ağ simgesi (ve Bluetooth) de görünür, kapalı çentik kalabalıklaşmaz. Varsayılan açılma üzerine gelincedir: çentik Peek'e uğramadan doğrudan açılır. Koy › Çentik'te "Tıklayınca" seçilirse önce Peek görünür.
 - **Kısa bildirimler (Peek):** "Pomodoro bitti", "Şarj tamamlandı", "Kulaklık bağlandı" gibi.
+  - **Windows bildirim kartı:** Windows bildirimleri çentikte kart olur (ayar: Bildirimleri çentikte göster). Bilinen kısıt: Windows 11 Rahatsız etmeyin düğmesi tek başına algılanmıyor (belgelenmiş API yok); kartlar Odaklanma oturumunda ve sunum modunda susar.
 
 ## Arama paneli
 - `Win+Shift+Q` ile açık çentiğin içinde açılır, tuval büyümez (AGENTS #13). Durum satırı, sayfa ve sekmeler o sırada gizlidir.
