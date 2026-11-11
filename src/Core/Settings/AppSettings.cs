@@ -54,6 +54,7 @@ public sealed record AppSettings
 
         DockItems.PinnedOrder ??= [];
         DockItems.Folders ??= [];
+        DockItems.Items ??= [];
         Notch.EnabledPanels ??= new NotchSettings().EnabledPanels;
         Notch.ControlCenterLayout ??= new NotchSettings().ControlCenterLayout;
         Displays.Monitors ??= new();

@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Koy.Core.Display;
 using Koy.Core.Dock;
+using Koy.Core.Dock.Items;
 
 namespace Koy.Core.Settings;
 
@@ -25,4 +26,6 @@ namespace Koy.Core.Settings;
 [JsonSerializable(typeof(ValueList<DockFolder>))]
 [JsonSerializable(typeof(ValueDictionary<MonitorSettings>))]
 [JsonSerializable(typeof(DockFolder))]
+[JsonSerializable(typeof(ValueList<DockItemEntry>))]
+[JsonSerializable(typeof(DockItemEntry))]
 internal sealed partial class SettingsJsonContext : JsonSerializerContext;
