@@ -23,7 +23,7 @@ public static class AppIconOverrides
     }
 
     /// <summary>
-    /// Değer: mutlak yol ya da yalnız dosya adı; uzantı png, ico ya da svg olmalı. Yollarda ".." bileşeni yasak.
+    /// Değer: mutlak yol ya da yalnız dosya adı; uzantı png, ico ya da svg olmalı. Yollarda nokta bileşeni, boş ya da nokta/boşlukla biten bileşen ve aygıt adı (CON, NUL, COM1…) yasak.
     /// Kırpılmış ve normalleştirilmiş değeri verir.
     /// </summary>
     public static bool TryValidateSource(string? value, out string normalized)
@@ -45,11 +45,15 @@ public static class AppIconOverrides
             if (IsUncPath(candidate)) return false;
             if (!IsDriveRootedPath(candidate)) return false;
             if (candidate.IndexOf(':', 2) >= 0) return false;
-            if (candidate.Split('\\', '/').Any(part => part is "." or "..")) return false;
+            if (!candidate[3..].Split('\\', '/').All(IsSafeComponent)) return false;
         }
         else if (candidate.Contains('\\') || candidate.Contains('/') || candidate.Contains(':'))
         {
             // Göreli yol kabul edilmez: yalnız dosya adı (klasör çözümü Core dışında).
+            return false;
+        }
+        else if (!IsSafeComponent(candidate))
+        {
             return false;
         }
 
@@ -69,6 +73,28 @@ public static class AppIconOverrides
 
         normalized = candidate;
         return true;
+    }
+
+    // Win32'nin ayrılmış aygıt adları. Uzantı yok sayılır: "NUL.png" da NUL aygıtıdır, "CON.png" okumak sonsuza dek bekler.
+    // COM¹/COM²/COM³ ve LPT¹/LPT²/LPT³ (üst simge rakam) Windows'ta aynı şekilde ayrılmıştır.
+    private static readonly string[] ReservedNames =
+    [
+        "CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$",
+        "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "COM¹", "COM²", "COM³",
+        "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "LPT¹", "LPT²", "LPT³"
+    ];
+
+    /// <summary>
+    /// Yol bileşeni: boş değil, sonu nokta ya da boşluk değil (Win32 bunları sessizce kırpar, "..." ve "x." gibi biçimler
+    /// bu yüzden başka bir şeye çözülür) ve ayrılmış aygıt adı değil.
+    /// </summary>
+    private static bool IsSafeComponent(string part)
+    {
+        if (part.Length == 0 || part[^1] is '.' or ' ') return false;
+
+        var dot = part.IndexOf('.');
+        var stem = (dot >= 0 ? part[..dot] : part).TrimEnd(' ');
+        return !ReservedNames.Contains(stem, StringComparer.OrdinalIgnoreCase);
     }
 
     // Ağ ve aygıt yolu önekleri. "\\" ve "//" zaten "\\?\" ile "\\.\" önekini de kapsar; yine de açık listelenir.

@@ -51,6 +51,21 @@ public class AppIconOverrideTests : IDisposable
     [InlineData("C:\\icons\\.\\app.png", false, null)]
     [InlineData("C:/icons/app.png", false, null)]
     [InlineData("C:app.png", false, null)]
+    [InlineData("con.png", false, null)]
+    [InlineData("NUL.svg", false, null)]
+    [InlineData("com1.ico", false, null)]
+    [InlineData("LPT9.tar.png", false, null)]
+    [InlineData("COM\u00B9.png", false, null)]
+    [InlineData("C:\\icons\\aux.png", false, null)]
+    [InlineData("C:\\nul\\a.png", false, null)]
+    [InlineData("C:\\icons.\\a.png", false, null)]
+    [InlineData("C:\\icons \\a.png", false, null)]
+    [InlineData("C:\\...\\a.png", false, null)]
+    [InlineData("C:\\icons\\\\a.png", false, null)]
+    [InlineData("console.png", true, "console.png")]
+    [InlineData("com10.png", true, "com10.png")]
+    [InlineData("my.con.png", true, "my.con.png")]
+    [InlineData("C:\\icons/mixed.png", true, "C:\\icons/mixed.png")]
     [InlineData("", false, null)]
     [InlineData(null, false, null)]
     public void Value_must_be_an_image_path_or_name_and_never_a_script(string? value, bool expected, string? normalized)
@@ -73,6 +88,14 @@ public class AppIconOverrideTests : IDisposable
     public void Pack_entry_must_be_a_bare_file_name(string value, bool expected)
     {
         Assert.Equal(expected, AppIconOverrides.TryValidatePackFile(value, out _));
+    }
+
+    [Fact]
+    public void Device_named_pack_file_falls_back_to_default()
+    {
+        var choice = IconResolver.Resolve("calc.lnk", null, IconPack.Folder, "nul.png");
+
+        Assert.Equal(new IconChoice(IconSourceKind.Default, null), choice);
     }
 
     [Fact]
@@ -204,6 +227,45 @@ public class AppIconOverrideTests : IDisposable
 
         Assert.Equal(IconPack.Folder, loaded.Appearance.IconPack);
         Assert.Equal("C:\\icons\\note.png", loaded.Appearance.AppIconOverrides["notepad.lnk"]);
+    }
+
+    [Theory]
+    [InlineData("""{ "Appearance": { "AppIconOverrides": null } }""")]
+    [InlineData("""{ "Appearance": null }""")]
+    public void Null_override_map_in_the_file_is_restored_to_an_empty_map(string json)
+    {
+        Directory.CreateDirectory(_dir);
+        var path = Path.Combine(_dir, "settings.json");
+        File.WriteAllText(path, json);
+
+        var loaded = new SettingsStore(path).Load();
+
+        Assert.NotNull(loaded.Appearance.AppIconOverrides);
+        Assert.Empty(loaded.Appearance.AppIconOverrides);
+        Assert.Null(AppIconOverrides.Lookup(loaded.Appearance.AppIconOverrides, "calc.lnk"));
+    }
+
+    [Fact]
+    public void Lookup_ignores_a_null_stored_value()
+    {
+        // Elle düzenlenmiş dosyadan null değer gelebilir; çözümleme patlamadan yok saymalı.
+        var map = new ValueDictionary<string> { ["calc.lnk"] = null! };
+
+        Assert.Null(AppIconOverrides.Lookup(map, "calc.lnk"));
+    }
+
+    [Fact]
+    public void Undefined_icon_pack_number_resolves_to_the_default_icon()
+    {
+        // Elle yazılmış sayı ("IconPack": 7) enum'a olduğu gibi girer; çözümleme paketi yok sayıp yerleşik simgeye düşmeli.
+        Directory.CreateDirectory(_dir);
+        var path = Path.Combine(_dir, "settings.json");
+        File.WriteAllText(path, """{ "Appearance": { "IconPack": 7 } }""");
+
+        var loaded = new SettingsStore(path).Load();
+        var choice = IconResolver.Resolve("calc.lnk", null, loaded.Appearance.IconPack, "calc.svg");
+
+        Assert.Equal(new IconChoice(IconSourceKind.Default, null), choice);
     }
 
     public void Dispose()
