@@ -629,3 +629,11 @@ Karar (2026-11-11): paketsiz süreçte `NotificationChanged` aboneliği 0x800704
 - [ ] **P6-App, bellek:** şarkı çalarken önce/sonra ölçüm (`measure-memory.ps1`), `docs/MEMORY.md`.
 - [x] **P6-App, cam uyumu (demo `CamMuzikKarti.dc.html`):** Albüm rengi kart zemini çentiğin etkin malzemesinin alfasında (`MusicViewModel.SetCardAlpha`, `NotchViewModel` malzeme değişince verir; Katı 255 / Buzlu 219 / Cam 184); Kapak resmi opak kalır (okunurluk perdeden); palet yokken (Düz, gri ya da kapaksız) kart her malzemede nötr: demodaki "Düz nötr" (proje sahibi kararı 2026-11-11, eski yeşil `#0E2A18` bırakıldı); `KoyNotchMusicCard` Katı'da `#141416`, camda beyaz %6, ikincil metin beyaz %62, çubuklar beyaz %60, kapaksız yer tutucu (kart ve kapalı çentik) `#27272A`. UiSnapshots ile Katı ve Cam'da üç stil kontrol edildi.
 - [x] **P6-App, elle sınama (proje sahibi, 2026-11-11):** parça değişince renk değişiyor, büyütülmüş kart aynı renkte; siyah-beyaz kapakta kart nötr griye dönüyor (Spotify). Kapaksız video ve Albüm kapağı stili ayrıca denenmedi.
+
+## Ayar şeması v4 — bölümlere ayrılmış kayıtlar (PR #85)
+- [x] `settings.json` v4: `AppSettings` yalnız bölüm kayıtlarını tutar (`General`, `Appearance`, `Dock`, `DockItems`, `Notch`, `Music`, `Displays`, `Shortcuts`, `Voice`, `Search`, `Focus`, `Weather`, `Clipboard`, `QuickLaunch`). Eşitlik kayıtlardan gelir, elle `Equals` yok.
+- [x] Göç: v3 düz anahtarlar `SettingsKeyMap` ile bölümlere taşınır; sayı ve dile bağlı değerler `LegacyValueTranslator` ile enum adına çevrilir. Tanınmayan değer yalnız kendi alanını varsayılana döndürür.
+- [x] Göç yedeği: ilk v3 → v4 okumada `settings.v3.json` bir kez yazılır, sonra asla üzerine yazılmaz.
+- [x] Testler: altın dosya (`Fixtures/settings-v3.json`) her alanın doğru bölüme geldiğini doğrular; anahtar kapsam testi her v3 anahtarının eşlendiğini ya da bilerek atıldığını (`MonitorTarget`) denetler; boş bölüm ve null liste testleri; tam kayıt/okuma döngüsü.
+- [x] `DockItems` (sıra, klasörler) değişince dock yeniden kurulmaz (`DockSettingsDiff`).
+- [ ] Sahip doğrulaması (uygulama çalıştırılarak): gerçek v0.2.6 `settings.json` ile her sayfa değerlerini korur mu; görev çubuğu kill → geri gelir (AGENTS #7); `scripts/measure-memory.ps1` ve `docs/MEMORY.md` satırı.

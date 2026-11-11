@@ -29,7 +29,7 @@ Unutma:
 ## Yeni ayar eklemek
 | Katman | Dosya | Ne yapılır |
 |---|---|---|
-| Core | `src/Core/Settings/AppSettings.cs` | Varsayılan değerli alan |
+| Core | `src/Core/Settings/SettingsSections.cs` | Varsayılan değerli alan, ilgili bölüm kaydına (`GeneralSettings`, `DockSettings`…). Eşitlik kayıttan kendiliğinden gelir |
 | Core | `src/Core/Settings/SettingsJsonContext.cs` | Yeni enum ya da liste tipi varsa `[JsonSerializable]` |
 | Core | `src/Core/Settings/SettingsMigration.cs` | Yalnız eski değerin anlamı değiştiyse |
 | App | `src/App/Features/Settings/KoyWindowViewModel.cs` | Özellik; `LoadFromSettings` içinde okuma, kaydetme bölümünde yazma |
