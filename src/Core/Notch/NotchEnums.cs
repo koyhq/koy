@@ -18,11 +18,46 @@ public enum IdleDisplayMode
     RingClockDay
 }
 
-/// <summary>Çentiğin açılması: fareyle üzerine gelince (varsayılan) ya da tıklayınca.</summary>
+/// <summary>Çentiğin açılması: fareyle üzerine gelince (varsayılan), tıklayınca ya da sürüklenen öğe üstüne gelince.</summary>
 public enum NotchOpenBehavior
 {
     Hover,
-    Click
+    Click,
+    DragOver
+}
+
+/// <summary>Sekme çubuğunun görünümü: yalnız simge, simge ve ad, ya da hiç.</summary>
+public enum NotchTabBarStyle
+{
+    IconOnly,
+    IconAndLabel,
+    Hidden
+}
+
+/// <summary>Müzik görselleştiricisinin çizim biçimi.</summary>
+public enum NotchVisualizerStyle
+{
+    Bars,
+    Wave,
+    Dots
+}
+
+/// <summary>Görselleştirici rengi: Windows vurgu rengi ya da albüm kapağından çıkarılan renk.</summary>
+public enum NotchVisualizerColorSource
+{
+    Accent,
+    Artwork
+}
+
+/// <summary>Ana sayfadaki kartlar. Sıra ve görünürlük <see cref="Settings.NotchSettings.HomeCards"/> listesindedir.</summary>
+public enum HomeCard
+{
+    Music,
+    HeadphoneBattery,
+    SystemNetwork,
+    QuickLaunch,
+    Weather,
+    Timers
 }
 
 /// <summary>Çentik üstünde fare tekerleği: panel değiştir (varsayılan) ya da sistem sesini ayarla.</summary>

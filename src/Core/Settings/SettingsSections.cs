@@ -147,6 +147,24 @@ public sealed record NotchSettings
     /// <summary>Çentiğin açılması: üzerine gelince (varsayılan) ya da tıklayınca.</summary>
     public NotchOpenBehavior OpenBehavior { get; set; } = NotchOpenBehavior.Hover;
 
+    /// <summary>Üzerine gelince açılma gecikmesi (ms, 0–2000). Tıklayınca açılmada kullanılmaz.</summary>
+    public int OpenDelayMs { get; set; }
+
+    /// <summary>İmleç çentikten çıkınca kapanma gecikmesi (ms, 0–2000).</summary>
+    public int CloseDelayMs { get; set; }
+
+    /// <summary>Sekme çubuğu: yalnız simge (varsayılan), simge ve ad, ya da gizli.</summary>
+    public NotchTabBarStyle TabBarStyle { get; set; } = NotchTabBarStyle.IconOnly;
+
+    /// <summary>
+    /// Sekmelerin kullanıcı sırası (panel anahtarları). Boşsa ya da eksikse varsayılan sıra kullanılır; görünürlük
+    /// yine <see cref="EnabledPanels"/> ile belirlenir. Bkz. <c>NotchPanels.NormalizeOrder</c>.
+    /// </summary>
+    public ValueList<string> PanelOrder { get; set; } = [];
+
+    /// <summary>Ana sayfada gösterilen kartlar ve sırası. Boş liste: hiçbir kart yok. Bkz. <c>HomeCardLayout.Normalize</c>.</summary>
+    public ValueList<HomeCard> HomeCards { get; set; } = [HomeCard.Music, HomeCard.HeadphoneBattery, HomeCard.SystemNetwork, HomeCard.QuickLaunch, HomeCard.Weather, HomeCard.Timers];
+
     /// <summary>Çentik boştayken (kapalı, müzik çalmıyor) ne gösterilir.</summary>
     public IdleDisplayMode IdleDisplay { get; set; } = IdleDisplayMode.ClockAndBattery;
 
@@ -195,6 +213,15 @@ public sealed record MusicSettings
     /// LRCLIB'e gider, bu yüzden kullanıcı kartındaki düğmeyle ya da ayardan kendisi açar. İstek yalnız Ana görünürken, parça başına bir kez.
     /// </summary>
     public bool LyricsEnabled { get; set; }
+
+    /// <summary>Çentik görselleştiricisinin biçimi: çubuklar (varsayılan), dalga ya da noktalar.</summary>
+    public NotchVisualizerStyle VisualizerStyle { get; set; } = NotchVisualizerStyle.Bars;
+
+    /// <summary>Görselleştirici rengi: vurgu (varsayılan) ya da albüm kapağı.</summary>
+    public NotchVisualizerColorSource VisualizerColorSource { get; set; } = NotchVisualizerColorSource.Accent;
+
+    /// <summary>Görselleştiricideki çubuk sayısı (<see cref="Notch.NotchVisualizer.MinBarCount"/>–<see cref="Notch.NotchVisualizer.MaxBarCount"/>).</summary>
+    public int VisualizerBarCount { get; set; } = 5;
 }
 
 /// <summary>Ekranlar: monitör başına ayar ve yeni ekran varsayılanı.</summary>
