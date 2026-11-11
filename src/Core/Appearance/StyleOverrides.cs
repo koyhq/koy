@@ -1,14 +1,22 @@
+using System.Collections.Frozen;
 using System.Globalization;
 
 namespace Koy.Core.Appearance;
 
 /// <summary>
-/// Geçerliliği denetlenmiş geçersiz kılmalar: token adı → kanonik metin değer. Değerler her zaman
-/// <see cref="StyleTokens"/> kurallarından geçmiş olur (renk "#RRGGBB", sayı invariant, enum listedeki ad).
+/// Geçerliliği denetlenmiş geçersiz kılmalar: token adı → kanonik metin değer. Yalnız
+/// <see cref="StyleOverrideSanitizer"/> üretir (kurucu internal), bu yüzden değerler her zaman
+/// <see cref="StyleTokens"/> kurallarından geçmiştir (renk "#RRGGBB", sayı invariant, enum listedeki ad).
+/// Sözlük donmuştur: cast ile yazılamaz, paylaşılan <see cref="Empty"/> örneği zehirlenemez.
 /// </summary>
-public sealed record StyleOverrides(IReadOnlyDictionary<string, string> Values)
+public sealed class StyleOverrides
 {
-    public static StyleOverrides Empty { get; } = new(new Dictionary<string, string>(StringComparer.Ordinal));
+    internal StyleOverrides(IDictionary<string, string> values) =>
+        Values = values.ToFrozenDictionary(StringComparer.Ordinal);
+
+    public IReadOnlyDictionary<string, string> Values { get; }
+
+    public static StyleOverrides Empty { get; } = new(new Dictionary<string, string>());
 }
 
 public enum StyleDropReason
@@ -37,7 +45,8 @@ public enum StyleDropReason
 
 public sealed record DroppedStyleOverride(string Name, StyleDropReason Reason);
 
-public sealed record StyleSanitizeResult(StyleOverrides Accepted, IReadOnlyList<DroppedStyleOverride> Dropped);
+/// <param name="OmittedDropCount">Rapor sınırı (<c>MaxReportedDrops</c>) yüzünden listeye alınmayan ret sayısı.</param>
+public sealed record StyleSanitizeResult(StyleOverrides Accepted, IReadOnlyList<DroppedStyleOverride> Dropped, int OmittedDropCount = 0);
 
 /// <summary>
 /// Kullanıcı (ya da paylaşılan paket) girdisini whitelist'e göre süzer. Saf fonksiyon: dosya, WPF ya da
@@ -52,30 +61,43 @@ public static class StyleOverrideSanitizer
     // Rapora yazılan anahtar uzunluğu sınırı: dosyadaki dev anahtar tanılama ekranını şişirmesin.
     private const int MaxEchoedNameLength = 64;
 
+    // Dosyada milyonlarca bilinmeyen anahtar olsa da rapor ve bellek sınırlı kalır; fazlası yalnız sayılır.
+    private const int MaxReportedDrops = 64;
+
     public static StyleSanitizeResult Sanitize(IEnumerable<KeyValuePair<string, string?>> raw)
     {
         var accepted = new Dictionary<string, string>(StringComparer.Ordinal);
+        // Yalnız whitelist adları izlenir (en çok 7); bilinmeyen anahtarlar için küme büyümez.
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var dropped = new List<DroppedStyleOverride>();
+        var omitted = 0;
+
+        void Drop(string name, StyleDropReason reason)
+        {
+            if (dropped.Count < MaxReportedDrops)
+                dropped.Add(new DroppedStyleOverride(name, reason));
+            else
+                omitted++;
+        }
 
         foreach (var (name, value) in raw)
         {
             // JSON anahtarı null gelemez ama sınır çağrıcıdan geçer; çökmek yerine reddedilir.
             if (name is null)
             {
-                dropped.Add(new DroppedStyleOverride(string.Empty, StyleDropReason.UnknownToken));
-                continue;
-            }
-
-            if (!seen.Add(name))
-            {
-                dropped.Add(new DroppedStyleOverride(EchoName(name), StyleDropReason.Duplicate));
+                Drop(string.Empty, StyleDropReason.UnknownToken);
                 continue;
             }
 
             if (!StyleTokens.TryGet(name, out var token))
             {
-                dropped.Add(new DroppedStyleOverride(EchoName(name), StyleDropReason.UnknownToken));
+                Drop(EchoName(name), StyleDropReason.UnknownToken);
+                continue;
+            }
+
+            if (!seen.Add(name))
+            {
+                Drop(name, StyleDropReason.Duplicate);
                 continue;
             }
 
@@ -83,10 +105,10 @@ public static class StyleOverrideSanitizer
             if (reason is null)
                 accepted[name] = canonical;
             else
-                dropped.Add(new DroppedStyleOverride(name, reason.Value));
+                Drop(name, reason.Value);
         }
 
-        return new StyleSanitizeResult(new StyleOverrides(accepted), dropped);
+        return new StyleSanitizeResult(new StyleOverrides(accepted), dropped, omitted);
     }
 
     // Yalnız rapora giden ad kırpılır; eşleşme ve tekrar kontrolü tam ad üzerinden yapılmıştır.
