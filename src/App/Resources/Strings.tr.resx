@@ -264,6 +264,12 @@
   <data name="NavShortcuts" xml:space="preserve">
     <value>Kısayollar</value>
   </data>
+  <data name="NavDictation" xml:space="preserve">
+    <value>Dikte</value>
+  </data>
+  <data name="DictationSubtitle" xml:space="preserve">
+    <value>Sesinizle ya da yazdığınız komutla bir kodlama asistanı çalıştırın</value>
+  </data>
   <data name="NavPerformance" xml:space="preserve">
     <value>Performans</value>
   </data>
@@ -704,6 +710,39 @@
   </data>
   <data name="VoiceHarnessCustom" xml:space="preserve">
     <value>Özel</value>
+  </data>
+  <data name="VoicePermissionTitle" xml:space="preserve">
+    <value>Claude izinleri</value>
+  </data>
+  <data name="VoicePermissionDesc" xml:space="preserve">
+    <value>Sesli komutlar başsız çalışır, bu yüzden Claude onay isteyemez. Salt okunur (varsayılan): dosya oluşturmayı ve değiştirmeyi engeller. Düzenleme: yalnız dosya düzenlemeye izin verir. Otomatik: Claude güvenli işleri kendisi onaylar, riskli olanları engeller.</value>
+  </data>
+  <data name="VoicePermissionAuto" xml:space="preserve">
+    <value>Otomatik</value>
+  </data>
+  <data name="VoicePermissionAcceptEdits" xml:space="preserve">
+    <value>Düzenleme</value>
+  </data>
+  <data name="VoicePermissionReadOnly" xml:space="preserve">
+    <value>Salt okunur</value>
+  </data>
+  <data name="VoiceReplyTitle" xml:space="preserve">
+    <value>Sesli komut yanıtı</value>
+  </data>
+  <data name="VoiceReplyOpenFile" xml:space="preserve">
+    <value>Dosya olarak aç</value>
+  </data>
+  <data name="VoiceReplyClose" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="VoiceModelTitle" xml:space="preserve">
+    <value>Claude modeli</value>
+  </data>
+  <data name="VoiceModelDesc" xml:space="preserve">
+    <value>Sesli komutun çalışacağı model. Varsayılan, Claude Code'un ayarlı modelini kullanır. Yalnız Claude için geçerlidir.</value>
+  </data>
+  <data name="VoiceModelDefault" xml:space="preserve">
+    <value>Varsayılan</value>
   </data>
   <data name="VoiceCustomCommandTitle" xml:space="preserve">
     <value>Özel Komut Şablonu</value>
@@ -2269,7 +2308,10 @@
     <value>Tamamlandı</value>
   </data>
   <data name="VoiceErrorInvalidCommand" xml:space="preserve">
-    <value>Özel komut geçersiz. Koy › Çentik'ten kontrol edin.</value>
+    <value>Özel komut geçersiz. Koy › Dikte'den kontrol edin.</value>
+  </data>
+  <data name="VoiceErrorInvalidModel" xml:space="preserve">
+    <value>“{0}” geçerli bir model adı değil. Koy › Dikte'den kontrol edin.</value>
   </data>
   <data name="VoiceErrorScriptNotSupported" xml:space="preserve">
     <value>{0} bir .cmd ya da .bat betiği, Koy bunu başlatamaz. Özel komut olarak .exe yolunu verin.</value>

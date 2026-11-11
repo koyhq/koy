@@ -9,7 +9,63 @@ public class VoiceCommandTests
     {
         var resolved = VoiceCommandParser.Resolve(VoiceHarnessType.Claude, "unit test yaz");
         Assert.Equal("claude", resolved.Executable);
+        // Varsayılan salt okunur: izin bayrağı yok, dikte yanlış duyulsa da onaysız değişiklik olmaz.
         Assert.Equal(["-p", "--", "unit test yaz"], resolved.Arguments);
+    }
+
+    [Theory]
+    [InlineData(VoiceClaudePermission.Auto, new[] { "-p", "--permission-mode", "auto", "--", "x" })]
+    [InlineData(VoiceClaudePermission.AcceptEdits, new[] { "-p", "--permission-mode", "acceptEdits", "--", "x" })]
+    [InlineData(VoiceClaudePermission.Default, new[] { "-p", "--", "x" })]
+    public void VoiceCommandParser_ClaudePermission_AddsModeBeforeDoubleDash(VoiceClaudePermission mode, string[] expected)
+    {
+        var resolved = VoiceCommandParser.Resolve(VoiceHarnessType.Claude, "x", claudePermission: mode);
+        Assert.Equal(expected, resolved.Arguments);
+    }
+
+    [Fact]
+    public void VoiceCommandParser_ClaudeModel_AddsModelFlagBeforeDoubleDash()
+    {
+        var resolved = VoiceCommandParser.Resolve(VoiceHarnessType.Claude, "x", claudePermission: VoiceClaudePermission.Auto, model: "opus");
+        Assert.Equal(["-p", "--model", "opus", "--permission-mode", "auto", "--", "x"], resolved.Arguments);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  ")]
+    [InlineData("default")]
+    [InlineData("DEFAULT")]
+    public void VoiceCommandParser_ClaudeModel_DefaultOrEmpty_AddsNoModelFlag(string? model)
+    {
+        var resolved = VoiceCommandParser.Resolve(VoiceHarnessType.Claude, "x", claudePermission: VoiceClaudePermission.Default, model: model);
+        Assert.Equal(["-p", "--", "x"], resolved.Arguments);
+    }
+
+    [Theory]
+    [InlineData("--dangerously-skip-permissions")]
+    [InlineData("-x")]
+    [InlineData("opus; calc")]
+    [InlineData("a b")]
+    public void VoiceCommandParser_ClaudeModel_InvalidName_Throws(string model)
+    {
+        var ex = Assert.Throws<VoiceCommandException>(() => VoiceCommandParser.Resolve(VoiceHarnessType.Claude, "x", model: model));
+        // Kullanıcı metnini App seçer: Core yalnız kodu ve modelin adını taşır.
+        Assert.Equal(VoiceFailure.InvalidModel, ex.Failure);
+        Assert.Equal(model, ex.Detail);
+    }
+
+    [Fact]
+    public void VoiceCommandParser_Model_DoesNotAffectOtherHarnesses()
+    {
+        Assert.Equal(["exec", "--", "x"], VoiceCommandParser.Resolve(VoiceHarnessType.Codex, "x", model: "opus").Arguments);
+    }
+
+    [Fact]
+    public void VoiceCommandParser_ClaudePermission_DoesNotAffectOtherHarnesses()
+    {
+        Assert.Equal(["exec", "--", "x"], VoiceCommandParser.Resolve(VoiceHarnessType.Codex, "x", claudePermission: VoiceClaudePermission.Auto).Arguments);
+        Assert.Equal(["-p", "x"], VoiceCommandParser.Resolve(VoiceHarnessType.Agy, "x", claudePermission: VoiceClaudePermission.Auto).Arguments);
     }
 
     [Fact]

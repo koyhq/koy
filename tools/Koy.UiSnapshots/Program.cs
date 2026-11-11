@@ -23,7 +23,7 @@ public static class Program
     private const double Scale = 1.5;
 
     private static readonly string[] PageNames =
-        ["genel", "centik", "dock", "ekranlar", "gorunum", "kisayollar", "performans", "hakkinda"];
+        ["genel", "centik", "dock", "ekranlar", "gorunum", "kisayollar", "dikte", "performans", "hakkinda"];
 
     /// <summary>Görüntülerde kullanılan malzeme (Katı / Buzlu / Cam).</summary>
     internal static string Material { get; private set; } = "Katı";
@@ -205,7 +205,7 @@ public static class Program
             kvm.Weather.SelectPlaceCommand.Execute(kvm.Weather.Results[0]);
             RenderElement(root, 880, 680, Name("ayar-centik-hava-secili"));
 
-            kvm.SelectPage(7);
+            kvm.SelectPage(8);
             RenderElement(root, 880, 680, Name("ayar-hakkinda-atif"));
         }
         finally
@@ -658,7 +658,7 @@ public static class Program
                 sv.VerticalScrollBarVisibility = System.Windows.Controls.ScrollBarVisibility.Disabled;
             var root = (FrameworkElement)win.Content;
             root.Measure(new Size(880, double.PositiveInfinity));
-            vm.SelectPage(7);
+            vm.SelectPage(8);
 
             string Path_(string name) => Path.Combine(outDir, $"{prefix}-{theme}-{name}.png");
 
