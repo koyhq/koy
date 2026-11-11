@@ -49,6 +49,9 @@ public static class StyleOverrideSanitizer
     // Bundan uzun bir değer zaten geçerli bir renk, sayı ya da enum değil; ayrıştırmadan önce elenir.
     private const int MaxValueLength = 32;
 
+    // Rapora yazılan anahtar uzunluğu sınırı: dosyadaki dev anahtar tanılama ekranını şişirmesin.
+    private const int MaxEchoedNameLength = 64;
+
     public static StyleSanitizeResult Sanitize(IEnumerable<KeyValuePair<string, string?>> raw)
     {
         var accepted = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -66,13 +69,13 @@ public static class StyleOverrideSanitizer
 
             if (!seen.Add(name))
             {
-                dropped.Add(new DroppedStyleOverride(name, StyleDropReason.Duplicate));
+                dropped.Add(new DroppedStyleOverride(EchoName(name), StyleDropReason.Duplicate));
                 continue;
             }
 
             if (!StyleTokens.TryGet(name, out var token))
             {
-                dropped.Add(new DroppedStyleOverride(name, StyleDropReason.UnknownToken));
+                dropped.Add(new DroppedStyleOverride(EchoName(name), StyleDropReason.UnknownToken));
                 continue;
             }
 
@@ -85,6 +88,10 @@ public static class StyleOverrideSanitizer
 
         return new StyleSanitizeResult(new StyleOverrides(accepted), dropped);
     }
+
+    // Yalnız rapora giden ad kırpılır; eşleşme ve tekrar kontrolü tam ad üzerinden yapılmıştır.
+    private static string EchoName(string name) =>
+        name.Length <= MaxEchoedNameLength ? name : name[..MaxEchoedNameLength];
 
     private static StyleDropReason? Validate(StyleToken token, string? value, out string canonical)
     {
@@ -138,14 +145,23 @@ public static class StyleOverrideSanitizer
         if (number < token.Min || number > token.Max)
             return StyleDropReason.OutOfRange;
 
-        canonical = number.ToString("R", CultureInfo.InvariantCulture);
+        // -0 eşitlikte 0'a eşit olduğu için aralığı geçer; kanonik metinde "-0" çıkmasın diye sıfır yazılır.
+        if (number == 0)
+            number = 0;
+
+        // "R" küçük değerleri "1E-05" gibi üstel biçime çevirir. Sabit basamaklı biçim aralıkta hiç üstel üretmez.
+        canonical = number.ToString("0.################", CultureInfo.InvariantCulture);
         return null;
     }
 
     private static StyleDropReason? ValidateEnum(StyleToken token, string text, out string canonical)
     {
         canonical = string.Empty;
-        foreach (var option in token.EnumValues ?? [])
+        // Listesi olmayan token hiçbir enum değerini kabul etmez (default ImmutableArray üzerinde sayım çöker).
+        if (token.EnumValues.IsDefault)
+            return StyleDropReason.UnknownEnumValue;
+
+        foreach (var option in token.EnumValues)
         {
             if (string.Equals(option, text, StringComparison.OrdinalIgnoreCase))
             {

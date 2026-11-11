@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace Koy.Core.Appearance;
 
 /// <summary>Değer kipi: renk (#RRGGBB), sınırlı sayı ya da sabit listeden bir ad.</summary>
@@ -10,9 +12,10 @@ public enum StyleValueKind
 
 /// <summary>
 /// Kullanıcının geçersiz kılabileceği tek bir tema token'ı. Ad, değer kipi ve izinli aralık ya da liste burada sabittir;
-/// dosyadan gelen hiçbir şey bu tanımın dışına çıkamaz.
+/// dosyadan gelen hiçbir şey bu tanımın dışına çıkamaz. Liste <see cref="ImmutableArray{T}"/> olduğu için
+/// bir cast ile de değiştirilemez (yazma denemesi NotSupportedException verir).
 /// </summary>
-public sealed record StyleToken(string Name, StyleValueKind Kind, double Min = 0, double Max = 0, IReadOnlyList<string>? EnumValues = null);
+public sealed record StyleToken(string Name, StyleValueKind Kind, double Min = 0, double Max = 0, ImmutableArray<string> EnumValues = default);
 
 /// <summary>
 /// Güvenlik sınırı: yalnız bu listedeki tokenlar geçersiz kılınabilir. XAML, yol, tip adı ya da kod burada yoktur,
@@ -27,13 +30,16 @@ public static class StyleTokens
     public static readonly StyleToken BorderThickness = new("BorderThickness", StyleValueKind.Number, 0, 4);
     public static readonly StyleToken FontSize = new("FontSize", StyleValueKind.Number, 10, 20);
     public static readonly StyleToken FontWeight = new("FontWeight", StyleValueKind.Enum,
-        EnumValues: ["Normal", "Medium", "SemiBold", "Bold"]);
+        EnumValues: ImmutableArray.Create("Normal", "Medium", "SemiBold", "Bold"));
 
-    public static IReadOnlyList<StyleToken> All { get; } =
-        [Accent, Surface, Text, CornerRadius, BorderThickness, FontSize, FontWeight];
+    // Tek doğruluk kaynağı: arama tablosu bu listeden türetilir, ikinci bir ad listesi tutulmaz.
+    private static readonly ImmutableArray<StyleToken> Whitelist =
+        ImmutableArray.Create(Accent, Surface, Text, CornerRadius, BorderThickness, FontSize, FontWeight);
 
-    private static readonly Dictionary<string, StyleToken> ByName =
-        All.ToDictionary(t => t.Name, StringComparer.Ordinal);
+    private static readonly ImmutableDictionary<string, StyleToken> ByName =
+        Whitelist.ToImmutableDictionary(t => t.Name, StringComparer.Ordinal);
+
+    public static IReadOnlyList<StyleToken> All => Whitelist;
 
     /// <summary>Ad tam eşleşmeli (büyük-küçük harf duyarlı) aranır; listede yoksa false.</summary>
     public static bool TryGet(string name, out StyleToken token)

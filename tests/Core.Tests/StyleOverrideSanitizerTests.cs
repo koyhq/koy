@@ -1,3 +1,4 @@
+using System.Collections;
 using Koy.Core.Appearance;
 
 namespace Koy.Core.Tests;
@@ -190,5 +191,65 @@ public class StyleOverrideSanitizerTests
     {
         foreach (var token in StyleTokens.All.Where(t => t.Kind == StyleValueKind.Number))
             Assert.True(token.Min < token.Max, token.Name);
+    }
+
+    [Fact]
+    public void Whitelist_cannot_be_mutated_through_a_cast()
+    {
+        // Liste salt okunurdur: IList üzerinden yazma ya da ekleme denemesi istisna verir, içerik değişmez.
+        var all = (IList)StyleTokens.All;
+        Assert.Throws<NotSupportedException>(() => all[0] = new StyleToken("Evil", StyleValueKind.Color));
+        Assert.Throws<NotSupportedException>(() => all.Add(new StyleToken("Evil", StyleValueKind.Color)));
+
+        Assert.Equal(7, StyleTokens.All.Count);
+        Assert.False(StyleTokens.TryGet("Evil", out _));
+        Assert.Equal("Accent", StyleTokens.All[0].Name);
+    }
+
+    [Fact]
+    public void Enum_list_cannot_be_mutated_through_a_cast_and_rejects_injected_value()
+    {
+        var options = (IList)StyleTokens.FontWeight.EnumValues;
+        Assert.Throws<NotSupportedException>(() => options[0] = "Evil");
+
+        var result = Run(("FontWeight", "Evil"));
+        Assert.Equal([new DroppedStyleOverride("FontWeight", StyleDropReason.UnknownEnumValue)], result.Dropped);
+        Assert.Equal(new[] { "Normal", "Medium", "SemiBold", "Bold" }, StyleTokens.FontWeight.EnumValues.ToArray());
+    }
+
+    [Theory]
+    [InlineData("CornerRadius", "-0")]
+    [InlineData("BorderThickness", "-0.0")]
+    public void Negative_zero_is_normalized_to_zero(string name, string value)
+    {
+        var result = Run((name, value));
+
+        Assert.Equal("0", result.Accepted.Values[name]);
+        Assert.Empty(result.Dropped);
+    }
+
+    [Theory]
+    [InlineData("0.00001", "0.00001")]
+    [InlineData("1E-05", "0.00001")]
+    [InlineData("0.0000000000000000000001", "0")]
+    public void Tiny_number_is_canonicalized_without_exponent_notation(string value, string expected)
+    {
+        var result = Run(("BorderThickness", value));
+
+        Assert.Equal(expected, result.Accepted.Values["BorderThickness"]);
+        Assert.DoesNotContain("E", result.Accepted.Values["BorderThickness"], StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Unknown_key_longer_than_64_chars_is_truncated_in_the_report()
+    {
+        // Rapordaki ad kırpılır; yalnız tanılama çıktısı etkilenir, reddetme kararı değişmez.
+        var longKey = new string('k', 200);
+        var result = Run((longKey, "#FFFFFF"));
+
+        Assert.Empty(result.Accepted.Values);
+        var drop = Assert.Single(result.Dropped);
+        Assert.Equal(64, drop.Name.Length);
+        Assert.Equal(StyleDropReason.UnknownToken, drop.Reason);
     }
 }
