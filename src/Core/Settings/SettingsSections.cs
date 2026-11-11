@@ -49,6 +49,21 @@ public sealed record AppearanceSettings
 
     /// <summary>Okunabilirlik koruması: açık duvar kağıdında saydam malzeme kendiliğinden daha opak seviyeye çıkar.</summary>
     public bool MaterialReadabilityGuard { get; set; } = true;
+
+    /// <summary>Arayüz yazı tipi adı. Boşsa ya da yüklü değilse Koy varsayılanı (bkz. FontScalePolicy).</summary>
+    public string FontFamily { get; set; } = "";
+
+    /// <summary>Saat ve sayılar için ayrı yazı tipi. Boşsa arayüz yazı tipi kullanılır.</summary>
+    public string ClockFontFamily { get; set; } = "";
+
+    /// <summary>Taban yazı boyu (DIP), 10-18 aralığında sınırlanır.</summary>
+    public double BaseFontSize { get; set; } = FontScalePolicy.DefaultBaseFontSize;
+
+    /// <summary>Yazı kalınlığı (100-900). Okunurluk için 100'lük adımlarda tutulur.</summary>
+    public int FontWeight { get; set; } = FontScalePolicy.DefaultFontWeight;
+
+    /// <summary>Koy'un kendi ölçeği (yüzde, 80-150), monitör DPI'sinin üstüne uygulanır.</summary>
+    public int UiScalePercent { get; set; } = FontScalePolicy.DefaultUiScale;
 }
 
 /// <summary>Dock ayarları. Dock'un kendi yazdığı veriler (sıra, klasörler) <see cref="DockItemsSettings"/> bölümündedir.</summary>
