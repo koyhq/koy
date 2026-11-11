@@ -62,6 +62,7 @@ public sealed record AppSettings
         Notch.EnabledPanels ??= new NotchSettings().EnabledPanels;
         Notch.ControlCenterLayout ??= new NotchSettings().ControlCenterLayout;
         Displays.Monitors ??= new();
+        Dock.TrayAppVisibility ??= new();
         Search.DisabledSources ??= [];
         QuickLaunch.Items ??= [];
         return this;

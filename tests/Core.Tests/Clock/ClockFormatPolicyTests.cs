@@ -1,0 +1,89 @@
+using Koy.Core.Clock;
+
+namespace Koy.Core.Tests.Clock;
+
+public class ClockFormatPolicyTests
+{
+    [Theory]
+    [InlineData(ClockHourFormat.Auto, true, true)]
+    [InlineData(ClockHourFormat.Auto, false, false)]
+    [InlineData(ClockHourFormat.Hour12, false, true)]
+    [InlineData(ClockHourFormat.Hour24, true, false)]
+    public void Hour_format_setting_overrides_culture_only_when_explicit(ClockHourFormat setting, bool culture12, bool expected)
+        => Assert.Equal(expected, ClockFormatPolicy.UsesTwelveHourClock(setting, culture12));
+
+    [Theory]
+    [InlineData(false, false, "HH:mm")]
+    [InlineData(false, true, "HH:mm:ss")]
+    [InlineData(true, false, "h:mm tt")]
+    [InlineData(true, true, "h:mm:ss tt")]
+    public void Time_pattern_follows_hour_and_seconds(bool twelveHour, bool seconds, string expected)
+        => Assert.Equal(expected, ClockFormatPolicy.TimePattern(twelveHour, seconds));
+
+    [Fact]
+    public void Time_pattern_formats_a_known_instant()
+    {
+        var at = new DateTime(2026, 1, 5, 13, 7, 9);
+
+        Assert.Equal("13:07:09", at.ToString(ClockFormatPolicy.TimePattern(false, true), System.Globalization.CultureInfo.InvariantCulture));
+        Assert.Equal("1:07 PM", at.ToString(ClockFormatPolicy.TimePattern(true, false), System.Globalization.CultureInfo.InvariantCulture));
+    }
+
+    [Theory]
+    [InlineData(WeekStartSetting.System, DayOfWeek.Sunday, DayOfWeek.Sunday)]
+    [InlineData(WeekStartSetting.System, DayOfWeek.Monday, DayOfWeek.Monday)]
+    [InlineData(WeekStartSetting.Saturday, DayOfWeek.Monday, DayOfWeek.Saturday)]
+    [InlineData(WeekStartSetting.Sunday, DayOfWeek.Monday, DayOfWeek.Sunday)]
+    [InlineData(WeekStartSetting.Monday, DayOfWeek.Sunday, DayOfWeek.Monday)]
+    public void First_day_of_week_uses_culture_only_for_system(WeekStartSetting setting, DayOfWeek culture, DayOfWeek expected)
+        => Assert.Equal(expected, ClockFormatPolicy.ResolveFirstDayOfWeek(setting, culture));
+
+    [Fact]
+    public void Week_of_year_with_monday_start_matches_iso_week()
+    {
+        // ISO 8601: 2026-03-22 (Pazar) 12. haftada (16-22 Mart).
+        Assert.Equal(12, ClockFormatPolicy.WeekOfYear(new DateTime(2026, 3, 22), DayOfWeek.Monday));
+    }
+
+    [Fact]
+    public void Week_of_year_first_week_starts_on_the_first_day_that_has_four_days_in_the_year()
+    {
+        // 4 gün kuralı: 2026 Ocak'ın ilk haftası Cumartesi başlangıçlıysa 3 Ocak Cumartesi'dir (Ocak 3-9, yılın 7 günü).
+        Assert.Equal(1, ClockFormatPolicy.WeekOfYear(new DateTime(2026, 1, 3), DayOfWeek.Saturday));
+        Assert.Equal(1, ClockFormatPolicy.WeekOfYear(new DateTime(2026, 1, 9), DayOfWeek.Saturday));
+        Assert.Equal(2, ClockFormatPolicy.WeekOfYear(new DateTime(2026, 1, 10), DayOfWeek.Saturday));
+    }
+
+    [Theory]
+    [InlineData("dd.MM.yyyy")]
+    [InlineData("ddd, d MMMM")]
+    [InlineData("yyyy-MM-dd")]
+    public void Valid_custom_date_formats_are_accepted(string format)
+        => Assert.True(ClockFormatPolicy.IsValidCustomDateFormat(format));
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("\\")]
+    [InlineData("dd\tMM")]
+    public void Invalid_custom_date_formats_are_rejected(string? format)
+        => Assert.False(ClockFormatPolicy.IsValidCustomDateFormat(format));
+
+    [Fact]
+    public void Custom_date_format_longer_than_the_limit_is_rejected()
+    {
+        var tooLong = new string('d', ClockFormatPolicy.MaxCustomDateFormatLength + 1);
+        var atLimit = new string('d', ClockFormatPolicy.MaxCustomDateFormatLength);
+
+        Assert.False(ClockFormatPolicy.IsValidCustomDateFormat(tooLong));
+        Assert.True(ClockFormatPolicy.IsValidCustomDateFormat(atLimit));
+    }
+
+    [Theory]
+    [InlineData(null, false)]
+    [InlineData("", false)]
+    [InlineData("Tokyo Standard Time", true)]
+    public void Second_clock_is_on_only_with_a_time_zone_id(string? id, bool expected)
+        => Assert.Equal(expected, ClockFormatPolicy.HasSecondClock(id));
+}

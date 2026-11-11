@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Koy.Core.Display;
 using Koy.Core.Dock;
 using Koy.Core.Notch;
+using Koy.Core.Tray;
 
 namespace Koy.Core.Settings;
 
@@ -29,4 +30,5 @@ namespace Koy.Core.Settings;
 [JsonSerializable(typeof(ValueDictionary<MonitorSettings>))]
 [JsonSerializable(typeof(ValueDictionary<string>))]
 [JsonSerializable(typeof(DockFolder))]
+[JsonSerializable(typeof(ValueDictionary<TrayIconVisibility>))]
 internal sealed partial class SettingsJsonContext : JsonSerializerContext;
