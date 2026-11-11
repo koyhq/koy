@@ -46,6 +46,26 @@ public class ClockFormatPolicyTests
     }
 
     [Fact]
+    public void Week_of_year_with_monday_start_matches_iso_week_for_every_day()
+    {
+        for (var day = new DateTime(2000, 1, 1); day.Year < 2041; day = day.AddDays(1))
+            Assert.Equal(System.Globalization.ISOWeek.GetWeekOfYear(day), ClockFormatPolicy.WeekOfYear(day, DayOfWeek.Monday));
+    }
+
+    [Theory]
+    // Calendar.GetWeekOfYear bunları 53 sayar; hafta, dördüncü gününün düştüğü yeni yıla aittir.
+    [InlineData(2007, 12, 31, DayOfWeek.Monday, 1)]
+    [InlineData(2024, 12, 29, DayOfWeek.Sunday, 1)]
+    // Yıl başındaki günler önceki yılın son haftasında kalır.
+    [InlineData(2021, 1, 1, DayOfWeek.Monday, 53)]
+    public void Week_of_year_moves_days_across_the_year_boundary(int y, int m, int d, DayOfWeek firstDay, int expected)
+        => Assert.Equal(expected, ClockFormatPolicy.WeekOfYear(new DateTime(y, m, d), firstDay));
+
+    [Fact]
+    public void Week_of_year_ignores_the_time_of_day()
+        => Assert.Equal(1, ClockFormatPolicy.WeekOfYear(new DateTime(2007, 12, 31, 23, 59, 0), DayOfWeek.Monday));
+
+    [Fact]
     public void Week_of_year_first_week_starts_on_the_first_day_that_has_four_days_in_the_year()
     {
         // 4 gün kuralı: 2026 Ocak'ın ilk haftası Cumartesi başlangıçlıysa 3 Ocak Cumartesi'dir (Ocak 3-9, yılın 7 günü).
