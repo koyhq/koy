@@ -21,8 +21,9 @@ public sealed record ExtensionManifest
         Version = version;
         Author = author;
 
-        // Girdi listesinin kopyası: çağıranın sonradan değiştirdiği bir liste manifesti bozamaz.
-        Capabilities = capabilities.ToArray();
+        // Kopya + salt okunur sarmalayıcı: çağıran sonradan değiştiremez, tüketici de diziye dönüştürüp yazamaz.
+        // Sıralı tutulur: aynı yetki kümesi hangi sırayla yazılırsa yazılsın eşit sayılır.
+        Capabilities = Array.AsReadOnly(capabilities.Order().ToArray());
         EntryKind = entryKind;
     }
 

@@ -1,3 +1,6 @@
+using System.Globalization;
+using System.Text;
+
 namespace Koy.Core.Extensions;
 
 /// <summary>Manifest doğrulamasının ilk hatalı alanını söyler. Hata yoksa <see cref="None"/>.</summary>
@@ -28,6 +31,9 @@ public static class ExtensionManifestValidator
 
     // Sürüm parçası en çok 6 hane: "999999.999999.999999" gibi aşırı değerleri ve taşmayı engeller.
     public const int MaxVersionPartDigits = 6;
+
+    // Üç parça ve iki nokta: en uzun geçerli sürümün uzunluğu.
+    private const int MaxVersionLength = (3 * MaxVersionPartDigits) + 2;
 
     // Yetki sayısı kapalı kümenin büyüklüğünden çok daha yüksekse, şişirilmiş bir manifesttir.
     public const int MaxCapabilities = 16;
@@ -124,7 +130,7 @@ public static class ExtensionManifestValidator
     /// <summary>
     /// Kimlik: küçük harf ile başlar, yalnız küçük harf, rakam ve tire içerir, tireyle bitmez.
     /// Uzunluk 2 ile 64 arasında. Büyük harf ya da boşluk kabul edilmez, çünkü kimlik dosya adı ve
-    /// karşılaştırma anahtarı olarak kullanılır.
+    /// karşılaştırma anahtarı olarak kullanılır. Windows aygıt adları (con, nul, com1…) da reddedilir.
     /// </summary>
     private static bool IsValidId(string? id)
     {
@@ -146,25 +152,43 @@ public static class ExtensionManifestValidator
             }
         }
 
-        return id[^1] != '-';
+        return id[^1] != '-' && !IsReservedDeviceName(id);
     }
 
-    /// <summary>Sürüm tam olarak üç parçalı "major.minor.patch" biçiminde olmalı; her parça yalnız rakam içerir.</summary>
+    // Kimlik dosya adı olarak kullanılacak; Windows'ta bu adlar dosya değil aygıt açar (con, nul, com1…).
+    private static bool IsReservedDeviceName(string id)
+    {
+        if (id is "con" or "prn" or "aux" or "nul")
+        {
+            return true;
+        }
+
+        return id.Length == 4
+            && (id.StartsWith("com", StringComparison.Ordinal) || id.StartsWith("lpt", StringComparison.Ordinal))
+            && id[3] is >= '1' and <= '9';
+    }
+
+    /// <summary>
+    /// Sürüm tam olarak üç parçalı "major.minor.patch" biçiminde olmalı; her parça yalnız rakam içerir.
+    /// Uzunluk önce denetlenir: aşırı uzun bir metin bölünüp parçalara kopyalanmaz.
+    /// </summary>
     private static bool IsValidVersion(string? version)
     {
-        if (version is null)
+        if (version is null || version.Length > MaxVersionLength)
         {
             return false;
         }
 
-        var parts = version.Split('.');
-        if (parts.Length != 3)
+        var parts = 0;
+        foreach (var range in version.AsSpan().Split('.'))
         {
-            return false;
-        }
+            parts++;
+            if (parts > 3)
+            {
+                return false;
+            }
 
-        foreach (var part in parts)
-        {
+            var part = version.AsSpan(range);
             if (part.Length < 1 || part.Length > MaxVersionPartDigits)
             {
                 return false;
@@ -185,7 +209,7 @@ public static class ExtensionManifestValidator
             }
         }
 
-        return true;
+        return parts == 3;
     }
 
     /// <summary>
@@ -204,12 +228,33 @@ public static class ExtensionManifestValidator
             return false;
         }
 
-        foreach (var c in value)
+        // Kullanıcıya onay ekranında gösterilir: görünmez ya da yön değiştiren karakterler (U+202E, U+200B,
+        // U+2028), özel kullanım ve eşleşmemiş vekil karakterler başka bir adı taklit etmek için kullanılabilir.
+        for (var i = 0; i < value.Length; i++)
         {
-            if (char.IsControl(c))
+            if (!Rune.TryGetRuneAt(value, i, out var rune))
             {
                 return false;
             }
+
+            switch (Rune.GetUnicodeCategory(rune))
+            {
+                case UnicodeCategory.Control:
+                case UnicodeCategory.Format:
+                case UnicodeCategory.LineSeparator:
+                case UnicodeCategory.ParagraphSeparator:
+                case UnicodeCategory.PrivateUse:
+                case UnicodeCategory.OtherNotAssigned:
+                    return false;
+            }
+
+            if (rune.IsBmp)
+            {
+                continue;
+            }
+
+            // Vekil çift iki char tutar; ikincisini atla.
+            i++;
         }
 
         return true;

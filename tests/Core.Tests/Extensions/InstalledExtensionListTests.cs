@@ -128,4 +128,33 @@ public class InstalledExtensionListTests
         Assert.False(ok);
         Assert.Equal(InstalledExtensionListError.UnknownId, error);
     }
+
+    [Fact]
+    public void Build_stops_reading_once_limit_is_exceeded()
+    {
+        var pulled = 0;
+        IEnumerable<InstalledExtension> Endless()
+        {
+            while (pulled < 10_000)
+            {
+                yield return Installed($"ext-{pulled++}".Replace('0', 'a').Replace('1', 'b').Replace('2', 'c')
+                    .Replace('3', 'd').Replace('4', 'e').Replace('5', 'f').Replace('6', 'g').Replace('7', 'h')
+                    .Replace('8', 'i').Replace('9', 'j'));
+            }
+        }
+
+        var ok = InstalledExtensionList.TryBuild(Endless(), out _, out var error);
+
+        Assert.False(ok);
+        Assert.Equal(InstalledExtensionListError.TooManyExtensions, error);
+        Assert.Equal(InstalledExtensionList.MaxInstalled + 1, pulled);
+    }
+
+    [Fact]
+    public void Built_list_cannot_be_mutated_through_a_cast()
+    {
+        InstalledExtensionList.TryBuild([Installed("alpha")], out var list, out _);
+
+        Assert.False(list is IList<InstalledExtension> { IsReadOnly: false });
+    }
 }
