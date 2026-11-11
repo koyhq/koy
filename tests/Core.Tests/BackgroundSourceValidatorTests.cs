@@ -123,11 +123,58 @@ public class BackgroundSourceValidatorTests
     }
 
     [Fact]
-    public void Validation_does_not_touch_the_file_system()
+    public void Validation_accepts_a_path_that_does_not_exist_yet()
     {
-        // Dosya yok; doğrulama yine de yalnız metne bakıp kabul etmeli.
+        // Doğrulayıcı saf metin denetimidir: dosyanın var olup olmadığına bakmaz.
         var source = new BackgroundSource(BackgroundKind.Video, @"C:\yok\hic\bu-dosya-yok.mp4");
 
         Assert.Equal(BackgroundSourceError.None, BackgroundSourceValidator.Validate(source));
+    }
+
+    [Theory]
+    [InlineData(@"\\?\C:\Pictures\a.png")]
+    [InlineData(@"\\.\C:\Pictures\a.png")]
+    [InlineData(@"\\server\share\a.png")]
+    [InlineData("//server/share/a.png")]
+    [InlineData("C:/Users/ali/Pictures/a.png")]
+    public void Device_prefixes_unc_and_forward_slashes_are_not_local(string path)
+    {
+        Assert.Equal(BackgroundSourceError.NotLocalPath,
+            BackgroundSourceValidator.Validate(new BackgroundSource(BackgroundKind.StillImage, path)));
+    }
+
+    [Theory]
+    [InlineData(@"C:\Pictures\dosya.png:gizli")]
+    [InlineData(@"C:\Pictures:ads.png")]
+    [InlineData(@"C:\Pictures\a.png:Zone.Identifier")]
+    public void Alternate_data_streams_are_rejected(string path)
+    {
+        Assert.Equal(BackgroundSourceError.InvalidCharacters,
+            BackgroundSourceValidator.Validate(new BackgroundSource(BackgroundKind.StillImage, path)));
+    }
+
+    [Theory]
+    [InlineData(BackgroundKind.StillImage, @"C:\Pictures\NUL.png")]
+    [InlineData(BackgroundKind.AnimatedImage, @"C:\Pictures\com1.gif")]
+    [InlineData(BackgroundKind.Video, @"C:\Pictures\LPT1.mp4")]
+    public void Windows_device_names_are_rejected_with_any_extension(BackgroundKind kind, string path)
+    {
+        Assert.Equal(BackgroundSourceError.ReservedDeviceName,
+            BackgroundSourceValidator.Validate(new BackgroundSource(kind, path)));
+    }
+
+    [Fact]
+    public void Names_that_only_start_like_a_device_are_accepted()
+    {
+        Assert.Equal(BackgroundSourceError.None,
+            BackgroundSourceValidator.Validate(new BackgroundSource(BackgroundKind.StillImage, Dir + "CONsole.png")));
+    }
+
+    [Fact]
+    public void Enum_values_are_pinned_for_persistence()
+    {
+        // Bu değerler ayar dosyasında saklanabilir; değiştirmek mevcut kayıtları bozar.
+        Assert.Equal(3, (int)BackgroundKind.Video);
+        Assert.Equal(7, (int)BackgroundSourceError.ReservedDeviceName);
     }
 }

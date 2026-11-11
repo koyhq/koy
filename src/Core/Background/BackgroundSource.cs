@@ -2,13 +2,14 @@ namespace Koy.Core.Background;
 
 /// <summary>
 /// Arka plan türü. Yalnız veri: bu tür dosyayı açmaz, çözmez, oynatmaz.
+/// Değerler kalıcıdır (ayar dosyasına yazılabilir): mevcut değerler değiştirilmez, yeni üye yalnızca sona eklenir.
 /// </summary>
 public enum BackgroundKind
 {
-    None,
-    StillImage,
-    AnimatedImage,
-    Video
+    None = 0,
+    StillImage = 1,
+    AnimatedImage = 2,
+    Video = 3
 }
 
 /// <summary>

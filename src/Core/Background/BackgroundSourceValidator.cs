@@ -2,16 +2,18 @@ namespace Koy.Core.Background;
 
 /// <summary>
 /// Doğrulama sonucu. Hata yoksa <see cref="Error"/> <see cref="BackgroundSourceError.None"/> olur.
+/// Değerler kalıcıdır (ayar dosyasına yazılabilir): mevcut değerler değiştirilmez, yeni üye yalnızca sona eklenir.
 /// </summary>
 public enum BackgroundSourceError
 {
-    None,
-    MissingPath,
-    PathTooLong,
-    InvalidCharacters,
-    NotLocalPath,
-    UnknownExtension,
-    KindMismatch
+    None = 0,
+    MissingPath = 1,
+    PathTooLong = 2,
+    InvalidCharacters = 3,
+    NotLocalPath = 4,
+    UnknownExtension = 5,
+    KindMismatch = 6,
+    ReservedDeviceName = 7
 }
 
 /// <summary>
@@ -27,6 +29,14 @@ public static class BackgroundSourceValidator
     private static readonly string[] StillExtensions = [".png", ".jpg", ".jpeg", ".webp", ".bmp"];
     private static readonly string[] AnimatedExtensions = [".gif"];
     private static readonly string[] VideoExtensions = [".mp4", ".webm"];
+
+    // Windows aygıt adları; uzantı ne olursa olsun dosya adı olarak aygıtı açar.
+    private static readonly string[] DeviceNames =
+    [
+        "CON", "PRN", "AUX", "NUL",
+        "COM0", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+        "LPT0", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
+    ];
 
     /// <summary>Kaynağı denetler ve ilk bulunan hatayı döner.</summary>
     public static BackgroundSourceError Validate(BackgroundSource source)
@@ -46,9 +56,18 @@ public static class BackgroundSourceValidator
         if (path.Any(char.IsControl))
             return BackgroundSourceError.InvalidCharacters;
 
-        // Uzak kaynak (URL, UNC) ve göreli yol çözümlemesi bu özelliğin kapsamı dışında.
+        // Uzak kaynak (URL, UNC, \\?\ ve \\.\ önekleri) ve göreli yol bu özelliğin kapsamı dışında.
+        // Yalnız "<harf>:\..." biçimi kabul edilir; eğik çizgi kanonik olmadığı için reddedilir.
         if (path.Contains("://", StringComparison.Ordinal) || path.StartsWith(@"\\", StringComparison.Ordinal) || !IsAbsoluteWindowsPath(path))
             return BackgroundSourceError.NotLocalPath;
+
+        // Alternatif veri akışı (dosya.png:gizli) sürücü harfinden sonra iki nokta üst üste ile gelir.
+        // Yol metninde iki nokta yalnızca sürücü harfinden sonra olabilir, başka hiçbir yerde.
+        if (path.IndexOf(':', 2) >= 0)
+            return BackgroundSourceError.InvalidCharacters;
+
+        if (IsReservedDeviceName(path))
+            return BackgroundSourceError.ReservedDeviceName;
 
         var extension = Extension(path);
         if (extension is null)
@@ -75,13 +94,26 @@ public static class BackgroundSourceValidator
     private static string? Extension(string path)
     {
         var lastDot = path.LastIndexOf('.');
-        var lastSeparator = path.LastIndexOfAny(['\\', '/']);
+        var lastSeparator = path.LastIndexOf('\\');
         if (lastDot < 0 || lastDot < lastSeparator || lastDot == path.Length - 1)
             return null;
         return path[lastDot..];
     }
 
-    /// <summary>Sürücü harfli (C:\...) ya da çözümlenmiş yerel yol mu. Platformdan bağımsız, saf metin denetimi.</summary>
+    /// <summary>
+    /// Dosya adının ilk noktaya kadarki kısmı aygıt adıysa (NUL.png, com1.gif) true.
+    /// Windows sondaki boşlukları yok sayar; "CONsole.png" aygıt değildir.
+    /// </summary>
+    private static bool IsReservedDeviceName(string path)
+    {
+        var fileName = path[(path.LastIndexOf('\\') + 1)..];
+        var stem = fileName.Split('.')[0].TrimEnd(' ').ToUpperInvariant();
+        return DeviceNames.Contains(stem);
+    }
+
+    /// <summary>
+    /// Sürücü harfli ve kanonik (yalnız ters eğik çizgili) yerel yol mu. Platformdan bağımsız, saf metin denetimi.
+    /// </summary>
     private static bool IsAbsoluteWindowsPath(string path) =>
-        path.Length >= 3 && char.IsAsciiLetter(path[0]) && path[1] == ':' && (path[2] == '\\' || path[2] == '/');
+        path.Length >= 3 && char.IsAsciiLetter(path[0]) && path[1] == ':' && path[2] == '\\' && path.IndexOf('/') < 0;
 }
