@@ -292,4 +292,87 @@ public class ExtensionManifestValidatorTests
             ExtensionManifestError.InvalidId,
             ErrorOf(id: "X", version: "bad"));
     }
+
+    [Theory]
+    [InlineData("con")]
+    [InlineData("nul")]
+    [InlineData("aux")]
+    [InlineData("prn")]
+    [InlineData("com1")]
+    [InlineData("lpt9")]
+    public void Windows_device_names_are_rejected_as_ids(string id)
+    {
+        Assert.Equal(ExtensionManifestError.InvalidId, ErrorOf(id: id));
+    }
+
+    [Theory]
+    [InlineData("com0")]
+    [InlineData("com10")]
+    [InlineData("console")]
+    [InlineData("my-con")]
+    public void Names_that_only_resemble_device_names_are_accepted(string id)
+    {
+        Assert.True(Create(id: id));
+    }
+
+    [Fact]
+    public void Version_with_trailing_dot_is_rejected()
+    {
+        Assert.Equal(ExtensionManifestError.InvalidVersion, ErrorOf(version: "1.0.0."));
+    }
+
+    [Fact]
+    public void Huge_version_is_rejected_by_length()
+    {
+        var version = string.Join('.', Enumerable.Repeat("1", 10_000));
+
+        Assert.Equal(ExtensionManifestError.InvalidVersion, ErrorOf(version: version));
+    }
+
+    [Theory]
+    [InlineData(0x202E)] // sağdan sola geçersiz kılma
+    [InlineData(0x200B)] // sıfır genişlikli boşluk
+    [InlineData(0x2028)] // satır ayırıcı
+    [InlineData(0xE000)] // özel kullanım
+    [InlineData(0xD800)] // eşleşmemiş üst vekil
+    [InlineData(0xDC00)] // eşleşmemiş alt vekil
+    public void Name_and_author_with_invisible_or_malformed_characters_are_rejected(int codeUnit)
+    {
+        var text = "Ada" + (char)codeUnit + "Lovelace";
+
+        Assert.Equal(ExtensionManifestError.InvalidName, ErrorOf(name: text));
+        Assert.Equal(ExtensionManifestError.InvalidAuthor, ErrorOf(author: text));
+    }
+
+    [Fact]
+    public void Name_with_ordinary_unicode_is_accepted()
+    {
+        var emoji = char.ConvertFromUtf32(0x1F600);
+        var text = "Çağrı Işık " + emoji;
+
+        Assert.True(Create(name: text, author: text));
+    }
+
+    [Fact]
+    public void Capabilities_are_sorted_so_order_of_writing_does_not_matter()
+    {
+        ExtensionManifestValidator.TryCreate(
+            "my-theme", "My Theme", "1.0.0", "Ada", ["clipboard", "network"], "data", out var first, out _);
+        ExtensionManifestValidator.TryCreate(
+            "my-theme", "My Theme", "1.0.0", "Ada", ["network", "clipboard"], "data", out var second, out _);
+
+        Assert.Equal(first, second);
+        Assert.Equal(first!.GetHashCode(), second!.GetHashCode());
+        Assert.Equal(new[] { ExtensionCapability.Network, ExtensionCapability.Clipboard }, first.Capabilities);
+    }
+
+    [Fact]
+    public void Capabilities_cannot_be_mutated_through_a_cast()
+    {
+        ExtensionManifestValidator.TryCreate(
+            "my-theme", "My Theme", "1.0.0", "Ada", ["network"], "data", out var manifest, out _);
+
+        Assert.IsNotType<ExtensionCapability[]>(manifest!.Capabilities);
+        Assert.False(manifest.Capabilities is IList<ExtensionCapability> { IsReadOnly: false });
+    }
 }

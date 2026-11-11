@@ -31,12 +31,18 @@ public static class InstalledExtensionList
         out InstalledExtensionListError error)
     {
         list = [];
-        var items = entries.ToList();
 
-        if (items.Count > MaxInstalled)
+        // En çok MaxInstalled + 1 öğe okunur: sınır aşılınca numaralandırma durur, fazlası kopyalanmaz.
+        var items = new List<InstalledExtension>();
+        foreach (var entry in entries)
         {
-            error = InstalledExtensionListError.TooManyExtensions;
-            return false;
+            if (items.Count == MaxInstalled)
+            {
+                error = InstalledExtensionListError.TooManyExtensions;
+                return false;
+            }
+
+            items.Add(entry);
         }
 
         // Kimlikler doğrulamadan geçtiği için büyük/küçük harf farkı yoktur; ordinal karşılaştırma yeterli.
@@ -50,7 +56,7 @@ public static class InstalledExtensionList
             }
         }
 
-        list = items.OrderBy(item => item.Manifest.Id, StringComparer.Ordinal).ToList();
+        list = items.OrderBy(item => item.Manifest.Id, StringComparer.Ordinal).ToList().AsReadOnly();
         error = InstalledExtensionListError.None;
         return true;
     }
