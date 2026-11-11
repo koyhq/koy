@@ -63,12 +63,13 @@ public static class DockPresentationMath
         if (buttonPressed)
             return false;
 
+        // Tanımsız değer (elle düzenlenmiş dosya) kenarda bekleme gibi davranır: "hiç açılmaz" sonucu gizli dock'u ve
+        // görev çubuğunu erişilmez bırakırdı.
         return trigger switch
         {
             DockRevealTrigger.EdgeTouch => atEdge,
-            DockRevealTrigger.EdgeHold => atEdge && edgeHeldFor >= TimeSpan.FromMilliseconds(ClampDelay(revealDelayMs)),
             DockRevealTrigger.ShortcutOnly => shortcutActive,
-            _ => false
+            _ => atEdge && edgeHeldFor >= TimeSpan.FromMilliseconds(ClampDelay(revealDelayMs))
         };
     }
 

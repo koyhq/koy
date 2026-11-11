@@ -107,6 +107,17 @@ public class DockPresentationMathTests
             shortcutActive: true, edgeHeldFor: TimeSpan.Zero, revealDelayMs: 0));
     }
 
+    [Fact]
+    public void Undefined_trigger_behaves_like_edge_hold_so_the_dock_stays_reachable()
+    {
+        var undefined = (DockRevealTrigger)42;
+
+        Assert.False(DockPresentationMath.ShouldReveal(undefined, atEdge: true, buttonPressed: false,
+            shortcutActive: false, edgeHeldFor: TimeSpan.FromMilliseconds(100), revealDelayMs: 300));
+        Assert.True(DockPresentationMath.ShouldReveal(undefined, atEdge: true, buttonPressed: false,
+            shortcutActive: false, edgeHeldFor: TimeSpan.FromMilliseconds(300), revealDelayMs: 300));
+    }
+
     [Theory]
     [InlineData(DockRevealTrigger.EdgeTouch)]
     [InlineData(DockRevealTrigger.EdgeHold)]
@@ -151,8 +162,9 @@ public class DockPresentationMathTests
         Assert.Equal(DockColorSource.Accent, dock.BadgeColor);
         Assert.Equal(DockBadgeStyle.Number, dock.BadgeStyle);
         Assert.Equal(DockBadgeCorner.TopRight, dock.BadgeCorner);
-        Assert.Equal(DockRevealTrigger.EdgeTouch, dock.RevealTrigger);
-        Assert.Equal(300, dock.RevealDelayMs);
+        // Bugünkü dock kenarda ~300 ms bekleyince açılır (EdgeRevealTracker); varsayılan bunu değiştirmemeli.
+        Assert.Equal(DockRevealTrigger.EdgeHold, dock.RevealTrigger);
+        Assert.Equal((int)EdgeRevealTracker.DefaultDelay.TotalMilliseconds, dock.RevealDelayMs);
         Assert.False(dock.HiddenEdgeLine);
         Assert.False(dock.IndicatorOnePerWindow);
     }

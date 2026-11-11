@@ -32,7 +32,7 @@ public enum DockRevealTrigger
     /// <summary>Fare alt kenara değer değmez (gecikme yok).</summary>
     EdgeTouch,
 
-    /// <summary>Fare alt kenarda <c>RevealDelayMs</c> kadar basılı tutulunca.</summary>
+    /// <summary>Fare alt kenarda <c>RevealDelayMs</c> kadar durunca (bugünkü davranış, varsayılan).</summary>
     EdgeHold,
 
     /// <summary>Yalnız kısayol; kenar hareketi dock'u açmaz.</summary>
