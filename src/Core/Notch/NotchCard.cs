@@ -14,6 +14,7 @@ public enum NotchCardKind
 /// <param name="PrimaryActionLabel">Birincil düğmenin yazısı; boşsa düğme gösterilmez.</param>
 /// <param name="AppName">Bildirimi gönderen uygulama; güncellemede boş.</param>
 /// <param name="Icon">Bildirim için uygulama simgesi (kodlanmış resim); güncellemede null.</param>
+/// <param name="Header">Başlığın üstündeki küçük satır (bildirimde "UYGULAMA · şimdi"); boşsa satır gösterilmez.</param>
 public sealed record NotchCard(
     NotchCardKind Kind,
     string Title,
@@ -21,7 +22,10 @@ public sealed record NotchCard(
     string PrimaryActionLabel = "",
     string AppName = "",
     DateTimeOffset? Timestamp = null,
-    byte[]? Icon = null)
+    byte[]? Icon = null,
+    string Header = "")
 {
     public bool HasPrimaryAction => !string.IsNullOrEmpty(PrimaryActionLabel);
+    public bool HasHeader => !string.IsNullOrEmpty(Header);
+    public bool HasSubtitle => !string.IsNullOrEmpty(Subtitle);
 }

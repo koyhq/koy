@@ -179,6 +179,13 @@ public sealed record AppSettings
     public bool NotchHideInFullscreen { get; set; } = true;
     /// <summary>Kamera ve mikrofon kullanımında çentikte gizlilik noktaları görünsün.</summary>
     public bool ShowPrivacyIndicator { get; set; } = true;
+    /// <summary>
+    /// Windows bildirimleri çentikte kart olarak görünsün. Yalnız açıkken ve izin verilmişse bildirim listesi yoklanır
+    /// (paketsiz süreçte olay yok); kapalıyken hiçbir zamanlayıcı çalışmaz.
+    /// </summary>
+    public bool NotchShowNotifications { get; set; } = true;
+    /// <summary>Bildirim kartında yalnız uygulama adı ve başlık görünsün, gövde gizlensin (gizlilik).</summary>
+    public bool NotchNotificationsHideBody { get; set; }
 
     public List<string> ControlCenterLayout { get; set; } = ["wifi", "bluetooth", "donotdisturb"];
     public List<string> EnabledPanels { get; set; } = ["home", "focus", "calendar", "shelf", "clipboard", "system", "controlcenter"];
@@ -278,6 +285,8 @@ public sealed record AppSettings
                MusicLyricsEnabled == other.MusicLyricsEnabled &&
                NotchHideInFullscreen == other.NotchHideInFullscreen &&
                ShowPrivacyIndicator == other.ShowPrivacyIndicator &&
+               NotchShowNotifications == other.NotchShowNotifications &&
+               NotchNotificationsHideBody == other.NotchNotificationsHideBody &&
                WeatherLatitude.Equals(other.WeatherLatitude) &&
                WeatherLongitude.Equals(other.WeatherLongitude) &&
                WeatherCity == other.WeatherCity &&
@@ -365,6 +374,8 @@ public sealed record AppSettings
         hash.Add(MusicLyricsEnabled);
         hash.Add(NotchHideInFullscreen);
         hash.Add(ShowPrivacyIndicator);
+        hash.Add(NotchShowNotifications);
+        hash.Add(NotchNotificationsHideBody);
         hash.Add(WeatherLatitude);
         hash.Add(WeatherLongitude);
         hash.Add(WeatherCity);
