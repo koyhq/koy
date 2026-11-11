@@ -75,4 +75,26 @@ public class SettingsChangesTests
         Assert.Throws<ArgumentNullException>(() => SettingsChanges.ChangedKeys(null!, new AppSettings()));
         Assert.Throws<ArgumentNullException>(() => SettingsChanges.ChangedKeys(new AppSettings(), null!));
     }
+
+    [Fact]
+    public void Uygulamanin_kendi_yazdigi_durum_alanlari_degisiklik_sayilmaz()
+    {
+        var defaults = new AppSettings();
+        var current = new AppSettings
+        {
+            General = new GeneralSettings { FirstRunCompleted = true, LastSeenVersion = "1.2.3" },
+            Weather = new WeatherSettings { LocationUpdatedUnix = 1_700_000_000 },
+        };
+
+        Assert.Empty(SettingsChanges.ChangedKeys(current, defaults));
+    }
+
+    [Fact]
+    public void Ic_durum_alanlari_gercek_degisikligi_gizlemez()
+    {
+        var defaults = new AppSettings();
+        var current = new AppSettings { General = new GeneralSettings { FirstRunCompleted = true, AutoCheckUpdates = false } };
+
+        Assert.Equal(["General.AutoCheckUpdates"], SettingsChanges.ChangedKeys(current, defaults));
+    }
 }

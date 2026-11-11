@@ -20,8 +20,8 @@ public sealed record SettingSearchHit(SettingSearchEntry Entry, int Score);
 /// Ayarlar penceresindeki arama. Sorgu boşluklara göre parçalanır; her parça satırın en az bir yerinde
 /// (başlık, anahtar sözcük ya da açıklama) geçmelidir. Büyük/küçük harf ve Türkçe harfler (ı/i, ş/s, ğ/g, ç/c, ö/o, ü/u)
 /// farksızdır: "karanlik" sorgusu "Karanlık tema" satırını bulur.
-/// Puan, parça başına en iyi eşleşmeye göre: başlık 3, anahtar sözcük 2, açıklama 1. Başlığın tamamı sorguyla
-/// başlıyorsa +2. Eşit puanda verilen sıra korunur.
+/// Puan, parça başına en iyi eşleşmeye göre: başlık 3, anahtar sözcük 2, açıklama 1. Başlık sorgunun tamamıyla
+/// (parçalar tek boşlukla birleşik) başlıyorsa +2. Eşit puanda verilen sıra korunur.
 /// </summary>
 public static class SettingsSearch
 {
@@ -65,7 +65,7 @@ public static class SettingsSearch
             return [];
         }
 
-        return Fold(query).Split(Separators, StringSplitOptions.RemoveEmptyEntries).Distinct(StringComparer.Ordinal).ToList();
+        return Fold(query).Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).Distinct(StringComparer.Ordinal).ToList();
     }
 
     private static int ScoreEntry(SettingSearchEntry entry, IReadOnlyList<string> tokens, string fullQuery)
