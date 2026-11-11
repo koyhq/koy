@@ -150,7 +150,7 @@ public sealed class NotchController : IDisposable
         _mouseLeaveTimer = _timeProvider.CreateTimer(
             _ => OnMouseLeaveTimeout(),
             null,
-            TimeSpan.FromMilliseconds(400),
+            TimeSpan.FromMilliseconds(NotchOpenPolicy.DefaultCloseDelayMs),
             Timeout.InfiniteTimeSpan);
     }
 

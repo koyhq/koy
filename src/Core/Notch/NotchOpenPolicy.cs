@@ -29,34 +29,31 @@ public static class NotchOpenPolicy
 {
     public const int MaxDelayMs = 2000;
 
+    /// <summary>İmleç çıkınca kapanma gecikmesinin bugünkü değeri (<see cref="NotchController"/> zamanlayıcısı).</summary>
+    public const int DefaultCloseDelayMs = 400;
+
     public static int ClampDelay(int delayMs) => Math.Clamp(delayMs, 0, MaxDelayMs);
 
     /// <summary>
-    /// Üzerine gelince ve sürükleyince açılmada gecikme uygulanır (yanlış tetiklemeyi önler). Tıklamada gecikme yoktur:
-    /// kullanıcı zaten bilerek tıkladı. Tıklanmış açık çentik kapanır.
+    /// Kipe özgü olan yalnız çentiği neyin açtığıdır: üzerine gelmek, tıklamak ya da sürüklemek. Açılma gecikmesi
+    /// kipin kendi tetikleyicisine uygulanır (yanlış tetiklemeyi önler); tıklamada gecikme yoktur, kullanıcı bilerek tıkladı.
+    /// Her kipte ortak olanlar bugünkü davranıştır: imleç (ya da sürüklenen öğe) çıkınca açık çentik kapanma gecikmesiyle
+    /// kapanır; dosya ya da metin sürüklenince çentik, Raf'a bırakılabilsin diye açılır.
     /// </summary>
     public static NotchOpenDecision Decide(NotchOpenBehavior behavior, NotchPointerEvent pointerEvent, bool isOpen, int openDelayMs, int closeDelayMs)
     {
         var open = ClampDelay(openDelayMs);
         var close = ClampDelay(closeDelayMs);
 
-        switch (behavior)
+        return pointerEvent switch
         {
-            case NotchOpenBehavior.Hover:
-                if (pointerEvent == NotchPointerEvent.Enter && !isOpen) return new(NotchOpenAction.Open, open);
-                if (pointerEvent == NotchPointerEvent.Leave && isOpen) return new(NotchOpenAction.Close, close);
-                break;
-
-            case NotchOpenBehavior.Click:
-                if (pointerEvent == NotchPointerEvent.Click) return new(isOpen ? NotchOpenAction.Close : NotchOpenAction.Open, 0);
-                break;
-
-            case NotchOpenBehavior.DragOver:
-                if (pointerEvent == NotchPointerEvent.DragEnter && !isOpen) return new(NotchOpenAction.Open, open);
-                if (pointerEvent == NotchPointerEvent.DragLeave && isOpen) return new(NotchOpenAction.Close, close);
-                break;
-        }
-
-        return new(NotchOpenAction.None, 0);
+            NotchPointerEvent.Leave or NotchPointerEvent.DragLeave when isOpen => new(NotchOpenAction.Close, close),
+            NotchPointerEvent.Enter when !isOpen && behavior == NotchOpenBehavior.Hover => new(NotchOpenAction.Open, open),
+            NotchPointerEvent.Click when behavior == NotchOpenBehavior.Click =>
+                new(isOpen ? NotchOpenAction.Close : NotchOpenAction.Open, 0),
+            NotchPointerEvent.DragEnter when !isOpen =>
+                new(NotchOpenAction.Open, behavior == NotchOpenBehavior.DragOver ? open : 0),
+            _ => new(NotchOpenAction.None, 0),
+        };
     }
 }

@@ -265,8 +265,8 @@ public sealed record NotchSettings
     /// <summary>Üzerine gelince açılma gecikmesi (ms, 0–2000). Tıklayınca açılmada kullanılmaz.</summary>
     public int OpenDelayMs { get; set; }
 
-    /// <summary>İmleç çentikten çıkınca kapanma gecikmesi (ms, 0–2000).</summary>
-    public int CloseDelayMs { get; set; }
+    /// <summary>İmleç çentikten çıkınca kapanma gecikmesi (ms, 0–2000). Varsayılan bugünkü 400 ms.</summary>
+    public int CloseDelayMs { get; set; } = NotchOpenPolicy.DefaultCloseDelayMs;
 
     /// <summary>Sekme çubuğu: yalnız simge (varsayılan), simge ve ad, ya da gizli.</summary>
     public NotchTabBarStyle TabBarStyle { get; set; } = NotchTabBarStyle.IconOnly;
@@ -278,7 +278,7 @@ public sealed record NotchSettings
     public ValueList<string> PanelOrder { get; set; } = [];
 
     /// <summary>Ana sayfada gösterilen kartlar ve sırası. Boş liste: hiçbir kart yok. Bkz. <c>HomeCardLayout.Normalize</c>.</summary>
-    public ValueList<HomeCard> HomeCards { get; set; } = [HomeCard.Music, HomeCard.HeadphoneBattery, HomeCard.SystemNetwork, HomeCard.QuickLaunch, HomeCard.Weather, HomeCard.Timers];
+    public ValueList<HomeCard> HomeCards { get; set; } = new(HomeCardLayout.Default);
 
     /// <summary>Çentik boştayken (kapalı, müzik çalmıyor) ne gösterilir.</summary>
     public IdleDisplayMode IdleDisplay { get; set; } = IdleDisplayMode.ClockAndBattery;
