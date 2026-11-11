@@ -608,3 +608,7 @@ Karar (2026-11-11): paketsiz süreçte `NotificationChanged` aboneliği 0x800704
 - [ ] Elle sınama (proje sahibi): üç malzeme × koyu / açık tema × koyu / açık duvar kağıdı; kapalı çentik opak mı; açılış geçişi; tam genişlik ve kapsül dock; sağ alt menü; duvar kağıdını değiştirince korumanın güncellenmesi; hareket azalt.
 - [ ] Bellek ve CPU ölçümü (AGENTS #1): ölçülmedi (uygulama çalıştırılmadı). Beklenen: Katı'da fark yok (duvar kağıdı okunmaz); saydam seviyede WinRT görüntü çözücüsü bir kez yüklenir, saydam yüzeyde yazılımla çizim maliyeti açık çentik boyutuyla orantılı.
 - Kapsam dışı (demoda vardı): "Pil tasarrufunda saydamlığı kapat"; renkli Ana kartları (müzik, ağ, sistem) opak kalır, müzik kartı P6-App'te.
+
+## Müzik kartı: albüm rengi (#66)
+- [x] **P6-Core (`Core/Media/CoverPaletteExtractor`, `Core/Appearance/ColorMath` HSL, testli):** küçük BGRA kapaktan tek geçişte 24 ton kovalı baskın ton; gri/monokrom kapakta (aday piksel < %10) null. Çıktı `CoverPalette(Card, SubText, Spectrum)`; Card beyaz başlıkla en az 7:1 kontrastlı.
+- [ ] **P6-App:** kart bağlama ve kapak arka planı (P4A onayı sonrası).
