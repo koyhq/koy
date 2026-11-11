@@ -30,10 +30,10 @@ public class ExtensionManifestValidatorTests
     }
 
     [Fact]
-    public void Valid_manifest_keeps_fields_and_trims_name_and_author()
+    public void Valid_manifest_keeps_fields_as_given()
     {
         var ok = ExtensionManifestValidator.TryCreate(
-            "my-theme", "  My Theme  ", "0.2.6", " Ada ",
+            "my-theme", "My Theme", "0.2.6", "Ada",
             ["network", "clipboard"], "data", out var manifest, out var error);
 
         Assert.True(ok);
@@ -66,6 +66,66 @@ public class ExtensionManifestValidatorTests
 
         Assert.True(ok);
         Assert.Empty(manifest!.Capabilities);
+    }
+
+    [Theory]
+    [InlineData(" My Theme")]
+    [InlineData("My Theme ")]
+    [InlineData("\tMy Theme")]
+    [InlineData("My Theme\n")]
+    public void Name_with_surrounding_whitespace_is_rejected_not_trimmed(string name)
+    {
+        Assert.Equal(ExtensionManifestError.InvalidName, ErrorOf(name: name));
+    }
+
+    [Theory]
+    [InlineData(" Ada")]
+    [InlineData("Ada ")]
+    [InlineData("\tAda")]
+    public void Author_with_surrounding_whitespace_is_rejected_not_trimmed(string author)
+    {
+        Assert.Equal(ExtensionManifestError.InvalidAuthor, ErrorOf(author: author));
+    }
+
+    [Fact]
+    public void Capabilities_read_stops_once_limit_is_exceeded()
+    {
+        // Sonsuz bir kaynak: sınır aşılınca okuma durmazsa bu test takılır ya da sayım yanlış olur.
+        var pulled = 0;
+        IEnumerable<string?> Endless()
+        {
+            while (pulled < 10_000)
+            {
+                pulled++;
+                yield return "network";
+            }
+        }
+
+        Assert.Equal(ExtensionManifestError.TooManyCapabilities, ErrorOf(capabilities: Endless()));
+        Assert.Equal(ExtensionManifestValidator.MaxCapabilities + 1, pulled);
+    }
+
+    [Fact]
+    public void Manifests_with_same_content_are_equal_and_hash_the_same()
+    {
+        ExtensionManifestValidator.TryCreate(
+            "my-theme", "My Theme", "1.0.0", "Ada", ["network", "files"], "data", out var first, out _);
+        ExtensionManifestValidator.TryCreate(
+            "my-theme", "My Theme", "1.0.0", "Ada", ["network", "files"], "data", out var second, out _);
+
+        Assert.Equal(first, second);
+        Assert.Equal(first!.GetHashCode(), second!.GetHashCode());
+    }
+
+    [Fact]
+    public void Manifests_with_different_capabilities_are_not_equal()
+    {
+        ExtensionManifestValidator.TryCreate(
+            "my-theme", "My Theme", "1.0.0", "Ada", ["network"], "data", out var first, out _);
+        ExtensionManifestValidator.TryCreate(
+            "my-theme", "My Theme", "1.0.0", "Ada", ["files"], "data", out var second, out _);
+
+        Assert.NotEqual(first, second);
     }
 
     [Theory]

@@ -17,6 +17,7 @@ public enum ExtensionManifestError
 /// <summary>
 /// Dışarıdan gelen ham değerleri (ör. JSON'dan okunmuş metinler) sıkı kurallarla doğrular.
 /// Bilinmeyen yetki ya da tür, geçersiz kimlik ve sürüm, sınırları aşan metin reddedilir; sessizce düzeltilmez.
+/// Ad ve yazarın baştaki ya da sondaki boşluğu da reddedilir, kırpılmaz.
 /// </summary>
 public static class ExtensionManifestValidator
 {
@@ -33,7 +34,9 @@ public static class ExtensionManifestValidator
 
     /// <summary>
     /// Ham değerleri doğrular. Başarılıysa <paramref name="manifest"/> dolar, değilse <paramref name="error"/>
-    /// ilk hatalı alanı söyler. Yetki listesi <c>null</c> ise boş kabul edilir.
+    /// ilk hatalı alanı söyler.
+    /// Yetki alanı hiç verilmezse (<c>null</c>) bu açık bir kuraldır: boş liste, yani hiç yetki istemeyen
+    /// eklenti. Bu bir düzeltme değildir; eksik alan ile boş liste aynı anlama gelir.
     /// </summary>
     public static bool TryCreate(
         string? id,
@@ -71,12 +74,21 @@ public static class ExtensionManifestValidator
             return false;
         }
 
-        // Sayıyı önce bakılır: sınırsız bir listeyi tek tek çözmeden reddedilir.
-        var list = capabilities?.ToList() ?? new List<string?>();
-        if (list.Count > MaxCapabilities)
+        // Sayı en fazla MaxCapabilities + 1 öğeye kadar okunur: sınır aşılınca numaralandırma durur ve
+        // fazlası hiç kopyalanmaz. Sayı denetimi, yetki adlarının çözümlemesinden önce yapılır.
+        var list = new List<string?>();
+        if (capabilities is not null)
         {
-            error = ExtensionManifestError.TooManyCapabilities;
-            return false;
+            foreach (var value in capabilities)
+            {
+                if (list.Count == MaxCapabilities)
+                {
+                    error = ExtensionManifestError.TooManyCapabilities;
+                    return false;
+                }
+
+                list.Add(value);
+            }
         }
 
         var parsed = new List<ExtensionCapability>(list.Count);
@@ -104,7 +116,7 @@ public static class ExtensionManifestValidator
             return false;
         }
 
-        manifest = new ExtensionManifest(id!, name!.Trim(), version!, author!.Trim(), parsed, kind);
+        manifest = new ExtensionManifest(id!, name!, version!, author!, parsed, kind);
         error = ExtensionManifestError.None;
         return true;
     }
@@ -176,21 +188,23 @@ public static class ExtensionManifestValidator
         return true;
     }
 
-    /// <summary>Ad ve yazar: boş olmayan, sınırı aşmayan ve denetim karakteri içermeyen metin.</summary>
+    /// <summary>
+    /// Ad ve yazar: boş olmayan, sınırı aşmayan, denetim karakteri içermeyen ve baştaki ya da sondaki
+    /// boşluk taşımayan metin. Boşluk sessizce kırpılmaz; böyle bir değer reddedilir.
+    /// </summary>
     private static bool IsValidText(string? value, int maxLength)
     {
-        if (value is null)
+        if (value is null || value.Length == 0 || value.Length > maxLength)
         {
             return false;
         }
 
-        var trimmed = value.Trim();
-        if (trimmed.Length == 0 || trimmed.Length > maxLength)
+        if (char.IsWhiteSpace(value[0]) || char.IsWhiteSpace(value[^1]))
         {
             return false;
         }
 
-        foreach (var c in trimmed)
+        foreach (var c in value)
         {
             if (char.IsControl(c))
             {
