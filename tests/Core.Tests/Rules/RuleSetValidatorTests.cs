@@ -216,6 +216,103 @@ public class RuleSetValidatorTests
     }
 
     [Fact]
+    public void RulesOverLimit_DoNotParseTheirConditions()
+    {
+        var drafts = Enumerable.Range(0, RuleLimits.MaxRules)
+            .Select(i => Draft($"Kural {i}", "p", Process($"app{i}")))
+            .Append(Draft("Fazla", "p", new RuleConditionDraft("battery")))
+            .ToList();
+
+        var result = RuleSetValidator.Validate(drafts);
+
+        Assert.Equal(RuleLimits.MaxRules, result.Rules.Count);
+        Assert.Equal(1, result.DroppedRules);
+        Assert.Equal(0, result.DroppedConditions);
+    }
+
+    [Fact]
+    public void TooManyConditions_DropsRule()
+    {
+        var conditions = Enumerable.Range(0, RuleLimits.MaxConditionsPerRule + 1)
+            .Select(i => Process($"app{i}"))
+            .ToArray();
+
+        var result = RuleSetValidator.Validate([Draft("Kod", "work", conditions)]);
+
+        Assert.Empty(result.Rules);
+        Assert.Equal(1, result.DroppedRules);
+    }
+
+    [Fact]
+    public void ConditionsAtLimit_AreKept()
+    {
+        var conditions = Enumerable.Range(0, RuleLimits.MaxConditionsPerRule).Select(i => Process($"app{i}")).ToArray();
+
+        var rule = Assert.Single(RuleSetValidator.Validate([Draft("Kod", "work", conditions)]).Rules);
+        Assert.Equal(RuleLimits.MaxConditionsPerRule, rule.Conditions.Count);
+    }
+
+    [Fact]
+    public void OverlongProfileId_IsRejected()
+    {
+        var profile = new string('p', RuleLimits.MaxProfileIdLength + 1);
+
+        var result = RuleSetValidator.Validate([Draft("Kod", profile, Process("code"))]);
+
+        Assert.Empty(result.Rules);
+        Assert.Equal(1, result.DroppedRules);
+    }
+
+    [Fact]
+    public void OverlongProcessName_IsDropped()
+    {
+        var name = new string('a', RuleLimits.MaxProcessNameLength + 1);
+
+        var result = RuleSetValidator.Validate([Draft("Kod", "work", Process(name))]);
+
+        Assert.Empty(result.Rules);
+        Assert.Equal(1, result.DroppedConditions);
+    }
+
+    [Fact]
+    public void NullDraftNullConditionsAndNullCondition_AreDroppedWithoutThrowing()
+    {
+        // El ile düzenlenmiş JSON'dan null liste/öğe gelebilir; tür sistemi bunu engellemez.
+        var result = RuleSetValidator.Validate([
+            null!,
+            new RuleDraft("A", "work", true, null!),
+            new RuleDraft("B", "work", true, [null!]),
+            Draft("C", "work", Process("code")),
+        ]);
+
+        Assert.Equal("C", Assert.Single(result.Rules).Name);
+        Assert.Equal(3, result.DroppedRules);
+    }
+
+    [Fact]
+    public void TimeWindow_ToleratesSurroundingWhitespace()
+    {
+        var result = RuleSetValidator.Validate([
+            Draft("Gece", "sleep", new RuleConditionDraft("timeWindow", From: " 22:00 ", To: "06:00	")),
+        ]);
+
+        Assert.Single(result.Rules);
+    }
+
+    [Theory]
+    [InlineData("24:00", "06:00")]
+    [InlineData("22:00", "24:00")]
+    [InlineData("22:00", "06:60")]
+    public void NonexistentClockTimes_AreDropped(string from, string to)
+    {
+        var result = RuleSetValidator.Validate([
+            Draft("Gece", "sleep", new RuleConditionDraft("timeWindow", From: from, To: to)),
+        ]);
+
+        Assert.Empty(result.Rules);
+    }
+
+    [Fact]
     public void DisabledRule_IsKept_WithEnabledFalse()
     {
         var draft = new RuleDraft("Kod", "work", false, [Process("code")]);

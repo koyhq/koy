@@ -1,12 +1,17 @@
 namespace Koy.Core.Rules;
 
-/// <summary>Bir andaki bağlam görüntüsü. Ölçüm (süreç izleme, saat, ekran sayımı) Core dışında yapılır.</summary>
+/// <summary>
+/// Bir andaki bağlam görüntüsü. Ölçüm (süreç izleme, saat, ekran sayımı) Core dışında yapılır.
+/// <paramref name="ProcessName"/> yalnız dosya adı olmalı (yol değil; yol içeren ad hiçbir süreç koşuluyla eşleşmez).
+/// <paramref name="LocalTime"/> UTC değil, makinenin yerel saatidir; saat dilimi ve yaz saati dönüşümü çağıranın işi.
+/// </summary>
 public sealed record RuleContext(string? ProcessName, TimeOnly LocalTime, int DisplayCount, bool IsFullscreen);
 
 /// <summary>
 /// Saf karar mantığı: kuralları listedeki sırayla dener. Etkin ve bütün koşulları sağlayan
 /// ilk kuralın profil kimliğini döner; hiçbiri eşleşmezse null. Sıra belirlidir, aynı girdi
-/// her zaman aynı sonucu verir.
+/// her zaman aynı sonucu verir. Çelişen kurallarda öncelik yalnız liste sırasıdır.
+/// Koşulsuz kural ve tanınmayan koşul türü eşleşmez (fail-closed).
 /// </summary>
 public static class RuleEvaluator
 {
@@ -32,7 +37,11 @@ public static class RuleEvaluator
         _ => false,
     };
 
-    /// <summary>From dahil, To hariç. From > To ise aralık gece yarısını aşar (ör. 22:00-06:00).</summary>
-    private static bool InWindow(TimeOnly now, TimeOnly from, TimeOnly to) =>
-        from < to ? now >= from && now < to : now >= from || now < to;
+    /// <summary>From dahil, To hariç. From > To ise aralık gece yarısını aşar (ör. 22:00-06:00). From == To belirsizdir, eşleşmez.</summary>
+    private static bool InWindow(TimeOnly now, TimeOnly from, TimeOnly to)
+    {
+        if (from == to)
+            return false;
+        return from < to ? now >= from && now < to : now >= from || now < to;
+    }
 }
