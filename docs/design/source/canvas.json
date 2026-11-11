@@ -169,18 +169,18 @@
       "page": "cam",
       "title": "Açık çentik: cam (etkileşimli)",
       "w": 1240,
-      "h": 860,
+      "h": 940,
       "x": 0,
       "y": 0,
       "is_interactive": true
     },
     "CamDurumlar.dc.html": {
       "page": "cam",
-      "title": "Kapalı hâller ve açılış geçişi",
+      "title": "Kapalı hâller, yüzen ada, boşta halka, kart ve açılış geçişi",
       "w": 1240,
-      "h": 760,
+      "h": 2990,
       "x": 0,
-      "y": 980,
+      "y": 1060,
       "is_interactive": true
     },
     "CamKoy.dc.html": {
@@ -189,7 +189,7 @@
       "w": 1240,
       "h": 900,
       "x": 0,
-      "y": 1860,
+      "y": 4170,
       "is_interactive": true
     }
   },
