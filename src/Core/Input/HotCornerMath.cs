@@ -7,8 +7,13 @@ public readonly record struct ScreenRect(int Left, int Top, int Width, int Heigh
     public int Bottom => Top + Height;
 }
 
+/// <summary>Çok ekranlı masaüstünde bulunan köşe: hangi ekran (listedeki sıra) ve hangi köşe.</summary>
+public readonly record struct CornerHit(int ScreenIndex, ScreenCorner Corner);
+
 /// <summary>
 /// Köşe tespiti için saf matematik. Fare kancası ve zamanlayıcı Platform'da; burada yalnız koordinat kararı var.
+/// Koordinatlar ve köşe boyu aynı birimde olmalı (fiziksel piksel); ekran başına DPI farkı varsa çağıran köşe boyunu
+/// o ekranın ölçeğiyle çarpıp verir.
 /// </summary>
 public static class HotCornerMath
 {
@@ -41,6 +46,49 @@ public static class HotCornerMath
             (false, true) => ScreenCorner.BottomLeft,
             _ => ScreenCorner.BottomRight
         };
+    }
+
+    /// <summary>
+    /// Çok ekranlı masaüstü için <see cref="HitTest(int, int, ScreenRect, int)"/>. Komşu ekrana geçilebilen kenardaki köşe
+    /// gerçek köşe sayılmaz: yan yana iki ekranda ortak kenarın köşeleri imleci durdurmaz, yanlışlıkla tetiklenirdi.
+    /// Yalnız masaüstünün dış köşeleri (ya da komşusuz kenarla oluşan köşeler) döner. Negatif koordinatlar desteklenir.
+    /// </summary>
+    public static CornerHit? HitTest(int x, int y, IReadOnlyList<ScreenRect> screens, int cornerSize)
+    {
+        for (var i = 0; i < screens.Count; i++)
+        {
+            if (HitTest(x, y, screens[i], cornerSize) is not { } corner)
+                continue;
+
+            var s = screens[i];
+            var right = corner is ScreenCorner.TopRight or ScreenCorner.BottomRight;
+            var bottom = corner is ScreenCorner.BottomLeft or ScreenCorner.BottomRight;
+
+            // İmleç ekranın dış kenarına gidip bir piksel ötesine geçebiliyorsa o yönde komşu ekran vardır.
+            var edgeX = right ? s.Right : s.Left - 1;
+            var edgeY = bottom ? s.Bottom : s.Top - 1;
+            if (ContainsPoint(screens, i, edgeX, y) || ContainsPoint(screens, i, x, edgeY))
+                return null;
+
+            return new CornerHit(i, corner);
+        }
+
+        return null;
+    }
+
+    private static bool ContainsPoint(IReadOnlyList<ScreenRect> screens, int skip, int x, int y)
+    {
+        for (var j = 0; j < screens.Count; j++)
+        {
+            if (j == skip)
+                continue;
+
+            var r = screens[j];
+            if (r.Width > 0 && r.Height > 0 && x >= r.Left && x < r.Right && y >= r.Top && y < r.Bottom)
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>

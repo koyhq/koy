@@ -193,4 +193,70 @@ public class InputBindingTests
         Assert.Empty(report.Accepted);
         Assert.Empty(report.Issues);
     }
+
+    [Fact]
+    public void Parse_NullVeriCokertmezDusurulur()
+    {
+        Assert.False(InputBindingParser.Parse(null).IsValid);
+    }
+
+    [Fact]
+    public void Validate_YerlesikKisayolIleCakisanDusurulur()
+    {
+        // Ctrl+Alt+N varsayılan olarak ToggleNotch'a bağlı.
+        var builtIn = ShortcutBindings.All.ToDictionary(a => a, ShortcutBindings.DefaultText);
+        var bindings = new[]
+        {
+            new InputBinding(InputAction.OpenSearch, new ShortcutTrigger(new Hotkey(HotkeyModifiers.Control | HotkeyModifiers.Alt, 'N'))),
+            new InputBinding(InputAction.OpenSearch, new ShortcutTrigger(new Hotkey(HotkeyModifiers.Control | HotkeyModifiers.Alt, 'J')))
+        };
+
+        var report = InputBindingValidator.Validate(bindings, new HashSet<string>(), builtIn);
+
+        Assert.Equal(bindings[1], Assert.Single(report.Accepted));
+        var issue = Assert.Single(report.Issues);
+        Assert.Equal(InputIssueKind.ConflictsWithBuiltIn, issue.Kind);
+        Assert.Equal(ShortcutAction.ToggleNotch, issue.BuiltIn);
+    }
+
+    [Fact]
+    public void Validate_YerlesikKisayolVerilmezseDenetlenmez()
+    {
+        var bindings = new[]
+        {
+            new InputBinding(InputAction.OpenSearch, new ShortcutTrigger(new Hotkey(HotkeyModifiers.Control | HotkeyModifiers.Alt, 'N')))
+        };
+
+        Assert.Single(InputBindingValidator.Validate(bindings, new HashSet<string>()).Accepted);
+    }
+
+    [Fact]
+    public void Validate_OzelEylemKimligiBuyukKucukHarfDuyarsiz()
+    {
+        var bindings = new[]
+        {
+            new InputBinding(InputAction.RunCustomAction, new MouseTrigger(InputSurface.Dock, MouseGesture.Wheel), "Build")
+        };
+
+        // Küme büyük-küçük harf duyarlı olsa bile ayrıştırıcıyla aynı kuralla eşleşmeli.
+        var report = InputBindingValidator.Validate(bindings, new HashSet<string>(["build"]));
+
+        Assert.Single(report.Accepted);
+    }
+
+    [Fact]
+    public void Validate_EnCokMaxBindingsKabulEdilir()
+    {
+        // 26 harf x farklı değiştirici birleşimi: hepsi benzersiz.
+        var bindings = Enumerable.Range(0, InputBindingValidator.MaxBindings + 3)
+            .Select(i => new InputBinding(
+                InputAction.OpenSearch,
+                new ShortcutTrigger(new Hotkey((HotkeyModifiers)(1 + i / 26), 0x41 + i % 26))))
+            .ToList();
+
+        var report = InputBindingValidator.Validate(bindings, new HashSet<string>());
+
+        Assert.Equal(InputBindingValidator.MaxBindings, report.Accepted.Count);
+        Assert.Equal(3, report.Issues.Count(x => x.Kind == InputIssueKind.TooMany));
+    }
 }

@@ -2,7 +2,7 @@ namespace Koy.Core.Input;
 
 /// <summary>
 /// Kısayol, köşe ya da fare hareketiyle tetiklenebilen eylemler. Kapalı liste.
-/// Ayar dosyasında ad olarak yazılır: değerler yalnız SONA eklenir, mevcut adlar ve sıra değiştirilmez.
+/// Ayar dosyasında ad olarak yazılır (sayı değil): mevcut adlar değiştirilmez, yeni eylem eklenebilir.
 /// </summary>
 public enum InputAction
 {

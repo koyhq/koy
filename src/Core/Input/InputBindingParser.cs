@@ -43,8 +43,12 @@ public static class InputBindingParser
 
     public const int MaxPushBackPx = 200;
 
-    public static InputBindingParseResult Parse(InputBindingData data)
+    public static InputBindingParseResult Parse(InputBindingData? data)
     {
+        // JSON listesindeki null öğe; hata fırlatmadan düşer.
+        if (data is null)
+            return Drop(InputBindingDropReason.UnknownAction);
+
         if (!TryParseName<InputAction>(data.Action, out var action))
             return Drop(InputBindingDropReason.UnknownAction);
 

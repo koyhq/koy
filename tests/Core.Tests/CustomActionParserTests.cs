@@ -94,4 +94,25 @@ public class CustomActionParserTests
         Assert.Equal("https://ornek.example/x", action.Target);
         Assert.Equal(1, result.Dropped);
     }
+
+    [Fact]
+    public void Parse_NullOgeCokertmezDusurulur()
+    {
+        var result = CustomActionParser.Parse([null, Data("a", "OpenPath", @"C:\x")]);
+
+        Assert.Equal("a", Assert.Single(result.Accepted).Id);
+        Assert.Equal(1, result.Dropped);
+    }
+
+    [Fact]
+    public void Parse_EnCokMaxActionsKabulEdilir()
+    {
+        var items = Enumerable.Range(0, CustomActionParser.MaxActions + 5)
+            .Select(i => Data("a" + i, "OpenPath", @"C:\x"));
+
+        var result = CustomActionParser.Parse(items);
+
+        Assert.Equal(CustomActionParser.MaxActions, result.Accepted.Count);
+        Assert.Equal(5, result.Dropped);
+    }
 }
