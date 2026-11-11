@@ -520,6 +520,10 @@ Proje sahibi istedi. Kod yazılmadı.
 - [x] **Arayüz (App):** `Ctrl+Alt+V` varsayılan kısayolu, çentikte 260×40 OSD ses göstergesi, onaylama için geçici pencere odak yönetimi (Enter/Esc veya çentiğe tıklama), Ayarlar › Çentik altında Harness ve onaylama ayarları.
 - [ ] Elle sınama (proje sahibi): `Ctrl+Alt+V` ile konuşma, metni onaylayıp çalıştırma, model çıktısının çentikte görünmesi.
 
+## Dock önizlemesine orta tık pencereyi kapatır (#61)
+- [x] Önizlemedeki küçük resme (tek pencere ve grup) orta tık o pencereyi kapatır, önizleme kapanır; gruptaki diğer pencereler kalır. `MiddleClickAction` ayarına bakılmaz. `DockWindow.xaml(.cs)`.
+- [ ] Elle sınama (proje sahibi): tek pencereli uygulamada kapanma; üç pencereli Not Defteri'nde yalnız ortadaki; kaydedilmemiş belgede "kaydet?" sorusu ve Koy donmaması; orta tık simgede eski davranış; sol tık önizlemede pencereyi öne getirir.
+
 ## Şarkı sözleri (#57) sonrası karar
 - [x] Sözler varsayılan kapalı (çalan başlık, tarayıcı videoları dahil, LRCLIB'e gider). Ana sayfadaki müzik kartında küçük düğmeyle açılıp kapanır, ayar kalıcı kaydedilir; Ayarlar › Çentik'teki seçenek aynı ayar.
 

@@ -290,6 +290,36 @@ public partial class DockWindow : Window
         }
     }
 
+    private void OnSingleThumbnailMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton != MouseButton.Middle)
+        {
+            return;
+        }
+
+        if (ViewModel?.PreviewItem?.SingleWindow is { } window)
+        {
+            ViewModel.PreviewItem.CloseSpecificWindowCommand.Execute(window.Handle);
+            ViewModel.ClosePreviewNow();
+            e.Handled = true;
+        }
+    }
+
+    private void OnGroupedThumbnailMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton != MouseButton.Middle)
+        {
+            return;
+        }
+
+        if (sender is FrameworkElement { DataContext: DockWindowEntry entry } && ViewModel?.PreviewItem is not null)
+        {
+            ViewModel.PreviewItem.CloseSpecificWindowCommand.Execute(entry.Handle);
+            ViewModel.ClosePreviewNow();
+            e.Handled = true;
+        }
+    }
+
     private void OnPopupMouseEnter(object sender, MouseEventArgs e)
     {
         ViewModel?.OnPopupMouseEnter();
