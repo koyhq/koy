@@ -1,3 +1,5 @@
+using System.Reflection;
+using System.Text.Json.Nodes;
 using Koy.Core.Display;
 using Koy.Core.Settings;
 using Xunit;
@@ -14,9 +16,7 @@ public class SettingsMigrationTests
     [InlineData("")]
     public void Version2_primary_or_all_becomes_all_screens_open(string target)
     {
-        var old = new AppSettings { Version = 2, MonitorTarget = target };
-
-        var migrated = SettingsMigration.Migrate(old);
+        var migrated = SettingsFile.Load("{ \"Version\": 2, \"MonitorTarget\": \"" + target + "\" }");
 
         Assert.Equal(AppSettings.CurrentVersion, migrated.Version);
         Assert.Empty(migrated.Monitors);
@@ -26,9 +26,7 @@ public class SettingsMigrationTests
     [Fact]
     public void Version2_specific_monitor_keeps_only_that_screen_open()
     {
-        var old = new AppSettings { Version = 2, MonitorTarget = @"\\.\DISPLAY2" };
-
-        var migrated = SettingsMigration.Migrate(old);
+        var migrated = SettingsFile.Load("""{ "Version": 2, "MonitorTarget": "\\\\.\\DISPLAY2" }""");
 
         Assert.True(migrated.Monitors[@"\\.\DISPLAY2"].NotchEnabled);
         Assert.True(migrated.Monitors[@"\\.\DISPLAY2"].DockEnabled);
@@ -36,19 +34,42 @@ public class SettingsMigrationTests
     }
 
     [Fact]
+    public void Version2_specific_monitor_replaces_an_existing_record_of_the_same_screen()
+    {
+        var migrated = SettingsFile.Load("""
+            { "Version": 2, "MonitorTarget": "ofis",
+              "Monitors": { "OFIS": { "NotchEnabled": false, "DockEnabled": false, "Name": "Eski" } } }
+            """);
+
+        var record = Assert.Single(migrated.Monitors);
+        Assert.True(record.Value.NotchEnabled && record.Value.DockEnabled);
+    }
+
+    [Fact]
     public void Current_version_is_untouched()
     {
-        var current = new AppSettings { MonitorTarget = "Elle", NewScreenDefault = NewScreenMode.NotchOnly };
+        var root = JsonNode.Parse("""{ "Version": 3, "MonitorTarget": "Elle", "NewScreenDefault": "NotchOnly" }""")!.AsObject();
 
-        Assert.Same(current, SettingsMigration.Migrate(current));
+        var original = SettingsMigration.Migrate(root);
+
+        Assert.Equal(AppSettings.CurrentVersion, original);
+        Assert.Equal("Elle", (string?)root["MonitorTarget"]);
+        Assert.Equal("NotchOnly", (string?)root["NewScreenDefault"]);
+        Assert.Null(root["Monitors"]);
+    }
+
+    [Fact]
+    public void Missing_version_is_treated_as_the_pre_v4_default_and_returns_original_version()
+    {
+        var root = JsonNode.Parse("""{ "DockEnabled": true }""")!.AsObject();
+
+        Assert.Equal(3, SettingsMigration.Migrate(root));
     }
 
     [Fact]
     public void Migration_preserves_other_settings()
     {
-        var old = new AppSettings { Version = 2, Language = "en", DockIconSize = 55 };
-
-        var migrated = SettingsMigration.Migrate(old);
+        var migrated = SettingsFile.Load("""{ "Version": 2, "Language": "en", "DockIconSize": 55 }""");
 
         Assert.Equal("en", migrated.Language);
         Assert.Equal(55, migrated.DockIconSize);
@@ -102,4 +123,45 @@ public class SettingsMigrationTests
             File.Delete(path);
         }
     }
+
+    [Fact]
+    public void Golden_v3_fixture_has_every_field_different_from_the_default()
+    {
+        // Altın dosya her alanı varsayılandan farklı tutmalı; yeni alan eklenirse dosya da güncellenmeli.
+        var loaded = SettingsFile.Load(SettingsFile.FixtureV3);
+        var defaults = new AppSettings();
+
+        foreach (var property in typeof(AppSettings).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            // Version zaten güncel; Language varsayılanı makinenin diline bağlı (aynı değere denk gelebilir).
+            if (property.Name is nameof(AppSettings.Version) or nameof(AppSettings.Language))
+                continue;
+            var value = property.GetValue(loaded);
+            var def = property.GetValue(defaults);
+            Assert.False(Equals(value, def) || SequenceEqual(value, def), $"{property.Name} altın dosyada varsayılan değerde.");
+        }
+    }
+
+    [Fact]
+    public void Golden_v3_fixture_is_read_and_written_without_losing_a_single_value()
+    {
+        var path = TempPath();
+        try
+        {
+            File.WriteAllText(path, SettingsFile.FixtureV3);
+            var store = new SettingsStore(path);
+
+            store.Save(store.Load());
+
+            Assert.Equal(SettingsFile.FixtureV3.ReplaceLineEndings("\n"), File.ReadAllText(path).ReplaceLineEndings("\n"));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    private static bool SequenceEqual(object? a, object? b) =>
+        a is System.Collections.IEnumerable x && b is System.Collections.IEnumerable y && a is not string &&
+        x.Cast<object>().SequenceEqual(y.Cast<object>());
 }

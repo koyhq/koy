@@ -61,7 +61,7 @@ public class NewScreenDefaultTests
     {
         foreach (var target in new[] { "Primary", "All", "" })
         {
-            var migrated = SettingsMigration.Migrate(new AppSettings { Version = 2, MonitorTarget = target });
+            var migrated = SettingsFile.Load("{ \"Version\": 2, \"MonitorTarget\": \"" + target + "\" }");
 
             Assert.Empty(migrated.Monitors);
             Assert.Equal(NewScreenMode.NotchAndDock, migrated.NewScreenDefault);

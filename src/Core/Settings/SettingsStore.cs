@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Koy.Core.Settings;
 
@@ -14,23 +15,26 @@ public sealed class SettingsStore(string path)
     /// <summary>Dosya yoksa ya da JSON'u bozuksa varsayılan ayarları döner. Okuma sırasındaki G/Ç hataları (kilitli dosya vb.) yakalanmaz.</summary>
     public AppSettings Load()
     {
-        AppSettings? settings = null;
         try
         {
             if (!File.Exists(Path))
                 return new AppSettings();
 
+            JsonNode? node;
             using (var stream = File.OpenRead(Path))
-            {
-                settings = JsonSerializer.Deserialize(stream, SettingsJsonContext.Default.AppSettings);
-            }
+                node = JsonNode.Parse(stream);
+
+            if (node is not JsonObject root)
+                return new AppSettings();
+
+            // Göç tipli okumadan önce JSON ağacında yapılır: şema ya da değer biçimi değişse de dosya okunabilir kalır.
+            SettingsMigration.Migrate(root);
+            return root.Deserialize(SettingsJsonContext.Default.AppSettings) ?? new AppSettings();
         }
         catch (JsonException)
         {
             return new AppSettings();
         }
-
-        return settings is null ? new AppSettings() : SettingsMigration.Migrate(settings);
     }
 
     /// <summary>Önce geçici dosyaya yazar, sonra yerine taşır; yazma yarıda kesilirse eski dosya bozulmaz.</summary>
