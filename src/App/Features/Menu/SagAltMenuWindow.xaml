@@ -10,14 +10,20 @@
         Title="{Binding [MenuWindowTitle], Source={x:Static res:Loc.Instance}}"
         Width="320"
         SizeToContent="Height"
-        WindowStyle="None"
-        AllowsTransparency="True"
+        WindowStyle="SingleBorderWindow"
+        AllowsTransparency="False"
         Background="Transparent"
         ShowInTaskbar="False"
         Topmost="True"
         ResizeMode="NoResize"
         FontFamily="{DynamicResource KoyFont}"
         Deactivated="Window_Deactivated">
+
+    <!-- Katmansız pencere, çerçeve istemci alanına uzatılır; bulanıklık, gölge ve köşeler DWM'den (WindowFrame). -->
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" GlassFrameThickness="-1" ResizeBorderThickness="0"
+                      CornerRadius="0" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
 
     <Window.Resources>
         <Style x:Key="MenuActionButtonStyle" TargetType="Button">
@@ -93,16 +99,9 @@
         </Style>
     </Window.Resources>
 
-    <!-- Ana Açılır Menü Kabuğu: 320 px, 16 px köşe yuvarlaklığı, koyu yarı saydam yüzey -->
-    <Border Margin="16"
-            Background="{DynamicResource KoyBgWindow}"
-            BorderBrush="{DynamicResource KoyBorderHairline}"
-            BorderThickness="1"
-            CornerRadius="{DynamicResource KoyRadiusWindow}"
+    <!-- Ana açılır menü kabuğu: 320 px; köşe, kenarlık ve gölge DWM'den (WindowFrame), yüzey malzemeyi izler. -->
+    <Border Background="{DynamicResource KoyBgWindow}"
             Padding="14">
-        <Border.Effect>
-            <DropShadowEffect Color="#000000" Opacity="0.45" BlurRadius="28" ShadowDepth="10" Direction="270" />
-        </Border.Effect>
 
         <StackPanel>
             <!-- Başlık Alanı -->

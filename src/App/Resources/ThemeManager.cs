@@ -21,6 +21,12 @@ public static class ThemeManager
     private static ResourceDictionary? _themeDictionary;
     private static ResourceDictionary? _overrides;
     private static AppSettings? _last;
+
+    /// <summary>Son uygulanan ayarlar (pencere çerçeveleri okur); henüz uygulanmadıysa null.</summary>
+    public static AppSettings? LastSettings => _last;
+
+    /// <summary>Kaynaklar her uygulandığında (tema, vurgu, malzeme, köşe, duvar kağıdı); pencere çerçeveleri dinler.</summary>
+    public static event Action? Applied;
     private static bool _watching;
     private static bool _watchingMaterial;
 
@@ -79,6 +85,8 @@ public static class ThemeManager
 
         if (ThemeSetting.Normalize(settings.Theme) == ThemeSetting.System)
             WatchSystemTheme(app);
+
+        Applied?.Invoke();
     }
 
     private static void BuildOverrides(AppSettings settings, ResolvedTheme theme, ResourceDictionary palette)
