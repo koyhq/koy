@@ -47,7 +47,7 @@ public sealed record AppearanceSettings
     public bool BatterySaverReduceMotion { get; set; } = true;
     public MaterialLevel Material { get; set; } = MaterialLevel.Solid;
 
-    /// <summary>Animasyon başına açma/kapama. Kapalı bir animasyonun son durumu hiç kare çizilmeden anında uygulanır.</summary>
+    /// <summary>Animasyon başına açma/kapama. Kapalı bir animasyonun son durumu hiç kare çizilmeden anında uygulanır. Henüz bağlı değil: animasyonlar bu anahtarları okumuyor (bkz. MotionPolicy.ScaleFor).</summary>
     public MotionSettings Motion { get; set; } = new();
 
     /// <summary>Okunabilirlik koruması: açık duvar kağıdında saydam malzeme kendiliğinden daha opak seviyeye çıkar.</summary>

@@ -67,13 +67,19 @@ public sealed class SettingsStore(string path)
 
     private static bool DropAt(JsonObject root, string path)
     {
-        // "$.Dock.Style" → ["Dock", "Style"]
+        // "$.Appearance.Motion.Osd" → ["Appearance", "Motion", "Osd"]; yalnız son alan düşer.
         var parts = path.TrimStart('$').TrimStart('.').Split('.');
-        if (parts.Length == 2 && !parts[1].Contains('[') && root[parts[0]] is JsonObject section)
-            return section.Remove(parts[1]);
+        if (parts.Any(p => p.Contains('[')))
+            return root.Remove(parts[0].Split('[')[0]);
 
-        var top = parts[0].Split('[')[0];
-        return root.Remove(top);
+        var parent = root;
+        for (var i = 0; i < parts.Length - 1; i++)
+        {
+            if (parent[parts[i]] is not JsonObject next)
+                return root.Remove(parts[0]);
+            parent = next;
+        }
+        return parent.Remove(parts[^1]);
     }
 
     // Yedek yazılamazsa (kilit, yetki) açılış durmasın; yedek bir kolaylıktır, ayarların kendisi değil.

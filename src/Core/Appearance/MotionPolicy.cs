@@ -65,6 +65,6 @@ public static class MotionPolicy
         MotionKind.Osd => t.Osd,
         MotionKind.BadgeBounce => t.BadgeBounce,
         MotionKind.TabTransitions => t.TabTransitions,
-        _ => true,
+        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Eksik anahtar eşlemesi."),
     };
 }
