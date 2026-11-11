@@ -72,4 +72,12 @@ public class ApplyRevertPolicyTests
 
         Assert.Equal(TimeSpan.FromSeconds(15), ApplyRevertPolicy.Remaining(applied, earlier, TimeSpan.FromSeconds(15)));
     }
+
+    [Fact]
+    public void Remaining_does_not_overflow_with_a_huge_timeout_when_the_clock_moves_backward()
+    {
+        var earlier = AppliedAt.AddHours(-1);
+
+        Assert.Equal(TimeSpan.MaxValue, ApplyRevertPolicy.Remaining(AppliedAt, earlier, TimeSpan.MaxValue));
+    }
 }

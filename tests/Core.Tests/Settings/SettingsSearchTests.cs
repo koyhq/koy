@@ -94,4 +94,12 @@ public class SettingsSearchTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => SettingsSearch.Search([Dock], "dock", limit: -1));
     }
+
+    [Fact]
+    public void Bolunmez_bosluk_da_sorgu_parcalarini_ayirir()
+    {
+        var hits = SettingsSearch.Search([Entry("b", "Dock", "gizle")], "dock gizle");
+
+        Assert.Single(hits);
+    }
 }

@@ -7,10 +7,20 @@ namespace Koy.Core.Settings;
 /// Bölüm kayıtlarının her yazılabilir alanı tek tek karşılaştırılır. Eşitlik kayıt eşitliğinden ve
 /// ValueList / ValueDictionary eşitliğinden gelir. Anahtar biçimi "Bölüm.Alan" (örn. "Dock.Enabled").
 /// Yansıma yalnız bu karşılaştırmada kullanılır; JSON'a dokunmaz (AGENTS #10).
-/// Sürüm alanı (<see cref="AppSettings.Version"/>) kullanıcı ayarı olmadığı için hiç karşılaştırılmaz.
+/// Sürüm alanı (<see cref="AppSettings.Version"/>) ve uygulamanın kendi yazdığı durum alanları (<see cref="InternalKeys"/>)
+/// kullanıcı ayarı olmadığı için hiç karşılaştırılmaz.
 /// </summary>
 public static class SettingsChanges
 {
+    // İlk açılıştan sonra hep varsayılandan farklıdır ve "Varsayılana dön" bunları bilerek korur (FirstRunPolicy);
+    // sayılsalar General sayfası sıfırlandıktan sonra bile "değişmiş" görünürdü.
+    private static readonly HashSet<string> InternalKeys =
+    [
+        "General.FirstRunCompleted",
+        "General.LastSeenVersion",
+        "Weather.LocationUpdatedUnix",
+    ];
+
     public static IReadOnlyList<string> ChangedKeys(AppSettings current, AppSettings defaults)
     {
         ArgumentNullException.ThrowIfNull(current);
@@ -30,9 +40,10 @@ public static class SettingsChanges
                 var defaultSection = section.GetValue(defaults);
                 foreach (var field in EditableProperties(section.PropertyType))
                 {
-                    if (!Equals(field.GetValue(currentSection), field.GetValue(defaultSection)))
+                    var key = $"{section.Name}.{field.Name}";
+                    if (!InternalKeys.Contains(key) && !Equals(field.GetValue(currentSection), field.GetValue(defaultSection)))
                     {
-                        changed.Add($"{section.Name}.{field.Name}");
+                        changed.Add(key);
                     }
                 }
             }
