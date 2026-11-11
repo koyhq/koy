@@ -126,6 +126,7 @@ Unutma: Animasyon `Spring` ile yapılır ve yalnız hareket varken kare çizer (
 - Dosyalar: `site/index.html`, `site/style.css`, `site/js/`, `site/img/`. Derleme adımı yok.
 - Dene: `python -m http.server --directory site`.
 - `main`'e `site/**` değişikliği gelince `.github/workflows/pages.yml` yayınlar.
+- Görsel ya da `style.css` aynı adla değişirse `?v=` sürüm etiketini (`index.html`, `style.css` içindeki `bay.svg`) yenile; yoksa ziyaretçi önbellekteki eskisini görür.
 
 ## Ekran görüntüsü üretmek
 ```powershell
