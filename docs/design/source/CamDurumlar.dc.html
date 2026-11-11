@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Cam çentik: kapalı hâller (taslak)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1240px; height: 760px; box-sizing: border-box; padding: 28px; background: #0F0F11; font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif; color: #F4F4F5; display: flex; flex-direction: column; gap: 18px;">
+
+  <div style="display: flex; flex-direction: column; gap: 4px;">
+    <span style="font-size: 18px; font-weight: 600;">Kapalı çentik koyu kalır, yalnız açılınca cama döner</span>
+    <span style="font-size: 13px; color: #A1A1AA;">Kapalı çentik ekranın üst kenarındaki fiziksel çentik yanılsamasını sürdürür: dolgusu opak #0A0A0B, kenarlıksız. Saydamlık yalnız açık çentikte (620×352) devreye girer.</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
+    <sc-for list="{{states}}" as="s">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="height: 120px; border-radius: 12px; background: {{wall}}; display: flex; justify-content: center; overflow: hidden;">
+          <div style="width: {{s.w}}px; height: {{s.h}}px; background: #0A0A0B; border-radius: 0 0 16px 16px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; box-sizing: border-box; font-size: 12px; gap: 8px;">
+            <span style="display: flex; align-items: center; gap: 6px;">
+              <sc-if value="{{s.cover}}"><span style="width: 20px; height: 20px; border-radius: 5px; background: linear-gradient(135deg, #C026D3, #6366F1 60%, #0EA5E9);"></span></sc-if>
+              <sc-if value="{{s.icon}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{s.ic}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{s.d}}"></path></svg></sc-if>
+              <span style="font-weight: 600;">{{s.left}}</span><span style="color: #A1A1AA;">{{s.left2}}</span>
+            </span>
+            <sc-if value="{{s.bar}}"><span style="flex-grow: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.16);"><span style="display: block; width: {{s.bv}}; height: 4px; border-radius: 2px; background: {{s.bc}};"></span></span></sc-if>
+            <span style="display: flex; align-items: center; gap: 6px; color: {{s.rc}}; font-weight: {{s.rw}};">{{s.right}}</span>
+          </div>
+        </div>
+        <span style="font-size: 12.5px; font-weight: 600;">{{s.t}}</span>
+        <span style="font-size: 11.5px; color: #A1A1AA; line-height: 1.4;">{{s.n}}</span>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- Açılış geçişi -->
+  <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 4px;">
+    <span style="font-size: 13px; font-weight: 600;">Açılış geçişi (yay animasyonu sırasında)</span>
+    <div style="height: 200px; border-radius: 12px; background: {{wall}}; display: flex; justify-content: space-around; align-items: flex-start; overflow: hidden;">
+      <sc-for list="{{steps}}" as="p">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+          <div style="width: {{p.w}}px; height: {{p.h}}px; background: {{p.bg}}; border: 1px solid {{p.bd}}; border-top: none; border-radius: 0 0 {{p.r}}px {{p.r}}px;"></div>
+          <span style="font-size: 11px; padding: 4px 9px; border-radius: 9px; background: rgba(10,10,11,0.8); color: #D4D4D8;">{{p.l}}</span>
+        </div>
+      </sc-for>
+    </div>
+    <span style="font-size: 11.5px; color: #A1A1AA;">Dolgunun opaklığı şeklin boyutuyla birlikte yaydan okunur (ek animasyon saati yok): boyut %0'da opak, %100'de seçili saydamlık. Kapanırken tersi. Hareket kapalıysa ("Kapalı" hız ya da Windows "animasyonları azalt") doğrudan son değer atanır.</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1240,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const batt = '%86';
+    const wifi = 'M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0';
+    const base = { cover: false, icon: false, bar: false, left2: '', rc: '#F4F4F5', rw: 400, ic: '#F4F4F5', d: '' };
+    const st = (o) => Object.assign({}, base, o);
+    return {
+      wall: 'radial-gradient(circle at 18% 40%, #F97316 0, transparent 40%), radial-gradient(circle at 70% 30%, #8B5CF6 0, transparent 45%), radial-gradient(circle at 50% 120%, #06B6D4 0, transparent 50%), #1E1B4B',
+      states: [
+        st({ t: 'Boşta', n: '236×34. Solda saat, sağda pil. Değişmedi.', w: 236, h: 34, left: '14:36', right: batt }),
+        st({ t: 'Peek (üzerine gelince)', n: 'Tarih ve ağ simgesi eklenir. Hâlâ opak; cam yalnız açık çentikte.', w: 300, h: 34, left: '14:36', left2: '· Per 6 Kas', right: 'Wi-Fi · BT · ' + batt }),
+        st({ t: 'Müzik çalarken', n: 'Solda kapak, sağda hareketsiz dalga simgesi.', w: 236, h: 34, cover: true, left: '', right: '▮▮▮' }),
+        st({ t: 'Zamanlayıcı çalışırken', n: 'Kalan süre Odak rengiyle; saniyede bir metin tazelenir, animasyon yok.', w: 236, h: 34, left: '14:36', right: '18:24', rc: '#FB7185', rw: 600 }),
+        st({ t: 'Ses göstergesi', n: '260×40, 1,5 sn. Çubuk beyaz.', w: 260, h: 40, icon: true, d: 'M11 5L6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7', left: '', bar: true, bv: '42%', bc: '#F4F4F5', right: '42' }),
+        st({ t: 'Parlaklık göstergesi', n: '260×40, 1,5 sn. Çubuk sarı #FACC15.', w: 260, h: 40, icon: true, ic: '#FACC15', d: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M2 12h2M20 12h2', left: '', bar: true, bv: '64%', bc: '#FACC15', right: '64' }),
+        st({ t: 'Kısa bildirim', n: '"Pomodoro bitti", "Şarj tamamlandı" gibi. Opak kalır, okunurluk önce.', w: 300, h: 40, icon: true, ic: '#FB7185', d: 'M12 8v5l3 2M12 22a9 9 0 1 0 0-18 9 9 0 0 0 0 18z', left: 'Pomodoro bitti', right: 'Mola 5 dk', rc: '#A1A1AA' }),
+        st({ t: 'Wi-Fi bağlandı', n: 'Bağlantı değişince kısa Peek. Simge beyaz, metin ikincil.', w: 300, h: 34, icon: true, d: wifi, left: 'Ev Ağı', right: 'Bağlandı', rc: '#A1A1AA' })
+      ],
+      steps: [
+        { l: 'Kapalı · opak', w: 236, h: 34, r: 16, bg: '#0A0A0B', bd: 'transparent' },
+        { l: '%40 · rgba(12,12,14,0.94)', w: 390, h: 100, r: 22, bg: 'rgba(12,12,14,0.94)', bd: 'rgba(255,255,255,0.04)' },
+        { l: '%100 · Buzlu 0,84', w: 520, h: 150, r: 28, bg: 'rgba(12,12,14,0.84)', bd: 'rgba(255,255,255,0.10)' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
