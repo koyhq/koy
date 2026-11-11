@@ -42,6 +42,8 @@ public static class DockLayoutLimits
     /// </summary>
     public static void Sanitize(DockSettings dock)
     {
+        // Tanımsız enum sayısı (hand-edited "Edge": 7) alt kenara döner.
+        if (!Enum.IsDefined(dock.Edge)) dock.Edge = DockEdge.Bottom;
         dock.LengthPercent = ClampLengthPercent(dock.LengthPercent);
         dock.EdgeOffsetDip = ClampEdgeOffsetDip(dock.EdgeOffsetDip);
         dock.InnerPaddingDip = ClampInnerPaddingDip(dock.InnerPaddingDip);
