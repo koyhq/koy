@@ -10,12 +10,20 @@ namespace Koy.Core.Display;
 public static class WindowPlacementMath
 {
     /// <summary>Monitörün üst kenarında yatay ortalı pencere (çentik).</summary>
-    public static WindowRect TopCenter(DisplayMonitor monitor, double widthDip, double heightDip)
+    public static WindowRect TopCenter(DisplayMonitor monitor, double widthDip, double heightDip) =>
+        TopCenter(monitor, widthDip, heightDip, 0);
+
+    /// <summary>
+    /// Üst kenardan <paramref name="topOffsetDip"/> aşağıda yatay ortalı pencere (yüzen ada). Ofset hedef monitörün
+    /// kendi dikey ölçeğiyle piksele çevrilir; pencere boyutu değişmez, yalnız Top kayar.
+    /// </summary>
+    public static WindowRect TopCenter(DisplayMonitor monitor, double widthDip, double heightDip, double topOffsetDip)
     {
         var width = ToPixels(widthDip, monitor.DpiScaleX);
         var height = ToPixels(heightDip, monitor.DpiScaleY);
         var left = monitor.Bounds.Left + (monitor.Bounds.Width - width) / 2;
-        return new WindowRect(left, monitor.Bounds.Top, left + width, monitor.Bounds.Top + height);
+        var top = monitor.Bounds.Top + ToPixels(Math.Max(0, topOffsetDip), monitor.DpiScaleY);
+        return new WindowRect(left, top, left + width, top + height);
     }
 
     /// <summary>Monitörün alt kenarında yatay ortalı, alttan boşluklu pencere (yüzen kapsül dock).</summary>

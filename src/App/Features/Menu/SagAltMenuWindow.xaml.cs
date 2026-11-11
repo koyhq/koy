@@ -41,6 +41,8 @@ public partial class SagAltMenuWindow : Window
     public SagAltMenuWindow(SagAltMenuViewModel? viewModel = null)
     {
         InitializeComponent();
+        // Gerçek bulanıklık, koyu çerçeve, gölge ve köşeler DWM'den (Koy penceresiyle aynı).
+        Koy.App.Resources.WindowFrame.Attach(this);
         DataContext = viewModel ?? new SagAltMenuViewModel();
 
         ViewModel.RequestClose += () => Hide();

@@ -9,10 +9,10 @@ namespace Koy.App.Resources;
 /// <summary>
 /// Görünüm ayarlarını (tema, vurgu, malzeme, köşe, hareket) uygulama kaynaklarına uygular.
 /// Sıra: [0] tema sözlüğü (Koyu/Açık, değişince yenisiyle değiştirilir), Tokens, Icons, Styles, en sonda
-/// ezmeler (vurgu tonları, köşe yarıçapları, yarı saydam yüzeyler). Hepsi DynamicResource ile okunduğu için
+/// ezmeler (vurgu tonları, köşe yarıçapları, Buzlu / Cam yüzeyler). Hepsi DynamicResource ile okunduğu için
 /// değişiklik açık pencerelere anında yansır.
-/// Yalnız Koy penceresi, ilk kurulum sihirbazı ve sağ alt menü bu kaynakları kullanır; çentik ve dock kendi
-/// sabit renklerinde kalır.
+/// Koy penceresi, ilk kurulum sihirbazı ve sağ alt menü bu kaynakları kullanır; çentik ve dock temadan bağımsız koyu
+/// kalır, yalnız malzeme saydamken çentik kartlarının (KoyNotchCard / KoyNotchChip) tonu buradan ezilir.
 /// </summary>
 public static class ThemeManager
 {
@@ -21,7 +21,14 @@ public static class ThemeManager
     private static ResourceDictionary? _themeDictionary;
     private static ResourceDictionary? _overrides;
     private static AppSettings? _last;
+
+    /// <summary>Son uygulanan ayarlar (pencere çerçeveleri okur); henüz uygulanmadıysa null.</summary>
+    public static AppSettings? LastSettings => _last;
+
+    /// <summary>Kaynaklar her uygulandığında (tema, vurgu, malzeme, köşe, duvar kağıdı); pencere çerçeveleri dinler.</summary>
+    public static event Action? Applied;
     private static bool _watching;
+    private static bool _watchingMaterial;
 
     public static ResolvedTheme Current { get; private set; } = ResolvedTheme.Dark;
 
@@ -65,8 +72,21 @@ public static class ThemeManager
         BuildOverrides(settings, theme, wanted);
         Motion.Refresh(settings);
 
+        // Duvar kağıdı okununca ya da değişince okunabilirlik koruması yeniden değerlendirilir.
+        if (!_watchingMaterial)
+        {
+            _watchingMaterial = true;
+            MaterialState.Changed += () =>
+            {
+                if (_last is { } s)
+                    Apply(app, s);
+            };
+        }
+
         if (ThemeSetting.Normalize(settings.Theme) == ThemeSetting.System)
             WatchSystemTheme(app);
+
+        Applied?.Invoke();
     }
 
     private static void BuildOverrides(AppSettings settings, ResolvedTheme theme, ResourceDictionary palette)
@@ -102,15 +122,40 @@ public static class ThemeManager
             o["KoyAccentSubtle"] = new SolidColorBrush(Color.FromArgb(theme == ResolvedTheme.Dark ? (byte)0x26 : (byte)0x22, c.R, c.G, c.B));
         }
 
-        // Yarı saydam malzeme: pencere yüzeyleri %88 opak; satırlar ve metin kontrastı korunur.
-        if (MaterialSetting.IsTranslucent(settings.Material))
+        // Saydam malzeme (Buzlu %86, Cam %72; onaylı kaynak CamKoy.dc.html): pencere yüzeyleri seviyenin opaklığında,
+        // satırlar duvar kağıdını hafifçe gösteren beyaz katman (koyu %5, açık %62). Okunabilirlik koruması açık duvar
+        // kağıdında seviyeyi kendiliğinden yükseltir (MaterialState).
+        var windowLevel = MaterialState.ForWindow(settings, theme);
+        if (windowLevel != MaterialSetting.Solid)
         {
-            var alpha = (byte)Math.Round(255 * MaterialSetting.TranslucentSurfaceOpacity);
-            foreach (var key in new[] { "KoyBgWindow", "KoyBgShell" })
+            // Başlık çubuğu ve kenar menüsü (KoyBgShell) içerikle aynı tonda: demoda kendi zeminleri yok, pencere tek
+            // yüzey. Ayrı tonlar akriliğin üstünde iki farklı gri gibi duruyordu (proje sahibi, 2026-11-11).
+            var alpha = MaterialSetting.SurfaceAlpha(windowLevel);
+            if (palette["KoyBgWindow"] is SolidColorBrush src)
             {
-                if (palette[key] is SolidColorBrush src)
-                    o[key] = new SolidColorBrush(Color.FromArgb(alpha, src.Color.R, src.Color.G, src.Color.B));
+                var surface = Color.FromArgb(alpha, src.Color.R, src.Color.G, src.Color.B);
+                o["KoyBgWindow"] = new SolidColorBrush(surface);
+                o["KoyBgShell"] = new SolidColorBrush(surface);
             }
+            o["KoyBgRow"] = new SolidColorBrush(theme == ResolvedTheme.Dark
+                ? Color.FromArgb(0x0D, 0xFF, 0xFF, 0xFF)
+                : Color.FromArgb(0x9E, 0xFF, 0xFF, 0xFF));
+            // Segment kutusu: opak gri, saydam satırın üstünde delik gibi durmasın (demo --seg-bg). KoyBgControl'e
+            // dokunulmaz; üzerine gelme vurgusu da onu kullanır ve koyulaşırsa vurgu tersine dönerdi.
+            o["KoyBgSegment"] = new SolidColorBrush(theme == ResolvedTheme.Dark
+                ? Color.FromArgb(0x38, 0x00, 0x00, 0x00)
+                : Color.FromArgb(0x0D, 0x00, 0x00, 0x00));
+        }
+
+        // Açık çentik camlaşınca kartlar opak gri yerine beyaz katman olur (CamCentik.dc.html: kart %6, vurgulu %9);
+        // opak zeminde bu değerler bugünkü #141416 / #1F1F23 ile neredeyse aynı tonu verir.
+        if (MaterialState.ForNotch(settings) != MaterialSetting.Solid)
+        {
+            o["KoyNotchCard"] = new SolidColorBrush(Color.FromArgb(0x0F, 0xFF, 0xFF, 0xFF));
+            o["KoyNotchChip"] = new SolidColorBrush(Color.FromArgb(0x17, 0xFF, 0xFF, 0xFF));
+            // Müzik kartı palet yokken (Düz nötr) diğer kartlarla aynı cam tonunda; ikincil metin ve çubuklar zaten
+            // nötr (Tokens). Albüm rengi ve kapak resmi MusicViewModel fırçalarından gelir.
+            o["KoyNotchMusicCard"] = new SolidColorBrush(Color.FromArgb(0x0F, 0xFF, 0xFF, 0xFF));
         }
     }
 

@@ -31,6 +31,9 @@ public partial class NotchWindow : Window
 
     private NotchViewModel? ViewModel => DataContext as NotchViewModel;
 
+    // Yüzen adada pencerenin Top'u ekran üstünden kayar; tuval boyutu ve tuval içi konumlar değişmez (AGENTS #13).
+    private double TopOffsetDip => ViewModel?.TopOffsetDip ?? 0;
+
     private DisplayMonitor? _targetMonitor;
     public Action? DisplayChangeHandler { get; set; }
     public Action? VoiceConfirmRequested { get; set; }
@@ -121,19 +124,19 @@ public partial class NotchWindow : Window
             // (WM_DPICHANGED), boyut aynı çağrıda verilirse iki kez ölçeklenir. DpiChanged gelince tam yerleşir.
             var windowScale = VisualTreeHelper.GetDpi(this).DpiScaleX;
             var sameDpi = Math.Abs(windowScale - _targetMonitor.DpiScaleX) < 0.01;
-            WindowStyles.SetBounds(_hwnd, WindowPlacementMath.TopCenter(_targetMonitor, Width, Height), resize: sameDpi);
+            WindowStyles.SetBounds(_hwnd, WindowPlacementMath.TopCenter(_targetMonitor, Width, Height, TopOffsetDip), resize: sameDpi);
         }
         else if (_targetMonitor is not null && _targetMonitor.WidthDip > 100)
         {
             // Pencere henüz oluşmadı: yaklaşık DIP konumu; SourceInitialized'da piksel konumu uygulanır.
             Left = _targetMonitor.LeftDip + (_targetMonitor.WidthDip - Width) / 2;
-            Top = _targetMonitor.TopDip;
+            Top = _targetMonitor.TopDip + TopOffsetDip;
         }
         else
         {
             var screenWidth = SystemParameters.PrimaryScreenWidth;
             Left = (screenWidth - Width) / 2;
-            Top = 0;
+            Top = TopOffsetDip;
         }
     }
 

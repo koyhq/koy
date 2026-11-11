@@ -1,6 +1,7 @@
 using Koy.Core.Tray;
 using Koy.Core.Clipboard;
 using Koy.Core.Network;
+using Koy.Core.Notifications;
 using Koy.Core.Power;
 using Koy.Core.Privacy;
 using Koy.Core.QuickLaunch;
@@ -12,6 +13,7 @@ using Koy.Platform.Bluetooth;
 using Koy.Platform.Clipboard;
 using Koy.Platform.Media;
 using Koy.Platform.Network;
+using Koy.Platform.Notifications;
 using Koy.Platform.Power;
 using Koy.Platform.Privacy;
 using Koy.Platform.Radio;
@@ -55,6 +57,8 @@ public sealed class SharedServices : IDisposable
     private readonly object _powerLock = new();
     private IPowerService? _powerService;
     private int _powerServiceUsers;
+    private WinRtNotificationListener? _notifications;
+    private int _notificationsUsers;
     private bool _disposed;
 
     public WindowTracker AcquireWindowTracker()
@@ -329,6 +333,30 @@ public sealed class SharedServices : IDisposable
     }
 
     /// <summary>
+    /// Windows bildirim dinleyicisi. Başlatılmamış döner: çağıran izni denetler ve yalnız <c>Allowed</c> ise
+    /// <c>Start()</c> der (yoklama başlar). Son bırakan <see cref="ReleaseNotificationListener"/> ile zamanlayıcıyı söker.
+    /// <c>NotificationArrived</c> arka plan iş parçacığından gelir: Dispatcher'a geçirin.
+    /// </summary>
+    public INotificationListener AcquireNotificationListener()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        _notificationsUsers++;
+        return _notifications ??= new WinRtNotificationListener();
+    }
+
+    public void ReleaseNotificationListener()
+    {
+        if (_notificationsUsers == 0)
+            return;
+
+        if (--_notificationsUsers == 0)
+        {
+            _notifications?.Dispose();
+            _notifications = null;
+        }
+    }
+
+    /// <summary>
     /// Sistem verisi örnekleyicisi (CPU, RAM, ağ, Koy belleği), Start edilmiş döner: çağıran yalnız çentik
     /// AÇILIRKEN almalı, KAPANIRKEN <see cref="ReleaseSystemStats"/> ile bırakmalı (son bırakan zamanlayıcıyı söker).
     /// <paramref name="network"/> ağ adı içindir (INetworkService.Current.Name); ilk alan verir.
@@ -460,6 +488,9 @@ public sealed class SharedServices : IDisposable
         _trayHostLease.Reset();
         _clipboard?.Dispose();
         _clipboard = null;
+        _notifications?.Dispose();
+        _notifications = null;
+        _notificationsUsers = 0;
         _systemStats?.Dispose();
         _systemStats = null;
         _clipboardUsers = 0;

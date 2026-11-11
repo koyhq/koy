@@ -5,6 +5,7 @@ using System.Windows.Media.Imaging;
 using Koy.App.Features.Menu;
 using Koy.App.Features.Settings;
 using Koy.App.Features.Wizard;
+using Koy.App.Resources;
 using Koy.Core.Settings;
 
 namespace Koy.UiSnapshots;
@@ -24,6 +25,12 @@ public static class Program
     private static readonly string[] PageNames =
         ["genel", "centik", "dock", "ekranlar", "gorunum", "kisayollar", "dikte", "performans", "hakkinda"];
 
+    /// <summary>Görüntülerde kullanılan malzeme (Katı / Buzlu / Cam).</summary>
+    internal static string Material { get; private set; } = "Katı";
+
+    /// <summary>Çizimin arkasındaki zemin; saydam yüzeyler bunu gösterir.</summary>
+    private static Color Backdrop = Color.FromRgb(0x7A, 0x80, 0x8C);
+
     [STAThread]
     public static int Main(string[] args)
     {
@@ -31,6 +38,23 @@ public static class Program
         var prefix = Arg(args, "--prefix") ?? "snap";
         var themeArg = (Arg(args, "--theme") ?? "dark").ToLowerInvariant();
         var scene = (Arg(args, "--scene") ?? "all").ToLowerInvariant();
+        // Malzeme (kati | buzlu | cam) ve saydam yüzeyin arkasındaki duvar kağıdı (light | dark; verilmezse orta gri).
+        // Duvar kağıdı hiçbir zaman gerçek masaüstünden okunmaz; verilen renk okunabilirlik korumasına da girer.
+        Material = Koy.Core.Appearance.MaterialSetting.Normalize(Arg(args, "--material") switch
+        {
+            "buzlu" or "frosted" => "Buzlu",
+            "cam" or "glass" => "Cam",
+            _ => "Katı"
+        });
+        Koy.Core.Appearance.Rgb? wallpaper = (Arg(args, "--wallpaper") ?? "").ToLowerInvariant() switch
+        {
+            "light" => new Koy.Core.Appearance.Rgb(236, 240, 246),
+            "dark" => new Koy.Core.Appearance.Rgb(24, 30, 44),
+            _ => null
+        };
+        if (wallpaper is { } w)
+            Backdrop = Color.FromRgb(w.R, w.G, w.B);
+        MaterialState.SetWallpaperForPreview(wallpaper);
         Directory.CreateDirectory(outDir);
 
         var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
@@ -77,7 +101,7 @@ public static class Program
         // Ayarlar geçici bir dosyada: gerçek %AppData%\Koy\settings.json'a dokunulmaz.
         var tempSettings = Path.Combine(Path.GetTempPath(), "koy-uisnap-" + Guid.NewGuid().ToString("N") + ".json");
         var store = new SettingsStore(tempSettings);
-        store.Save(new AppSettings { FirstRunCompleted = true });
+        store.Save(new AppSettings { FirstRunCompleted = true, Material = Material });
 
         try
         {
@@ -157,7 +181,7 @@ public static class Program
         var tempDir = Path.Combine(Path.GetTempPath(), "koy-uisnap-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempDir);
         var store = new SettingsStore(Path.Combine(tempDir, "settings.json"));
-        store.Save(new AppSettings { FirstRunCompleted = true });
+        store.Save(new AppSettings { FirstRunCompleted = true, Material = Material });
 
         try
         {
@@ -200,17 +224,23 @@ public static class Program
 
     private static NotchSet MakeNotch(bool music, IReadOnlyList<Koy.Core.Shelf.ShelfItem>? shelf = null, List<string>? tileOrder = null,
         bool locationBlocked = false, bool audioConnected = true, Func<Koy.Core.SystemStats.ISystemStatsService>? statsFactory = null,
-        bool brightnessSupported = true, bool wideCover = false)
+        bool brightnessSupported = true, bool wideCover = false, string notchStyle = Koy.Core.Notch.NotchStyle.Pinned,
+        int idleMode = Koy.Core.Notch.IdleDisplay.ClockAndBattery, FakePower? power = null, string? language = null)
     {
         var settings = new AppSettings
         {
             FirstRunCompleted = true,
+            NotchStyle = notchStyle,
+            IdleDisplayMode = idleMode,
+            Material = Material,
             WeatherLocationSource = Koy.Core.Weather.WeatherLocationSource.City,
             WeatherCity = "İstanbul, Türkiye",
             WeatherLatitude = 41.01,
             WeatherLongitude = 28.97,
             ControlCenterLayout = tileOrder ?? new AppSettings().ControlCenterLayout
         };
+        if (language is not null)
+            settings.Language = language;
 
         var controller = new Koy.Core.Notch.NotchController();
         controller.SetEnabledPanels(Koy.Core.Notch.NotchPanels.Order);
@@ -226,7 +256,7 @@ public static class Program
                 () => new FakeAudio(), () => new FakeRadio(), null, () => new FakeBrightness(brightnessSupported), new FakeFocusAssist(), settings,
                 wifiFactory: () => new FakeWifi(locationBlocked),
                 bluetoothDevices: new Koy.App.Features.ControlCenter.BluetoothDevicesViewModel(() => new FakeBluetooth(audioConnected), null)),
-            new Koy.App.Features.Status.StatusViewModel(new FakePower(), new FakeWeather(), settings),
+            new Koy.App.Features.Status.StatusViewModel(power ?? new FakePower(), new FakeWeather(), settings),
             new Koy.App.Features.Focus.FocusViewModel(timers, settings, tasks: MakeTasks()),
             new Koy.App.Features.Shelf.ShelfViewModel(new FakeShelf(shelf ?? [])),
             MakeCalendar(settings),
@@ -313,13 +343,14 @@ public static class Program
         {
             shape.Width = Koy.Core.Notch.NotchLayout.ExpandedWidth;
             shape.Height = Koy.Core.Notch.NotchLayout.ExpandedHeight;
-            shape.CornerRadius = 34;
+            shape.CornerRadius = Koy.Core.Notch.NotchStyle.CornerRadius(set.Vm.Settings.NotchStyle, Koy.Core.Notch.NotchSurface.Expanded, shape.Height, 34);
         }
         else
         {
-            shape.Width = set.Vm.IsMusicPlaying ? 280 : 236;
-            shape.Height = 34;
-            shape.CornerRadius = 18;
+            var peek = set.Vm.State == Koy.Core.Notch.NotchState.Peek;
+            shape.Width = peek ? 300 : set.Vm.IsMusicPlaying ? 280 : 236;
+            shape.Height = peek ? 38 : 34;
+            shape.CornerRadius = Koy.Core.Notch.NotchStyle.CornerRadius(set.Vm.Settings.NotchStyle, Koy.Core.Notch.NotchSurface.Closed, shape.Height, 18);
         }
 
         Settle();
@@ -354,6 +385,39 @@ public static class Program
         ShotNotch(set, name("kapali-gizlilik"), expanded: false);
         set.Vm.Dispose();
 
+        // Halka pil ve gün/saat (#63): %43, düşük pil, şarjda, pilsiz kasa, zamanlayıcı, Peek, İngilizce.
+        var ring = Koy.Core.Notch.IdleDisplay.RingClockDay;
+        set = MakeNotch(music: false, idleMode: ring, power: new FakePower(43));
+        ShotNotch(set, name("halka"), expanded: false);
+        set.Vm.Controller.OnMouseEnter();
+        Flush();
+        ShotNotch(set, name("halka-peek"), expanded: false);
+        set.Vm.Controller.OnMouseLeave();
+        set.Vm.Controller.OnMouseLeaveTimeout();
+        set.Timers.Toggle(Koy.Core.Timers.FocusKind.Focus);
+        Flush();
+        ShotNotch(set, name("halka-zamanlayici"), expanded: false);
+        set.Vm.Dispose();
+        set = MakeNotch(music: false, idleMode: ring, power: new FakePower(12));
+        ShotNotch(set, name("halka-dusuk"), expanded: false);
+        set.Vm.Dispose();
+        set = MakeNotch(music: false, idleMode: ring, power: new FakePower(100, charging: true));
+        ShotNotch(set, name("halka-sarj"), expanded: false);
+        set.Vm.Dispose();
+        set = MakeNotch(music: false, idleMode: ring, power: new FakePower(hasBattery: false));
+        ShotNotch(set, name("halka-pilsiz"), expanded: false);
+        set.Vm.Dispose();
+        set = MakeNotch(music: false, idleMode: ring, power: new FakePower(43), language: "en");
+        ShotNotch(set, name("halka-en"), expanded: false);
+        set.Vm.Dispose();
+
+        // Yüzen ada: kulaksız kapsül (pencerenin 9 DIP kayması canlı pencerede; burada yalnız şekil).
+        set = MakeNotch(music: false, notchStyle: Koy.Core.Notch.NotchStyle.Floating);
+        ShotNotch(set, name("yuzen-kapali"), expanded: false);
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+        ShotNotch(set, name("yuzen-acik"), expanded: true);
+        set.Vm.Dispose();
+
         // Ana: müzik çalıyor / çalmıyor + çalışan zamanlayıcı satırı.
         set = MakeNotch(music: true);
         set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
@@ -365,6 +429,19 @@ public static class Program
         set.Vm.Home.ToggleMusicExpandedCommand.Execute(null);
         ShotNotch(set, name("ana-muzik-buyuk"), expanded: true);
         set.Vm.Dispose();
+
+        // Müzik kartı stilleri (#66): Albüm kapağı (küçük ve büyük kart) ve Düz.
+        foreach (var style in new[] { "Artwork", "Neutral" })
+        {
+            set = MakeNotch(music: true);
+            set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+            set.Vm.Music.SetCardStyle(style);
+            Flush();
+            ShotNotch(set, name("ana-muzik-" + style.ToLowerInvariant()), expanded: true);
+            set.Vm.Home.ToggleMusicExpandedCommand.Execute(null);
+            ShotNotch(set, name("ana-muzik-" + style.ToLowerInvariant() + "-buyuk"), expanded: true);
+            set.Vm.Dispose();
+        }
 
         // Video kapağı (Chrome/YouTube Windows'a ~150×83 verir): kırpılmadan tamamı, arkada bulanık hâli.
         set = MakeNotch(music: true, wideCover: true);
@@ -571,7 +648,7 @@ public static class Program
     {
         var tempSettings = Path.Combine(Path.GetTempPath(), "koy-uisnap-" + Guid.NewGuid().ToString("N") + ".json");
         var store = new SettingsStore(tempSettings);
-        store.Save(new AppSettings { FirstRunCompleted = true });
+        store.Save(new AppSettings { FirstRunCompleted = true, Material = Material });
 
         try
         {
@@ -627,7 +704,7 @@ public static class Program
         var dv = new DrawingVisual();
         using (var dc = dv.RenderOpen())
         {
-            dc.DrawRectangle(new SolidColorBrush(Color.FromRgb(0x7A, 0x80, 0x8C)), null, new Rect(0, 0, pxW, pxH));
+            dc.DrawRectangle(new SolidColorBrush(Backdrop), null, new Rect(0, 0, pxW, pxH));
             dc.DrawImage(shot, new Rect(pad * Scale, pad * Scale, shot.PixelWidth, shot.PixelHeight));
         }
         var final = new RenderTargetBitmap(pxW, pxH, 96, 96, PixelFormats.Pbgra32);

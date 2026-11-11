@@ -73,6 +73,29 @@
             </Grid>
         </Border>
 
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [NotchStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [NotchStyleDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [NotchStylePinned], Source={x:Static res:Loc.Instance}}" GroupName="NotchStyle"
+                                     IsChecked="{Binding NotchStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Yapışık}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [NotchStyleFloating], Source={x:Static res:Loc.Instance}}" GroupName="NotchStyle"
+                                     IsChecked="{Binding NotchStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Yüzen}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
         <!-- BOŞTAYKEN -->
         <TextBlock Text="{Binding [IdleDisplayTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 
@@ -93,6 +116,10 @@
                         <RadioButton Content="{Binding [IdleClockOnly], Source={x:Static res:Loc.Instance}}" GroupName="IdleMode"
                                      IsChecked="{Binding IdleDisplayMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=1}"
                                      Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [IdleRingClockDay], Source={x:Static res:Loc.Instance}}" GroupName="IdleMode"
+                                     ToolTip="{Binding [IdleRingClockDayDesc], Source={x:Static res:Loc.Instance}}"
+                                     IsChecked="{Binding IdleDisplayMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=3}"
+                                     Style="{StaticResource SegRadioStyle}" />
                         <RadioButton Content="{Binding [IdleNone], Source={x:Static res:Loc.Instance}}" GroupName="IdleMode"
                                      IsChecked="{Binding IdleDisplayMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=2}"
                                      Style="{StaticResource SegRadioStyle}" />
@@ -112,6 +139,32 @@
                 </StackPanel>
                 <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [MusicWaveformTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding MusicShowWaveform}" HorizontalAlignment="Right" VerticalAlignment="Center"
                           Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [MusicCardStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [MusicCardStyleDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [MusicCardStyleNeutral], Source={x:Static res:Loc.Instance}}" GroupName="MusicCardStyle"
+                                     IsChecked="{Binding MusicCardStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Neutral}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [MusicCardStyleTinted], Source={x:Static res:Loc.Instance}}" GroupName="MusicCardStyle"
+                                     IsChecked="{Binding MusicCardStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Tinted}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [MusicCardStyleArtwork], Source={x:Static res:Loc.Instance}}" GroupName="MusicCardStyle"
+                                     IsChecked="{Binding MusicCardStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Artwork}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
             </Grid>
         </Border>
 
@@ -173,6 +226,39 @@
                     <TextBlock Text="{Binding [PrivacyIndicatorDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
                 <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [PrivacyIndicatorTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding ShowPrivacyIndicator}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [NotificationsTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [NotificationsDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                    <TextBlock Text="{Binding [NotificationsNeedPermission], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}"
+                               Foreground="{DynamicResource KoyAccent}"
+                               Visibility="{Binding NotificationsPermissionMissing, Converter={StaticResource BoolToVis}}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [NotificationsTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding NotchShowNotifications}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}" IsEnabled="{Binding NotchShowNotifications}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [NotificationsHideBodyTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [NotificationsHideBodyDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [NotificationsHideBodyTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding NotchNotificationsHideBody}" HorizontalAlignment="Right" VerticalAlignment="Center"
                           Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>

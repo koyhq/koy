@@ -14,19 +14,25 @@
         MinWidth="880"
         MinHeight="600"
         WindowStartupLocation="CenterScreen"
-        WindowStyle="None"
-        AllowsTransparency="True"
+        WindowStyle="SingleBorderWindow"
+        AllowsTransparency="False"
         Background="Transparent"
         ResizeMode="CanMinimize"
         FontFamily="{DynamicResource KoyFont}"
         Foreground="{DynamicResource KoyTextPrimary}"
         TextOptions.TextFormattingMode="Display">
 
+    <!-- Katmansız pencere: çerçeve istemci alanına uzatılır (GlassFrameThickness -1), sistem başlık çubuğu çizilmez.
+         Arka plan (Buzlu / Cam'da akrilik), koyu çerçeve ve köşeler DWM'den gelir (KoyWindow.ApplyFrame). Katmanlı
+         pencerede DWM bulanıklık uygulamıyordu; bulanıksız saydamlık arkadaki pencereleri çamur griye karıştırıyordu. -->
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" GlassFrameThickness="-1" ResizeBorderThickness="0"
+                      CornerRadius="0" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
+
     <!-- Ana pencere kabuğu: 880 px, köşe yarıçapı ve yüzeyler token'dan gelir -->
-    <Border Background="{DynamicResource KoyBgWindow}"
-            BorderBrush="{DynamicResource KoyBorderHairline}"
-            BorderThickness="1"
-            CornerRadius="{DynamicResource KoyRadiusWindow}">
+    <!-- Köşe ve kenarlık DWM'den; kabuk köşesiz ve kenarlıksız. -->
+    <Border Background="{DynamicResource KoyBgWindow}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="40" />
@@ -39,7 +45,6 @@
                     BorderBrush="{DynamicResource KoyBorderShell}"
                     BorderThickness="0,0,0,1"
                     Padding="16,0,6,0"
-                    CornerRadius="{DynamicResource KoyRadiusWindowTop}"
                     MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -69,8 +74,7 @@
                         Background="{DynamicResource KoyBgShell}"
                         Padding="10,12"
                         BorderBrush="{DynamicResource KoyBorderShell}"
-                        BorderThickness="0,0,1,0"
-                        CornerRadius="{DynamicResource KoyRadiusWindowBottomLeft}">
+                        BorderThickness="0,0,1,0">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
@@ -172,7 +176,7 @@
                         </Style.Triggers>
                     </Style>
                 </Grid.Style>
-                <Border Background="{DynamicResource KoyScrim}" CornerRadius="{DynamicResource KoyRadiusWindow}" />
+                <Border Background="{DynamicResource KoyScrim}" />
                 <Border x:Name="UninstallCard" Width="440" VerticalAlignment="Center" HorizontalAlignment="Center"
                         Background="{DynamicResource KoyBgRow}" BorderBrush="{DynamicResource KoyBorderStrong}" BorderThickness="1"
                         CornerRadius="{DynamicResource KoyRadiusRow}" Padding="24"
@@ -262,7 +266,7 @@
                         </Style.Triggers>
                     </Style>
                 </Grid.Style>
-                <Border Background="{DynamicResource KoyScrim}" CornerRadius="{DynamicResource KoyRadiusWindow}" />
+                <Border Background="{DynamicResource KoyScrim}" />
                 <Border x:Name="UpdateCard" Width="480" VerticalAlignment="Center" HorizontalAlignment="Center"
                         Background="{DynamicResource KoyBgRow}" BorderBrush="{DynamicResource KoyBorderStrong}" BorderThickness="1"
                         CornerRadius="{DynamicResource KoyRadiusRow}" Padding="24"
@@ -355,7 +359,7 @@
                         </Style.Triggers>
                     </Style>
                 </Grid.Style>
-                <Border Background="{DynamicResource KoyScrim}" CornerRadius="{DynamicResource KoyRadiusWindow}" />
+                <Border Background="{DynamicResource KoyScrim}" />
                 <Border x:Name="WhatsNewCard" Width="500" MaxHeight="520" VerticalAlignment="Center" HorizontalAlignment="Center"
                         Background="{DynamicResource KoyBgRow}" BorderBrush="{DynamicResource KoyBorderStrong}" BorderThickness="1"
                         CornerRadius="{DynamicResource KoyRadiusRow}" Padding="24"

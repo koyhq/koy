@@ -7,11 +7,15 @@ using Koy.Core.Notch;
 using Koy.App.Resources;
 using Koy.Core.Appearance;
 using Koy.Core.Dock;
+using Koy.Core.Media;
 using Koy.Core.Settings;
 using Koy.Core.Uninstall;
 using Koy.Core.Updates;
 using Koy.Core.Visibility;
 using Koy.Core.Voice;
+using Koy.App.Features.Notch;
+using Koy.Core.Notifications;
+using Koy.Platform.Notifications;
 using Koy.Platform.Shell;
 
 namespace Koy.App.Features.Settings;
@@ -92,10 +96,16 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private int _idleDisplayMode; // 0: Saat ve pil, 1: Yalnız saat, 2: Hiçbiri
 
     [ObservableProperty]
+    private string _notchStyle = Koy.Core.Notch.NotchStyle.Pinned; // "Yapışık" ya da "Yüzen"
+
+    [ObservableProperty]
     private bool _musicShowWaveform = true;
 
     [ObservableProperty]
     private bool _musicLyricsEnabled;
+
+    [ObservableProperty]
+    private string _musicCardStyle = MusicCardStyleSetting.Tinted;
 
     [ObservableProperty]
     private bool _showVolumeOsd = true;
@@ -105,6 +115,17 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _showPrivacyIndicator = true;
+
+    /// <summary>Windows bildirimleri çentikte kart olarak görünsün (<c>AppSettings.NotchShowNotifications</c>).</summary>
+    [ObservableProperty]
+    private bool _notchShowNotifications = true;
+
+    [ObservableProperty]
+    private bool _notchNotificationsHideBody;
+
+    /// <summary>Ayar açık ama Windows bildirim izni yok (reddedildi ya da okunamadı): sayfada açıklama satırı çıkar.</summary>
+    [ObservableProperty]
+    private bool _notificationsPermissionMissing;
 
     [ObservableProperty]
     private bool _panelFocus = true;
@@ -270,6 +291,14 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private string _material = "Katı";
 
+    /// <summary>Okunabilirlik koruması: açık duvar kağıdında saydam malzeme daha opak seviyeye çıkar.</summary>
+    [ObservableProperty]
+    private bool _materialReadabilityGuard = true;
+
+    /// <summary>Açık çentik malzemeyi izlesin; kapalıysa açık çentik hep opak.</summary>
+    [ObservableProperty]
+    private bool _notchFollowsMaterial = true;
+
     [ObservableProperty]
     private double _cornerRadius = 12.0;
 
@@ -420,7 +449,19 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         UpdateStatus.Changed += OnUpdateStatusChanged;
         OnUpdateStatusChanged();
         LoadFromSettings();
+        NotchFeature.NotificationAccessChanged += OnNotificationAccessChanged;
+        RefreshNotificationPermission();
     }
+
+    partial void OnNotchShowNotificationsChanged(bool value) => RefreshNotificationPermission();
+
+    // İzin sonucu çentik özelliği istek yaptıktan sonra gelir (arka plan iş parçacığı olabilir).
+    private void OnNotificationAccessChanged() =>
+        System.Windows.Application.Current?.Dispatcher.InvokeAsync(RefreshNotificationPermission);
+
+    private void RefreshNotificationPermission() =>
+        NotificationsPermissionMissing = NotchShowNotifications &&
+            WinRtNotificationListener.GetAccessStatus() is NotificationAccessStatus.Denied or NotificationAccessStatus.Unavailable;
 
     private void OnUpdateStatusChanged()
     {
@@ -474,9 +515,13 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             ShowVolumeOsd = s.ShowVolumeOsd;
             ShowBrightnessOsd = s.ShowBrightnessOsd;
             ShowPrivacyIndicator = s.ShowPrivacyIndicator;
+            NotchShowNotifications = s.NotchShowNotifications;
+            NotchNotificationsHideBody = s.NotchNotificationsHideBody;
             MusicShowWaveform = s.MusicShowWaveform;
+            MusicCardStyle = MusicCardStyleSetting.Normalize(s.MusicCardStyle);
             MusicLyricsEnabled = s.MusicLyricsEnabled;
             IdleDisplayMode = s.IdleDisplayMode;
+            NotchStyle = Koy.Core.Notch.NotchStyle.Normalize(s.NotchStyle);
             NotchOpenBehavior = s.NotchOpenBehavior;
 
             // Eski sürümlerin karışık değerleri ("Koyu", 18 vb.) seçenek değerlerine indirilir.
@@ -484,6 +529,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             AccentColor = s.AccentColor ?? AccentPalette.DefaultHex;
             UseWindowsAccent = s.UseWindowsAccent;
             Material = MaterialSetting.Normalize(s.Material);
+            MaterialReadabilityGuard = s.MaterialReadabilityGuard;
+            NotchFollowsMaterial = s.NotchFollowsMaterial;
             CornerRadius = CornerSetting.ToStored(CornerSetting.Resolve(s.CornerRadius));
             AnimationSpeed = MotionPolicy.NormalizeSpeed(s.AnimationSpeed);
             RespectReduceMotion = s.RespectReduceMotion;
@@ -629,6 +676,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             return;
 
         if (e.PropertyName is nameof(Theme) or nameof(AccentColor) or nameof(UseWindowsAccent) or nameof(Material)
+            or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
             or nameof(CornerRadius) or nameof(AnimationSpeed) or nameof(RespectReduceMotion) or nameof(BatterySaverReduceMotion))
         {
             // Görünüm ayarları açık pencerelere anında yansır.
@@ -657,11 +705,13 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         name is not null && name != nameof(DockEnabled) &&
         (name.StartsWith("Dock", StringComparison.Ordinal) ||
          name is nameof(HideWindowsTaskbar) or nameof(BatterySaverReduceMotion) or nameof(MiddleClickAction) or nameof(Material)
+             or nameof(MaterialReadabilityGuard)
              or nameof(AnimationSpeed) or nameof(RespectReduceMotion));
 
     private static bool AffectsNotch(string? name) =>
-        name is nameof(NotchVisibility) or nameof(NotchHideInFullscreen) or nameof(MusicShowWaveform) or nameof(MusicLyricsEnabled)
-            or nameof(ShowVolumeOsd) or nameof(ShowBrightnessOsd) or nameof(ShowPrivacyIndicator) or nameof(IdleDisplayMode)
+        name is nameof(NotchVisibility) or nameof(NotchHideInFullscreen) or nameof(MusicShowWaveform) or nameof(MusicCardStyle) or nameof(MusicLyricsEnabled)
+            or nameof(ShowVolumeOsd) or nameof(ShowBrightnessOsd) or nameof(ShowPrivacyIndicator) or nameof(NotchShowNotifications) or nameof(NotchNotificationsHideBody) or nameof(IdleDisplayMode) or nameof(NotchStyle)
+            or nameof(Material) or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
             or nameof(NotchOpenBehavior) or nameof(WheelAction) or nameof(BatterySaverReduceMotion)
             or nameof(WeatherRefreshInterval) or nameof(PomodoroWorkMinutes) or nameof(PomodoroShortBreakMinutes) or nameof(PomodoroLongBreakMinutes)
             or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
@@ -745,14 +795,20 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             ShowVolumeOsd = ShowVolumeOsd,
             ShowBrightnessOsd = ShowBrightnessOsd,
             ShowPrivacyIndicator = ShowPrivacyIndicator,
+            NotchShowNotifications = NotchShowNotifications,
+            NotchNotificationsHideBody = NotchNotificationsHideBody,
             MusicShowWaveform = MusicShowWaveform,
+            MusicCardStyle = MusicCardStyle,
             MusicLyricsEnabled = MusicLyricsEnabled,
             IdleDisplayMode = IdleDisplayMode,
+            NotchStyle = NotchStyle,
             NotchOpenBehavior = NotchOpenBehavior,
             Theme = Theme,
             AccentColor = AccentColor,
             UseWindowsAccent = UseWindowsAccent,
             Material = Material,
+            MaterialReadabilityGuard = MaterialReadabilityGuard,
+            NotchFollowsMaterial = NotchFollowsMaterial,
             CornerRadius = CornerRadius,
             AnimationSpeed = AnimationSpeed,
             RespectReduceMotion = RespectReduceMotion,

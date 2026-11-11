@@ -11,12 +11,18 @@
         Width="880"
         Height="600"
         WindowStartupLocation="CenterScreen"
-        WindowStyle="None"
-        AllowsTransparency="True"
+        WindowStyle="SingleBorderWindow"
+        AllowsTransparency="False"
         Background="Transparent"
         ResizeMode="NoResize"
         FontFamily="{DynamicResource KoyFont}"
         Foreground="{DynamicResource KoyTextPrimary}">
+
+    <!-- Katmansız pencere, çerçeve istemci alanına uzatılır; bulanıklık, gölge ve köşeler DWM'den (WindowFrame). -->
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" GlassFrameThickness="-1" ResizeBorderThickness="0"
+                      CornerRadius="0" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -76,11 +82,8 @@
         </Style>
     </Window.Resources>
 
-    <!-- Ana Pencere Gövdesi -->
-    <Border Background="{DynamicResource KoyBgWindow}"
-            BorderBrush="{DynamicResource KoyBorderHairline}"
-            BorderThickness="1"
-            CornerRadius="{DynamicResource KoyRadiusWindow}">
+    <!-- Ana pencere gövdesi: köşe ve kenarlık DWM'den (WindowFrame). -->
+    <Border Background="{DynamicResource KoyBgWindow}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="36" /> <!-- Başlık çubuğu / sürükleme alanı -->

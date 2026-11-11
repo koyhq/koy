@@ -10,6 +10,7 @@ public class NotchBehaviorSettingsTests
     [InlineData(0, true, true)]
     [InlineData(1, true, false)]
     [InlineData(2, false, false)]
+    [InlineData(3, true, true)] // halka pil ve gün/saat
     [InlineData(99, true, true)] // bilinmeyen değer varsayılana düşer
     public void IdleDisplay_maps_mode_to_clock_and_battery(int mode, bool clock, bool battery)
     {
@@ -21,6 +22,7 @@ public class NotchBehaviorSettingsTests
     [InlineData(0, true)]
     [InlineData(1, false)]
     [InlineData(2, false)]
+    [InlineData(3, true)] // halka modunda Peek'te
     [InlineData(99, true)] // bilinmeyen değer varsayılana düşer
     public void IdleDisplay_shows_radio_icons_only_in_clock_and_battery_mode(int mode, bool radio)
     {

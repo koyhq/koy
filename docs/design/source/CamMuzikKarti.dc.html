@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Cam müzik kartı (bileşen)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 8px; width: 268px;">
+  <div style="width: 268px; height: 236px; border-radius: 20px; background: {{bg}}; border: 1px solid {{border}}; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <span style="width: 64px; height: 64px; border-radius: 14px; background: {{cover}}; flex-shrink: 0;"></span>
+      <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex-grow: 1;">
+        <span style="font-size: 16px; font-weight: 600; color: var(--text-1);">Gece Yolculuğu</span>
+        <span style="font-size: 13px; color: {{sub}};">Mor ve Ötesi</span>
+        <span style="font-size: 11px; color: {{sub}}; opacity: 0.75;">Spotify</span>
+      </div>
+      <span style="display: flex; align-items: flex-end; gap: 2px; height: 18px; flex-shrink: 0;" aria-hidden="true">
+        <sc-for list="{{bars}}" as="b"><span style="width: 3px; height: {{b}}px; border-radius: 1px; background: {{spectrum}};"></span></sc-for>
+      </span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px; font-size: 10px; color: {{sub}};">1:25<span style="flex-grow: 1; height: 4px; border-radius: 2px; background: var(--track);"><span style="display: block; width: 38%; height: 4px; border-radius: 2px; background: var(--text-1);"></span></span>3:41</div>
+    <div style="display: flex; justify-content: center; align-items: center; gap: 28px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#F4F4F5" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14L9 12z"></path></svg>
+      <span style="width: 44px; height: 44px; border-radius: 22px; background: var(--btn-bg); display: flex; align-items: center; justify-content: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0A0A0B" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"></path></svg></span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#F4F4F5" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5v14l11-7z"></path></svg>
+    </div>
+  </div>
+  <sc-if value="{{caption}}">
+    <div style="display: flex; flex-direction: column; gap: 2px;">
+      <span style="font-size: 12.5px; font-weight: 600; color: #F4F4F5;">{{title}}</span>
+      <span style="font-size: 11px; color: #A1A1AA; line-height: 1.4;">{{note}}</span>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":268,"height":300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    // Kapak örnekleri: h = baskın ton (derece), s = ortalama doygunluk (0-1). Gri kapakta palet çıkmaz (null).
+    const covers = {
+      mor: { grad: 'linear-gradient(135deg, #C026D3, #6366F1 60%, #0EA5E9)', h: 262, s: 0.72 },
+      turuncu: { grad: 'linear-gradient(135deg, #FB923C, #EF4444 55%, #7C2D12)', h: 18, s: 0.85 },
+      yesil: { grad: 'linear-gradient(135deg, #4ADE80, #0D9488 60%, #14532D)', h: 150, s: 0.60 },
+      gri: { grad: 'linear-gradient(135deg, #F4F4F5, #71717A 55%, #18181B)', h: 0, s: 0.02 }
+    };
+    const cv = covers[p.cover] || covers.mor;
+    const alpha = p.alpha === undefined || p.alpha === '' ? 1 : Number(p.alpha);
+
+    const hslToRgb = (h, s, l) => {
+      const k = (n) => (n + h / 30) % 12;
+      const a = s * Math.min(l, 1 - l);
+      const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+      return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+    };
+    const hex = (c) => '#' + c.map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+    const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    const lum = (c) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+    const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+
+    // CoverPaletteExtractor kuralları: Card S 0.35-0.55, L 0.14; SubText S 0.60, L 0.80; Spectrum = SubText (alfa 0.75).
+    const mono = cv.s < 0.20;
+    let pal = null;
+    if (!mono) {
+      const cs = Math.max(0.35, Math.min(0.55, cv.s));
+      let l = 0.14;
+      let card = hslToRgb(cv.h, cs, l);
+      while (ratio(card, [244, 244, 245]) < 7 && l > 0.04) { l -= 0.01; card = hslToRgb(cv.h, cs, l); }
+      const sub = hslToRgb(cv.h, 0.60, 0.80);
+      pal = { card, sub };
+    }
+
+    let v = p.variant || 'duz';
+    if (!pal && v !== 'duz') v = 'duz';   // gri kapak: varsayılan nötr tema
+    let bg, border, sub, spectrum, title, note;
+    const veil = 'linear-gradient(180deg, rgba(10,10,11,0.55), rgba(10,10,11,0.85))';
+    if (v === 'ton') {
+      const c = pal.card;
+      bg = 'rgba(' + c.join(',') + ',' + alpha + ')';
+      border = 'var(--line)';
+      sub = hex(pal.sub);
+      spectrum = 'rgba(' + pal.sub.join(',') + ',0.75)';
+      title = 'Albüm rengi';
+      note = 'Card ' + hex(c) + ' · SubText ' + hex(pal.sub) + ' · Spectrum SubText @0.75 · kart zemini malzeme opaklığında (' + alpha + ').';
+    } else if (v === 'kapak') {
+      const c = pal.card;
+      bg = veil + ', linear-gradient(rgba(' + c.join(',') + ',0.30), rgba(' + c.join(',') + ',0.30)), ' + cv.grad;
+      border = 'var(--line)';
+      sub = hex(pal.sub);
+      spectrum = 'rgba(' + pal.sub.join(',') + ',0.75)';
+      title = 'Kapak resmi arka plan';
+      note = '32 px kapak UniformToFill ile büyütülür, bulanıklık yok. Perde #0A0A0B 0,55 → 0,85 + Card tonu 0,30. Metin okunurluğu perdeden gelir.';
+    } else {
+      bg = 'var(--card)';
+      border = 'var(--line)';
+      sub = 'var(--text-2)';
+      spectrum = 'rgba(244,244,245,0.60)';
+      title = (!pal && p.variant && p.variant !== 'duz') ? 'Gri kapak: düz nötre döner' : 'Düz nötr';
+      note = pal ? 'Cam yüzeyin kendi kart tonu. Albüm rengi yok.' : 'Gri / tek renkli kapak: palet çıkmaz, seçilen stil ne olursa olsun varsayılan nötr tema.';
+    }
+    return {
+      bg, border, sub, spectrum, title, note,
+      cover: cv.grad,
+      bars: [8, 14, 10, 16, 6],
+      caption: !!p.caption
+    };
+  }
+}
+</script>
+</body>
+</html>

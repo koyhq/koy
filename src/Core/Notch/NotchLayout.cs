@@ -24,6 +24,13 @@ public static class NotchLayout
     /// sekme çubuğu 44 + alt boşluk 12. Gövde sabit olduğu için sekme değişince çentik boyut değiştirmez.
     /// </summary>
     public const double ExpandedHeight = 352;
+
+    /// <summary>Çentik kartının genişliği (güncelleme, bildirim). HUD'dan (260×40) ayrıdır; tuvalin içinde kalır.</summary>
+    public const double CardWidth = 380;
+
+    /// <summary>Çentik kartının yüksekliği.</summary>
+    public const double CardHeight = 72;
+
     /// <summary>Boşta yerleşimi (saat, pil, durum simgeleri ya da müzik çalıyorsa kapak) çizilsin mi.</summary>
     public static bool ShowCollapsedLayout(NotchState state, bool hasTrack) =>
         state == NotchState.Collapsed || (state == NotchState.Peek && !hasTrack);

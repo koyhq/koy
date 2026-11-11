@@ -45,9 +45,6 @@ public partial class KoyWindow : Window
     /// <summary>Sayfa değişince yeni sayfa kısa bir solmayla girer; hareket kapalıysa anında geçer.</summary>
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(KoyWindowViewModel.Material))
-            ApplyBackdrop();
-
         if (e.PropertyName == nameof(KoyWindowViewModel.IsUninstallConfirming) && ViewModel.IsUninstallConfirming && IsVisible)
         {
             // Kart solarak girer; odak güvenli seçeneğe (İptal) verilir.
@@ -108,19 +105,8 @@ public partial class KoyWindow : Window
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
-        ApplyBackdrop();
-    }
-
-    /// <summary>
-    /// Yarı saydamda DWM acrylic istenir. AllowsTransparency penceresinde sistem bunu yok sayabilir;
-    /// o durumda etki, ThemeManager'ın %88 opak yüzeyleriyle sınırlı kalır (hata vermez).
-    /// </summary>
-    private void ApplyBackdrop()
-    {
-        var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-        var translucent = Koy.Core.Appearance.MaterialSetting.IsTranslucent(ViewModel.Material);
-        Koy.Platform.Shell.BackdropService.ApplyBackdrop(
-            hwnd, translucent ? Koy.Platform.Shell.WindowBackdropType.Acrylic : Koy.Platform.Shell.WindowBackdropType.None);
+        // Gerçek bulanıklık, koyu çerçeve ve köşeler DWM'den; tema / malzeme / köşe değişince kendiliğinden yenilenir.
+        WindowFrame.Attach(this);
     }
 
     private void KeepSettingsLabel_Click(object sender, MouseButtonEventArgs e)

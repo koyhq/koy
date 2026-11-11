@@ -24,7 +24,7 @@
     </UserControl.Resources>
 
     <!-- Windows tarzı tam genişlik: yükseklik DockPositionResolver.FullWidthHeightDip (48), ekran kenarına sıfır boşluk,
-         köşe yuvarlaması yok, üstte ince parıltı çizgisi. Yüzey Material ayarına uyar (yarı saydam ya da opak; DockViewModel.FullWidthSurface). -->
+         köşe yuvarlaması yok, üstte ince parıltı çizgisi. Yüzey malzeme ayarına uyar (Katı / Buzlu / Cam; DockViewModel.FullWidthSurface). -->
     <Border Background="{Binding FullWidthSurface}"
             BorderBrush="#26FFFFFF"
             BorderThickness="0,1,0,0"

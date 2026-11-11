@@ -120,6 +120,28 @@ public class VisibilityControllerTests
     }
 
     [Fact]
+    public void Hold_KeepsNotchVisibleAfterPeekTimeoutUntilReleased()
+    {
+        using var controller = new VisibilityController(VisibilityMode.Peek);
+        controller.OnMediaActivity();
+        controller.SetHold(true);
+        controller.OnMediaPeekTimeout();
+        Assert.True(controller.IsVisible);
+
+        controller.SetHold(false);
+        Assert.False(controller.IsVisible);
+    }
+
+    [Fact]
+    public void Hold_DoesNotOverrideFullscreenHide()
+    {
+        using var controller = new VisibilityController(VisibilityMode.Smart);
+        controller.SetHold(true);
+        controller.SetFullscreen(true);
+        Assert.False(controller.IsVisible);
+    }
+
+    [Fact]
     public void PeekMode_MediaActivity_PeeksAndTimesOut()
     {
         using var controller = new VisibilityController(VisibilityMode.Peek);

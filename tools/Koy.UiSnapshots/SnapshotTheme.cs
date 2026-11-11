@@ -16,6 +16,6 @@ internal static class SnapshotTheme
 
     public static void Apply(Application app, string theme)
     {
-        ThemeManager.Apply(app, new AppSettings { Theme = theme == "light" ? "Light" : "Dark" }, systemUsesLightOverride: false);
+        ThemeManager.Apply(app, new AppSettings { Theme = theme == "light" ? "Light" : "Dark", Material = Program.Material }, systemUsesLightOverride: false);
     }
 }

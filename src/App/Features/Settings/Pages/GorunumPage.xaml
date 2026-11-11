@@ -136,10 +136,43 @@
                                      Content="{Binding [MaterialSolid], Source={x:Static res:Loc.Instance}}"
                                      IsChecked="{Binding Material, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Katı}" />
                         <RadioButton GroupName="Material" Style="{StaticResource SegRadioStyle}"
-                                     Content="{Binding [MaterialTranslucent], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding Material, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter='Yarı saydam'}" />
+                                     Content="{Binding [MaterialFrosted], Source={x:Static res:Loc.Instance}}"
+                                     IsChecked="{Binding Material, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Buzlu}" />
+                        <RadioButton GroupName="Material" Style="{StaticResource SegRadioStyle}"
+                                     Content="{Binding [MaterialGlass], Source={x:Static res:Loc.Instance}}"
+                                     IsChecked="{Binding Material, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Cam}" />
                     </StackPanel>
                 </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [NotchFollowsMaterialTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [NotchFollowsMaterialDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [NotchFollowsMaterialTitle], Source={x:Static res:Loc.Instance}}"
+                          IsChecked="{Binding NotchFollowsMaterial}" Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [ReadabilityGuardTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ReadabilityGuardDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [ReadabilityGuardTitle], Source={x:Static res:Loc.Instance}}"
+                          IsChecked="{Binding MaterialReadabilityGuard}" Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
 
