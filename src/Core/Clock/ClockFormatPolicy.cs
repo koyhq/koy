@@ -40,10 +40,21 @@ public static class ClockFormatPolicy
 
     /// <summary>
     /// Hafta numarası. Kural: yılın ilk haftası, yılın en az dört gününü içeren ilk hafta (ISO 8601 ile aynı mantık;
-    /// haftanın ilk günü seçime göre). Takvimde gösterilir.
+    /// haftanın ilk günü seçime göre). Yıl sonundaki günler sonraki yılın 1. haftasına düşebilir (Pazartesi
+    /// başlangıçta 31.12.2007 → 1). Takvimde gösterilir.
     /// </summary>
-    public static int WeekOfYear(DateTime date, DayOfWeek firstDay) =>
-        CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstFourDayWeek, firstDay);
+    // Calendar.GetWeekOfYear(FirstFourDayWeek) yıl sonunu sonraki yıla taşımaz (31.12.2007 → 53), bu yüzden elle:
+    // bir hafta, dördüncü gününün düştüğü yıla aittir; o yılın 1. haftası 4 Ocak'ı içeren haftadır.
+    public static int WeekOfYear(DateTime date, DayOfWeek firstDay)
+    {
+        var weekStart = StartOfWeek(date.Date, firstDay);
+        var year = weekStart.AddDays(3).Year;
+        var firstWeekStart = StartOfWeek(new DateTime(year, 1, 4), firstDay);
+        return (weekStart - firstWeekStart).Days / 7 + 1;
+    }
+
+    private static DateTime StartOfWeek(DateTime date, DayOfWeek firstDay) =>
+        date.AddDays(-(((int)date.DayOfWeek - (int)firstDay + 7) % 7));
 
     /// <summary>
     /// Özel tarih biçimi geçerli mi: boş olmayan, en fazla <see cref="MaxCustomDateFormatLength"/> karakter, denetim
