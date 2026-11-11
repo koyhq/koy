@@ -7,6 +7,7 @@ using Koy.Core.Notch;
 using Koy.App.Resources;
 using Koy.Core.Appearance;
 using Koy.Core.Dock;
+using Koy.Core.Media;
 using Koy.Core.Settings;
 using Koy.Core.Uninstall;
 using Koy.Core.Updates;
@@ -102,6 +103,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _musicLyricsEnabled;
+
+    [ObservableProperty]
+    private string _musicCardStyle = MusicCardStyleSetting.Tinted;
 
     [ObservableProperty]
     private bool _showVolumeOsd = true;
@@ -506,6 +510,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             NotchShowNotifications = s.NotchShowNotifications;
             NotchNotificationsHideBody = s.NotchNotificationsHideBody;
             MusicShowWaveform = s.MusicShowWaveform;
+            MusicCardStyle = MusicCardStyleSetting.Normalize(s.MusicCardStyle);
             MusicLyricsEnabled = s.MusicLyricsEnabled;
             IdleDisplayMode = s.IdleDisplayMode;
             NotchStyle = Koy.Core.Notch.NotchStyle.Normalize(s.NotchStyle);
@@ -694,7 +699,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
              or nameof(AnimationSpeed) or nameof(RespectReduceMotion));
 
     private static bool AffectsNotch(string? name) =>
-        name is nameof(NotchVisibility) or nameof(NotchHideInFullscreen) or nameof(MusicShowWaveform) or nameof(MusicLyricsEnabled)
+        name is nameof(NotchVisibility) or nameof(NotchHideInFullscreen) or nameof(MusicShowWaveform) or nameof(MusicCardStyle) or nameof(MusicLyricsEnabled)
             or nameof(ShowVolumeOsd) or nameof(ShowBrightnessOsd) or nameof(ShowPrivacyIndicator) or nameof(NotchShowNotifications) or nameof(NotchNotificationsHideBody) or nameof(IdleDisplayMode) or nameof(NotchStyle)
             or nameof(Material) or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
             or nameof(NotchOpenBehavior) or nameof(WheelAction) or nameof(BatterySaverReduceMotion)
@@ -783,6 +788,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             NotchShowNotifications = NotchShowNotifications,
             NotchNotificationsHideBody = NotchNotificationsHideBody,
             MusicShowWaveform = MusicShowWaveform,
+            MusicCardStyle = MusicCardStyle,
             MusicLyricsEnabled = MusicLyricsEnabled,
             IdleDisplayMode = IdleDisplayMode,
             NotchStyle = NotchStyle,

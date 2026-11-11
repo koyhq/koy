@@ -611,4 +611,9 @@ Karar (2026-11-11): paketsiz süreçte `NotificationChanged` aboneliği 0x800704
 
 ## Müzik kartı: albüm rengi (#66)
 - [x] **P6-Core (`Core/Media/CoverPaletteExtractor`, `Core/Appearance/ColorMath` HSL, testli):** küçük BGRA kapaktan tek geçişte 24 ton kovalı baskın ton; gri/monokrom kapakta (aday piksel < %10) null. Çıktı `CoverPalette(Card, SubText, Spectrum)`; Card beyaz başlıkla en az 7:1 kontrastlı.
-- [ ] **P6-App:** kart bağlama ve kapak arka planı (P4A onayı sonrası).
+- [x] **P6-App, ayar:** `MusicCardStyle` (`Neutral` Düz, `Tinted` Albüm rengi varsayılan, `Artwork` Albüm kapağı); Core'da `MusicCardStyleSetting.Normalize` + testler; Ayarlar › Çentik'te üç seçenek (TR/EN).
+- [x] **P6-App, palet:** `MusicViewModel` parça değişince bir kez, arka planda 32 px ikinci çözüm + `CoverPaletteExtractor`; `CardBrush/SubTextBrush/SpectrumBrush` (Spectrum alfa 0,75) dondurulmuş; aynı kapak için `CoverFingerprint` ile yeniden hesaplanmaz; gri/kapaksız parçada Tokens fırçaları.
+- [x] **P6-App, kapak arka planı:** `Artwork` modunda 32 px bitmap `UniformToFill` + `Linear`, üstünde Card tonu (0,30) ve `#0A0A0B` 0,55 → 0,85 perde; `BlurEffect` yok; küçük ve büyütülmüş kart aynı katmanı kullanır (`HomePanel.xaml`).
+- [ ] **P6-App, elle sınama:** Spotify'da renkli, koyu ve siyah-beyaz kapaklar; YouTube'da kapaksız video; parça değişince geçiş; üç mod ve büyütülmüş kart; açık tema; Ayarlar'dan stil değişince çentik yeniden kurulur.
+- [ ] **P6-App, bellek:** şarkı çalarken önce/sonra ölçüm (`measure-memory.ps1`), `docs/MEMORY.md`.
+- [ ] **P6-App, cam uyumu:** P4B birleşince kart zemini `MaterialSetting.SurfaceOpacity` ile (bu pakette yapılmadı).

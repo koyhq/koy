@@ -537,6 +537,21 @@
   <data name="MusicWaveformTitle" xml:space="preserve">
     <value>Show album art and waveform when playing</value>
   </data>
+  <data name="MusicCardStyleTitle" xml:space="preserve">
+    <value>Music card style</value>
+  </data>
+  <data name="MusicCardStyleDesc" xml:space="preserve">
+    <value>Plain keeps the fixed card. Album color tints it from the cover. Album art uses the cover as a dimmed backdrop. Grey covers always use the plain card.</value>
+  </data>
+  <data name="MusicCardStyleNeutral" xml:space="preserve">
+    <value>Plain</value>
+  </data>
+  <data name="MusicCardStyleTinted" xml:space="preserve">
+    <value>Album color</value>
+  </data>
+  <data name="MusicCardStyleArtwork" xml:space="preserve">
+    <value>Album art</value>
+  </data>
   <data name="IndicatorsHeader" xml:space="preserve">
     <value>Indicators</value>
   </data>

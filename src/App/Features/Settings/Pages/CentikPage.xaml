@@ -149,6 +149,32 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [MusicCardStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [MusicCardStyleDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [MusicCardStyleNeutral], Source={x:Static res:Loc.Instance}}" GroupName="MusicCardStyle"
+                                     IsChecked="{Binding MusicCardStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Neutral}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [MusicCardStyleTinted], Source={x:Static res:Loc.Instance}}" GroupName="MusicCardStyle"
+                                     IsChecked="{Binding MusicCardStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Tinted}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [MusicCardStyleArtwork], Source={x:Static res:Loc.Instance}}" GroupName="MusicCardStyle"
+                                     IsChecked="{Binding MusicCardStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Artwork}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [LyricsSettingTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding [LyricsSettingDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>

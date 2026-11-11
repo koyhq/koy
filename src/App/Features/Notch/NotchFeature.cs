@@ -240,7 +240,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
 
         // Müzik kartı çubukları: ses yakalama yalnız kart görünür ve müzik çalarken (MusicViewModel.UpdateSpectrum).
         var musicVm = new MusicViewModel(_mediaService!, spectrumAcquire: () => services.AcquireSpectrumService(), spectrumRelease: services.ReleaseSpectrumService,
-            lyricsProvider: _lyricsProvider);
+            lyricsProvider: _lyricsProvider, cardStyle: settings.MusicCardStyle);
         musicVm.Lyrics.EnabledToggled += SaveLyricsEnabled;
         // Parlaklık, çentiğin o anki ekranına bağlanır; ekran düzeni değişince state.Monitor güncellenir.
         NotchWindowState? stateRef = null;

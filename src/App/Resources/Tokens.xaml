@@ -96,6 +96,7 @@
     <SolidColorBrush x:Key="KoyNotchMusicCard" Color="#0E2A18" />
     <SolidColorBrush x:Key="KoyNotchMusicCover" Color="#22C55E" />
     <SolidColorBrush x:Key="KoyNotchMusicSub" Color="#BBF7D0" />
+    <SolidColorBrush x:Key="KoyNotchMusicSpectrum" Color="#BFBBF7D0" />
     <SolidColorBrush x:Key="KoyNotchWeatherCard" Color="#121A2B" />
     <SolidColorBrush x:Key="KoyNotchWeatherSoft" Color="#BFDBFE" />
     <SolidColorBrush x:Key="KoyNotchWeatherIconBg" Color="#223B82F6" />

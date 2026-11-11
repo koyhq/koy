@@ -83,14 +83,122 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private bool _showSpectrum;
 
+    // Albüm rengi: stil Düz değilse ve kapak renkliyse parça değişince bir kez, arka planda hesaplanır.
+    private string _cardStyle = MusicCardStyleSetting.Tinted;
+    private CoverFingerprint? _coverKey;
+    private int _paletteGeneration;
+
+    /// <summary>Kart kapaktan boyanıyor (stil Düz değil ve kapak renkli). Değilse XAML Tokens fırçalarında kalır.</summary>
+    [ObservableProperty]
+    private bool _hasTint;
+
+    /// <summary>Kartın zemini küçültülmüş kapak (Albüm kapağı stili, renkli kapak).</summary>
+    [ObservableProperty]
+    private bool _hasBackdrop;
+
+    [ObservableProperty]
+    private Brush? _cardBrush;
+
+    [ObservableProperty]
+    private Brush? _subTextBrush;
+
+    [ObservableProperty]
+    private Brush? _spectrumBrush;
+
+    /// <summary>Kapak arka planının altındaki hafif ton (Card, alfa 0,30).</summary>
+    [ObservableProperty]
+    private Brush? _tintOverlayBrush;
+
+    /// <summary>32 px kapak; kart büyütür (UniformToFill, Linear). Dondurulmuş.</summary>
+    [ObservableProperty]
+    private Brush? _backdropBrush;
+
+    /// <summary>Müzik kartı stili ("Neutral", "Tinted", "Artwork"); çentik kurulurken ayardan verilir.</summary>
+    public void SetCardStyle(string? style)
+    {
+        var normalized = MusicCardStyleSetting.Normalize(style);
+        if (normalized == _cardStyle)
+            return;
+
+        _cardStyle = normalized;
+        _coverKey = null;
+        UpdateCoverPalette(_mediaService.Current?.Thumbnail);
+    }
+
+    private void UpdateCoverPalette(byte[]? bytes)
+    {
+        if (_cardStyle == MusicCardStyleSetting.Neutral || bytes is null || bytes.Length == 0)
+        {
+            _paletteGeneration++;
+            _coverKey = null;
+            ApplyPalette(null, null);
+            return;
+        }
+
+        var key = CoverFingerprint.Of(bytes);
+        if (key == _coverKey)
+            return; // aynı kapak: yeniden hesaplanmaz
+
+        _coverKey = key;
+        var generation = ++_paletteGeneration;
+        var wantBackdrop = _cardStyle == MusicCardStyleSetting.Artwork;
+        // 32 px çözüm ve palet arka planda; sonuç arayüz iş parçacığında uygulanır (parça artık değiştiyse atılır).
+        Task.Run(() => CoverSampler.Sample(bytes, wantBackdrop)).ContinueWith(t =>
+        {
+            if (t.IsCompletedSuccessfully)
+                _dispatcher.InvokeAsync(() =>
+                {
+                    if (!_disposed && generation == _paletteGeneration)
+                        ApplyPalette(t.Result.Palette, t.Result.Small);
+                });
+        }, TaskScheduler.Default);
+    }
+
+    private void ApplyPalette(CoverPalette? palette, BitmapSource? small)
+    {
+        if (palette is null)
+        {
+            HasTint = false;
+            HasBackdrop = false;
+            CardBrush = SubTextBrush = SpectrumBrush = TintOverlayBrush = BackdropBrush = null;
+            return;
+        }
+
+        CardBrush = Solid(palette.Card, 255);
+        SubTextBrush = Solid(palette.SubText, 255);
+        SpectrumBrush = Solid(palette.Spectrum, 0xBF); // alfa 0,75
+        if (small is not null)
+        {
+            TintOverlayBrush = Solid(palette.Card, 0x4D); // alfa 0,30
+            var image = new ImageBrush(small) { Stretch = Stretch.UniformToFill };
+            image.Freeze();
+            BackdropBrush = image;
+        }
+        else
+        {
+            TintOverlayBrush = BackdropBrush = null;
+        }
+
+        HasBackdrop = small is not null;
+        HasTint = true;
+    }
+
+    private static SolidColorBrush Solid(Koy.Core.Appearance.Rgb c, byte alpha)
+    {
+        var brush = new SolidColorBrush(Color.FromArgb(alpha, c.R, c.G, c.B));
+        brush.Freeze();
+        return brush;
+    }
+
     /// <summary>Müzik kartındaki eşzamanlı sözler.</summary>
     public LyricsViewModel Lyrics { get; }
 
     public MusicViewModel(IMediaService mediaService, Dispatcher? dispatcher = null,
         Func<SpectrumCaptureService>? spectrumAcquire = null, Action? spectrumRelease = null,
-        ILyricsProvider? lyricsProvider = null)
+        ILyricsProvider? lyricsProvider = null, string? cardStyle = null)
     {
         _mediaService = mediaService;
+        _cardStyle = MusicCardStyleSetting.Normalize(cardStyle);
         _dispatcher = dispatcher ?? System.Windows.Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
         _spectrumAcquire = spectrumAcquire;
         _spectrumRelease = spectrumRelease;
@@ -241,6 +349,7 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
             SourceAppId = string.Empty;
             IsPlaying = false;
             Thumbnail = null;
+            UpdateCoverPalette(null);
             UpdateProgressTimer();
             OnPropertyChanged(nameof(ShowCollapsedMedia));
             return;
@@ -252,6 +361,7 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
         SourceAppId = MediaAppName.FromSourceAppId(info.SourceAppId);
         IsPlaying = info.IsPlaying;
         Thumbnail = DecodeThumbnail(info.Thumbnail);
+        UpdateCoverPalette(info.Thumbnail);
 
         UpdateProgressTimer();
         OnPropertyChanged(nameof(ShowCollapsedMedia));
@@ -347,6 +457,7 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
             return;
 
         _disposed = true;
+        _paletteGeneration++;
         Lyrics.PropertyChanged -= OnLyricsPropertyChanged;
         Lyrics.Dispose();
         UpdateSpectrum();

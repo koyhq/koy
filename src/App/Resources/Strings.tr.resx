@@ -537,6 +537,21 @@
   <data name="MusicWaveformTitle" xml:space="preserve">
     <value>Müzik çalarken kapak ve dalga</value>
   </data>
+  <data name="MusicCardStyleTitle" xml:space="preserve">
+    <value>Müzik kartı stili</value>
+  </data>
+  <data name="MusicCardStyleDesc" xml:space="preserve">
+    <value>Düz, sabit kartı korur. Albüm rengi kartı kapaktan boyar. Albüm kapağı, kapağı koyulaştırılmış arka plan yapar. Gri kapakta her zaman düz kart kullanılır.</value>
+  </data>
+  <data name="MusicCardStyleNeutral" xml:space="preserve">
+    <value>Düz</value>
+  </data>
+  <data name="MusicCardStyleTinted" xml:space="preserve">
+    <value>Albüm rengi</value>
+  </data>
+  <data name="MusicCardStyleArtwork" xml:space="preserve">
+    <value>Albüm kapağı</value>
+  </data>
   <data name="IndicatorsHeader" xml:space="preserve">
     <value>Göstergeler</value>
   </data>

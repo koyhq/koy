@@ -430,6 +430,19 @@ public static class Program
         ShotNotch(set, name("ana-muzik-buyuk"), expanded: true);
         set.Vm.Dispose();
 
+        // Müzik kartı stilleri (#66): Albüm kapağı (küçük ve büyük kart) ve Düz.
+        foreach (var style in new[] { "Artwork", "Neutral" })
+        {
+            set = MakeNotch(music: true);
+            set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+            set.Vm.Music.SetCardStyle(style);
+            Flush();
+            ShotNotch(set, name("ana-muzik-" + style.ToLowerInvariant()), expanded: true);
+            set.Vm.Home.ToggleMusicExpandedCommand.Execute(null);
+            ShotNotch(set, name("ana-muzik-" + style.ToLowerInvariant() + "-buyuk"), expanded: true);
+            set.Vm.Dispose();
+        }
+
         // Video kapağı (Chrome/YouTube Windows'a ~150×83 verir): kırpılmadan tamamı, arkada bulanık hâli.
         set = MakeNotch(music: true, wideCover: true);
         set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
