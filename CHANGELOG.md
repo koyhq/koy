@@ -7,6 +7,49 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.6](https://github.com/koyhq/koy/compare/v0.2.5...v0.2.6) (2026-11-11)
+Highlights:
+- **Glass:** Appearance › Material is now Solid, Frosted or Glass. The Koy window, the tray menu and the setup wizard use the Windows acrylic blur; the open notch and the dock become slightly see-through. On a bright wallpaper Koy steps the level up on its own so text stays readable.
+- **Notifications on the notch:** Windows notifications show briefly as cards on the notch (for example a coding agent saying it is done). You can hide the message text, and nothing shows during Focus or presentations.
+- **Update card:** when a new version is out, the notch shows it once with an Update button.
+- **Floating island and ring battery:** the notch can float just below the top edge as a capsule, and a new idle display shows the battery as a ring with the day and time.
+- **Album colors:** the music card takes its color from the album cover, or uses the cover itself as the background. Plain cards are now neutral grey.
+- **Dictation tab:** voice command settings have their own tab. Choose Claude's permission (read-only by default, Edits or Auto) and its model; the full reply opens in a card under the notch.
+- **Dock:** middle-click a window preview to close that window.
+
+
+
+### Added
+
+* **appearance:** add frosted and glass material levels ([e4aad69](https://github.com/koyhq/koy/commit/e4aad69f5e398d1d2383005a5945482a570dea87))
+* **appearance:** give the tray menu and setup wizard the system acrylic frame ([f1705f1](https://github.com/koyhq/koy/commit/f1705f19cbb6e22ce470123a4309ddfcf7630d27))
+* **appearance:** use the system acrylic backdrop for the Koy window ([75b3ac9](https://github.com/koyhq/koy/commit/75b3ac940ff538aeb43c5b3d37424c556b622f04))
+* **media:** add the music card style setting and a cover fingerprint ([857e99a](https://github.com/koyhq/koy/commit/857e99a1c01a6fc6d04a239d182e4ae3ad47bb5d))
+* **media:** extract an accent palette from album artwork ([fc2c492](https://github.com/koyhq/koy/commit/fc2c4921cf532f94e70ac24feb78dfb3d1763a9a))
+* **music:** follow the glass material on the music card ([333a801](https://github.com/koyhq/koy/commit/333a801a08bc3e87dbb9ad265e4dbd985b2ecfe0))
+* **music:** tint the music card and use the album artwork as its backdrop ([e7b9f6f](https://github.com/koyhq/koy/commit/e7b9f6faf0e04a0b0200c879b79068fa941a8ad2))
+* **music:** use neutral tones for the plain music card ([f0f44a1](https://github.com/koyhq/koy/commit/f0f44a1e8805652d1f2f03052166f2758e5344e8))
+* **notch:** add a floating island style ([f528d5a](https://github.com/koyhq/koy/commit/f528d5a7bdeba14c6afd06602afdcd28db78b02f))
+* **notch:** add a ring battery and day-time idle display ([70ab63e](https://github.com/koyhq/koy/commit/70ab63e0670855b3855bf655fe2ede19802da027))
+* **notch:** show an update card on the notch when a new release is available ([887b95a](https://github.com/koyhq/koy/commit/887b95ab1d4f01280ec0029ef57de8320092e4a7))
+* **notch:** show the Do Not Disturb state on its control tile ([611af88](https://github.com/koyhq/koy/commit/611af885f3933ef2cad9192941236063a8beada5))
+* **notch:** show Windows notifications as cards on the notch ([09f3217](https://github.com/koyhq/koy/commit/09f32178726af9206de60a810de04352699942df))
+* **notifications:** add notification diff, poller, queue and card presentation ([62d5455](https://github.com/koyhq/koy/commit/62d545545fabc72f2db76f187fdc8bd46777f854))
+* **notifications:** poll the Windows notification list without package identity ([08bbe41](https://github.com/koyhq/koy/commit/08bbe4188ed78752e662fc926d553dfc49a2b1e1))
+* **voice:** add Dictation tab with Claude permission mode, model choice and reply card ([dee5f8b](https://github.com/koyhq/koy/commit/dee5f8be3a1c9fda2b6c58778f85fa355e304d48))
+
+
+### Fixed
+
+* **dock:** close the window when its preview is middle-clicked ([66d4bc0](https://github.com/koyhq/koy/commit/66d4bc05146b50981cca15e1bccea8308f00f0b5))
+* **notch:** crop transparent margins so notification logos fill the icon circle ([b243c5d](https://github.com/koyhq/koy/commit/b243c5d6e12104d701de094d17e9f51617f74986))
+* **notch:** keep the notch visible while a card is shown ([2ca6ea1](https://github.com/koyhq/koy/commit/2ca6ea12909a830b4c8bc5c71a3a287270d2ad6e))
+* **notch:** show the right app icon on notification cards ([6c72ad6](https://github.com/koyhq/koy/commit/6c72ad61c1cd0e5e6b1831a8fd77e48fc64afaa9))
+* **notifications:** detect Do Not Disturb and focus sessions on Windows 11 ([123f4c0](https://github.com/koyhq/koy/commit/123f4c045de48894d03a690efdad5132ffd06b77))
+* **notifications:** drop the unreliable registry check for Do Not Disturb ([b0fdc4e](https://github.com/koyhq/koy/commit/b0fdc4ea8fbe229831fa791891aacde50dc8f083))
+* **notifications:** treat a replaced notification with the same id as new ([2cae303](https://github.com/koyhq/koy/commit/2cae303041fcc857b71bad474226a7e6349c4279))
+* **voice:** default to read-only permission, localize model list and invalid model error ([980eb09](https://github.com/koyhq/koy/commit/980eb098c113e163642b44b585cc4ab7fc9d6cde))
+
 ## [0.2.5](https://github.com/koyhq/koy/compare/v0.2.4...v0.2.5) (2026-11-09)
 Highlights:
 - **Voice command in Turkish and English:** Ctrl+Alt+V now opens a box in the notch and starts Windows voice typing (Win+H), which writes in your keyboard language, so Turkish works without installing a speech language. You can also type the command. Enter runs it, Esc cancels, and the first line of the reply shows in the notch; click it for the full reply.
