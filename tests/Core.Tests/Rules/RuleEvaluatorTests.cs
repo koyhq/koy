@@ -134,6 +134,65 @@ public class RuleEvaluatorTests
         Assert.Null(RuleEvaluator.Evaluate(rules, Context()));
     }
 
+    [Theory]
+    [InlineData(23, 59, true)]
+    [InlineData(22, 0, true)]
+    [InlineData(0, 0, false)]
+    public void WindowEndingAtMidnight_CoversUntilEndOfDay(int hour, int minute, bool expected)
+    {
+        var rules = new[] { Rule("aksam", new TimeWindowCondition(new TimeOnly(22, 0), new TimeOnly(0, 0))) };
+
+        var result = RuleEvaluator.Evaluate(rules, Context(time: new TimeOnly(hour, minute)));
+
+        Assert.Equal(expected ? "aksam" : null, result);
+    }
+
+    [Fact]
+    public void MidnightSpanningWindow_ExcludesEndInstant_IncludesSecondsBefore()
+    {
+        var rules = new[] { Rule("uyku", new TimeWindowCondition(new TimeOnly(22, 0), new TimeOnly(6, 0))) };
+
+        Assert.Equal("uyku", RuleEvaluator.Evaluate(rules, Context(time: new TimeOnly(5, 59, 59))));
+        Assert.Null(RuleEvaluator.Evaluate(rules, Context(time: new TimeOnly(6, 0, 0))));
+    }
+
+    [Fact]
+    public void EqualFromAndTo_NeverMatches_EvenWhenBuiltWithoutValidator()
+    {
+        var rules = new[] { Rule("belirsiz", new TimeWindowCondition(new TimeOnly(9, 0), new TimeOnly(9, 0))) };
+
+        Assert.Null(RuleEvaluator.Evaluate(rules, Context(time: new TimeOnly(9, 0))));
+        Assert.Null(RuleEvaluator.Evaluate(rules, Context(time: new TimeOnly(15, 0))));
+    }
+
+    [Fact]
+    public void UnknownConditionType_NeverMatches()
+    {
+        var rules = new[] { Rule("x", new UnknownCondition()) };
+
+        Assert.Null(RuleEvaluator.Evaluate(rules, Context()));
+    }
+
+    private sealed record UnknownCondition : RuleCondition;
+
+    [Fact]
+    public void ProcessWithPath_NeverMatches()
+    {
+        var rules = new[] { Rule("work", new ProcessCondition("code")) };
+
+        Assert.Null(RuleEvaluator.Evaluate(rules, Context(process: @"C:\apps\code.exe")));
+    }
+
+    [Fact]
+    public void ConflictingRules_ResolveByOrder_AndSwappingOrderSwapsWinner()
+    {
+        var a = Rule("a", new ProcessCondition("code"));
+        var b = Rule("b", new ProcessCondition("code"), new DisplayCountCondition(1));
+
+        Assert.Equal("a", RuleEvaluator.Evaluate([a, b], Context()));
+        Assert.Equal("b", RuleEvaluator.Evaluate([b, a], Context()));
+    }
+
     [Fact]
     public void Evaluation_IsDeterministic_ForSameInput()
     {

@@ -10,6 +10,8 @@ public sealed record RuleSetValidation(IReadOnlyList<AutoRule> Rules, int Droppe
 /// ya da bilinmeyen türdeyse kural tamamen atılır, kalan koşullarıyla tutulmaz. Geçerli koşullar
 /// kalsa da kural ancak tam hâliyle anlamlıdır. Koşulsuz kural her şeyle eşleşeceği için de kabul
 /// edilmez. Fazla kurallar (üst sınır) listenin sonundan atılır ve yine raporlanır.
+/// El ile düzenlenmiş dosyadan gelen null liste/öğe ve aşırı büyük girdi de kuralı atar, istisna fırlatmaz.
+/// Saat aralığı "HH:mm" olmalı; "24:00" yoktur, gün sonuna kadar olan aralık için bitiş "00:00" yazılır.
 /// </summary>
 public static class RuleSetValidator
 {
@@ -19,11 +21,21 @@ public static class RuleSetValidator
         var droppedRules = 0;
         var droppedConditions = 0;
 
-        foreach (var draft in drafts)
+        for (var i = 0; i < drafts.Count; i++)
         {
-            var name = draft.Name?.Trim();
-            var profileId = draft.ProfileId?.Trim();
-            if (string.IsNullOrEmpty(name) || name.Length > RuleLimits.MaxNameLength || string.IsNullOrEmpty(profileId))
+            // Üst sınıra ulaşıldıysa kalanların koşullarını ayrıştırmaya gerek yok.
+            if (rules.Count >= RuleLimits.MaxRules)
+            {
+                droppedRules += drafts.Count - i;
+                break;
+            }
+
+            var draft = drafts[i];
+            var name = draft?.Name?.Trim();
+            var profileId = draft?.ProfileId?.Trim();
+            if (string.IsNullOrEmpty(name) || name.Length > RuleLimits.MaxNameLength
+                || string.IsNullOrEmpty(profileId) || profileId.Length > RuleLimits.MaxProfileIdLength
+                || draft!.Conditions is null || draft.Conditions.Count > RuleLimits.MaxConditionsPerRule)
             {
                 droppedRules++;
                 continue;
@@ -33,7 +45,7 @@ public static class RuleSetValidator
             var hasInvalidCondition = false;
             foreach (var conditionDraft in draft.Conditions)
             {
-                var condition = ParseCondition(conditionDraft);
+                var condition = conditionDraft is null ? null : ParseCondition(conditionDraft);
                 if (condition is null)
                 {
                     droppedConditions++;
@@ -47,7 +59,7 @@ public static class RuleSetValidator
 
             // Bir koşul bile geçersizse kalanlarla kurmak yanlış tetiklemeye yol açar:
             // "süreç=oyun VE saat=25:00-06:00" yalnız "süreç=oyun" olursa gün boyu uygulanır.
-            if (hasInvalidCondition || conditions.Count == 0 || rules.Count >= RuleLimits.MaxRules)
+            if (hasInvalidCondition || conditions.Count == 0)
             {
                 droppedRules++;
                 continue;
@@ -70,7 +82,7 @@ public static class RuleSetValidator
             return null;
         if (name.EndsWith(".exe", StringComparison.Ordinal))
             name = name[..^4];
-        if (name.Length == 0 || name.IndexOfAny(['\\', '/', ':']) >= 0)
+        if (name.Length == 0 || name.Length > RuleLimits.MaxProcessNameLength || name.IndexOfAny(['\\', '/', ':']) >= 0)
             return null;
         return name;
     }
@@ -107,5 +119,5 @@ public static class RuleSetValidator
     }
 
     private static bool TryParseTime(string? raw, out TimeOnly time) =>
-        TimeOnly.TryParseExact(raw, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out time);
+        TimeOnly.TryParseExact(raw?.Trim(), "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out time);
 }
