@@ -607,13 +607,28 @@
     <value>Malzeme</value>
   </data>
   <data name="MaterialDesc" xml:space="preserve">
-    <value>Yarı saydam, pencere yüzeylerini %88 opak yapar ve arkasındaki masaüstünü hafifçe gösterir.</value>
+    <value>Buzlu %86, Cam %72 opaktır; bulanıklık yoktur. Koy penceresi, açık çentik, dock ve menüler aynı ayarı izler. Kapalı çentik hep opak kalır.</value>
+  </data>
+  <data name="MaterialFrosted" xml:space="preserve">
+    <value>Buzlu</value>
+  </data>
+  <data name="MaterialGlass" xml:space="preserve">
+    <value>Cam</value>
+  </data>
+  <data name="NotchFollowsMaterialTitle" xml:space="preserve">
+    <value>Açık çentik malzemeyi izlesin</value>
+  </data>
+  <data name="NotchFollowsMaterialDesc" xml:space="preserve">
+    <value>Kapatılırsa açık çentik hep opak kalır; pencere ve dock saydam olabilir.</value>
+  </data>
+  <data name="ReadabilityGuardTitle" xml:space="preserve">
+    <value>Okunabilirlik koruması</value>
+  </data>
+  <data name="ReadabilityGuardDesc" xml:space="preserve">
+    <value>Duvar kağıdı açık renkliyse ikincil metin 4,5:1 altına inmesin diye Cam kendiliğinden Buzlu’ya (gerekirse Katı’ya) çıkar. Duvar kağıdı bir kez, değişince yeniden ölçülür.</value>
   </data>
   <data name="MaterialSolid" xml:space="preserve">
     <value>Katı</value>
-  </data>
-  <data name="MaterialTranslucent" xml:space="preserve">
-    <value>Yarı saydam</value>
   </data>
   <data name="CornerRadiusTitle" xml:space="preserve">
     <value>Köşe yuvarlaklığı</value>

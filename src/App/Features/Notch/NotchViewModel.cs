@@ -333,6 +333,8 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
         UpdateClock();
         UpdateBatteryState();
+        UpdateGlassSurface();
+        MaterialState.Changed += OnMaterialChanged;
         UpdateTargetSize();
         UpdateActivePanels();
 
@@ -600,7 +602,46 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
                 State == NotchState.Expanded ? NotchSurface.Expanded : NotchSurface.Closed, TargetHeight, TargetCornerRadius);
         }
 
+        UpdateSurface();
         TargetSizeChanged?.Invoke(TargetWidth, TargetHeight);
+    }
+
+    // --- MALZEME (Katı / Buzlu / Cam) ---
+    // Kapalı çentik, Peek ve HUD fiziksel çentik yanılsaması için hep opak #0A0A0B; açık çentik ve kart etkin malzemenin
+    // opaklığında (onaylı kaynak CamDurumlar.dc.html). Geçiş durum değişimiyle anlık; boyut yayı aynı kalır, Storyboard yok.
+
+    private static readonly Brush OpaqueSurface = FrozenArgb(0xFF, 0x0A, 0x0A, 0x0B);
+    private Brush _glassSurface = OpaqueSurface;
+
+    /// <summary>Çentik şeklinin zemini.</summary>
+    [ObservableProperty]
+    private Brush _surfaceBrush = OpaqueSurface;
+
+    private static Brush FrozenArgb(byte a, byte r, byte g, byte b)
+    {
+        var brush = new SolidColorBrush(Color.FromArgb(a, r, g, b));
+        brush.Freeze();
+        return brush;
+    }
+
+    private void UpdateGlassSurface()
+    {
+        var level = MaterialState.ForNotch(Settings);
+        _glassSurface = level == Koy.Core.Appearance.MaterialSetting.Solid
+            ? OpaqueSurface
+            : FrozenArgb(Koy.Core.Appearance.MaterialSetting.SurfaceAlpha(level), 0x0A, 0x0A, 0x0B);
+    }
+
+    private void UpdateSurface()
+    {
+        var glassy = Osd.IsActive ? Osd.Type == OsdType.Card : State == NotchState.Expanded;
+        SurfaceBrush = glassy ? _glassSurface : OpaqueSurface;
+    }
+
+    private void OnMaterialChanged()
+    {
+        UpdateGlassSurface();
+        UpdateSurface();
     }
 
     // Dosya seçici açıkken fare çentikten ayrılır; çentik kapanıp seçiciyi yetim bırakmasın diye geçici olarak açık tutulur.
@@ -686,6 +727,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
             return;
 
         _disposed = true;
+        MaterialState.Changed -= OnMaterialChanged;
         StopClockTimer();
         _controller.StateChanged -= OnStateChanged;
         _controller.PanelChanged -= OnPanelChanged;

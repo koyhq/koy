@@ -112,8 +112,8 @@ public partial class KoyWindow : Window
     }
 
     /// <summary>
-    /// Yarı saydamda DWM acrylic istenir. AllowsTransparency penceresinde sistem bunu yok sayabilir;
-    /// o durumda etki, ThemeManager'ın %88 opak yüzeyleriyle sınırlı kalır (hata vermez).
+    /// Buzlu ve Cam'da DWM acrylic istenir. AllowsTransparency penceresinde sistem bunu yok sayar; etki ThemeManager'ın
+    /// %86 / %72 opak yüzeyleriyle sınırlı kalır (hata vermez, bulanıklık yok).
     /// </summary>
     private void ApplyBackdrop()
     {

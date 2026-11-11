@@ -607,13 +607,28 @@
     <value>Material</value>
   </data>
   <data name="MaterialDesc" xml:space="preserve">
-    <value>Translucent makes window surfaces 88% opaque so the desktop shows through slightly.</value>
+    <value>Frosted is 86% opaque, Glass 72%; there is no blur. The Koy window, the open notch, the dock and menus follow it. The closed notch always stays solid.</value>
+  </data>
+  <data name="MaterialFrosted" xml:space="preserve">
+    <value>Frosted</value>
+  </data>
+  <data name="MaterialGlass" xml:space="preserve">
+    <value>Glass</value>
+  </data>
+  <data name="NotchFollowsMaterialTitle" xml:space="preserve">
+    <value>Open notch follows the material</value>
+  </data>
+  <data name="NotchFollowsMaterialDesc" xml:space="preserve">
+    <value>When off, the open notch stays solid while the window and dock can be see-through.</value>
+  </data>
+  <data name="ReadabilityGuardTitle" xml:space="preserve">
+    <value>Readability guard</value>
+  </data>
+  <data name="ReadabilityGuardDesc" xml:space="preserve">
+    <value>On a light wallpaper, Glass moves up to Frosted (or Solid if needed) so secondary text keeps 4.5:1 contrast. The wallpaper is measured once, and again when it changes.</value>
   </data>
   <data name="MaterialSolid" xml:space="preserve">
     <value>Solid</value>
-  </data>
-  <data name="MaterialTranslucent" xml:space="preserve">
-    <value>Translucent</value>
   </data>
   <data name="CornerRadiusTitle" xml:space="preserve">
     <value>Corner radius</value>

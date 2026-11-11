@@ -238,11 +238,32 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     private double _itemSize = 38.0;
 
     /// <summary>
-    /// Tam genişlik çubuğun yüzeyi. Material "Yarı saydam" ise %88 opak (ThemeManager'ın pencere yüzeyleriyle aynı değer),
-    /// "Katı" ise opak. Dock penceresi katmanlı (AllowsTransparency) olduğundan DWM arka plan malzemesi (akrilik/mika)
-    /// uygulanamaz; bulanıklık yerine yarı saydam yüzey kullanılır.
+    /// Tam genişlik çubuğun yüzeyi: etkin malzemenin opaklığında (Katı opak, Buzlu %86, Cam %72; okunabilirlik
+    /// koruması dahil). Dock penceresi katmanlı (AllowsTransparency) olduğundan DWM akrilik uygulanamaz; bulanıklık yok.
     /// </summary>
-    public Brush FullWidthSurface { get; }
+    [ObservableProperty]
+    private Brush _fullWidthSurface = Brushes.Black;
+
+    /// <summary>Yüzen kapsülün yüzeyi: Katı'da bugünkü %90 (#E618181B), saydam seviyede o seviyenin opaklığı.</summary>
+    [ObservableProperty]
+    private Brush _capsuleSurface = Brushes.Black;
+
+    private readonly AppSettings _materialSettings;
+
+    private void UpdateMaterialSurfaces()
+    {
+        var level = MaterialState.ForDock(_materialSettings);
+        var full = new SolidColorBrush(Color.FromArgb(MaterialSetting.SurfaceAlpha(level), 0x12, 0x12, 0x16));
+        full.Freeze();
+        FullWidthSurface = full;
+
+        var capsuleAlpha = level == MaterialSetting.Solid ? (byte)0xE6 : MaterialSetting.SurfaceAlpha(level);
+        var capsule = new SolidColorBrush(Color.FromArgb(capsuleAlpha, 0x18, 0x18, 0x1B));
+        capsule.Freeze();
+        CapsuleSurface = capsule;
+    }
+
+    private void OnMaterialChanged() => UpdateMaterialSurfaces();
 
     /// <summary>Simgeler en küçük boyutta bile sığmıyor: şerit sınırında kırpılır (aksi halde yan bölümlere taşardı).</summary>
     [ObservableProperty]
@@ -341,12 +362,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _showFolders = settings.DockShowFolders;
         _showBadges = settings.DockShowBadges;
 
-        var surfaceAlpha = MaterialSetting.IsTranslucent(settings.Material)
-            ? (byte)Math.Round(255 * MaterialSetting.TranslucentSurfaceOpacity)
-            : (byte)255;
-        var surface = new SolidColorBrush(Color.FromArgb(surfaceAlpha, 0x12, 0x12, 0x16));
-        surface.Freeze();
-        FullWidthSurface = surface;
+        _materialSettings = settings;
+        UpdateMaterialSurfaces();
+        MaterialState.Changed += OnMaterialChanged;
 
         _translateSpring = new Spring(0) { Stiffness = 280, Damping = 25 };
         _opacitySpring = new Spring(1.0) { Stiffness = 200, Damping = 24 };
@@ -1462,6 +1480,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         if (_disposed) return;
         _disposed = true;
 
+        MaterialState.Changed -= OnMaterialChanged;
         _thumbnailHoverTimer.Stop();
         _previewCloseTimer.Stop();
         _dodgeHoverTimer.Stop();

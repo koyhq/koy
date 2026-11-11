@@ -148,3 +148,13 @@ Sürümler release-please ile otomatiktir, elle etiket atılmaz. Ayrıntı: `CON
 | Core | `src/Core/Display/WindowPlacementMath.cs` | `TopCenter` ofset aşırı yüklemesi (tuval sabit, yalnız pencere Top'u kayar) |
 | App | `src/App/Features/Notch/NotchShape.cs`, `NotchWindow.xaml(.cs)`, `NotchViewModel.cs` | Kulaksız şekil, ofsetli yerleşim, biçime göre köşe yarıçapı |
 | App | `src/App/Features/Notch/NotchFeature.cs` | `NotchBounds` ve fare kenar bölgesi (`CheckEdgePeek`) ofseti sayar |
+
+## Malzeme (Katı / Buzlu / Cam) ve okunabilirlik koruması
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Appearance/MaterialSetting.cs` | Seviyeler, opaklık, eski "Yarı saydam" çevirisi |
+| Core | `src/Core/Appearance/ReadabilityGuard.cs` | Duvar kağıdı ortalamasına göre etkin seviye (ikincil metin ≥ 4,5:1) |
+| Platform | `src/Platform/Display/WallpaperSampler.cs` | Duvar kağıdının ortalama rengi (16 px çözüm) |
+| App | `src/App/Resources/MaterialState.cs` | Ne zaman okunur, etkin seviye (pencere / çentik / dock), `Changed` olayı |
+| App | `src/App/Resources/ThemeManager.cs` | Pencere, satır, segment ve çentik kartı tonları |
+| App | `NotchViewModel.SurfaceBrush`, `DockViewModel.FullWidthSurface` / `CapsuleSurface` | Çentik ve dock zemini |

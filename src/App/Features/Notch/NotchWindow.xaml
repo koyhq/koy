@@ -57,7 +57,7 @@
     <local:NotchShape x:Name="Notch"
                       Width="236" Height="34"
                       CornerRadius="18" EarRadius="{Binding EarRadius}"
-                      Background="#0A0A0B"
+                      Background="{Binding SurfaceBrush}"
                       PreviewMouseLeftButtonDown="Notch_PreviewMouseLeftButtonDown"
                       MouseEnter="Notch_MouseEnter"
                       MouseLeave="Notch_MouseLeave"

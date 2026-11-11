@@ -5,6 +5,7 @@ using System.Windows.Media.Imaging;
 using Koy.App.Features.Menu;
 using Koy.App.Features.Settings;
 using Koy.App.Features.Wizard;
+using Koy.App.Resources;
 using Koy.Core.Settings;
 
 namespace Koy.UiSnapshots;
@@ -24,6 +25,12 @@ public static class Program
     private static readonly string[] PageNames =
         ["genel", "centik", "dock", "ekranlar", "gorunum", "kisayollar", "performans", "hakkinda"];
 
+    /// <summary>Görüntülerde kullanılan malzeme (Katı / Buzlu / Cam).</summary>
+    internal static string Material { get; private set; } = "Katı";
+
+    /// <summary>Çizimin arkasındaki zemin; saydam yüzeyler bunu gösterir.</summary>
+    private static Color Backdrop = Color.FromRgb(0x7A, 0x80, 0x8C);
+
     [STAThread]
     public static int Main(string[] args)
     {
@@ -31,6 +38,23 @@ public static class Program
         var prefix = Arg(args, "--prefix") ?? "snap";
         var themeArg = (Arg(args, "--theme") ?? "dark").ToLowerInvariant();
         var scene = (Arg(args, "--scene") ?? "all").ToLowerInvariant();
+        // Malzeme (kati | buzlu | cam) ve saydam yüzeyin arkasındaki duvar kağıdı (light | dark; verilmezse orta gri).
+        // Duvar kağıdı hiçbir zaman gerçek masaüstünden okunmaz; verilen renk okunabilirlik korumasına da girer.
+        Material = Koy.Core.Appearance.MaterialSetting.Normalize(Arg(args, "--material") switch
+        {
+            "buzlu" or "frosted" => "Buzlu",
+            "cam" or "glass" => "Cam",
+            _ => "Katı"
+        });
+        Koy.Core.Appearance.Rgb? wallpaper = (Arg(args, "--wallpaper") ?? "").ToLowerInvariant() switch
+        {
+            "light" => new Koy.Core.Appearance.Rgb(236, 240, 246),
+            "dark" => new Koy.Core.Appearance.Rgb(24, 30, 44),
+            _ => null
+        };
+        if (wallpaper is { } w)
+            Backdrop = Color.FromRgb(w.R, w.G, w.B);
+        MaterialState.SetWallpaperForPreview(wallpaper);
         Directory.CreateDirectory(outDir);
 
         var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
@@ -77,7 +101,7 @@ public static class Program
         // Ayarlar geçici bir dosyada: gerçek %AppData%\Koy\settings.json'a dokunulmaz.
         var tempSettings = Path.Combine(Path.GetTempPath(), "koy-uisnap-" + Guid.NewGuid().ToString("N") + ".json");
         var store = new SettingsStore(tempSettings);
-        store.Save(new AppSettings { FirstRunCompleted = true });
+        store.Save(new AppSettings { FirstRunCompleted = true, Material = Material });
 
         try
         {
@@ -157,7 +181,7 @@ public static class Program
         var tempDir = Path.Combine(Path.GetTempPath(), "koy-uisnap-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempDir);
         var store = new SettingsStore(Path.Combine(tempDir, "settings.json"));
-        store.Save(new AppSettings { FirstRunCompleted = true });
+        store.Save(new AppSettings { FirstRunCompleted = true, Material = Material });
 
         try
         {
@@ -208,6 +232,7 @@ public static class Program
             FirstRunCompleted = true,
             NotchStyle = notchStyle,
             IdleDisplayMode = idleMode,
+            Material = Material,
             WeatherLocationSource = Koy.Core.Weather.WeatherLocationSource.City,
             WeatherCity = "İstanbul, Türkiye",
             WeatherLatitude = 41.01,
@@ -610,7 +635,7 @@ public static class Program
     {
         var tempSettings = Path.Combine(Path.GetTempPath(), "koy-uisnap-" + Guid.NewGuid().ToString("N") + ".json");
         var store = new SettingsStore(tempSettings);
-        store.Save(new AppSettings { FirstRunCompleted = true });
+        store.Save(new AppSettings { FirstRunCompleted = true, Material = Material });
 
         try
         {
@@ -666,7 +691,7 @@ public static class Program
         var dv = new DrawingVisual();
         using (var dc = dv.RenderOpen())
         {
-            dc.DrawRectangle(new SolidColorBrush(Color.FromRgb(0x7A, 0x80, 0x8C)), null, new Rect(0, 0, pxW, pxH));
+            dc.DrawRectangle(new SolidColorBrush(Backdrop), null, new Rect(0, 0, pxW, pxH));
             dc.DrawImage(shot, new Rect(pad * Scale, pad * Scale, shot.PixelWidth, shot.PixelHeight));
         }
         var final = new RenderTargetBitmap(pxW, pxH, 96, 96, PixelFormats.Pbgra32);

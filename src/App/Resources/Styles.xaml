@@ -132,7 +132,7 @@
 
     <!-- Segment kapsayıcısı (SegRadioStyle düğmelerini sarar) -->
     <Style x:Key="SegmentContainerStyle" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource KoyBgControl}" />
+        <Setter Property="Background" Value="{DynamicResource KoyBgSegment}" />
         <Setter Property="BorderBrush" Value="{DynamicResource KoyBorderHairline}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{DynamicResource KoyRadiusControl}" />

@@ -11,6 +11,11 @@ namespace Koy.App.Features.Notch;
 /// </summary>
 public class NotchShape : ContentControl
 {
+    // Zemin OnRender'da çizilir; malzeme (opak ↔ cam) durum değişince fırça değişir, yeniden çizim gerekir.
+    static NotchShape() =>
+        BackgroundProperty.OverrideMetadata(typeof(NotchShape),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
+
     public static readonly DependencyProperty CornerRadiusProperty =
         DependencyProperty.Register(
             nameof(CornerRadius),

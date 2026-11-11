@@ -126,6 +126,10 @@ public sealed record AppSettings
     /// <summary>Çentiğin açılması: 0 = üzerine gelince (varsayılan), 1 = tıklayınca.</summary>
     public int NotchOpenBehavior { get; set; }
     public string Material { get; set; } = "Katı";
+    /// <summary>Okunabilirlik koruması: açık duvar kağıdında saydam malzeme kendiliğinden daha opak seviyeye çıkar.</summary>
+    public bool MaterialReadabilityGuard { get; set; } = true;
+    /// <summary>Açık çentik ve kartlar malzemeyi izlesin; kapalıysa açık çentik hep opak kalır.</summary>
+    public bool NotchFollowsMaterial { get; set; } = true;
     /// <summary>Çentik biçimi: "Yapışık" (varsayılan, ekran kenarına bitişik, kulaklı) ya da "Yüzen" (kulaksız kapsül, üstten 9 DIP boşluk).</summary>
     public string NotchStyle { get; set; } = Koy.Core.Notch.NotchStyle.Pinned;
     public int WheelAction { get; set; }
@@ -259,6 +263,8 @@ public sealed record AppSettings
                IdleDisplayMode == other.IdleDisplayMode &&
                NotchOpenBehavior == other.NotchOpenBehavior &&
                Material == other.Material &&
+               MaterialReadabilityGuard == other.MaterialReadabilityGuard &&
+               NotchFollowsMaterial == other.NotchFollowsMaterial &&
                NotchStyle == other.NotchStyle &&
                WheelAction == other.WheelAction &&
                MiddleClickAction == other.MiddleClickAction &&
@@ -350,6 +356,8 @@ public sealed record AppSettings
         hash.Add(IdleDisplayMode);
         hash.Add(NotchOpenBehavior);
         hash.Add(Material);
+        hash.Add(MaterialReadabilityGuard);
+        hash.Add(NotchFollowsMaterial);
         hash.Add(NotchStyle);
         hash.Add(WheelAction);
         hash.Add(MiddleClickAction);

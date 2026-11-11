@@ -287,6 +287,14 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private string _material = "Katı";
 
+    /// <summary>Okunabilirlik koruması: açık duvar kağıdında saydam malzeme daha opak seviyeye çıkar.</summary>
+    [ObservableProperty]
+    private bool _materialReadabilityGuard = true;
+
+    /// <summary>Açık çentik malzemeyi izlesin; kapalıysa açık çentik hep opak.</summary>
+    [ObservableProperty]
+    private bool _notchFollowsMaterial = true;
+
     [ObservableProperty]
     private double _cornerRadius = 12.0;
 
@@ -508,6 +516,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             AccentColor = s.AccentColor ?? AccentPalette.DefaultHex;
             UseWindowsAccent = s.UseWindowsAccent;
             Material = MaterialSetting.Normalize(s.Material);
+            MaterialReadabilityGuard = s.MaterialReadabilityGuard;
+            NotchFollowsMaterial = s.NotchFollowsMaterial;
             CornerRadius = CornerSetting.ToStored(CornerSetting.Resolve(s.CornerRadius));
             AnimationSpeed = MotionPolicy.NormalizeSpeed(s.AnimationSpeed);
             RespectReduceMotion = s.RespectReduceMotion;
@@ -651,6 +661,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             return;
 
         if (e.PropertyName is nameof(Theme) or nameof(AccentColor) or nameof(UseWindowsAccent) or nameof(Material)
+            or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
             or nameof(CornerRadius) or nameof(AnimationSpeed) or nameof(RespectReduceMotion) or nameof(BatterySaverReduceMotion))
         {
             // Görünüm ayarları açık pencerelere anında yansır.
@@ -679,11 +690,13 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         name is not null && name != nameof(DockEnabled) &&
         (name.StartsWith("Dock", StringComparison.Ordinal) ||
          name is nameof(HideWindowsTaskbar) or nameof(BatterySaverReduceMotion) or nameof(MiddleClickAction) or nameof(Material)
+             or nameof(MaterialReadabilityGuard)
              or nameof(AnimationSpeed) or nameof(RespectReduceMotion));
 
     private static bool AffectsNotch(string? name) =>
         name is nameof(NotchVisibility) or nameof(NotchHideInFullscreen) or nameof(MusicShowWaveform) or nameof(MusicLyricsEnabled)
             or nameof(ShowVolumeOsd) or nameof(ShowBrightnessOsd) or nameof(ShowPrivacyIndicator) or nameof(NotchShowNotifications) or nameof(NotchNotificationsHideBody) or nameof(IdleDisplayMode) or nameof(NotchStyle)
+            or nameof(Material) or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
             or nameof(NotchOpenBehavior) or nameof(WheelAction) or nameof(BatterySaverReduceMotion)
             or nameof(WeatherRefreshInterval) or nameof(PomodoroWorkMinutes) or nameof(PomodoroShortBreakMinutes) or nameof(PomodoroLongBreakMinutes)
             or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
@@ -778,6 +791,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             AccentColor = AccentColor,
             UseWindowsAccent = UseWindowsAccent,
             Material = Material,
+            MaterialReadabilityGuard = MaterialReadabilityGuard,
+            NotchFollowsMaterial = NotchFollowsMaterial,
             CornerRadius = CornerRadius,
             AnimationSpeed = AnimationSpeed,
             RespectReduceMotion = RespectReduceMotion,
