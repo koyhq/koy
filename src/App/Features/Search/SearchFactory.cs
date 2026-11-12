@@ -30,6 +30,8 @@ public static class SearchFactory
         ("apps", "SearchCatApps"),
         ("windows", "SearchCatWindows"),
         ("calculator", "SearchCatCalculator"),
+        ("units", "SearchCatUnits"),
+        ("color", "SearchCatColor"),
         ("session", "SearchCatSession"),
         ("shell", "SearchCatShell"),
         ("locations", "SearchCatLocations"),
@@ -83,6 +85,24 @@ public static class SearchFactory
                 new SearchSyntax("12*8", T("SearchSyntaxCalc")),
                 new SearchSyntax("sqrt(16)+1", T("SearchSyntaxCalcFunctions")),
                 new SearchSyntax("hex=255", T("SearchSyntaxCalcBase"))
+            ]
+        });
+        Add(new UnitConverterSource(shell, T)
+        {
+            Syntaxes =
+            [
+                new SearchSyntax("10 km to mi", T("SearchSyntaxUnits")),
+                new SearchSyntax("100 c in f", T("SearchSyntaxUnits")),
+                new SearchSyntax("1 gb in mb", T("SearchSyntaxUnitsData"))
+            ]
+        });
+        Add(new ColorConverterSource(shell, T)
+        {
+            Syntaxes =
+            [
+                new SearchSyntax("#FF8800", T("SearchSyntaxColor")),
+                new SearchSyntax("rgb(255, 136, 0)", T("SearchSyntaxColor")),
+                new SearchSyntax("hsl(32, 100%, 50%)", T("SearchSyntaxColor"))
             ]
         });
         Add(new SessionSearchSource(new SystemCommandService(), SessionEntries(), T)

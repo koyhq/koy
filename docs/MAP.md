@@ -79,6 +79,13 @@ Unutma: Bildirim yoklaması AGENTS #5'in tek yoklama istisnasıdır (paketsiz s�
 | App | `Settings/Pages/CentikPage.xaml`, `KoyWindowViewModel.cs` | "Görseller" bölümü: hedef, kaynak, önayar, dosya seçici, perde |
 
 Unutma: çentik kapalı / gizliyken hiçbir şey oynamaz ve kare tutulmaz (AGENTS #5, #6); hareketi azalt ve pil tasarrufunda yalnız ilk kare. Tuval 620×352 büyütülmez (AGENTS #13).
+## Aramaya yeni kaynak eklemek
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Search/` | `SearchSource` türevi (örnekler: `UnitConverterSource` + `UnitConverter`, `ColorConverterSource` + `ColorParser`); kopyalama `ISearchShell.CopyText` ile |
+| App | `src/App/Features/Search/SearchFactory.cs` | `SourceCatalog` satırı (Ayarlar'daki aç/kapat listesi) ve `Create` içinde `Add(...)` + `Syntaxes` |
+| App | `src/App/Resources/Strings.resx`, `Strings.tr.resx` | `SearchCat<Ad>` ve `SearchSyntax<Ad>` metinleri |
+| Test | `tests/Core.Tests/Search/` | Kaynak testleri (`SearchSourceTests`, `UnitAndColorConverterTests`) |
 
 ## Yeni kullanıcı metni ya da çeviri eklemek
 | Katman | Dosya | Ne yapılır |

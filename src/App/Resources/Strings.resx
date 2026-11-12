@@ -960,6 +960,12 @@
   <data name="SearchCatDateTime" xml:space="preserve">
     <value>Date and time</value>
   </data>
+  <data name="SearchCatUnits" xml:space="preserve">
+    <value>Unit converter</value>
+  </data>
+  <data name="SearchCatColor" xml:space="preserve">
+    <value>Color converter</value>
+  </data>
   <data name="SearchCatHelp" xml:space="preserve">
     <value>Help</value>
   </data>
@@ -1112,6 +1118,15 @@
   </data>
   <data name="SearchSyntaxTime" xml:space="preserve">
     <value>Shows the current time.</value>
+  </data>
+  <data name="SearchSyntaxUnits" xml:space="preserve">
+    <value>Converts length, mass, temperature, data size and speed. Enter copies the number.</value>
+  </data>
+  <data name="SearchSyntaxUnitsData" xml:space="preserve">
+    <value>Data sizes use 1000 (kb, mb, gb); write kib, mib, gib for 1024.</value>
+  </data>
+  <data name="SearchSyntaxColor" xml:space="preserve">
+    <value>Shows a color as HEX, RGB and HSL. Enter copies a row.</value>
   </data>
   <data name="SearchSettingsHeader" xml:space="preserve">
     <value>Search</value>
@@ -2378,6 +2393,33 @@
   </data>
   <data name="AboutPlaceLink" xml:space="preserve">
     <value>OpenStreetMap</value>
+  </data>
+  <data name="OpenWebsiteAction" xml:space="preserve">
+    <value>Open website</value>
+  </data>
+  <data name="AboutSiteTitle" xml:space="preserve">
+    <value>Project website</value>
+  </data>
+  <data name="AboutSiteDesc" xml:space="preserve">
+    <value>Screenshots, downloads and news at koyhq.github.io/koy.</value>
+  </data>
+  <data name="AboutThanksTitle" xml:space="preserve">
+    <value>Thanks and inspiration</value>
+  </data>
+  <data name="AboutThanksDesc" xml:space="preserve">
+    <value>Koy grew from the ideas of two projects. No code, images or text were taken from either.</value>
+  </data>
+  <data name="AboutNectarTitle" xml:space="preserve">
+    <value>Nectar</value>
+  </data>
+  <data name="AboutNectarDesc" xml:space="preserve">
+    <value>The idea of a spring-animated notch at the top of the screen.</value>
+  </data>
+  <data name="AboutSeelenTitle" xml:space="preserve">
+    <value>Seelen UI</value>
+  </data>
+  <data name="AboutSeelenDesc" xml:space="preserve">
+    <value>A floating dock that replaces the taskbar, and smart placement near windows.</value>
   </data>
   <data name="UpdateReadyOnExit" xml:space="preserve">
     <value>A new version was downloaded and will install when Koy closes. Check now to install it immediately.</value>

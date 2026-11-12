@@ -960,6 +960,12 @@
   <data name="SearchCatDateTime" xml:space="preserve">
     <value>Tarih ve saat</value>
   </data>
+  <data name="SearchCatUnits" xml:space="preserve">
+    <value>Birim çevirici</value>
+  </data>
+  <data name="SearchCatColor" xml:space="preserve">
+    <value>Renk çevirici</value>
+  </data>
   <data name="SearchCatHelp" xml:space="preserve">
     <value>Yardım</value>
   </data>
@@ -1112,6 +1118,15 @@
   </data>
   <data name="SearchSyntaxTime" xml:space="preserve">
     <value>Şu anki saati gösterir.</value>
+  </data>
+  <data name="SearchSyntaxUnits" xml:space="preserve">
+    <value>Uzunluk, kütle, sıcaklık, veri boyutu ve hızı çevirir. Enter sayıyı kopyalar.</value>
+  </data>
+  <data name="SearchSyntaxUnitsData" xml:space="preserve">
+    <value>Veri boyutu 1000 tabanlıdır (kb, mb, gb); 1024 için kib, mib, gib yaz.</value>
+  </data>
+  <data name="SearchSyntaxColor" xml:space="preserve">
+    <value>Rengi HEX, RGB ve HSL olarak gösterir. Enter satırı kopyalar.</value>
   </data>
   <data name="SearchSettingsHeader" xml:space="preserve">
     <value>Arama</value>
@@ -2378,6 +2393,33 @@
   </data>
   <data name="AboutPlaceLink" xml:space="preserve">
     <value>OpenStreetMap</value>
+  </data>
+  <data name="OpenWebsiteAction" xml:space="preserve">
+    <value>Siteyi aç</value>
+  </data>
+  <data name="AboutSiteTitle" xml:space="preserve">
+    <value>Proje sitesi</value>
+  </data>
+  <data name="AboutSiteDesc" xml:space="preserve">
+    <value>Ekran görüntüleri, indirmeler ve haberler koyhq.github.io/koy adresinde.</value>
+  </data>
+  <data name="AboutThanksTitle" xml:space="preserve">
+    <value>Teşekkür ve esin</value>
+  </data>
+  <data name="AboutThanksDesc" xml:space="preserve">
+    <value>Koy iki projenin fikirlerinden doğdu. İkisinden de kod, görsel ya da metin alınmadı.</value>
+  </data>
+  <data name="AboutNectarTitle" xml:space="preserve">
+    <value>Nectar</value>
+  </data>
+  <data name="AboutNectarDesc" xml:space="preserve">
+    <value>Ekranın üstünde yay animasyonlu çentik fikri.</value>
+  </data>
+  <data name="AboutSeelenTitle" xml:space="preserve">
+    <value>Seelen UI</value>
+  </data>
+  <data name="AboutSeelenDesc" xml:space="preserve">
+    <value>Görev çubuğunun yerini alan yüzen dock ve pencereye yaklaşınca davranan akıllı yerleşim.</value>
   </data>
   <data name="UpdateReadyOnExit" xml:space="preserve">
     <value>Yeni sürüm indirildi; Koy kapanınca kurulacak. Hemen kurmak için Şimdi denetle.</value>
