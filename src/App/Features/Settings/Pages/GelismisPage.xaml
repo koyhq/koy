@@ -1,0 +1,80 @@
+<UserControl x:Class="Koy.App.Features.Settings.Pages.GelismisPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Koy.App.Features.Settings"
+             xmlns:res="clr-namespace:Koy.App.Resources"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:KoyWindowViewModel}">
+
+    <!-- Gelişmiş (issue #69): kendi arayüzü olmayan her basit ayar, modelden kendiliğinden (AdvancedSettings). -->
+    <StackPanel Margin="0,0,16,24">
+        <TextBlock Text="{Binding [NavAdvanced], Source={x:Static res:Loc.Instance}}" Style="{StaticResource PageTitleStyle}" />
+        <TextBlock Text="{Binding [AdvancedSubtitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource PageSubtitleStyle}" Margin="0,4,0,8" />
+        <TextBlock Text="{Binding [AdvancedWarning], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}"
+                   Foreground="{DynamicResource KoyDangerText}" Margin="0,0,0,12" />
+
+        <TextBox Style="{StaticResource SettingTextBoxStyle}" Margin="0,0,0,12"
+                 Text="{Binding AdvancedFilter, UpdateSourceTrigger=PropertyChanged}"
+                 AutomationProperties.Name="{Binding [AdvancedFilterHint], Source={x:Static res:Loc.Instance}}" />
+
+        <ItemsControl ItemsSource="{Binding AdvancedRows}" Focusable="False"
+                      VirtualizingPanel.IsVirtualizing="True">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type local:AdvancedSettingRow}">
+                    <Border Style="{StaticResource SettingRowStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,12,0">
+                                <TextBlock Text="{Binding Key}" FontFamily="{DynamicResource KoyFontMono}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource SettingTitleStyle}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsChanged}" Value="True">
+                                                    <Setter Property="Foreground" Value="{DynamicResource KoyAccentText}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Text="{Binding DefaultText}" Style="{StaticResource SettingDescStyle}" />
+                                <TextBlock Text="{Binding Error}" Foreground="{DynamicResource KoyDangerText}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource SettingDescStyle}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Error}" Value="">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <Grid Grid.Column="1" VerticalAlignment="Center">
+                                <CheckBox IsChecked="{Binding BoolValue}" Style="{StaticResource ToggleSwitchStyle}" HorizontalAlignment="Right"
+                                          AutomationProperties.Name="{Binding Key}"
+                                          Visibility="{Binding IsBool, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
+                                <ComboBox ItemsSource="{Binding Choices}" SelectedItem="{Binding Text}" Width="180" Height="32"
+                                          Style="{StaticResource SettingComboBoxStyle}" AutomationProperties.Name="{Binding Key}"
+                                          Visibility="{Binding IsChoice, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
+                                <TextBox Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}" Width="180" Style="{StaticResource SettingTextBoxStyle}"
+                                         AutomationProperties.Name="{Binding Key}" LostFocus="ValueBox_LostFocus" KeyDown="ValueBox_KeyDown"
+                                         Visibility="{Binding IsTextual, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
+                            </Grid>
+
+                            <Button Grid.Column="2" Margin="8,0,0,0" Command="{Binding ResetCommand}" Style="{StaticResource SettingButtonStyle}"
+                                    Content="{Binding [AdvancedResetRow], Source={x:Static res:Loc.Instance}}"
+                                    Visibility="{Binding IsChanged, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

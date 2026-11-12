@@ -1263,6 +1263,39 @@
   <data name="ReduceMotionDesc" xml:space="preserve">
     <value>If animations are off in Windows, Koy turns motion off too.</value>
   </data>
+  <data name="NavAdvanced" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
+  <data name="AdvancedSubtitle" xml:space="preserve">
+    <value>Every setting without its own control, straight from settings.json.</value>
+  </data>
+  <data name="AdvancedWarning" xml:space="preserve">
+    <value>For experienced users. Invalid values are never saved; a change rebuilds the notch and dock.</value>
+  </data>
+  <data name="AdvancedFilterHint" xml:space="preserve">
+    <value>Filter by key</value>
+  </data>
+  <data name="AdvancedDefault" xml:space="preserve">
+    <value>Default: {0}</value>
+  </data>
+  <data name="AdvancedInvalid" xml:space="preserve">
+    <value>Not a valid value for this setting; nothing was saved.</value>
+  </data>
+  <data name="AdvancedResetRow" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="ApplyRevertPrompt" xml:space="preserve">
+    <value>Keep this change?</value>
+  </data>
+  <data name="ApplyRevertKeep" xml:space="preserve">
+    <value>Keep</value>
+  </data>
+  <data name="ApplyRevertRevert" xml:space="preserve">
+    <value>Revert</value>
+  </data>
+  <data name="SettingsFileInvalid" xml:space="preserve">
+    <value>settings.json was changed but could not be read. Koy keeps the last valid settings.</value>
+  </data>
   <data name="AccentBlue" xml:space="preserve">
     <value>Blue</value>
   </data>
