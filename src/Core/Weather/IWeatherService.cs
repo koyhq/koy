@@ -5,7 +5,8 @@ public sealed record WeatherInfo(
     int WeatherCode,
     string DescriptionKey,
     string IconKind,
-    DateTimeOffset FetchedAt);
+    DateTimeOffset FetchedAt,
+    double? WindSpeedKmh = null);
 
 /// <summary>
 /// Open-Meteo hava durumu sözleşmesi.

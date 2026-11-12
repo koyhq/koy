@@ -41,6 +41,36 @@ public static class OpenMeteoParser
         }
     }
 
+    /// <summary>
+    /// Anlık rüzgâr hızı (<c>current.wind_speed_10m</c>, Open-Meteo varsayılanı km/sa). Alan yoksa, sayı değilse ya da
+    /// negatifse null: rüzgâr yoksa hava durumu yine de gösterilir.
+    /// </summary>
+    public static double? ParseWindSpeed(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+            return null;
+
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            if (!doc.RootElement.TryGetProperty("current", out var current) ||
+                !current.TryGetProperty("wind_speed_10m", out var wind) ||
+                wind.ValueKind != JsonValueKind.Number)
+                return null;
+
+            var value = wind.GetDouble();
+            return double.IsFinite(value) && value >= 0 ? value : null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
+    }
+
     public static IReadOnlyList<GeoPlace> ParseGeocoding(string? json)
     {
         if (string.IsNullOrWhiteSpace(json))
