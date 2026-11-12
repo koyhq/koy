@@ -37,7 +37,7 @@ public sealed class ConsentStorePrivacyService : IPrivacyMonitorService
     /// Bir Start–Stop döngüsünün tanıtıcıları. İş parçacığı kendi Run'ını sahiplenir ve çıkarken bırakır;
     /// böylece Stop iş parçacığı hâlâ beklerken tanıtıcıları altından çekmez.
     /// </summary>
-    private sealed class Run
+    private sealed class Run : IDisposable
     {
         public readonly ManualResetEvent Cancel = new(false);
         public readonly AutoResetEvent CamEvent = new(false);
@@ -50,6 +50,8 @@ public sealed class ConsentStorePrivacyService : IPrivacyMonitorService
         public bool MicArmed;
         public bool ParentArmed;
         public Thread? Thread;
+
+        public void Dispose() => Release();
 
         public void Release()
         {

@@ -194,20 +194,20 @@ public class SearchCommandSafetyTests
         var shell = new CountingShell();
         var source = new ShellCommandSearchSource(shell, T);
 
-        source.Search(new SearchQuery("build a")).Single();
+        _ = source.Search(new SearchQuery("build a")).Single();
         var afterFirst = shell.FileChecks;
-        source.Search(new SearchQuery("build a b")).Single();
+        _ = source.Search(new SearchQuery("build a b")).Single();
         Assert.Equal(afterFirst, shell.FileChecks);
 
-        source.Search(new SearchQuery("nope")).ToList();
+        _ = source.Search(new SearchQuery("nope")).ToList();
         var afterMiss = shell.FileChecks;
         Assert.True(afterMiss > afterFirst);
-        source.Search(new SearchQuery("nope x")).ToList();
+        _ = source.Search(new SearchQuery("nope x")).ToList();
         Assert.Equal(afterMiss, shell.FileChecks);
         Assert.DoesNotContain(shell.Checked, c => c.StartsWith(@"\\", StringComparison.Ordinal));
 
         source.Release();
-        source.Search(new SearchQuery("build a")).Single();
+        _ = source.Search(new SearchQuery("build a")).Single();
         Assert.True(shell.FileChecks > afterMiss);
     }
 

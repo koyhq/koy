@@ -263,5 +263,6 @@ public class EventBookTests : IDisposable
     public void Dispose()
     {
         try { Directory.Delete(_dir, true); } catch { }
+        GC.SuppressFinalize(this);
     }
 }

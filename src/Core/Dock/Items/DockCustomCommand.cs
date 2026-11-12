@@ -11,7 +11,8 @@ public sealed record DockCustomLaunch(string Target, string? Arguments);
 /// </summary>
 public static class DockCustomCommand
 {
-    private static readonly char[] InvalidPathChars = ['"', '<', '>', '|', '*', '?'];
+    private static readonly System.Buffers.SearchValues<char> InvalidPathChars =
+        System.Buffers.SearchValues.Create(['"', '<', '>', '|', '*', '?']);
 
     public static bool TryParse(string? command, out DockCustomLaunch launch)
     {

@@ -68,7 +68,7 @@ public sealed partial class AdvancedSettingRow : ObservableObject
 
     public string Default { get; }
 
-    public string DefaultText => string.Format(Strings.Get("AdvancedDefault"), Default.Length == 0 ? "\"\"" : Default);
+    public string DefaultText => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("AdvancedDefault"), Default.Length == 0 ? "\"\"" : Default);
 
     public IReadOnlyList<string> Choices { get; }
 

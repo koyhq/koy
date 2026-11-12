@@ -26,7 +26,7 @@ public sealed class HotCornerController : IDisposable
     private readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
     private readonly HotCornerTracker _tracker = new();
     private readonly FullscreenDetector _fullscreen = new();
-    private ICornerHookService? _hook;
+    private CornerHookService? _hook;
     private MonitorService? _monitors;
     private DispatcherTimer? _dwell;
     private HotCornersSettings _settings = new();

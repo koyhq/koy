@@ -18,7 +18,8 @@ public static class VoiceCommandParser
         "cscript", "cscript.exe"
     };
 
-    private static readonly char[] DangerousShellCharacters = ['|', '&', ';', '>', '<', '`', '$'];
+    private static readonly System.Buffers.SearchValues<char> DangerousShellCharacters =
+        System.Buffers.SearchValues.Create(['|', '&', ';', '>', '<', '`', '$']);
 
     /// <summary>
     /// Harness türüne ve parametrelere göre yürütülecek komut ve argümanları çözer.
@@ -137,7 +138,7 @@ public static class VoiceCommandParser
         return BuildArgumentsFromTokens(tokens, prompt);
     }
 
-    private static IReadOnlyList<string> BuildArgumentsFromTokens(IReadOnlyList<string> tokens, string prompt)
+    private static List<string> BuildArgumentsFromTokens(List<string> tokens, string prompt)
     {
         var promptReplaced = false;
         var result = new List<string>(tokens.Count + 1);

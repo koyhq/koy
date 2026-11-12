@@ -26,6 +26,13 @@ internal static class ShellLinkEntryReader
         pid = 2
     };
 
+    // PKEY_ItemNameDisplay (ör. Spotify gibi PKEY_Title boş bırakan uygulamalar için yedek)
+    private static readonly PROPERTYKEY ItemNameDisplayKey = new()
+    {
+        fmtid = new Guid("B725F130-47EF-101A-A5F1-02608C9EEBAC"),
+        pid = 10
+    };
+
     // PKEY_AppUserModel_IsDestListSeparator
     private static readonly PROPERTYKEY SeparatorKey = new()
     {
@@ -72,7 +79,8 @@ internal static class ShellLinkEntryReader
     public static unsafe JumpListEntry? FromLink(object link)
     {
         var store = link as IPropertyStore;
-        var title = Resolve(ReadString(store, TitleKey));
+        var title = Resolve(ReadString(store, TitleKey))
+                    ?? Resolve(ReadString(store, ItemNameDisplayKey));
         var separator = ReadBool(store, SeparatorKey);
 
         var target = string.Empty;
@@ -83,6 +91,9 @@ internal static class ShellLinkEntryReader
             target = ReadLinkText(shellLink, LinkText.Path);
             args = ReadLinkText(shellLink, LinkText.Arguments);
             dir = ReadLinkText(shellLink, LinkText.WorkingDirectory);
+
+            if (string.IsNullOrWhiteSpace(title) && !separator)
+                title = Resolve(ReadLinkText(shellLink, LinkText.Description));
 
             if (string.IsNullOrWhiteSpace(target) && !separator)
                 target = ParsingNameOfIdList(shellLink) ?? string.Empty;
@@ -125,7 +136,7 @@ internal static class ShellLinkEntryReader
         }
     }
 
-    private enum LinkText { Path, Arguments, WorkingDirectory }
+    private enum LinkText { Path, Arguments, WorkingDirectory, Description }
 
     private static unsafe string ReadLinkText(IShellLinkW link, LinkText which)
     {
@@ -139,6 +150,7 @@ internal static class ShellLinkEntryReader
                 {
                     case LinkText.Path: link.GetPath(p, TextBuffer, null, 0); break;
                     case LinkText.Arguments: link.GetArguments(p, TextBuffer); break;
+                    case LinkText.Description: link.GetDescription(p, TextBuffer); break;
                     default: link.GetWorkingDirectory(p, TextBuffer); break;
                 }
 

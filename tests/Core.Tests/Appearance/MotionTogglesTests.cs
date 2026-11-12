@@ -14,6 +14,7 @@ public class MotionTogglesTests : IDisposable
     {
         try { Directory.Delete(_dir, recursive: true); }
         catch (IOException) { }
+        GC.SuppressFinalize(this);
     }
 
     public static IEnumerable<object[]> Kinds() =>

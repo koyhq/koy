@@ -89,7 +89,7 @@ public class RuleSetValidatorTests
             Draft("Üçüncü", "sleep", new RuleConditionDraft("timeWindow", From: "22:00", To: "06:30")),
         ]);
 
-        Assert.Equal(new[] { "Birinci", "Üçüncü" }, result.Rules.Select(r => r.Name).ToArray());
+        Assert.Equal(["Birinci", "Üçüncü"], result.Rules.Select(r => r.Name));
         Assert.Equal(1, result.DroppedRules);
     }
 

@@ -132,7 +132,7 @@ public sealed partial class SystemStatsViewModel : ObservableObject, IDisposable
         CpuText = hasRates ? SystemFormat.Percent(s.CpuPercent, CultureInfo.CurrentCulture) : NoValue;
         TopProcessText = string.IsNullOrWhiteSpace(s.TopProcessName)
             ? ""
-            : string.Format(Strings.Get("SystemTopProcess"), s.TopProcessName);
+            : string.Format(CultureInfo.CurrentCulture, Strings.Get("SystemTopProcess"), s.TopProcessName);
 
         RamProgress = Math.Clamp(s.RamPercent, 0, 100) / 100;
         RamText = hasData ? SystemFormat.Percent(s.RamPercent, CultureInfo.CurrentCulture) : NoValue;

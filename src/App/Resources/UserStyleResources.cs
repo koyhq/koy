@@ -58,7 +58,7 @@ public static class UserStyleResources
             yield return Describe(diagnostic);
 
         if (result.OmittedDiagnostics > 0)
-            yield return string.Format(Strings.Get("UserStyleDiagMore"), result.OmittedDiagnostics);
+            yield return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("UserStyleDiagMore"), result.OmittedDiagnostics);
     }
 
     /// <summary>Durum satırı: kapalı / dosya yok / "N uygulandı, M yok sayıldı".</summary>
@@ -68,7 +68,7 @@ public static class UserStyleResources
             return Strings.Get("UserStyleStatusOff");
         if (!fileExists)
             return Strings.Get("UserStyleStatusNoFile");
-        return string.Format(Strings.Get("UserStyleStatusLoaded"),
+        return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("UserStyleStatusLoaded"),
             result.ValidEntries.Count, result.Diagnostics.Count + result.OmittedDiagnostics);
     }
 }

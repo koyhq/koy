@@ -31,10 +31,10 @@ public abstract partial class DockEntryViewModel : ObservableObject
     [ObservableProperty]
     private bool _isTargetGlow;
 
-    protected readonly Spring ScaleSpring = new(1.0) { Stiffness = 320, Damping = 26 };
+    protected Spring ScaleSpring { get; } = new(1.0) { Stiffness = 320, Damping = 26 };
 
     // Basma ilerlemesi (0 bırakılmış, 1 basılı): hover ölçeğinden ayrı yay. Hafif sönümlü: bırakınca küçük bir geri sıçrama.
-    protected readonly Spring PressSpring = new(0) { Stiffness = 520, Damping = 24 };
+    protected Spring PressSpring { get; } = new(0) { Stiffness = 520, Damping = 24 };
     private bool _pressMotion = true;
 
     /// <summary>Farenin sol tuşu bu öğenin üzerinde basılı (basma geri bildirimi).</summary>
@@ -101,7 +101,7 @@ public abstract partial class DockEntryViewModel : ObservableObject
         }
     }
 
-    protected readonly Spring OffsetSpring = new(0) { Stiffness = 380, Damping = 30 };
+    protected Spring OffsetSpring { get; } = new(0) { Stiffness = 380, Damping = 30 };
 
     public double OffsetX => OffsetSpring.Value;
     public double OffsetY => OffsetSpring.Value;

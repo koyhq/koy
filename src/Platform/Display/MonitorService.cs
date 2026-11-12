@@ -133,7 +133,7 @@ public sealed class MonitorService : IMonitorService
     public DisplayMonitor? GetPrimaryMonitor()
     {
         var monitors = GetMonitors();
-        return monitors.FirstOrDefault(m => m.IsPrimary) ?? monitors.FirstOrDefault();
+        return monitors.FirstOrDefault(m => m.IsPrimary) ?? (monitors.Count > 0 ? monitors[0] : null);
     }
 
     public DisplayMonitor? GetMonitor(string idOrName)

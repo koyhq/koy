@@ -57,7 +57,7 @@ public sealed partial class SearchRowViewModel(SearchResult result, string? head
     private bool _isConfirming;
 
     public string? Subtitle => IsConfirming
-        ? Result.ConfirmationDetail is { } detail ? string.Format(Strings.Get("SearchConfirmRun"), detail) : Strings.Get("SearchConfirmHint")
+        ? Result.ConfirmationDetail is { } detail ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("SearchConfirmRun"), detail) : Strings.Get("SearchConfirmHint")
         : Result.Subtitle;
 
     public bool HasSubtitle => !string.IsNullOrEmpty(Subtitle);
@@ -337,7 +337,7 @@ public sealed partial class SearchViewModel : ObservableObject, IDisposable
         }, TaskScheduler.Default);
     }
 
-    private static ImageSource? Decode(Func<byte[]?> load)
+    private static BitmapImage? Decode(Func<byte[]?> load)
     {
         var bytes = load();
         if (bytes is null || bytes.Length == 0)

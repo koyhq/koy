@@ -14,6 +14,7 @@ public class SettingsStoreRobustnessTests : IDisposable
     {
         try { Directory.Delete(_dir, recursive: true); }
         catch (IOException) { }
+        GC.SuppressFinalize(this);
     }
 
     private string PathFor(string name = "settings.json") => Path.Combine(_dir, name);

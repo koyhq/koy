@@ -51,9 +51,10 @@ public static class Program
     }
 }
 
-public partial class App : Application
+public partial class App : Application, IDisposable
 {
     private readonly List<IFeature> _features = [];
+    private bool _disposed;
     private TrayIconManager? _trayIconManager;
     private ShortcutController? _shortcuts;
     private HotCornerController? _hotCorners;
@@ -501,6 +502,20 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        // Sıra önemli: özellikler servisleri hâlâ kullanırken servisler atılmamalı.
+        Dispose();
+
+        TaskbarService.Restore();
+        AppUninstaller.CleanAfterExit();
+        base.OnExit(e);
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+        _disposed = true;
+
         _shortcuts?.Dispose();
         _shortcuts = null;
 
@@ -516,9 +531,6 @@ public partial class App : Application
             feature.Stop();
 
         _services.Dispose();
-
-        TaskbarService.Restore();
-        AppUninstaller.CleanAfterExit();
-        base.OnExit(e);
+        GC.SuppressFinalize(this);
     }
 }

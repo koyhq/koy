@@ -147,7 +147,7 @@ public sealed partial class QuickLaunchViewModel : ObservableObject, IDisposable
         }
     }
 
-    private static ImageSource? Decode(byte[] bytes)
+    private static BitmapImage? Decode(byte[] bytes)
     {
         try
         {

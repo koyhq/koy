@@ -20,7 +20,7 @@ public class InstalledExtensionListTests
 
         Assert.True(ok);
         Assert.Equal(InstalledExtensionListError.None, error);
-        Assert.Equal(new[] { "alpha", "mid", "zeta" }, list.Select(e => e.Manifest.Id));
+        Assert.Equal(["alpha", "mid", "zeta"], list.Select(e => e.Manifest.Id));
     }
 
     [Fact]
@@ -93,7 +93,7 @@ public class InstalledExtensionListTests
         Assert.Equal(InstalledExtensionListError.None, error);
         Assert.True(result[0].Enabled);
         Assert.False(result[1].Enabled);
-        Assert.Equal(new[] { "alpha", "beta" }, result.Select(e => e.Manifest.Id));
+        Assert.Equal(["alpha", "beta"], result.Select(e => e.Manifest.Id));
     }
 
     [Fact]

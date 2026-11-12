@@ -163,7 +163,7 @@ public static class Program
 
             // Güncelleme ve Neler Geldi görünümleri
             vm.HasAvailableUpdate = true;
-            vm.AvailableVersionText = string.Format(Koy.App.Resources.Strings.Get("UpdateAvailableBadge"), "0.2.0");
+            vm.AvailableVersionText = string.Format(System.Globalization.CultureInfo.CurrentCulture, Koy.App.Resources.Strings.Get("UpdateAvailableBadge"), "0.2.0");
             RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-guncelleme-dugme.png"));
 
             vm.OpenUpdateOverlay();

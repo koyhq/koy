@@ -47,8 +47,9 @@ using Koy.Platform.Weather;
 
 namespace Koy.App.Features.Notch;
 
-public sealed class NotchFeature(AppSettings settings, SharedServices services) : IFeature
+public sealed class NotchFeature(AppSettings settings, SharedServices services) : IFeature, IDisposable
 {
+    public void Dispose() => Stop();
     private sealed class NotchWindowState : IDisposable
     {
         public required DisplayMonitor Monitor { get; set; }

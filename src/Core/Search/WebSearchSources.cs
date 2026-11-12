@@ -45,7 +45,7 @@ public sealed class WebShortcutSearchSource(
         if (defaultBrowser?.Invoke() is { } browser && DefaultBrowserSearch.SearchCommand(browser, query.Raw) is { } command)
             return Row("browser", browser.Name, query.Raw, () => shell.RunWithArguments(command.Executable, command.Arguments));
 
-        var shortcut = shortcuts.FirstOrDefault(s => s.Key == "ddg") ?? shortcuts.FirstOrDefault();
+        var shortcut = shortcuts.FirstOrDefault(s => s.Key == "ddg") ?? (shortcuts.Count > 0 ? shortcuts[0] : null);
         return shortcut is null ? null : Row(shortcut, query.Raw);
     }
 
@@ -76,13 +76,13 @@ public sealed class WebShortcutSearchSource(
 
     private SearchResult Row(WebShortcut shortcut, string term)
     {
-        var url = string.Format(shortcut.UrlTemplate, Uri.EscapeDataString(term));
+        var url = string.Format(System.Globalization.CultureInfo.InvariantCulture, shortcut.UrlTemplate, Uri.EscapeDataString(term));
         return Row(shortcut.Key, shortcut.Provider, term, () => shell.Open(url));
     }
 
     private SearchResult Row(string key, string provider, string term, Action execute)
     {
-        return new SearchResult("web:" + key + ":" + term, Name, string.Format(t("SearchWebFor"), provider, term), execute)
+        return new SearchResult("web:" + key + ":" + term, Name, string.Format(System.Globalization.CultureInfo.CurrentCulture, t("SearchWebFor"), provider, term), execute)
         {
             Glyph = SearchGlyph.Globe,
             CategoryRelevance = SearchRelevance.Highest,

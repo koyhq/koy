@@ -135,7 +135,7 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
         Type = OsdType.Volume;
         Percent = pct;
         IsMuted = isMuted;
-        PercentText = pct.ToString();
+        PercentText = pct.ToString(System.Globalization.CultureInfo.CurrentCulture);
         IsActive = true;
 
         OnPropertyChanged(nameof(FillStarWidth));
@@ -154,7 +154,7 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
         Type = OsdType.Brightness;
         Percent = pct;
         IsMuted = false;
-        PercentText = pct.ToString();
+        PercentText = pct.ToString(System.Globalization.CultureInfo.CurrentCulture);
         IsActive = true;
 
         OnPropertyChanged(nameof(FillStarWidth));

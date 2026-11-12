@@ -288,7 +288,7 @@ public class ShortcutManagerTests
     public void Apply_reports_other_app_holding_the_shortcut_and_keeps_the_rest()
     {
         var fake = new FakeHotkeyService();
-        Hotkey.TryParse("Ctrl+Alt+R", out var taken);
+        Assert.True(Hotkey.TryParse("Ctrl+Alt+R", out var taken));
         fake.TakenByOthers.Add(taken);
         using var manager = new ShortcutManager(fake);
 

@@ -46,13 +46,13 @@ public static class CaptureUsagePolicy
         var mic = state.ActiveMicrophoneApp ?? unknownApp;
 
         if (state.IsCameraInUse && state.IsMicrophoneInUse)
-            return string.Format(formatCamAndMic, cam, mic);
+            return string.Format(System.Globalization.CultureInfo.CurrentCulture, formatCamAndMic, cam, mic);
 
         if (state.IsCameraInUse)
-            return string.Format(formatCam, cam);
+            return string.Format(System.Globalization.CultureInfo.CurrentCulture, formatCam, cam);
 
         if (state.IsMicrophoneInUse)
-            return string.Format(formatMic, mic);
+            return string.Format(System.Globalization.CultureInfo.CurrentCulture, formatMic, mic);
 
         return string.Empty;
     }

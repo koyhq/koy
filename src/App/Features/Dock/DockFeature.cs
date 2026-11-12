@@ -27,8 +27,9 @@ namespace Koy.App.Features.Dock;
 /// Açıldığında Windows görev çubuğunu gizler, kapandığında güvenle geri yükler (AGENTS.md #7 & #12).
 /// Çoklu monitör ortamında hedef ekranların her biri için bağımsız bir DockWindow örneği yönetir (M6.2).
 /// </summary>
-public sealed class DockFeature(AppSettings settings, SharedServices services) : IFeature
+public sealed class DockFeature(AppSettings settings, SharedServices services) : IFeature, IDisposable
 {
+    public void Dispose() => Stop();
     private sealed class DockWindowState : IDisposable
     {
         public required DisplayMonitor Monitor { get; set; }
@@ -953,9 +954,11 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
             if (!isFullscreen && !monitorMaximized && state.Hwnd != 0 && info.Handle != state.Hwnd)
             {
-                // Uygulamanın bağlam menüsü açıkken dock kendini öne almaz: menü dock'un arkasında kalırdı
+                // Uygulamanın veya Koy'un kendi bağlam menüsü açıkken dock kendini öne almaz: menü dock'un arkasında kalırdı
                 // (menü kapanınca ön plan yine değişir ve dock öne alınır).
-                if (!FullscreenDetector.IsScreenClippingHost(info.Handle) && !PopupMenuProbe.AnyVisibleMenu())
+                if (!FullscreenDetector.IsScreenClippingHost(info.Handle)
+                    && !PopupMenuProbe.AnyVisibleMenu()
+                    && !DockContextMenuManager.HasActiveMenu)
                 {
                     WindowStyles.ReassertTopmost(state.Hwnd);
                 }

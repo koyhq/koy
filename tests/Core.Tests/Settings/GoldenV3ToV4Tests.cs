@@ -79,7 +79,7 @@ public class GoldenV3ToV4Tests
     [Fact]
     public void DockItems_section_gets_pinned_order_and_folders()
     {
-        Assert.Equal(new[] { "Obsidian.lnk", "Firefox.lnk", "Terminal.lnk" }, S.DockItems.PinnedOrder);
+        Assert.Equal(["Obsidian.lnk", "Firefox.lnk", "Terminal.lnk"], S.DockItems.PinnedOrder);
         Assert.Equal(2, S.DockItems.Folders.Count);
         Assert.Equal(new DockFolder("f1a2b3c4", "Araçlar", ["calc.lnk", "notepad.lnk"]), S.DockItems.Folders[0]);
         Assert.Equal(new DockFolder("d5e6f7a8", "Oyunlar", ["steam.lnk"]), S.DockItems.Folders[1]);
@@ -101,8 +101,8 @@ public class GoldenV3ToV4Tests
         Assert.False(S.Notch.ShowPrivacyIndicator);
         Assert.False(S.Notch.ShowNotifications);
         Assert.True(S.Notch.NotificationsHideBody);
-        Assert.Equal(new[] { "home", "calendar", "system" }, S.Notch.EnabledPanels);
-        Assert.Equal(new[] { "bluetooth", "wifi" }, S.Notch.ControlCenterLayout);
+        Assert.Equal(["home", "calendar", "system"], S.Notch.EnabledPanels);
+        Assert.Equal(["bluetooth", "wifi"], S.Notch.ControlCenterLayout);
     }
 
     [Fact]
@@ -159,7 +159,7 @@ public class GoldenV3ToV4Tests
     {
         Assert.False(S.Search.RetainPrior);
         Assert.Equal(SearchHistoryMode.ImmediateCompletion, S.Search.HistoryMode);
-        Assert.Equal(new[] { "bookmarks", "files" }, S.Search.DisabledSources);
+        Assert.Equal(["bookmarks", "files"], S.Search.DisabledSources);
         Assert.True(S.Search.Pinned);
     }
 
@@ -194,6 +194,6 @@ public class GoldenV3ToV4Tests
 
     [Fact]
     public void QuickLaunch_section()
-        => Assert.Equal(new[] { @"C:\Apps\a.exe", @"C:\Docs" }, S.QuickLaunch.Items);
+        => Assert.Equal([@"C:\Apps\a.exe", @"C:\Docs"], S.QuickLaunch.Items);
 
 }

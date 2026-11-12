@@ -80,12 +80,12 @@ public class NotchShape : ContentControl
         InvalidateVisual();
     }
 
-    protected override void OnRender(DrawingContext dc)
+    protected override void OnRender(DrawingContext drawingContext)
     {
         if (_geometry is not null && Background is not null)
-            dc.DrawGeometry(Background, null, _geometry);
+            drawingContext.DrawGeometry(Background, null, _geometry);
 
-        base.OnRender(dc);
+        base.OnRender(drawingContext);
     }
 
     protected override HitTestResult? HitTestCore(PointHitTestParameters hitTestParameters)

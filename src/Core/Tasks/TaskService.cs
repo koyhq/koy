@@ -14,7 +14,7 @@ public sealed class TaskService : ITaskService
     {
         _now = now ?? (() => DateTimeOffset.Now);
         _file = new JsonListFile<TaskItem>(
-            path ?? JsonListFile<TaskItem>.InSettingsFolder("tasks.json"),
+            path ?? JsonListFile.InSettingsFolder("tasks.json"),
             DataJsonContext.Default.ListTaskItem,
             onError);
         _items = _file.Load().Where(t => !string.IsNullOrWhiteSpace(t.Title)).ToList();

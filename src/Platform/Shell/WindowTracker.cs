@@ -260,7 +260,8 @@ public sealed class WindowTracker : IWindowTracker
 
             // Süreç bilgisi
             uint pid = 0;
-            PInvoke.GetWindowThreadProcessId(hwnd, &pid);
+            if (PInvoke.GetWindowThreadProcessId(hwnd, &pid) == 0)
+                pid = 0;
 
             // Mağaza (UWP) penceresinin sahibi ApplicationFrameHost.exe'dir ve bütün Mağaza uygulamalarına ortaktır.
             // Gerçek uygulama sürecini çocuk CoreWindow'dan bul; bulunamazsa 0 (askıdaki uygulama): "Sonlandır" çalışmaz
@@ -270,7 +271,7 @@ public sealed class WindowTracker : IWindowTracker
                 pid = ResolveUwpProcessId(hwnd, pid);
 
             // AUMID: Windows görev çubuğu düğmeleri bununla gruplar; sabitli kısayolla eşleşmede önce o kullanılır.
-            var aumid = GetAppUserModelId(hwnd);
+            var aumid = GetAppUserModelId(hwnd, pid);
 
             var procPath = GetProcessPath(pid);
 
@@ -372,7 +373,7 @@ public sealed class WindowTracker : IWindowTracker
         // Koy'un kendi pencerelerinin (dock, açılır pencereler, önizleme kutucuğu, thumbnail host, menüler)
         // olayları yoksayılır; aksi halde popup açılışında döngüsel tetiklenme (flicker) ve kilitlenme oluşur.
         uint pid = 0;
-        unsafe { PInvoke.GetWindowThreadProcessId(hwnd, &pid); }
+        unsafe { _ = PInvoke.GetWindowThreadProcessId(hwnd, &pid); }
         if (pid == (uint)Environment.ProcessId)
             return;
 
@@ -509,8 +510,7 @@ public sealed class WindowTracker : IWindowTracker
         PInvoke.EnumChildWindows(frameWindow, (HWND child, LPARAM _) =>
         {
             uint childPid = 0;
-            PInvoke.GetWindowThreadProcessId(child, &childPid);
-            if (childPid != 0 && childPid != framePid)
+            if (PInvoke.GetWindowThreadProcessId(child, &childPid) != 0 && childPid != 0 && childPid != framePid)
             {
                 result = childPid;
                 return false;
@@ -539,7 +539,7 @@ public sealed class WindowTracker : IWindowTracker
     private readonly object _aumidGate = new();
     private static readonly TimeSpan EmptyAumidRetry = TimeSpan.FromSeconds(10);
 
-    private string? GetAppUserModelId(HWND hwnd)
+    private string? GetAppUserModelId(HWND hwnd, uint pid)
     {
         lock (_aumidGate)
         {
@@ -548,7 +548,8 @@ public sealed class WindowTracker : IWindowTracker
                 return cached.Value;
         }
 
-        var value = AppUserModelIdReader.ForWindow(hwnd);
+        // Paketli uygulamalar (Spotify, Claude…) pencereye değil pakete AUMID verir: süreçten oku.
+        var value = AppUserModelIdReader.ForWindow(hwnd) ?? AppUserModelIdReader.ForProcess(pid);
         lock (_aumidGate)
             _aumidCache[hwnd.Value] = (value, DateTime.UtcNow);
         return value;

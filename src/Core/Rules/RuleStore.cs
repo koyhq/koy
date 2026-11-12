@@ -11,7 +11,7 @@ public sealed class RuleStore(string path)
 {
     private readonly JsonListFile<RuleDraft> _file = new(path, DataJsonContext.Default.ListRuleDraft);
 
-    public static string DefaultPath { get; } = JsonListFile<RuleDraft>.InSettingsFolder("rules.json");
+    public static string DefaultPath { get; } = JsonListFile.InSettingsFolder("rules.json");
 
     public string Path => _file.Path;
 

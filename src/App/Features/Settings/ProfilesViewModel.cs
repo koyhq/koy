@@ -157,13 +157,13 @@ public sealed partial class ProfilesViewModel : ObservableObject
         return names.Count == 0 ? Strings.Get("ProfileCorrupt") : string.Join(", ", names);
     }
 
-    private IReadOnlyList<ProfileSection> SelectedSections() =>
+    private List<ProfileSection> SelectedSections() =>
         Sections.Where(s => s.IsSelected).Select(s => s.Section).ToList();
 
     private void Report(string key, bool error = false, params object[] args)
     {
         var format = Strings.Get(key);
-        StatusText = args.Length == 0 ? format : string.Format(format, args);
+        StatusText = args.Length == 0 ? format : string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
         StatusIsError = error;
     }
 
@@ -301,7 +301,7 @@ public sealed partial class ProfilesViewModel : ObservableObject
         PendingSectionsText = DescribeSections(imported.Sections);
         PendingChangesText = changed.Count == 0
             ? Strings.Get("ProfileImportNoChanges")
-            : string.Format(Strings.Get("ProfileImportChanges"), DescribeSections(changed));
+            : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("ProfileImportChanges"), DescribeSections(changed));
         HasPending = true;
         StatusText = "";
     }

@@ -44,7 +44,7 @@ public sealed class InstalledAppsService : IInstalledAppsService
     /// <summary>Uygulamanın simgesi ve başlatma yolu için kabuk adı.</summary>
     public static string ShellPath(InstalledApp app) => AppsFolder + "\\" + app.Id;
 
-    private static unsafe IReadOnlyList<InstalledApp> Enumerate(CancellationToken cancellationToken)
+    private static unsafe List<InstalledApp> Enumerate(CancellationToken cancellationToken)
     {
         var apps = new List<InstalledApp>();
         object? folderObject = null;
