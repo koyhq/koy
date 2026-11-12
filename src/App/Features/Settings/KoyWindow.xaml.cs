@@ -47,6 +47,9 @@ public partial class KoyWindow : Window
 
     private const double BaseWidth = 880, BaseHeight = 680, BaseMinHeight = 600;
 
+    // Son uygulanan ölçek; Applied her görünüm değişikliğinde (vurgu rengi vb.) gelir, ölçek aynıysa pencereye dokunulmaz.
+    private double _uiScale = double.NaN;
+
     /// <summary>
     /// Koy ölçeği (issue #71): kök öğeye LayoutTransform, pencere boyu ölçekle; çalışma alanına sığmıyorsa sığacak
     /// kadar küçültülür (FontScalePolicy.FitScale). Çentik tuvali sabit kalır (AGENTS #13), ölçek yalnız bu pencerede.
@@ -56,13 +59,21 @@ public partial class KoyWindow : Window
         var percent = ThemeManager.LastSettings?.Appearance.UiScalePercent ?? Koy.Core.Appearance.FontScalePolicy.DefaultUiScale;
         var work = SystemParameters.WorkArea;
         var scale = Koy.Core.Appearance.FontScalePolicy.FitScale(percent, BaseWidth, BaseHeight, work.Width, work.Height);
+        if (scale == _uiScale)
+            return;
+
         if (Content is FrameworkElement root)
             root.LayoutTransform = scale == 1.0 ? System.Windows.Media.Transform.Identity : new System.Windows.Media.ScaleTransform(scale, scale);
 
+        // İlk açılışta taban boy; sonra kullanıcının verdiği boy ölçekle orantılı büyür/küçülür, çalışma alanını aşmaz.
+        var ratio = double.IsNaN(_uiScale) ? 0 : scale / _uiScale;
+        _uiScale = scale;
         MinWidth = BaseWidth * scale;
         MinHeight = BaseMinHeight * scale;
-        Width = BaseWidth * scale;
-        Height = BaseHeight * scale;
+        Width = ratio > 0 ? Math.Min(Width * ratio, work.Width) : BaseWidth * scale;
+        Height = ratio > 0 ? Math.Min(Height * ratio, work.Height) : BaseHeight * scale;
+        Width = Math.Max(Width, MinWidth);
+        Height = Math.Max(Height, MinHeight);
     }
 
     /// <summary>Sayfa değişince yeni sayfa kısa bir solmayla girer; hareket kapalıysa anında geçer.</summary>
