@@ -168,4 +168,20 @@ public class DockPresentationMathTests
         Assert.False(dock.HiddenEdgeLine);
         Assert.False(dock.IndicatorOnePerWindow);
     }
+
+    [Theory]
+    [InlineData(DockRevealTrigger.EdgeTouch, 500, 0)]
+    [InlineData(DockRevealTrigger.EdgeHold, 500, 500)]
+    [InlineData(DockRevealTrigger.EdgeHold, 9999, 2000)]
+    [InlineData(DockRevealTrigger.EdgeHold, -3, 0)]
+    [InlineData(DockRevealTrigger.ShortcutOnly, 300, 300)]
+    public void Edge_reveal_delay_follows_trigger_and_is_clamped(DockRevealTrigger trigger, int ms, int expectedMs) =>
+        Assert.Equal(TimeSpan.FromMilliseconds(expectedMs), DockPresentationMath.EdgeRevealDelay(trigger, ms));
+
+    [Theory]
+    [InlineData(DockIndicatorStyle.Dot, true)]
+    [InlineData(DockIndicatorStyle.Line, true)]
+    [InlineData(DockIndicatorStyle.Highlight, false)]
+    public void Only_highlight_style_draws_no_mark(DockIndicatorStyle style, bool expected) =>
+        Assert.Equal(expected, DockPresentationMath.DrawsIndicatorMark(style));
 }

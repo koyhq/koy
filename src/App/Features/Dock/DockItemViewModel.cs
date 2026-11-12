@@ -176,8 +176,34 @@ public sealed partial class DockItemViewModel : DockEntryViewModel
     [ObservableProperty]
     private ImageSource? _icon;
 
-    /// <summary>Çalışan göstergesi stili "Çizgi" mi (ayar: 0 = nokta, 1 = çizgi). Öğe oluşturulurken verilir.</summary>
-    public bool UseLineIndicator { get; init; }
+    /// <summary>Gösterge ve rozet görünümü (ayardan türetilir, öğe oluşturulurken verilir).</summary>
+    public DockPresentationStyle Presentation
+    {
+        get => _presentation;
+        init
+        {
+            _presentation = value;
+            RefreshPresentation();
+        }
+    }
+
+    private DockPresentationStyle _presentation = DockPresentationStyle.Default;
+
+    /// <summary>Simgenin altında çizilecek gösterge sayısı (Core: pencere başına nokta ya da tek gösterge).</summary>
+    [ObservableProperty]
+    private int _indicatorCount;
+
+    /// <summary>Birden çok nokta çizilecek mi (pencere başına kip).</summary>
+    public bool HasMultiDots => IndicatorCount > 1;
+
+    /// <summary>Nokta şablonu için sıra listesi (uzunluğu <see cref="IndicatorCount"/>).</summary>
+    public IReadOnlyList<int> IndicatorDots { get; private set; } = [];
+
+    [ObservableProperty]
+    private bool _showBadge;
+
+    [ObservableProperty]
+    private string _badgeText = "";
 
     public bool HasOpenWindows => Windows.Count > 0;
     public DockWindowEntry? SingleWindow => Windows.Count == 1 ? Windows[0] : null;
@@ -197,11 +223,29 @@ public sealed partial class DockItemViewModel : DockEntryViewModel
         _hasBadge = model.BadgeCount > 0;
         _windows = model.Windows ?? [];
         _isMultiWindow = _windows.Count > 1;
+        RefreshPresentation();
 
         if (model.IconData is { Length: > 0 })
         {
             _icon = LoadImage(model.IconData);
         }
+    }
+
+    // Gösterge sayısı ve rozet kararı Core'dadır; burada yalnız sonuç özelliklere yazılır.
+    private void RefreshPresentation()
+    {
+        var windowCount = IsRunning ? Math.Max(1, Windows.Count) : 0;
+        var count = DockPresentationMath.IndicatorCount(windowCount, Presentation.IndicatorStyle, Presentation.OnePerWindow);
+        if (count != IndicatorCount || IndicatorDots.Count != count)
+        {
+            IndicatorDots = Enumerable.Range(0, count).ToArray();
+            IndicatorCount = count;
+            OnPropertyChanged(nameof(IndicatorDots));
+            OnPropertyChanged(nameof(HasMultiDots));
+        }
+
+        ShowBadge = Presentation.ShowBadges && DockPresentationMath.ShowsBadge(BadgeCount, Presentation.BadgeStyle);
+        BadgeText = DockPresentationMath.BadgeText(BadgeCount, Presentation.BadgeStyle);
     }
 
     public void Update(DockItem model)
@@ -223,6 +267,8 @@ public sealed partial class DockItemViewModel : DockEntryViewModel
             OnPropertyChanged(nameof(HasOpenWindows));
             OnPropertyChanged(nameof(SingleWindow));
         }
+
+        RefreshPresentation();
 
         if (_customIcon is null && Icon is null && model.IconData is { Length: > 0 })
         {

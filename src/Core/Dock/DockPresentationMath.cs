@@ -74,6 +74,18 @@ public static class DockPresentationMath
     }
 
     /// <summary>
+    /// Kenar izleyicisinin bekleme süresi. Kenara dokunmak beklemesizdir; diğer tetikleyiciler (kısayol dahil: kısayol
+    /// yolu henüz yok, kenar yine açabilmeli) ayardaki süreyi bekler.
+    /// </summary>
+    public static TimeSpan EdgeRevealDelay(DockRevealTrigger trigger, int revealDelayMs) =>
+        trigger == DockRevealTrigger.EdgeTouch
+            ? TimeSpan.Zero
+            : TimeSpan.FromMilliseconds(ClampDelay(revealDelayMs));
+
+    /// <summary>Çalışma göstergesi simgenin altına nokta/çizgi çizer mi (arka plan vurgusu çizmez).</summary>
+    public static bool DrawsIndicatorMark(DockIndicatorStyle style) => style != DockIndicatorStyle.Highlight;
+
+    /// <summary>
     /// Gizli dock'un altındaki ince çizgi. Ayar açıksa, dock gizliyse ve tam ekran bir uygulama yoksa görünür;
     /// tam ekranda çizgi her zaman gizlenir (oyun ve video kenarda bir şerit görmesin).
     /// </summary>

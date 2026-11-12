@@ -441,6 +441,36 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _dockShowBadges = true;
 
     [ObservableProperty]
+    private DockColorSource _dockIndicatorColor = DockColorSource.Accent;
+
+    [ObservableProperty]
+    private string _dockIndicatorCustomColor = "";
+
+    [ObservableProperty]
+    private bool _dockIndicatorOnePerWindow;
+
+    [ObservableProperty]
+    private DockBadgeStyle _dockBadgeStyle = DockBadgeStyle.Number;
+
+    [ObservableProperty]
+    private DockBadgeCorner _dockBadgeCorner = DockBadgeCorner.TopRight;
+
+    [ObservableProperty]
+    private DockColorSource _dockBadgeColor = DockColorSource.Accent;
+
+    [ObservableProperty]
+    private string _dockBadgeCustomColor = "";
+
+    [ObservableProperty]
+    private DockRevealTrigger _dockRevealTrigger = DockRevealTrigger.EdgeHold;
+
+    [ObservableProperty]
+    private int _dockRevealDelayMs = (int)EdgeRevealTracker.DefaultDelay.TotalMilliseconds;
+
+    [ObservableProperty]
+    private bool _dockHiddenEdgeLine;
+
+    [ObservableProperty]
     private bool _dockShowStartButton = true;
 
     [ObservableProperty]
@@ -890,6 +920,16 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             DockDodgeDelayMs = s.Dock.DodgeDelayMs;
             DockIconSize = s.Dock.IconSize > 0 ? s.Dock.IconSize : 28.0;
             DockIndicatorStyle = s.Dock.IndicatorStyle;
+            DockIndicatorColor = s.Dock.IndicatorColor;
+            DockIndicatorCustomColor = s.Dock.IndicatorCustomColor ?? "";
+            DockIndicatorOnePerWindow = s.Dock.IndicatorOnePerWindow;
+            DockBadgeStyle = s.Dock.BadgeStyle;
+            DockBadgeCorner = s.Dock.BadgeCorner;
+            DockBadgeColor = s.Dock.BadgeColor;
+            DockBadgeCustomColor = s.Dock.BadgeCustomColor ?? "";
+            DockRevealTrigger = s.Dock.RevealTrigger;
+            DockRevealDelayMs = s.Dock.RevealDelayMs;
+            DockHiddenEdgeLine = s.Dock.HiddenEdgeLine;
             DockNewTrayIconVisibility = s.Dock.NewTrayIconVisibility == Koy.Core.Tray.TrayIconVisibility.Hidden
                 ? Koy.Core.Tray.TrayIconVisibility.Hidden
                 : Koy.Core.Tray.TrayIconVisibility.Overflow;
@@ -1274,6 +1314,16 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 DodgeDelayMs = DockDodgeDelayMs,
                 IconSize = DockIconSize,
                 IndicatorStyle = DockIndicatorStyle,
+                IndicatorColor = DockIndicatorColor,
+                IndicatorCustomColor = DockIndicatorCustomColor,
+                IndicatorOnePerWindow = DockIndicatorOnePerWindow,
+                BadgeStyle = DockBadgeStyle,
+                BadgeCorner = DockBadgeCorner,
+                BadgeColor = DockBadgeColor,
+                BadgeCustomColor = DockBadgeCustomColor,
+                RevealTrigger = DockRevealTrigger,
+                RevealDelayMs = DockRevealDelayMs,
+                HiddenEdgeLine = DockHiddenEdgeLine,
                 MiddleClickAction = MiddleClickAction,
                 NewTrayIconVisibility = DockNewTrayIconVisibility,
                 TrayAppVisibility = TrayAppsForSave()

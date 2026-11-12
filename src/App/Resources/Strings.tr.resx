@@ -2826,5 +2826,92 @@
   <data name="ProfileErrorSaveFailed" xml:space="preserve">
     <value>Profil listesi kaydedilemedi. Disk alanını kontrol edip yeniden dene.</value>
   </data>
+  <data name="IndicatorHighlight" xml:space="preserve">
+    <value>Arka plan</value>
+  </data>
+  <data name="IndicatorColorTitle" xml:space="preserve">
+    <value>Gösterge rengi</value>
+  </data>
+  <data name="ColorAccent" xml:space="preserve">
+    <value>Vurgu</value>
+  </data>
+  <data name="ColorNeutral" xml:space="preserve">
+    <value>Nötr</value>
+  </data>
+  <data name="ColorCustom" xml:space="preserve">
+    <value>Özel</value>
+  </data>
+  <data name="ColorCustomHint" xml:space="preserve">
+    <value>Özel renk #RRGGBB biçiminde (geçersizse vurgu rengi kullanılır)</value>
+  </data>
+  <data name="IndicatorOnePerWindowTitle" xml:space="preserve">
+    <value>Pencere başına bir nokta</value>
+  </data>
+  <data name="IndicatorOnePerWindowDesc" xml:space="preserve">
+    <value>Nokta kipinde her açık pencere için bir nokta gösterir (en çok üç).</value>
+  </data>
+  <data name="DockBadgesHeader" xml:space="preserve">
+    <value>ROZETLER</value>
+  </data>
+  <data name="DockShowBadgesTitle" xml:space="preserve">
+    <value>Rozetleri göster</value>
+  </data>
+  <data name="BadgeStyleTitle" xml:space="preserve">
+    <value>Rozet biçimi</value>
+  </data>
+  <data name="BadgeNumber" xml:space="preserve">
+    <value>Sayı</value>
+  </data>
+  <data name="BadgeDotOnly" xml:space="preserve">
+    <value>Yalnız nokta</value>
+  </data>
+  <data name="BadgeCornerTitle" xml:space="preserve">
+    <value>Rozet köşesi</value>
+  </data>
+  <data name="CornerTopLeft" xml:space="preserve">
+    <value>Sol üst</value>
+  </data>
+  <data name="CornerTopRight" xml:space="preserve">
+    <value>Sağ üst</value>
+  </data>
+  <data name="CornerBottomLeft" xml:space="preserve">
+    <value>Sol alt</value>
+  </data>
+  <data name="CornerBottomRight" xml:space="preserve">
+    <value>Sağ alt</value>
+  </data>
+  <data name="BadgeColorTitle" xml:space="preserve">
+    <value>Rozet rengi</value>
+  </data>
+  <data name="RevealTriggerTitle" xml:space="preserve">
+    <value>Açılma tetikleyicisi</value>
+  </data>
+  <data name="RevealTriggerDesc" xml:space="preserve">
+    <value>Gizli dock, imleç alt kenara varınca nasıl geri gelir.</value>
+  </data>
+  <data name="RevealEdgeTouch" xml:space="preserve">
+    <value>Kenara dokun</value>
+  </data>
+  <data name="RevealEdgeHold" xml:space="preserve">
+    <value>Kenarda bekle</value>
+  </data>
+  <data name="RevealDelayTitle" xml:space="preserve">
+    <value>Kenarda bekleme süresi</value>
+  </data>
+  <data name="RevealDelayShort" xml:space="preserve">
+    <value>Kısa</value>
+  </data>
+  <data name="RevealDelayNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="RevealDelayLong" xml:space="preserve">
+    <value>Uzun</value>
+  </data>
+  <data name="HiddenEdgeLineTitle" xml:space="preserve">
+    <value>Gizliyken çizgi</value>
+  </data>
+  <data name="HiddenEdgeLineDesc" xml:space="preserve">
+    <value>Dock gizliyken alt kenarda ince bir çizgi gösterir. Tam ekran uygulamalarda hiç görünmez.</value>
+  </data>
 </root>
 
