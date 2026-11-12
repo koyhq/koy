@@ -66,6 +66,9 @@ public sealed class InstalledRegistry
         return null;
     }
 
+    /// <summary>Bu türden "uygulandı" işaretli bir kayıt var mı (tema zinciri: ilk özgün yedeği korumak için).</summary>
+    public bool HasApplied(ExtensionKind kind) => Entries.Any(e => e.Kind == kind && e.Applied);
+
     public static bool TryBuild(IEnumerable<InstalledEntry> entries, out InstalledRegistry registry, out InstalledRegistryError error)
     {
         registry = Empty;
@@ -159,11 +162,32 @@ public sealed record InstalledRegistryFile(int Version, List<InstalledEntry> Ext
 [JsonSerializable(typeof(InstalledRegistryFile))]
 internal sealed partial class StoreJsonContext : JsonSerializerContext;
 
+/// <summary>Kayıt dosyasının okuma sonucu: yazmaya izin verip vermediğini belirler.</summary>
+internal enum RegistryLoadState
+{
+    /// <summary>Dosya okundu (geçerli ya da yalnız bozuk kayıtlar elendi).</summary>
+    Ok,
+
+    /// <summary>Dosya yok: boş kayıt, yazmak güvenli.</summary>
+    Missing,
+
+    /// <summary>Bozuk JSON ya da bilinmeyen eski/yanlış biçim: yazmadan önce <c>.bad</c> olarak kenara alınır.</summary>
+    Corrupt,
+
+    /// <summary>Okunamadı (G/Ç, yetki): dosya belki sağlam, üzerine yazılmaz.</summary>
+    Unreadable,
+
+    /// <summary>Daha yeni sürümün dosyası: bu sürüm asla ezmez.</summary>
+    NewerVersion,
+}
+
 /// <summary>
-/// <c>%AppData%\Koy\extensions.json</c> okuma/yazma. Bozuk, okunamayan ya da yanlış sürümlü dosya boş kayıt
-/// sayılır (hata crash.log'a yazılır, çağıran çökmez); geçerli dosyada bozuk tek tek kayıtlar, tekrar eden
-/// kimlikler ve 64 sınırını aşanlar atılır. Yazma geçici dosya + taşıma ile yapılır (yarım dosya kalmaz).
-/// Yansımalı serileştirme yok: kaynak üreticili <see cref="StoreJsonContext"/> (AGENTS #10).
+/// <c>%AppData%\Koy\extensions.json</c> okuma/yazma. Okuma hiç fırlatmaz (hata crash.log'a yazılır); okunamayan
+/// dosya <see cref="Load"/>'da boş görünür ama <see cref="Update"/> onu ezmez: dosya yoksa boş kayıttan yazılır,
+/// bozuksa önce <c>.bad</c> olarak kenara alınır, okunamıyorsa ya da daha yeni sürümse hiç yazılmaz (false).
+/// Geçerli dosyada bozuk tek tek kayıtlar, tekrar eden kimlikler ve 64 sınırını aşanlar atılır. Yazma geçici
+/// dosya + taşıma ile yapılır (yarım dosya kalmaz). Yansımalı serileştirme yok: kaynak üreticili
+/// <see cref="StoreJsonContext"/> (AGENTS #10).
 /// </summary>
 public sealed class InstalledRegistryStore(string? path = null, Action<string, Exception>? onError = null)
 {
@@ -180,44 +204,85 @@ public sealed class InstalledRegistryStore(string? path = null, Action<string, E
     {
         lock (Gate)
         {
-            return LoadCore();
+            return LoadCore(out _);
         }
     }
 
-    public bool Save(InstalledRegistry registry)
-    {
-        lock (Gate)
-        {
-            return SaveCore(registry);
-        }
-    }
+    /// <summary>Kaydı olduğu gibi yazar; <see cref="Update"/> ile aynı koruma kuralları (okunamayan dosya ezilmez).</summary>
+    public bool Save(InstalledRegistry registry) => Update(_ => registry);
 
     /// <summary>
     /// Kaydı okur, <paramref name="change"/> ile değiştirir ve yazar; hepsi tek kilit altında. Dönüş null ise
-    /// değişiklik yapılmaz. Yazılırsa true.
+    /// değişiklik yapılmaz. Yazılırsa true; dosya okunamıyorsa ya da daha yeni sürümse false (dosyaya dokunulmaz).
     /// </summary>
     public bool Update(Func<InstalledRegistry, InstalledRegistry?> change)
     {
         lock (Gate)
         {
-            var next = change(LoadCore());
+            var current = LoadCore(out var state);
+            switch (state)
+            {
+                case RegistryLoadState.Unreadable:
+                case RegistryLoadState.NewerVersion:
+                    return false;
+                case RegistryLoadState.Corrupt:
+                    // Kullanıcı kurtarabilsin diye bozuk dosya silinmez, kenara alınır; alınamazsa yazılmaz.
+                    if (!MoveAside())
+                    {
+                        return false;
+                    }
+
+                    break;
+            }
+
+            var next = change(current);
             return next is not null && SaveCore(next);
         }
     }
 
-    private InstalledRegistry LoadCore()
+    private bool MoveAside()
     {
+        try
+        {
+            var target = Path + ".bad";
+            if (File.Exists(target))
+            {
+                // Önceki yedek ezilmez.
+                target = Path + "." + DateTime.UtcNow.ToString("yyyyMMddHHmmss", System.Globalization.CultureInfo.InvariantCulture) + ".bad";
+            }
+
+            File.Move(Path, target, overwrite: true);
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            _onError("InstalledRegistryStore.MoveAside", ex);
+            return false;
+        }
+    }
+
+    private InstalledRegistry LoadCore(out RegistryLoadState state)
+    {
+        state = RegistryLoadState.Ok;
         try
         {
             if (!File.Exists(Path))
             {
+                state = RegistryLoadState.Missing;
                 return InstalledRegistry.Empty;
             }
 
             using var stream = File.OpenRead(Path);
             var file = JsonSerializer.Deserialize(stream, StoreJsonContext.Default.InstalledRegistryFile);
-            if (file?.Extensions is null || file.Version != CurrentVersion)
+            if (file is null || file.Version > CurrentVersion)
             {
+                state = file is null ? RegistryLoadState.Corrupt : RegistryLoadState.NewerVersion;
+                return InstalledRegistry.Empty;
+            }
+
+            if (file.Extensions is null || file.Version != CurrentVersion)
+            {
+                state = RegistryLoadState.Corrupt;
                 return InstalledRegistry.Empty;
             }
 
@@ -239,9 +304,16 @@ public sealed class InstalledRegistryStore(string? path = null, Action<string, E
 
             return InstalledRegistry.TryBuild(good, out var registry, out _) ? registry : InstalledRegistry.Empty;
         }
-        catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException or NotSupportedException)
+        catch (Exception ex) when (ex is JsonException or NotSupportedException)
         {
             _onError("InstalledRegistryStore.Load", ex);
+            state = RegistryLoadState.Corrupt;
+            return InstalledRegistry.Empty;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            _onError("InstalledRegistryStore.Load", ex);
+            state = RegistryLoadState.Unreadable;
             return InstalledRegistry.Empty;
         }
     }

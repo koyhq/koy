@@ -1,6 +1,12 @@
 {
-  "summary": "Calm dark look with solid surfaces and longer focus sessions.",
-  "description": "A settings profile for a quiet setup: dark theme, Windows accent color, solid material, calm animations and 50/10/20 minute focus timers. Importing adds it to your profile library; it is applied only when you choose it in Profiles.",
+  "summary": {
+    "en": "Calm dark look with solid surfaces and longer focus sessions.",
+    "tr": "Düz yüzeyli, sakin koyu görünüm ve daha uzun odak oturumları."
+  },
+  "description": {
+    "en": "A settings profile for a quiet setup: dark theme, Windows accent color, solid material, calm animations and 50/10/20 minute focus timers. Importing adds it to your profile library; it is applied only when you choose it in Profiles.",
+    "tr": "Sakin bir kurulum için ayar profili: koyu tema, Windows vurgu rengi, düz malzeme, sakin animasyonlar ve 50/10/20 dakikalık odak sayaçları. İçe aktarınca profil kitaplığına eklenir; yalnız Profiller bölümünden seçtiğinde uygulanır."
+  },
   "homepage": "https://github.com/koyhq/koy",
   "updated": "2026-11-12",
   "downloads": 0

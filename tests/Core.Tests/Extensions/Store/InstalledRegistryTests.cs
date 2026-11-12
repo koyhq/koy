@@ -207,4 +207,72 @@ public class InstalledRegistryTests
         Assert.False(store.Save(Registry(Installed("aa"))));
         Assert.Single(errors);
     }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("{ bozuk")]
+    [InlineData("null")]
+    [InlineData("{ \"version\": 0, \"extensions\": [] }")]
+    public void Update_moves_corrupt_file_aside_then_writes(string content)
+    {
+        using var dir = new TempDir();
+        var path = dir.Combine("extensions.json");
+        File.WriteAllText(path, content);
+        var store = new InstalledRegistryStore(path, (_, _) => { });
+
+        Assert.True(store.Update(r => r.TryUpsert(Installed("aa"), out var next, out _) ? next : null));
+
+        Assert.Equal(content, File.ReadAllText(path + ".bad"));
+        Assert.Equal("aa", Assert.Single(store.Load().Entries).Id);
+    }
+
+    [Fact]
+    public void Update_keeps_an_earlier_bad_backup()
+    {
+        using var dir = new TempDir();
+        var path = dir.Combine("extensions.json");
+        File.WriteAllText(path + ".bad", "ilk");
+        File.WriteAllText(path, "{ bozuk");
+        var store = new InstalledRegistryStore(path, (_, _) => { });
+
+        Assert.True(store.Update(r => r.TryUpsert(Installed("aa"), out var next, out _) ? next : null));
+
+        Assert.Equal("ilk", File.ReadAllText(path + ".bad"));
+        Assert.Equal(2, Directory.GetFiles(dir.Path, "extensions.json*.bad").Length);
+    }
+
+    [Fact]
+    public void Update_never_overwrites_a_newer_version_file()
+    {
+        using var dir = new TempDir();
+        var path = dir.Combine("extensions.json");
+        const string newer = "{ \"version\": 99, \"extensions\": [] }";
+        File.WriteAllText(path, newer);
+        var store = new InstalledRegistryStore(path);
+
+        Assert.False(store.Update(r => r.TryUpsert(Installed("aa"), out var next, out _) ? next : null));
+        Assert.False(store.Save(Registry(Installed("aa"))));
+
+        Assert.Equal(newer, File.ReadAllText(path));
+        Assert.False(File.Exists(path + ".bad"));
+    }
+
+    [Fact]
+    public void Update_does_not_write_when_the_file_is_unreadable()
+    {
+        using var dir = new TempDir();
+        var path = dir.Combine("extensions.json");
+        var store = new InstalledRegistryStore(path, (_, _) => { });
+        Assert.True(store.Save(Registry(Installed("aa"))));
+        var before = File.ReadAllText(path);
+
+        // Dosya başka bir süreçte özel kilitli gibi: okuma IOException verir.
+        using (new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None))
+        {
+            Assert.False(store.Update(r => r.Remove("aa")));
+        }
+
+        Assert.Equal(before, File.ReadAllText(path));
+        Assert.Equal("aa", Assert.Single(store.Load().Entries).Id);
+    }
 }

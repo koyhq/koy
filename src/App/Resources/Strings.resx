@@ -3669,6 +3669,12 @@
   <data name="ExtApplySaveFailed" xml:space="preserve">
     <value>The settings could not be saved.</value>
   </data>
+  <data name="ExtUnexpectedError" xml:space="preserve">
+    <value>Something went wrong. Please try again.</value>
+  </data>
+  <data name="ExtRegistrySaveFailed" xml:space="preserve">
+    <value>Koy could not record the change in its extension list. Nothing was changed.</value>
+  </data>
   <data name="ExtApplyErrorInvalidPath" xml:space="preserve">
     <value>The extension's files are missing or not usable.</value>
   </data>

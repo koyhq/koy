@@ -36,7 +36,7 @@ internal static class ExtensionSnapshots
             if (!file.StartsWith(repoRoot, StringComparison.OrdinalIgnoreCase) || !File.Exists(file))
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
 
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(File.ReadAllBytes(file)) });
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(File.ReadAllBytes(file)), RequestMessage = request });
         }
     }
 

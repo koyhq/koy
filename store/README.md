@@ -7,7 +7,9 @@ pull request ile eklenir, bakımcı inceler. Tasarım ve dosya biçimleri:
 > **English summary.** `store/index.json` is the catalog the in-app store reads. Packages are data-only `.koyext` zips
 > (theme, icon pack, live background, settings profile): no code, no XAML. To submit one: fork, add
 > `store/src/<id>/`, run `python scripts/build-store.py`, commit the generated files, open a PR. A maintainer reviews it
-> against the checklist below. `python scripts/build-store.py --check` (also run by CI) verifies everything.
+> against the checklist below. `summary` and `description` in `store.json` are either a plain string or an object of
+> language to text (`{"en": "...", "tr": "..."}`, `en` required); the app shows the UI language and falls back to English.
+> The extension name stays untranslated. `python scripts/build-store.py --check` (also run by CI) verifies everything.
 
 ## Klasörler
 
@@ -30,7 +32,7 @@ store/
    | `manifest.json` | `{"id","name","version":"1.0.0","author","kind","license","capabilities":[],"entryKind":"data"}` |
    | içerik | `kind`'a göre: `theme.json` (theme), `icons/<Uygulama>.png\|ico\|svg` (iconpack), `background.gif\|webp\|mp4\|webm` (background), `profile.json` (profile) |
    | `preview.png` | Mağaza kartı görseli, 320×180 önerilir, en çok 1 MB |
-   | `store.json` | Yalnız indekse girer, pakete girmez: `summary` (≤200), `description` (≤2000, düz metin), `homepage` (https), `updated` (`YYYY-MM-DD`), `downloads` (0) |
+   | `store.json` | Yalnız indekse girer, pakete girmez: `summary` (≤200), `description` (≤2000, düz metin; ikisi de düz metin ya da `{"en": "...", "tr": "..."}` nesnesi, nesnede `en` zorunlu), `homepage` (https), `updated` (`YYYY-MM-DD`), `downloads` (0) |
 
    Örnekler için `store/src/` altındaki mevcut paketlere bakın.
 4. `python scripts/build-store.py` çalıştırın (yalnız Python 3 standart kütüphanesi gerekir). Paketi, önizlemeyi ve `index.json`'u üretir.
@@ -47,7 +49,7 @@ Sürüm `major.minor.patch` olmalı; kullanıcılar sürüm farkıyla "Güncelle
 - **Marka logosu ve telif ihlali yok.** Başka uygulamaların resmî simgeleri/logoları, lisanssız görseller, başkasının eserinin kopyası kabul edilmez. Simge paketlerinde kendi çizdiğiniz şekilleri kullanın.
 - **Temalar** `user-theme.json` biçimindedir: yalnız izinli `Koy…` kaynak anahtarları, renkler `#RRGGBB` / `#AARRGGBB`; dosya ≤ 64 KB. Pencere/tuval boyutları değiştirilemez.
 - **Profiller** `koy-profile` biçimindedir; makineye özgü alanlar (simge paketi klasörü, canlı arka plan yolu, dock başlat simgesi yolu) yazılmaz. Kısayol çakışması ve geçersiz değer reddedilir.
-- **Boyut sınırları:** paket (indirme) ≤ 25 MB, açılmış toplam ≤ 50 MB, en çok 512 dosya, canlı arka plan dosyası ≤ 64 MB (pratikte ≤ 500 KB hedefleyin: çentik 620×352; GIF en çok 120 kare tutulur), `index.json` ≤ 1 MB ve en çok 500 öğe. Açıklama ve özet düz metindir, İngilizce yazılır.
+- **Boyut sınırları:** paket (indirme) ≤ 25 MB, açılmış toplam ≤ 50 MB, en çok 512 dosya, canlı arka plan dosyası ≤ 64 MB (pratikte ≤ 500 KB hedefleyin: çentik 620×352; GIF en çok 120 kare tutulur), `index.json` ≤ 1 MB ve en çok 500 öğe. Açıklama ve özet düz metindir; İngilizce (`en`) zorunludur, Türkçe (`tr`) gibi başka diller isteğe bağlı eklenir, uygulama arayüz diline göre seçer.
 - **Güvenli yollar:** mutlak yol, `..`, sürücü harfi (`C:`), ters bölü (`\`), `:` (alternatif veri akışı), sonu nokta/boşluk olan ya da `CON`, `NUL`, `COM1` gibi aygıt adlı dosya yok; bağlantı (symlink) yok.
 - Her paket yalnız kendi türünün dosyalarını içerir (ör. tema paketinde yalnız `manifest.json`, `theme.json`, `preview.png`).
 - Aynı kimlikle ikinci paket eklenemez; kimlik klasör adıyla aynıdır. Kimlikte başkasının adı ya da markası kullanılmaz.

@@ -15,13 +15,17 @@ public enum ExtensionApplyError
 /// <summary>Plana göre App/Platform'un yapacağı dosya işi. Plan dosyaya dokunmaz, yalnız ne yapılacağını söyler.</summary>
 public enum ExtensionFileActionKind
 {
-    /// <summary>user-theme.json varsa user-theme.backup.json olarak sakla; yedek zaten varsa üzerine yazma (ilk özgün kalsın).</summary>
+    /// <summary>
+    /// Kullanıcının ÖZGÜN stil durumunu sakla: user-theme.json varsa user-theme.backup.json olarak kopyala, her durumda
+    /// özgün <c>UserStyleOverridesEnabled</c> değerini (<see cref="ExtensionFileAction.OriginalOverridesEnabled"/>) durum
+    /// dosyasına yaz ("özgün dosya yoktu" da böyle kaydedilir). Yedek ya da durum dosyası zaten varsa dokunma (ilk özgün kalsın).
+    /// </summary>
     BackupUserStyle,
 
     /// <summary><see cref="ExtensionFileAction.SourcePath"/> dosyasını user-theme.json olarak kopyala.</summary>
     CopyThemeToUserStyle,
 
-    /// <summary>Yedek varsa user-theme.json üzerine geri taşı; yoksa user-theme.json'u sil.</summary>
+    /// <summary>Yedek varsa user-theme.json üzerine geri taşı; yoksa (özgün dosya yoktu) user-theme.json'u sil. Durum dosyasını da temizler.</summary>
     RestoreUserStyleBackup,
 
     /// <summary>
@@ -31,7 +35,36 @@ public enum ExtensionFileActionKind
     ImportProfile,
 }
 
-public sealed record ExtensionFileAction(ExtensionFileActionKind Kind, string? SourcePath = null);
+public sealed record ExtensionFileAction(
+    ExtensionFileActionKind Kind, string? SourcePath = null, bool OriginalOverridesEnabled = false);
+
+/// <summary>
+/// Tema uygulanmadan önceki kullanıcı stil durumu (diskteki yedekten okunur). <see cref="HasFile"/>: özgün user-theme.json
+/// vardı (yedeği duruyor); false ise özgün durumda dosya yoktu. <see cref="OverridesEnabled"/>: özgün
+/// <c>UserStyleOverridesEnabled</c>. Yedek de durum dosyası da yoksa çağıran <c>null</c> verir.
+/// </summary>
+public sealed record UserStyleBackup(bool HasFile, bool OverridesEnabled)
+{
+    /// <summary>Durum dosyasının adı (user-theme.json ile aynı klasörde).</summary>
+    public const string StateFileName = "user-theme.backup.state";
+
+    public static string SerializeState(bool overridesEnabled) => "overrides=" + (overridesEnabled ? "true" : "false");
+
+    public static bool TryParseState(string? text, out bool overridesEnabled)
+    {
+        overridesEnabled = false;
+        switch (text?.Trim())
+        {
+            case "overrides=true":
+                overridesEnabled = true;
+                return true;
+            case "overrides=false":
+                return true;
+            default:
+                return false;
+        }
+    }
+}
 
 /// <summary>
 /// Uygula/Kaldır kararı. <see cref="Settings"/> yeni ayarlardır (çağıranın verdiği nesne değişmez); değişiklik yoksa
@@ -57,7 +90,12 @@ public static class ExtensionApplyPlanner
     public const string UserStyleBackupFileName = "user-theme.backup.json";
 
     /// <summary>Uygulanabilir ayar karşılığı olan türden eklentiyi uygulayan plan.</summary>
-    public static ExtensionApplyPlan Apply(AppSettings current, InstalledEntry entry, string installFolder)
+    /// <param name="themeAlreadyApplied">
+    /// Tema için: kayıtta zaten uygulanmış bir mağaza teması var (bu dahil). O zaman şu anki user-theme.json bir
+    /// mağaza temasıdır, kullanıcının özgünü değil; yedek alınmaz (ilk uygulamadaki özgün yedek korunur).
+    /// </param>
+    public static ExtensionApplyPlan Apply(
+        AppSettings current, InstalledEntry entry, string installFolder, bool themeAlreadyApplied = false)
     {
         if (!IconPackFiles.IsSafeFolder(installFolder))
         {
@@ -70,11 +108,16 @@ public static class ExtensionApplyPlanner
             {
                 var source = Path.Combine(installFolder, PackageEntryPolicy.ThemeName);
                 var settings = current with { Appearance = current.Appearance with { UserStyleOverridesEnabled = true } };
-                return new(ExtensionApplyError.None, settings,
-                [
-                    new(ExtensionFileActionKind.BackupUserStyle),
-                    new(ExtensionFileActionKind.CopyThemeToUserStyle, source),
-                ]);
+                List<ExtensionFileAction> actions = [];
+                if (!themeAlreadyApplied)
+                {
+                    actions.Add(new(
+                        ExtensionFileActionKind.BackupUserStyle,
+                        OriginalOverridesEnabled: current.Appearance.UserStyleOverridesEnabled));
+                }
+
+                actions.Add(new(ExtensionFileActionKind.CopyThemeToUserStyle, source));
+                return new(ExtensionApplyError.None, settings, actions);
             }
 
             case ExtensionKind.IconPack:
@@ -131,9 +174,12 @@ public static class ExtensionApplyPlanner
     /// başka bir şey seçtiyse dokunulmaz); tema için kayıttaki <c>Applied</c> bayrağına. Hedef (Notch / Müzik kartı)
     /// değişmez. Profil türünde yapılacak bir şey yoktur (içe alınan profil kitaplıkta kalır).
     /// </summary>
-    /// <param name="userStyleBackupExists">Tema için: user-theme.backup.json var mı. Varsa tema geri yüklenir ve geçersiz kılma açık kalır; yoksa dosya silinir ve kapatılır.</param>
+    /// <param name="backup">
+    /// Tema için: diskteki özgün durum yedeği. Özgün dosya varsa geri yüklenir, yoksa user-theme.json silinir;
+    /// geçersiz kılma her iki durumda özgün değerine döner. Yedek hiç yoksa (null) dosya silinir ve kapatılır.
+    /// </param>
     public static ExtensionApplyPlan RevertOnUninstall(
-        AppSettings current, InstalledEntry entry, string installFolder, bool userStyleBackupExists = false)
+        AppSettings current, InstalledEntry entry, string installFolder, UserStyleBackup? backup = null)
     {
         switch (entry.Kind)
         {
@@ -141,7 +187,7 @@ public static class ExtensionApplyPlanner
                 return new(ExtensionApplyError.None,
                     current with
                     {
-                        Appearance = current.Appearance with { UserStyleOverridesEnabled = userStyleBackupExists },
+                        Appearance = current.Appearance with { UserStyleOverridesEnabled = backup?.OverridesEnabled ?? false },
                     },
                     [new(ExtensionFileActionKind.RestoreUserStyleBackup)]);
 

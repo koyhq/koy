@@ -181,13 +181,95 @@ public class ExtensionApplyPlannerTests
         var current = new AppSettings();
         current.Appearance.UserStyleOverridesEnabled = true;
 
-        var withBackup = ExtensionApplyPlanner.RevertOnUninstall(current, entry, Folder, userStyleBackupExists: true);
-        var withoutBackup = ExtensionApplyPlanner.RevertOnUninstall(current, entry, Folder, userStyleBackupExists: false);
+        var withBackup = ExtensionApplyPlanner.RevertOnUninstall(current, entry, Folder, new UserStyleBackup(true, true));
+        var withoutBackup = ExtensionApplyPlanner.RevertOnUninstall(current, entry, Folder, backup: null);
 
         Assert.Equal(ExtensionFileActionKind.RestoreUserStyleBackup, Assert.Single(withBackup.FileActions).Kind);
         Assert.True(withBackup.Settings!.Appearance.UserStyleOverridesEnabled);
         Assert.Equal(ExtensionFileActionKind.RestoreUserStyleBackup, Assert.Single(withoutBackup.FileActions).Kind);
         Assert.False(withoutBackup.Settings!.Appearance.UserStyleOverridesEnabled);
+    }
+
+    [Fact]
+    public void Theme_apply_records_the_original_overrides_flag_in_the_backup_action()
+    {
+        var current = new AppSettings();
+        current.Appearance.UserStyleOverridesEnabled = true;
+
+        var plan = ExtensionApplyPlanner.Apply(current, Installed(kind: ExtensionKind.Theme, payload: "theme.json"), Folder);
+
+        Assert.True(plan.FileActions[0].OriginalOverridesEnabled);
+        Assert.False(ExtensionApplyPlanner.Apply(new AppSettings(), Installed(kind: ExtensionKind.Theme, payload: "theme.json"), Folder)
+            .FileActions[0].OriginalOverridesEnabled);
+    }
+
+    [Fact]
+    public void Switching_between_themes_never_backs_up_the_previous_store_theme()
+    {
+        var entry = Installed(kind: ExtensionKind.Theme, payload: "theme.json");
+        var current = new AppSettings();
+        current.Appearance.UserStyleOverridesEnabled = true;
+
+        var plan = ExtensionApplyPlanner.Apply(current, entry, Folder, themeAlreadyApplied: true);
+
+        Assert.Equal(ExtensionFileActionKind.CopyThemeToUserStyle, Assert.Single(plan.FileActions).Kind);
+        Assert.True(plan.Settings!.Appearance.UserStyleOverridesEnabled);
+    }
+
+    [Fact]
+    public void Uninstalling_the_applied_theme_restores_the_original_state_even_when_there_was_no_original_file()
+    {
+        var entry = Installed(kind: ExtensionKind.Theme, applied: true, payload: "theme.json");
+        var current = new AppSettings();
+        current.Appearance.UserStyleOverridesEnabled = true;
+
+        // Özgün: dosya yoktu, geçersiz kılma kapalıydı.
+        var none = ExtensionApplyPlanner.RevertOnUninstall(current, entry, Folder, new UserStyleBackup(false, false));
+        // Özgün: dosya vardı ama geçersiz kılma kapalıydı.
+        var offWithFile = ExtensionApplyPlanner.RevertOnUninstall(current, entry, Folder, new UserStyleBackup(true, false));
+
+        Assert.False(none.Settings!.Appearance.UserStyleOverridesEnabled);
+        Assert.False(offWithFile.Settings!.Appearance.UserStyleOverridesEnabled);
+        Assert.Equal(ExtensionFileActionKind.RestoreUserStyleBackup, Assert.Single(none.FileActions).Kind);
+    }
+
+    [Fact]
+    public void Theme_chain_A_then_B_then_uninstalling_either_leaves_a_consistent_state()
+    {
+        var a = Installed(kind: ExtensionKind.Theme, payload: "theme.json") with { Id = "koyhq.a" };
+        var b = Installed(kind: ExtensionKind.Theme, payload: "theme.json") with { Id = "koyhq.b" };
+
+        // A uygulanır: yedek alınır. B uygulanır: kayıtta uygulanmış tema var, yedek alınmaz.
+        var applyA = ExtensionApplyPlanner.Apply(new AppSettings(), a, Folder);
+        var registry = Registry(a, b).WithApplied("koyhq.a");
+        var applyB = ExtensionApplyPlanner.Apply(applyA.Settings!, b, Folder, registry.HasApplied(ExtensionKind.Theme));
+        registry = registry.WithApplied("koyhq.b");
+        Assert.Contains(applyA.FileActions, x => x.Kind == ExtensionFileActionKind.BackupUserStyle);
+        Assert.DoesNotContain(applyB.FileActions, x => x.Kind == ExtensionFileActionKind.BackupUserStyle);
+
+        // A'yı kaldırmak B'ye dokunmaz (A artık uygulanmış değil).
+        var removeA = ExtensionApplyPlanner.RevertOnUninstall(applyB.Settings!, registry.Find("koyhq.a")!, Folder, new UserStyleBackup(false, false));
+        Assert.Empty(removeA.FileActions);
+        Assert.True(removeA.Settings!.Appearance.UserStyleOverridesEnabled);
+
+        // B'yi kaldırmak özgün duruma döner.
+        var removeB = ExtensionApplyPlanner.RevertOnUninstall(applyB.Settings!, registry.Find("koyhq.b")!, Folder, new UserStyleBackup(false, false));
+        Assert.Equal(ExtensionFileActionKind.RestoreUserStyleBackup, Assert.Single(removeB.FileActions).Kind);
+        Assert.False(removeB.Settings!.Appearance.UserStyleOverridesEnabled);
+    }
+
+    [Theory]
+    [InlineData("overrides=true", true, true)]
+    [InlineData("overrides=false\n", true, false)]
+    [InlineData("", false, false)]
+    [InlineData("overrides=maybe", false, false)]
+    [InlineData(null, false, false)]
+    public void Backup_state_text_parses_and_round_trips(string? text, bool ok, bool value)
+    {
+        Assert.Equal(ok, UserStyleBackup.TryParseState(text, out var parsed));
+        Assert.Equal(value, parsed);
+        Assert.True(UserStyleBackup.TryParseState(UserStyleBackup.SerializeState(true), out var t) && t);
+        Assert.True(UserStyleBackup.TryParseState(UserStyleBackup.SerializeState(false), out var f) && !f);
     }
 
     [Fact]

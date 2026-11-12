@@ -18,7 +18,7 @@ public class StoreIndexParserTests
         Assert.Equal(ExtensionKind.Theme, item.Kind);
         Assert.Equal(7, item.Downloads);
         Assert.Equal(new DateOnly(2026, 11, 12), item.Updated);
-        Assert.Equal("a\nb", item.Description);
+        Assert.Equal("a\nb", item.Description.Resolve("en"));
         Assert.Equal(1234, item.Package.Size);
         Assert.Equal(new string('a', 64), item.Package.Sha256);
         Assert.Equal(new DateTimeOffset(2026, 11, 12, 0, 0, 0, TimeSpan.Zero), result.Index.Generated);
@@ -71,7 +71,7 @@ public class StoreIndexParserTests
     [Fact]
     public void Http_package_url_skips_item()
     {
-        var item = ItemJson().Replace("https://example.com/p.koyext", "http://example.com/p.koyext");
+        var item = ItemJson().Replace(PackageUrl, "http://example.com/p.koyext");
 
         var result = StoreIndexParser.Parse(IndexJson(item));
 
@@ -88,7 +88,7 @@ public class StoreIndexParserTests
     [InlineData("example.com/p")]
     public void Bad_urls_skip_item(string url)
     {
-        var item = ItemJson().Replace("https://example.com/p.koyext", url);
+        var item = ItemJson().Replace(PackageUrl, url);
 
         Assert.Equal(1, StoreIndexParser.Parse(IndexJson(item)).SkippedItems);
     }
@@ -114,7 +114,7 @@ public class StoreIndexParserTests
     public void Good_preview_is_kept_and_hash_is_lowercased()
     {
         var hash = new string('A', 64);
-        var result = StoreIndexParser.Parse(IndexJson(ItemJson(extra: ", \"preview\": { \"url\": \"https://x.com/p.png\", \"sha256\": \"" + hash + "\" }")));
+        var result = StoreIndexParser.Parse(IndexJson(ItemJson(extra: ", \"preview\": { \"url\": \"" + PreviewUrl + "\", \"sha256\": \"" + hash + "\" }")));
 
         Assert.Equal(new string('a', 64), Assert.Single(result.Index!.Items).Preview!.Sha256);
     }
@@ -168,7 +168,7 @@ public class StoreIndexParserTests
         var result = StoreIndexParser.Parse(IndexJson(atLimit, over));
 
         Assert.Equal(1, result.SkippedItems);
-        Assert.Equal(2000, Assert.Single(result.Index!.Items).Description.Length);
+        Assert.Equal(2000, Assert.Single(result.Index!.Items).Description.Resolve("en").Length);
     }
 
     [Fact]

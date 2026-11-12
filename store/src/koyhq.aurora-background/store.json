@@ -1,6 +1,12 @@
 {
-  "summary": "Slow looping aurora gradient for the notch.",
-  "description": "A small seamless looping GIF with soft green, teal and violet color drifts, sized for the 620x352 open notch. Choose where to show it (notch or music card) in the notch settings after applying.",
+  "summary": {
+    "en": "Slow looping aurora gradient for the notch.",
+    "tr": "Çentik için yavaş ve döngüsel bir aurora gradyanı."
+  },
+  "description": {
+    "en": "A small seamless looping GIF with soft green, teal and violet color drifts, sized for the 620x352 open notch. Choose where to show it (notch or music card) in the notch settings after applying.",
+    "tr": "Yumuşak yeşil, turkuaz ve mor renk geçişleri olan, 620x352 açık çentik boyutuna göre hazırlanmış küçük, kesintisiz döngülü bir GIF. Uyguladıktan sonra nerede gösterileceğini (çentik ya da müzik kartı) çentik ayarlarından seçersin."
+  },
   "homepage": "https://github.com/koyhq/koy",
   "updated": "2026-11-12",
   "downloads": 0

@@ -10,8 +10,14 @@
       "version": "1.0.0",
       "author": "Koy",
       "license": "CC-BY-SA-4.0",
-      "summary": "Slow looping aurora gradient for the notch.",
-      "description": "A small seamless looping GIF with soft green, teal and violet color drifts, sized for the 620x352 open notch. Choose where to show it (notch or music card) in the notch settings after applying.",
+      "summary": {
+        "en": "Slow looping aurora gradient for the notch.",
+        "tr": "Çentik için yavaş ve döngüsel bir aurora gradyanı."
+      },
+      "description": {
+        "en": "A small seamless looping GIF with soft green, teal and violet color drifts, sized for the 620x352 open notch. Choose where to show it (notch or music card) in the notch settings after applying.",
+        "tr": "Yumuşak yeşil, turkuaz ve mor renk geçişleri olan, 620x352 açık çentik boyutuna göre hazırlanmış küçük, kesintisiz döngülü bir GIF. Uyguladıktan sonra nerede gösterileceğini (çentik ya da müzik kartı) çentik ayarlarından seçersin."
+      },
       "homepage": "https://github.com/koyhq/koy",
       "updated": "2026-11-12",
       "downloads": 0,
@@ -32,8 +38,14 @@
       "version": "1.1.0",
       "author": "Koy",
       "license": "GPL-3.0-or-later",
-      "summary": "Pure black surfaces, white borders and a bright yellow accent.",
-      "description": "A maximum-contrast theme for the Koy window, menus, notch and dock, for low-vision use or bright rooms: black backgrounds, white text and borders, and a yellow accent that stays visible on every surface. Changes colors only.",
+      "summary": {
+        "en": "Pure black surfaces, white borders and a bright yellow accent.",
+        "tr": "Saf siyah yüzeyler, beyaz kenarlıklar ve parlak sarı vurgu."
+      },
+      "description": {
+        "en": "A maximum-contrast theme for the Koy window, menus, notch and dock, for low-vision use or bright rooms: black backgrounds, white text and borders, and a yellow accent that stays visible on every surface. Changes colors only.",
+        "tr": "Koy penceresi, menüler, çentik ve dock için en yüksek karşıtlıklı tema; az gören kullanıcılar ya da aydınlık ortamlar için: siyah arka planlar, beyaz yazı ve kenarlıklar, her yüzeyde görünür kalan sarı bir vurgu. Yalnız renkleri değiştirir."
+      },
       "homepage": "https://github.com/koyhq/koy",
       "updated": "2026-11-12",
       "downloads": 0,
@@ -54,8 +66,14 @@
       "version": "1.0.0",
       "author": "Koy",
       "license": "GPL-3.0-or-later",
-      "summary": "Calm dark look with solid surfaces and longer focus sessions.",
-      "description": "A settings profile for a quiet setup: dark theme, Windows accent color, solid material, calm animations and 50/10/20 minute focus timers. Importing adds it to your profile library; it is applied only when you choose it in Profiles.",
+      "summary": {
+        "en": "Calm dark look with solid surfaces and longer focus sessions.",
+        "tr": "Düz yüzeyli, sakin koyu görünüm ve daha uzun odak oturumları."
+      },
+      "description": {
+        "en": "A settings profile for a quiet setup: dark theme, Windows accent color, solid material, calm animations and 50/10/20 minute focus timers. Importing adds it to your profile library; it is applied only when you choose it in Profiles.",
+        "tr": "Sakin bir kurulum için ayar profili: koyu tema, Windows vurgu rengi, düz malzeme, sakin animasyonlar ve 50/10/20 dakikalık odak sayaçları. İçe aktarınca profil kitaplığına eklenir; yalnız Profiller bölümünden seçtiğinde uygulanır."
+      },
       "homepage": "https://github.com/koyhq/koy",
       "updated": "2026-11-12",
       "downloads": 0,
@@ -76,8 +94,14 @@
       "version": "1.0.0",
       "author": "Koy",
       "license": "CC-BY-SA-4.0",
-      "summary": "Simple single-color icons for common apps.",
-      "description": "A small icon pack of plain geometric single-color glyphs for popular apps: Firefox, Visual Studio Code, File Explorer, Spotify, Notepad, Calculator, Windows Terminal and Settings. Drawn from scratch; not the apps' own logos. Apps without an icon here keep their normal icon.",
+      "summary": {
+        "en": "Simple single-color icons for common apps.",
+        "tr": "Yaygın uygulamalar için sade, tek renkli simgeler."
+      },
+      "description": {
+        "en": "A small icon pack of plain geometric single-color glyphs for popular apps: Firefox, Visual Studio Code, File Explorer, Spotify, Notepad, Calculator, Windows Terminal and Settings. Drawn from scratch; not the apps' own logos. Apps without an icon here keep their normal icon.",
+        "tr": "Popüler uygulamalar için düz geometrik, tek renkli glifler içeren küçük bir simge paketi: Firefox, Visual Studio Code, Dosya Gezgini, Spotify, Not Defteri, Hesap Makinesi, Windows Terminal ve Ayarlar. Sıfırdan çizildi; uygulamaların kendi logoları değildir. Burada simgesi olmayan uygulamalar normal simgesini korur."
+      },
       "homepage": "https://github.com/koyhq/koy",
       "updated": "2026-11-12",
       "downloads": 0,
@@ -98,8 +122,14 @@
       "version": "1.1.0",
       "author": "Koy",
       "license": "GPL-3.0-or-later",
-      "summary": "Cool, arctic blue-gray palette with a frosty cyan accent.",
-      "description": "A calm dark theme for the Koy window, menus, notch and dock built around the Nord palette: deep blue-gray surfaces, soft off-white text and a frosty cyan accent. Changes colors only; sizes and layout are untouched. Palette colors are by Sven Greb (MIT).",
+      "summary": {
+        "en": "Cool, arctic blue-gray palette with a frosty cyan accent.",
+        "tr": "Serin, arktik mavi-gri palet ve buz gibi camgöbeği vurgu."
+      },
+      "description": {
+        "en": "A calm dark theme for the Koy window, menus, notch and dock built around the Nord palette: deep blue-gray surfaces, soft off-white text and a frosty cyan accent. Changes colors only; sizes and layout are untouched. Palette colors are by Sven Greb (MIT).",
+        "tr": "Koy penceresi, menüler, çentik ve dock için Nord paletiyle hazırlanmış sakin bir koyu tema: derin mavi-gri yüzeyler, yumuşak kırık beyaz yazı ve buz gibi camgöbeği vurgu. Yalnız renkleri değiştirir; boyutlara ve yerleşime dokunmaz. Palet renkleri Sven Greb'e aittir (MIT)."
+      },
       "homepage": "https://github.com/koyhq/koy",
       "updated": "2026-11-12",
       "downloads": 0,
@@ -120,8 +150,14 @@
       "version": "1.1.0",
       "author": "Koy",
       "license": "GPL-3.0-or-later",
-      "summary": "Precision-tuned dark teal palette with a blue accent.",
-      "description": "Solarized Dark colors for the Koy window, menus, notch and dock: dark teal surfaces, warm cream text and a blue accent, with the classic green, yellow and red status colors. Changes colors only. Palette by Ethan Schoonover (MIT).",
+      "summary": {
+        "en": "Precision-tuned dark teal palette with a blue accent.",
+        "tr": "Hassas ayarlı koyu petrol yeşili palet ve mavi vurgu."
+      },
+      "description": {
+        "en": "Solarized Dark colors for the Koy window, menus, notch and dock: dark teal surfaces, warm cream text and a blue accent, with the classic green, yellow and red status colors. Changes colors only. Palette by Ethan Schoonover (MIT).",
+        "tr": "Koy penceresi, menüler, çentik ve dock için Solarized Dark renkleri: koyu petrol yeşili yüzeyler, sıcak krem yazı ve mavi vurgu; klasik yeşil, sarı ve kırmızı durum renkleriyle birlikte. Yalnız renkleri değiştirir. Palet Ethan Schoonover'a aittir (MIT)."
+      },
       "homepage": "https://github.com/koyhq/koy",
       "updated": "2026-11-12",
       "downloads": 0,

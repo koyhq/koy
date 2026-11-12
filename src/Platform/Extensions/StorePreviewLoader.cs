@@ -95,7 +95,9 @@ public sealed class StorePreviewLoader(HttpClient? http = null, string? cacheFol
         try
         {
             using var response = await _http.GetAsync(preview.Url, HttpCompletionOption.ResponseHeadersRead, timeout.Token).ConfigureAwait(false);
-            if (!response.IsSuccessStatusCode || response.Content.Headers.ContentLength is > MaxBytes)
+            if (!response.IsSuccessStatusCode
+                || !StoreUrlPolicy.IsTrustedAssetUri(response.RequestMessage?.RequestUri)
+                || response.Content.Headers.ContentLength is > MaxBytes)
             {
                 return null;
             }

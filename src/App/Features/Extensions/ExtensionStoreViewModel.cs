@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.Input;
 using Koy.App.Features.Settings;
 using Koy.App.Resources;
 using Koy.Core.Appearance;
+using Koy.Core.Diagnostics;
 using Koy.Core.Extensions.Store;
 using Koy.Core.Settings;
 using Koy.Core.SystemStats;
@@ -255,6 +256,12 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject
                 IndexErrorText = Strings.Get("ExtIndexError" + result.Error);
             }
         }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // Fire-and-forget çağrılır: yakalanmayan istisna görev içinde kaybolurdu.
+            CrashLog.Write("ExtensionStoreViewModel.LoadIndex", ex);
+            IndexErrorText = Strings.Get("ExtUnexpectedError");
+        }
         finally
         {
             IsLoading = false;
@@ -274,7 +281,7 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject
 
     private void Rebuild()
     {
-        _state = _state with { Query = BuildQuery() };
+        _state = _state with { Query = BuildQuery(), Language = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName };
         var all = _state.Visible();
         var wanted = new List<StoreCardViewModel>();
         foreach (var view in all.Take(_displayCount))
@@ -525,23 +532,31 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject
         SetBusy(item.Id, true);
         var progress = new Progress<double>(value => card.Progress = value);
 
-        InstallResult result;
         try
         {
-            result = await _client.InstallFromStoreAsync(item, progress, CancellationToken.None);
-        }
-        finally
-        {
-            SetBusy(item.Id, false);
-        }
+            InstallResult result;
+            try
+            {
+                result = await _client.InstallFromStoreAsync(item, progress, CancellationToken.None);
+            }
+            finally
+            {
+                SetBusy(item.Id, false);
+            }
 
-        if (!result.IsSuccess)
-        {
-            card.Say(Strings.Get("ExtInstallError" + result.Error), true);
-            return;
-        }
+            if (!result.IsSuccess)
+            {
+                card.Say(Strings.Get("ExtInstallError" + result.Error), true);
+                return;
+            }
 
-        FinishInstall(card, result, update);
+            FinishInstall(card, result, update);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            CrashLog.Write("ExtensionStoreViewModel.InstallFromStore", ex);
+            Report(card, Strings.Get("ExtUnexpectedError"), true);
+        }
     }
 
     // Kurulum bitti: güncellenen eklenti uygulanmışsa yeni dosyalar ayara/kullanıcı dosyasına yansısın diye Uygula yeniden çalışır.
@@ -618,6 +633,12 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject
 
             FinishInstall(null, result, update: false);
         }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            CrashLog.Write("ExtensionStoreViewModel.InstallFile", ex);
+            StatusText = Strings.Get("ExtUnexpectedError");
+            StatusIsError = true;
+        }
         finally
         {
             IsInstallingFile = false;
@@ -686,10 +707,12 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject
 
     private sealed record ApplyOutcome(string? ErrorKey, InstalledEntry? Entry, ExtensionFileActionResult? Files);
 
-    // Sıra: plan → dosya işleri → ayarı kaydet ve canlı uygula → kayıtta "uygulandı" işareti.
+    // Sıra: plan → dosya işleri → ayarı kaydet ve canlı uygula → kayıtta "uygulandı" işareti. Bir adım başarısız olursa
+    // önceki adımlar geri alınır (kullanıcı stil dosyaları ve ayarlar eski haline döner); yarım durum kalmaz.
     private ApplyOutcome ApplyCore(string id)
     {
-        var entry = _client.Registry.Load().Find(id);
+        var registry = _client.Registry.Load();
+        var entry = registry.Find(id);
         var folder = ExtensionPaths.FolderFor(id, _client.ExtensionsFolder);
         if (entry is null || folder is null)
         {
@@ -697,25 +720,49 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject
             return new("ExtApplyNotInstalled", null, null);
         }
 
-        var plan = ExtensionApplyPlanner.Apply(_profiles.CurrentSettings(), entry, folder);
+        var before = _profiles.CurrentSettings();
+        var plan = ExtensionApplyPlanner.Apply(before, entry, folder, registry.HasApplied(ExtensionKind.Theme));
         if (!plan.IsSuccess)
             return new("ExtApplyError" + plan.Error, entry, null);
 
+        var snapshot = TakeSnapshotFor(plan);
         var files = _runner.Run(plan.FileActions);
         if (!files.IsSuccess)
+        {
+            RestoreSnapshot(snapshot);
             return new(files.ErrorKey, entry, files);
+        }
 
         if (!_profiles.CommitSettings(plan.Settings!))
+        {
+            RestoreSnapshot(snapshot);
             return new("ExtApplySaveFailed", entry, files);
+        }
 
-        if (entry.Kind != ExtensionKind.Profile)
-            _client.Registry.Update(r => r.WithApplied(id));
+        if (entry.Kind != ExtensionKind.Profile && !_client.Registry.Update(r => r.WithApplied(id)))
+        {
+            // Kayıt yazılamadı: "uygulandı" işareti olmadan ayar açık kalırsa kaldırma geri almayı atlardı.
+            _profiles.CommitSettings(before);
+            RestoreSnapshot(snapshot);
+            ReloadRegistry();
+            return new("ExtRegistrySaveFailed", entry, files);
+        }
 
         if (files.ImportedProfile is not null && !files.ProfileAlreadyPresent)
             ProfilesChanged?.Invoke();
 
         ReloadRegistry();
         return new(null, entry, files);
+    }
+
+    // Kullanıcı stil dosyalarına dokunan plan için geri alma kopyası (diğer planlar dosyaya yazmaz).
+    private UserStyleSnapshot? TakeSnapshotFor(ExtensionApplyPlan plan) =>
+        plan.FileActions.Any(a => a.Kind != ExtensionFileActionKind.ImportProfile) ? _runner.TakeSnapshot() : null;
+
+    private void RestoreSnapshot(UserStyleSnapshot? snapshot)
+    {
+        if (snapshot is not null)
+            _runner.RestoreSnapshot(snapshot);
     }
 
     // --- Kaldır ---
@@ -735,36 +782,52 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject
         SetBusy(id, true);
         try
         {
-            // Önce ayar geri alınır (simge paketi → yerleşik, arka plan → ambiyans, tema → yedek), sonra klasör silinir.
-            var plan = ExtensionApplyPlanner.RevertOnUninstall(_profiles.CurrentSettings(), entry, folder, _runner.BackupExists);
+            // Önce ayar geri alınır (simge paketi → yerleşik, arka plan → ambiyans, tema → özgün durum), sonra klasör silinir.
+            // Klasör silinemezse geri alma geri alınır: eklenti kurulu kalır ve uygulandığı gibi çalışmaya devam eder.
+            var before = _profiles.CurrentSettings();
+            var plan = ExtensionApplyPlanner.RevertOnUninstall(before, entry, folder, _runner.ReadBackup());
             if (!plan.IsSuccess)
             {
                 card.Say(Strings.Get("ExtApplyError" + plan.Error), true);
                 return;
             }
 
+            var snapshot = TakeSnapshotFor(plan);
             var files = _runner.Run(plan.FileActions);
             if (!files.IsSuccess)
             {
+                RestoreSnapshot(snapshot);
                 card.Say(Strings.Get(files.ErrorKey!), true);
                 return;
             }
 
             if (!_profiles.CommitSettings(plan.Settings!))
             {
+                RestoreSnapshot(snapshot);
                 card.Say(Strings.Get("ExtApplySaveFailed"), true);
                 return;
             }
 
-            _client.Registry.Update(r => r.WithoutApplied(id));
             if (!await _client.UninstallAsync(id))
             {
+                // Klasör hâlâ duruyorsa eklenti kurulu kalmıştır: ayarı ve dosyaları eski haline döndür.
+                if (Directory.Exists(folder))
+                {
+                    _profiles.CommitSettings(before);
+                    RestoreSnapshot(snapshot);
+                }
+
                 card.Say(string.Format(Strings.Get("ExtUninstallFailed"), entry.Name), true);
                 return;
             }
 
             StatusText = string.Format(Strings.Get("ExtUninstalledOk"), entry.Name);
             StatusIsError = false;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            CrashLog.Write("ExtensionStoreViewModel.Uninstall", ex);
+            card.Say(Strings.Get("ExtUnexpectedError"), true);
         }
         finally
         {
