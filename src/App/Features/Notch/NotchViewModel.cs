@@ -18,6 +18,7 @@ using Koy.App.Features.Settings;
 using Koy.App.Features.Shelf;
 using Koy.App.Features.Status;
 using Koy.App.Features.SystemInfo;
+using Koy.Core.Clock;
 using Koy.Core.Notch;
 using Koy.Core.Power;
 using Koy.Core.Settings;
@@ -228,7 +229,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private string _title = "Koy";
 
     [ObservableProperty]
-    private string _clockTime = DateTime.Now.ToString("HH:mm");
+    private string _clockTime = "";
 
     [ObservableProperty]
     private int _batteryPercent = 100;
@@ -406,9 +407,10 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
             return;
 
         UpdateClock();
+        // Saniye gösterilirken saniyede bir; değilse 15 sn yeter. Zamanlayıcı yalnız çentik görünürken çalışır (AGENTS #5).
         _clockTimer = new DispatcherTimer(DispatcherPriority.Background, _dispatcher)
         {
-            Interval = TimeSpan.FromSeconds(15)
+            Interval = Settings.Notch.ClockShowSeconds ? TimeSpan.FromSeconds(1) : TimeSpan.FromSeconds(15)
         };
         _clockTimer.Tick += (_, _) => UpdateClock();
         _clockTimer.Start();
@@ -426,12 +428,13 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private void UpdateClock()
     {
         var now = DateTime.Now;
-        ClockTime = now.ToString("HH:mm");
+        var clock = Settings.Notch;
+        ClockTime = now.ToString(ClockFormatPolicy.ResolveTimePattern(clock.ClockHourFormat, clock.ClockShowSeconds, CultureInfo.CurrentCulture), CultureInfo.CurrentCulture);
         if (IsIdleRing)
         {
             var culture = IdleCulture;
-            IdleDayTime = IdleDisplayFormat.DayTime(now, culture);
-            IdlePeekDate = "· " + IdleDisplayFormat.ShortDate(now, culture);
+            IdleDayTime = IdleDisplayFormat.DayTime(now, culture, ClockFormatPolicy.ResolveTimePattern(clock.ClockHourFormat, clock.ClockShowSeconds, culture));
+            IdlePeekDate = "· " + IdleDisplayFormat.ShortDate(now, culture, clock.ClockCustomDateFormat);
         }
     }
 

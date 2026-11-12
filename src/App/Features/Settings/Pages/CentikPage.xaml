@@ -183,6 +183,106 @@
             </Grid>
         </Border>
 
+        <!-- SAAT (issue #77) -->
+        <TextBlock Text="{Binding [ClockHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [ClockHourFormatTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ClockHourFormatDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [ClockFormatAuto], Source={x:Static res:Loc.Instance}}" GroupName="ClockHourFormat"
+                                     IsChecked="{Binding ClockHourFormat, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Auto}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [ClockFormat12], Source={x:Static res:Loc.Instance}}" GroupName="ClockHourFormat"
+                                     IsChecked="{Binding ClockHourFormat, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Hour12}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [ClockFormat24], Source={x:Static res:Loc.Instance}}" GroupName="ClockHourFormat"
+                                     IsChecked="{Binding ClockHourFormat, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Hour24}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [ClockShowSecondsTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ClockShowSecondsDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [ClockShowSecondsTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding ClockShowSeconds}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [ClockFirstDayTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ClockFirstDayDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [ClockFormatAuto], Source={x:Static res:Loc.Instance}}" GroupName="ClockFirstDay"
+                                     IsChecked="{Binding ClockFirstDayOfWeek, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=System}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [ClockFirstDayMonday], Source={x:Static res:Loc.Instance}}" GroupName="ClockFirstDay"
+                                     IsChecked="{Binding ClockFirstDayOfWeek, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Monday}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [ClockFirstDaySunday], Source={x:Static res:Loc.Instance}}" GroupName="ClockFirstDay"
+                                     IsChecked="{Binding ClockFirstDayOfWeek, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Sunday}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [ClockFirstDaySaturday], Source={x:Static res:Loc.Instance}}" GroupName="ClockFirstDay"
+                                     IsChecked="{Binding ClockFirstDayOfWeek, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Saturday}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [ClockShowWeekNumberTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ClockShowWeekNumberDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [ClockShowWeekNumberTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding ClockShowWeekNumber}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <StackPanel>
+                <TextBlock Text="{Binding [ClockCustomDateTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                <TextBlock Text="{Binding [ClockCustomDateDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                <TextBox Margin="0,8,0,0" Style="{StaticResource SettingTextBoxStyle}" Text="{Binding ClockCustomDateFormat}"
+                         AutomationProperties.Name="{Binding [ClockCustomDateTitle], Source={x:Static res:Loc.Instance}}" />
+                <TextBlock Text="{Binding [ClockCustomDateInvalid], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}"
+                           Foreground="{DynamicResource KoyDangerText}" Margin="0,4,0,0"
+                           Visibility="{Binding ClockCustomDateFormatInvalid, Converter={StaticResource BoolToVis}}" />
+            </StackPanel>
+        </Border>
+
         <!-- GÖSTERGELER -->
         <TextBlock Text="{Binding [IndicatorsHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 

@@ -7,19 +7,19 @@ public sealed record CalendarDay(
     bool IsWeekend);
 
 /// <summary>
-/// Ay görünümü için 6×7 = 42 günlük ızgara üretir (Pazartesi başlangıçlı).
+/// Ay görünümü için 6×7 = 42 günlük ızgara üretir. Haftanın ilk günü varsayılan Pazartesi; ayardan
+/// (<see cref="Clock.ClockFormatPolicy.ResolveFirstDayOfWeek"/>) Cumartesi ya da Pazar da olabilir.
 /// Saf C#, kültür ve tarih bağımsız test edilebilir.
 /// </summary>
 public static class MonthGrid
 {
-    public static IReadOnlyList<CalendarDay> Build(int year, int month, DateOnly? today = null)
+    public static IReadOnlyList<CalendarDay> Build(int year, int month, DateOnly? today = null, DayOfWeek firstDay = DayOfWeek.Monday)
     {
         var currentToday = today ?? DateOnly.FromDateTime(DateTime.Today);
         var firstOfMonth = new DateOnly(year, month, 1);
 
-        // Pazartesi başlangıç: Pazartesi = 1, Pazar = 0 -> Pazar için 7
-        var dayOfWeek = firstOfMonth.DayOfWeek;
-        var startOffset = (dayOfWeek == DayOfWeek.Sunday ? 7 : (int)dayOfWeek) - 1;
+        // Ayın ilk gününden geriye, seçilen haftanın ilk gününe kadar.
+        var startOffset = ((int)firstOfMonth.DayOfWeek - (int)firstDay + 7) % 7;
 
         var startDate = firstOfMonth.AddDays(-startOffset);
         var days = new List<CalendarDay>(42);
@@ -35,4 +35,8 @@ public static class MonthGrid
 
         return days;
     }
+
+    /// <summary>Izgara sütunlarının gün sırası: ilk gün seçimden başlar, yedi gün.</summary>
+    public static IReadOnlyList<DayOfWeek> WeekdayOrder(DayOfWeek firstDay) =>
+        Enumerable.Range(0, 7).Select(i => (DayOfWeek)(((int)firstDay + i) % 7)).ToArray();
 }
