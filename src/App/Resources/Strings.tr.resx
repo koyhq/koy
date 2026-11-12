@@ -1263,6 +1263,33 @@
   <data name="ReduceMotionDesc" xml:space="preserve">
     <value>Windows'ta animasyonlar kapalıysa Koy da hareketi kapatır.</value>
   </data>
+  <data name="MotionTogglesTitle" xml:space="preserve">
+    <value>Animasyonlar tek tek</value>
+  </data>
+  <data name="MotionTogglesDesc" xml:space="preserve">
+    <value>Tek bir animasyonu kapatın; o hareket doğrudan son haline geçer.</value>
+  </data>
+  <data name="MotionTogglesDisabledHint" xml:space="preserve">
+    <value>Genel animasyon ayarı kapalıyken bunlar etkisizdir.</value>
+  </data>
+  <data name="MotionNotchOpenClose" xml:space="preserve">
+    <value>Çentik açılış ve kapanışı</value>
+  </data>
+  <data name="MotionDockMagnify" xml:space="preserve">
+    <value>Dock büyütme</value>
+  </data>
+  <data name="MotionFolderPanel" xml:space="preserve">
+    <value>Dock klasör paneli</value>
+  </data>
+  <data name="MotionOsd" xml:space="preserve">
+    <value>Ses, parlaklık ve bildirim göstergeleri</value>
+  </data>
+  <data name="MotionBadgeBounce" xml:space="preserve">
+    <value>Rozet zıplaması</value>
+  </data>
+  <data name="MotionTabTransitions" xml:space="preserve">
+    <value>Çentik sekme geçişleri</value>
+  </data>
   <data name="AccentBlue" xml:space="preserve">
     <value>Mavi</value>
   </data>
