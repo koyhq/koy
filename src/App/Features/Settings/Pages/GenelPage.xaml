@@ -65,6 +65,54 @@
             </Grid>
         </Border>
 
+        <!-- BİRİMLER (issue #77). Rüzgâr hızı bugün hiçbir yerde gösterilmediği için satırı yok. -->
+        <TextBlock Text="{Binding [UnitsHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [UnitTemperatureTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [UnitCelsius], Source={x:Static res:Loc.Instance}}" GroupName="TemperatureUnit"
+                                     IsChecked="{Binding TemperatureUnit, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Celsius}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [UnitFahrenheit], Source={x:Static res:Loc.Instance}}" GroupName="TemperatureUnit"
+                                     IsChecked="{Binding TemperatureUnit, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Fahrenheit}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [UnitNetworkSpeedTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [UnitNetworkSpeedDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [UnitBytes], Source={x:Static res:Loc.Instance}}" GroupName="NetworkSpeedUnit"
+                                     IsChecked="{Binding NetworkSpeedUnit, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Bytes}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [UnitBits], Source={x:Static res:Loc.Instance}}" GroupName="NetworkSpeedUnit"
+                                     IsChecked="{Binding NetworkSpeedUnit, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Bits}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
         <!-- GÜNCELLEMELER -->
         <TextBlock Text="{Binding [UpdatesHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 

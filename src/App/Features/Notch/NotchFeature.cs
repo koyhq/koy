@@ -260,7 +260,8 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         var shelfVm = new ShelfViewModel(_shelfService!);
         var calendarVm = new CalendarViewModel(settings, _sharedEvents);
         // Sistem verisi çentik açıkken ve Ana ya da Sistem görünürken alınır, yoksa bırakılır (SystemStatsViewModel.SetActive).
-        var systemVm = new SystemStatsViewModel(() => services.AcquireSystemStats(_networkService), services.ReleaseSystemStats);
+        var systemVm = new SystemStatsViewModel(() => services.AcquireSystemStats(_networkService), services.ReleaseSystemStats,
+            networkUnit: settings.General.NetworkSpeedUnit);
         var quickLaunchVm = new QuickLaunchViewModel(services.QuickLaunch);
         var clipboardVm = _clipboardHistory is null ? null : new ClipboardViewModel(_clipboardHistory);
 

@@ -16,6 +16,33 @@ public static class SystemFormat
         return Number(value, culture, trimZero: true) + " " + unit + (AppLanguage.IsTurkish(culture) ? "/sn" : "/s");
     }
 
+    /// <summary>
+    /// Hız, seçilen birimle: bayt seçiliyse <see cref="Speed(long, CultureInfo)"/> (ikili, KB/sn); bit seçiliyse ondalık
+    /// ön ekli bit: "800 b/sn", "360 kb/sn", "2,5 Mb/sn", "1,2 Gb/sn" (1 kb = 1000 bit, ağ hızı geleneği).
+    /// </summary>
+    public static string Speed(long bytesPerSecond, Units.NetworkSpeedUnit unit, CultureInfo culture)
+    {
+        if (unit != Units.NetworkSpeedUnit.Bits)
+            return Speed(bytesPerSecond, culture);
+
+        var bits = Units.UnitConversion.NetworkSpeed(Math.Max(0, bytesPerSecond), unit);
+        string[] units = ["b", "kb", "Mb", "Gb", "Tb"];
+        var i = 0;
+        while (bits >= 1000 && i < units.Length - 1)
+        {
+            bits /= 1000;
+            i++;
+        }
+
+        if (Math.Round(bits) >= 1000 && i < units.Length - 1)
+        {
+            bits /= 1000;
+            i++;
+        }
+
+        return Number(bits, culture, trimZero: true) + " " + units[i] + (AppLanguage.IsTurkish(culture) ? "/sn" : "/s");
+    }
+
     /// <summary>Bellek: "9,2 / 16 GB" (kullanılan her zaman bir ondalık, toplam tam sayıysa ondalıksız).</summary>
     public static string Memory(long usedBytes, long totalBytes, CultureInfo culture)
     {

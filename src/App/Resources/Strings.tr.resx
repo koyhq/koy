@@ -1290,6 +1290,93 @@
   <data name="MotionTabTransitions" xml:space="preserve">
     <value>Çentik sekme geçişleri</value>
   </data>
+  <data name="ClockHeader" xml:space="preserve">
+    <value>Saat</value>
+  </data>
+  <data name="ClockHourFormatTitle" xml:space="preserve">
+    <value>Saat biçimi</value>
+  </data>
+  <data name="ClockHourFormatDesc" xml:space="preserve">
+    <value>Otomatik, arayüz dilini izler.</value>
+  </data>
+  <data name="ClockFormatAuto" xml:space="preserve">
+    <value>Otomatik</value>
+  </data>
+  <data name="ClockFormat12" xml:space="preserve">
+    <value>12 saat</value>
+  </data>
+  <data name="ClockFormat24" xml:space="preserve">
+    <value>24 saat</value>
+  </data>
+  <data name="ClockShowSecondsTitle" xml:space="preserve">
+    <value>Saniyeyi göster</value>
+  </data>
+  <data name="ClockShowSecondsDesc" xml:space="preserve">
+    <value>Çentik saatinde. Yalnız çentik görünürken saniyede bir yenilenir.</value>
+  </data>
+  <data name="ClockFirstDayTitle" xml:space="preserve">
+    <value>Haftanın ilk günü</value>
+  </data>
+  <data name="ClockFirstDayDesc" xml:space="preserve">
+    <value>Takvimin ay görünümü ve hafta numarası buna göre.</value>
+  </data>
+  <data name="ClockFirstDayMonday" xml:space="preserve">
+    <value>Pazartesi</value>
+  </data>
+  <data name="ClockFirstDaySunday" xml:space="preserve">
+    <value>Pazar</value>
+  </data>
+  <data name="ClockFirstDaySaturday" xml:space="preserve">
+    <value>Cumartesi</value>
+  </data>
+  <data name="ClockShowWeekNumberTitle" xml:space="preserve">
+    <value>Hafta numarasını göster</value>
+  </data>
+  <data name="ClockShowWeekNumberDesc" xml:space="preserve">
+    <value>Takvimde seçili günün yanında.</value>
+  </data>
+  <data name="ClockCustomDateTitle" xml:space="preserve">
+    <value>Özel tarih biçimi</value>
+  </data>
+  <data name="ClockCustomDateDesc" xml:space="preserve">
+    <value>Halka modunda saatin yanındaki tarih, örn. dd.MM.yyyy. Boş bırakılırsa varsayılan.</value>
+  </data>
+  <data name="ClockCustomDateInvalid" xml:space="preserve">
+    <value>Bu biçim geçerli değil, kaydedilmedi.</value>
+  </data>
+  <data name="CalendarWeekNumber" xml:space="preserve">
+    <value>{0}. hafta</value>
+  </data>
+  <data name="UnitsHeader" xml:space="preserve">
+    <value>Birimler</value>
+  </data>
+  <data name="UnitTemperatureTitle" xml:space="preserve">
+    <value>Sıcaklık</value>
+  </data>
+  <data name="UnitCelsius" xml:space="preserve">
+    <value>Celsius</value>
+  </data>
+  <data name="UnitFahrenheit" xml:space="preserve">
+    <value>Fahrenheit</value>
+  </data>
+  <data name="UnitCelsiusSuffix" xml:space="preserve">
+    <value>°C</value>
+  </data>
+  <data name="UnitFahrenheitSuffix" xml:space="preserve">
+    <value>°F</value>
+  </data>
+  <data name="UnitNetworkSpeedTitle" xml:space="preserve">
+    <value>Ağ hızı</value>
+  </data>
+  <data name="UnitNetworkSpeedDesc" xml:space="preserve">
+    <value>Sistem sayfasında bayt (MB/sn) ya da bit (Mb/sn).</value>
+  </data>
+  <data name="UnitBytes" xml:space="preserve">
+    <value>Bayt</value>
+  </data>
+  <data name="UnitBits" xml:space="preserve">
+    <value>Bit</value>
+  </data>
   <data name="AccentBlue" xml:space="preserve">
     <value>Mavi</value>
   </data>

@@ -20,6 +20,14 @@ public class ClockFormatPolicyTests
     public void Time_pattern_follows_hour_and_seconds(bool twelveHour, bool seconds, string expected)
         => Assert.Equal(expected, ClockFormatPolicy.TimePattern(twelveHour, seconds));
 
+    [Theory]
+    [InlineData("en-US", ClockHourFormat.Auto, false, "h:mm tt")]
+    [InlineData("tr-TR", ClockHourFormat.Auto, false, "HH:mm")]
+    [InlineData("tr-TR", ClockHourFormat.Hour12, true, "h:mm:ss tt")]
+    [InlineData("en-US", ClockHourFormat.Hour24, false, "HH:mm")]
+    public void Resolved_pattern_follows_culture_on_auto(string culture, ClockHourFormat setting, bool seconds, string expected)
+        => Assert.Equal(expected, ClockFormatPolicy.ResolveTimePattern(setting, seconds, new System.Globalization.CultureInfo(culture)));
+
     [Fact]
     public void Time_pattern_formats_a_known_instant()
     {

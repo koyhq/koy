@@ -18,6 +18,7 @@ using Koy.App.Features.Settings;
 using Koy.App.Features.Shelf;
 using Koy.App.Features.Status;
 using Koy.App.Features.SystemInfo;
+using Koy.Core.Clock;
 using Koy.Core.Notch;
 using Koy.Core.Power;
 using Koy.Core.Settings;
@@ -228,7 +229,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private string _title = "Koy";
 
     [ObservableProperty]
-    private string _clockTime = DateTime.Now.ToString("HH:mm");
+    private string _clockTime = "";
 
     [ObservableProperty]
     private int _batteryPercent = 100;
@@ -406,10 +407,11 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
             return;
 
         UpdateClock();
-        // Dakika başına hizalı: dakikada bir uyanır, saat dakika döner dönmez değişir (ClockTick).
+        // Saniye gösterilirken saniyede bir; değilse dakika başına hizalı, dakikada bir uyanır (ClockTick).
+        // Zamanlayıcı yalnız çentik görünürken çalışır (AGENTS #5).
         _clockTimer = new DispatcherTimer(DispatcherPriority.Background, _dispatcher)
         {
-            Interval = ClockTick.DelayToNextMinute(DateTime.Now)
+            Interval = NextClockDelay()
         };
         _clockTimer.Tick += (_, _) => OnClockTick();
         _clockTimer.Start();
@@ -431,8 +433,11 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     {
         UpdateClock();
         if (_clockTimer is not null)
-            _clockTimer.Interval = ClockTick.DelayToNextMinute(DateTime.Now);
+            _clockTimer.Interval = NextClockDelay();
     }
+
+    private TimeSpan NextClockDelay() =>
+        Settings.Notch.ClockShowSeconds ? TimeSpan.FromSeconds(1) : ClockTick.DelayToNextMinute(DateTime.Now);
 
     // SystemEvents kendi iş parçacığında çağırır; saat UI iş parçacığında yenilenir.
     private void OnSystemTimeChanged(object? sender, EventArgs e) => RunOnUi(() =>
@@ -444,12 +449,13 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private void UpdateClock()
     {
         var now = DateTime.Now;
-        ClockTime = now.ToString("HH:mm");
+        var clock = Settings.Notch;
+        ClockTime = now.ToString(ClockFormatPolicy.ResolveTimePattern(clock.ClockHourFormat, clock.ClockShowSeconds, CultureInfo.CurrentCulture), CultureInfo.CurrentCulture);
         if (IsIdleRing)
         {
             var culture = IdleCulture;
-            IdleDayTime = IdleDisplayFormat.DayTime(now, culture);
-            IdlePeekDate = "· " + IdleDisplayFormat.ShortDate(now, culture);
+            IdleDayTime = IdleDisplayFormat.DayTime(now, culture, ClockFormatPolicy.ResolveTimePattern(clock.ClockHourFormat, clock.ClockShowSeconds, culture));
+            IdlePeekDate = "· " + IdleDisplayFormat.ShortDate(now, culture, clock.ClockCustomDateFormat);
         }
     }
 

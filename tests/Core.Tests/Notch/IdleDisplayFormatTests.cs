@@ -20,10 +20,25 @@ public class IdleDisplayFormatTests
     }
 
     [Fact]
+    public void DayTime_uses_the_given_time_pattern()
+    {
+        Assert.Equal("Tue 7:21 PM", IdleDisplayFormat.DayTime(Tuesday, En, "h:mm tt"));
+        Assert.Equal("Sal 19:21:05", IdleDisplayFormat.DayTime(Tuesday, Tr, "HH:mm:ss"));
+    }
+
+    [Fact]
     public void ShortDate_follows_language_day_month_order()
     {
         Assert.Equal("17 Kas", IdleDisplayFormat.ShortDate(Tuesday, Tr));
         Assert.Equal("Nov 17", IdleDisplayFormat.ShortDate(Tuesday, En));
+    }
+
+    [Fact]
+    public void ShortDate_uses_valid_custom_format_and_ignores_invalid_one()
+    {
+        Assert.Equal("17.11.2026", IdleDisplayFormat.ShortDate(Tuesday, Tr, "dd.MM.yyyy"));
+        Assert.Equal("17 Kas", IdleDisplayFormat.ShortDate(Tuesday, Tr, ""));
+        Assert.Equal("Nov 17", IdleDisplayFormat.ShortDate(Tuesday, En, "   "));
     }
 
     [Theory]
