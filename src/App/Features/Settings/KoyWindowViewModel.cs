@@ -15,6 +15,7 @@ using Koy.Core.Visibility;
 using Koy.Core.Weather;
 using Koy.Core.Voice;
 using Koy.App.Features.Notch;
+using Koy.App.Features.Notch.LiveBackground;
 using Koy.Core.Notifications;
 using Koy.Platform.Notifications;
 using Koy.Platform.Shell;
@@ -299,6 +300,79 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private MusicCardStyle _musicCardStyle = MusicCardStyle.Tinted;
+
+    // ---- Canlı arka plan (issue #67). Kararlar ve doğrulama Core'da (LiveBackground*); burası yalnız bağlar. ----
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLiveBackgroundEnabled))]
+    private LiveBackgroundTarget _liveBackgroundTarget = LiveBackgroundTarget.None;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLiveBackgroundFileSource))]
+    [NotifyPropertyChangedFor(nameof(IsLiveBackgroundAmbientSource))]
+    [NotifyPropertyChangedFor(nameof(LiveBackgroundFileMessage))]
+    private LiveBackgroundSourceKind _liveBackgroundSource = LiveBackgroundSourceKind.BuiltInAmbient;
+
+    [ObservableProperty]
+    private string _liveBackgroundPreset = LiveBackgroundPresets.DefaultId;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(LiveBackgroundFileName))]
+    [NotifyPropertyChangedFor(nameof(LiveBackgroundFileMessage))]
+    private string _liveBackgroundFilePath = "";
+
+    [ObservableProperty]
+    private int _liveBackgroundScrimPercent = LiveBackgroundLimits.DefaultScrimPercent;
+
+    public bool IsLiveBackgroundEnabled => LiveBackgroundTarget != LiveBackgroundTarget.None;
+    public bool IsLiveBackgroundFileSource => LiveBackgroundSource == LiveBackgroundSourceKind.LocalFile;
+    public bool IsLiveBackgroundAmbientSource => LiveBackgroundSource == LiveBackgroundSourceKind.BuiltInAmbient;
+
+    /// <summary>Önayar seçici: kimlik + yerelleştirilmiş ad.</summary>
+    public IReadOnlyList<LiveBackgroundPresetOption> LiveBackgroundPresetOptions { get; } =
+        LiveBackgroundPresets.All.Select(p => new LiveBackgroundPresetOption(p.Id, Strings.Get(p.NameKey))).ToList();
+
+    /// <summary>Perde yüzdesi seçenekleri.</summary>
+    public int[] LiveBackgroundScrimOptions { get; } = [40, 50, 60, 65, 70, 80, 90];
+
+    public string LiveBackgroundFileName => string.IsNullOrWhiteSpace(LiveBackgroundFilePath)
+        ? Strings.Get("LiveBgNoFile")
+        : System.IO.Path.GetFileName(LiveBackgroundFilePath);
+
+    /// <summary>Seçili dosyanın doğrulama sonucu (boş = sorun yok ya da dosya seçilmemiş). Doğrulama Core'dadır.</summary>
+    public string LiveBackgroundFileMessage => !IsLiveBackgroundFileSource || string.IsNullOrWhiteSpace(LiveBackgroundFilePath)
+        ? ""
+        : LiveBackgroundMessages.For(LiveBackgroundFileValidator.Validate(
+            LiveBackgroundFilePath,
+            // Boyut yalnız yol metni geçerliyse okunur: UNC / URL yoluna ağ erişimi yapılmaz.
+            LiveBackgroundFileValidator.Validate(LiveBackgroundFilePath, 1) == LiveBackgroundFileError.None
+                ? LiveBackgroundState.FileLength(LiveBackgroundFilePath)
+                : 1));
+
+    /// <summary>"Dosya seç" düğmesi. Yalnız kullanıcı tıklamasından çağrılır (ayar yüklenirken dosya penceresi açılmasın).</summary>
+    [RelayCommand]
+    public void PickLiveBackgroundFile()
+    {
+        if (_isLoading)
+            return;
+
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = Strings.Get("LiveBgPickTitle"),
+            Filter = string.Format(Strings.Get("LiveBgPickFilter"), LiveBackgroundFileValidator.DialogPattern),
+            CheckFileExists = true
+        };
+
+        var owner = Application.Current?.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+        var accepted = owner is not null ? dialog.ShowDialog(owner) : dialog.ShowDialog();
+
+        // Geçersiz dosya da yola yazılır: neden mesajı satırda görünür, çentik yalnız geçerliyse çizer.
+        if (accepted == true)
+        {
+            LiveBackgroundFilePath = dialog.FileName;
+            LiveBackgroundSource = LiveBackgroundSourceKind.LocalFile;
+        }
+    }
 
     [ObservableProperty]
     private bool _showVolumeOsd = true;
@@ -992,6 +1066,11 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             MusicShowWaveform = s.Music.ShowWaveform;
             MusicCardStyle = s.Music.CardStyle;
             MusicLyricsEnabled = s.Music.LyricsEnabled;
+            LiveBackgroundTarget = s.Notch.LiveBackgroundTarget;
+            LiveBackgroundSource = s.Notch.LiveBackgroundSource;
+            LiveBackgroundPreset = LiveBackgroundPresets.Find(s.Notch.LiveBackgroundPreset).Id;
+            LiveBackgroundFilePath = s.Notch.LiveBackgroundFilePath ?? "";
+            LiveBackgroundScrimPercent = LiveBackgroundLimits.ClampScrimPercent(s.Notch.LiveBackgroundScrimPercent);
             IdleDisplayMode = s.Notch.IdleDisplay;
             NotchStyle = s.Notch.Style;
             NotchOpenBehavior = s.Notch.OpenBehavior;
@@ -1280,6 +1359,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             or nameof(Material) or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
             or nameof(NotchOpenBehavior) or nameof(WheelAction) or nameof(BatterySaverReduceMotion)
             or nameof(NotchOpenDelayMs) or nameof(NotchCloseDelayMs) or nameof(NotchTabBarStyle) or nameof(NotchTabOrderVersion)
+            or nameof(LiveBackgroundTarget) or nameof(LiveBackgroundSource) or nameof(LiveBackgroundPreset) or nameof(LiveBackgroundFilePath) or nameof(LiveBackgroundScrimPercent)
             or nameof(WeatherRefreshInterval) or nameof(PomodoroWorkMinutes) or nameof(PomodoroShortBreakMinutes) or nameof(PomodoroLongBreakMinutes)
             or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
             or nameof(PanelControlCenter) or nameof(PanelClipboard) or nameof(PanelSystem) or nameof(ClipboardHistoryEnabled)
@@ -1406,6 +1486,11 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 TabBarStyle = NotchTabBarStyle,
                 // Varsayılan sıra boş liste olarak kalır ("yalnız değişenler" onu değişmiş saymasın).
                 PanelOrder = _panelOrder.SequenceEqual(NotchPanels.Order.Select(NotchPanels.ToKey)) ? [] : new ValueList<string>(_panelOrder),
+                LiveBackgroundTarget = LiveBackgroundTarget,
+                LiveBackgroundSource = LiveBackgroundSource,
+                LiveBackgroundPreset = LiveBackgroundPreset,
+                LiveBackgroundFilePath = LiveBackgroundFilePath,
+                LiveBackgroundScrimPercent = LiveBackgroundScrimPercent,
                 FollowsMaterial = NotchFollowsMaterial,
                 WheelAction = WheelAction,
                 ClockHourFormat = ClockHourFormat,

@@ -3168,5 +3168,95 @@
   <data name="UserStyleDiagOutOfRange" xml:space="preserve">
     <value>Value is outside the allowed range.</value>
   </data>
+  <data name="LiveBgHeader" xml:space="preserve">
+    <value>Visuals</value>
+  </data>
+  <data name="LiveBgTargetTitle" xml:space="preserve">
+    <value>Live background</value>
+  </data>
+  <data name="LiveBgTargetDesc" xml:space="preserve">
+    <value>Animated or looping backdrop behind the open notch and/or the music card. Plays only while the notch is open.</value>
+  </data>
+  <data name="LiveBgTargetNone" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="LiveBgTargetNotch" xml:space="preserve">
+    <value>Notch</value>
+  </data>
+  <data name="LiveBgTargetMusicCard" xml:space="preserve">
+    <value>Music card</value>
+  </data>
+  <data name="LiveBgTargetBoth" xml:space="preserve">
+    <value>Both</value>
+  </data>
+  <data name="LiveBgSourceTitle" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="LiveBgSourceDesc" xml:space="preserve">
+    <value>A built-in ambient gradient or your own GIF, short video (MP4, WebM) or WebP image. Reduce motion and battery saver show a still first frame.</value>
+  </data>
+  <data name="LiveBgSourceAmbient" xml:space="preserve">
+    <value>Ambient</value>
+  </data>
+  <data name="LiveBgSourceFile" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="LiveBgPresetTitle" xml:space="preserve">
+    <value>Ambient preset</value>
+  </data>
+  <data name="LiveBgPresetDesc" xml:space="preserve">
+    <value>Slowly shifting dark colors. No file is loaded.</value>
+  </data>
+  <data name="LiveBgPresetAurora" xml:space="preserve">
+    <value>Aurora</value>
+  </data>
+  <data name="LiveBgPresetEmber" xml:space="preserve">
+    <value>Ember</value>
+  </data>
+  <data name="LiveBgPresetOcean" xml:space="preserve">
+    <value>Ocean</value>
+  </data>
+  <data name="LiveBgPresetDusk" xml:space="preserve">
+    <value>Dusk</value>
+  </data>
+  <data name="LiveBgFileTitle" xml:space="preserve">
+    <value>Background file</value>
+  </data>
+  <data name="LiveBgFileChoose" xml:space="preserve">
+    <value>Choose file</value>
+  </data>
+  <data name="LiveBgNoFile" xml:space="preserve">
+    <value>No file chosen</value>
+  </data>
+  <data name="LiveBgPickTitle" xml:space="preserve">
+    <value>Choose a background</value>
+  </data>
+  <data name="LiveBgPickFilter" xml:space="preserve">
+    <value>Backgrounds ({0})|{0}</value>
+  </data>
+  <data name="LiveBgScrimTitle" xml:space="preserve">
+    <value>Dark overlay</value>
+  </data>
+  <data name="LiveBgScrimDesc" xml:space="preserve">
+    <value>Darkens the background so text stays readable (percent).</value>
+  </data>
+  <data name="LiveBgErrorMissing" xml:space="preserve">
+    <value>No file chosen.</value>
+  </data>
+  <data name="LiveBgErrorExtension" xml:space="preserve">
+    <value>Unsupported file type. Use GIF, MP4, WebM or WebP.</value>
+  </data>
+  <data name="LiveBgErrorNotLocal" xml:space="preserve">
+    <value>Only files on a local drive are supported (no network paths or links).</value>
+  </data>
+  <data name="LiveBgErrorEmpty" xml:space="preserve">
+    <value>The file is empty or cannot be read.</value>
+  </data>
+  <data name="LiveBgErrorTooLarge" xml:space="preserve">
+    <value>The file is too large (limit {0} MB).</value>
+  </data>
+  <data name="LiveBgErrorInvalid" xml:space="preserve">
+    <value>This file path is not valid.</value>
+  </data>
 </root>
 

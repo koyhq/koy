@@ -3168,5 +3168,95 @@
   <data name="UserStyleDiagOutOfRange" xml:space="preserve">
     <value>Değer izinli aralığın dışında.</value>
   </data>
+  <data name="LiveBgHeader" xml:space="preserve">
+    <value>Görseller</value>
+  </data>
+  <data name="LiveBgTargetTitle" xml:space="preserve">
+    <value>Canlı arka plan</value>
+  </data>
+  <data name="LiveBgTargetDesc" xml:space="preserve">
+    <value>Açık çentiğin ve/veya müzik kartının arkasında hareketli ya da döngülü zemin. Yalnız çentik açıkken oynar.</value>
+  </data>
+  <data name="LiveBgTargetNone" xml:space="preserve">
+    <value>Kapalı</value>
+  </data>
+  <data name="LiveBgTargetNotch" xml:space="preserve">
+    <value>Çentik</value>
+  </data>
+  <data name="LiveBgTargetMusicCard" xml:space="preserve">
+    <value>Müzik kartı</value>
+  </data>
+  <data name="LiveBgTargetBoth" xml:space="preserve">
+    <value>İkisi de</value>
+  </data>
+  <data name="LiveBgSourceTitle" xml:space="preserve">
+    <value>Kaynak</value>
+  </data>
+  <data name="LiveBgSourceDesc" xml:space="preserve">
+    <value>Yerleşik ambiyans geçişi ya da kendi GIF, kısa video (MP4, WebM) veya WebP görselin. Hareketi azalt ve pil tasarrufunda sabit ilk kare görünür.</value>
+  </data>
+  <data name="LiveBgSourceAmbient" xml:space="preserve">
+    <value>Ambiyans</value>
+  </data>
+  <data name="LiveBgSourceFile" xml:space="preserve">
+    <value>Dosya</value>
+  </data>
+  <data name="LiveBgPresetTitle" xml:space="preserve">
+    <value>Ambiyans önayarı</value>
+  </data>
+  <data name="LiveBgPresetDesc" xml:space="preserve">
+    <value>Yavaşça kayan koyu renkler. Dosya yüklenmez.</value>
+  </data>
+  <data name="LiveBgPresetAurora" xml:space="preserve">
+    <value>Aurora</value>
+  </data>
+  <data name="LiveBgPresetEmber" xml:space="preserve">
+    <value>Köz</value>
+  </data>
+  <data name="LiveBgPresetOcean" xml:space="preserve">
+    <value>Okyanus</value>
+  </data>
+  <data name="LiveBgPresetDusk" xml:space="preserve">
+    <value>Alacakaranlık</value>
+  </data>
+  <data name="LiveBgFileTitle" xml:space="preserve">
+    <value>Arka plan dosyası</value>
+  </data>
+  <data name="LiveBgFileChoose" xml:space="preserve">
+    <value>Dosya seç</value>
+  </data>
+  <data name="LiveBgNoFile" xml:space="preserve">
+    <value>Dosya seçilmedi</value>
+  </data>
+  <data name="LiveBgPickTitle" xml:space="preserve">
+    <value>Arka plan seç</value>
+  </data>
+  <data name="LiveBgPickFilter" xml:space="preserve">
+    <value>Arka planlar ({0})|{0}</value>
+  </data>
+  <data name="LiveBgScrimTitle" xml:space="preserve">
+    <value>Koyu perde</value>
+  </data>
+  <data name="LiveBgScrimDesc" xml:space="preserve">
+    <value>Yazının okunması için arka planı karartır (yüzde).</value>
+  </data>
+  <data name="LiveBgErrorMissing" xml:space="preserve">
+    <value>Dosya seçilmedi.</value>
+  </data>
+  <data name="LiveBgErrorExtension" xml:space="preserve">
+    <value>Desteklenmeyen dosya türü. GIF, MP4, WebM ya da WebP kullan.</value>
+  </data>
+  <data name="LiveBgErrorNotLocal" xml:space="preserve">
+    <value>Yalnız yerel sürücüdeki dosyalar desteklenir (ağ yolu ya da bağlantı olmaz).</value>
+  </data>
+  <data name="LiveBgErrorEmpty" xml:space="preserve">
+    <value>Dosya boş ya da okunamıyor.</value>
+  </data>
+  <data name="LiveBgErrorTooLarge" xml:space="preserve">
+    <value>Dosya çok büyük (sınır {0} MB).</value>
+  </data>
+  <data name="LiveBgErrorInvalid" xml:space="preserve">
+    <value>Bu dosya yolu geçerli değil.</value>
+  </data>
 </root>
 

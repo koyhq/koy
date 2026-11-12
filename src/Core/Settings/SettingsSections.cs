@@ -346,6 +346,24 @@ public sealed record NotchSettings
 
     /// <summary>İkinci saatin saat dilimi kimliği (Windows kimliği, örn. "Tokyo Standard Time"). Boşsa ikinci saat kapalı.</summary>
     public string ClockSecondTimeZoneId { get; set; } = "";
+
+    /// <summary>
+    /// Canlı arka plan (issue #67): nereye uygulanacağı. Varsayılan None = özellik kapalı, hiçbir şey yüklenmez ve çizilmez.
+    /// Yalnız çentik açıkken oynar, kapanınca durur ve bellek bırakılır (bkz. <see cref="LiveBackgroundPlaybackPolicy"/>).
+    /// </summary>
+    public LiveBackgroundTarget LiveBackgroundTarget { get; set; } = LiveBackgroundTarget.None;
+
+    /// <summary>Canlı arka plan kaynağı: yerleşik ambiyans (varsayılan) ya da yerel dosya.</summary>
+    public LiveBackgroundSourceKind LiveBackgroundSource { get; set; } = LiveBackgroundSourceKind.BuiltInAmbient;
+
+    /// <summary>Yerleşik ambiyans önayar kimliği (bkz. <see cref="LiveBackgroundPresets"/>); bilinmeyen kimlik varsayılana düşer.</summary>
+    public string LiveBackgroundPreset { get; set; } = LiveBackgroundPresets.DefaultId;
+
+    /// <summary>Yerel dosya yolu (.gif, .mp4, .webm, .webp; yalnız yerel sürücü). Geçerliliği <see cref="LiveBackgroundFileValidator"/> denetler.</summary>
+    public string LiveBackgroundFilePath { get; set; } = "";
+
+    /// <summary>Okunabilirlik için koyu perdenin yüzdesi (30–90, bkz. <see cref="LiveBackgroundLimits.ClampScrimPercent"/>).</summary>
+    public int LiveBackgroundScrimPercent { get; set; } = LiveBackgroundLimits.DefaultScrimPercent;
 }
 
 /// <summary>Müzik kartı.</summary>

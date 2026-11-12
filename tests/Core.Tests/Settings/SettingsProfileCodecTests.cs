@@ -227,6 +227,41 @@ public class SettingsProfileCodecTests
     }
 
     [Fact]
+    public void Export_clears_live_background_file_path_but_keeps_other_live_background_choices()
+    {
+        var source = Source() with
+        {
+            Notch = Source().Notch with
+            {
+                LiveBackgroundTarget = Koy.Core.Notch.LiveBackgroundTarget.Both,
+                LiveBackgroundSource = Koy.Core.Notch.LiveBackgroundSourceKind.LocalFile,
+                LiveBackgroundFilePath = @"C:\Users\ornek\loop.gif",
+            },
+        };
+
+        var json = SettingsProfileCodec.Export(source, "P", [ProfileSection.Notch]);
+
+        Assert.Equal("", JsonNode.Parse(json)!["Settings"]!["Notch"]!["LiveBackgroundFilePath"]!.GetValue<string>());
+        Assert.Equal("Both", JsonNode.Parse(json)!["Settings"]!["Notch"]!["LiveBackgroundTarget"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public void Apply_keeps_the_local_live_background_file_path()
+    {
+        var source = Source() with
+        {
+            Notch = Source().Notch with { LiveBackgroundTarget = Koy.Core.Notch.LiveBackgroundTarget.Notch },
+        };
+        var profile = Profile(SettingsProfileCodec.Export(source, "P", [ProfileSection.Notch]));
+        var current = new AppSettings { Notch = new NotchSettings { LiveBackgroundFilePath = @"D:\yerel.gif" } };
+
+        var applied = SettingsProfileCodec.Apply(current, profile, [ProfileSection.Notch]);
+
+        Assert.Equal(Koy.Core.Notch.LiveBackgroundTarget.Notch, applied.Notch.LiveBackgroundTarget);
+        Assert.Equal(@"D:\yerel.gif", applied.Notch.LiveBackgroundFilePath);
+    }
+
+    [Fact]
     public void Export_clears_local_app_icon_override_paths_from_the_file()
     {
         var source = Source() with
