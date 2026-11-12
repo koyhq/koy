@@ -103,6 +103,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private bool _isHandleVisible;
 
+    /// <summary>Gizli dock'un altındaki ince çizgi (ayar açık, dock gizli, tam ekran yok). Anında değişir, animasyonsuzdur.</summary>
+    [ObservableProperty]
+    private bool _isEdgeLineVisible;
+
     [ObservableProperty]
     private double _dockHeight = 60.0;
 
@@ -120,6 +124,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     private bool _showBadges = true;
+
+    private readonly DockPresentationStyle _presentation;
 
     // Sistem tepsisi: simgeler yalnız pencere açıkken eşitlenir ve çözülür (boştayken iş yok).
     [ObservableProperty]
@@ -361,6 +367,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         StartIcon = settings.Dock.ShowStartButton ? DockStartIconLoader.Load(settings) : null;
         _showFolders = settings.Dock.ShowFolders;
         _showBadges = settings.Dock.ShowBadges;
+        _presentation = DockPresentationStyle.From(settings.Dock);
 
         _materialSettings = settings;
         UpdateMaterialSurfaces();
@@ -882,6 +889,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
 
         IsVisible = shouldShow;
+        // Çekil tutamağı zaten gizli dock'u işaret eder; ikisi üst üste çizilmez.
+        IsEdgeLineVisible = !resolved.IsHandleVisible && DockPresentationMath.ShowsHiddenEdgeLine(
+            _settings.Dock.HiddenEdgeLine, !shouldShow, isBlockedByFullscreen || _isForegroundWindowFullscreen);
         Status?.SetActive(shouldShow);
 
         // Fare izleme yalnız dock gizliyken (ya da kenardan açıldıysa, kapanışını görmek için) ve tam ekranda değilken
@@ -1255,7 +1265,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                 {
                     IconSize = IconSize,
                     ItemSize = ItemSize,
-                    UseLineIndicator = _settings.Dock.IndicatorStyle == DockIndicatorStyle.Line
+                    Presentation = _presentation
                 };
                 itemVmCache[m.Id] = vm;
                 itemVmCache[PinnedOrder.IdOf(m.Id)] = vm;
@@ -1299,7 +1309,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                                 {
                                     IconSize = IconSize,
                                     ItemSize = ItemSize,
-                                    UseLineIndicator = _settings.Dock.IndicatorStyle == DockIndicatorStyle.Line
+                                    Presentation = _presentation
                                 };
                                 folderItems.Add(fallbackVm);
                             }
@@ -1319,8 +1329,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                             var newFolderVm = new DockFolderViewModel(folder, folderItems, this)
                             {
                                 IconSize = IconSize,
-                                ItemSize = ItemSize,
-                                UseLineIndicator = _settings.Dock.IndicatorStyle == DockIndicatorStyle.Line
+                                ItemSize = ItemSize
                             };
                             desiredEntries.Add(newFolderVm);
                         }

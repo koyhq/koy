@@ -44,6 +44,22 @@
                                 <DataTrigger Binding="{Binding IsActive}" Value="True">
                                     <Setter Property="Background" Value="#1AFFFFFF"/>
                                 </DataTrigger>
+                                <!-- Gösterge stili "Arka plan": çalışan uygulamanın zemini vurgu rengiyle boyanır (nokta/çizgi çizilmez) -->
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Presentation.IsHighlight}" Value="True"/>
+                                        <Condition Binding="{Binding IsRunning}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Background" Value="{DynamicResource KoyAccentSubtle}"/>
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Presentation.IsHighlight}" Value="True"/>
+                                        <Condition Binding="{Binding IsRunning}" Value="True"/>
+                                        <Condition Binding="{Binding Presentation.HasIndicatorBrush}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Background" Value="{Binding Presentation.HighlightBrush}"/>
+                                </MultiDataTrigger>
                                 <DataTrigger Binding="{Binding IsAttention}" Value="True">
                                     <Setter Property="Background" Value="#2EF97316"/>
                                 </DataTrigger>
@@ -106,17 +122,32 @@
                             </Border>
                         </Grid>
 
-                        <!-- Okunmamış Bildirim Rozeti: Sağ üst kırmızı hap #EF4444, 11px beyaz kalın yazı -->
-                        <Border HorizontalAlignment="Right"
-                                VerticalAlignment="Top"
-                                Margin="0,2,2,0"
-                                MinHeight="18"
-                                MinWidth="18"
-                                CornerRadius="9"
-                                Background="#EF4444"
-                                Padding="4,1"
-                                Visibility="{Binding HasBadge, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
-                            <TextBlock Text="{Binding BadgeCount}"
+                        <!-- Okunmamış Bildirim Rozeti: köşe, renk ve biçim (sayı / yalnız nokta) ayardan; 11px beyaz kalın yazı -->
+                        <Border HorizontalAlignment="{Binding Presentation.BadgeHorizontal}"
+                                VerticalAlignment="{Binding Presentation.BadgeVertical}"
+                                Margin="{Binding Presentation.BadgeMargin}"
+                                Visibility="{Binding ShowBadge, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="MinHeight" Value="18"/>
+                                    <Setter Property="MinWidth" Value="18"/>
+                                    <Setter Property="CornerRadius" Value="9"/>
+                                    <Setter Property="Padding" Value="4,1"/>
+                                    <Setter Property="Background" Value="{DynamicResource KoyAccent}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Presentation.HasBadgeBrush}" Value="True">
+                                            <Setter Property="Background" Value="{Binding Presentation.BadgeBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Presentation.BadgeDotOnly}" Value="True">
+                                            <Setter Property="MinHeight" Value="10"/>
+                                            <Setter Property="MinWidth" Value="10"/>
+                                            <Setter Property="CornerRadius" Value="5"/>
+                                            <Setter Property="Padding" Value="0"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="{Binding BadgeText}"
                                        FontSize="11"
                                        FontWeight="Bold"
                                        Foreground="#FFFFFF"
@@ -125,15 +156,37 @@
                         </Border>
 
                         <!-- Çoklu Pencere Göstergesi: 3 küçük nokta vurgu rengi (Birden fazla pencere varsa) -->
-                        <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Bottom"
-                                    Margin="0,0,0,2"
-                                    Visibility="{Binding IsMultiWindow, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
-                            <Border Width="4" Height="3" CornerRadius="1.5" Background="{DynamicResource KoyAccent}" Margin="1,0"/>
-                            <Border Width="4" Height="3" CornerRadius="1.5" Background="{DynamicResource KoyAccent}" Margin="1,0"/>
-                            <Border Width="4" Height="3" CornerRadius="1.5" Background="{DynamicResource KoyAccent}" Margin="1,0"/>
-                        </StackPanel>
+                        <!-- Gösterge stili "Arka plan" iken nokta/çizgi hiç çizilmez (DrawsMark) -->
+                        <Grid Visibility="{Binding Presentation.DrawsMark, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                        <!-- Pencere başına nokta kipinde sayı (en çok 3) Core'dan gelir (IndicatorCount). -->
+                        <ItemsControl ItemsSource="{Binding IndicatorDots}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Bottom"
+                                      Margin="0,0,0,2"
+                                      IsHitTestVisible="False"
+                                      Visibility="{Binding HasMultiDots, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Width="4" Height="3" CornerRadius="1.5" Margin="1,0">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="{DynamicResource KoyAccent}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding DataContext.Presentation.HasIndicatorBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="True">
+                                                        <Setter Property="Background" Value="{Binding DataContext.Presentation.IndicatorBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
                         <!-- Tekil Pencere / Çalışan Göstergesi (Tek pencere veya odak) -->
                         <Border HorizontalAlignment="Center"
@@ -150,7 +203,7 @@
                                                 <Condition Binding="{Binding IsRunning}" Value="True"/>
                                                 <Condition Binding="{Binding IsActive}" Value="False"/>
                                                 <Condition Binding="{Binding IsAttention}" Value="False"/>
-                                                <Condition Binding="{Binding IsMultiWindow}" Value="False"/>
+                                                <Condition Binding="{Binding HasMultiDots}" Value="False"/>
                                             </MultiDataTrigger.Conditions>
                                             <Setter Property="Visibility" Value="Visible"/>
                                             <Setter Property="Width" Value="6"/>
@@ -164,8 +217,8 @@
                                                 <Condition Binding="{Binding IsRunning}" Value="True"/>
                                                 <Condition Binding="{Binding IsActive}" Value="False"/>
                                                 <Condition Binding="{Binding IsAttention}" Value="False"/>
-                                                <Condition Binding="{Binding IsMultiWindow}" Value="False"/>
-                                                <Condition Binding="{Binding UseLineIndicator}" Value="True"/>
+                                                <Condition Binding="{Binding HasMultiDots}" Value="False"/>
+                                                <Condition Binding="{Binding Presentation.UseLine}" Value="True"/>
                                             </MultiDataTrigger.Conditions>
                                             <Setter Property="Width" Value="16"/>
                                         </MultiDataTrigger>
@@ -176,6 +229,10 @@
                                             <Setter Property="Height" Value="3"/>
                                             <Setter Property="CornerRadius" Value="1.5"/>
                                             <Setter Property="Background" Value="{DynamicResource KoyAccent}"/>
+                                        </DataTrigger>
+                                        <!-- Gösterge rengi nötr/özel ise çalışan ve aktif göstergeler bu renkle boyanır (dikkat turuncusu kalır) -->
+                                        <DataTrigger Binding="{Binding Presentation.HasIndicatorBrush}" Value="True">
+                                            <Setter Property="Background" Value="{Binding Presentation.IndicatorBrush}"/>
                                         </DataTrigger>
                                         <!-- Dikkat İstiyor: 16×3 px çizgi #F97316 -->
                                         <DataTrigger Binding="{Binding IsAttention}" Value="True">
@@ -189,6 +246,7 @@
                                 </Style>
                             </Border.Style>
                         </Border>
+                        </Grid>
                     </Grid>
                 </Border>
             </DataTemplate>
