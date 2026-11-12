@@ -65,6 +65,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     // Animasyon hızı ayarı (Sakin 1,5 / Hızlı 0,65): yay zamanı bununla bölünür. 0 ise ReduceMotion zaten anında atlar.
     private static double TimeScale => Motion.Scale > 0 ? 1.0 / Motion.Scale : 1.0;
 
+    // Büyütme yayı: genel hareket ve "Dock büyütme" anahtarı birlikte (MotionPolicy.ScaleFor).
+    private bool MagnifyAnimates => !ReduceMotion && Motion.EnabledFor(MotionPolicy.MotionKind.DockMagnify);
+
     private DisplayMonitor? _currentMonitor;
     private WindowRect _foregroundWindowBounds = WindowRect.Empty;
     private bool _isForegroundWindowMaximized;
@@ -1014,6 +1017,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         // Tepe büyüme çubuğun yüksekliğine göre sınırlanır (48 px çubukta öğe taşmaz); komşu yarısı kadar büyür.
         var peak = DockFitMath.HoverPeakScale(DockHeight, ItemSize);
         var neighbor = 1.0 + (peak - 1.0) * 0.5;
+        // Büyütme animasyonu anahtarı kapalıysa büyüme yine olur ama yaysız, tek karede (issue #79).
+        var animate = MagnifyAnimates;
 
         for (var i = 0; i < Items.Count; i++)
         {
@@ -1024,7 +1029,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                 1 => neighbor,
                 _ => 1.0
             };
-            Items[i].SetTargetScale(targetScale);
+            if (animate)
+                Items[i].SetTargetScale(targetScale);
+            else
+                Items[i].SnapScale(targetScale);
         }
 
         _isAnimating = true;
@@ -1139,9 +1147,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     public void OnHoverEnded()
     {
+        var animate = MagnifyAnimates;
         for (var i = 0; i < Items.Count; i++)
         {
-            if (ReduceMotion)
+            if (!animate)
                 Items[i].SnapScale(1.0);
             else
                 Items[i].SetTargetScale(1.0);

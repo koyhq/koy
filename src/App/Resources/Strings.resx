@@ -1263,6 +1263,33 @@
   <data name="ReduceMotionDesc" xml:space="preserve">
     <value>If animations are off in Windows, Koy turns motion off too.</value>
   </data>
+  <data name="MotionTogglesTitle" xml:space="preserve">
+    <value>Individual animations</value>
+  </data>
+  <data name="MotionTogglesDesc" xml:space="preserve">
+    <value>Turn off a single animation; it then jumps straight to its final state.</value>
+  </data>
+  <data name="MotionTogglesDisabledHint" xml:space="preserve">
+    <value>These have no effect while the overall animation setting is off.</value>
+  </data>
+  <data name="MotionNotchOpenClose" xml:space="preserve">
+    <value>Notch open and close</value>
+  </data>
+  <data name="MotionDockMagnify" xml:space="preserve">
+    <value>Dock magnification</value>
+  </data>
+  <data name="MotionFolderPanel" xml:space="preserve">
+    <value>Dock folder panel</value>
+  </data>
+  <data name="MotionOsd" xml:space="preserve">
+    <value>Volume, brightness and notification pop-ups</value>
+  </data>
+  <data name="MotionBadgeBounce" xml:space="preserve">
+    <value>Badge bounce</value>
+  </data>
+  <data name="MotionTabTransitions" xml:space="preserve">
+    <value>Notch tab transitions</value>
+  </data>
   <data name="AccentBlue" xml:space="preserve">
     <value>Blue</value>
   </data>

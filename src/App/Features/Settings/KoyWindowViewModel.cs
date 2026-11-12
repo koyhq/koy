@@ -309,6 +309,41 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private bool _respectReduceMotion = true;
 
+    // Animasyon başına anahtarlar (issue #79). Rozet zıplaması anahtarı arayüzde yok: dock rozetinde henüz animasyon yok.
+    [ObservableProperty]
+    private bool _motionNotchOpenClose = true;
+
+    [ObservableProperty]
+    private bool _motionTabTransitions = true;
+
+    [ObservableProperty]
+    private bool _motionOsd = true;
+
+    [ObservableProperty]
+    private bool _motionDockMagnify = true;
+
+    [ObservableProperty]
+    private bool _motionFolderPanel = true;
+
+    /// <summary>
+    /// Anahtarlar etkili mi: genel animasyon "Kapalı" ya da Windows "animasyonları azalt" (uy açıkken) varsa hepsi
+    /// etkisizdir (MotionPolicy.ScaleFor). Pil tasarrufu anlık durum olduğu için burada sayılmaz.
+    /// </summary>
+    public bool MotionTogglesActive =>
+        MotionPolicy.Scale(AnimationSpeed, RespectReduceMotion, SystemParameters.ClientAreaAnimation, batterySaverReduceMotion: false) > 0;
+
+    public bool MotionTogglesInactive => !MotionTogglesActive;
+
+    partial void OnAnimationSpeedChanged(AnimationSpeed value) => NotifyMotionTogglesActive();
+
+    partial void OnRespectReduceMotionChanged(bool value) => NotifyMotionTogglesActive();
+
+    private void NotifyMotionTogglesActive()
+    {
+        OnPropertyChanged(nameof(MotionTogglesActive));
+        OnPropertyChanged(nameof(MotionTogglesInactive));
+    }
+
     // --- KISAYOLLAR ---
     [ObservableProperty]
     private WheelAction _wheelAction;
@@ -534,6 +569,12 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             AnimationSpeed = s.Appearance.AnimationSpeed;
             RespectReduceMotion = s.Appearance.RespectReduceMotion;
             BatterySaverReduceMotion = s.Appearance.BatterySaverReduceMotion;
+            var motion = s.Appearance.Motion ?? new MotionSettings();
+            MotionNotchOpenClose = motion.NotchOpenClose;
+            MotionTabTransitions = motion.TabTransitions;
+            MotionOsd = motion.Osd;
+            MotionDockMagnify = motion.DockMagnify;
+            MotionFolderPanel = motion.FolderPanel;
             WeatherRefreshInterval = s.Weather.RefreshInterval;
             PomodoroWorkMinutes = s.Focus.PomodoroWorkMinutes;
             PomodoroShortBreakMinutes = s.Focus.PomodoroShortBreakMinutes;
@@ -664,7 +705,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     {
         base.OnPropertyChanged(e);
         if (_isLoading) return;
-        if (e.PropertyName is nameof(SelectedPageIndex) or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
+        if (e.PropertyName is nameof(SelectedPageIndex) or nameof(MotionTogglesActive) or nameof(MotionTogglesInactive) or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
             or nameof(IsResetConfirming) or nameof(UninstallAvailability) or nameof(CanUninstall) or nameof(UninstallRowDescription)
             or nameof(StartIconFileName) or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates) or nameof(DownloadProgressText))
             return;
@@ -676,8 +717,10 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
         if (e.PropertyName is nameof(Theme) or nameof(AccentColor) or nameof(UseWindowsAccent) or nameof(Material)
             or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
-            or nameof(CornerRadius) or nameof(AnimationSpeed) or nameof(RespectReduceMotion) or nameof(BatterySaverReduceMotion))
+            or nameof(CornerRadius) or nameof(AnimationSpeed) or nameof(RespectReduceMotion) or nameof(BatterySaverReduceMotion)
+            or nameof(MotionNotchOpenClose) or nameof(MotionTabTransitions) or nameof(MotionOsd) or nameof(MotionDockMagnify) or nameof(MotionFolderPanel))
         {
+            // Animasyon anahtarları da buradan (Motion.Refresh) canlı uygulanır; çentik ve dock yeniden kurulmaz.
             // Görünüm ayarları açık pencerelere anında yansır.
             ThemeManager.Apply(app, _store.Load());
         }
@@ -828,7 +871,15 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 CornerRadius = CornerRadius,
                 AnimationSpeed = AnimationSpeed,
                 RespectReduceMotion = RespectReduceMotion,
-                BatterySaverReduceMotion = BatterySaverReduceMotion
+                BatterySaverReduceMotion = BatterySaverReduceMotion,
+                Motion = (current.Appearance.Motion ?? new MotionSettings()) with
+                {
+                    NotchOpenClose = MotionNotchOpenClose,
+                    TabTransitions = MotionTabTransitions,
+                    Osd = MotionOsd,
+                    DockMagnify = MotionDockMagnify,
+                    FolderPanel = MotionFolderPanel
+                }
             },
             Weather = current.Weather with
             {

@@ -6,6 +6,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using Koy.App.Resources;
 using Koy.Core.Animation;
+using Koy.Core.Appearance;
 using Koy.Platform.Shell;
 
 namespace Koy.App.Features.Dock.Folder;
@@ -103,7 +104,7 @@ public partial class FolderPanel : UserControl
             Close();
     }
 
-    private bool AnimationsEnabled => Motion.Enabled && ViewModel?.OwnerViewModel?.ReduceMotion != true;
+    private bool AnimationsEnabled => Motion.EnabledFor(MotionPolicy.MotionKind.FolderPanel) && ViewModel?.OwnerViewModel?.ReduceMotion != true;
 
     private void Open()
     {

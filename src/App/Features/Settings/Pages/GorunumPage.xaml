@@ -12,6 +12,7 @@
         <Style x:Key="AccentSwatch" TargetType="RadioButton" BasedOn="{StaticResource ColorRadioStyle}">
             <Setter Property="GroupName" Value="Accent" />
         </Style>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </UserControl.Resources>
 
     <StackPanel Margin="0,0,16,24">
@@ -248,5 +249,70 @@
                           IsChecked="{Binding RespectReduceMotion}" Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
+
+        <!-- ANİMASYONLAR TEK TEK (issue #79): genel çarpan 0 iken etkisiz, devre dışı görünür -->
+        <TextBlock Text="{Binding [MotionTogglesTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+        <TextBlock Text="{Binding [MotionTogglesDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,0,0,8" />
+        <TextBlock Text="{Binding [MotionTogglesDisabledHint], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}"
+                   Foreground="{DynamicResource KoyAccentText}" Margin="0,0,0,8"
+                   Visibility="{Binding MotionTogglesInactive, Converter={StaticResource BoolToVis}}" />
+
+        <StackPanel IsEnabled="{Binding MotionTogglesActive}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding [MotionNotchOpenClose], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [MotionNotchOpenClose], Source={x:Static res:Loc.Instance}}"
+                              IsChecked="{Binding MotionNotchOpenClose}" Style="{StaticResource ToggleSwitchStyle}" />
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding [MotionTabTransitions], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [MotionTabTransitions], Source={x:Static res:Loc.Instance}}"
+                              IsChecked="{Binding MotionTabTransitions}" Style="{StaticResource ToggleSwitchStyle}" />
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding [MotionOsd], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [MotionOsd], Source={x:Static res:Loc.Instance}}"
+                              IsChecked="{Binding MotionOsd}" Style="{StaticResource ToggleSwitchStyle}" />
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding [MotionDockMagnify], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [MotionDockMagnify], Source={x:Static res:Loc.Instance}}"
+                              IsChecked="{Binding MotionDockMagnify}" Style="{StaticResource ToggleSwitchStyle}" />
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding [MotionFolderPanel], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [MotionFolderPanel], Source={x:Static res:Loc.Instance}}"
+                              IsChecked="{Binding MotionFolderPanel}" Style="{StaticResource ToggleSwitchStyle}" />
+                </Grid>
+            </Border>
+        </StackPanel>
     </StackPanel>
 </UserControl>
