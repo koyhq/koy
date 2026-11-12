@@ -87,6 +87,22 @@ public static class LiveBackgroundLimits
     /// <summary>Çözülmüş karelerin toplam bellek sınırı (bayt). 620×352×4 ≈ 0,87 MB/kare: yaklaşık 55 kare.</summary>
     public const long MaxDecodedBytes = 48L * 1024 * 1024;
 
+    /// <summary>
+    /// Kaynağın çözülmemiş (tam çözünürlük, kare başına 4 bayt) toplam boyutu için üst sınır. GIF kareleri düşük sıkıştırmalı
+    /// dosyalarda bile çok daha büyük açılabilir; 64 MB'lık bir dosya bile gigabaytlarca kare üretebilir, bu yüzden kare sayısı ve
+    /// çözünürlük birlikte sınırlanır.
+    /// </summary>
+    public const long MaxSourceDecodedBytes = 128L * 1024 * 1024;
+
+    /// <summary>Kaynak çözülebilir mi: ölçüler geçerli ve ham kare belleği sınırın içinde (<see cref="MaxSourceDecodedBytes"/>).</summary>
+    public static bool IsSourceWithinBudget(int sourceWidth, int sourceHeight, int frameCount)
+    {
+        if (sourceWidth <= 0 || sourceHeight <= 0 || frameCount <= 0)
+            return false;
+        // double: uç değerlerde long taşması sınırı aşan girdiyi geçerli gösterirdi.
+        return (double)sourceWidth * sourceHeight * 4 * frameCount <= MaxSourceDecodedBytes;
+    }
+
     /// <summary>Yerel dosya boyutu sınırı (bayt).</summary>
     public const long MaxFileSizeBytes = 64L * 1024 * 1024;
 

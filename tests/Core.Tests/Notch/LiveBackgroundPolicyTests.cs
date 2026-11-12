@@ -362,6 +362,27 @@ public class LiveBackgroundPolicyTests
         Assert.Equal(620, LiveBackgroundLimits.DecodePixelWidth);
     }
 
+    [Theory]
+    [InlineData(480, 270, 60, true)]      // ~31 MB
+    [InlineData(1920, 1080, 15, true)]    // ~124 MB
+    [InlineData(1920, 1080, 17, false)]   // ~141 MB
+    [InlineData(4000, 4000, 1, true)]     // tek büyük kare (64 MB)
+    [InlineData(4000, 4000, 3, false)]  // 192 MB
+    [InlineData(0, 100, 1, false)]
+    [InlineData(100, 0, 1, false)]
+    [InlineData(100, 100, 0, false)]
+    [InlineData(100, 100, -1, false)]
+    public void IsSourceWithinBudget_limits_raw_decoded_size(int w, int h, int frames, bool expected)
+    {
+        Assert.Equal(expected, LiveBackgroundLimits.IsSourceWithinBudget(w, h, frames));
+    }
+
+    [Fact]
+    public void IsSourceWithinBudget_does_not_overflow_on_huge_input()
+    {
+        Assert.False(LiveBackgroundLimits.IsSourceWithinBudget(int.MaxValue, int.MaxValue, int.MaxValue));
+    }
+
     [Fact]
     public void FramePlan_small_gif_keeps_every_frame()
     {
