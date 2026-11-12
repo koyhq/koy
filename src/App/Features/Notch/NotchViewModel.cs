@@ -323,7 +323,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         _clipboard = clipboard;
         LiveBackground = new LiveBackgroundState(settings.Notch);
         Home = new HomeViewModel(music, status, focus, systemStats, quickLaunch, shellActions, () => _controller.GoToPanel(NotchPanel.Focus),
-            controlCenter.BluetoothDevices) { LiveBackground = LiveBackground };
+            controlCenter.BluetoothDevices, settings.Notch.HomeCards) { LiveBackground = LiveBackground };
         quickLaunch.HoldOpen = HoldOpenForPicker;
         _visibility = visibility ?? new VisibilityController(settings.Notch.Visibility);
         _dispatcher = dispatcher ?? (System.Windows.Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher);

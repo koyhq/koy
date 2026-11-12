@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Koy.Core.Notch;
 
 namespace Koy.App.Features.Music;
 
@@ -87,6 +88,26 @@ public sealed class SpectrumBars : FrameworkElement
         set => SetValue(GapProperty, value);
     }
 
+    public static readonly DependencyProperty VisualizerStyleProperty = DependencyProperty.Register(
+        nameof(VisualizerStyle), typeof(NotchVisualizerStyle), typeof(SpectrumBars),
+        new FrameworkPropertyMetadata(NotchVisualizerStyle.Bars, FrameworkPropertyMetadataOptions.AffectsRender));
+
+    public NotchVisualizerStyle VisualizerStyle
+    {
+        get => (NotchVisualizerStyle)GetValue(VisualizerStyleProperty);
+        set => SetValue(VisualizerStyleProperty, value);
+    }
+
+    public static readonly DependencyProperty BarCountProperty = DependencyProperty.Register(
+        nameof(BarCount), typeof(int), typeof(SpectrumBars),
+        new FrameworkPropertyMetadata(5, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender));
+
+    public int BarCount
+    {
+        get => (int)GetValue(BarCountProperty);
+        set => SetValue(BarCountProperty, value);
+    }
+
     public static readonly DependencyProperty FeedProperty = DependencyProperty.Register(
         nameof(Feed), typeof(SpectrumFeed), typeof(SpectrumBars),
         new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, OnFeedChanged));
@@ -138,27 +159,53 @@ public sealed class SpectrumBars : FrameworkElement
 
     protected override Size MeasureOverride(Size availableSize)
     {
-        var count = Feed?.Levels.Length ?? 0;
+        var rawCount = Feed?.Levels.Length ?? 0;
+        var count = Math.Min(rawCount, NotchVisualizer.ClampBarCount(BarCount > 0 ? BarCount : 5));
         return new Size(count > 0 ? count * BarWidth + (count - 1) * Gap : 0, 0);
     }
 
     protected override void OnRender(DrawingContext dc)
     {
-        var levels = Feed?.Levels;
-        if (levels is null || levels.Length == 0)
+        var rawLevels = Feed?.Levels;
+        if (rawLevels is null || rawLevels.Length == 0)
+            return;
+
+        var count = Math.Min(rawLevels.Length, NotchVisualizer.ClampBarCount(BarCount > 0 ? BarCount : 5));
+        if (count <= 0)
             return;
 
         var height = ActualHeight;
         var barWidth = BarWidth;
         var gap = Gap;
         var radius = barWidth / 2;
-        var total = levels.Length * barWidth + (levels.Length - 1) * gap;
+        var total = count * barWidth + (count - 1) * gap;
         var x = Math.Max(0, (ActualWidth - total) / 2);
         var fill = Fill;
-        for (var i = 0; i < levels.Length; i++, x += barWidth + gap)
+        var style = VisualizerStyle;
+
+        for (var i = 0; i < count; i++, x += barWidth + gap)
         {
-            var barHeight = Math.Max(MinBar, Math.Round(levels[i] * height));
-            dc.DrawRoundedRectangle(fill, null, new Rect(x, height - barHeight, barWidth, barHeight), radius, radius);
+            var level = rawLevels[i];
+            switch (style)
+            {
+                case NotchVisualizerStyle.Wave:
+                    var midY = height / 2;
+                    var halfH = Math.Max(MinBar / 2, Math.Round((level * height) / 2));
+                    dc.DrawRoundedRectangle(fill, null, new Rect(x, midY - halfH, barWidth, halfH * 2), radius, radius);
+                    break;
+
+                case NotchVisualizerStyle.Dots:
+                    var dotBarHeight = Math.Max(MinBar, Math.Round(level * height));
+                    var dotY = Math.Max(radius, Math.Min(height - radius, height - dotBarHeight));
+                    dc.DrawEllipse(fill, null, new Point(x + radius, dotY), radius, radius);
+                    break;
+
+                case NotchVisualizerStyle.Bars:
+                default:
+                    var barHeight = Math.Max(MinBar, Math.Round(level * height));
+                    dc.DrawRoundedRectangle(fill, null, new Rect(x, height - barHeight, barWidth, barHeight), radius, radius);
+                    break;
+            }
         }
     }
 }

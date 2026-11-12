@@ -183,6 +183,77 @@
             </Grid>
         </Border>
 
+        <!-- Ses Görselleştiricisi -->
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [VisualizerStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [VisualizerStyleDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [VisualizerStyleBars], Source={x:Static res:Loc.Instance}}" GroupName="VisualizerStyle"
+                                     IsChecked="{Binding VisualizerStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Bars}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [VisualizerStyleWave], Source={x:Static res:Loc.Instance}}" GroupName="VisualizerStyle"
+                                     IsChecked="{Binding VisualizerStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Wave}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [VisualizerStyleDots], Source={x:Static res:Loc.Instance}}" GroupName="VisualizerStyle"
+                                     IsChecked="{Binding VisualizerStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Dots}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [VisualizerColorSourceTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [VisualizerColorSourceDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [VisualizerColorSourceAccent], Source={x:Static res:Loc.Instance}}" GroupName="VisualizerColorSource"
+                                     IsChecked="{Binding VisualizerColorSource, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Accent}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [VisualizerColorSourceArtwork], Source={x:Static res:Loc.Instance}}" GroupName="VisualizerColorSource"
+                                     IsChecked="{Binding VisualizerColorSource, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Artwork}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [VisualizerBarCountTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [VisualizerBarCountDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Slider Width="140" Minimum="3" Maximum="16" TickFrequency="1" IsSnapToTickEnabled="True"
+                            Value="{Binding VisualizerBarCount}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding VisualizerBarCount, StringFormat='{}{0}'}"
+                               Foreground="{DynamicResource KoyTextSecondary}"
+                               FontSize="{DynamicResource KoyFontCaption}"
+                               Width="32" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
         <!-- SAAT (issue #77) -->
         <TextBlock Text="{Binding [ClockHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 
@@ -701,6 +772,34 @@
                             <Button Grid.Column="2" Content="↓" Width="32" Style="{StaticResource SettingButtonStyle}"
                                     Command="{Binding DataContext.MoveTabDownCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding Panel}"
                                     AutomationProperties.Name="{Binding [NotchTabMoveDown], Source={x:Static res:Loc.Instance}}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <TextBlock Text="{Binding [HomeCardSectionTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+        <TextBlock Text="{Binding [HomeCardSectionDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,-4,0,8" />
+        <ItemsControl ItemsSource="{Binding HomeCardOrder}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource SettingRowStyle}" MinHeight="40">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" IsChecked="{Binding IsEnabled}" VerticalAlignment="Center" Margin="0,0,12,0"
+                                      AutomationProperties.Name="{Binding Label}" />
+                            <TextBlock Grid.Column="1" Text="{Binding Label}" Style="{StaticResource SettingTitleStyle}" VerticalAlignment="Center" />
+                            <Button Grid.Column="2" Content="↑" Width="32" Margin="0,0,6,0" Style="{StaticResource SettingButtonStyle}"
+                                    Command="{Binding DataContext.MoveHomeCardUpCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding Card}"
+                                    AutomationProperties.Name="{Binding [HomeCardMoveUp], Source={x:Static res:Loc.Instance}}" />
+                            <Button Grid.Column="3" Content="↓" Width="32" Style="{StaticResource SettingButtonStyle}"
+                                    Command="{Binding DataContext.MoveHomeCardDownCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding Card}"
+                                    AutomationProperties.Name="{Binding [HomeCardMoveDown], Source={x:Static res:Loc.Instance}}" />
                         </Grid>
                     </Border>
                 </DataTemplate>
