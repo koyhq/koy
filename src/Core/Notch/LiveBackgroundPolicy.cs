@@ -1,3 +1,4 @@
+using System.Globalization;
 using Koy.Core.Background;
 
 namespace Koy.Core.Notch;
@@ -242,6 +243,19 @@ public static class LiveBackgroundFileValidator
     /// <summary>OpenFileDialog süzgeci ("*.gif;*.mp4;*.webm;*.webp").</summary>
     public static string DialogPattern => string.Join(';', AllowedExtensions.Select(e => "*" + e));
 
+    public const int MaxPathLength = 259;
+
+    private static readonly string[] DeviceNames =
+    [
+        "CON", "PRN", "AUX", "NUL",
+        "COM0", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+        "LPT0", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+        "COM¹", "COM²", "COM³", "LPT¹", "LPT²", "LPT³",
+        "CONIN$", "CONOUT$"
+    ];
+
+    private static readonly char[] InvalidNameChars = ['<', '>', '"', '|', '?', '*'];
+
     /// <summary>Dosya yolunu ve boyutunu denetler; ilk hatayı döner.</summary>
     public static LiveBackgroundFileError Validate(string? path, long fileSizeBytes)
     {
@@ -252,21 +266,24 @@ public static class LiveBackgroundFileValidator
         if (extension is null || !AllowedExtensions.Contains(extension))
             return LiveBackgroundFileError.UnsupportedExtension;
 
-        var kind = BackgroundSourceValidator.KindOf(extension);
-        if (kind is null)
-            return LiveBackgroundFileError.UnsupportedExtension;
+        if (path.Length > MaxPathLength)
+            return LiveBackgroundFileError.InvalidPath;
 
-        var error = BackgroundSourceValidator.Validate(new BackgroundSource(kind.Value, path));
-        if (error != BackgroundSourceError.None)
-        {
-            return error switch
-            {
-                BackgroundSourceError.MissingPath => LiveBackgroundFileError.MissingPath,
-                BackgroundSourceError.NotLocalPath => LiveBackgroundFileError.NotLocalPath,
-                BackgroundSourceError.UnknownExtension or BackgroundSourceError.KindMismatch => LiveBackgroundFileError.UnsupportedExtension,
-                _ => LiveBackgroundFileError.InvalidPath
-            };
-        }
+        if (path.Any(c => char.IsControl(c) || char.GetUnicodeCategory(c) == UnicodeCategory.Format))
+            return LiveBackgroundFileError.InvalidPath;
+
+        if (path.Contains("://", StringComparison.Ordinal) || path.StartsWith(@"\\", StringComparison.Ordinal) || !IsAbsoluteWindowsPath(path))
+            return LiveBackgroundFileError.NotLocalPath;
+
+        if (path.IndexOf(':', 2) >= 0)
+            return LiveBackgroundFileError.InvalidPath;
+
+        if (path.IndexOfAny(InvalidNameChars) >= 0)
+            return LiveBackgroundFileError.InvalidPath;
+
+        var segments = path[3..].Split('\\');
+        if (segments.Any(IsNonCanonicalSegment) || segments.Any(IsReservedDeviceName))
+            return LiveBackgroundFileError.InvalidPath;
 
         if (fileSizeBytes <= 0)
             return LiveBackgroundFileError.Empty;
@@ -275,6 +292,18 @@ public static class LiveBackgroundFileValidator
 
         return LiveBackgroundFileError.None;
     }
+
+    private static bool IsNonCanonicalSegment(string segment) =>
+        segment.Length == 0 || segment is "." or ".." || segment[^1] is '.' or ' ';
+
+    private static bool IsReservedDeviceName(string segment)
+    {
+        var stem = segment.Split('.')[0].TrimEnd(' ').ToUpperInvariant();
+        return DeviceNames.Contains(stem);
+    }
+
+    private static bool IsAbsoluteWindowsPath(string path) =>
+        path.Length >= 3 && char.IsAsciiLetter(path[0]) && path[1] == ':' && path[2] == '\\' && path.IndexOf('/') < 0;
 
     /// <summary>Yolun uzantısı (küçük harf, noktalı); yoksa null.</summary>
     public static string? ExtensionOf(string path)

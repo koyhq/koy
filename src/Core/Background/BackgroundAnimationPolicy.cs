@@ -1,6 +1,17 @@
 namespace Koy.Core.Background;
 
 /// <summary>
+/// Arka plan türü (BackgroundAnimationPolicy ve LiveBackgroundPolicy tarafından kullanılır).
+/// </summary>
+public enum BackgroundKind
+{
+    None = 0,
+    StillImage = 1,
+    AnimatedImage = 2,
+    Video = 3
+}
+
+/// <summary>
 /// Pencere, güç ve hareket durumu. Arka planın hareket edip etmeyeceğine bunlar karar verir.
 /// Varsayılan (default) değer "görünmez ve hareket yok" demektir: unutulan alan animasyonu açmaz.
 /// </summary>

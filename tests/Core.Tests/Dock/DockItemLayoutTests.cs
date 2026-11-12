@@ -1,6 +1,7 @@
 using System.Globalization;
 using Koy.Core.Dock;
 using Koy.Core.Dock.Items;
+using Koy.Core.Notch;
 
 namespace Koy.Core.Tests;
 
@@ -137,7 +138,7 @@ public class DockItemLayoutTests
     {
         var now = new DateTime(2026, 11, 12, 10, 15, 20, 500);
         var delay = DockClockTick.DelayToNextMinute(now);
-        Assert.Equal(TimeSpan.FromMilliseconds(39500 + 50), delay);
+        Assert.Equal(TimeSpan.FromMilliseconds(39500) + ClockTick.Margin, delay);
         Assert.Equal(0, (now + delay).Second);
     }
 
@@ -147,7 +148,7 @@ public class DockItemLayoutTests
         foreach (var s in new[] { 0, 1, 30, 59 })
         {
             var d = DockClockTick.DelayToNextMinute(new DateTime(2026, 1, 1, 0, 0, s, 999));
-            Assert.InRange(d, TimeSpan.FromMilliseconds(50), TimeSpan.FromMilliseconds(60050));
+            Assert.InRange(d, ClockTick.MinimumDelay, TimeSpan.FromMinutes(1) + ClockTick.Margin);
         }
     }
 
