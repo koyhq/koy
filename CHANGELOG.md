@@ -7,6 +7,29 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.8](https://github.com/koyhq/koy/compare/v0.2.7...v0.2.8) (2026-11-12)
+
+
+### Added
+
+* **appearance:** let theme packs restyle notch and dock ([9ddb99d](https://github.com/koyhq/koy/commit/9ddb99dafd8ee81d644572fc8b2591274883f06e))
+* **extensions:** add store index, package installer and installed registry ([4c5c996](https://github.com/koyhq/koy/commit/4c5c99667734b3e84655bfd46f436bf384ceaeb3))
+* **settings:** add developer mode toggle and redesign advanced settings page ([74b76b3](https://github.com/koyhq/koy/commit/74b76b3ffc4718b063254d4bb0bb17d9fa71872b))
+* **settings:** add DeveloperMode and friendly section/property titles to AdvancedSettings ([1558550](https://github.com/koyhq/koy/commit/1558550f0783e13d7e93956e6ef45b864accb6e5))
+* **settings:** add extensions page with store browsing, install and apply ([8670139](https://github.com/koyhq/koy/commit/867013903f08cdff6c2347ad42fb1ce4e44e5d8b))
+* **settings:** map unit keys, remove about thanks links, and add gelismis snapshot ([65595d6](https://github.com/koyhq/koy/commit/65595d6a1046b8fa739c70635324369847a98df5))
+* **store:** add extension index, sample packages and store check workflow ([d3b18c1](https://github.com/koyhq/koy/commit/d3b18c129641a8d77b784fbc393ca17108080f6a))
+* **store:** paint notch and dock in the sample theme packs ([99da370](https://github.com/koyhq/koy/commit/99da370c7d6987318b4250d9801c06b58f4059ad))
+* **strings:** add developer mode and advanced filter strings ([d9dd358](https://github.com/koyhq/koy/commit/d9dd35898eca4f85b451836ad07389c3ba39038a))
+
+
+### Fixed
+
+* **settings:** clean up orphan static notices in changed-only filter view ([e0c8f8f](https://github.com/koyhq/koy/commit/e0c8f8ffa40858607be0c5f19d5ff2f5007014f1))
+* **settings:** fix adorner leaks, polish changed-only filter view, and redesign advanced settings ([e180826](https://github.com/koyhq/koy/commit/e18082615c6f4fabbd5ac9208636facfe7ddd920))
+* **settings:** fix adorner lifecycle for changed setting indicator dots ([f12d33b](https://github.com/koyhq/koy/commit/f12d33b0ff9f3645860e09eca4685906b41e86dd))
+* **settings:** preserve section headers and handle empty states when filtering changed settings ([04b61c2](https://github.com/koyhq/koy/commit/04b61c22d176351ffb0e3bcc88427bba2fef8339))
+
 ## [0.2.7](https://github.com/koyhq/koy/compare/v0.2.6...v0.2.7) (2026-11-12)
 
 

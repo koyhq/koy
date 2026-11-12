@@ -5,6 +5,46 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.8](https://github.com/koyhq/koy/compare/v0.2.7...v0.2.8) (2026-11-12)
+Öne çıkanlar:
+- **Gelişmiş ayarlar sayfası yenilendi:** Ham anahtarlar yerine anlaşılır Türkçe başlıklar ve mono teknik etiketler, arama çubuğu ve modern uyarı paneli getirildi.
+- **Geliştirici modu:** Gelişmiş sekmesi artık varsayılanda sol menüde kalabalık yapmıyor; Hakkında › Sorun Giderme altındaki anahtarla açılıyor.
+- **"Yalnız değişenleri göster" düzeltildi:** Sayfa geçişlerinde ekranda yetim kalan mavi noktalar (adorner sızıntısı) temizlendi; değişen ayarların bölüm başlıkları korundu ve boş sayfalar için zarif bilgilendirme kartı eklendi.
+- **Eklenti Mağazası (Extensions):** Tema paketleri ve eklentileri listeleyip tek tıkla indirip uygulayabileceğiniz yeni Eklentiler sayfası eklendi.
+- **Hakkında sayfası temizliği:** Sayfa sonundaki eski teşekkür ve harici bağlantı kartları kaldırıldı.
+
+### Eklenenler
+
+* **appearance:** tema paketleriyle çentik ve dock stilini özelleştirme ([9ddb99d](https://github.com/koyhq/koy/commit/9ddb99dafd8ee81d644572fc8b2591274883f06e))
+* **extensions:** mağaza indeksi, paket yükleyici ve kayıt defteri ([4c5c996](https://github.com/koyhq/koy/commit/4c5c99667734b3e84655bfd46f436bf384ceaeb3))
+* **settings:** geliştirici modu anahtarı ve modern gelişmiş ayarlar tasarımı ([74b76b3](https://github.com/koyhq/koy/commit/74b76b3ffc4718b063254d4bb0bb17d9fa71872b))
+* **settings:** DeveloperMode ve kullanıcı dostu başlıklar ([1558550](https://github.com/koyhq/koy/commit/1558550f0783e13d7e93956e6ef45b864accb6e5))
+* **settings:** eklenti mağazası sayfası ([8670139](https://github.com/koyhq/koy/commit/867013903f08cdff6c2347ad42fb1ce4e44e5d8b))
+* **settings:** birim anahtarları eşlemesi ve arayüz testleri ([65595d6](https://github.com/koyhq/koy/commit/65595d6a1046b8fa739c70635324369847a98df5))
+* **store:** örnek tema paketleri ve mağaza doğrulama akışı ([d3b18c1](https://github.com/koyhq/koy/commit/d3b18c129641a8d77b784fbc393ca17108080f6a))
+
+### Düzeltmeler
+
+* **settings:** yalnız değişenler görünümündeki yetim statik uyarı kutuları gizlendi ([e0c8f8f](https://github.com/koyhq/koy/commit/e0c8f8ffa40858607be0c5f19d5ff2f5007014f1))
+* **settings:** mavi nokta (adorner) sızıntıları ve sayfa düzeni düzeltildi ([e180826](https://github.com/koyhq/koy/commit/e18082615c6f4fabbd5ac9208636facfe7ddd920))
+* **settings:** değişen ayar noktalarının yaşam döngüsü ve görünürlük takibi ([f12d33b](https://github.com/koyhq/koy/commit/f12d33b0ff9f3645860e09eca4685906b41e86dd))
+* **settings:** filtrelemede bölüm başlıklarının korunması ve boş durum kartı ([04b61c2](https://github.com/koyhq/koy/commit/04b61c22d176351ffb0e3bcc88427bba2fef8339))
+
+## [0.2.7](https://github.com/koyhq/koy/compare/v0.2.6...v0.2.7) (2026-11-12)
+Öne çıkanlar:
+- **Ekran köşeleri (Hot Corners):** Ekranın dört köşesine kısayol veya eylem atama (çentiği aç, pencereleri göster vb.).
+- **Dock geliştirmeleri:** Gruplama, monitör başına filtreleme, tıklama eylemleri ve akıllı rozetler.
+- **Yazı tipi ve ölçekleme:** Yazı boyutu ve Koy pencere ölçekleme ayarları.
+
+### Eklenenler
+
+* **appearance:** yazı tipi ve UI ölçekleme ayarları ([e759063](https://github.com/koyhq/koy/commit/e75906363647624b26660a95e956c1d43e7c849e))
+* **appearance:** simge paketi ayarı ([db35753](https://github.com/koyhq/koy/commit/db357535c33775bcd97853ffc036d34ac8902324))
+* **core:** ekran köşeleri takibi ve tetikleyicileri ([ec7fdfc](https://github.com/koyhq/koy/commit/ec7fdfc23f7ce2c58db9146336e9c62dcc9aa79c))
+* **dock:** dock ögesi kuralları, tıklama politikası ve filtreleme ([8c396ba](https://github.com/koyhq/koy/commit/8c396ba2f043d98988359412308f7243672a9982))
+
+---
+
 ## [0.2.6](https://github.com/koyhq/koy/compare/v0.2.5...v0.2.6) (2026-11-11)
 Öne çıkanlar:
 - **Cam:** Görünüm › Malzeme artık Katı, Buzlu ya da Cam. Koy penceresi, sağ alt menü ve kurulum sihirbazı Windows'un akrilik bulanıklığını kullanıyor; açık çentik ve dock hafifçe saydamlaşıyor. Açık renkli duvar kağıdında yazılar okunur kalsın diye Koy seviyeyi kendiliğinden yükseltiyor.
