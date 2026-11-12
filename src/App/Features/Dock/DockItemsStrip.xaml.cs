@@ -36,8 +36,17 @@ public partial class DockItemsStrip : UserControl
             return;
         }
 
-        if (sender is FrameworkElement { DataContext: DockItemViewModel item })
+        if (sender is FrameworkElement { DataContext: DockItemViewModel item } element)
         {
+            // "Önizlemeleri göster" eylemi: çalışan simgede kutucuk açılır; açılamazsa denetleyici varsayılan eyleme düşer.
+            if (ViewModel is { } vm &&
+                vm.Controller.LeftClickAction == DockLeftClickAction.ShowThumbnails &&
+                item.Model.IsRunning &&
+                vm.TryShowPreviewNow(item, element))
+            {
+                return;
+            }
+
             ViewModel?.ClosePreviewNow();
             item.ClickCommand.Execute(null);
         }
@@ -56,6 +65,25 @@ public partial class DockItemsStrip : UserControl
             ViewModel?.ClosePreviewNow();
             folder.ClickCommand.Execute(null);
             e.Handled = true;
+        }
+    }
+
+    private void OnExtraLeftClick(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: DockExtraViewModel { IsInteractive: true } extra })
+        {
+            ViewModel?.ActivateExtra(extra);
+            e.Handled = true;
+        }
+    }
+
+    private void OnExtraRightClick(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        if (sender is FrameworkElement { DataContext: DockExtraViewModel extra } element && ViewModel is { } dock)
+        {
+            dock.ClosePreviewNow();
+            DockContextMenuManager.Open(DockContextMenuManager.CreateExtraContextMenu(dock, extra), element);
         }
     }
 

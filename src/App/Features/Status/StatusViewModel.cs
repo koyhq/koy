@@ -7,6 +7,7 @@ using Koy.App.Resources;
 using Koy.Core.Network;
 using Koy.Core.Power;
 using Koy.Core.Settings;
+using Koy.Core.Units;
 using Koy.Core.Weather;
 
 namespace Koy.App.Features.Status;
@@ -40,6 +41,10 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
     /// <summary>"Perşembe, 6 Kasım": açık çentiğin durum satırında ve boşta Ana kartında saatin altında.</summary>
     [ObservableProperty]
     private string _dayDate = "";
+
+    /// <summary>Açık çentik durum satırında tarihin ardındaki ikinci saat (" · UTC+9 21:00"); ikinci saat kapalıysa boş.</summary>
+    [ObservableProperty]
+    private string _secondClockSuffix = "";
 
     /// <summary>Günün dilimine göre selamlama ("Günaydın"): müzik çalmıyorken Ana kartında.</summary>
     [ObservableProperty]
@@ -78,6 +83,10 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
     /// <summary>Durum satırı için kısa sıcaklık ("14°"); veri yoksa "--°".</summary>
     [ObservableProperty]
     private string _temperatureShort = "--°";
+
+    /// <summary>Rüzgâr ipucu ("Rüzgâr 14 km/sa"); rüzgâr verisi yoksa boş.</summary>
+    [ObservableProperty]
+    private string _windToolTip = "";
 
     [ObservableProperty]
     private string _weatherDescription = "";
@@ -263,11 +272,15 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
     {
         var now = DateTime.Now;
         var culture = new CultureInfo(_settings.General.Language == "en" ? "en-US" : "tr-TR");
-        CurrentTime = now.ToString("HH:mm", culture);
+        // 12/24 saat ayarı (issue #77); saniye yalnız kapalı çentik saatinde, burada dakika hizası korunur.
+        CurrentTime = now.ToString(Koy.Core.Clock.ClockFormatPolicy.ResolveTimePattern(_settings.Notch.ClockHourFormat, showSeconds: false, culture), culture);
         CurrentDate = now.ToString("d MMMM dddd", culture);
         ShortDate = now.ToString("d MMM ddd", culture);
         FullDate = now.ToString("d MMMM yyyy dddd", culture);
         DayDate = now.ToString("dddd, d MMMM", culture);
+        var pattern = Koy.Core.Clock.ClockFormatPolicy.ResolveTimePattern(_settings.Notch.ClockHourFormat, showSeconds: false, culture);
+        SecondClockSuffix = Koy.Core.Clock.ClockFormatPolicy.ComposePeekLine("", null,
+            Koy.Core.Clock.SecondClock.Read(_settings.Notch.ClockSecondTimeZoneId, DateTimeOffset.Now, pattern, culture)?.Text);
         Greeting = Strings.Get(Koy.Core.Notch.Greeting.ForHour(now.Hour) switch
         {
             Koy.Core.Notch.DayPart.Morning => "GreetMorning",
@@ -342,19 +355,28 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
         if (weather is null)
         {
             HasWeather = false;
-            TemperatureText = "--°C";
+            TemperatureText = "--" + TemperatureSuffix;
             TemperatureShort = "--°";
             WeatherDescription = Strings.Loading;
             WeatherIconKind = "Cloud";
+            WindToolTip = "";
             return;
         }
 
         HasWeather = true;
-        TemperatureText = $"{Math.Round(weather.Temperature)}°C";
-        TemperatureShort = $"{Math.Round(weather.Temperature)}°";
+        // Hava servisi Celsius verir; seçilen birime Core çevirir, birim harfi Strings'ten (issue #77).
+        var degrees = Math.Round(UnitConversion.Temperature(weather.Temperature, _settings.General.TemperatureUnit));
+        TemperatureText = $"{degrees}{TemperatureSuffix}";
+        TemperatureShort = $"{degrees}°";
         WeatherDescription = Strings.Get(weather.DescriptionKey);
         WeatherIconKind = weather.IconKind;
+        var wind = weather.WindSpeedKmh is { } kmh
+            ? WindSpeedFormatter.Format(kmh, _settings.General.WindSpeedUnit, CultureInfo.CurrentCulture)
+            : null;
+        WindToolTip = wind is null ? "" : string.Format(CultureInfo.CurrentCulture, Strings.Get("WeatherWindTooltip"), wind);
     }
+
+    private string TemperatureSuffix => Strings.Get(_settings.General.TemperatureUnit == TemperatureUnit.Fahrenheit ? "UnitFahrenheitSuffix" : "UnitCelsiusSuffix");
 
     [RelayCommand]
     private async Task RefreshWeatherAsync()

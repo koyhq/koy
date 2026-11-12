@@ -18,6 +18,13 @@
 
     <Window.ContextMenu>
         <ContextMenu>
+            <MenuItem Header="{x:Static res:Strings.DockAddItem}">
+                <MenuItem Header="{x:Static res:Strings.DockAddSeparator}" Command="{Binding AddSeparatorCommand}"/>
+                <MenuItem Header="{x:Static res:Strings.DockAddSpacer}" Command="{Binding AddSpacerCommand}"/>
+                <MenuItem Header="{x:Static res:Strings.DockAddClock}" Command="{Binding AddClockCommand}"/>
+                <MenuItem Header="{x:Static res:Strings.DockAddTrash}" Command="{Binding AddTrashCommand}"/>
+                <MenuItem Header="{x:Static res:Strings.DockAddCustom}" Command="{Binding AddCustomCommand}"/>
+            </MenuItem>
             <MenuItem Header="{x:Static res:Strings.Settings}" Command="{Binding OpenSettingsCommand}"/>
         </ContextMenu>
     </Window.ContextMenu>
@@ -28,7 +35,7 @@
               IsHitTestVisible="{Binding IsVisible}">
             <Grid.RenderTransform>
                 <TransformGroup>
-                    <TranslateTransform Y="{Binding TranslationY}"/>
+                    <TranslateTransform X="{Binding TranslationX}" Y="{Binding TranslationY}"/>
                 </TransformGroup>
             </Grid.RenderTransform>
             <Grid.Opacity>
@@ -42,26 +49,39 @@
             <local:DockFullWidth Visibility="{Binding IsFullWidthMode, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
         </Grid>
 
-        <!-- 3. Çekil (Dodge) Modu İnce Tutamak: 120×4 px, 2 px yarıçap, alttan 4 px, rgba(24,24,27,0.35) -->
-        <Border Width="120"
-                Height="4"
+        <!-- 3. Çekil (Dodge) Modu İnce Tutamak: kenara duyarlı 120×4 px / 4×120 px, 2 px yarıçap, rgba(24,24,27,0.35) -->
+        <Border Width="{Binding DodgeHandleWidth}"
+                Height="{Binding DodgeHandleHeight}"
                 CornerRadius="2"
                 Background="#5918181B"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Bottom"
-                Margin="0,0,0,4"
+                HorizontalAlignment="{Binding DodgeHandleHorizontalAlignment}"
+                VerticalAlignment="{Binding DodgeHandleVerticalAlignment}"
+                Margin="{Binding DodgeHandleMargin}"
                 Cursor="Hand"
                 ToolTip="{Binding [DockShowTooltip], Source={x:Static res:Loc.Instance}}"
                 Visibility="{Binding IsHandleVisible, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"
                 MouseEnter="OnDodgeHandleMouseEnter"
                 MouseLeave="OnDodgeHandleMouseLeave"/>
 
+        <!-- 3b. Gizli dock kenar çizgisi: dock gizliyken alt kenarda 160×2 px ince çizgi (ayar: HiddenEdgeLine).
+             Tıklamayı yakalamaz; açılma kenar izleyicisinden gelir. Animasyonsuz, anında görünür/kaybolur. -->
+        <Border Width="160"
+                Height="2"
+                CornerRadius="1"
+                Background="{DynamicResource KoyAccent}"
+                Opacity="0.7"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                IsHitTestVisible="False"
+                Visibility="{Binding IsEdgeLineVisible, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
+
         <!-- 4. Canlı DWM Pencere Küçük Resim Önizlemesi -->
         <Popup x:Name="ThumbnailPreviewPopup"
                IsOpen="{Binding IsPreviewPopupOpen}"
                PlacementTarget="{Binding PreviewPlacementTarget}"
-               Placement="Top"
-               VerticalOffset="-10"
+               Placement="{Binding PreviewPlacement}"
+               VerticalOffset="{Binding PreviewVerticalOffset}"
+               HorizontalOffset="{Binding PreviewHorizontalOffset}"
                AllowsTransparency="True"
                StaysOpen="True"
                MouseEnter="OnPopupMouseEnter"

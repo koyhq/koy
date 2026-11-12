@@ -35,9 +35,17 @@ public static class Strings
     public static string NextPhase => Get(nameof(NextPhase));
     public static string Dock => Get(nameof(Dock));
     public static string LaunchNewInstance => Get(nameof(LaunchNewInstance));
+    public static string DockItemChangeIcon => Get(nameof(DockItemChangeIcon));
+    public static string DockItemResetIcon => Get(nameof(DockItemResetIcon));
     public static string Close => Get(nameof(Close));
     public static string EndTask => Get(nameof(EndTask));
     public static string StartMenu => Get(nameof(StartMenu));
+    public static string DockAddItem => Get(nameof(DockAddItem));
+    public static string DockAddSeparator => Get(nameof(DockAddSeparator));
+    public static string DockAddSpacer => Get(nameof(DockAddSpacer));
+    public static string DockAddClock => Get(nameof(DockAddClock));
+    public static string DockAddTrash => Get(nameof(DockAddTrash));
+    public static string DockAddCustom => Get(nameof(DockAddCustom));
     public static string VolumeLevel => Get(nameof(VolumeLevel));
     public static string MonitorSummary => Get(nameof(MonitorSummary));
     public static string VolumeMuted => Get(nameof(VolumeMuted));

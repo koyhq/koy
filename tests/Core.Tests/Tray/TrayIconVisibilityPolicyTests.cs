@@ -45,4 +45,12 @@ public class TrayIconVisibilityPolicyTests
 
         Assert.Equal(TrayIconVisibility.Shown, TrayIconVisibilityPolicy.Resolve(exe, perApp, TrayIconVisibility.Shown));
     }
+
+    [Fact]
+    public void Settings_list_merges_seen_and_saved_apps_as_sorted_keys()
+    {
+        var apps = TrayIconVisibilityPolicy.SettingsApps(["Steam.exe", null, " ", "discord.exe"], ["DISCORD.EXE", "onedrive.exe"]);
+
+        Assert.Equal(["discord.exe", "onedrive.exe", "steam.exe"], apps);
+    }
 }

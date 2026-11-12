@@ -35,6 +35,14 @@ public static class NotchOpenPolicy
     public static int ClampDelay(int delayMs) => Math.Clamp(delayMs, 0, MaxDelayMs);
 
     /// <summary>
+    /// Sürüklenen öğe çentiğin üstünde <paramref name="elapsedMs"/> süredir duruyor: çentik açılsın mı. Yalnız
+    /// "sürükleyince aç" kipinde açılma gecikmesi beklenir; diğer kiplerde hemen açılır (bugünkü davranış, Raf'a bırakmak için).
+    /// Sürükleme olayları zaten sürekli geldiği için zamanlayıcı gerekmez.
+    /// </summary>
+    public static bool DragShouldOpen(NotchOpenBehavior behavior, double elapsedMs, int openDelayMs) =>
+        behavior != NotchOpenBehavior.DragOver || elapsedMs >= ClampDelay(openDelayMs);
+
+    /// <summary>
     /// Kipe özgü olan yalnız çentiği neyin açtığıdır: üzerine gelmek, tıklamak ya da sürüklemek. Açılma gecikmesi
     /// kipin kendi tetikleyicisine uygulanır (yanlış tetiklemeyi önler); tıklamada gecikme yoktur, kullanıcı bilerek tıkladı.
     /// Her kipte ortak olanlar bugünkü davranıştır: imleç (ya da sürüklenen öğe) çıkınca açık çentik kapanma gecikmesiyle

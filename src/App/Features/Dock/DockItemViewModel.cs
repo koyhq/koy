@@ -85,14 +85,36 @@ public abstract partial class DockEntryViewModel : ObservableObject
         OnPropertyChanged(nameof(PressScale));
         OnPropertyChanged(nameof(PressOpacity));
     }
+    private bool _isVertical;
+    public bool IsVertical
+    {
+        get => _isVertical;
+        set
+        {
+            if (_isVertical != value)
+            {
+                _isVertical = value;
+                OnPropertyChanged(nameof(IsVertical));
+                OnPropertyChanged(nameof(TranslateX));
+                OnPropertyChanged(nameof(TranslateY));
+            }
+        }
+    }
+
     protected readonly Spring OffsetSpring = new(0) { Stiffness = 380, Damping = 30 };
 
     public double OffsetX => OffsetSpring.Value;
+    public double OffsetY => OffsetSpring.Value;
+    public double TranslateX => IsVertical ? 0.0 : OffsetSpring.Value;
+    public double TranslateY => IsVertical ? OffsetSpring.Value : 0.0;
     public void SetTargetOffset(double target) => OffsetSpring.Target = target;
     public void SnapOffset(double offset)
     {
         OffsetSpring.SnapTo(offset);
         OnPropertyChanged(nameof(OffsetX));
+        OnPropertyChanged(nameof(OffsetY));
+        OnPropertyChanged(nameof(TranslateX));
+        OnPropertyChanged(nameof(TranslateY));
     }
 
     public bool StepOffset(double dt)
@@ -102,6 +124,9 @@ public abstract partial class DockEntryViewModel : ObservableObject
 
         var moving = OffsetSpring.Step(dt);
         OnPropertyChanged(nameof(OffsetX));
+        OnPropertyChanged(nameof(OffsetY));
+        OnPropertyChanged(nameof(TranslateX));
+        OnPropertyChanged(nameof(TranslateY));
         return moving;
     }
 
@@ -176,8 +201,34 @@ public sealed partial class DockItemViewModel : DockEntryViewModel
     [ObservableProperty]
     private ImageSource? _icon;
 
-    /// <summary>Çalışan göstergesi stili "Çizgi" mi (ayar: 0 = nokta, 1 = çizgi). Öğe oluşturulurken verilir.</summary>
-    public bool UseLineIndicator { get; init; }
+    /// <summary>Gösterge ve rozet görünümü (ayardan türetilir, öğe oluşturulurken verilir).</summary>
+    public DockPresentationStyle Presentation
+    {
+        get => _presentation;
+        init
+        {
+            _presentation = value;
+            RefreshPresentation();
+        }
+    }
+
+    private DockPresentationStyle _presentation = DockPresentationStyle.Default;
+
+    /// <summary>Simgenin altında çizilecek gösterge sayısı (Core: pencere başına nokta ya da tek gösterge).</summary>
+    [ObservableProperty]
+    private int _indicatorCount;
+
+    /// <summary>Birden çok nokta çizilecek mi (pencere başına kip).</summary>
+    public bool HasMultiDots => IndicatorCount > 1;
+
+    /// <summary>Nokta şablonu için sıra listesi (uzunluğu <see cref="IndicatorCount"/>).</summary>
+    public IReadOnlyList<int> IndicatorDots { get; private set; } = [];
+
+    [ObservableProperty]
+    private bool _showBadge;
+
+    [ObservableProperty]
+    private string _badgeText = "";
 
     public bool HasOpenWindows => Windows.Count > 0;
     public DockWindowEntry? SingleWindow => Windows.Count == 1 ? Windows[0] : null;
@@ -197,11 +248,29 @@ public sealed partial class DockItemViewModel : DockEntryViewModel
         _hasBadge = model.BadgeCount > 0;
         _windows = model.Windows ?? [];
         _isMultiWindow = _windows.Count > 1;
+        RefreshPresentation();
 
         if (model.IconData is { Length: > 0 })
         {
             _icon = LoadImage(model.IconData);
         }
+    }
+
+    // Gösterge sayısı ve rozet kararı Core'dadır; burada yalnız sonuç özelliklere yazılır.
+    private void RefreshPresentation()
+    {
+        var windowCount = IsRunning ? Math.Max(1, Windows.Count) : 0;
+        var count = DockPresentationMath.IndicatorCount(windowCount, Presentation.IndicatorStyle, Presentation.OnePerWindow);
+        if (count != IndicatorCount || IndicatorDots.Count != count)
+        {
+            IndicatorDots = Enumerable.Range(0, count).ToArray();
+            IndicatorCount = count;
+            OnPropertyChanged(nameof(IndicatorDots));
+            OnPropertyChanged(nameof(HasMultiDots));
+        }
+
+        ShowBadge = Presentation.ShowBadges && DockPresentationMath.ShowsBadge(BadgeCount, Presentation.BadgeStyle);
+        BadgeText = DockPresentationMath.BadgeText(BadgeCount, Presentation.BadgeStyle);
     }
 
     public void Update(DockItem model)
@@ -224,11 +293,42 @@ public sealed partial class DockItemViewModel : DockEntryViewModel
             OnPropertyChanged(nameof(SingleWindow));
         }
 
-        if (Icon is null && model.IconData is { Length: > 0 })
+        RefreshPresentation();
+
+        if (_customIcon is null && Icon is null && model.IconData is { Length: > 0 })
         {
             Icon = LoadImage(model.IconData);
         }
     }
+
+    // Kullanıcının ya da simge paketinin verdiği simge; doluyken pencereden gelen simge Icon'u ezmez.
+    private ImageSource? _customIcon;
+
+    /// <summary>Ayarlarda bu uygulamaya ait kendi simge değişimi var (menüde "Simgeyi sıfırla" etkin olur).</summary>
+    public bool HasIconOverride { get; private set; }
+
+    /// <summary>Simgenin sahibi dock; "Simgeyi değiştir / sıfırla" ayara yazmayı ona bırakır.</summary>
+    public DockViewModel? IconOwner { get; set; }
+
+    /// <summary>Değişim ya da paket simgesini uygular; null verilirse uygulamanın kendi simgesine dönülür.</summary>
+    public void ApplyAppIcon(ImageSource? custom, bool hasOverride)
+    {
+        HasIconOverride = hasOverride;
+        OnPropertyChanged(nameof(HasIconOverride));
+        var hadCustom = _customIcon is not null;
+        _customIcon = custom;
+
+        if (custom is not null)
+            Icon = custom;
+        else if (hadCustom)
+            Icon = Model.IconData is { Length: > 0 } ? LoadImage(Model.IconData) : null;
+    }
+
+    [RelayCommand]
+    private void ChangeIcon() => IconOwner?.ChangeAppIcon(this);
+
+    [RelayCommand]
+    private void ResetIcon() => IconOwner?.ResetAppIcon(this);
 
     [RelayCommand]
     private void Click()

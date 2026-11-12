@@ -51,4 +51,44 @@ public class AppBarMathTests
 
         Assert.Equal(new WindowRect(1920, 832, 3840, 880), r);
     }
+
+    [Fact]
+    public void Top_edge_allocates_from_queried_top()
+    {
+        var queried = new WindowRect(0, 0, 1920, 1080);
+        var r = AppBarMath.FinalRect(DockEdge.Top, Monitor, 48, queried, ownsBottomEdge: false);
+        Assert.Equal(new WindowRect(0, 0, 1920, 48), r);
+    }
+
+    [Fact]
+    public void Left_edge_allocates_from_queried_left()
+    {
+        var queried = new WindowRect(0, 0, 1920, 1080);
+        var r = AppBarMath.FinalRect(DockEdge.Left, Monitor, 48, queried, ownsBottomEdge: false);
+        Assert.Equal(new WindowRect(0, 0, 48, 1080), r);
+    }
+
+    [Fact]
+    public void Right_edge_allocates_from_queried_right()
+    {
+        var queried = new WindowRect(0, 0, 1920, 1080);
+        var r = AppBarMath.FinalRect(DockEdge.Right, Monitor, 48, queried, ownsBottomEdge: false);
+        Assert.Equal(new WindowRect(1920 - 48, 0, 1920, 1080), r);
+    }
+
+    [Fact]
+    public void NeedsReassert_WorksOnAllEdges()
+    {
+        // Top edge: expected work.Top is 48. If work.Top < 48 (e.g. 0), needs reassert
+        Assert.True(AppBarOwnership.NeedsReassert(DockEdge.Top, Monitor, new WindowRect(0, 0, 1920, 1080), 48, false));
+        Assert.False(AppBarOwnership.NeedsReassert(DockEdge.Top, Monitor, new WindowRect(0, 48, 1920, 1080), 48, false));
+
+        // Left edge: expected work.Left is 48. If work.Left < 48 (e.g. 0), needs reassert
+        Assert.True(AppBarOwnership.NeedsReassert(DockEdge.Left, Monitor, new WindowRect(0, 0, 1920, 1080), 48, false));
+        Assert.False(AppBarOwnership.NeedsReassert(DockEdge.Left, Monitor, new WindowRect(48, 0, 1920, 1080), 48, false));
+
+        // Right edge: expected work.Right is 1920 - 48 = 1872. If work.Right > 1872 (e.g. 1920), needs reassert
+        Assert.True(AppBarOwnership.NeedsReassert(DockEdge.Right, Monitor, new WindowRect(0, 0, 1920, 1080), 48, false));
+        Assert.False(AppBarOwnership.NeedsReassert(DockEdge.Right, Monitor, new WindowRect(0, 0, 1872, 1080), 48, false));
+    }
 }

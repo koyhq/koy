@@ -121,7 +121,8 @@ public class NotchOptionsTests
         var notch = new AppSettings().Notch;
         var music = new AppSettings().Music;
 
-        Assert.Equal(NotchTabBarStyle.IconOnly, notch.TabBarStyle);
+        // Bugünkü sekme çubuğu simge ve adı birlikte gösterir; varsayılan onu korur.
+        Assert.Equal(NotchTabBarStyle.IconAndLabel, notch.TabBarStyle);
         Assert.Equal(0, notch.OpenDelayMs);
         Assert.Equal(NotchOpenPolicy.DefaultCloseDelayMs, notch.CloseDelayMs);
         Assert.Empty(notch.PanelOrder);

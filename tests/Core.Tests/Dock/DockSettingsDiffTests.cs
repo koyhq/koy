@@ -28,6 +28,27 @@ public class DockSettingsDiffTests
     }
 
     [Fact]
+    public void Icon_pack_and_app_icon_changes_rebuild_view_models_only()
+    {
+        var baseline = new AppSettings();
+        var variants = new[]
+        {
+            new AppSettings { Appearance = new AppearanceSettings { IconPack = IconPack.Folder } },
+            new AppSettings { Appearance = new AppearanceSettings { IconPackFolder = @"C:\Simgeler" } },
+            new AppSettings { Appearance = new AppearanceSettings { AppIconOverrides = new() { ["Notepad.lnk"] = @"C:\a.png" } } },
+        };
+
+        foreach (var after in variants)
+        {
+            var d = DockSettingsDiff.Compare(baseline, after);
+            Assert.True(d.RebuildViewModels);
+            Assert.False(d.ReconcileAppBar);
+            Assert.False(d.ReconcileTaskbar);
+            Assert.False(d.ReconcileTray);
+        }
+    }
+
+    [Fact]
     public void Style_change_reconciles_appbar_but_never_the_taskbar()
     {
         var d = DockSettingsDiff.Compare(new AppSettings(), new AppSettings { Dock = new DockSettings { Style = DockStyleMode.FullWidth } });
@@ -168,6 +189,39 @@ public class DockSettingsDiffTests
         var d = DockSettingsDiff.Compare(new AppSettings { Appearance = new AppearanceSettings { BatterySaverReduceMotion = true } }, new AppSettings { Appearance = new AppearanceSettings { BatterySaverReduceMotion = false } });
 
         Assert.True(d.ReconcilePower);
+        Assert.True(d.RebuildViewModels);
+    }
+
+    [Fact]
+    public void Edge_change_reconciles_appbar_and_rebuilds()
+    {
+        var d = DockSettingsDiff.Compare(
+            new AppSettings { Dock = new DockSettings { Edge = DockEdge.Bottom } },
+            new AppSettings { Dock = new DockSettings { Edge = DockEdge.Top } });
+
+        Assert.True(d.ReconcileAppBar);
+        Assert.True(d.RebuildViewModels);
+    }
+
+    [Fact]
+    public void LengthPercent_change_reconciles_appbar_and_rebuilds()
+    {
+        var d = DockSettingsDiff.Compare(
+            new AppSettings { Dock = new DockSettings { LengthPercent = 100 } },
+            new AppSettings { Dock = new DockSettings { LengthPercent = 80 } });
+
+        Assert.True(d.ReconcileAppBar);
+        Assert.True(d.RebuildViewModels);
+    }
+
+    [Fact]
+    public void EdgeOffsetDip_change_reconciles_appbar_and_rebuilds()
+    {
+        var d = DockSettingsDiff.Compare(
+            new AppSettings { Dock = new DockSettings { EdgeOffsetDip = 0.0 } },
+            new AppSettings { Dock = new DockSettings { EdgeOffsetDip = 10.0 } });
+
+        Assert.True(d.ReconcileAppBar);
         Assert.True(d.RebuildViewModels);
     }
 }

@@ -1,11 +1,14 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using Koy.App.Resources;
 using Koy.Core.Animation;
+using Koy.Core.Appearance;
+using Koy.Core.Dock;
 using Koy.Platform.Shell;
 
 namespace Koy.App.Features.Dock.Folder;
@@ -103,11 +106,41 @@ public partial class FolderPanel : UserControl
             Close();
     }
 
-    private bool AnimationsEnabled => Motion.Enabled && ViewModel?.OwnerViewModel?.ReduceMotion != true;
+    private bool AnimationsEnabled => Motion.EnabledFor(MotionPolicy.MotionKind.FolderPanel) && ViewModel?.OwnerViewModel?.ReduceMotion != true;
 
     private void Open()
     {
         _closing = false;
+        var edge = ViewModel?.OwnerViewModel?.Edge ?? DockEdge.Bottom;
+        switch (edge)
+        {
+            case DockEdge.Top:
+                FolderPopup.Placement = PlacementMode.Bottom;
+                FolderPopup.VerticalOffset = 8;
+                FolderPopup.HorizontalOffset = 0;
+                PopupBody.RenderTransformOrigin = new Point(0.5, 0);
+                break;
+            case DockEdge.Left:
+                FolderPopup.Placement = PlacementMode.Right;
+                FolderPopup.HorizontalOffset = 8;
+                FolderPopup.VerticalOffset = 0;
+                PopupBody.RenderTransformOrigin = new Point(0, 0.5);
+                break;
+            case DockEdge.Right:
+                FolderPopup.Placement = PlacementMode.Left;
+                FolderPopup.HorizontalOffset = -8;
+                FolderPopup.VerticalOffset = 0;
+                PopupBody.RenderTransformOrigin = new Point(1, 0.5);
+                break;
+            case DockEdge.Bottom:
+            default:
+                FolderPopup.Placement = PlacementMode.Top;
+                FolderPopup.VerticalOffset = -8;
+                FolderPopup.HorizontalOffset = 0;
+                PopupBody.RenderTransformOrigin = new Point(0.5, 1);
+                break;
+        }
+
         if (!FolderPopup.IsOpen)
         {
             ApplyVisual(AnimationsEnabled ? 0 : 1);
@@ -246,7 +279,28 @@ public partial class FolderPanel : UserControl
         PopupScale.ScaleX = scale;
         PopupScale.ScaleY = scale;
 
-        PopupShift.Y = ShiftDip * (1.0 - clamped);
+        var delta = ShiftDip * (1.0 - clamped);
+        var edge = ViewModel?.OwnerViewModel?.Edge ?? DockEdge.Bottom;
+        switch (edge)
+        {
+            case DockEdge.Top:
+                PopupShift.X = 0;
+                PopupShift.Y = -delta;
+                break;
+            case DockEdge.Left:
+                PopupShift.X = -delta;
+                PopupShift.Y = 0;
+                break;
+            case DockEdge.Right:
+                PopupShift.X = delta;
+                PopupShift.Y = 0;
+                break;
+            case DockEdge.Bottom:
+            default:
+                PopupShift.X = 0;
+                PopupShift.Y = delta;
+                break;
+        }
     }
 
     #region Başlık Düzenleme (Inline Rename)

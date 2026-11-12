@@ -5,9 +5,11 @@ using Koy.App.Features.ControlCenter;
 using Koy.App.Features.Focus;
 using Koy.App.Features.SystemInfo;
 using Koy.App.Features.Music;
+using Koy.App.Features.Notch.LiveBackground;
 using Koy.App.Features.Settings;
 using Koy.App.Features.Status;
 using Koy.Core.Diagnostics;
+using Koy.Core.Notch;
 using Koy.Core.Shell;
 
 namespace Koy.App.Features.Home;
@@ -23,6 +25,9 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     private bool _disposed;
 
     public MusicViewModel Music { get; }
+
+    /// <summary>Müzik kartı zemini için canlı arka plan kararı (NotchViewModel verir; yoksa kart eski zeminini korur).</summary>
+    public LiveBackgroundState? LiveBackground { get; init; }
     public StatusViewModel Status { get; }
     public FocusViewModel Focus { get; }
 
@@ -35,11 +40,29 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     /// <summary>Hızlı başlat şeridi.</summary>
     public QuickLaunchViewModel QuickLaunch { get; }
 
-    /// <summary>Sol kartta müzik gösterilir (parça var).</summary>
-    public bool ShowMusic => Music.HasTrack;
+    /// <summary>Aktif kartlar ve sıraları.</summary>
+    public IReadOnlyList<HomeCard> Cards { get; }
 
-    /// <summary>Sol kartta selamlama ve büyük saat gösterilir (parça yok).</summary>
-    public bool ShowIdle => !Music.HasTrack;
+    /// <summary>Sol kartta müzik gösterilir (parça var ve Müzik kartı açık).</summary>
+    public bool ShowMusic => Music.HasTrack && Cards.Contains(HomeCard.Music);
+
+    /// <summary>Sol kartta selamlama ve büyük saat gösterilir (parça yok veya müzik kartı kapalı).</summary>
+    public bool ShowIdle => !ShowMusic;
+
+    /// <summary>Odak zamanlayıcı butonu (zamanlayıcı çalışıyor ve Zamanlayıcılar kartı açık).</summary>
+    public bool ShowFocusCard => Focus.HasRunning && Cards.Contains(HomeCard.Timers);
+
+    /// <summary>Kulaklık/ses cihazı kartı (cihaz var ve Kulaklık kartı açık).</summary>
+    public bool ShowHeadphoneCard => (Bluetooth?.HasPrimaryAudio == true) && Cards.Contains(HomeCard.HeadphoneBattery);
+
+    /// <summary>Sistem ve ağ kartı (CPU, RAM, Ağ).</summary>
+    public bool ShowSystemCard => Cards.Contains(HomeCard.SystemNetwork);
+
+    /// <summary>Hızlı başlat şeridi.</summary>
+    public bool ShowQuickLaunchCard => Cards.Contains(HomeCard.QuickLaunch);
+
+    /// <summary>Hava durumu kartı (durum satırı/ana sayfa).</summary>
+    public bool ShowWeatherCard => Cards.Contains(HomeCard.Weather);
 
     /// <summary>
     /// Kullanıcı müzik kartını büyüttü mü (karta tıklayınca açılır/kapanır). Çentik kapanıp açılınca korunur;
@@ -50,30 +73,31 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     private bool _isMusicExpanded;
 
     /// <summary>Müzik kartı küçük düzende (sol sütun).</summary>
-    public bool ShowMusicCompact => Music.HasTrack && !IsMusicExpanded;
+    public bool ShowMusicCompact => ShowMusic && !IsMusicExpanded;
 
     /// <summary>Müzik kartı büyük düzende: Ana gövdesinin tamamını kaplar, sağ sütun gizlenir. Çentik boyutu değişmez.</summary>
-    public bool ShowMusicLarge => Music.HasTrack && IsMusicExpanded;
+    public bool ShowMusicLarge => ShowMusic && IsMusicExpanded;
 
-    /// <summary>Sağ sütun (kulaklık, CPU/RAM, ağ, hızlı başlat) yalnız müzik kartı büyük değilken görünür.</summary>
-    public bool ShowSideColumn => !ShowMusicLarge;
+    /// <summary>Sağ sütun (kulaklık, CPU/RAM, ağ, hızlı başlat) yalnız müzik kartı büyük değilken ve en az bir kart etkinken görünür.</summary>
+    public bool ShowSideColumn => !ShowMusicLarge && (ShowHeadphoneCard || ShowSystemCard || ShowQuickLaunchCard);
 
     /// <summary>Müzik kartına (düğme ve ilerleme çubuğu dışında) tıklanınca büyür ya da eski boyutuna döner.</summary>
     [RelayCommand]
     private void ToggleMusicExpanded()
     {
-        if (Music.HasTrack)
+        if (ShowMusic)
             IsMusicExpanded = !IsMusicExpanded;
     }
 
     /// <summary>Hava durumu kartı konum seçilmişse hava gösterir, seçilmemişse konum seçmeye yönlendirir.</summary>
-    public bool ShowWeather => Status.HasWeatherLocation;
+    public bool ShowWeather => Status.HasWeatherLocation && ShowWeatherCard;
 
-    public bool ShowNoLocation => !Status.HasWeatherLocation;
+    public bool ShowNoLocation => !Status.HasWeatherLocation && ShowWeatherCard;
 
     public HomeViewModel(MusicViewModel music, StatusViewModel status, FocusViewModel focus, SystemStatsViewModel stats, QuickLaunchViewModel quickLaunch,
-        IShellActionService? shell = null, Action? openFocus = null, BluetoothDevicesViewModel? bluetooth = null)
+        IShellActionService? shell = null, Action? openFocus = null, BluetoothDevicesViewModel? bluetooth = null, IEnumerable<HomeCard>? homeCards = null)
     {
+        Cards = HomeCardLayout.Normalize(homeCards);
         Bluetooth = bluetooth;
         Stats = stats;
         QuickLaunch = quickLaunch;

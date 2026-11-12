@@ -16,6 +16,7 @@
         Background="Transparent"
         ResizeMode="NoResize"
         FontFamily="{DynamicResource KoyFont}"
+        FontWeight="{DynamicResource KoyFontWeightBase}"
         Foreground="{DynamicResource KoyTextPrimary}">
 
     <!-- Katmansız pencere, çerçeve istemci alanına uzatılır; bulanıklık, gölge ve köşeler DWM'den (WindowFrame). -->

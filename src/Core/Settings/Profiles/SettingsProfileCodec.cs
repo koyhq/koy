@@ -66,8 +66,10 @@ public static class SettingsProfileCodec
         // Dock başlat simgesinin yolu bu makineye özgü: paylaşılan dosyaya yazılmaz (içe aktarmada yerel değer korunur).
         var shareable = current with
         {
-            Appearance = current.Appearance with { AppIconOverrides = new() },
+            Appearance = current.Appearance with { AppIconOverrides = new(), IconPackFolder = "" },
             Dock = current.Dock with { StartIconPath = "" },
+            // Canlı arka plan dosyasının yolu da bu makineye özgü.
+            Notch = current.Notch with { LiveBackgroundFilePath = "" },
         };
         var full = (JsonObject)JsonSerializer.SerializeToNode(shareable, SettingsJsonContext.Default.AppSettings)!;
         var settings = new JsonObject { ["Version"] = AppSettings.CurrentVersion };
@@ -218,7 +220,8 @@ public static class SettingsProfileCodec
                     || !IsSaneList(s.Notch.EnabledPanels) || !IsSaneList(s.Notch.ControlCenterLayout)
                     || !Enum.IsDefined(s.Notch.TabBarStyle) || !IsSaneList(s.Notch.PanelOrder)
                     || s.Notch.HomeCards is null || s.Notch.HomeCards.Count > MaxListItems || !s.Notch.HomeCards.All(Enum.IsDefined)
-                    || !Enum.IsDefined(s.Notch.ClockHourFormat) || !Enum.IsDefined(s.Notch.ClockFirstDayOfWeek),
+                    || !Enum.IsDefined(s.Notch.ClockHourFormat) || !Enum.IsDefined(s.Notch.ClockFirstDayOfWeek)
+                    || !Enum.IsDefined(s.Notch.LiveBackgroundTarget) || !Enum.IsDefined(s.Notch.LiveBackgroundSource),
                 ProfileSection.Music =>
                     !Enum.IsDefined(s.Music.CardStyle) || !Enum.IsDefined(s.Music.VisualizerStyle)
                     || !Enum.IsDefined(s.Music.VisualizerColorSource),
@@ -286,7 +289,11 @@ public static class SettingsProfileCodec
             {
                 ProfileSection.Appearance => result with
                 {
-                    Appearance = profile.Settings.Appearance with { AppIconOverrides = current.Appearance.AppIconOverrides },
+                    Appearance = profile.Settings.Appearance with
+                    {
+                        AppIconOverrides = current.Appearance.AppIconOverrides,
+                        IconPackFolder = current.Appearance.IconPackFolder,
+                    },
                 },
                 ProfileSection.Dock => result with
                 {
@@ -298,6 +305,7 @@ public static class SettingsProfileCodec
                     {
                         EnabledPanels = new ValueList<string>(profile.Settings.Notch.EnabledPanels),
                         ControlCenterLayout = new ValueList<string>(profile.Settings.Notch.ControlCenterLayout),
+                        LiveBackgroundFilePath = current.Notch.LiveBackgroundFilePath,
                     },
                 },
                 ProfileSection.Music => result with { Music = profile.Settings.Music with { } },

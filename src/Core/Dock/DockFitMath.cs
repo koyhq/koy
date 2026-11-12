@@ -17,8 +17,12 @@ public static class DockFitMath
 
     public static double ItemSizeFor(double iconSize) => iconSize + ItemChromeDip;
 
-    /// <summary>Bir yuvanın kapladığı yatay genişlik.</summary>
-    public static double SlotWidth(double iconSize) => iconSize + ItemChromeDip + SlotMarginDip;
+    /// <summary>Bir yuvanın kapladığı genişlik veya yükseklik.</summary>
+    public static double SlotWidth(double iconSize, double iconSpacingDip = SlotMarginDip)
+    {
+        var spacing = DockLayoutLimits.ClampIconSpacingDip(iconSpacingDip);
+        return iconSize + ItemChromeDip + spacing;
+    }
 
     /// <summary>
     /// Verilen genişliğe sığan simge boyutu (tam sayı DIP). Tercih edilenden büyümez, en küçük boyutun altına inmez;
@@ -28,13 +32,20 @@ public static class DockFitMath
     /// <param name="slotCount">Simge boyutuyla ölçeklenen yuva sayısı.</param>
     /// <param name="fixedWidth">Boyuta bağlı olmayan genişlik (dolgu, ayırıcı, sabit düğmeler).</param>
     /// <param name="availableWidth">Kullanılabilir toplam genişlik.</param>
-    public static double FitIconSize(double preferredIconSize, int slotCount, double fixedWidth, double availableWidth)
+    /// <param name="iconSpacingDip">Yuva başına simge aralığı.</param>
+    public static double FitIconSize(
+        double preferredIconSize,
+        int slotCount,
+        double fixedWidth,
+        double availableWidth,
+        double iconSpacingDip = SlotMarginDip)
     {
         if (preferredIconSize <= MinIconSizeDip || slotCount <= 0 || !double.IsFinite(availableWidth) || availableWidth <= 0)
             return preferredIconSize;
 
+        var spacing = DockLayoutLimits.ClampIconSpacingDip(iconSpacingDip);
         var perSlot = (availableWidth - fixedWidth) / slotCount;
-        var fit = Math.Floor(perSlot - ItemChromeDip - SlotMarginDip);
+        var fit = Math.Floor(perSlot - ItemChromeDip - spacing);
         return Math.Clamp(fit, MinIconSizeDip, preferredIconSize);
     }
 

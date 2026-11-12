@@ -43,9 +43,6 @@ public sealed partial class DockFolderViewModel : DockEntryViewModel
     [ObservableProperty]
     private bool _isEditingTitle;
 
-    [ObservableProperty]
-    private bool _useLineIndicator;
-
     public ObservableCollection<DockItemViewModel> Items { get; } = [];
 
     public string RenameTooltip => Resources.Strings.Get("DockFolderRename");

@@ -13,26 +13,16 @@ public static class EventAgenda
     public static IReadOnlyList<CalendarEvent> ForDay(IEnumerable<CalendarEvent> events, DateOnly day) =>
         events.Where(e => e.Date == day).OrderBy(e => e.Start).ThenBy(e => e.Title, StringComparer.CurrentCultureIgnoreCase).ToList();
 
-    /// <summary>Günün ait olduğu haftanın Pazartesi'si.</summary>
-    public static DateOnly WeekStart(DateOnly day)
-    {
-        var offset = day.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)day.DayOfWeek - 1;
-        return day.AddDays(-offset);
-    }
+    /// <summary>Günün ait olduğu haftanın ilk günü (varsayılan Pazartesi).</summary>
+    public static DateOnly WeekStart(DateOnly day, DayOfWeek firstDay = DayOfWeek.Monday) => WeekGrid.Start(day, firstDay);
 
-    /// <summary>Günün haftasındaki 7 gün (Pazartesi - Pazar) ve her günün etkinlikleri.</summary>
-    public static IReadOnlyList<DayAgenda> ForWeek(IEnumerable<CalendarEvent> events, DateOnly day, DateOnly today)
+    /// <summary>Günün haftasındaki 7 gün (<paramref name="firstDay"/> ile başlar, varsayılan Pazartesi) ve her günün etkinlikleri.</summary>
+    public static IReadOnlyList<DayAgenda> ForWeek(IEnumerable<CalendarEvent> events, DateOnly day, DateOnly today, DayOfWeek firstDay = DayOfWeek.Monday)
     {
         var list = events as IReadOnlyCollection<CalendarEvent> ?? events.ToList();
-        var start = WeekStart(day);
-        var days = new List<DayAgenda>(7);
-        for (var i = 0; i < 7; i++)
-        {
-            var date = start.AddDays(i);
-            days.Add(new DayAgenda(date, date == today, ForDay(list, date)));
-        }
-
-        return days;
+        return WeekGrid.Days(day, firstDay)
+            .Select(date => new DayAgenda(date, date == today, ForDay(list, date)))
+            .ToList();
     }
 
     /// <summary>

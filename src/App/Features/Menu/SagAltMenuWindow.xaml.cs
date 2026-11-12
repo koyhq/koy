@@ -131,8 +131,14 @@ public partial class SagAltMenuWindow : Window
         // 4. Pencere boyutları
         // WPF Window.Measure, HWND yokken GetWindowMinMax içinde FailFast ile süreci düşürür (kaydedilen 5.11 17:11 çökmesi).
         // Bu yüzden ölçmeden önce HWND'yi (göstermeden) oluştururuz; böylece ilk gösterimde de titremesiz konumlanır.
-        double menuWidth = 320;
-        double menuHeight = 350;
+        // Koy ölçeği (issue #71): kök öğe ölçeklenir, pencere genişliği ona uyar. Menü küçük olduğu için ekrana sığdırma gerekmez.
+        var scale = Koy.Core.Appearance.FontScalePolicy.ClampUiScale(Koy.App.Resources.ThemeManager.LastSettings?.Appearance.UiScalePercent
+            ?? Koy.Core.Appearance.FontScalePolicy.DefaultUiScale) / 100.0;
+        if (Content is FrameworkElement root)
+            root.LayoutTransform = scale == 1.0 ? System.Windows.Media.Transform.Identity : new System.Windows.Media.ScaleTransform(scale, scale);
+        double menuWidth = 320 * scale;
+        Width = menuWidth;
+        double menuHeight = 350 * scale;
         if (EnsureNativeWindow())
         {
             try

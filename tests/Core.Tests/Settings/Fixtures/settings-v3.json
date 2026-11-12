@@ -129,6 +129,12 @@
   "WeatherLocationSource": "City",
   "WeatherUseLocation": true,
   "WeatherLocationUpdatedUnix": 1762800000,
+  "HotCornerTopLeft": "OpenNotch",
+  "HotCornerTopRight": "OpenSearch",
+  "HotCornerBottomLeft": "OpenKoyWindow",
+  "HotCornerBottomRight": "ToggleDock",
+  "HotCornerDwellMs": 700,
+  "HotCornerDisableInFullscreen": false,
   "ClipboardHistoryEnabled": false,
   "QuickLaunchItems": [
     "C:\\Apps\\a.exe",

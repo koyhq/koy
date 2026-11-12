@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using Koy.Core.Animation;
+using Koy.Core.Appearance;
 using Koy.App.Resources;
 using Koy.App.Features.Notch.OSD;
 using Koy.Core.Display;
@@ -33,6 +34,8 @@ public partial class NotchWindow : Window
     // Panel geçişinin süre çarpanından türeyen zaman ölçeği (Sakin 1/1.5, Hızlı 1/0.65); MotionPolicy ile aynı kaynak.
     private double _panelTimeScale = 1.0;
     private bool _animating;
+    // Son boyut değişimi OSD içindi: OSD kapanınca şeklin geri dönüşü de OSD anahtarına uyar.
+    private bool _osdShape;
     private bool _isNotchVisible = true;
     private nint _hwnd;
 
@@ -349,7 +352,9 @@ public partial class NotchWindow : Window
         if (e.Data.GetDataPresent(DataFormats.FileDrop) || e.Data.GetDataPresent(DataFormats.Text))
         {
             e.Effects = DragDropEffects.Copy;
-            ViewModel?.ExpandToShelf();
+            _dragEnteredAt = Environment.TickCount64;
+            if (DragShouldOpen())
+                ViewModel?.ExpandToShelf();
         }
         else
         {
@@ -358,12 +363,22 @@ public partial class NotchWindow : Window
         e.Handled = true;
     }
 
+    // "Sürükleyince aç" kipinde açılma gecikmesi (issue #78): DragOver sürekli geldiği için zamanlayıcı kurulmaz.
+    private long _dragEnteredAt;
+
+    private bool DragShouldOpen()
+    {
+        var notch = ViewModel?.Settings.Notch;
+        return notch is null || NotchOpenPolicy.DragShouldOpen(notch.OpenBehavior, Environment.TickCount64 - _dragEnteredAt, notch.OpenDelayMs);
+    }
+
     private void Notch_DragOver(object sender, DragEventArgs e)
     {
         if (e.Data.GetDataPresent(DataFormats.FileDrop) || e.Data.GetDataPresent(DataFormats.Text))
         {
             e.Effects = DragDropEffects.Copy;
-            if (ViewModel is not null && (ViewModel.State != Core.Notch.NotchState.Expanded || ViewModel.CurrentPanel != Core.Notch.NotchPanel.Shelf))
+            if (ViewModel is not null && (ViewModel.State != Core.Notch.NotchState.Expanded || ViewModel.CurrentPanel != Core.Notch.NotchPanel.Shelf)
+                && DragShouldOpen())
             {
                 ViewModel.ExpandToShelf();
             }
@@ -423,8 +438,9 @@ public partial class NotchWindow : Window
             return;
         }
 
-        // Pil tasarrufu, Windows "animasyonları azalt" ya da Animasyon: Kapalı iken panel anında değişir.
-        if (ViewModel?.ReduceMotion == true || !Motion.Enabled)
+        // Pil tasarrufu, Windows "animasyonları azalt", Animasyon: Kapalı ya da sekme geçişi anahtarı kapalıyken panel anında değişir.
+        var scale = Motion.ScaleFor(MotionPolicy.MotionKind.TabTransitions);
+        if (ViewModel?.ReduceMotion == true || scale <= 0)
         {
             _panelTranslateX.SnapTo(0);
             _panelOpacity.SnapTo(1);
@@ -433,7 +449,7 @@ public partial class NotchWindow : Window
             return;
         }
 
-        _panelTimeScale = 1.0 / Motion.Scale;
+        _panelTimeScale = 1.0 / scale;
         _panelTranslateX.SnapTo(direction > 0 ? 35 : -35);
         _panelTranslateX.Target = 0;
         _panelOpacity.SnapTo(0.25);
@@ -496,12 +512,20 @@ public partial class NotchWindow : Window
             return;
         }
 
-        if (ViewModel?.ReduceMotion == true)
+        // OSD (ses, parlaklık, kart) ile açılış/kapanış aynı şekli büyütür; hangisi olduğuna göre kendi anahtarı okunur.
+        var osdActive = ViewModel?.Osd.IsActive == true;
+        var kind = osdActive || (_osdShape && ViewModel?.State != NotchState.Expanded)
+            ? MotionPolicy.MotionKind.Osd
+            : MotionPolicy.MotionKind.NotchOpenClose;
+        _osdShape = osdActive;
+
+        if (ViewModel?.ReduceMotion == true || !Motion.EnabledFor(kind))
         {
-            // Pil tasarrufu: yay animasyonu yok, şekil tek karede yeni boyuta geçer.
+            // Pil tasarrufu ya da açılış/kapanış animasyonu kapalı: yay yok, şekil tek karede yeni boyuta geçer.
             _width.SnapTo(width);
             _height.SnapTo(height);
-            _cornerRadius.SnapTo(ViewModel.TargetCornerRadius);
+            if (ViewModel is not null)
+                _cornerRadius.SnapTo(ViewModel.TargetCornerRadius);
         }
         else
         {

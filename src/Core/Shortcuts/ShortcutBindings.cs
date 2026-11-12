@@ -12,7 +12,8 @@ public enum ShortcutAction
     PlayPause,
     OpenSearch,
     OpenSearchClipboard,
-    VoiceCommand
+    VoiceCommand,
+    OpenKoyWindow
 }
 
 /// <summary>Eylem ile ayar alanı ve varsayılan tuş eşlemesi.</summary>
@@ -34,6 +35,8 @@ public static class ShortcutBindings
         ShortcutAction.OpenSearch => "Win+Shift+Q",
         ShortcutAction.OpenSearchClipboard => "Alt+Shift+F2",
         ShortcutAction.VoiceCommand => "Ctrl+Alt+V",
+        // Atanmamış gelir: bugün bağlı olmayan bir kombinasyon yeni çakışma üretmesin.
+        ShortcutAction.OpenKoyWindow => "",
         _ => ""
     };
 
@@ -47,6 +50,7 @@ public static class ShortcutBindings
         ShortcutAction.OpenSearch => settings.Shortcuts.OpenSearch,
         ShortcutAction.OpenSearchClipboard => settings.Shortcuts.OpenSearchClipboard,
         ShortcutAction.VoiceCommand => settings.Shortcuts.VoiceCommand,
+        ShortcutAction.OpenKoyWindow => settings.Shortcuts.OpenKoyWindow,
         _ => ""
     };
 
@@ -60,12 +64,15 @@ public static class ShortcutBindings
         ShortcutAction.OpenSearch => settings with { Shortcuts = settings.Shortcuts with { OpenSearch = text } },
         ShortcutAction.OpenSearchClipboard => settings with { Shortcuts = settings.Shortcuts with { OpenSearchClipboard = text } },
         ShortcutAction.VoiceCommand => settings with { Shortcuts = settings.Shortcuts with { VoiceCommand = text } },
+        ShortcutAction.OpenKoyWindow => settings with { Shortcuts = settings.Shortcuts with { OpenKoyWindow = text } },
         _ => settings
     };
 
     /// <summary>Metin, eylemin varsayılan kombinasyonu mu? Yazım sırası önemsizdir (Win+Shift+Q = Shift+Win+Q).</summary>
     public static bool IsDefault(ShortcutAction action, string text) =>
-        Hotkey.TryParse(text, out var current) && Hotkey.TryParse(DefaultText(action), out var fallback) && current == fallback;
+        string.IsNullOrWhiteSpace(DefaultText(action))
+            ? string.IsNullOrWhiteSpace(text)
+            : Hotkey.TryParse(text, out var current) && Hotkey.TryParse(DefaultText(action), out var fallback) && current == fallback;
 
     /// <summary>Bütün eylemlerin ayardaki metni (boş metin = atanmamış).</summary>
     public static Dictionary<ShortcutAction, string> ReadAll(AppSettings settings) =>

@@ -52,7 +52,7 @@ public sealed class WeatherService : IWeatherService
         {
             var latStr = latitude.ToString("F2", CultureInfo.InvariantCulture); // ~1 km: tahmin ızgarası zaten km ölçeğinde, tam konum gitmez
             var lonStr = longitude.ToString("F2", CultureInfo.InvariantCulture);
-            var url = $"https://api.open-meteo.com/v1/forecast?latitude={latStr}&longitude={lonStr}&current=temperature_2m,weather_code";
+            var url = $"https://api.open-meteo.com/v1/forecast?latitude={latStr}&longitude={lonStr}&current=temperature_2m,weather_code,wind_speed_10m";
 
             using var response = await _httpClient.GetAsync(url, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -66,7 +66,8 @@ public sealed class WeatherService : IWeatherService
                     current.WeatherCode,
                     WeatherCodeMapper.ToDescriptionKey(current.WeatherCode),
                     WeatherCodeMapper.ToIconKind(current.WeatherCode),
-                    now);
+                    now,
+                    OpenMeteoParser.ParseWindSpeed(json));
                 _cachedLatitude = latitude;
                 _cachedLongitude = longitude;
                 _lastFetchTime = now;

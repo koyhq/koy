@@ -17,7 +17,7 @@
                 <Border x:Name="ItemContainer"
                         Width="{Binding ItemSize}"
                         Height="{Binding ItemSize}"
-                        Margin="1,0"
+                        Margin="{Binding DataContext.SlotMargin, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}"
                         CornerRadius="10"
                         Cursor="Hand"
                         ToolTip="{Binding Title}"
@@ -44,6 +44,22 @@
                                 <DataTrigger Binding="{Binding IsActive}" Value="True">
                                     <Setter Property="Background" Value="#1AFFFFFF"/>
                                 </DataTrigger>
+                                <!-- Gösterge stili "Arka plan": çalışan uygulamanın zemini vurgu rengiyle boyanır (nokta/çizgi çizilmez) -->
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Presentation.IsHighlight}" Value="True"/>
+                                        <Condition Binding="{Binding IsRunning}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Background" Value="{DynamicResource KoyAccentSubtle}"/>
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Presentation.IsHighlight}" Value="True"/>
+                                        <Condition Binding="{Binding IsRunning}" Value="True"/>
+                                        <Condition Binding="{Binding Presentation.HasIndicatorBrush}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Background" Value="{Binding Presentation.HighlightBrush}"/>
+                                </MultiDataTrigger>
                                 <DataTrigger Binding="{Binding IsAttention}" Value="True">
                                     <Setter Property="Background" Value="#2EF97316"/>
                                 </DataTrigger>
@@ -55,13 +71,19 @@
                     </Border.Style>
 
                     <Border.RenderTransform>
-                        <TranslateTransform X="{Binding OffsetX}"/>
+                        <TranslateTransform X="{Binding TranslateX}" Y="{Binding TranslateY}"/>
                     </Border.RenderTransform>
 
                     <Border.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="{x:Static res:Strings.LaunchNewInstance}"
                                       Command="{Binding MiddleClickCommand}"/>
+                            <Separator/>
+                            <MenuItem Header="{x:Static res:Strings.DockItemChangeIcon}"
+                                      Command="{Binding ChangeIconCommand}"/>
+                            <MenuItem Header="{x:Static res:Strings.DockItemResetIcon}"
+                                      Command="{Binding ResetIconCommand}"
+                                      IsEnabled="{Binding HasIconOverride}"/>
                             <Separator/>
                             <MenuItem Header="{x:Static res:Strings.Close}"
                                       Command="{Binding CloseCommand}"/>
@@ -106,17 +128,32 @@
                             </Border>
                         </Grid>
 
-                        <!-- Okunmamış Bildirim Rozeti: Sağ üst kırmızı hap #EF4444, 11px beyaz kalın yazı -->
-                        <Border HorizontalAlignment="Right"
-                                VerticalAlignment="Top"
-                                Margin="0,2,2,0"
-                                MinHeight="18"
-                                MinWidth="18"
-                                CornerRadius="9"
-                                Background="#EF4444"
-                                Padding="4,1"
-                                Visibility="{Binding HasBadge, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
-                            <TextBlock Text="{Binding BadgeCount}"
+                        <!-- Okunmamış Bildirim Rozeti: köşe, renk ve biçim (sayı / yalnız nokta) ayardan; 11px beyaz kalın yazı -->
+                        <Border HorizontalAlignment="{Binding Presentation.BadgeHorizontal}"
+                                VerticalAlignment="{Binding Presentation.BadgeVertical}"
+                                Margin="{Binding Presentation.BadgeMargin}"
+                                Visibility="{Binding ShowBadge, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="MinHeight" Value="18"/>
+                                    <Setter Property="MinWidth" Value="18"/>
+                                    <Setter Property="CornerRadius" Value="9"/>
+                                    <Setter Property="Padding" Value="4,1"/>
+                                    <Setter Property="Background" Value="{DynamicResource KoyAccent}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Presentation.HasBadgeBrush}" Value="True">
+                                            <Setter Property="Background" Value="{Binding Presentation.BadgeBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Presentation.BadgeDotOnly}" Value="True">
+                                            <Setter Property="MinHeight" Value="10"/>
+                                            <Setter Property="MinWidth" Value="10"/>
+                                            <Setter Property="CornerRadius" Value="5"/>
+                                            <Setter Property="Padding" Value="0"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="{Binding BadgeText}"
                                        FontSize="11"
                                        FontWeight="Bold"
                                        Foreground="#FFFFFF"
@@ -125,15 +162,37 @@
                         </Border>
 
                         <!-- Çoklu Pencere Göstergesi: 3 küçük nokta vurgu rengi (Birden fazla pencere varsa) -->
-                        <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Bottom"
-                                    Margin="0,0,0,2"
-                                    Visibility="{Binding IsMultiWindow, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
-                            <Border Width="4" Height="3" CornerRadius="1.5" Background="{DynamicResource KoyAccent}" Margin="1,0"/>
-                            <Border Width="4" Height="3" CornerRadius="1.5" Background="{DynamicResource KoyAccent}" Margin="1,0"/>
-                            <Border Width="4" Height="3" CornerRadius="1.5" Background="{DynamicResource KoyAccent}" Margin="1,0"/>
-                        </StackPanel>
+                        <!-- Gösterge stili "Arka plan" iken nokta/çizgi hiç çizilmez (DrawsMark) -->
+                        <Grid Visibility="{Binding Presentation.DrawsMark, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                        <!-- Pencere başına nokta kipinde sayı (en çok 3) Core'dan gelir (IndicatorCount). -->
+                        <ItemsControl ItemsSource="{Binding IndicatorDots}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Bottom"
+                                      Margin="0,0,0,2"
+                                      IsHitTestVisible="False"
+                                      Visibility="{Binding HasMultiDots, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Width="4" Height="3" CornerRadius="1.5" Margin="1,0">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="{DynamicResource KoyAccent}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding DataContext.Presentation.HasIndicatorBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="True">
+                                                        <Setter Property="Background" Value="{Binding DataContext.Presentation.IndicatorBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
                         <!-- Tekil Pencere / Çalışan Göstergesi (Tek pencere veya odak) -->
                         <Border HorizontalAlignment="Center"
@@ -150,7 +209,7 @@
                                                 <Condition Binding="{Binding IsRunning}" Value="True"/>
                                                 <Condition Binding="{Binding IsActive}" Value="False"/>
                                                 <Condition Binding="{Binding IsAttention}" Value="False"/>
-                                                <Condition Binding="{Binding IsMultiWindow}" Value="False"/>
+                                                <Condition Binding="{Binding HasMultiDots}" Value="False"/>
                                             </MultiDataTrigger.Conditions>
                                             <Setter Property="Visibility" Value="Visible"/>
                                             <Setter Property="Width" Value="6"/>
@@ -164,8 +223,8 @@
                                                 <Condition Binding="{Binding IsRunning}" Value="True"/>
                                                 <Condition Binding="{Binding IsActive}" Value="False"/>
                                                 <Condition Binding="{Binding IsAttention}" Value="False"/>
-                                                <Condition Binding="{Binding IsMultiWindow}" Value="False"/>
-                                                <Condition Binding="{Binding UseLineIndicator}" Value="True"/>
+                                                <Condition Binding="{Binding HasMultiDots}" Value="False"/>
+                                                <Condition Binding="{Binding Presentation.UseLine}" Value="True"/>
                                             </MultiDataTrigger.Conditions>
                                             <Setter Property="Width" Value="16"/>
                                         </MultiDataTrigger>
@@ -176,6 +235,10 @@
                                             <Setter Property="Height" Value="3"/>
                                             <Setter Property="CornerRadius" Value="1.5"/>
                                             <Setter Property="Background" Value="{DynamicResource KoyAccent}"/>
+                                        </DataTrigger>
+                                        <!-- Gösterge rengi nötr/özel ise çalışan ve aktif göstergeler bu renkle boyanır (dikkat turuncusu kalır) -->
+                                        <DataTrigger Binding="{Binding Presentation.HasIndicatorBrush}" Value="True">
+                                            <Setter Property="Background" Value="{Binding Presentation.IndicatorBrush}"/>
                                         </DataTrigger>
                                         <!-- Dikkat İstiyor: 16×3 px çizgi #F97316 -->
                                         <DataTrigger Binding="{Binding IsAttention}" Value="True">
@@ -189,6 +252,121 @@
                                 </Style>
                             </Border.Style>
                         </Border>
+                        </Grid>
+
+                        <!-- Uygulama Etiketi (DockLabelMode: Always ya da OnHover) -->
+                        <TextBlock Text="{Binding Title}"
+                                   FontSize="9"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource KoyTextPrimary}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Bottom"
+                                   Margin="2,0,2,1"
+                                   TextTrimming="CharacterEllipsis"
+                                   IsHitTestVisible="False">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Presentation.LabelMode}" Value="Always">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Presentation.LabelMode}" Value="OnHover"/>
+                                                <Condition Binding="{Binding Path=IsMouseOver, RelativeSource={RelativeSource AncestorType=Border, AncestorLevel=1}}" Value="True"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </Border>
+            </DataTemplate>
+
+            <!-- Ek öğe şablonu: ayırıcı, boşluk, saat, çöp kutusu, özel düğme. Yalnız ayarlardan eklenirse çizilir. -->
+            <DataTemplate DataType="{x:Type local:DockExtraViewModel}">
+                <Border x:Name="ExtraContainer"
+                        RenderTransformOrigin="0.5,0.5"
+                        Height="{Binding ItemSize}"
+                        Margin="1,0"
+                        CornerRadius="10"
+                        Background="Transparent"
+                        ToolTip="{Binding Title}"
+                        MouseLeftButtonUp="OnExtraLeftClick"
+                        MouseRightButtonUp="OnExtraRightClick"
+                        MouseEnter="OnItemMouseEnter"
+                        MouseLeave="OnItemMouseLeave"
+                        ContextMenuOpening="OnItemContextMenuOpening">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Width" Value="{Binding ItemSize}"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSeparator}" Value="True">
+                                    <Setter Property="Width" Value="9"/>
+                                    <Setter Property="Cursor" Value="Arrow"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsSpacer}" Value="True">
+                                    <Setter Property="Width" Value="20"/>
+                                    <Setter Property="Cursor" Value="Arrow"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsClock}" Value="True">
+                                    <Setter Property="Width" Value="72"/>
+                                </DataTrigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#22FFFFFF"/>
+                                </Trigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsInteractive}" Value="False"/>
+                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Background" Value="Transparent"/>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Border.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}"/>
+                            <TranslateTransform X="{Binding OffsetX}"/>
+                        </TransformGroup>
+                    </Border.RenderTransform>
+
+                    <Grid>
+                        <!-- Ayırıcı: ince dikey çizgi -->
+                        <Border Width="1"
+                                Margin="0,8"
+                                HorizontalAlignment="Center"
+                                Background="#33FFFFFF"
+                                Visibility="{Binding IsSeparator, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
+
+                        <!-- Çöp kutusu ve özel düğme: sabit simge -->
+                        <TextBlock Text="{Binding Glyph}"
+                                   FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                   FontSize="{Binding IconSize}"
+                                   Foreground="#E6FFFFFF"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Visibility="{Binding IsGlyphButton, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
+
+                        <!-- Saat: saat ve tarih -->
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Visibility="{Binding IsClock, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                            <TextBlock Text="{Binding TimeText}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Foreground="#F2FFFFFF"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding DateText}"
+                                       FontSize="10"
+                                       Foreground="#B3FFFFFF"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
                     </Grid>
                 </Border>
             </DataTemplate>
@@ -200,7 +378,7 @@
                             RenderTransformOrigin="0.5,0.5"
                             Width="{Binding ItemSize}"
                             Height="{Binding ItemSize}"
-                            Margin="1,0"
+                            Margin="{Binding DataContext.SlotMargin, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}"
                             CornerRadius="10"
                             Cursor="Hand"
                             ToolTip="{Binding Title}"
@@ -237,7 +415,7 @@
                             <TransformGroup>
                                 <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}"/>
                                 <ScaleTransform ScaleX="{Binding PressScale}" ScaleY="{Binding PressScale}"/>
-                                <TranslateTransform X="{Binding OffsetX}"/>
+                                <TranslateTransform X="{Binding TranslateX}" Y="{Binding TranslateY}"/>
                             </TransformGroup>
                         </Border.RenderTransform>
 
@@ -283,7 +461,7 @@
         </ItemsControl.Resources>
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-                <StackPanel Orientation="Horizontal"/>
+                <StackPanel Orientation="{Binding DataContext.StripOrientation, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}"/>
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
     </ItemsControl>

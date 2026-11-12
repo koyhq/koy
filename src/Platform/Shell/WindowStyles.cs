@@ -144,6 +144,17 @@ public static class WindowStyles
     }
 
     /// <summary>
+    /// Pencerenin süreç exe adı, uzantısız (ör. "chrome"). Sınırlı sorgu hakkıyla, yönetici süreçlerde de çalışır;
+    /// çözülemezse null. Bağlam kuralları ön plan olayında bir kez çağırır (yoklama yok).
+    /// </summary>
+    public static string? GetWindowProcessName(nint hwnd)
+    {
+        var pid = GetWindowProcessId(hwnd);
+        var path = WindowTracker.GetProcessPath(pid);
+        return string.IsNullOrEmpty(path) ? null : System.IO.Path.GetFileNameWithoutExtension(path);
+    }
+
+    /// <summary>
     /// Verilen pencerenin bulunduğu monitörün tanıtıcısını (HMONITOR) döndürür.
     /// </summary>
     public static nint GetWindowMonitor(nint hwnd)

@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Koy.App.Features.Notch"
         xmlns:osd="clr-namespace:Koy.App.Features.Notch.OSD"
         xmlns:home="clr-namespace:Koy.App.Features.Home"
+        xmlns:livebg="clr-namespace:Koy.App.Features.Notch.LiveBackground"
         xmlns:focus="clr-namespace:Koy.App.Features.Focus"
         xmlns:cc="clr-namespace:Koy.App.Features.ControlCenter"
         xmlns:status="clr-namespace:Koy.App.Features.Status"
@@ -22,6 +23,7 @@
         Width="640" Height="364"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="NoResize" Topmost="True" ShowInTaskbar="False" ShowActivated="False"
+        FontFamily="{DynamicResource KoyNotchFont}"
         AllowDrop="True"
         DragEnter="Notch_DragEnter"
         DragOver="Notch_DragOver"
@@ -83,6 +85,12 @@
       </local:NotchShape.ContextMenu>
 
       <Grid>
+        <!-- 0. Canlı arka plan (issue #67): içeriğin altında, çentik şekline kırpılır. Varsayılan kapalı; yalnız açık çentikte çizilir,
+             kapanınca animasyon ve kareler bırakılır. Koyu perde yazının okunmasını korur. -->
+        <livebg:LiveBackgroundHost Selection="{Binding LiveBackground.Selection}"
+                                   Mode="{Binding LiveBackground.NotchMode}"
+                                   ScrimOpacity="{Binding LiveBackground.ScrimOpacity}" />
+
         <!-- 1. Collapsed Durumu (236x34 px, köşe yuvarlaklığı 0 0 18 18, arka plan #0A0A0B) -->
         <Grid x:Name="CollapsedView">
           <Grid.Style>
@@ -243,7 +251,8 @@
             <!-- Sol: Saat (HH:mm, 13px, font-weight 600, foreground #F4F4F5) -->
             <TextBlock Grid.Column="0"
                        Visibility="{Binding ShowIdleClassicClock, Converter={StaticResource BoolToVis}}"
-                       Text="{Binding ClockTime}"
+                       Text="{Binding ClockDisplay}"
+                       FontFamily="{DynamicResource KoyClockFont}"
                        Foreground="#F4F4F5"
                        FontSize="13"
                        FontWeight="SemiBold"
@@ -303,7 +312,7 @@
                   </Style.Triggers>
                 </Style>
               </StackPanel.Style>
-              <TextBlock Text="{Binding IdleDayTime}" Foreground="#F4F4F5" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+              <TextBlock Text="{Binding IdleDayTime}" FontFamily="{DynamicResource KoyClockFont}" Foreground="#F4F4F5" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
               <TextBlock Text="{Binding IdlePeekDate}" Foreground="#A1A1AA" FontSize="13" Margin="5,0,0,0" VerticalAlignment="Center"
                          Visibility="{Binding ShowIdlePeekDate, Converter={StaticResource BoolToVis}}" />
             </StackPanel>
@@ -373,14 +382,22 @@
                        Visibility="{Binding IsMicrophoneActive, Converter={StaticResource BoolToVis}}" />
             </StackPanel>
 
-            <!-- Sağ: 4 çubuklu hareketsiz dalga (yükseklik 14px, çubuklar: 8, 14, 10, 5 px, genişlik 3px, boşluk 2px, dolgu #4ADE80, %0 CPU) -->
-            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Height="14"
-                        Visibility="{Binding ShowMusicWaveform, Converter={StaticResource BoolToVis}}">
-              <Border Width="3" Height="8" Background="#4ADE80" CornerRadius="1" VerticalAlignment="Bottom" />
-              <Border Width="3" Height="14" Background="#4ADE80" CornerRadius="1" Margin="2,0,0,0" VerticalAlignment="Bottom" />
-              <Border Width="3" Height="10" Background="#4ADE80" CornerRadius="1" Margin="2,0,0,0" VerticalAlignment="Bottom" />
-              <Border Width="3" Height="5" Background="#4ADE80" CornerRadius="1" Margin="2,0,0,0" VerticalAlignment="Bottom" />
-            </StackPanel>
+            <!-- Sağ: dinamik dalga simgesi (yükseklik 14px, çubuk genişliği 3px, boşluk 2px) -->
+            <ItemsControl Grid.Column="2" VerticalAlignment="Center" Height="14"
+                          ItemsSource="{Binding WaveformBars}" Focusable="False"
+                          Visibility="{Binding ShowMusicWaveform, Converter={StaticResource BoolToVis}}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border Width="3" Height="{Binding}" Background="{Binding DataContext.WaveformBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                          CornerRadius="1" Margin="1,0" VerticalAlignment="Bottom" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
           </Grid>
         </Grid>
 
@@ -517,7 +534,7 @@
 
             <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="12" TextTrimming="CharacterEllipsis">
               <Run Text="{Binding Status.CurrentTime, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource KoyNotchText}" />
-              <Run Text="{Binding Status.DayDate, Mode=OneWay, StringFormat=' · {0}'}" Foreground="{DynamicResource KoyNotchMuted}" />
+              <Run Text="{Binding Status.DayDate, Mode=OneWay, StringFormat=' · {0}'}" Foreground="{DynamicResource KoyNotchMuted}" /><Run Text="{Binding Status.SecondClockSuffix, Mode=OneWay}" Foreground="{DynamicResource KoyNotchMuted}" />
             </TextBlock>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -535,7 +552,8 @@
               <!-- Hava: konum seçilmişse sıcaklık ve küçük yer adı (tıklayınca yenilenir); seçilmemişse konum seçtirir -->
               <Button Style="{StaticResource NotchPlainButtonStyle}" Margin="0,0,12,0" VerticalAlignment="Center"
                       Command="{Binding Status.RefreshWeatherCommand}"
-                      Visibility="{Binding Status.HasWeatherLocation, Converter={StaticResource BoolToVis}}">
+                      ToolTip="{Binding Status.WindToolTip}"
+                      Visibility="{Binding Home.ShowWeather, Converter={StaticResource BoolToVis}}">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                   <Viewbox Width="15" Height="15" Margin="0,0,5,0" VerticalAlignment="Center">
                     <status:WeatherGlyph DataContext="{Binding Status}" />
@@ -611,7 +629,8 @@
           </ContentControl>
 
           <!-- Sekme çubuğu: sekmeler listeden üretilir (NotchTabs); seçili sekme kendi sayfa rengini alır -->
-          <ItemsControl Grid.Row="2" ItemsSource="{Binding Tabs}" Focusable="False">
+          <ItemsControl Grid.Row="2" ItemsSource="{Binding Tabs}" Focusable="False"
+                        Visibility="{Binding ShowTabBar, Converter={StaticResource BoolToVis}}">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate>
                 <UniformGrid Rows="1" />
@@ -642,6 +661,10 @@
                           <Setter TargetName="Pill" Property="Background" Value="{DynamicResource KoyNotchChip}" />
                           <Setter TargetName="Label" Property="Foreground" Value="{DynamicResource KoyNotchText}" />
                           <Setter TargetName="Glyph" Property="Foreground" Value="{Binding Accent}" />
+                        </DataTrigger>
+                        <!-- Sekme çubuğu biçimi "yalnız simge" (issue #78): ad gizlenir, simge dikey ortada kalır -->
+                        <DataTrigger Binding="{Binding DataContext.ShowTabLabels, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="False">
+                          <Setter TargetName="Label" Property="Visibility" Value="Collapsed" />
                         </DataTrigger>
                       </ControlTemplate.Triggers>
                     </ControlTemplate>

@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:Koy.App.Features.Home"
              xmlns:status="clr-namespace:Koy.App.Features.Status"
              xmlns:music="clr-namespace:Koy.App.Features.Music"
+             xmlns:livebg="clr-namespace:Koy.App.Features.Notch.LiveBackground"
              xmlns:res="clr-namespace:Koy.App.Resources"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:HomeViewModel}"
@@ -43,9 +44,13 @@
     <Style x:Key="MusicSpectrumBars" TargetType="music:SpectrumBars">
       <Setter Property="Fill" Value="{DynamicResource KoyNotchMusicSpectrum}" />
       <Style.Triggers>
-        <DataTrigger Binding="{Binding Music.HasTint}" Value="True">
+        <MultiDataTrigger>
+          <MultiDataTrigger.Conditions>
+            <Condition Binding="{Binding Music.HasTint}" Value="True" />
+            <Condition Binding="{Binding Music.VisualizerColorSource}" Value="Artwork" />
+          </MultiDataTrigger.Conditions>
           <Setter Property="Fill" Value="{Binding Music.SpectrumBrush}" />
-        </DataTrigger>
+        </MultiDataTrigger>
       </Style.Triggers>
     </Style>
     <!-- Albüm kapağı stili: kapağın üstüne kart tonu (alfa 0,30), onun üstüne koyu perde (#0A0A0B 0,55 → 0,85). BlurEffect yok. -->
@@ -156,6 +161,24 @@
           <Border CornerRadius="22" Background="{StaticResource MusicArtworkVeil}" />
         </Border>
 
+        <!-- Canlı arka plan (issue #67): yalnız müzik kartı görünürken ve hedef müzik kartını içeriyorsa; kapalıyken (varsayılan)
+             hiçbir şey çizilmez. Albüm kapağı katmanının üstünde, içeriğin altında; koyu perde yazıyı korur. -->
+        <livebg:LiveBackgroundHost Margin="-16" CornerRadius="22"
+                                   Selection="{Binding LiveBackground.Selection}"
+                                   Mode="{Binding LiveBackground.MusicCardMode}"
+                                   ScrimOpacity="{Binding LiveBackground.ScrimOpacity}">
+          <livebg:LiveBackgroundHost.Style>
+            <Style TargetType="livebg:LiveBackgroundHost">
+              <Setter Property="Visibility" Value="Collapsed" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding ShowMusic}" Value="True">
+                  <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </livebg:LiveBackgroundHost.Style>
+        </livebg:LiveBackgroundHost>
+
         <!-- Müzik yok: selamlama, büyük saat, gün ve tarih -->
         <Grid>
           <Grid.Style>
@@ -181,7 +204,7 @@
             <TextBlock Text="{Binding Status.DayDate}" FontSize="13" Foreground="{DynamicResource KoyNotchMuted}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" />
           </StackPanel>
           <Button Style="{StaticResource CardButtonStyle}" Command="{Binding OpenFocusCommand}"
-                  Visibility="{Binding Focus.HasRunning, Converter={StaticResource BoolToVis}}" Grid.Row="3" Margin="0,10,0,0">
+                  Visibility="{Binding ShowFocusCard, Converter={StaticResource BoolToVis}}" Grid.Row="3" Margin="0,10,0,0">
             <Border CornerRadius="14" Background="{DynamicResource KoyNotchSurface}" Padding="12,9">
               <StackPanel Orientation="Horizontal">
                 <Ellipse Width="8" Height="8" Fill="{DynamicResource KoyNotchAccentFocus}" VerticalAlignment="Center" />
@@ -263,7 +286,8 @@
 
           <!-- Ses çubukları (tasarım H): çalan sesten 24 bant; yakalama yalnız kart görünür ve müzik çalarken sürer -->
           <music:SpectrumBars Grid.Row="1" Height="26" VerticalAlignment="Center" HorizontalAlignment="Center"
-                              Feed="{Binding Music.Spectrum}" Style="{StaticResource MusicSpectrumBars}" IsHitTestVisible="False"
+                              Feed="{Binding Music.Spectrum}" VisualizerStyle="{Binding Music.VisualizerStyle}"
+                              Style="{StaticResource MusicSpectrumBars}" IsHitTestVisible="False"
                               Visibility="{Binding Music.ShowSpectrum, Converter={StaticResource BoolToVis}}" />
           <music:LyricsView Grid.Row="1" FontSize="13" Margin="0,6,0,6" DataContext="{Binding Music.Lyrics}"
                             Visibility="{Binding IsShown, Converter={StaticResource BoolToVis}}" />
@@ -431,7 +455,8 @@
             </StackPanel>
 
             <music:SpectrumBars Grid.Row="1" Height="34" BarWidth="7" Gap="5" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                Feed="{Binding Music.Spectrum}" Style="{StaticResource MusicSpectrumBars}" IsHitTestVisible="False"
+                                Feed="{Binding Music.Spectrum}" VisualizerStyle="{Binding Music.VisualizerStyle}"
+                                Style="{StaticResource MusicSpectrumBars}" IsHitTestVisible="False"
                                 Visibility="{Binding Music.ShowSpectrum, Converter={StaticResource BoolToVis}}" />
 
             <music:LyricsView Grid.Row="1" FontSize="15" Margin="0,8,0,8" DataContext="{Binding Music.Lyrics}"
@@ -509,17 +534,16 @@
 
     <!-- SAĞ SÜTUN (tasarımdaki gibi): üstte kulaklık kartı (yalnız bağlı ses cihazı varsa; yoksa hiç yer kaplamaz),
          CPU / RAM ile ağ kartı yan yana, altta hızlı başlat şeridi. Hava durumu yalnız üstteki durum satırındadır. -->
-    <Grid Grid.Column="2" Visibility="{Binding ShowSideColumn, Converter={StaticResource BoolToVis}}">
+    <Grid x:Name="RightColumnGrid" Grid.Column="2" Visibility="{Binding ShowSideColumn, Converter={StaticResource BoolToVis}}">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
         <RowDefinition Height="*" />
-        <RowDefinition Height="8" />
         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
 
       <!-- Kulaklık kartı: bağlı ses cihazının adı ve (varsa) pili. Pil bilinmiyorsa yüzde gösterilmez. -->
-      <Border Grid.Row="0" Height="40" Margin="0,0,0,8" CornerRadius="18" Background="{DynamicResource KoyNotchControlCard}" Padding="14,0"
-              Visibility="{Binding Bluetooth.HasPrimaryAudio, Converter={StaticResource BoolToVis}}">
+      <Border x:Name="HeadphoneCardBorder" Grid.Row="0" Height="40" Margin="0,0,0,8" CornerRadius="18" Background="{DynamicResource KoyNotchControlCard}" Padding="14,0"
+              Visibility="{Binding ShowHeadphoneCard, Converter={StaticResource BoolToVis}}">
         <Grid DataContext="{Binding Bluetooth.PrimaryAudio}">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -546,7 +570,7 @@
         </Grid>
       </Border>
 
-      <Grid Grid.Row="1">
+      <Grid x:Name="SystemCardGrid" Grid.Row="1" Margin="0,0,0,8" Visibility="{Binding ShowSystemCard, Converter={StaticResource BoolToVis}}">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*" />
           <ColumnDefinition Width="8" />
@@ -587,7 +611,8 @@
       </Grid>
 
       <!-- Hızlı başlat -->
-      <Border Grid.Row="3" CornerRadius="18" Background="{DynamicResource KoyNotchCard}" Padding="14,8,10,9">
+      <Border x:Name="QuickLaunchCardBorder" Grid.Row="2" CornerRadius="18" Background="{DynamicResource KoyNotchCard}" Padding="14,8,10,9"
+              Visibility="{Binding ShowQuickLaunchCard, Converter={StaticResource BoolToVis}}">
         <StackPanel>
           <TextBlock Text="{Binding [QuickLaunchTitle], Source={x:Static res:Loc.Instance}}" FontSize="11" Foreground="{DynamicResource KoyNotchMuted}" />
           <StackPanel Orientation="Horizontal" Margin="0,6,0,0">

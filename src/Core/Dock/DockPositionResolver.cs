@@ -21,7 +21,8 @@ public sealed record DockResolvedState(
     bool IsHandleVisible,
     bool IsHidden,
     bool IsFullWidth,
-    int AppBarReservedHeightDip)
+    int AppBarReservedHeightDip,
+    double TranslationX = 0.0)
 {
     public bool HasUniformRadius =>
         CornerRadiusTopLeft.Equals(CornerRadiusTopRight) &&
@@ -69,8 +70,17 @@ public static class DockPositionResolver
         bool isMouseOverDock = false,
         bool isWindowFullscreen = false,
         bool hideInFullscreen = true,
-        bool edgeRevealEnabled = true)
+        bool edgeRevealEnabled = true,
+        DockEdge edge = DockEdge.Bottom,
+        int lengthPercent = DockLayoutLimits.DefaultLengthPercent,
+        double edgeOffsetDip = DockLayoutLimits.DefaultEdgeOffsetDip,
+        double innerPaddingDip = DockLayoutLimits.DefaultInnerPaddingDip)
     {
+        if (!Enum.IsDefined(edge)) edge = DockEdge.Bottom;
+        lengthPercent = DockLayoutLimits.ClampLengthPercent(lengthPercent);
+        edgeOffsetDip = DockLayoutLimits.ClampEdgeOffsetDip(edgeOffsetDip);
+        innerPaddingDip = DockLayoutLimits.ClampInnerPaddingDip(innerPaddingDip);
+
         // Gerçek tam ekran (oyun, F11, tam ekran video): dock HİÇBİR koşulda çıkmaz, kenar tetiği de yoktur
         // (hideInFullscreen kapalıysa kullanıcı dock'u tam ekranda da istiyor demektir, o zaman normal akış sürer).
         // Büyütülmüş pencerede ise dock gizlenir ama fare alt kenara gelince (edgeRevealEnabled) geri çıkar.
@@ -82,60 +92,101 @@ public static class DockPositionResolver
         var monitorBottom = monitorTop + monitorHeight;
         var monitorRight = monitorLeft + monitorWidth;
 
-        // Yakınlık / Çakışma denetimi
-        var proximityZoneTop = monitorBottom - ProximityThresholdDip;
-        var windowIntersects = isWindowMaximized ||
-            (!foregroundWindowBoundsDip.IsEmpty &&
-             foregroundWindowBoundsDip.Bottom >= proximityZoneTop &&
-             foregroundWindowBoundsDip.Top < monitorBottom &&
-             foregroundWindowBoundsDip.Right > monitorLeft &&
-             foregroundWindowBoundsDip.Left < monitorRight);
+        // Yakınlık / Çakışma denetimi (seçili kenara göre ProximityThresholdDip şeridi)
+        bool edgeIntersects = edge switch
+        {
+            DockEdge.Top => foregroundWindowBoundsDip.Top <= monitorTop + ProximityThresholdDip &&
+                            foregroundWindowBoundsDip.Bottom > monitorTop &&
+                            foregroundWindowBoundsDip.Right > monitorLeft &&
+                            foregroundWindowBoundsDip.Left < monitorRight,
+            DockEdge.Left => foregroundWindowBoundsDip.Left <= monitorLeft + ProximityThresholdDip &&
+                             foregroundWindowBoundsDip.Right > monitorLeft &&
+                             foregroundWindowBoundsDip.Bottom > monitorTop &&
+                             foregroundWindowBoundsDip.Top < monitorBottom,
+            DockEdge.Right => foregroundWindowBoundsDip.Right >= monitorRight - ProximityThresholdDip &&
+                              foregroundWindowBoundsDip.Left < monitorRight &&
+                              foregroundWindowBoundsDip.Bottom > monitorTop &&
+                              foregroundWindowBoundsDip.Top < monitorBottom,
+            _ => foregroundWindowBoundsDip.Bottom >= monitorBottom - ProximityThresholdDip &&
+                 foregroundWindowBoundsDip.Top < monitorBottom &&
+                 foregroundWindowBoundsDip.Right > monitorLeft &&
+                 foregroundWindowBoundsDip.Left < monitorRight
+        };
+
+        var windowIntersects = isWindowMaximized || (!foregroundWindowBoundsDip.IsEmpty && edgeIntersects);
+
+        (double tl, double tr, double br, double bl) SnappedCorners() => edge switch
+        {
+            DockEdge.Top => (0.0, 0.0, SnappedCornerRadiusDip, SnappedCornerRadiusDip),
+            DockEdge.Left => (0.0, SnappedCornerRadiusDip, SnappedCornerRadiusDip, 0.0),
+            DockEdge.Right => (SnappedCornerRadiusDip, 0.0, 0.0, SnappedCornerRadiusDip),
+            _ => (SnappedCornerRadiusDip, SnappedCornerRadiusDip, 0.0, 0.0)
+        };
+
+        (double tx, double ty) Translation(bool isHidden, double thickness, double offset)
+        {
+            if (!isHidden) return (0.0, 0.0);
+            var shift = thickness + offset + 10.0;
+            return edge switch
+            {
+                DockEdge.Top => (0.0, -shift),
+                DockEdge.Left => (-shift, 0.0),
+                DockEdge.Right => (shift, 0.0),
+                _ => (0.0, shift)
+            };
+        }
 
         // Tam Genişlik Modu (M6.3 / DESIGN.md)
         if (dockStyle == DockStyleMode.FullWidth)
         {
-            var top = monitorBottom - FullWidthHeightDip;
+            var monitorWorkArea = new DockRectDip(monitorLeft, monitorTop, monitorWidth, monitorHeight);
+            var layout = DockLayoutMath.Compute(edge, lengthPercent, edgeOffsetDip, innerPaddingDip, FullWidthHeightDip, monitorWorkArea);
+            var outer = layout.Outer;
             var reservedHeight = proximityMode == DockProximityMode.ReserveSpace ? (int)FullWidthHeightDip : 0;
 
             if (isWindowFullscreen && hideInFullscreen)
             {
+                var (tx, ty) = Translation(true, FullWidthHeightDip, edgeOffsetDip);
                 return new DockResolvedState(
-                    LeftDip: monitorLeft,
-                    TopDip: top,
-                    WidthDip: monitorWidth,
-                    HeightDip: FullWidthHeightDip,
+                    LeftDip: outer.Left,
+                    TopDip: outer.Top,
+                    WidthDip: outer.Width,
+                    HeightDip: outer.Height,
                     CornerRadiusTopLeft: 0,
                     CornerRadiusTopRight: 0,
                     CornerRadiusBottomRight: 0,
                     CornerRadiusBottomLeft: 0,
-                    TranslationY: FullWidthHeightDip + 10.0,
+                    TranslationY: ty,
                     Opacity: 0.0,
                     IsSnapped: true,
                     IsHandleVisible: false,
                     IsHidden: true,
                     IsFullWidth: true,
-                    AppBarReservedHeightDip: reservedHeight);
+                    AppBarReservedHeightDip: reservedHeight,
+                    TranslationX: tx);
             }
 
             if (isWindowMaximized && hideInFullscreen && proximityMode != DockProximityMode.ReserveSpace)
             {
                 var isHovered = (edgeRevealEnabled && isMouseAtBottomEdge) || isMouseOverDock;
+                var (tx, ty) = Translation(!isHovered, FullWidthHeightDip, edgeOffsetDip);
                 return new DockResolvedState(
-                    LeftDip: monitorLeft,
-                    TopDip: top,
-                    WidthDip: monitorWidth,
-                    HeightDip: FullWidthHeightDip,
+                    LeftDip: outer.Left,
+                    TopDip: outer.Top,
+                    WidthDip: outer.Width,
+                    HeightDip: outer.Height,
                     CornerRadiusTopLeft: 0,
                     CornerRadiusTopRight: 0,
                     CornerRadiusBottomRight: 0,
                     CornerRadiusBottomLeft: 0,
-                    TranslationY: isHovered ? 0 : (FullWidthHeightDip + 10.0),
+                    TranslationY: ty,
                     Opacity: isHovered ? 1.0 : 0.0,
                     IsSnapped: true,
                     IsHandleVisible: false,
                     IsHidden: !isHovered,
                     IsFullWidth: true,
-                    AppBarReservedHeightDip: 0);
+                    AppBarReservedHeightDip: 0,
+                    TranslationX: tx);
             }
 
             switch (proximityMode)
@@ -145,30 +196,32 @@ public static class DockPositionResolver
                     if (windowIntersects)
                     {
                         var isHovered = isMouseAtBottomEdge || isMouseOverDock;
+                        var (tx, ty) = Translation(!isHovered, FullWidthHeightDip, edgeOffsetDip);
                         return new DockResolvedState(
-                            LeftDip: monitorLeft,
-                            TopDip: top,
-                            WidthDip: monitorWidth,
-                            HeightDip: FullWidthHeightDip,
+                            LeftDip: outer.Left,
+                            TopDip: outer.Top,
+                            WidthDip: outer.Width,
+                            HeightDip: outer.Height,
                             CornerRadiusTopLeft: 0,
                             CornerRadiusTopRight: 0,
                             CornerRadiusBottomRight: 0,
                             CornerRadiusBottomLeft: 0,
-                            TranslationY: isHovered ? 0 : (FullWidthHeightDip + 10.0),
+                            TranslationY: ty,
                             Opacity: isHovered ? 1.0 : 0.0,
                             IsSnapped: true,
                             IsHandleVisible: false,
                             IsHidden: !isHovered,
                             IsFullWidth: true,
-                            AppBarReservedHeightDip: 0);
+                            AppBarReservedHeightDip: 0,
+                            TranslationX: tx);
                     }
                     else
                     {
                         return new DockResolvedState(
-                            LeftDip: monitorLeft,
-                            TopDip: top,
-                            WidthDip: monitorWidth,
-                            HeightDip: FullWidthHeightDip,
+                            LeftDip: outer.Left,
+                            TopDip: outer.Top,
+                            WidthDip: outer.Width,
+                            HeightDip: outer.Height,
                             CornerRadiusTopLeft: 0,
                             CornerRadiusTopRight: 0,
                             CornerRadiusBottomRight: 0,
@@ -179,37 +232,40 @@ public static class DockPositionResolver
                             IsHandleVisible: false,
                             IsHidden: false,
                             IsFullWidth: true,
-                            AppBarReservedHeightDip: 0);
+                            AppBarReservedHeightDip: 0,
+                            TranslationX: 0);
                     }
                 }
 
                 case DockProximityMode.AlwaysHidden:
                 {
                     var isHovered = isMouseAtBottomEdge || isMouseOverDock;
+                    var (tx, ty) = Translation(!isHovered, FullWidthHeightDip, edgeOffsetDip);
                     return new DockResolvedState(
-                        LeftDip: monitorLeft,
-                        TopDip: top,
-                        WidthDip: monitorWidth,
-                        HeightDip: FullWidthHeightDip,
+                        LeftDip: outer.Left,
+                        TopDip: outer.Top,
+                        WidthDip: outer.Width,
+                        HeightDip: outer.Height,
                         CornerRadiusTopLeft: 0,
                         CornerRadiusTopRight: 0,
                         CornerRadiusBottomRight: 0,
                         CornerRadiusBottomLeft: 0,
-                        TranslationY: isHovered ? 0 : (FullWidthHeightDip + 10.0),
+                        TranslationY: ty,
                         Opacity: isHovered ? 1.0 : 0.0,
                         IsSnapped: true,
                         IsHandleVisible: false,
                         IsHidden: !isHovered,
                         IsFullWidth: true,
-                        AppBarReservedHeightDip: 0);
+                        AppBarReservedHeightDip: 0,
+                        TranslationX: tx);
                 }
 
                 default: // DockDown, ReserveSpace
                     return new DockResolvedState(
-                        LeftDip: monitorLeft,
-                        TopDip: top,
-                        WidthDip: monitorWidth,
-                        HeightDip: FullWidthHeightDip,
+                        LeftDip: outer.Left,
+                        TopDip: outer.Top,
+                        WidthDip: outer.Width,
+                        HeightDip: outer.Height,
                         CornerRadiusTopLeft: 0,
                         CornerRadiusTopRight: 0,
                         CornerRadiusBottomRight: 0,
@@ -220,33 +276,59 @@ public static class DockPositionResolver
                         IsHandleVisible: false,
                         IsHidden: false,
                         IsFullWidth: true,
-                        AppBarReservedHeightDip: reservedHeight);
+                        AppBarReservedHeightDip: reservedHeight,
+                        TranslationX: 0);
             }
         }
 
         // Yüzen Kapsül Modu (FloatingCapsule)
-        var capsuleWidth = Math.Max(contentWidthDip > 0 ? contentWidthDip : 520.0, 160.0);
-        var capsuleLeft = monitorLeft + Math.Max(0.0, (monitorWidth - capsuleWidth) / 2.0);
+        DockRectDip ComputeCapsuleRect(bool isSnapped)
+        {
+            var thickness = isSnapped ? SnappedHeightDip : FloatingHeightDip;
+            var offset = isSnapped ? edgeOffsetDip : (FloatingBottomMarginDip + edgeOffsetDip);
+            var capsuleLength = Math.Max(contentWidthDip > 0 ? contentWidthDip : 520.0, 160.0);
+
+            if (edge is DockEdge.Bottom or DockEdge.Top)
+            {
+                var width = Math.Min(capsuleLength, monitorWidth);
+                var left = monitorLeft + Math.Max(0.0, (monitorWidth - width) / 2.0);
+                var top = edge == DockEdge.Bottom
+                    ? monitorBottom - offset - thickness
+                    : monitorTop + offset;
+                return new DockRectDip(left, top, width, thickness);
+            }
+            else
+            {
+                var height = Math.Min(capsuleLength, monitorHeight);
+                var top = monitorTop + Math.Max(0.0, (monitorHeight - height) / 2.0);
+                var left = edge == DockEdge.Left
+                    ? monitorLeft + offset
+                    : monitorRight - offset - thickness;
+                return new DockRectDip(left, top, thickness, height);
+            }
+        }
 
         if (isWindowFullscreen && hideInFullscreen)
         {
-            var top = monitorBottom - FloatingHeightDip - FloatingBottomMarginDip;
+            var outer = ComputeCapsuleRect(isSnapped: false);
+            var (tx, ty) = Translation(true, FloatingHeightDip, FloatingBottomMarginDip + edgeOffsetDip);
             return new DockResolvedState(
-                LeftDip: capsuleLeft,
-                TopDip: top,
-                WidthDip: capsuleWidth,
-                HeightDip: FloatingHeightDip,
+                LeftDip: outer.Left,
+                TopDip: outer.Top,
+                WidthDip: outer.Width,
+                HeightDip: outer.Height,
                 CornerRadiusTopLeft: FloatingCornerRadiusDip,
                 CornerRadiusTopRight: FloatingCornerRadiusDip,
                 CornerRadiusBottomRight: FloatingCornerRadiusDip,
                 CornerRadiusBottomLeft: FloatingCornerRadiusDip,
-                TranslationY: FloatingHeightDip + FloatingBottomMarginDip + 10.0,
+                TranslationY: ty,
                 Opacity: 0.0,
                 IsSnapped: false,
                 IsHandleVisible: false,
                 IsHidden: true,
                 IsFullWidth: false,
-                AppBarReservedHeightDip: 0);
+                AppBarReservedHeightDip: 0,
+                TranslationX: tx);
         }
 
         // Aşağı yapış'ta büyütülmüş pencere dock'u gizlemez: dock alta yapışık kalır (aşağıdaki DockDown kolu), yer ayırmaz.
@@ -255,24 +337,26 @@ public static class DockPositionResolver
         if (isWindowMaximized && hideInFullscreen
             && proximityMode is not (DockProximityMode.ReserveSpace or DockProximityMode.DockDown or DockProximityMode.AlwaysFloating))
         {
-            var top = monitorBottom - FloatingHeightDip - FloatingBottomMarginDip;
+            var outer = ComputeCapsuleRect(isSnapped: false);
             var isHovered = (edgeRevealEnabled && isMouseAtBottomEdge) || isMouseOverDock;
+            var (tx, ty) = Translation(!isHovered, FloatingHeightDip, FloatingBottomMarginDip + edgeOffsetDip);
             return new DockResolvedState(
-                LeftDip: capsuleLeft,
-                TopDip: top,
-                WidthDip: capsuleWidth,
-                HeightDip: FloatingHeightDip,
+                LeftDip: outer.Left,
+                TopDip: outer.Top,
+                WidthDip: outer.Width,
+                HeightDip: outer.Height,
                 CornerRadiusTopLeft: FloatingCornerRadiusDip,
                 CornerRadiusTopRight: FloatingCornerRadiusDip,
                 CornerRadiusBottomRight: FloatingCornerRadiusDip,
                 CornerRadiusBottomLeft: FloatingCornerRadiusDip,
-                TranslationY: isHovered ? 0 : (FloatingHeightDip + FloatingBottomMarginDip + 10.0),
+                TranslationY: ty,
                 Opacity: isHovered ? 1.0 : 0.0,
                 IsSnapped: false,
                 IsHandleVisible: !isHovered,
                 IsHidden: !isHovered,
                 IsFullWidth: false,
-                AppBarReservedHeightDip: 0);
+                AppBarReservedHeightDip: 0,
+                TranslationX: tx);
         }
 
         switch (proximityMode)
@@ -281,34 +365,36 @@ public static class DockPositionResolver
             {
                 if (windowIntersects)
                 {
-                    // Aşağı yapış: Alt kenara oturur, 60 px -> 46 px incelir, yalnız üst köşeler 14 px yuvarlak
-                    var top = monitorBottom - SnappedHeightDip;
+                    // Aşağı yapış: Kenara oturur, 60 px -> 46 px incelir, içe bakan iki köşe 14 px yuvarlak
+                    var outer = ComputeCapsuleRect(isSnapped: true);
+                    var (tl, tr, br, bl) = SnappedCorners();
                     return new DockResolvedState(
-                        LeftDip: capsuleLeft,
-                        TopDip: top,
-                        WidthDip: capsuleWidth,
-                        HeightDip: SnappedHeightDip,
-                        CornerRadiusTopLeft: SnappedCornerRadiusDip,
-                        CornerRadiusTopRight: SnappedCornerRadiusDip,
-                        CornerRadiusBottomRight: 0,
-                        CornerRadiusBottomLeft: 0,
+                        LeftDip: outer.Left,
+                        TopDip: outer.Top,
+                        WidthDip: outer.Width,
+                        HeightDip: outer.Height,
+                        CornerRadiusTopLeft: tl,
+                        CornerRadiusTopRight: tr,
+                        CornerRadiusBottomRight: br,
+                        CornerRadiusBottomLeft: bl,
                         TranslationY: 0,
                         Opacity: 1.0,
                         IsSnapped: true,
                         IsHandleVisible: false,
                         IsHidden: false,
                         IsFullWidth: false,
-                        AppBarReservedHeightDip: 0);
+                        AppBarReservedHeightDip: 0,
+                        TranslationX: 0);
                 }
                 else
                 {
-                    // Boşta / Pencere uzakta: Yüzen kapsül (60 px, alttan 10 px, 18 px yarıçap)
-                    var top = monitorBottom - FloatingHeightDip - FloatingBottomMarginDip;
+                    // Boşta / Pencere uzakta: Yüzen kapsül (60 px, kenardan 10 px + ofset, 18 px yarıçap)
+                    var outer = ComputeCapsuleRect(isSnapped: false);
                     return new DockResolvedState(
-                        LeftDip: capsuleLeft,
-                        TopDip: top,
-                        WidthDip: capsuleWidth,
-                        HeightDip: FloatingHeightDip,
+                        LeftDip: outer.Left,
+                        TopDip: outer.Top,
+                        WidthDip: outer.Width,
+                        HeightDip: outer.Height,
                         CornerRadiusTopLeft: FloatingCornerRadiusDip,
                         CornerRadiusTopRight: FloatingCornerRadiusDip,
                         CornerRadiusBottomRight: FloatingCornerRadiusDip,
@@ -319,47 +405,50 @@ public static class DockPositionResolver
                         IsHandleVisible: false,
                         IsHidden: false,
                         IsFullWidth: false,
-                        AppBarReservedHeightDip: 0);
+                        AppBarReservedHeightDip: 0,
+                        TranslationX: 0);
                 }
             }
 
             case DockProximityMode.ReserveSpace:
             {
-                // Yer ayır: Masaüstü çalışma alanından (AppBar) 46 px ayırır, dock alta oturur
-                var top = monitorBottom - SnappedHeightDip;
+                // Yer ayır: Masaüstü çalışma alanından (AppBar) 46 px ayırır, dock kenara oturur
+                var outer = ComputeCapsuleRect(isSnapped: true);
+                var (tl, tr, br, bl) = SnappedCorners();
                 return new DockResolvedState(
-                    LeftDip: capsuleLeft,
-                    TopDip: top,
-                    WidthDip: capsuleWidth,
-                    HeightDip: SnappedHeightDip,
-                    CornerRadiusTopLeft: SnappedCornerRadiusDip,
-                    CornerRadiusTopRight: SnappedCornerRadiusDip,
-                    CornerRadiusBottomRight: 0,
-                    CornerRadiusBottomLeft: 0,
+                    LeftDip: outer.Left,
+                    TopDip: outer.Top,
+                    WidthDip: outer.Width,
+                    HeightDip: outer.Height,
+                    CornerRadiusTopLeft: tl,
+                    CornerRadiusTopRight: tr,
+                    CornerRadiusBottomRight: br,
+                    CornerRadiusBottomLeft: bl,
                     TranslationY: 0,
                     Opacity: 1.0,
                     IsSnapped: true,
                     IsHandleVisible: false,
                     IsHidden: false,
                     IsFullWidth: false,
-                    AppBarReservedHeightDip: (int)SnappedHeightDip);
+                    AppBarReservedHeightDip: (int)SnappedHeightDip,
+                    TranslationX: 0);
             }
 
             case DockProximityMode.Dodge:
             {
-                var top = monitorBottom - FloatingHeightDip - FloatingBottomMarginDip;
+                var outer = ComputeCapsuleRect(isSnapped: false);
 
                 if (windowIntersects)
                 {
                     var isHovered = isMouseAtBottomEdge || isMouseOverDock;
                     if (isHovered)
                     {
-                        // Fare alt kenara geldiğinde dock yukarı kayarak geri çıkar
+                        // Fare kenara geldiğinde dock kayarak geri çıkar
                         return new DockResolvedState(
-                            LeftDip: capsuleLeft,
-                            TopDip: top,
-                            WidthDip: capsuleWidth,
-                            HeightDip: FloatingHeightDip,
+                            LeftDip: outer.Left,
+                            TopDip: outer.Top,
+                            WidthDip: outer.Width,
+                            HeightDip: outer.Height,
                             CornerRadiusTopLeft: FloatingCornerRadiusDip,
                             CornerRadiusTopRight: FloatingCornerRadiusDip,
                             CornerRadiusBottomRight: FloatingCornerRadiusDip,
@@ -370,37 +459,40 @@ public static class DockPositionResolver
                             IsHandleVisible: false,
                             IsHidden: false,
                             IsFullWidth: false,
-                            AppBarReservedHeightDip: 0);
+                            AppBarReservedHeightDip: 0,
+                            TranslationX: 0);
                     }
                     else
                     {
                         // Pencere üstüne binince dock çekilir, altta 120×4 tutamak kalır
+                        var (tx, ty) = Translation(true, FloatingHeightDip, FloatingBottomMarginDip + edgeOffsetDip);
                         return new DockResolvedState(
-                            LeftDip: capsuleLeft,
-                            TopDip: top,
-                            WidthDip: capsuleWidth,
-                            HeightDip: FloatingHeightDip,
+                            LeftDip: outer.Left,
+                            TopDip: outer.Top,
+                            WidthDip: outer.Width,
+                            HeightDip: outer.Height,
                             CornerRadiusTopLeft: FloatingCornerRadiusDip,
                             CornerRadiusTopRight: FloatingCornerRadiusDip,
                             CornerRadiusBottomRight: FloatingCornerRadiusDip,
                             CornerRadiusBottomLeft: FloatingCornerRadiusDip,
-                            TranslationY: FloatingHeightDip + FloatingBottomMarginDip + 10.0,
+                            TranslationY: ty,
                             Opacity: 0.0,
                             IsSnapped: false,
                             IsHandleVisible: true,
                             IsHidden: true,
                             IsFullWidth: false,
-                            AppBarReservedHeightDip: 0);
+                            AppBarReservedHeightDip: 0,
+                            TranslationX: tx);
                     }
                 }
                 else
                 {
                     // Çakışan pencere yok, normal yüzer
                     return new DockResolvedState(
-                        LeftDip: capsuleLeft,
-                        TopDip: top,
-                        WidthDip: capsuleWidth,
-                        HeightDip: FloatingHeightDip,
+                        LeftDip: outer.Left,
+                        TopDip: outer.Top,
+                        WidthDip: outer.Width,
+                        HeightDip: outer.Height,
                         CornerRadiusTopLeft: FloatingCornerRadiusDip,
                         CornerRadiusTopRight: FloatingCornerRadiusDip,
                         CornerRadiusBottomRight: FloatingCornerRadiusDip,
@@ -411,42 +503,45 @@ public static class DockPositionResolver
                         IsHandleVisible: false,
                         IsHidden: false,
                         IsFullWidth: false,
-                        AppBarReservedHeightDip: 0);
+                        AppBarReservedHeightDip: 0,
+                        TranslationX: 0);
                 }
             }
 
             case DockProximityMode.AlwaysHidden:
             {
-                var top = monitorBottom - FloatingHeightDip - FloatingBottomMarginDip;
+                var outer = ComputeCapsuleRect(isSnapped: false);
                 var isHovered = isMouseAtBottomEdge || isMouseOverDock;
+                var (tx, ty) = Translation(!isHovered, FloatingHeightDip, FloatingBottomMarginDip + edgeOffsetDip);
 
                 return new DockResolvedState(
-                    LeftDip: capsuleLeft,
-                    TopDip: top,
-                    WidthDip: capsuleWidth,
-                    HeightDip: FloatingHeightDip,
+                    LeftDip: outer.Left,
+                    TopDip: outer.Top,
+                    WidthDip: outer.Width,
+                    HeightDip: outer.Height,
                     CornerRadiusTopLeft: FloatingCornerRadiusDip,
                     CornerRadiusTopRight: FloatingCornerRadiusDip,
                     CornerRadiusBottomRight: FloatingCornerRadiusDip,
                     CornerRadiusBottomLeft: FloatingCornerRadiusDip,
-                    TranslationY: isHovered ? 0 : (FloatingHeightDip + FloatingBottomMarginDip + 10.0),
+                    TranslationY: ty,
                     Opacity: isHovered ? 1.0 : 0.0,
                     IsSnapped: false,
                     IsHandleVisible: false,
                     IsHidden: !isHovered,
                     IsFullWidth: false,
-                    AppBarReservedHeightDip: 0);
+                    AppBarReservedHeightDip: 0,
+                    TranslationX: tx);
             }
 
             case DockProximityMode.AlwaysFloating:
             {
                 // Hep havada: pencere yakınlığına (windowIntersects) ve büyütülmüşlüğe bakılmaz; hep yüzen kapsül.
-                var top = monitorBottom - FloatingHeightDip - FloatingBottomMarginDip;
+                var outer = ComputeCapsuleRect(isSnapped: false);
                 return new DockResolvedState(
-                    LeftDip: capsuleLeft,
-                    TopDip: top,
-                    WidthDip: capsuleWidth,
-                    HeightDip: FloatingHeightDip,
+                    LeftDip: outer.Left,
+                    TopDip: outer.Top,
+                    WidthDip: outer.Width,
+                    HeightDip: outer.Height,
                     CornerRadiusTopLeft: FloatingCornerRadiusDip,
                     CornerRadiusTopRight: FloatingCornerRadiusDip,
                     CornerRadiusBottomRight: FloatingCornerRadiusDip,
@@ -457,7 +552,8 @@ public static class DockPositionResolver
                     IsHandleVisible: false,
                     IsHidden: false,
                     IsFullWidth: false,
-                    AppBarReservedHeightDip: 0);
+                    AppBarReservedHeightDip: 0,
+                    TranslationX: 0);
             }
 
             default:

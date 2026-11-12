@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Koy.Core.Lyrics;
 using Koy.Core.Media;
+using Koy.Core.Notch;
 using Koy.Platform.Audio;
 
 namespace Koy.App.Features.Music;
@@ -105,6 +106,15 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private Brush? _spectrumBrush;
 
+    [ObservableProperty]
+    private NotchVisualizerStyle _visualizerStyle = NotchVisualizerStyle.Bars;
+
+    [ObservableProperty]
+    private NotchVisualizerColorSource _visualizerColorSource = NotchVisualizerColorSource.Accent;
+
+    [ObservableProperty]
+    private int _visualizerBarCount = 5;
+
     /// <summary>Kapak arka planının altındaki hafif ton (Card, alfa 0,30).</summary>
     [ObservableProperty]
     private Brush? _tintOverlayBrush;
@@ -182,7 +192,9 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
 
         CardBrush = Solid(palette.Card, _cardAlpha);
         SubTextBrush = Solid(palette.SubText, 255);
-        SpectrumBrush = Solid(palette.Spectrum, 0xBF); // alfa 0,75
+        SpectrumBrush = VisualizerColorSource == NotchVisualizerColorSource.Artwork
+            ? Solid(palette.Spectrum, 0xBF)
+            : null;
         if (small is not null)
         {
             TintOverlayBrush = Solid(palette.Card, 0x4D); // alfa 0,30
@@ -211,10 +223,16 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
 
     public MusicViewModel(IMediaService mediaService, Dispatcher? dispatcher = null,
         Func<SpectrumCaptureService>? spectrumAcquire = null, Action? spectrumRelease = null,
-        ILyricsProvider? lyricsProvider = null, MusicCardStyle cardStyle = MusicCardStyle.Tinted)
+        ILyricsProvider? lyricsProvider = null, MusicCardStyle cardStyle = MusicCardStyle.Tinted,
+        NotchVisualizerStyle visualizerStyle = NotchVisualizerStyle.Bars,
+        NotchVisualizerColorSource visualizerColorSource = NotchVisualizerColorSource.Accent,
+        int visualizerBarCount = 5)
     {
         _mediaService = mediaService;
         _cardStyle = cardStyle;
+        _visualizerStyle = visualizerStyle;
+        _visualizerColorSource = visualizerColorSource;
+        _visualizerBarCount = NotchVisualizer.ClampBarCount(visualizerBarCount);
         _dispatcher = dispatcher ?? System.Windows.Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
         _spectrumAcquire = spectrumAcquire;
         _spectrumRelease = spectrumRelease;

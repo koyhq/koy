@@ -4,6 +4,7 @@ using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Koy.Core.Calendar;
+using Koy.Core.Clock;
 using Koy.Core.Settings;
 
 namespace Koy.App.Features.Calendar;
@@ -31,6 +32,9 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
     private readonly Dispatcher _dispatcher;
     private readonly CultureInfo _culture;
     private readonly Func<DateOnly> _today;
+    private readonly string _timePattern;
+    private readonly DayOfWeek _firstDay;
+    private readonly bool _showWeekNumber;
     private bool _active;
     private bool _disposed;
 
@@ -40,9 +44,15 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
         _events = events ?? new SharedEvents();
         _today = today ?? (() => DateOnly.FromDateTime(DateTime.Today));
         _culture = new CultureInfo(settings.General.Language == "en" ? "en-US" : "tr-TR");
-        WeekdayHeaders = _culture.Name.StartsWith("tr", StringComparison.OrdinalIgnoreCase)
-            ? ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz"]
-            : ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+        // Saat ve hafta ayarları (issue #77); ayar değişince çentik yeniden kurulur, burada bir kez okunur.
+        _timePattern = ClockFormatPolicy.ResolveTimePattern(settings.Notch.ClockHourFormat, showSeconds: false, _culture);
+        _firstDay = ClockFormatPolicy.ResolveFirstDayOfWeek(settings.Notch.ClockFirstDayOfWeek, _culture.DateTimeFormat.FirstDayOfWeek);
+        _showWeekNumber = settings.Notch.ClockShowWeekNumber;
+        // Pazar = 0 sırasıyla iki harfli başlıklar; ızgaranın ilk gününe göre döndürülür.
+        string[] byDay = _culture.Name.StartsWith("tr", StringComparison.OrdinalIgnoreCase)
+            ? ["Pz", "Pt", "Sa", "Ça", "Pe", "Cu", "Ct"]
+            : ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+        WeekdayHeaders = MonthGrid.WeekdayOrder(_firstDay).Select(d => byDay[(int)d]).ToArray();
         _anchor = _today();
         // Defter burada okunmaz (disk işi sayfa görününce yapılır); yalnız başlık kurulur.
         UpdateTitles();
@@ -127,13 +137,15 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
     {
         var date = Anchor.ToDateTime(TimeOnly.MinValue);
         DayTitle = date.ToString("d MMMM dddd", _culture);
+        if (_showWeekNumber)
+            DayTitle += " · " + string.Format(_culture, Koy.App.Resources.Strings.Get("CalendarWeekNumber"), ClockFormatPolicy.WeekOfYear(date, _firstDay));
         switch (ViewMode)
         {
             case CalendarViewMode.Month:
                 HeaderTitle = date.ToString("MMMM yyyy", _culture);
                 break;
             case CalendarViewMode.Week:
-                var first = EventAgenda.WeekStart(Anchor).ToDateTime(TimeOnly.MinValue);
+                var first = EventAgenda.WeekStart(Anchor, _firstDay).ToDateTime(TimeOnly.MinValue);
                 var last = first.AddDays(6);
                 HeaderTitle = first.Month == last.Month
                     ? $"{first.Day} – {last.ToString("d MMM", _culture)}"
@@ -154,18 +166,18 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
 
         if (ViewMode == CalendarViewMode.Month)
         {
-            Cells = MonthGrid.Build(Anchor.Year, Anchor.Month, today)
+            Cells = MonthGrid.Build(Anchor.Year, Anchor.Month, today, _firstDay)
                 .Select(d => new CalendarCell(d.Date, d.IsCurrentMonth, d.IsToday, d.Date == Anchor, withEvents.Contains(d.Date)))
                 .ToList();
         }
         else if (ViewMode == CalendarViewMode.Week)
         {
-            WeekDays = EventAgenda.ForWeek(all, Anchor, today).Select(BuildWeekRow).ToList();
+            WeekDays = EventAgenda.ForWeek(all, Anchor, today, _firstDay).Select(BuildWeekRow).ToList();
         }
 
         DayEvents.Clear();
         foreach (var e in EventAgenda.ForDay(all, Anchor))
-            DayEvents.Add(new EventRow(e.Id, e.Start.ToString("HH:mm", _culture), e.Title));
+            DayEvents.Add(new EventRow(e.Id, e.Start.ToString(_timePattern, _culture), e.Title));
         HasDayEvents = DayEvents.Count > 0;
     }
 
@@ -176,7 +188,7 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
         if (day.Events.Count > 0)
         {
             var first = day.Events[0];
-            summary = $"{first.Start.ToString("HH:mm", _culture)} {first.Title}";
+            summary = $"{first.Start.ToString(_timePattern, _culture)} {first.Title}";
             if (day.Events.Count > 1)
                 summary += $"  +{day.Events.Count - 1}";
         }

@@ -59,6 +59,9 @@ public sealed record AppearanceSettings
     /// <summary>Arayüz simge kaynağı: yerleşik ya da kullanıcı klasörü (bkz. IconPack).</summary>
     public IconPack IconPack { get; set; } = IconPack.Builtin;
 
+    /// <summary>Simge paketi klasörü (IconPack.Folder iken). Bu makineye özgüdür: profil dışa aktarımına yazılmaz.</summary>
+    public string IconPackFolder { get; set; } = "";
+
     /// <summary>Uygulama başına simge değişimi (anahtar: kısayol adı, değer: doğrulanmış simge yolu). Bkz. AppIconOverrides.</summary>
     public ValueDictionary<string> AppIconOverrides { get; set; } = new();
 
@@ -67,7 +70,7 @@ public sealed record AppearanceSettings
     public bool BatterySaverReduceMotion { get; set; } = true;
     public MaterialLevel Material { get; set; } = MaterialLevel.Solid;
 
-    /// <summary>Animasyon başına açma/kapama. Kapalı bir animasyonun son durumu hiç kare çizilmeden anında uygulanır. Henüz bağlı değil: animasyonlar bu anahtarları okumuyor (bkz. MotionPolicy.ScaleFor).</summary>
+    /// <summary>Animasyon başına açma/kapama. Kapalı bir animasyonun son durumu yaysız, anında uygulanır. App tarafında Motion.ScaleFor ile okunur (bkz. MotionPolicy.ScaleFor); BadgeBounce henüz bağlı değil (dock rozetinde animasyon yok).</summary>
     public MotionSettings Motion { get; set; } = new();
 
     /// <summary>Okunabilirlik koruması: açık duvar kağıdında saydam malzeme kendiliğinden daha opak seviyeye çıkar.</summary>
@@ -87,6 +90,12 @@ public sealed record AppearanceSettings
 
     /// <summary>Koy'un kendi ölçeği (yüzde, 80-150), monitör DPI'sinin üstüne uygulanır.</summary>
     public int UiScalePercent { get; set; } = FontScalePolicy.DefaultUiScale;
+
+    /// <summary>
+    /// Açıksa %AppData%\Koy\user-theme.json izinli tema anahtarlarını ezer (bkz. UserStyleParser). Varsayılan kapalı:
+    /// dosya olsa bile okunmaz.
+    /// </summary>
+    public bool UserStyleOverridesEnabled { get; set; }
 }
 
 /// <summary>Animasyon başına açma/kapama (issue #79). Azaltılmış hareket ve pil tasarrufu hepsini ezer.</summary>
@@ -206,14 +215,14 @@ public sealed record DockSettings
     /// <summary>Dock simgesine orta tık: yeni pencere (varsayılan) ya da kapat.</summary>
     public MiddleClickAction MiddleClickAction { get; set; } = MiddleClickAction.NewWindow;
 
-    /// <summary>Aynı uygulamanın pencereleri tek simgede: hiç (varsayılan), her zaman ya da yalnız yer kalmayınca.</summary>
-    public DockGroupingMode GroupingMode { get; set; } = DockGroupingMode.Never;
+    /// <summary>Aynı uygulamanın pencereleri tek simgede: her zaman (varsayılan, bugünkü davranış), hiç ya da yalnız yer kalmayınca.</summary>
+    public DockGroupingMode GroupingMode { get; set; } = DockGroupingMode.Always;
 
     /// <summary>Dock'ta gösterilen pencereler: tüm monitörler (varsayılan) ya da yalnız dock'un monitörü.</summary>
     public DockWindowMonitorScope WindowMonitorScope { get; set; } = DockWindowMonitorScope.AllMonitors;
 
-    /// <summary>Dock simgesine sol tık: öne getir (varsayılan) ya da başka bir pencere eylemi.</summary>
-    public DockLeftClickAction LeftClickAction { get; set; } = DockLeftClickAction.BringToFront;
+    /// <summary>Dock simgesine sol tık: etkinse küçült, değilse öne getir (varsayılan, bugünkü davranış) ya da başka bir pencere eylemi.</summary>
+    public DockLeftClickAction LeftClickAction { get; set; } = DockLeftClickAction.MinimizeIfActive;
 
     /// <summary>Dock simgelerinin altındaki uygulama adı etiketi: hiç (varsayılan), her zaman ya da üzerine gelince.</summary>
     public DockLabelMode LabelMode { get; set; } = DockLabelMode.Never;
@@ -269,8 +278,11 @@ public sealed record NotchSettings
     /// <summary>İmleç çentikten çıkınca kapanma gecikmesi (ms, 0–2000). Varsayılan bugünkü 400 ms.</summary>
     public int CloseDelayMs { get; set; } = NotchOpenPolicy.DefaultCloseDelayMs;
 
-    /// <summary>Sekme çubuğu: yalnız simge (varsayılan), simge ve ad, ya da gizli.</summary>
-    public NotchTabBarStyle TabBarStyle { get; set; } = NotchTabBarStyle.IconOnly;
+    /// <summary>
+    /// Sekme çubuğu: simge ve ad (varsayılan, bugünkü görünüm), yalnız simge ya da gizli. Varsayılan arayüz bağlanırken
+    /// IconOnly'den buna çekildi; aksi halde güncellemeyle herkesin sekme adları kaybolurdu (issue #78).
+    /// </summary>
+    public NotchTabBarStyle TabBarStyle { get; set; } = NotchTabBarStyle.IconAndLabel;
 
     /// <summary>
     /// Sekmelerin kullanıcı sırası (panel anahtarları). Boşsa ya da eksikse varsayılan sıra kullanılır; görünürlük
@@ -334,6 +346,24 @@ public sealed record NotchSettings
 
     /// <summary>İkinci saatin saat dilimi kimliği (Windows kimliği, örn. "Tokyo Standard Time"). Boşsa ikinci saat kapalı.</summary>
     public string ClockSecondTimeZoneId { get; set; } = "";
+
+    /// <summary>
+    /// Canlı arka plan (issue #67): nereye uygulanacağı. Varsayılan None = özellik kapalı, hiçbir şey yüklenmez ve çizilmez.
+    /// Yalnız çentik açıkken oynar, kapanınca durur ve bellek bırakılır (bkz. <see cref="LiveBackgroundPlaybackPolicy"/>).
+    /// </summary>
+    public LiveBackgroundTarget LiveBackgroundTarget { get; set; } = LiveBackgroundTarget.None;
+
+    /// <summary>Canlı arka plan kaynağı: yerleşik ambiyans (varsayılan) ya da yerel dosya.</summary>
+    public LiveBackgroundSourceKind LiveBackgroundSource { get; set; } = LiveBackgroundSourceKind.BuiltInAmbient;
+
+    /// <summary>Yerleşik ambiyans önayar kimliği (bkz. <see cref="LiveBackgroundPresets"/>); bilinmeyen kimlik varsayılana düşer.</summary>
+    public string LiveBackgroundPreset { get; set; } = LiveBackgroundPresets.DefaultId;
+
+    /// <summary>Yerel dosya yolu (.gif, .mp4, .webm, .webp; yalnız yerel sürücü). Geçerliliği <see cref="LiveBackgroundFileValidator"/> denetler.</summary>
+    public string LiveBackgroundFilePath { get; set; } = "";
+
+    /// <summary>Okunabilirlik için koyu perdenin yüzdesi (30–90, bkz. <see cref="LiveBackgroundLimits.ClampScrimPercent"/>).</summary>
+    public int LiveBackgroundScrimPercent { get; set; } = LiveBackgroundLimits.DefaultScrimPercent;
 }
 
 /// <summary>Müzik kartı.</summary>
@@ -391,6 +421,25 @@ public sealed record ShortcutsSettings
     public string OpenSearch { get; set; } = "Win+Shift+Q";
     public string OpenSearchClipboard { get; set; } = "Alt+Shift+F2";
     public string VoiceCommand { get; set; } = "Ctrl+Alt+V";
+    public string OpenKoyWindow { get; set; } = "";
+}
+
+/// <summary>
+/// Ekran köşeleri (sıcak köşeler). Varsayılan: hiçbir köşeye eylem bağlı değil; hepsi None iken köşe takibi hiç çalışmaz.
+/// Eylem listesi Koy'un var olan yeteneklerine bağlıdır (bkz. CornerActions).
+/// </summary>
+public sealed record HotCornersSettings
+{
+    public Koy.Core.Input.CornerAction TopLeft { get; set; } = Koy.Core.Input.CornerAction.None;
+    public Koy.Core.Input.CornerAction TopRight { get; set; } = Koy.Core.Input.CornerAction.None;
+    public Koy.Core.Input.CornerAction BottomLeft { get; set; } = Koy.Core.Input.CornerAction.None;
+    public Koy.Core.Input.CornerAction BottomRight { get; set; } = Koy.Core.Input.CornerAction.None;
+
+    /// <summary>İmleç köşede bu kadar (ms) kesintisiz kalınca eylem çalışır; sınırlar için bkz. CornerActions.ClampDwell.</summary>
+    public int DwellMs { get; set; } = Koy.Core.Input.CornerActions.DefaultDwellMs;
+
+    /// <summary>Tam ekran uygulama (oyun, sunum, video) öndeyken köşeler tetiklenmez.</summary>
+    public bool DisableInFullscreen { get; set; } = true;
 }
 
 /// <summary>Sesli komut.</summary>

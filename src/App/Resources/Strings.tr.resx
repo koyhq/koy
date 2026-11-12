@@ -489,6 +489,39 @@
   <data name="IndicatorLine" xml:space="preserve">
     <value>Çizgi</value>
   </data>
+  <data name="DockWindowBehaviorHeader" xml:space="preserve">
+    <value>Pencere davranışı</value>
+  </data>
+  <data name="DockLeftClickTitle" xml:space="preserve">
+    <value>Çalışan uygulamaya tık</value>
+  </data>
+  <data name="DockLeftClickDesc" xml:space="preserve">
+    <value>Küçült: etkin uygulamaya tıklayınca küçültür. Öne: her zaman öne getirir. Döngü: pencereleri sırayla gezer. Önizleme: pencere küçük resimlerini açar.</value>
+  </data>
+  <data name="DockLeftClickMinimize" xml:space="preserve">
+    <value>Küçült</value>
+  </data>
+  <data name="DockLeftClickFront" xml:space="preserve">
+    <value>Öne</value>
+  </data>
+  <data name="DockLeftClickCycle" xml:space="preserve">
+    <value>Döngü</value>
+  </data>
+  <data name="DockLeftClickThumbnails" xml:space="preserve">
+    <value>Önizleme</value>
+  </data>
+  <data name="DockMonitorScopeTitle" xml:space="preserve">
+    <value>Dock'ta gösterilen pencereler</value>
+  </data>
+  <data name="DockMonitorScopeDesc" xml:space="preserve">
+    <value>Birden çok monitörde yalnız bu dock'un monitöründeki pencereleri göster. Küçültülmüş pencereler her dock'ta görünür kalır.</value>
+  </data>
+  <data name="DockMonitorScopeAll" xml:space="preserve">
+    <value>Tüm monitörler</value>
+  </data>
+  <data name="DockMonitorScopeCurrent" xml:space="preserve">
+    <value>Bu monitör</value>
+  </data>
   <data name="StartButtonTitle" xml:space="preserve">
     <value>Windows Başlat düğmesi</value>
   </data>
@@ -699,6 +732,36 @@
   <data name="ShortcutVoiceCommand" xml:space="preserve">
     <value>Sesli komut (harness)</value>
   </data>
+  <data name="ShortcutOpenKoyWindow" xml:space="preserve">
+    <value>Koy ayar penceresini aç</value>
+  </data>
+  <data name="CornersHeader" xml:space="preserve">
+    <value>Ekran köşeleri</value>
+  </data>
+  <data name="CornersHint" xml:space="preserve">
+    <value>İmleci bir ekran köşesinde bekletince eylem çalışır. Varsayılanda hiçbir köşe ayarlı değil; hepsi "Yok" iken hiçbir şey izlenmez. Fare tuşu basılıyken köşe tetiklenmez.</value>
+  </data>
+  <data name="CornerActionNone" xml:space="preserve">
+    <value>Yok</value>
+  </data>
+  <data name="CornerActionOpenNotch" xml:space="preserve">
+    <value>Çentiği aç / kapat</value>
+  </data>
+  <data name="CornerActionOpenSearch" xml:space="preserve">
+    <value>Aramayı aç</value>
+  </data>
+  <data name="CornerActionOpenKoyWindow" xml:space="preserve">
+    <value>Koy ayarlarını aç</value>
+  </data>
+  <data name="CornerActionToggleDock" xml:space="preserve">
+    <value>Dock'u göster / gizle</value>
+  </data>
+  <data name="CornerDwellTitle" xml:space="preserve">
+    <value>Köşede bekleme süresi</value>
+  </data>
+  <data name="CornerFullscreenTitle" xml:space="preserve">
+    <value>Tam ekran uygulama açıkken kapalı</value>
+  </data>
   <data name="VoiceHeader" xml:space="preserve">
     <value>SESLİ KOMUT VE HARNESS</value>
   </data>
@@ -897,6 +960,12 @@
   <data name="SearchCatDateTime" xml:space="preserve">
     <value>Tarih ve saat</value>
   </data>
+  <data name="SearchCatUnits" xml:space="preserve">
+    <value>Birim çevirici</value>
+  </data>
+  <data name="SearchCatColor" xml:space="preserve">
+    <value>Renk çevirici</value>
+  </data>
   <data name="SearchCatHelp" xml:space="preserve">
     <value>Yardım</value>
   </data>
@@ -1049,6 +1118,15 @@
   </data>
   <data name="SearchSyntaxTime" xml:space="preserve">
     <value>Şu anki saati gösterir.</value>
+  </data>
+  <data name="SearchSyntaxUnits" xml:space="preserve">
+    <value>Uzunluk, kütle, sıcaklık, veri boyutu ve hızı çevirir. Enter sayıyı kopyalar.</value>
+  </data>
+  <data name="SearchSyntaxUnitsData" xml:space="preserve">
+    <value>Veri boyutu 1000 tabanlıdır (kb, mb, gb); 1024 için kib, mib, gib yaz.</value>
+  </data>
+  <data name="SearchSyntaxColor" xml:space="preserve">
+    <value>Rengi HEX, RGB ve HSL olarak gösterir. Enter satırı kopyalar.</value>
   </data>
   <data name="SearchSettingsHeader" xml:space="preserve">
     <value>Arama</value>
@@ -1262,6 +1340,291 @@
   </data>
   <data name="ReduceMotionDesc" xml:space="preserve">
     <value>Windows'ta animasyonlar kapalıysa Koy da hareketi kapatır.</value>
+  </data>
+  <data name="MotionTogglesTitle" xml:space="preserve">
+    <value>Animasyonlar tek tek</value>
+  </data>
+  <data name="MotionTogglesDesc" xml:space="preserve">
+    <value>Tek bir animasyonu kapatın; o hareket doğrudan son haline geçer.</value>
+  </data>
+  <data name="MotionTogglesDisabledHint" xml:space="preserve">
+    <value>Genel animasyon ayarı kapalıyken bunlar etkisizdir.</value>
+  </data>
+  <data name="MotionNotchOpenClose" xml:space="preserve">
+    <value>Çentik açılış ve kapanışı</value>
+  </data>
+  <data name="MotionDockMagnify" xml:space="preserve">
+    <value>Dock büyütme</value>
+  </data>
+  <data name="MotionFolderPanel" xml:space="preserve">
+    <value>Dock klasör paneli</value>
+  </data>
+  <data name="MotionOsd" xml:space="preserve">
+    <value>Ses, parlaklık ve bildirim göstergeleri</value>
+  </data>
+  <data name="MotionBadgeBounce" xml:space="preserve">
+    <value>Rozet zıplaması</value>
+  </data>
+  <data name="MotionTabTransitions" xml:space="preserve">
+    <value>Çentik sekme geçişleri</value>
+  </data>
+  <data name="ClockHeader" xml:space="preserve">
+    <value>Saat</value>
+  </data>
+  <data name="ClockHourFormatTitle" xml:space="preserve">
+    <value>Saat biçimi</value>
+  </data>
+  <data name="ClockHourFormatDesc" xml:space="preserve">
+    <value>Otomatik, arayüz dilini izler.</value>
+  </data>
+  <data name="ClockFormatAuto" xml:space="preserve">
+    <value>Otomatik</value>
+  </data>
+  <data name="ClockFormat12" xml:space="preserve">
+    <value>12 saat</value>
+  </data>
+  <data name="ClockFormat24" xml:space="preserve">
+    <value>24 saat</value>
+  </data>
+  <data name="ClockShowSecondsTitle" xml:space="preserve">
+    <value>Saniyeyi göster</value>
+  </data>
+  <data name="ClockShowSecondsDesc" xml:space="preserve">
+    <value>Çentik saatinde. Yalnız çentik görünürken saniyede bir yenilenir.</value>
+  </data>
+  <data name="ClockFirstDayTitle" xml:space="preserve">
+    <value>Haftanın ilk günü</value>
+  </data>
+  <data name="ClockFirstDayDesc" xml:space="preserve">
+    <value>Takvimin ay görünümü ve hafta numarası buna göre.</value>
+  </data>
+  <data name="ClockFirstDayMonday" xml:space="preserve">
+    <value>Pazartesi</value>
+  </data>
+  <data name="ClockFirstDaySunday" xml:space="preserve">
+    <value>Pazar</value>
+  </data>
+  <data name="ClockFirstDaySaturday" xml:space="preserve">
+    <value>Cumartesi</value>
+  </data>
+  <data name="ClockShowWeekNumberTitle" xml:space="preserve">
+    <value>Hafta numarasını göster</value>
+  </data>
+  <data name="ClockShowWeekNumberDesc" xml:space="preserve">
+    <value>Takvimde seçili günün yanında.</value>
+  </data>
+  <data name="ClockCustomDateTitle" xml:space="preserve">
+    <value>Özel tarih biçimi</value>
+  </data>
+  <data name="ClockCustomDateDesc" xml:space="preserve">
+    <value>Halka modunda saatin yanındaki tarih, örn. dd.MM.yyyy. Boş bırakılırsa varsayılan.</value>
+  </data>
+  <data name="ClockCustomDateInvalid" xml:space="preserve">
+    <value>Bu biçim geçerli değil, kaydedilmedi.</value>
+  </data>
+  <data name="CalendarWeekNumber" xml:space="preserve">
+    <value>{0}. hafta</value>
+  </data>
+  <data name="UnitsHeader" xml:space="preserve">
+    <value>Birimler</value>
+  </data>
+  <data name="UnitTemperatureTitle" xml:space="preserve">
+    <value>Sıcaklık</value>
+  </data>
+  <data name="UnitCelsius" xml:space="preserve">
+    <value>Celsius</value>
+  </data>
+  <data name="UnitFahrenheit" xml:space="preserve">
+    <value>Fahrenheit</value>
+  </data>
+  <data name="UnitCelsiusSuffix" xml:space="preserve">
+    <value>°C</value>
+  </data>
+  <data name="UnitFahrenheitSuffix" xml:space="preserve">
+    <value>°F</value>
+  </data>
+  <data name="ClockShowDateTitle" xml:space="preserve">
+    <value>Saatin yanında tarih göster</value>
+  </data>
+  <data name="ClockShowDateDesc" xml:space="preserve">
+    <value>Çentik göz attığında saatin ardına kısa tarihi ekler. Varsayılan kapalı.</value>
+  </data>
+  <data name="ClockSecondTimeZoneTitle" xml:space="preserve">
+    <value>İkinci saat dilimi</value>
+  </data>
+  <data name="ClockSecondTimeZoneDesc" xml:space="preserve">
+    <value>Göz atan ve açık çentikte küçük bir ikinci saat satırı gösterir.</value>
+  </data>
+  <data name="ClockSecondTimeZoneNone" xml:space="preserve">
+    <value>Yok</value>
+  </data>
+  <data name="UnitWindTitle" xml:space="preserve">
+    <value>Rüzgâr hızı</value>
+  </data>
+  <data name="UnitWindKmh" xml:space="preserve">
+    <value>km/sa</value>
+  </data>
+  <data name="UnitWindMs" xml:space="preserve">
+    <value>m/sn</value>
+  </data>
+  <data name="UnitWindMph" xml:space="preserve">
+    <value>mph</value>
+  </data>
+  <data name="UnitWindKnots" xml:space="preserve">
+    <value>knot</value>
+  </data>
+  <data name="WeatherWindTooltip" xml:space="preserve">
+    <value>Rüzgâr {0}</value>
+  </data>
+  <data name="UnitNetworkSpeedTitle" xml:space="preserve">
+    <value>Ağ hızı</value>
+  </data>
+  <data name="UnitNetworkSpeedDesc" xml:space="preserve">
+    <value>Sistem sayfasında bayt (MB/sn) ya da bit (Mb/sn).</value>
+  </data>
+  <data name="UnitBytes" xml:space="preserve">
+    <value>Bayt</value>
+  </data>
+  <data name="UnitBits" xml:space="preserve">
+    <value>Bit</value>
+  </data>
+  <data name="SettingsSearchPlaceholder" xml:space="preserve">
+    <value>Ayarlarda ara</value>
+  </data>
+  <data name="SettingsSearchNoResult" xml:space="preserve">
+    <value>Eşleşen ayar yok.</value>
+  </data>
+  <data name="SettingsShowChangedOnly" xml:space="preserve">
+    <value>Yalnız değişenleri göster</value>
+  </data>
+  <data name="SettingsResetPage" xml:space="preserve">
+    <value>Varsayılana döndür</value>
+  </data>
+  <data name="SettingsResetPageConfirm" xml:space="preserve">
+    <value>Bu sayfa varsayılana dönsün mü?</value>
+  </data>
+  <data name="SettingsResetPageDone" xml:space="preserve">
+    <value>Sayfa varsayılana döndü.</value>
+  </data>
+  <data name="FontSectionTitle" xml:space="preserve">
+    <value>Yazı</value>
+  </data>
+  <data name="FontFamilyLabel" xml:space="preserve">
+    <value>Yazı tipi</value>
+  </data>
+  <data name="ClockFontLabel" xml:space="preserve">
+    <value>Saat yazı tipi</value>
+  </data>
+  <data name="FontSizeLabel" xml:space="preserve">
+    <value>Yazı boyu</value>
+  </data>
+  <data name="FontWeightLabel" xml:space="preserve">
+    <value>Yazı kalınlığı</value>
+  </data>
+  <data name="FontWeightNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="FontWeightMedium" xml:space="preserve">
+    <value>Orta</value>
+  </data>
+  <data name="FontWeightBold" xml:space="preserve">
+    <value>Kalın</value>
+  </data>
+  <data name="UiScaleLabel" xml:space="preserve">
+    <value>Koy ölçeği</value>
+  </data>
+  <data name="UiScaleDesc" xml:space="preserve">
+    <value>Bu pencere ve sağ alt menünün boyu. Çentik boyutu değişmez.</value>
+  </data>
+  <data name="FontDefault" xml:space="preserve">
+    <value>Varsayılan</value>
+  </data>
+  <data name="DockNewTrayIconTitle" xml:space="preserve">
+    <value>Yeni tepsi simgeleri</value>
+  </data>
+  <data name="DockNewTrayIconDesc" xml:space="preserve">
+    <value>Aşağıda kendi seçimi olmayan uygulamalar buna uyar.</value>
+  </data>
+  <data name="TrayIconShow" xml:space="preserve">
+    <value>Göster</value>
+  </data>
+  <data name="TrayIconHide" xml:space="preserve">
+    <value>Gizle</value>
+  </data>
+  <data name="TrayAppsHeader" xml:space="preserve">
+    <value>Tepsi simgeleri</value>
+  </data>
+  <data name="TrayAppsEmpty" xml:space="preserve">
+    <value>Dock tepsisini bir kez açın; tepsi simgesi olan uygulamalar burada listelenir.</value>
+  </data>
+  <data name="NavAdvanced" xml:space="preserve">
+    <value>Gelişmiş</value>
+  </data>
+  <data name="AdvancedSubtitle" xml:space="preserve">
+    <value>Kendi denetimi olmayan her ayar, doğrudan settings.json'dan.</value>
+  </data>
+  <data name="AdvancedWarning" xml:space="preserve">
+    <value>Deneyimli kullanıcılar için. Geçersiz değer asla kaydedilmez; değişiklik çentiği ve dock'u yeniden kurar.</value>
+  </data>
+  <data name="AdvancedFilterHint" xml:space="preserve">
+    <value>Anahtara göre süz</value>
+  </data>
+  <data name="AdvancedDefault" xml:space="preserve">
+    <value>Varsayılan: {0}</value>
+  </data>
+  <data name="AdvancedInvalid" xml:space="preserve">
+    <value>Bu ayar için geçerli bir değer değil; hiçbir şey kaydedilmedi.</value>
+  </data>
+  <data name="AdvancedResetRow" xml:space="preserve">
+    <value>Sıfırla</value>
+  </data>
+  <data name="ApplyRevertPrompt" xml:space="preserve">
+    <value>Bu değişiklik kalsın mı?</value>
+  </data>
+  <data name="ApplyRevertKeep" xml:space="preserve">
+    <value>Kalsın</value>
+  </data>
+  <data name="ApplyRevertRevert" xml:space="preserve">
+    <value>Geri al</value>
+  </data>
+  <data name="SettingsFileInvalid" xml:space="preserve">
+    <value>settings.json değişti ama okunamadı. Koy son geçerli ayarları koruyor.</value>
+  </data>
+  <data name="OpenOnDragOver" xml:space="preserve">
+    <value>Sürükleyince</value>
+  </data>
+  <data name="NotchOpenDelayTitle" xml:space="preserve">
+    <value>Açılma gecikmesi</value>
+  </data>
+  <data name="NotchOpenDelayDesc" xml:space="preserve">
+    <value>Üzerine gelince ya da sürükleyince açılmadan önce bekler. Tıklama her zaman hemen açar.</value>
+  </data>
+  <data name="NotchCloseDelayTitle" xml:space="preserve">
+    <value>İmleç çıkınca kapanma gecikmesi</value>
+  </data>
+  <data name="NotchTabBarTitle" xml:space="preserve">
+    <value>Sekme çubuğu</value>
+  </data>
+  <data name="NotchTabBarDesc" xml:space="preserve">
+    <value>Gizliyken sayfalar fare tekerleği ya da kısayollarla değişir.</value>
+  </data>
+  <data name="NotchTabBarIconLabel" xml:space="preserve">
+    <value>Simge ve ad</value>
+  </data>
+  <data name="NotchTabBarIcon" xml:space="preserve">
+    <value>Yalnız simge</value>
+  </data>
+  <data name="NotchTabBarHidden" xml:space="preserve">
+    <value>Gizli</value>
+  </data>
+  <data name="NotchTabOrderTitle" xml:space="preserve">
+    <value>Sekme sırası</value>
+  </data>
+  <data name="NotchTabMoveUp" xml:space="preserve">
+    <value>Yukarı taşı</value>
+  </data>
+  <data name="NotchTabMoveDown" xml:space="preserve">
+    <value>Aşağı taşı</value>
   </data>
   <data name="AccentBlue" xml:space="preserve">
     <value>Mavi</value>
@@ -2064,6 +2427,33 @@
   <data name="AboutPlaceLink" xml:space="preserve">
     <value>OpenStreetMap</value>
   </data>
+  <data name="OpenWebsiteAction" xml:space="preserve">
+    <value>Siteyi aç</value>
+  </data>
+  <data name="AboutSiteTitle" xml:space="preserve">
+    <value>Proje sitesi</value>
+  </data>
+  <data name="AboutSiteDesc" xml:space="preserve">
+    <value>Ekran görüntüleri, indirmeler ve haberler koyhq.github.io/koy adresinde.</value>
+  </data>
+  <data name="AboutThanksTitle" xml:space="preserve">
+    <value>Teşekkür ve esin</value>
+  </data>
+  <data name="AboutThanksDesc" xml:space="preserve">
+    <value>Koy iki projenin fikirlerinden doğdu. İkisinden de kod, görsel ya da metin alınmadı.</value>
+  </data>
+  <data name="AboutNectarTitle" xml:space="preserve">
+    <value>Nectar</value>
+  </data>
+  <data name="AboutNectarDesc" xml:space="preserve">
+    <value>Ekranın üstünde yay animasyonlu çentik fikri.</value>
+  </data>
+  <data name="AboutSeelenTitle" xml:space="preserve">
+    <value>Seelen UI</value>
+  </data>
+  <data name="AboutSeelenDesc" xml:space="preserve">
+    <value>Görev çubuğunun yerini alan yüzen dock ve pencereye yaklaşınca davranan akıllı yerleşim.</value>
+  </data>
   <data name="UpdateReadyOnExit" xml:space="preserve">
     <value>Yeni sürüm indirildi; Koy kapanınca kurulacak. Hemen kurmak için Şimdi denetle.</value>
   </data>
@@ -2078,6 +2468,45 @@
   </data>
   <data name="DockFolderDissolve" xml:space="preserve">
     <value>Klasörü dağıt</value>
+  </data>
+  <data name="DockAddItem" xml:space="preserve">
+    <value>Öğe ekle</value>
+  </data>
+  <data name="DockAddSeparator" xml:space="preserve">
+    <value>Ayırıcı</value>
+  </data>
+  <data name="DockAddSpacer" xml:space="preserve">
+    <value>Boşluk</value>
+  </data>
+  <data name="DockAddClock" xml:space="preserve">
+    <value>Saat</value>
+  </data>
+  <data name="DockAddTrash" xml:space="preserve">
+    <value>Geri Dönüşüm Kutusu</value>
+  </data>
+  <data name="DockAddCustom" xml:space="preserve">
+    <value>Özel düğme...</value>
+  </data>
+  <data name="DockItemClock" xml:space="preserve">
+    <value>Saat</value>
+  </data>
+  <data name="DockItemTrash" xml:space="preserve">
+    <value>Geri Dönüşüm Kutusu</value>
+  </data>
+  <data name="DockItemCustom" xml:space="preserve">
+    <value>Özel düğme</value>
+  </data>
+  <data name="DockItemCustomPick" xml:space="preserve">
+    <value>Düğmenin neyi açacağını seçin</value>
+  </data>
+  <data name="DockItemRemove" xml:space="preserve">
+    <value>Dock'tan kaldır</value>
+  </data>
+  <data name="DockItemMoveLeft" xml:space="preserve">
+    <value>Sola taşı</value>
+  </data>
+  <data name="DockItemMoveRight" xml:space="preserve">
+    <value>Sağa taşı</value>
   </data>
   <data name="UpdateAvailableBadge" xml:space="preserve">
     <value>Yeni sürüm: {0}</value>
@@ -2378,6 +2807,627 @@
   </data>
   <data name="NotchStyleFloating" xml:space="preserve">
     <value>Yüzen ada</value>
+  </data>
+  <data name="DockItemChangeIcon" xml:space="preserve">
+    <value>Simgeyi değiştir...</value>
+  </data>
+  <data name="DockItemResetIcon" xml:space="preserve">
+    <value>Simgeyi sıfırla</value>
+  </data>
+  <data name="DockItemIconPickTitle" xml:space="preserve">
+    <value>Bu uygulama için bir simge seç</value>
+  </data>
+  <data name="DockItemIconPickFilter" xml:space="preserve">
+    <value>Görseller (*.png;*.ico)|*.png;*.ico</value>
+  </data>
+  <data name="IconPackTitle" xml:space="preserve">
+    <value>Simge paketi</value>
+  </data>
+  <data name="IconPackDesc" xml:space="preserve">
+    <value>Dock uygulama simgelerini bir klasördeki görsellerle değiştirir. Dosyaları kısayol gibi adlandır: Firefox.png, Notepad.ico. Dosyası olmayan uygulama kendi simgesini korur.</value>
+  </data>
+  <data name="IconPackBuiltin" xml:space="preserve">
+    <value>Yerleşik</value>
+  </data>
+  <data name="IconPackFolder" xml:space="preserve">
+    <value>Klasör</value>
+  </data>
+  <data name="IconPackFolderChoose" xml:space="preserve">
+    <value>Klasör seç...</value>
+  </data>
+  <data name="IconPackFolderNone" xml:space="preserve">
+    <value>Klasör seçilmedi</value>
+  </data>
+  <data name="IconPackFolderPickTitle" xml:space="preserve">
+    <value>Simge paketi klasörünü seç</value>
+  </data>
+  <data name="ProfilesHeader" xml:space="preserve">
+    <value>Profiller</value>
+  </data>
+  <data name="ProfilesSaveTitle" xml:space="preserve">
+    <value>Geçerli ayarları profil olarak kaydet</value>
+  </data>
+  <data name="ProfilesSaveDesc" xml:space="preserve">
+    <value>Saklanacak bölümleri seç. Profil sonra uygulanabilir ya da dosyaya aktarılabilir. Makineye özgü değerler (ekranlar, hava durumu konumu, sabit uygulamalar, yerel simge yolları) hiçbir zaman eklenmez.</value>
+  </data>
+  <data name="ProfilesNameHint" xml:space="preserve">
+    <value>Profil adı</value>
+  </data>
+  <data name="ProfilesSaveButton" xml:space="preserve">
+    <value>Profili kaydet</value>
+  </data>
+  <data name="ProfilesExportCurrentButton" xml:space="preserve">
+    <value>Dosyaya aktar...</value>
+  </data>
+  <data name="ProfilesImportButton" xml:space="preserve">
+    <value>Dosyadan içe aktar...</value>
+  </data>
+  <data name="ProfilesImportPreviewTitle" xml:space="preserve">
+    <value>İçe aktarma önizlemesi</value>
+  </data>
+  <data name="ProfilesImportMachineNote" xml:space="preserve">
+    <value>Henüz hiçbir şey kaydedilmedi ya da değiştirilmedi. Makineye özgü değerler içe aktarılmaz.</value>
+  </data>
+  <data name="ProfilesImportSave" xml:space="preserve">
+    <value>Profillerime ekle</value>
+  </data>
+  <data name="ProfilesImportApply" xml:space="preserve">
+    <value>Ekle ve uygula</value>
+  </data>
+  <data name="ProfilesEmpty" xml:space="preserve">
+    <value>Henüz kayıtlı profil yok.</value>
+  </data>
+  <data name="ProfilesApply" xml:space="preserve">
+    <value>Uygula</value>
+  </data>
+  <data name="ProfilesRename" xml:space="preserve">
+    <value>Yeniden adlandır</value>
+  </data>
+  <data name="ProfilesDuplicate" xml:space="preserve">
+    <value>Çoğalt</value>
+  </data>
+  <data name="ProfilesExport" xml:space="preserve">
+    <value>Dışa aktar</value>
+  </data>
+  <data name="ProfilesDelete" xml:space="preserve">
+    <value>Sil</value>
+  </data>
+  <data name="ProfilesRenameConfirm" xml:space="preserve">
+    <value>Adlandır</value>
+  </data>
+  <data name="ProfilesDeleteConfirm" xml:space="preserve">
+    <value>Profili sil</value>
+  </data>
+  <data name="ProfileSectionAppearance" xml:space="preserve">
+    <value>Görünüm</value>
+  </data>
+  <data name="ProfileSectionDock" xml:space="preserve">
+    <value>Dock</value>
+  </data>
+  <data name="ProfileSectionNotch" xml:space="preserve">
+    <value>Çentik</value>
+  </data>
+  <data name="ProfileSectionMusic" xml:space="preserve">
+    <value>Müzik</value>
+  </data>
+  <data name="ProfileSectionShortcuts" xml:space="preserve">
+    <value>Kısayollar</value>
+  </data>
+  <data name="ProfileSectionFocus" xml:space="preserve">
+    <value>Odak</value>
+  </data>
+  <data name="ProfileCorrupt" xml:space="preserve">
+    <value>Bu profil bozuk, uygulanamaz.</value>
+  </data>
+  <data name="ProfileSaved" xml:space="preserve">
+    <value>"{0}" profili kaydedildi.</value>
+  </data>
+  <data name="ProfileApplied" xml:space="preserve">
+    <value>"{0}" profili uygulandı.</value>
+  </data>
+  <data name="ProfileAppliedNoChange" xml:space="preserve">
+    <value>"{0}" profili zaten ayarlarınla aynı. Hiçbir şey değişmedi.</value>
+  </data>
+  <data name="ProfileRenamed" xml:space="preserve">
+    <value>Yeni ad: "{0}".</value>
+  </data>
+  <data name="ProfileDeleted" xml:space="preserve">
+    <value>"{0}" profili silindi.</value>
+  </data>
+  <data name="ProfileExported" xml:space="preserve">
+    <value>{0} dosyasına aktarıldı.</value>
+  </data>
+  <data name="ProfileExportFailed" xml:space="preserve">
+    <value>Dosya yazılamadı. Konumu kontrol edip yeniden dene.</value>
+  </data>
+  <data name="ProfileExportDialogTitle" xml:space="preserve">
+    <value>Profili dışa aktar</value>
+  </data>
+  <data name="ProfileImportDialogTitle" xml:space="preserve">
+    <value>Profili içe aktar</value>
+  </data>
+  <data name="ProfileFileFilter" xml:space="preserve">
+    <value>Koy profili (*.json)|*.json|Tüm dosyalar (*.*)|*.*</value>
+  </data>
+  <data name="ProfileImportReadFailed" xml:space="preserve">
+    <value>Dosya okunamadı.</value>
+  </data>
+  <data name="ProfileImportNoChanges" xml:space="preserve">
+    <value>Uygulansa hiçbir şey değişmez: ayarların zaten aynı.</value>
+  </data>
+  <data name="ProfileImportChanges" xml:space="preserve">
+    <value>Uygulanırsa değişecek bölümler: {0}.</value>
+  </data>
+  <data name="ProfileImportErrorTooLarge" xml:space="preserve">
+    <value>Dosya bir Koy profili olamayacak kadar büyük.</value>
+  </data>
+  <data name="ProfileImportErrorMalformedJson" xml:space="preserve">
+    <value>Dosya geçerli bir JSON değil.</value>
+  </data>
+  <data name="ProfileImportErrorNotAProfile" xml:space="preserve">
+    <value>Bu bir Koy profil dosyası değil.</value>
+  </data>
+  <data name="ProfileImportErrorUnsupportedFormatVersion" xml:space="preserve">
+    <value>Bu profil Koy'un daha yeni bir sürümüyle oluşturulmuş. Koy'u güncelleyip yeniden dene.</value>
+  </data>
+  <data name="ProfileImportErrorInvalidName" xml:space="preserve">
+    <value>Profilin adı geçersiz.</value>
+  </data>
+  <data name="ProfileImportErrorUnknownSection" xml:space="preserve">
+    <value>Profil, bu sürümün tanımadığı bir bölüm içeriyor.</value>
+  </data>
+  <data name="ProfileImportErrorNoSections" xml:space="preserve">
+    <value>Profilde hiç ayar yok.</value>
+  </data>
+  <data name="ProfileImportErrorInvalidValues" xml:space="preserve">
+    <value>Profil, aralık dışı değerler içeriyor. Hiçbir şey içe aktarılmadı.</value>
+  </data>
+  <data name="ProfileErrorInvalidName" xml:space="preserve">
+    <value>En fazla 60 karakterlik, denetim karakteri içermeyen bir ad gir.</value>
+  </data>
+  <data name="ProfileErrorDuplicateName" xml:space="preserve">
+    <value>Bu adda bir profil zaten var.</value>
+  </data>
+  <data name="ProfileErrorNoSections" xml:space="preserve">
+    <value>En az bir bölüm seç.</value>
+  </data>
+  <data name="ProfileErrorNotFound" xml:space="preserve">
+    <value>Bu profil artık yok.</value>
+  </data>
+  <data name="ProfileErrorLimitReached" xml:space="preserve">
+    <value>En fazla 50 profil saklanabilir. Önce birini sil.</value>
+  </data>
+  <data name="ProfileErrorCorruptProfile" xml:space="preserve">
+    <value>Bu profil bozuk, kullanılamaz.</value>
+  </data>
+  <data name="ProfileErrorSaveFailed" xml:space="preserve">
+    <value>Profil listesi kaydedilemedi. Disk alanını kontrol edip yeniden dene.</value>
+  </data>
+  <data name="IndicatorHighlight" xml:space="preserve">
+    <value>Arka plan</value>
+  </data>
+  <data name="IndicatorColorTitle" xml:space="preserve">
+    <value>Gösterge rengi</value>
+  </data>
+  <data name="ColorAccent" xml:space="preserve">
+    <value>Vurgu</value>
+  </data>
+  <data name="ColorNeutral" xml:space="preserve">
+    <value>Nötr</value>
+  </data>
+  <data name="ColorCustom" xml:space="preserve">
+    <value>Özel</value>
+  </data>
+  <data name="ColorCustomHint" xml:space="preserve">
+    <value>Özel renk #RRGGBB biçiminde (geçersizse vurgu rengi kullanılır)</value>
+  </data>
+  <data name="IndicatorOnePerWindowTitle" xml:space="preserve">
+    <value>Pencere başına bir nokta</value>
+  </data>
+  <data name="IndicatorOnePerWindowDesc" xml:space="preserve">
+    <value>Nokta kipinde her açık pencere için bir nokta gösterir (en çok üç).</value>
+  </data>
+  <data name="DockBadgesHeader" xml:space="preserve">
+    <value>ROZETLER</value>
+  </data>
+  <data name="DockShowBadgesTitle" xml:space="preserve">
+    <value>Rozetleri göster</value>
+  </data>
+  <data name="BadgeStyleTitle" xml:space="preserve">
+    <value>Rozet biçimi</value>
+  </data>
+  <data name="BadgeNumber" xml:space="preserve">
+    <value>Sayı</value>
+  </data>
+  <data name="BadgeDotOnly" xml:space="preserve">
+    <value>Yalnız nokta</value>
+  </data>
+  <data name="BadgeCornerTitle" xml:space="preserve">
+    <value>Rozet köşesi</value>
+  </data>
+  <data name="CornerTopLeft" xml:space="preserve">
+    <value>Sol üst</value>
+  </data>
+  <data name="CornerTopRight" xml:space="preserve">
+    <value>Sağ üst</value>
+  </data>
+  <data name="CornerBottomLeft" xml:space="preserve">
+    <value>Sol alt</value>
+  </data>
+  <data name="CornerBottomRight" xml:space="preserve">
+    <value>Sağ alt</value>
+  </data>
+  <data name="BadgeColorTitle" xml:space="preserve">
+    <value>Rozet rengi</value>
+  </data>
+  <data name="RevealTriggerTitle" xml:space="preserve">
+    <value>Açılma tetikleyicisi</value>
+  </data>
+  <data name="RevealTriggerDesc" xml:space="preserve">
+    <value>Gizli dock, imleç alt kenara varınca nasıl geri gelir.</value>
+  </data>
+  <data name="RevealEdgeTouch" xml:space="preserve">
+    <value>Kenara dokun</value>
+  </data>
+  <data name="RevealEdgeHold" xml:space="preserve">
+    <value>Kenarda bekle</value>
+  </data>
+  <data name="RevealDelayTitle" xml:space="preserve">
+    <value>Kenarda bekleme süresi</value>
+  </data>
+  <data name="RevealDelayShort" xml:space="preserve">
+    <value>Kısa</value>
+  </data>
+  <data name="RevealDelayNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="RevealDelayLong" xml:space="preserve">
+    <value>Uzun</value>
+  </data>
+  <data name="HiddenEdgeLineTitle" xml:space="preserve">
+    <value>Gizliyken çizgi</value>
+  </data>
+  <data name="HiddenEdgeLineDesc" xml:space="preserve">
+    <value>Dock gizliyken alt kenarda ince bir çizgi gösterir. Tam ekran uygulamalarda hiç görünmez.</value>
+  </data>
+  <data name="RulesHeader" xml:space="preserve">
+    <value>Kurallar</value>
+  </data>
+  <data name="RulesAddTitle" xml:space="preserve">
+    <value>Uygulamaya göre profil değiştir</value>
+  </data>
+  <data name="RulesAddDesc" xml:space="preserve">
+    <value>Uygulama ön plandayken Koy seçtiğin profili uygular; uygulamadan çıkınca profilin değiştirdiği ayarlar eski haline döner. Kural, uygulama yaklaşık bir saniye ön planda kalınca uygulanır. Yeni kurallar kapalı başlar. Profil uygulamak kuralları değiştirmez.</value>
+  </data>
+  <data name="RulesProcessHint" xml:space="preserve">
+    <value>Uygulamanın exe adı, örneğin chrome.exe</value>
+  </data>
+  <data name="RulesPickRunning" xml:space="preserve">
+    <value>Çalışan uygulamalardan seç</value>
+  </data>
+  <data name="RulesRefreshRunning" xml:space="preserve">
+    <value>Listeyi yenile</value>
+  </data>
+  <data name="RulesProfileLabel" xml:space="preserve">
+    <value>Uygulanacak profil</value>
+  </data>
+  <data name="RulesAddButton" xml:space="preserve">
+    <value>Kural ekle</value>
+  </data>
+  <data name="RulesEmpty" xml:space="preserve">
+    <value>Henüz kural yok. Bir kural açılana kadar Koy ön plandaki uygulamayı izlemez.</value>
+  </data>
+  <data name="RulesUsesProfile" xml:space="preserve">
+    <value>Uygulanan profil: {0}</value>
+  </data>
+  <data name="RulesMissingProfile" xml:space="preserve">
+    <value>(silinmiş profil)</value>
+  </data>
+  <data name="RulesAdvancedRule" xml:space="preserve">
+    <value>özel koşullar</value>
+  </data>
+  <data name="RulesAdded" xml:space="preserve">
+    <value>Kural eklendi. Kapalı; kullanmak için aç.</value>
+  </data>
+  <data name="RulesSaveFailed" xml:space="preserve">
+    <value>Kurallar kaydedilemedi. Disk alanını kontrol edip yeniden dene.</value>
+  </data>
+  <data name="RulesErrorInvalidProcess" xml:space="preserve">
+    <value>chrome.exe gibi bir exe adı yaz (klasör yolu olmadan).</value>
+  </data>
+  <data name="RulesErrorNoProfile" xml:space="preserve">
+    <value>Önce bir profil seç. Yukarıdaki Profiller bölümünden bir profil kaydedebilirsin.</value>
+  </data>
+  <data name="RulesErrorLimitReached" xml:space="preserve">
+    <value>Çok fazla kural var. Önce birini sil.</value>
+  </data>
+  <data name="RulesErrorDuplicate" xml:space="preserve">
+    <value>Bu uygulama için zaten bir kural var.</value>
+  </data>
+  <data name="RulesErrorNotFound" xml:space="preserve">
+    <value>Bu kural artık yok.</value>
+  </data>
+  <data name="DockEdgeTitle" xml:space="preserve">
+    <value>Ekran kenarı</value>
+  </data>
+  <data name="DockEdgeBottom" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="DockEdgeTop" xml:space="preserve">
+    <value>Üst</value>
+  </data>
+  <data name="DockEdgeLeft" xml:space="preserve">
+    <value>Sol</value>
+  </data>
+  <data name="DockEdgeRight" xml:space="preserve">
+    <value>Sağ</value>
+  </data>
+  <data name="DockLengthTitle" xml:space="preserve">
+    <value>Dock uzunluğu</value>
+  </data>
+  <data name="DockEdgeOffsetTitle" xml:space="preserve">
+    <value>Kenardan uzaklık</value>
+  </data>
+  <data name="DockInnerPaddingTitle" xml:space="preserve">
+    <value>İç dolgu</value>
+  </data>
+  <data name="DockIconSpacingTitle" xml:space="preserve">
+    <value>Simge aralığı</value>
+  </data>
+  <data name="UserStyleHeader" xml:space="preserve">
+    <value>Kullanıcı stil dosyası</value>
+  </data>
+  <data name="UserStyleTitle" xml:space="preserve">
+    <value>Tema değerlerini dosyadan ez</value>
+  </data>
+  <data name="UserStyleDesc" xml:space="preserve">
+    <value>Koy klasöründeki user-theme.json dosyasını okur ve izinli renk, ölçü, köşe ve yazı tiplerini ezer. Dosyadaki başka hiçbir şey kullanılmaz, kod çalıştıramaz.</value>
+  </data>
+  <data name="UserStyleOpenFolder" xml:space="preserve">
+    <value>Klasörü aç</value>
+  </data>
+  <data name="UserStyleReload" xml:space="preserve">
+    <value>Yeniden yükle</value>
+  </data>
+  <data name="UserStyleStatusOff" xml:space="preserve">
+    <value>Kapalı. Dosya okunmaz.</value>
+  </data>
+  <data name="UserStyleStatusNoFile" xml:space="preserve">
+    <value>Koy klasöründe henüz user-theme.json yok. "Klasörü aç" ile bir tane ekleyebilirsin.</value>
+  </data>
+  <data name="UserStyleStatusLoaded" xml:space="preserve">
+    <value>{0} uygulandı, {1} yok sayıldı.</value>
+  </data>
+  <data name="UserStyleDiagMore" xml:space="preserve">
+    <value>... ve {0} sorun daha.</value>
+  </data>
+  <data name="UserStyleDiagInvalidJson" xml:space="preserve">
+    <value>Dosya boş ya da geçerli bir JSON değil.</value>
+  </data>
+  <data name="UserStyleDiagNotAnObject" xml:space="preserve">
+    <value>En üst düzey, anahtar-değer çiftlerinden oluşan bir JSON nesnesi olmalı.</value>
+  </data>
+  <data name="UserStyleDiagFileTooLarge" xml:space="preserve">
+    <value>Dosya 64 KB'tan büyük, kullanılmadı.</value>
+  </data>
+  <data name="UserStyleDiagFileUnreadable" xml:space="preserve">
+    <value>Dosya okunamadı.</value>
+  </data>
+  <data name="UserStyleDiagTooManyEntries" xml:space="preserve">
+    <value>Çok fazla girdi var, kalanı yok sayıldı.</value>
+  </data>
+  <data name="UserStyleDiagUnknownToken" xml:space="preserve">
+    <value>Bilinmeyen anahtar, yok sayıldı.</value>
+  </data>
+  <data name="UserStyleDiagDuplicateToken" xml:space="preserve">
+    <value>Anahtar tekrarlanmış, ilk değer kullanılır.</value>
+  </data>
+  <data name="UserStyleDiagWrongValueType" xml:space="preserve">
+    <value>Bu anahtar için değer türü yanlış.</value>
+  </data>
+  <data name="UserStyleDiagValueTooLong" xml:space="preserve">
+    <value>Değer çok uzun.</value>
+  </data>
+  <data name="UserStyleDiagBadColor" xml:space="preserve">
+    <value>#RRGGBB ya da #AARRGGBB gibi bir renk bekleniyordu.</value>
+  </data>
+  <data name="UserStyleDiagBadNumber" xml:space="preserve">
+    <value>Bir sayı bekleniyordu.</value>
+  </data>
+  <data name="UserStyleDiagBadQuad" xml:space="preserve">
+    <value>Bir sayı ya da virgülle ayrılmış dört sayı bekleniyordu (örn. 8 ya da 8,8,0,0).</value>
+  </data>
+  <data name="UserStyleDiagBadFontFamily" xml:space="preserve">
+    <value>Düz bir yazı tipi adı bekleniyordu.</value>
+  </data>
+  <data name="UserStyleDiagOutOfRange" xml:space="preserve">
+    <value>Değer izinli aralığın dışında.</value>
+  </data>
+  <data name="LiveBgHeader" xml:space="preserve">
+    <value>Görseller</value>
+  </data>
+  <data name="LiveBgTargetTitle" xml:space="preserve">
+    <value>Canlı arka plan</value>
+  </data>
+  <data name="LiveBgTargetDesc" xml:space="preserve">
+    <value>Açık çentiğin ve/veya müzik kartının arkasında hareketli ya da döngülü zemin. Yalnız çentik açıkken oynar.</value>
+  </data>
+  <data name="LiveBgTargetNone" xml:space="preserve">
+    <value>Kapalı</value>
+  </data>
+  <data name="LiveBgTargetNotch" xml:space="preserve">
+    <value>Çentik</value>
+  </data>
+  <data name="LiveBgTargetMusicCard" xml:space="preserve">
+    <value>Müzik kartı</value>
+  </data>
+  <data name="LiveBgTargetBoth" xml:space="preserve">
+    <value>İkisi de</value>
+  </data>
+  <data name="LiveBgSourceTitle" xml:space="preserve">
+    <value>Kaynak</value>
+  </data>
+  <data name="LiveBgSourceDesc" xml:space="preserve">
+    <value>Yerleşik ambiyans geçişi ya da kendi GIF, kısa video (MP4, WebM) veya WebP görselin. Hareketi azalt ve pil tasarrufunda sabit ilk kare görünür.</value>
+  </data>
+  <data name="LiveBgSourceAmbient" xml:space="preserve">
+    <value>Ambiyans</value>
+  </data>
+  <data name="LiveBgSourceFile" xml:space="preserve">
+    <value>Dosya</value>
+  </data>
+  <data name="LiveBgPresetTitle" xml:space="preserve">
+    <value>Ambiyans önayarı</value>
+  </data>
+  <data name="LiveBgPresetDesc" xml:space="preserve">
+    <value>Yavaşça kayan koyu renkler. Dosya yüklenmez.</value>
+  </data>
+  <data name="LiveBgPresetAurora" xml:space="preserve">
+    <value>Aurora</value>
+  </data>
+  <data name="LiveBgPresetEmber" xml:space="preserve">
+    <value>Köz</value>
+  </data>
+  <data name="LiveBgPresetOcean" xml:space="preserve">
+    <value>Okyanus</value>
+  </data>
+  <data name="LiveBgPresetDusk" xml:space="preserve">
+    <value>Alacakaranlık</value>
+  </data>
+  <data name="LiveBgFileTitle" xml:space="preserve">
+    <value>Arka plan dosyası</value>
+  </data>
+  <data name="LiveBgFileChoose" xml:space="preserve">
+    <value>Dosya seç</value>
+  </data>
+  <data name="LiveBgNoFile" xml:space="preserve">
+    <value>Dosya seçilmedi</value>
+  </data>
+  <data name="LiveBgPickTitle" xml:space="preserve">
+    <value>Arka plan seç</value>
+  </data>
+  <data name="LiveBgPickFilter" xml:space="preserve">
+    <value>Arka planlar ({0})|{0}</value>
+  </data>
+  <data name="LiveBgScrimTitle" xml:space="preserve">
+    <value>Koyu perde</value>
+  </data>
+  <data name="LiveBgScrimDesc" xml:space="preserve">
+    <value>Yazının okunması için arka planı karartır (yüzde).</value>
+  </data>
+  <data name="LiveBgErrorMissing" xml:space="preserve">
+    <value>Dosya seçilmedi.</value>
+  </data>
+  <data name="LiveBgErrorExtension" xml:space="preserve">
+    <value>Desteklenmeyen dosya türü. GIF, MP4, WebM ya da WebP kullan.</value>
+  </data>
+  <data name="LiveBgErrorNotLocal" xml:space="preserve">
+    <value>Yalnız yerel sürücüdeki dosyalar desteklenir (ağ yolu ya da bağlantı olmaz).</value>
+  </data>
+  <data name="LiveBgErrorEmpty" xml:space="preserve">
+    <value>Dosya boş ya da okunamıyor.</value>
+  </data>
+  <data name="LiveBgErrorTooLarge" xml:space="preserve">
+    <value>Dosya çok büyük (sınır {0} MB).</value>
+  </data>
+  <data name="LiveBgErrorInvalid" xml:space="preserve">
+    <value>Bu dosya yolu geçerli değil.</value>
+  </data>
+  <data name="HomeCardSectionTitle" xml:space="preserve">
+    <value>Ana sayfa kartları</value>
+  </data>
+  <data name="HomeCardSectionDesc" xml:space="preserve">
+    <value>Ana sayfada gösterilecek kartları ve sıralarını belirleyin.</value>
+  </data>
+  <data name="HomeCardMusic" xml:space="preserve">
+    <value>Müzik / Ses çalar</value>
+  </data>
+  <data name="HomeCardHeadphoneBattery" xml:space="preserve">
+    <value>Bağlı ses cihazı / Pil</value>
+  </data>
+  <data name="HomeCardSystemNetwork" xml:space="preserve">
+    <value>Sistem ve ağ</value>
+  </data>
+  <data name="HomeCardQuickLaunch" xml:space="preserve">
+    <value>Hızlı başlat</value>
+  </data>
+  <data name="HomeCardWeather" xml:space="preserve">
+    <value>Hava durumu</value>
+  </data>
+  <data name="HomeCardTimers" xml:space="preserve">
+    <value>Zamanlayıcılar</value>
+  </data>
+  <data name="HomeCardMoveUp" xml:space="preserve">
+    <value>Yukarı taşı</value>
+  </data>
+  <data name="HomeCardMoveDown" xml:space="preserve">
+    <value>Aşağı taşı</value>
+  </data>
+  <data name="VisualizerSectionTitle" xml:space="preserve">
+    <value>Ses görselleştiricisi</value>
+  </data>
+  <data name="VisualizerStyleTitle" xml:space="preserve">
+    <value>Görselleştirici çizim biçimi</value>
+  </data>
+  <data name="VisualizerStyleDesc" xml:space="preserve">
+    <value>Müzik çalarken hareket eden ses spektrumunun çizim biçimi.</value>
+  </data>
+  <data name="VisualizerStyleBars" xml:space="preserve">
+    <value>Çubuklar</value>
+  </data>
+  <data name="VisualizerStyleWave" xml:space="preserve">
+    <value>Dalga</value>
+  </data>
+  <data name="VisualizerStyleDots" xml:space="preserve">
+    <value>Noktalar</value>
+  </data>
+  <data name="VisualizerColorSourceTitle" xml:space="preserve">
+    <value>Görselleştirici rengi</value>
+  </data>
+  <data name="VisualizerColorSourceDesc" xml:space="preserve">
+    <value>Spektrum rengi tema vurgusunu mu yoksa albüm kapağını mı izlesin.</value>
+  </data>
+  <data name="VisualizerColorSourceAccent" xml:space="preserve">
+    <value>Tema vurgusu</value>
+  </data>
+  <data name="VisualizerColorSourceArtwork" xml:space="preserve">
+    <value>Albüm kapağı</value>
+  </data>
+  <data name="VisualizerBarCountTitle" xml:space="preserve">
+    <value>Çubuk sayısı</value>
+  </data>
+  <data name="VisualizerBarCountDesc" xml:space="preserve">
+    <value>Spektrumda çizilecek çubuk adedi (3–16 arası).</value>
+  </data>
+  <data name="DockGroupingModeTitle" xml:space="preserve">
+    <value>Pencere gruplama</value>
+  </data>
+  <data name="DockGroupingModeDesc" xml:space="preserve">
+    <value>Aynı uygulamanın birden çok penceresi tek bir dock simgesinde toplansın mı.</value>
+  </data>
+  <data name="DockGroupingModeNever" xml:space="preserve">
+    <value>Hiçbir zaman</value>
+  </data>
+  <data name="DockGroupingModeAlways" xml:space="preserve">
+    <value>Her zaman</value>
+  </data>
+  <data name="DockGroupingModeWhenSpaceRunsOut" xml:space="preserve">
+    <value>Yer kalmayınca</value>
+  </data>
+  <data name="DockLabelModeTitle" xml:space="preserve">
+    <value>Uygulama etiketleri</value>
+  </data>
+  <data name="DockLabelModeDesc" xml:space="preserve">
+    <value>Dock simgelerinin altında uygulama adı etiketleri gösterilsin mi.</value>
+  </data>
+  <data name="DockLabelModeNever" xml:space="preserve">
+    <value>Hiçbir zaman</value>
+  </data>
+  <data name="DockLabelModeAlways" xml:space="preserve">
+    <value>Her zaman</value>
+  </data>
+  <data name="DockLabelModeOnHover" xml:space="preserve">
+    <value>Üzerine gelince</value>
   </data>
 </root>
 

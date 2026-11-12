@@ -21,6 +21,14 @@ public static class ClockFormatPolicy
         _ => cultureUsesTwelveHour,
     };
 
+    /// <summary>Kültürün kısa saat deseni 12 saatlik mi ("h:mm tt" gibi küçük h).</summary>
+    public static bool CultureUsesTwelveHour(CultureInfo culture) =>
+        culture.DateTimeFormat.ShortTimePattern.Contains('h', StringComparison.Ordinal);
+
+    /// <summary>Ayar ve kültürden son saat deseni (Auto kültürü izler).</summary>
+    public static string ResolveTimePattern(ClockHourFormat setting, bool showSeconds, CultureInfo culture) =>
+        TimePattern(UsesTwelveHourClock(setting, CultureUsesTwelveHour(culture)), showSeconds);
+
     /// <summary>Saat deseni: "HH:mm", "HH:mm:ss", "h:mm tt", "h:mm:ss tt". "tt" öğlenden önce/sonra işaretini kültürden alır.</summary>
     public static string TimePattern(bool twelveHour, bool showSeconds)
     {
@@ -79,4 +87,18 @@ public static class ClockFormatPolicy
 
     /// <summary>İkinci saat açık mı: saat dilimi kimliği dolu olmalı.</summary>
     public static bool HasSecondClock(string? timeZoneId) => !string.IsNullOrWhiteSpace(timeZoneId);
+
+    /// <summary>
+    /// Göz atan çentikteki saat satırı: "saat · tarih · ikinci saat". Tarih ve ikinci saat boş/null ise eklenmez,
+    /// yani hiçbiri açık değilse yalnız saat döner (mevcut davranış).
+    /// </summary>
+    public static string ComposePeekLine(string time, string? date, string? secondClock)
+    {
+        var line = time;
+        if (!string.IsNullOrWhiteSpace(date))
+            line += " · " + date;
+        if (!string.IsNullOrWhiteSpace(secondClock))
+            line += " · " + secondClock;
+        return line;
+    }
 }

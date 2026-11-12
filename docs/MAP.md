@@ -39,7 +39,20 @@ Unutma:
 Unutma:
 - Yansımalı `JsonSerializer` çağrısı yazılmaz (AGENTS #10).
 - Dock ayarıysa `src/Core/Dock/DockSettingsDiff.cs` neyin yeniden kurulacağına karar verir.
+- Ayar araması ve "yalnız değişenler" satırı sayfadan kendisi bulur (`src/App/Features/Settings/SettingsPageIndex.cs`): satır `SettingRowStyle` kenarlığı, başlığı `SettingTitleStyle` ve `[Anahtar]` Loc bağı olmalı. Değişti noktası için denetimin bağlandığı VM özelliği `src/Core/Settings/SettingsKeyMap.cs` içinde olmalı; yoksa satır aranır ama noktası çıkmaz. Sayfa sıfırlama bölümleri: `KoyWindowViewModel.ResetSectionsFor`, `src/Core/Settings/SettingsPageReset.cs`.
 - Test örnekleri: `tests/Core.Tests/SettingsStoreTests.cs`, `tests/Core.Tests/SettingsMigrationTests.cs`.
+
+## Ayar profilleri (kaydet, uygula, içe/dışa aktar)
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Settings/Profiles/SettingsProfileCodec.cs` | Dosya biçimi: dışa aktar, doğrulamalı oku, bölümleri uygula. Yeni taşınabilir bölüm `ProfileSection`'a eklenir |
+| Core | `src/Core/Settings/Profiles/ProfileLibrary.cs` | Kayıtlı liste mantığı (oluştur, içe al, adlandır, çoğalt, sil, `Find`, `Apply`); saf, testli |
+| Core | `src/Core/Settings/Profiles/ProfileStore.cs` | `profiles.json` (ayar klasöründe) |
+| App | `src/App/Features/Settings/ProfileService.cs` | Listele / uygula girişi (`ProfileService.Instance.Apply(idOrName)`): ayarı kaydeder, tema ve özellikleri yeniden kurar. Kurallar da bunu çağırır |
+| App | `src/App/Features/Settings/ProfilesViewModel.cs` + `Pages/GenelPage.xaml` | Genel sayfasındaki Profiller bölümü |
+| Core | `src/Core/Rules/` | Bağlam kuralları: `RuleEvaluator` (eşleşme), `ContextProfileSwitcher` (titreşim önleme, tekrar uygulamama, geri dönüş), `RuleListEditor`, `RuleStore` (`rules.json`, settings.json dışında), `RuleSources` |
+| App | `src/App/Features/Rules/ContextRuleService.cs` | Ön plan olayını (`WindowTracker`) dinler, kural profilini `ProfileService` ile uygular/geri alır; etkin kural yoksa hiçbir şeye abone olmaz |
+| App | `src/App/Features/Settings/RulesViewModel.cs` + `Pages/GenelPage.xaml` | Genel sayfasındaki Kurallar bölümü |
 
 ## Çentik kartı ve Windows bildirimleri
 | Katman | Dosya | Ne yapılır |
@@ -54,6 +67,25 @@ Unutma:
 | App | `src/App/Features/Settings/Pages/CentikPage.xaml` | `NotchShowNotifications`, `NotchNotificationsHideBody` satırları |
 
 Unutma: Bildirim yoklaması AGENTS #5'in tek yoklama istisnasıdır (paketsiz süreçte olay yok); yalnız ayar açıkken ve çentik varken çalışır, `Stop`'ta sökülür. Core arayüzünde WinRT tipi yok: simge `byte[]?`, kimlik `uint`. Bildirim kartı yalnız birincil ekranın çentiğinde çıkar.
+
+## Canlı arka plan (çentik ve müzik kartı)
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Notch/LiveBackgroundPolicy.cs` | Hedef/kaynak enum'ları, önayar kataloğu, `LiveBackgroundPlaybackPolicy` (Off / ilk kare / oynat), yerel dosya doğrulayıcı, kare ve bellek sınırları (`GifFramePlan`, `LiveBackgroundLimits`) |
+| Core | `src/Core/Background/` | Eski dilim: `BackgroundAnimationPolicy` (hareket kuralı, `LiveBackgroundPlaybackPolicy` buna devreder) ve `BackgroundSourceValidator` (yol denetimi) |
+| Core | `src/Core/Settings/SettingsSections.cs` | `NotchSettings.LiveBackground*` (varsayılan hedef: Kapalı) |
+| App | `src/App/Features/Notch/LiveBackground/` | `LiveBackgroundState` (karar girdileri), `LiveBackgroundHost` (çizim, animasyon saatleri, video), `LiveBackgroundLoader` (GIF çözücü, 620 px, dondurulmuş kareler) |
+| App | `NotchWindow.xaml`, `Home/HomePanel.xaml` | Host, çentik zemininin ve müzik kartı zemininin içeriğin altında |
+| App | `Settings/Pages/CentikPage.xaml`, `KoyWindowViewModel.cs` | "Görseller" bölümü: hedef, kaynak, önayar, dosya seçici, perde |
+
+Unutma: çentik kapalı / gizliyken hiçbir şey oynamaz ve kare tutulmaz (AGENTS #5, #6); hareketi azalt ve pil tasarrufunda yalnız ilk kare. Tuval 620×352 büyütülmez (AGENTS #13).
+## Aramaya yeni kaynak eklemek
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Search/` | `SearchSource` türevi (örnekler: `UnitConverterSource` + `UnitConverter`, `ColorConverterSource` + `ColorParser`); kopyalama `ISearchShell.CopyText` ile |
+| App | `src/App/Features/Search/SearchFactory.cs` | `SourceCatalog` satırı (Ayarlar'daki aç/kapat listesi) ve `Create` içinde `Add(...)` + `Syntaxes` |
+| App | `src/App/Resources/Strings.resx`, `Strings.tr.resx` | `SearchCat<Ad>` ve `SearchSyntax<Ad>` metinleri |
+| Test | `tests/Core.Tests/Search/` | Kaynak testleri (`SearchSourceTests`, `UnitAndColorConverterTests`) |
 
 ## Yeni kullanıcı metni ya da çeviri eklemek
 | Katman | Dosya | Ne yapılır |
@@ -83,11 +115,14 @@ Unutma: Servis yalnız gerektiğinde çalışır, son bırakan zamanlayıcıyı 
 ## Dock davranışı ve görev çubuğu güvenliği
 | Katman | Dosya | Ne yapılır |
 |---|---|---|
-| Core | `src/Core/Dock/` | Konum, yakınlık ve hiza kararları |
+| Core | `src/Core/Dock/` | Konum, yakınlık, kenar ve hiza kararları (`DockPositionResolver`, `DockLayoutMath`, `DockFitMath`) |
 | Core | `src/Core/Shell/TaskbarStatePolicy.cs`, `src/Core/Shell/WatchdogPolicy.cs` | Görev çubuğu durumu ve gözcü kararları |
 | Platform | `src/Platform/Shell/TaskbarService.cs`, `src/Platform/Shell/ShellTrayLocator.cs` | Görev çubuğunu gizleme ve geri getirme |
+| Core | `src/Core/Dock/DockClickPolicy.cs`, `src/Core/Dock/DockMonitorFilter.cs`, `src/Core/Dock/DockWindowGrouping.cs` | Sol tık eylemi kararı, "yalnız bu monitörün pencereleri" süzgeci (pencere sınırlarının merkezi); gruplama kararı henüz bağlı değil |
 | App | `src/App/Features/Dock/DockFeature.cs` | Yaşam döngüsü |
-| App | `src/App/Features/Dock/DockViewModel.cs`, `src/App/Features/Dock/DockFullWidth.xaml`, `src/App/Features/Dock/DockCapsule.xaml` | Görünüm |
+| App | `src/App/Features/Dock/DockViewModel.cs`, `src/App/Features/Dock/DockFullWidth.xaml`, `src/App/Features/Dock/DockCapsule.xaml`, `src/App/Features/Settings/Pages/DockPage.xaml` | Görünüm, kenar/uzunluk/boşluk bağlamaları ve ayar sayfası |
+| Core, App | `src/Core/Dock/DockPresentationMath.cs`, `src/App/Features/Dock/DockPresentationStyle.cs`, `src/App/Features/Dock/DockItemsStrip.xaml` | Simge göstergesi (nokta, çizgi, arka plan), rozet, kenar açma gecikmesi ve gizli dock çizgisi: karar Core'da, fırça ve köşe eşlemesi App'te |
+| Core, App | `src/Core/Dock/Items/` (`DockItemLayout`, `DockCustomCommand`, `DockClockTick`), `src/App/Features/Dock/DockExtraViewModel.cs`, `DockViewModel.ComposeExtras` | Dock öğeleri (ayırıcı, boşluk, saat, çöp kutusu, özel düğme): düzen ve komut kuralları Core'da, çizim ve çalıştırma App'te. Eklemek için dock sağ tık menüsü "Öğe ekle" |
 | Core, Platform, App | `src/Core/StartMenu/`, `src/Platform/StartMenu/StartMenuHost.cs`, `src/App/Features/Dock/DockStartMenu.cs` | Başlat düğmesinin sağ tık (Win+X) menüsü: model ve eylemler Core'da, Windows tarafı Platform'da, çizim App'te |
 | Gözcü | `src/Watchdog/` | Koy ölürse görev çubuğunu geri getiren ayrı süreç |
 
@@ -109,6 +144,16 @@ Görev çubuğu dosyalarını değiştirirken dikkat: gözcü `TaskbarService.cs
 
 Kısayollar sayfasındaki satır `ShortcutBindings.All` listesinden kendiliğinden çıkar. Sistem kısayolları `src/Core/Shortcuts/ShortcutManager.cs` içindeki `ShortcutConflicts` ile elenir.
 
+## Ekran köşesi eylemi eklemek
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Input/CornerActions.cs` | `CornerAction` değeri ve `ToInputAction` eşlemesi; bekleme durumu `HotCornerTracker`, koordinat kararı `HotCornerMath` |
+| Core | `src/Core/Settings/SettingsSections.cs` | `HotCornersSettings` (köşe başına eylem, bekleme, tam ekranda kapalı) |
+| App | `src/App/Features/Actions/HotCornerController.cs` | Yoklama yok: köşeye giriş/çıkış olayıyla tek seferlik bekleme zamanlayıcısı, tam ekran ve tuş denetimi |
+| Platform | `src/Platform/Shell/CornerHookService.cs` | `WH_MOUSE_LL` kancası (kendi iş parçacığında, hiçbir şey yutmaz); yalnız bir köşe bağlıyken kurulur, yalnız köşe değişince haber verir (`Core/Input/ICornerHookService`) |
+| App | `src/App/App.xaml.cs` | `RunInputAction`: eylemin ne yapacağı |
+| App | `src/App/Features/Settings/Pages/KisayollarPage.xaml`, `HotCornersViewModel.cs` | Kısayollar sayfasındaki "Ekran köşeleri" bölümü |
+
 ## Tema, renk, ikon, hareket
 | Değişiklik | Dosya |
 |---|---|
@@ -118,7 +163,9 @@ Kısayollar sayfasındaki satır `ShortcutBindings.All` listesinden kendiliğind
 | Simgeler | `src/App/Resources/Icons.xaml`, `src/App/Resources/IconsNotch.xaml` |
 | Hareket | `src/App/Resources/Motion.cs`, `src/Core/Appearance/MotionPolicy.cs`, `src/Core/Animation/Spring.cs` |
 | Tema kararı | `src/App/Resources/ThemeManager.cs`, `src/Core/Appearance/` |
+| Kullanıcı stil dosyası (`user-theme.json`) | Core: `src/Core/Appearance/UserStyleOverrides.cs` (izinli anahtarlar `AllowedTokens`, kısıtlı ayrıştırıcı `UserStyleParser`), `UserStyleFile.cs` (okuma, boyut sınırı). App: `ThemeManager.cs` (tema sonrası uygular), `UserStyleResources.cs` (WPF'ye çevirir), `UserStyleWatcher.cs` (yalnız ayarlar açıkken izler), `Pages/GorunumPage.xaml`. Yeni renk/ölçü anahtarı eklersen `AllowedTokens`'a da ekle; `UserStyleOverridesTests` XAML ile eşitliği denetler. XAML okuyucu kullanılmaz |
 | Marka simgeleri | `assets/branding/`, sonra `python scripts/generate-icons.py` |
+| Dock uygulama simgesi: paket klasörü, uygulama başına değişim | Karar: `src/Core/Appearance/` (`IconResolver`, `IconPackFiles`, `AppIconKey`, `AppIconOverrides`). Yükleme: `src/App/Features/Dock/DockAppIcons.cs`. Menü: `DockItemsStrip.xaml`, kayıt: `DockViewModel.ChangeAppIcon`. Ayar satırı: `GorunumPage.xaml` |
 
 Unutma: Animasyon `Spring` ile yapılır ve yalnız hareket varken kare çizer (AGENTS #6). Yazılımla çizim varsayılandır (AGENTS #3).
 

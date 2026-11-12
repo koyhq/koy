@@ -15,6 +15,7 @@ using Koy.Core.Visibility;
 using Koy.Core.Weather;
 using Koy.Core.Voice;
 using Koy.App.Features.Notch;
+using Koy.App.Features.Notch.LiveBackground;
 using Koy.Core.Notifications;
 using Koy.Platform.Notifications;
 using Koy.Platform.Shell;
@@ -28,6 +29,11 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     /// <summary>Kısayollar sayfası: tuş yakalama, kayıt ve hata durumu.</summary>
     public ShortcutsViewModel Shortcuts { get; }
+    public ProfilesViewModel Profiles { get; }
+
+    /// <summary>Kısayollar sayfasındaki ekran köşeleri bölümü.</summary>
+    public HotCornersViewModel HotCorners { get; }
+    public RulesViewModel Rules { get; }
 
     /// <summary>Ekranlar sayfası: monitör şeması ve ekran başına ayarlar.</summary>
     public DisplaysViewModel Displays { get; }
@@ -44,6 +50,193 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _hideWindowsTaskbar = true;
+
+    // --- GELİŞMİŞ SAYFASI VE CANLI YENİDEN YÜKLEME (issue #69) ---
+
+    /// <summary>Gelişmiş sayfasının dizini; mevcut sayfaların dizinleri değişmesin diye en sona eklendi.</summary>
+    public const int AdvancedPageIndex = 9;
+
+    // Diskteki son bilinen ayarlar (yüklenen ya da bu pencerenin yazdığı); canlı yeniden yükleme aynıysa iş yapmaz.
+    private AppSettings? _lastKnown;
+
+    public string SettingsFilePath => _store.Path;
+
+    [ObservableProperty]
+    private IReadOnlyList<AdvancedSettingRow> _advancedRows = [];
+
+    [ObservableProperty]
+    private string _advancedFilter = "";
+
+    partial void OnAdvancedFilterChanged(string value) => RebuildAdvancedRows();
+
+    /// <summary>Dış düzenlenen settings.json okunamadı; son geçerli ayarlar korunuyor.</summary>
+    [ObservableProperty]
+    private bool _settingsFileInvalid;
+
+    // Kendi arayüzü olan ayarlar Gelişmiş tablosuna girmez: VM özellikleri düz v3 adlarıyla SettingsKeyMap'te.
+    private static readonly string[] DedicatedUiKeys =
+        SettingsKeyMap.V3ToV4.Values.Select(v => $"{v.Section}.{v.Name}").ToArray();
+
+    private void RebuildAdvancedRows()
+    {
+        if (SelectedPageIndex != AdvancedPageIndex)
+        {
+            AdvancedRows = [];
+            return;
+        }
+
+        var filter = AdvancedFilter.Trim();
+        AdvancedRows = AdvancedSettings.List(_store.Load(), DedicatedUiKeys)
+            .Where(r => filter.Length == 0 || r.Key.Contains(filter, StringComparison.OrdinalIgnoreCase))
+            .Select(r => new AdvancedSettingRow(r, ApplyAdvanced, ResetAdvanced))
+            .ToList();
+    }
+
+    private AdvancedSettingError ApplyAdvanced(string key, string text)
+    {
+        var error = AdvancedSettings.TrySet(_store.Load(), key, text, out var updated);
+        if (error == AdvancedSettingError.None)
+            CommitExternalSettings(updated);
+        return error;
+    }
+
+    private AdvancedSettingError ResetAdvanced(string key)
+    {
+        var error = AdvancedSettings.Reset(_store.Load(), key, out var updated);
+        if (error == AdvancedSettingError.None)
+            CommitExternalSettings(updated);
+        return error;
+    }
+
+    // Gelişmiş tablodan yazılan ayar: kaydedilir, pencere ve özellikler yeni değerle kurulur (alan her şey olabilir).
+    // Tablo bir sonraki tura bırakılır; satırın kendi bağlaması sürerken liste değiştirilmez.
+    private void CommitExternalSettings(AppSettings updated)
+    {
+        _store.Save(updated);
+        ApplyLoadedSettings();
+        System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(RebuildAdvancedRows);
+    }
+
+    private void ApplyLoadedSettings()
+    {
+        LoadFromSettings();
+        SettingsSaved?.Invoke();
+        if (Application.Current is { } current)
+            ThemeManager.Apply(current, _store.Load());
+        if (Application.Current is App app)
+            app.ReloadAllFeatures();
+    }
+
+    /// <summary>
+    /// settings.json dışarıdan değişti (Koy penceresi açıkken dosya izleyicisi çağırır). Koy'un kendi kaydı yok sayılır;
+    /// dosya okunamıyor ya da tek bir alanı bile tanınmıyorsa yüklenmez, kısa bir uyarı gösterilir.
+    /// </summary>
+    public void ReloadFromDiskIfChanged()
+    {
+        if (_store.IsOwnWrite())
+            return;
+
+        if (!_store.TryReadStrict(out var disk))
+        {
+            SettingsFileInvalid = true;
+            return;
+        }
+
+        SettingsFileInvalid = false;
+        if (Equals(disk, _lastKnown))
+            return;
+
+        ApplyLoadedSettings();
+        RebuildAdvancedRows();
+    }
+
+    // --- UYGULA / GERİ AL (issue #69) ---
+    // Riskli ayar (bugün yalnız görev çubuğunu gizleme): değişiklik hemen uygulanır, kullanıcı ~15 sn içinde
+    // onaylamazsa önceki değere dönülür. Karar Core'da (ApplyRevertPolicy); zamanlayıcı yalnız bekleyen değişiklik
+    // varken çalışır, karar verilince durur (AGENTS #5).
+    private bool? _revertHideTaskbarTo;
+    private DateTimeOffset _appliedAt;
+    private System.Windows.Threading.DispatcherTimer? _applyRevertTimer;
+    private bool _applyingRevert;
+
+    [ObservableProperty]
+    private bool _isApplyRevertPending;
+
+    [ObservableProperty]
+    private int _applyRevertSecondsLeft;
+
+    partial void OnHideWindowsTaskbarChanged(bool oldValue, bool newValue)
+    {
+        if (_isLoading || _applyingRevert)
+            return;
+
+        // Bekleyen bir değişiklik varken yeniden değişirse ilk (bilinen iyi) değer korunur.
+        _revertHideTaskbarTo ??= oldValue;
+        if (_revertHideTaskbarTo == newValue)
+        {
+            StopApplyRevert();
+            return;
+        }
+
+        _appliedAt = DateTimeOffset.UtcNow;
+        _applyRevertTimer ??= CreateApplyRevertTimer();
+        _applyRevertTimer.Start();
+        ApplyRevertSecondsLeft = (int)Math.Ceiling(ApplyRevertPolicy.DefaultTimeout.TotalSeconds);
+        IsApplyRevertPending = true;
+    }
+
+    private System.Windows.Threading.DispatcherTimer CreateApplyRevertTimer()
+    {
+        var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        timer.Tick += (_, _) => DecideApplyRevert(ApplyRevertChoice.None);
+        return timer;
+    }
+
+    private void DecideApplyRevert(ApplyRevertChoice choice)
+    {
+        if (_revertHideTaskbarTo is not { } previous)
+        {
+            StopApplyRevert();
+            return;
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        switch (ApplyRevertPolicy.Decide(_appliedAt, now, choice, ApplyRevertPolicy.DefaultTimeout))
+        {
+            case ApplyRevertDecision.Wait:
+                ApplyRevertSecondsLeft = (int)Math.Ceiling(ApplyRevertPolicy.Remaining(_appliedAt, now, ApplyRevertPolicy.DefaultTimeout).TotalSeconds);
+                break;
+            case ApplyRevertDecision.Keep:
+                StopApplyRevert();
+                break;
+            case ApplyRevertDecision.Revert:
+                StopApplyRevert();
+                _applyingRevert = true;
+                try
+                {
+                    // Normal kaydetme ve dock yeniden kurma yolundan geçer (OnPropertyChanged).
+                    HideWindowsTaskbar = previous;
+                }
+                finally
+                {
+                    _applyingRevert = false;
+                }
+                break;
+        }
+    }
+
+    private void StopApplyRevert()
+    {
+        _applyRevertTimer?.Stop();
+        _revertHideTaskbarTo = null;
+        IsApplyRevertPending = false;
+    }
+
+    [RelayCommand]
+    private void ConfirmApplyRevert() => DecideApplyRevert(ApplyRevertChoice.Confirm);
+
+    [RelayCommand]
+    private void RevertApplyRevert() => DecideApplyRevert(ApplyRevertChoice.Revert);
 
     [ObservableProperty]
     private string _language = AppLanguage.SystemDefault;
@@ -109,6 +302,88 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private MusicCardStyle _musicCardStyle = MusicCardStyle.Tinted;
 
     [ObservableProperty]
+    private NotchVisualizerStyle _visualizerStyle = NotchVisualizerStyle.Bars;
+
+    [ObservableProperty]
+    private NotchVisualizerColorSource _visualizerColorSource = NotchVisualizerColorSource.Accent;
+
+    [ObservableProperty]
+    private int _visualizerBarCount = 5;
+
+    // ---- Canlı arka plan (issue #67). Kararlar ve doğrulama Core'da (LiveBackground*); burası yalnız bağlar. ----
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLiveBackgroundEnabled))]
+    private LiveBackgroundTarget _liveBackgroundTarget = LiveBackgroundTarget.None;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLiveBackgroundFileSource))]
+    [NotifyPropertyChangedFor(nameof(IsLiveBackgroundAmbientSource))]
+    [NotifyPropertyChangedFor(nameof(LiveBackgroundFileMessage))]
+    private LiveBackgroundSourceKind _liveBackgroundSource = LiveBackgroundSourceKind.BuiltInAmbient;
+
+    [ObservableProperty]
+    private string _liveBackgroundPreset = LiveBackgroundPresets.DefaultId;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(LiveBackgroundFileName))]
+    [NotifyPropertyChangedFor(nameof(LiveBackgroundFileMessage))]
+    private string _liveBackgroundFilePath = "";
+
+    [ObservableProperty]
+    private int _liveBackgroundScrimPercent = LiveBackgroundLimits.DefaultScrimPercent;
+
+    public bool IsLiveBackgroundEnabled => LiveBackgroundTarget != LiveBackgroundTarget.None;
+    public bool IsLiveBackgroundFileSource => LiveBackgroundSource == LiveBackgroundSourceKind.LocalFile;
+    public bool IsLiveBackgroundAmbientSource => LiveBackgroundSource == LiveBackgroundSourceKind.BuiltInAmbient;
+
+    /// <summary>Önayar seçici: kimlik + yerelleştirilmiş ad.</summary>
+    public IReadOnlyList<LiveBackgroundPresetOption> LiveBackgroundPresetOptions { get; } =
+        LiveBackgroundPresets.All.Select(p => new LiveBackgroundPresetOption(p.Id, Strings.Get(p.NameKey))).ToList();
+
+    /// <summary>Perde yüzdesi seçenekleri.</summary>
+    public int[] LiveBackgroundScrimOptions { get; } = [40, 50, 60, 65, 70, 80, 90];
+
+    public string LiveBackgroundFileName => string.IsNullOrWhiteSpace(LiveBackgroundFilePath)
+        ? Strings.Get("LiveBgNoFile")
+        : System.IO.Path.GetFileName(LiveBackgroundFilePath);
+
+    /// <summary>Seçili dosyanın doğrulama sonucu (boş = sorun yok ya da dosya seçilmemiş). Doğrulama Core'dadır.</summary>
+    public string LiveBackgroundFileMessage => !IsLiveBackgroundFileSource || string.IsNullOrWhiteSpace(LiveBackgroundFilePath)
+        ? ""
+        : LiveBackgroundMessages.For(LiveBackgroundFileValidator.Validate(
+            LiveBackgroundFilePath,
+            // Boyut yalnız yol metni geçerliyse okunur: UNC / URL yoluna ağ erişimi yapılmaz.
+            LiveBackgroundFileValidator.Validate(LiveBackgroundFilePath, 1) == LiveBackgroundFileError.None
+                ? LiveBackgroundState.FileLength(LiveBackgroundFilePath)
+                : 1));
+
+    /// <summary>"Dosya seç" düğmesi. Yalnız kullanıcı tıklamasından çağrılır (ayar yüklenirken dosya penceresi açılmasın).</summary>
+    [RelayCommand]
+    public void PickLiveBackgroundFile()
+    {
+        if (_isLoading)
+            return;
+
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = Strings.Get("LiveBgPickTitle"),
+            Filter = string.Format(Strings.Get("LiveBgPickFilter"), LiveBackgroundFileValidator.DialogPattern),
+            CheckFileExists = true
+        };
+
+        var owner = Application.Current?.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+        var accepted = owner is not null ? dialog.ShowDialog(owner) : dialog.ShowDialog();
+
+        // Geçersiz dosya da yola yazılır: neden mesajı satırda görünür, çentik yalnız geçerliyse çizer.
+        if (accepted == true)
+        {
+            LiveBackgroundFilePath = dialog.FileName;
+            LiveBackgroundSource = LiveBackgroundSourceKind.LocalFile;
+        }
+    }
+
+    [ObservableProperty]
     private bool _showVolumeOsd = true;
 
     [ObservableProperty]
@@ -156,12 +431,127 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private NotchOpenBehavior _notchOpenBehavior = NotchOpenBehavior.Click;
 
+    // --- ÇENTİK DÜZENİ (issue #78) ---
+    public IReadOnlyList<int> NotchDelayOptions { get; } = [0, 150, 300, 500, 800, 1200, 2000];
+
+    [ObservableProperty]
+    private int _notchOpenDelayMs;
+
+    [ObservableProperty]
+    private int _notchCloseDelayMs = NotchOpenPolicy.DefaultCloseDelayMs;
+
+    [ObservableProperty]
+    private NotchTabBarStyle _notchTabBarStyle = NotchTabBarStyle.IconAndLabel;
+
+    /// <summary>Sekme sırası satırları (bütün paneller, görünürlükten bağımsız).</summary>
+    public ObservableCollection<NotchTabOrderItem> NotchTabOrder { get; } = [];
+
+    /// <summary>Sıra değişince artar; kaydı ve çentiğin yeniden kurulmasını tetikler.</summary>
+    [ObservableProperty]
+    private int _notchTabOrderVersion;
+
+    private List<string> _panelOrder = [];
+
+    private void LoadTabOrder(IEnumerable<string>? order)
+    {
+        _panelOrder = NotchPanels.NormalizeOrder(order).Select(NotchPanels.ToKey).ToList();
+        NotchTabOrder.Clear();
+        foreach (var panel in NotchPanels.NormalizeOrder(_panelOrder))
+            NotchTabOrder.Add(new NotchTabOrderItem(panel, NotchTabOrderItem.LabelOf(panel)));
+    }
+
+    [RelayCommand]
+    private void MoveTabUp(NotchPanel panel) => MoveTab(panel, -1);
+
+    [RelayCommand]
+    private void MoveTabDown(NotchPanel panel) => MoveTab(panel, 1);
+
+    // Dosyadaki (elle yazılmış) gecikme listede yoksa en yakın seçenek gösterilir; kaydedilince o değer yazılır.
+    private int NearestDelay(int ms)
+    {
+        var clamped = NotchOpenPolicy.ClampDelay(ms);
+        return NotchDelayOptions.OrderBy(o => Math.Abs(o - clamped)).First();
+    }
+
+    private void MoveTab(NotchPanel panel, int step)
+    {
+        var moved = NotchPanels.Move(_panelOrder, panel, step);
+        if (moved.SequenceEqual(_panelOrder))
+            return;
+
+        LoadTabOrder(moved);
+        NotchTabOrderVersion++;
+    }
+
+    /// <summary>Ana sayfa kartları satırları (bütün kartlar, görünürlük ve sıra ayarı).</summary>
+    public ObservableCollection<HomeCardOrderItem> HomeCardOrder { get; } = [];
+
+    /// <summary>Kart sırası veya görünürlüğü değişince artar; kaydı ve çentiğin yeniden kurulmasını tetikler.</summary>
+    [ObservableProperty]
+    private int _homeCardOrderVersion;
+
+    private List<HomeCard> _homeCards = [];
+
+    private void LoadHomeCards(IEnumerable<HomeCard>? cards)
+    {
+        var normalized = HomeCardLayout.Normalize(cards);
+        _homeCards = [.. normalized];
+        HomeCardOrder.Clear();
+        foreach (var card in _homeCards)
+            HomeCardOrder.Add(new HomeCardOrderItem(card, HomeCardOrderItem.LabelOf(card), isEnabled: true, OnHomeCardChanged));
+        foreach (var card in Enum.GetValues<HomeCard>())
+        {
+            if (!_homeCards.Contains(card))
+                HomeCardOrder.Add(new HomeCardOrderItem(card, HomeCardOrderItem.LabelOf(card), isEnabled: false, OnHomeCardChanged));
+        }
+    }
+
+    private void OnHomeCardChanged()
+    {
+        _homeCards = HomeCardOrder.Where(x => x.IsEnabled).Select(x => x.Card).ToList();
+        HomeCardOrderVersion++;
+    }
+
+    [RelayCommand]
+    private void MoveHomeCardUp(HomeCard card) => MoveHomeCard(card, -1);
+
+    [RelayCommand]
+    private void MoveHomeCardDown(HomeCard card) => MoveHomeCard(card, 1);
+
+    private void MoveHomeCard(HomeCard card, int step)
+    {
+        var item = HomeCardOrder.FirstOrDefault(x => x.Card == card);
+        if (item is null) return;
+        var index = HomeCardOrder.IndexOf(item);
+        var targetIndex = index + step;
+        if (targetIndex < 0 || targetIndex >= HomeCardOrder.Count) return;
+
+        HomeCardOrder.Move(index, targetIndex);
+        _homeCards = HomeCardOrder.Where(x => x.IsEnabled).Select(x => x.Card).ToList();
+        HomeCardOrderVersion++;
+    }
+
     // --- DOCK ---
     [ObservableProperty]
     private bool _dockEnabled = true;
 
     [ObservableProperty]
     private DockStyleMode _dockStyle = DockStyleMode.FloatingCapsule;
+
+    [ObservableProperty]
+    private DockEdge _dockEdge = DockEdge.Bottom;
+
+    [ObservableProperty]
+    private int _dockLengthPercent = DockLayoutLimits.DefaultLengthPercent;
+
+    [ObservableProperty]
+    private double _dockEdgeOffsetDip = DockLayoutLimits.DefaultEdgeOffsetDip;
+
+    [ObservableProperty]
+    private double _dockInnerPaddingDip = DockLayoutLimits.DefaultInnerPaddingDip;
+
+    [ObservableProperty]
+    private double _dockIconSpacingDip = DockLayoutLimits.DefaultIconSpacingDip;
 
     [ObservableProperty]
     private DockIconAlignment _dockIconAlignment = DockIconAlignment.Center;
@@ -198,7 +588,49 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private DockIndicatorStyle _dockIndicatorStyle;
 
     [ObservableProperty]
+    private DockLeftClickAction _dockLeftClickAction = DockLeftClickAction.MinimizeIfActive;
+
+    [ObservableProperty]
+    private DockGroupingMode _dockGroupingMode = DockGroupingMode.Always;
+
+    [ObservableProperty]
+    private DockLabelMode _dockLabelMode = DockLabelMode.Never;
+
+    [ObservableProperty]
+    private DockWindowMonitorScope _dockWindowMonitorScope = DockWindowMonitorScope.AllMonitors;
+
+    [ObservableProperty]
     private bool _dockShowBadges = true;
+
+    [ObservableProperty]
+    private DockColorSource _dockIndicatorColor = DockColorSource.Accent;
+
+    [ObservableProperty]
+    private string _dockIndicatorCustomColor = "";
+
+    [ObservableProperty]
+    private bool _dockIndicatorOnePerWindow;
+
+    [ObservableProperty]
+    private DockBadgeStyle _dockBadgeStyle = DockBadgeStyle.Number;
+
+    [ObservableProperty]
+    private DockBadgeCorner _dockBadgeCorner = DockBadgeCorner.TopRight;
+
+    [ObservableProperty]
+    private DockColorSource _dockBadgeColor = DockColorSource.Accent;
+
+    [ObservableProperty]
+    private string _dockBadgeCustomColor = "";
+
+    [ObservableProperty]
+    private DockRevealTrigger _dockRevealTrigger = DockRevealTrigger.EdgeHold;
+
+    [ObservableProperty]
+    private int _dockRevealDelayMs = (int)EdgeRevealTracker.DefaultDelay.TotalMilliseconds;
+
+    [ObservableProperty]
+    private bool _dockHiddenEdgeLine;
 
     [ObservableProperty]
     private bool _dockShowStartButton = true;
@@ -245,6 +677,46 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         {
             // İptal edildi ve elde geçerli dosya yok: "Özel" boş kalmasın, varsayılana dön.
             DockStartIcon = DockStartIcon.Koy;
+        }
+    }
+
+    // --- SİMGE PAKETİ (Görünüm sayfası; etkisi dock uygulama simgelerinde) ---
+    [ObservableProperty]
+    private IconPack _iconPack = IconPack.Builtin;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IconPackFolderName))]
+    private string _iconPackFolder = "";
+
+    /// <summary>Paket satırında gösterilen klasör adı; seçilmemişse "klasör seçilmedi".</summary>
+    public string IconPackFolderName => string.IsNullOrWhiteSpace(IconPackFolder)
+        ? Strings.Get("IconPackFolderNone")
+        : System.IO.Path.GetFileName(IconPackFolder.TrimEnd('\\', '/')) is { Length: > 0 } name ? name : IconPackFolder;
+
+    /// <summary>
+    /// "Klasör" seçilince ya da "Klasör seç" düğmesine basılınca çalışır. Yalnız kullanıcı tıklamasından çağrılır
+    /// (ayar yüklenirken dosya penceresi açılmasın). Güvenli olmayan klasör (ağ yolu vb.) kabul edilmez.
+    /// </summary>
+    [RelayCommand]
+    public void PickIconPackFolder()
+    {
+        if (_isLoading)
+            return;
+
+        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = Strings.Get("IconPackFolderPickTitle") };
+        var owner = Application.Current?.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+        var accepted = owner is not null ? dialog.ShowDialog(owner) : dialog.ShowDialog();
+
+        if (accepted == true && IconPackFiles.IsSafeFolder(dialog.FolderName))
+        {
+            // Önce klasör, sonra tür: tek geçerli durum olarak kaydedilir.
+            IconPackFolder = dialog.FolderName;
+            IconPack = IconPack.Folder;
+        }
+        else if (!IconPackFiles.IsSafeFolder(IconPackFolder))
+        {
+            // İptal edildi ve elde geçerli klasör yok: "Klasör" boş kalmasın, yerleşiğe dön.
+            IconPack = IconPack.Builtin;
         }
     }
 
@@ -308,6 +780,130 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _respectReduceMotion = true;
+
+    // Animasyon başına anahtarlar (issue #79). Rozet zıplaması anahtarı arayüzde yok: dock rozetinde henüz animasyon yok.
+    [ObservableProperty]
+    private bool _motionNotchOpenClose = true;
+
+    [ObservableProperty]
+    private bool _motionTabTransitions = true;
+
+    [ObservableProperty]
+    private bool _motionOsd = true;
+
+    [ObservableProperty]
+    private bool _motionDockMagnify = true;
+
+    [ObservableProperty]
+    private bool _motionFolderPanel = true;
+
+    /// <summary>
+    /// Anahtarlar etkili mi: genel animasyon "Kapalı" ya da Windows "animasyonları azalt" (uy açıkken) varsa hepsi
+    /// etkisizdir (MotionPolicy.ScaleFor). Pil tasarrufu anlık durum olduğu için burada sayılmaz.
+    /// </summary>
+    public bool MotionTogglesActive =>
+        MotionPolicy.Scale(AnimationSpeed, RespectReduceMotion, SystemParameters.ClientAreaAnimation, batterySaverReduceMotion: false) > 0;
+
+    public bool MotionTogglesInactive => !MotionTogglesActive;
+
+    partial void OnAnimationSpeedChanged(AnimationSpeed value) => NotifyMotionTogglesActive();
+
+    partial void OnRespectReduceMotionChanged(bool value) => NotifyMotionTogglesActive();
+
+    private void NotifyMotionTogglesActive()
+    {
+        OnPropertyChanged(nameof(MotionTogglesActive));
+        OnPropertyChanged(nameof(MotionTogglesInactive));
+    }
+    // --- SAAT VE BİRİMLER (issue #77) ---
+    [ObservableProperty]
+    private Koy.Core.Clock.ClockHourFormat _clockHourFormat = Koy.Core.Clock.ClockHourFormat.Auto;
+
+    [ObservableProperty]
+    private bool _clockShowSeconds;
+
+    [ObservableProperty]
+    private bool _clockShowDate;
+
+    /// <summary>Boş: ikinci saat kapalı. Değer Windows saat dilimi kimliğidir (<see cref="SecondTimeZoneOptions"/>).</summary>
+    [ObservableProperty]
+    private string _clockSecondTimeZoneId = "";
+
+    /// <summary>İkinci saat açılır listesi: "Yok" ve sistemdeki saat dilimleri. Liste ilk kullanımda bir kez okunur.</summary>
+    public IReadOnlyList<TimeZoneOption> SecondTimeZoneOptions => _secondTimeZoneOptions ??= BuildTimeZoneOptions();
+
+    private static IReadOnlyList<TimeZoneOption>? _secondTimeZoneOptions;
+
+    private static IReadOnlyList<TimeZoneOption> BuildTimeZoneOptions()
+    {
+        var list = new List<TimeZoneOption> { new("", Koy.App.Resources.Strings.Get("ClockSecondTimeZoneNone")) };
+        list.AddRange(TimeZoneInfo.GetSystemTimeZones().Select(z => new TimeZoneOption(z.Id, z.DisplayName)));
+        return list;
+    }
+
+    [ObservableProperty]
+    private bool _clockShowWeekNumber;
+
+    [ObservableProperty]
+    private Koy.Core.Clock.WeekStartSetting _clockFirstDayOfWeek = Koy.Core.Clock.WeekStartSetting.System;
+
+    /// <summary>Kutudaki metin; geçersizse kaydedilmez, eski değer kalır (bkz. <see cref="ClockCustomDateFormatInvalid"/>).</summary>
+    [ObservableProperty]
+    private string _clockCustomDateFormat = "";
+
+    [ObservableProperty]
+    private bool _clockCustomDateFormatInvalid;
+
+    partial void OnClockCustomDateFormatChanged(string value) =>
+        ClockCustomDateFormatInvalid = !string.IsNullOrWhiteSpace(value) && !Koy.Core.Clock.ClockFormatPolicy.IsValidCustomDateFormat(value);
+
+    [ObservableProperty]
+    private Koy.Core.Units.TemperatureUnit _temperatureUnit = Koy.Core.Units.TemperatureUnit.Celsius;
+
+    [ObservableProperty]
+    private Koy.Core.Units.WindSpeedUnit _windSpeedUnit = Koy.Core.Units.WindSpeedUnit.KilometersPerHour;
+
+    [ObservableProperty]
+    private Koy.Core.Units.NetworkSpeedUnit _networkSpeedUnit = Koy.Core.Units.NetworkSpeedUnit.Bytes;
+
+    // --- YAZI VE KOY ÖLÇEĞİ (issue #71) ---
+    /// <summary>Arayüz yazı tipi; boş = Koy varsayılanı.</summary>
+    [ObservableProperty]
+    private string _uiFontFamily = "";
+
+    /// <summary>Saat yazı tipi; boş = arayüz yazı tipi.</summary>
+    [ObservableProperty]
+    private string _clockFontFamily = "";
+
+    [ObservableProperty]
+    private double _baseFontSize = FontScalePolicy.DefaultBaseFontSize;
+
+    [ObservableProperty]
+    private int _uiFontWeight = FontScalePolicy.DefaultFontWeight;
+
+    [ObservableProperty]
+    private int _uiScalePercent = FontScalePolicy.DefaultUiScale;
+
+    public IReadOnlyList<double> BaseFontSizeOptions { get; } = [10, 11, 12, 13, 14, 15, 16, 17, 18];
+
+    public IReadOnlyList<int> UiScaleOptions { get; } = [80, 90, 100, 110, 120, 130, 140, 150];
+
+    private IReadOnlyList<FontOption>? _fontOptions;
+
+    /// <summary>Yazı tipi listesi: önce "Varsayılan", sonra yüklü yazı tipleri. Yalnız liste ilk istendiğinde taranır.</summary>
+    public IReadOnlyList<FontOption> FontOptions => _fontOptions ??=
+        [new FontOption("", Strings.Get("FontDefault"), new System.Windows.Media.FontFamily(FontScalePolicy.DefaultFontFamily)),
+         .. ThemeManager.InstalledFonts().Select(f => new FontOption(f, f, new System.Windows.Media.FontFamily(f)))];
+
+    // Kullanıcı stil dosyası (user-theme.json): anahtar, durum satırı ve tanı listesi. Mantık Core'da
+    // (UserStyleParser) ve ThemeManager'da; burada yalnız bağlanır.
+    [ObservableProperty]
+    private bool _userStyleOverridesEnabled;
+
+    [ObservableProperty]
+    private string _userStyleStatusText = "";
+
+    public ObservableCollection<string> UserStyleDiagnostics { get; } = [];
 
     // --- KISAYOLLAR ---
     [ObservableProperty]
@@ -443,13 +1039,27 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     {
         _store = store ?? new SettingsStore(SettingsStore.DefaultPath);
         Shortcuts = new ShortcutsViewModel(_store);
+        Profiles = new ProfilesViewModel(ProfileService.Instance);
+        ProfileService.Instance.Applied += OnProfileApplied;
+        HotCorners = new HotCornersViewModel(_store);
+        Rules = new RulesViewModel(ProfileService.Instance, Koy.App.Features.Rules.ContextRuleService.Instance);
+        Profiles.ListChanged += Rules.Refresh;
         Displays = new DisplaysViewModel(_store);
         Weather = new WeatherLocationViewModel(_store);
         UpdateStatus.Changed += OnUpdateStatusChanged;
         OnUpdateStatusChanged();
+        ThemeManager.UserStyleApplied += RefreshUserStyle;
         LoadFromSettings();
         NotchFeature.NotificationAccessChanged += OnNotificationAccessChanged;
         RefreshNotificationPermission();
+    }
+
+    // Profil (bu pencereden ya da bir kuraldan) uygulandı: değerler diskteki yeni ayarlardan okunur, aksi halde bir
+    // sonraki kayıt eski değerleri geri yazardı. Ayarlar sıfırlamasıyla aynı yenileme.
+    private void OnProfileApplied(Koy.Core.Settings.Profiles.SavedProfile profile)
+    {
+        LoadFromSettings();
+        SettingsSaved?.Invoke();
     }
 
     partial void OnNotchShowNotificationsChanged(bool value) => RefreshNotificationPermission();
@@ -478,6 +1088,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         try
         {
             var s = _store.Load();
+            _lastKnown = s;
 
             RunAtStartup = StartupService.IsEnabled;
             HideWindowsTaskbar = s.Dock.HideWindowsTaskbar;
@@ -489,6 +1100,11 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             NotchVisibility = s.Notch.Visibility;
             DockEnabled = s.Dock.Enabled;
             DockStyle = s.Dock.Style;
+            DockEdge = Enum.IsDefined(s.Dock.Edge) ? s.Dock.Edge : DockEdge.Bottom;
+            DockLengthPercent = DockLayoutLimits.ClampLengthPercent(s.Dock.LengthPercent);
+            DockEdgeOffsetDip = DockLayoutLimits.ClampEdgeOffsetDip(s.Dock.EdgeOffsetDip);
+            DockInnerPaddingDip = DockLayoutLimits.ClampInnerPaddingDip(s.Dock.InnerPaddingDip);
+            DockIconSpacingDip = DockLayoutLimits.ClampIconSpacingDip(s.Dock.IconSpacingDip);
             DockIconAlignment = s.Dock.IconAlignment;
             DockProximity = s.Dock.Proximity;
             DockHideInFullscreen = s.Dock.HideInFullscreen;
@@ -507,6 +1123,24 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             DockDodgeDelayMs = s.Dock.DodgeDelayMs;
             DockIconSize = s.Dock.IconSize > 0 ? s.Dock.IconSize : 28.0;
             DockIndicatorStyle = s.Dock.IndicatorStyle;
+            DockIndicatorColor = s.Dock.IndicatorColor;
+            DockIndicatorCustomColor = s.Dock.IndicatorCustomColor ?? "";
+            DockIndicatorOnePerWindow = s.Dock.IndicatorOnePerWindow;
+            DockBadgeStyle = s.Dock.BadgeStyle;
+            DockBadgeCorner = s.Dock.BadgeCorner;
+            DockBadgeColor = s.Dock.BadgeColor;
+            DockBadgeCustomColor = s.Dock.BadgeCustomColor ?? "";
+            DockRevealTrigger = s.Dock.RevealTrigger;
+            DockRevealDelayMs = s.Dock.RevealDelayMs;
+            DockHiddenEdgeLine = s.Dock.HiddenEdgeLine;
+            DockNewTrayIconVisibility = s.Dock.NewTrayIconVisibility == Koy.Core.Tray.TrayIconVisibility.Hidden
+                ? Koy.Core.Tray.TrayIconVisibility.Hidden
+                : Koy.Core.Tray.TrayIconVisibility.Overflow;
+            LoadTrayApps(s.Dock);
+            DockLeftClickAction = s.Dock.LeftClickAction;
+            DockGroupingMode = s.Dock.GroupingMode;
+            DockLabelMode = s.Dock.LabelMode;
+            DockWindowMonitorScope = s.Dock.WindowMonitorScope;
             // Tam genişlikte seçilemeyen mod ayar ekranında geçerli karşılığıyla görünür (çalışma anındaki eşlemeyle aynı).
             DockProximity = DockProximityMapping.Effective(DockStyle, DockProximity);
 
@@ -519,9 +1153,22 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             MusicShowWaveform = s.Music.ShowWaveform;
             MusicCardStyle = s.Music.CardStyle;
             MusicLyricsEnabled = s.Music.LyricsEnabled;
+            VisualizerStyle = s.Music.VisualizerStyle;
+            VisualizerColorSource = s.Music.VisualizerColorSource;
+            VisualizerBarCount = NotchVisualizer.ClampBarCount(s.Music.VisualizerBarCount);
+            LiveBackgroundTarget = s.Notch.LiveBackgroundTarget;
+            LiveBackgroundSource = s.Notch.LiveBackgroundSource;
+            LiveBackgroundPreset = LiveBackgroundPresets.Find(s.Notch.LiveBackgroundPreset).Id;
+            LiveBackgroundFilePath = s.Notch.LiveBackgroundFilePath ?? "";
+            LiveBackgroundScrimPercent = LiveBackgroundLimits.ClampScrimPercent(s.Notch.LiveBackgroundScrimPercent);
             IdleDisplayMode = s.Notch.IdleDisplay;
             NotchStyle = s.Notch.Style;
             NotchOpenBehavior = s.Notch.OpenBehavior;
+            NotchOpenDelayMs = NearestDelay(s.Notch.OpenDelayMs);
+            NotchCloseDelayMs = NearestDelay(s.Notch.CloseDelayMs);
+            NotchTabBarStyle = s.Notch.TabBarStyle;
+            LoadTabOrder(s.Notch.PanelOrder);
+            LoadHomeCards(s.Notch.HomeCards);
 
             // Eski sürümlerin karışık değerleri ("Koyu", 18 vb.) seçenek değerlerine indirilir.
             Theme = s.Appearance.Theme;
@@ -531,9 +1178,32 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             MaterialReadabilityGuard = s.Appearance.MaterialReadabilityGuard;
             NotchFollowsMaterial = s.Notch.FollowsMaterial;
             CornerRadius = CornerSetting.ToStored(CornerSetting.Resolve(s.Appearance.CornerRadius));
+            IconPack = s.Appearance.IconPack;
+            IconPackFolder = s.Appearance.IconPackFolder ?? "";
             AnimationSpeed = s.Appearance.AnimationSpeed;
             RespectReduceMotion = s.Appearance.RespectReduceMotion;
             BatterySaverReduceMotion = s.Appearance.BatterySaverReduceMotion;
+            var motion = s.Appearance.Motion ?? new MotionSettings();
+            MotionNotchOpenClose = motion.NotchOpenClose;
+            MotionTabTransitions = motion.TabTransitions;
+            MotionOsd = motion.Osd;
+            MotionDockMagnify = motion.DockMagnify;
+            MotionFolderPanel = motion.FolderPanel;
+            ClockHourFormat = s.Notch.ClockHourFormat;
+            ClockShowSeconds = s.Notch.ClockShowSeconds;
+            ClockShowWeekNumber = s.Notch.ClockShowWeekNumber;
+            ClockShowDate = s.Notch.ClockShowDate;
+            ClockSecondTimeZoneId = s.Notch.ClockSecondTimeZoneId ?? "";
+            ClockFirstDayOfWeek = s.Notch.ClockFirstDayOfWeek;
+            ClockCustomDateFormat = s.Notch.ClockCustomDateFormat ?? "";
+            TemperatureUnit = s.General.TemperatureUnit;
+            WindSpeedUnit = s.General.WindSpeedUnit;
+            NetworkSpeedUnit = s.General.NetworkSpeedUnit;
+            UiFontFamily = s.Appearance.FontFamily ?? "";
+            ClockFontFamily = s.Appearance.ClockFontFamily ?? "";
+            BaseFontSize = FontScalePolicy.ClampBaseFontSize(s.Appearance.BaseFontSize);
+            UiFontWeight = FontScalePolicy.ClampFontWeight(s.Appearance.FontWeight);
+            UiScalePercent = FontScalePolicy.ClampUiScale(s.Appearance.UiScalePercent);
             WeatherRefreshInterval = s.Weather.RefreshInterval;
             PomodoroWorkMinutes = s.Focus.PomodoroWorkMinutes;
             PomodoroShortBreakMinutes = s.Focus.PomodoroShortBreakMinutes;
@@ -549,6 +1219,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             WheelAction = s.Notch.WheelAction;
             MiddleClickAction = s.Dock.MiddleClickAction;
             Shortcuts.Load(s);
+            HotCorners.Load(s);
             Weather.Load(s);
 
             var panels = NotchPanels.ParseEnabled(s.Notch.EnabledPanels ?? ["home", "focus", "calendar", "shelf", "clipboard", "system", "controlcenter"]);
@@ -562,6 +1233,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             SearchRetainPrior = s.Search.RetainPrior;
             SearchHistoryMode = s.Search.HistoryMode;
             LoadSearchSources(s.Search.DisabledSources);
+
+            UserStyleOverridesEnabled = s.Appearance.UserStyleOverridesEnabled;
+            RefreshUserStyle();
 
             RefreshMemory();
 
@@ -628,6 +1302,57 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         }
     }
 
+    // --- TEPSİ SİMGELERİ (issue #77) ---
+    /// <summary>Kaydı olmayan (yeni) tepsi simgelerinin yeri: Overflow = tepsi penceresinde görünür, Hidden = gizli.</summary>
+    [ObservableProperty]
+    private Koy.Core.Tray.TrayIconVisibility _dockNewTrayIconVisibility = Koy.Core.Tray.TrayIconVisibilityPolicy.DefaultNewIcon;
+
+    /// <summary>Satırlardan biri değişince artar; "Dock" önekiyle kaydı ve dock'un yeniden kurulmasını tetikler.</summary>
+    [ObservableProperty]
+    private int _dockTrayAppsVersion;
+
+    public System.Collections.ObjectModel.ObservableCollection<TrayAppVisibilityRow> TrayAppRows { get; } = [];
+
+    public bool HasTrayAppRows => TrayAppRows.Count > 0;
+
+    partial void OnDockNewTrayIconVisibilityChanged(Koy.Core.Tray.TrayIconVisibility value)
+    {
+        foreach (var row in TrayAppRows)
+            row.FollowDefault(value != Koy.Core.Tray.TrayIconVisibility.Hidden);
+    }
+
+    // Kayıtlı "Shown" değerleri korunur: dock'ta satır içi gösterim gelince anlamı olacak, bugün tepsi penceresinde görünür.
+    private ValueDictionary<Koy.Core.Tray.TrayIconVisibility> _savedTrayApps = new();
+
+    private void LoadTrayApps(DockSettings dock)
+    {
+        _savedTrayApps = dock.TrayAppVisibility ?? new();
+        TrayAppRows.Clear();
+        foreach (var exe in Koy.Core.Tray.TrayIconVisibilityPolicy.SettingsApps(Koy.App.Features.Dock.Tray.TrayAppNames.Seen, _savedTrayApps.Keys))
+        {
+            var explicitRecord = _savedTrayApps.TryGetValue(exe, out var saved);
+            var visibility = explicitRecord ? saved : dock.NewTrayIconVisibility;
+            TrayAppRows.Add(new TrayAppVisibilityRow(exe, visibility != Koy.Core.Tray.TrayIconVisibility.Hidden, explicitRecord, () => DockTrayAppsVersion++));
+        }
+
+        OnPropertyChanged(nameof(HasTrayAppRows));
+    }
+
+    private ValueDictionary<Koy.Core.Tray.TrayIconVisibility> TrayAppsForSave()
+    {
+        var result = new ValueDictionary<Koy.Core.Tray.TrayIconVisibility>();
+        foreach (var row in TrayAppRows.Where(r => r.IsExplicit))
+        {
+            result[row.ExeName] = !row.IsShown
+                ? Koy.Core.Tray.TrayIconVisibility.Hidden
+                : _savedTrayApps.TryGetValue(row.ExeName, out var saved) && saved == Koy.Core.Tray.TrayIconVisibility.Shown
+                    ? Koy.Core.Tray.TrayIconVisibility.Shown
+                    : Koy.Core.Tray.TrayIconVisibility.Overflow;
+        }
+
+        return result;
+    }
+
     [ObservableProperty]
     private bool _searchRetainPrior = true;
 
@@ -658,15 +1383,24 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         {
             RefreshMemory();
         }
+
+        // Gelişmiş tablosu yalnız sayfası açıkken tutulur; başka sayfaya geçince bırakılır.
+        RebuildAdvancedRows();
     }
 
     protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
         if (_isLoading) return;
-        if (e.PropertyName is nameof(SelectedPageIndex) or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
+        if (e.PropertyName is nameof(SelectedPageIndex) or nameof(MotionTogglesActive) or nameof(MotionTogglesInactive) or nameof(ClockCustomDateFormatInvalid)
+            or nameof(IsApplyRevertPending) or nameof(ApplyRevertSecondsLeft) or nameof(AdvancedRows) or nameof(SettingsFileInvalid) or nameof(AdvancedFilter)
+            or nameof(HasTrayAppRows)
+            or nameof(SettingsSearchQuery) or nameof(IsSettingsSearching) or nameof(SettingsSearchResults)
+            or nameof(SettingsSearchNoResult) or nameof(ShowChangedOnly) or nameof(CanResetPage) or nameof(IsPageResetConfirming) or nameof(PageResetDone)
+            or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
             or nameof(IsResetConfirming) or nameof(UninstallAvailability) or nameof(CanUninstall) or nameof(UninstallRowDescription)
-            or nameof(StartIconFileName) or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates) or nameof(DownloadProgressText))
+            or nameof(UserStyleStatusText)
+            or nameof(StartIconFileName) or nameof(IconPackFolderName) or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates) or nameof(DownloadProgressText))
             return;
 
         SaveSettings();
@@ -676,8 +1410,13 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
         if (e.PropertyName is nameof(Theme) or nameof(AccentColor) or nameof(UseWindowsAccent) or nameof(Material)
             or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
-            or nameof(CornerRadius) or nameof(AnimationSpeed) or nameof(RespectReduceMotion) or nameof(BatterySaverReduceMotion))
+            or nameof(CornerRadius) or nameof(AnimationSpeed) or nameof(RespectReduceMotion) or nameof(BatterySaverReduceMotion)
+            or nameof(MotionNotchOpenClose) or nameof(MotionTabTransitions) or nameof(MotionOsd) or nameof(MotionDockMagnify) or nameof(MotionFolderPanel)
+            or nameof(UiFontFamily) or nameof(ClockFontFamily) or nameof(BaseFontSize) or nameof(UiFontWeight) or nameof(UiScalePercent)
+            or nameof(UserStyleOverridesEnabled))
         {
+            // Animasyon anahtarları da buradan (Motion.Refresh) canlı uygulanır; çentik ve dock yeniden kurulmaz.
+            // Yazı ve ölçek de kaynaklardan (DynamicResource) ve ThemeManager.Applied'dan canlı uygulanır.
             // Görünüm ayarları açık pencerelere anında yansır.
             ThemeManager.Apply(app, _store.Load());
         }
@@ -704,6 +1443,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         name is not null && name != nameof(DockEnabled) &&
         (name.StartsWith("Dock", StringComparison.Ordinal) ||
          name is nameof(HideWindowsTaskbar) or nameof(BatterySaverReduceMotion) or nameof(MiddleClickAction) or nameof(Material)
+             or nameof(IconPack) or nameof(IconPackFolder)
              or nameof(MaterialReadabilityGuard)
              or nameof(AnimationSpeed) or nameof(RespectReduceMotion));
 
@@ -712,11 +1452,17 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             or nameof(ShowVolumeOsd) or nameof(ShowBrightnessOsd) or nameof(ShowPrivacyIndicator) or nameof(NotchShowNotifications) or nameof(NotchNotificationsHideBody) or nameof(IdleDisplayMode) or nameof(NotchStyle)
             or nameof(Material) or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
             or nameof(NotchOpenBehavior) or nameof(WheelAction) or nameof(BatterySaverReduceMotion)
+            or nameof(NotchOpenDelayMs) or nameof(NotchCloseDelayMs) or nameof(NotchTabBarStyle) or nameof(NotchTabOrderVersion)
+            or nameof(HomeCardOrderVersion) or nameof(VisualizerStyle) or nameof(VisualizerColorSource) or nameof(VisualizerBarCount)
+            or nameof(LiveBackgroundTarget) or nameof(LiveBackgroundSource) or nameof(LiveBackgroundPreset) or nameof(LiveBackgroundFilePath) or nameof(LiveBackgroundScrimPercent)
             or nameof(WeatherRefreshInterval) or nameof(PomodoroWorkMinutes) or nameof(PomodoroShortBreakMinutes) or nameof(PomodoroLongBreakMinutes)
             or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
             or nameof(PanelControlCenter) or nameof(PanelClipboard) or nameof(PanelSystem) or nameof(ClipboardHistoryEnabled)
             or nameof(VoiceHarness) or nameof(VoiceClaudePermission) or nameof(VoiceModel) or nameof(VoiceCustomCommand) or nameof(VoiceWorkingDirectory) or nameof(VoiceTimeoutSeconds)
-            or nameof(SearchRetainPrior) or nameof(SearchHistoryMode) or nameof(SearchSourcesVersion);
+            or nameof(SearchRetainPrior) or nameof(SearchHistoryMode) or nameof(SearchSourcesVersion)
+            or nameof(ClockHourFormat) or nameof(ClockShowSeconds) or nameof(ClockShowWeekNumber) or nameof(ClockFirstDayOfWeek)
+            or nameof(ClockCustomDateFormat) or nameof(TemperatureUnit) or nameof(NetworkSpeedUnit)
+            or nameof(ClockShowDate) or nameof(ClockSecondTimeZoneId) or nameof(WindSpeedUnit);
 
     partial void OnLanguageChanged(string value)
     {
@@ -739,6 +1485,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             OnPropertyChanged(nameof(UninstallRowDescription));
             OnPropertyChanged(nameof(DownloadProgressText));
             OnPropertyChanged(nameof(StartIconFileName));
+            Profiles.RefreshLanguage();
+            Rules.Refresh();
+            LoadHomeCards(_homeCards);
         }
         catch { }
     }
@@ -768,13 +1517,21 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             {
                 Language = Language,
                 AutoCheckUpdates = AutoCheckUpdates,
-                UpdateChannel = UpdateChannel
+                UpdateChannel = UpdateChannel,
+                TemperatureUnit = TemperatureUnit,
+                WindSpeedUnit = WindSpeedUnit,
+                NetworkSpeedUnit = NetworkSpeedUnit
             },
             Dock = current.Dock with
             {
                 HideWindowsTaskbar = HideWindowsTaskbar,
                 Enabled = DockEnabled,
                 Style = DockStyle,
+                Edge = DockEdge,
+                LengthPercent = DockLayoutLimits.ClampLengthPercent(DockLengthPercent),
+                EdgeOffsetDip = DockLayoutLimits.ClampEdgeOffsetDip(DockEdgeOffsetDip),
+                InnerPaddingDip = DockLayoutLimits.ClampInnerPaddingDip(DockInnerPaddingDip),
+                IconSpacingDip = DockLayoutLimits.ClampIconSpacingDip(DockIconSpacingDip),
                 IconAlignment = DockIconAlignment,
                 Proximity = DockProximity,
                 HideInFullscreen = DockHideInFullscreen,
@@ -793,6 +1550,22 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 DodgeDelayMs = DockDodgeDelayMs,
                 IconSize = DockIconSize,
                 IndicatorStyle = DockIndicatorStyle,
+                IndicatorColor = DockIndicatorColor,
+                IndicatorCustomColor = DockIndicatorCustomColor,
+                IndicatorOnePerWindow = DockIndicatorOnePerWindow,
+                BadgeStyle = DockBadgeStyle,
+                BadgeCorner = DockBadgeCorner,
+                BadgeColor = DockBadgeColor,
+                BadgeCustomColor = DockBadgeCustomColor,
+                RevealTrigger = DockRevealTrigger,
+                RevealDelayMs = DockRevealDelayMs,
+                HiddenEdgeLine = DockHiddenEdgeLine,
+                NewTrayIconVisibility = DockNewTrayIconVisibility,
+                TrayAppVisibility = TrayAppsForSave(),
+                LeftClickAction = DockLeftClickAction,
+                GroupingMode = DockGroupingMode,
+                LabelMode = DockLabelMode,
+                WindowMonitorScope = DockWindowMonitorScope,
                 MiddleClickAction = MiddleClickAction
             },
             Notch = current.Notch with
@@ -808,15 +1581,38 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 IdleDisplay = IdleDisplayMode,
                 Style = NotchStyle,
                 OpenBehavior = NotchOpenBehavior,
+                OpenDelayMs = NotchOpenPolicy.ClampDelay(NotchOpenDelayMs),
+                CloseDelayMs = NotchOpenPolicy.ClampDelay(NotchCloseDelayMs),
+                TabBarStyle = NotchTabBarStyle,
+                // Varsayılan sıra boş liste olarak kalır ("yalnız değişenler" onu değişmiş saymasın).
+                PanelOrder = _panelOrder.SequenceEqual(NotchPanels.Order.Select(NotchPanels.ToKey)) ? [] : new ValueList<string>(_panelOrder),
+                LiveBackgroundTarget = LiveBackgroundTarget,
+                LiveBackgroundSource = LiveBackgroundSource,
+                LiveBackgroundPreset = LiveBackgroundPreset,
+                LiveBackgroundFilePath = LiveBackgroundFilePath,
+                LiveBackgroundScrimPercent = LiveBackgroundScrimPercent,
                 FollowsMaterial = NotchFollowsMaterial,
                 WheelAction = WheelAction,
+                ClockHourFormat = ClockHourFormat,
+                ClockShowSeconds = ClockShowSeconds,
+                ClockShowWeekNumber = ClockShowWeekNumber,
+                ClockShowDate = ClockShowDate,
+                ClockSecondTimeZoneId = ClockSecondTimeZoneId ?? "",
+                ClockFirstDayOfWeek = ClockFirstDayOfWeek,
+                // Geçersiz özel biçim kaydedilmez; boş metin yerleşik biçime döner.
+                ClockCustomDateFormat = string.IsNullOrWhiteSpace(ClockCustomDateFormat) ? ""
+                    : ClockCustomDateFormatInvalid ? current.Notch.ClockCustomDateFormat : ClockCustomDateFormat,
+                HomeCards = new ValueList<HomeCard>(_homeCards),
                 EnabledPanels = new ValueList<string>(enabledPanels)
             },
             Music = current.Music with
             {
                 ShowWaveform = MusicShowWaveform,
                 CardStyle = MusicCardStyle,
-                LyricsEnabled = MusicLyricsEnabled
+                LyricsEnabled = MusicLyricsEnabled,
+                VisualizerStyle = VisualizerStyle,
+                VisualizerColorSource = VisualizerColorSource,
+                VisualizerBarCount = NotchVisualizer.ClampBarCount(VisualizerBarCount)
             },
             Appearance = current.Appearance with
             {
@@ -826,9 +1622,25 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 Material = Material,
                 MaterialReadabilityGuard = MaterialReadabilityGuard,
                 CornerRadius = CornerRadius,
+                IconPack = IconPack,
+                IconPackFolder = IconPackFolder,
                 AnimationSpeed = AnimationSpeed,
                 RespectReduceMotion = RespectReduceMotion,
-                BatterySaverReduceMotion = BatterySaverReduceMotion
+                BatterySaverReduceMotion = BatterySaverReduceMotion,
+                Motion = (current.Appearance.Motion ?? new MotionSettings()) with
+                {
+                    NotchOpenClose = MotionNotchOpenClose,
+                    TabTransitions = MotionTabTransitions,
+                    Osd = MotionOsd,
+                    DockMagnify = MotionDockMagnify,
+                    FolderPanel = MotionFolderPanel
+                },
+                FontFamily = UiFontFamily ?? "",
+                ClockFontFamily = ClockFontFamily ?? "",
+                BaseFontSize = FontScalePolicy.ClampBaseFontSize(BaseFontSize),
+                FontWeight = FontScalePolicy.ClampFontWeight(UiFontWeight),
+                UiScalePercent = FontScalePolicy.ClampUiScale(UiScalePercent),
+                UserStyleOverridesEnabled = UserStyleOverridesEnabled
             },
             Weather = current.Weather with
             {
@@ -862,7 +1674,40 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         };
 
         _store.Save(updated);
+        _lastKnown = updated;
         SettingsSaved?.Invoke();
+    }
+
+    /// <summary>user-theme.json klasörünü Gezgin'de açar (klasör yoksa oluşturulur; dosyayı kullanıcı yazar).</summary>
+    [RelayCommand]
+    private void OpenUserStyleFolder()
+    {
+        try
+        {
+            System.IO.Directory.CreateDirectory(UserStyleFile.DefaultFolder);
+            Process.Start(new ProcessStartInfo { FileName = UserStyleFile.DefaultFolder, UseShellExecute = true })?.Dispose();
+        }
+        catch
+        {
+        }
+    }
+
+    [RelayCommand]
+    private void ReloadUserStyle()
+    {
+        if (Application.Current is { } app)
+            ThemeManager.ReloadUserStyle(app);
+        RefreshUserStyle();
+    }
+
+    private void RefreshUserStyle()
+    {
+        var result = ThemeManager.UserStyleResult;
+        UserStyleDiagnostics.Clear();
+        foreach (var line in UserStyleResources.DescribeAll(result))
+            UserStyleDiagnostics.Add(line);
+        UserStyleStatusText = UserStyleResources.StatusText(
+            UserStyleOverridesEnabled, UserStyleFile.GetStamp(UserStyleFile.DefaultPath).Exists, result);
     }
 
     [RelayCommand]
@@ -871,6 +1716,85 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         TaskbarService.Restore(force: true);
         // Dock çalışıyorsa Koy'un tepsi penceresi de bırakılır (görev çubuğu görünürken Shell_TrayWnd sahipliği alınmaz).
         (Application.Current as App)?.NotifyTaskbarRestoredManually();
+    }
+
+    // --- AYAR ARAMASI, YALNIZ DEĞİŞENLER, SAYFA SIFIRLAMA (issue #69) ---
+    // Dizin ve satır işaretleme pencerededir (sayfaların kendisinden kurulur); burada yalnız durum ve komutlar var.
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSettingsSearching))]
+    private string _settingsSearchQuery = "";
+
+    public bool IsSettingsSearching => !string.IsNullOrWhiteSpace(SettingsSearchQuery);
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SettingsSearchNoResult))]
+    private IReadOnlyList<SettingsSearchResult> _settingsSearchResults = [];
+
+    public bool SettingsSearchNoResult => IsSettingsSearching && SettingsSearchResults.Count == 0;
+
+    partial void OnSettingsSearchQueryChanged(string value) => OnPropertyChanged(nameof(SettingsSearchNoResult));
+
+    [ObservableProperty]
+    private bool _showChangedOnly;
+
+    /// <summary>Varsayılandan farklı ayar anahtarları ("Dock.ShowTray"); pencere satırları buna göre işaretler.</summary>
+    public IReadOnlyList<string> ChangedSettingKeys() => SettingsChanges.ChangedKeys(_store.Load(), new AppSettings());
+
+    /// <summary>Sayfa dizinine göre sıfırlanacak bölümler. Dock ve Ekranlar yok (görev çubuğu / AppBar etkisi).</summary>
+    public static IReadOnlyList<string> ResetSectionsFor(int pageIndex) => pageIndex switch
+    {
+        0 => [nameof(AppSettings.General)],
+        // Hava durumu konumu kullanıcı verisidir, sayfa sıfırlamada korunur.
+        1 => [nameof(AppSettings.Notch), nameof(AppSettings.Music), nameof(AppSettings.Focus), nameof(AppSettings.Search), nameof(AppSettings.Clipboard)],
+        4 => [nameof(AppSettings.Appearance)],
+        5 => [nameof(AppSettings.Shortcuts)],
+        6 => [nameof(AppSettings.Voice)],
+        _ => [],
+    };
+
+    public bool CanResetPage => ResetSectionsFor(SelectedPageIndex).Count > 0;
+
+    [ObservableProperty]
+    private bool _isPageResetConfirming;
+
+    /// <summary>Son sıfırlamadan sonra kısa bilgi satırı; sayfa değişince kapanır.</summary>
+    [ObservableProperty]
+    private bool _pageResetDone;
+
+    partial void OnSelectedPageIndexChanged(int value)
+    {
+        IsPageResetConfirming = false;
+        PageResetDone = false;
+        OnPropertyChanged(nameof(CanResetPage));
+    }
+
+    [RelayCommand]
+    private void RequestPageReset()
+    {
+        PageResetDone = false;
+        IsPageResetConfirming = true;
+    }
+
+    [RelayCommand]
+    private void CancelPageReset() => IsPageResetConfirming = false;
+
+    [RelayCommand]
+    private void ConfirmPageReset()
+    {
+        IsPageResetConfirming = false;
+        var sections = ResetSectionsFor(SelectedPageIndex);
+        if (sections.Count == 0)
+            return;
+
+        _store.Save(SettingsPageReset.Reset(_store.Load(), sections));
+        LoadFromSettings();
+        SettingsSaved?.Invoke();
+        if (Application.Current is { } current)
+            ThemeManager.Apply(current, _store.Load());
+        if (Application.Current is App app)
+            app.ReloadAllFeatures();
+        PageResetDone = true;
     }
 
     /// <summary>Sıfırlama iki adımlı: ilk tıklama onay ister (yanlışlıkla silmeyi önler).</summary>
@@ -1103,6 +2027,28 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 FileName = "https://github.com/koyhq/koy",
                 UseShellExecute = true
             });
+        }
+        catch
+        {
+        }
+    }
+
+    [RelayCommand]
+    public void OpenWebsite() => OpenExternal("https://koyhq.github.io/koy");
+
+    /// <summary>Esin kaynağı: Nectar (kod ya da görsel alınmadı, yalnız teşekkür).</summary>
+    [RelayCommand]
+    public void OpenNectar() => OpenExternal("https://github.com/kua8/Nectar");
+
+    /// <summary>Esin kaynağı: Seelen UI.</summary>
+    [RelayCommand]
+    public void OpenSeelenUi() => OpenExternal("https://github.com/eythaann/Seelen-UI");
+
+    private static void OpenExternal(string url)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
         }
         catch
         {

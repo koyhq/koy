@@ -104,6 +104,27 @@ public class SystemFormatTests
     public void Speed_rounding_rolls_over_to_next_unit() =>
         Assert.Equal("1 MB/sn", SystemFormat.Speed(1024 * 1024 - 1, Tr));
 
+    [Theory]
+    [InlineData(0, "0 b/sn")]
+    [InlineData(100, "800 b/sn")]
+    [InlineData(45_000, "360 kb/sn")]
+    [InlineData(312_500, "2,5 Mb/sn")]
+    [InlineData(150_000_000, "1,2 Gb/sn")]
+    [InlineData(-5, "0 b/sn")]
+    public void Speed_in_bits_uses_decimal_prefixes(long bytes, string expected) =>
+        Assert.Equal(expected, SystemFormat.Speed(bytes, Koy.Core.Units.NetworkSpeedUnit.Bits, Tr));
+
+    [Fact]
+    public void Speed_in_bits_rolls_over_and_uses_language_suffix()
+    {
+        Assert.Equal("1 Mb/s", SystemFormat.Speed(124_999, Koy.Core.Units.NetworkSpeedUnit.Bits, En));
+        Assert.Equal("1.5 kb/s", SystemFormat.Speed(187, Koy.Core.Units.NetworkSpeedUnit.Bits, En));
+    }
+
+    [Fact]
+    public void Speed_in_bytes_unit_matches_the_binary_formatter() =>
+        Assert.Equal(SystemFormat.Speed(2621440, Tr), SystemFormat.Speed(2621440, Koy.Core.Units.NetworkSpeedUnit.Bytes, Tr));
+
     [Fact]
     public void Memory_uses_one_decimal_for_used_and_trims_whole_total()
     {

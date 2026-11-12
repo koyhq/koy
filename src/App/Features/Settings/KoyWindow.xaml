@@ -19,6 +19,7 @@
         Background="Transparent"
         ResizeMode="CanMinimize"
         FontFamily="{DynamicResource KoyFont}"
+        FontWeight="{DynamicResource KoyFontWeightBase}"
         Foreground="{DynamicResource KoyTextPrimary}"
         TextOptions.TextFormattingMode="Display">
 
@@ -81,7 +82,92 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <StackPanel Grid.Row="0">
+                        <DockPanel Grid.Row="0">
+                        <!-- Ayar araması (issue #69): yazınca kenar menüsü yerine sonuçlar görünür -->
+                        <Grid DockPanel.Dock="Top" Margin="0,0,0,6">
+                            <TextBox x:Name="SettingsSearchBox" Style="{StaticResource SettingTextBoxStyle}"
+                                     Text="{Binding SettingsSearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewKeyDown="SettingsSearchBox_PreviewKeyDown"
+                                     AutomationProperties.Name="{Binding [SettingsSearchPlaceholder], Source={x:Static res:Loc.Instance}}" />
+                            <TextBlock Text="{Binding [SettingsSearchPlaceholder], Source={x:Static res:Loc.Instance}}" IsHitTestVisible="False"
+                                       Margin="11,0,0,0" VerticalAlignment="Center" FontSize="{DynamicResource KoyFontControl}"
+                                       Foreground="{DynamicResource KoyTextMuted}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SettingsSearchQuery}" Value="">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+
+                        <!-- Yalnız değişenleri göster: kutu şablonu içerik göstermez, metin yanında, tıklanınca kutuyu çevirir -->
+                        <Grid DockPanel.Dock="Top" Margin="2,2,0,10" Background="Transparent" Cursor="Hand" MouseLeftButtonUp="ChangedOnlyLabel_Click">
+                            <CheckBox IsChecked="{Binding ShowChangedOnly, Mode=TwoWay}" Style="{StaticResource ModernCheckBoxStyle}"
+                                      HorizontalAlignment="Left" VerticalAlignment="Center"
+                                      AutomationProperties.Name="{Binding [SettingsShowChangedOnly], Source={x:Static res:Loc.Instance}}" />
+                            <TextBlock Text="{Binding [SettingsShowChangedOnly], Source={x:Static res:Loc.Instance}}" Margin="28,0,0,0" VerticalAlignment="Center"
+                                       FontSize="{DynamicResource KoyFontCaption}" Foreground="{DynamicResource KoyTextSecondary}" TextWrapping="Wrap" />
+                        </Grid>
+
+                        <!-- Arama sonuçları -->
+                        <StackPanel DockPanel.Dock="Top">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsSettingsSearching}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock Text="{Binding [SettingsSearchNoResult], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="4,4,0,0"
+                                       Visibility="{Binding SettingsSearchNoResult, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
+                            <ItemsControl ItemsSource="{Binding SettingsSearchResults}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Click="SearchResult_Click" Tag="{Binding}" Cursor="Hand" Margin="0,1"
+                                                AutomationProperties.Name="{Binding Title}">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="bg" Background="Transparent" CornerRadius="{DynamicResource KoyRadiusSmall}" Padding="8,5">
+                                                        <ContentPresenter />
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource KoyBgNavHover}" />
+                                                        </Trigger>
+                                                        <Trigger Property="IsKeyboardFocused" Value="True">
+                                                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource KoyBgNavHover}" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title}" FontSize="13" Foreground="{DynamicResource KoyTextPrimary}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding Page}" FontSize="{DynamicResource KoyFontCaption}" Foreground="{DynamicResource KoyTextMuted}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <StackPanel>
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsSettingsSearching}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
                             <RadioButton GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconSettings}" Click="NavGenel_Click"
                                          IsChecked="{Binding SelectedPageIndex, Mode=TwoWay, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=0}"
                                          Content="{Binding [NavGeneral], Source={x:Static res:Loc.Instance}}" />
@@ -109,7 +195,11 @@
                             <RadioButton GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconInfo}" Click="NavHakkinda_Click"
                                          IsChecked="{Binding SelectedPageIndex, Mode=TwoWay, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=8}"
                                          Content="{Binding [NavAbout], Source={x:Static res:Loc.Instance}}" />
+                            <RadioButton GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconSettings}" Click="NavGelismis_Click"
+                                         IsChecked="{Binding SelectedPageIndex, Mode=TwoWay, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=9}"
+                                         Content="{Binding [NavAdvanced], Source={x:Static res:Loc.Instance}}" />
                         </StackPanel>
+                        </DockPanel>
 
                         <!-- Alt eylemler: Güncelleme bildirimi ve Koy'dan çık -->
                         <StackPanel Grid.Row="1" VerticalAlignment="Bottom">
@@ -144,12 +234,36 @@
                     </Grid>
                 </Border>
 
+                <!-- Alt uyarılar (issue #69): riskli ayar için uygula/geri al geri sayımı ve okunamayan settings.json bildirimi -->
+                <StackPanel Grid.Column="1" Panel.ZIndex="2" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,16">
+                    <Border Background="{DynamicResource KoyBgRow}" BorderBrush="{DynamicResource KoyAccent}" BorderThickness="1"
+                            CornerRadius="{DynamicResource KoyRadiusRow}" Padding="14,10" Margin="0,0,0,8"
+                            Visibility="{Binding IsApplyRevertPending, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Margin="0,0,14,0" Foreground="{DynamicResource KoyTextPrimary}">
+                                <Run Text="{Binding [ApplyRevertPrompt], Source={x:Static res:Loc.Instance}, Mode=OneWay}" />
+                                <Run Text="{Binding ApplyRevertSecondsLeft, Mode=OneWay, StringFormat='({0})'}" />
+                            </TextBlock>
+                            <Button Content="{Binding [ApplyRevertRevert], Source={x:Static res:Loc.Instance}}" Command="{Binding RevertApplyRevertCommand}"
+                                    Style="{StaticResource SettingButtonStyle}" Margin="0,0,8,0" />
+                            <Button Content="{Binding [ApplyRevertKeep], Source={x:Static res:Loc.Instance}}" Command="{Binding ConfirmApplyRevertCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{DynamicResource KoyDangerBg}" BorderBrush="{DynamicResource KoyDangerBorder}" BorderThickness="1"
+                            CornerRadius="{DynamicResource KoyRadiusRow}" Padding="14,10"
+                            Visibility="{Binding SettingsFileInvalid, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}">
+                        <TextBlock Text="{Binding [SettingsFileInvalid], Source={x:Static res:Loc.Instance}}" Foreground="{DynamicResource KoyDangerText}" TextWrapping="Wrap" MaxWidth="520" />
+                    </Border>
+                </StackPanel>
+
                 <!-- Sağ içerik alanı -->
                 <ScrollViewer x:Name="ContentScrollViewer"
                               Grid.Column="1"
                               Padding="28,24,24,24"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
+                    <Grid>
                     <Grid x:Name="PagesHost">
                         <pages:GenelPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=0}" />
                         <pages:CentikPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=1}" />
@@ -160,6 +274,29 @@
                         <pages:DiktePage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=6}" />
                         <pages:PerformansPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=7}" />
                         <pages:HakkindaPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=8}" />
+                        <pages:GelismisPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=9}" />
+                    </Grid>
+
+                    <!-- Sayfa başına "Varsayılana döndür" (issue #69): başlığın sağında, iki adımlı onay. Dock ve Ekranlar'da yok. -->
+                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,16,0" Orientation="Horizontal"
+                                Background="{DynamicResource KoyBgWindow}"
+                                Visibility="{Binding CanResetPage, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}">
+                        <TextBlock Text="{Binding [SettingsResetPageDone], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}"
+                                   VerticalAlignment="Center" Margin="0,0,10,0"
+                                   Visibility="{Binding PageResetDone, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
+                        <Button Content="{Binding [SettingsResetPage], Source={x:Static res:Loc.Instance}}" Command="{Binding RequestPageResetCommand}"
+                                Style="{StaticResource SettingButtonStyle}"
+                                Visibility="{Binding IsPageResetConfirming, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=False}" />
+                        <StackPanel Orientation="Horizontal"
+                                    Visibility="{Binding IsPageResetConfirming, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}">
+                            <TextBlock Text="{Binding [SettingsResetPageConfirm], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}"
+                                       VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <Button Content="{Binding [Cancel], Source={x:Static res:Loc.Instance}}" Command="{Binding CancelPageResetCommand}"
+                                    Style="{StaticResource SettingButtonStyle}" Margin="0,0,8,0" />
+                            <Button Content="{Binding [ResetConfirmButton], Source={x:Static res:Loc.Instance}}" Command="{Binding ConfirmPageResetCommand}"
+                                    Style="{StaticResource DangerButtonStyle}" />
+                        </StackPanel>
+                    </StackPanel>
                     </Grid>
                 </ScrollViewer>
             </Grid>

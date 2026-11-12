@@ -25,7 +25,10 @@ public readonly record struct DockSettingsDiff(
         var appBar = DockProximityMapping.Effective(before.Dock.Style, before.Dock.Proximity) == DockProximityMode.ReserveSpace
                      != (DockProximityMapping.Effective(after.Dock.Style, after.Dock.Proximity) == DockProximityMode.ReserveSpace)
                      || before.Dock.Style != after.Dock.Style
-                     || before.Dock.HideWindowsTaskbar != after.Dock.HideWindowsTaskbar;
+                     || before.Dock.HideWindowsTaskbar != after.Dock.HideWindowsTaskbar
+                     || before.Dock.Edge != after.Dock.Edge
+                     || before.Dock.LengthPercent != after.Dock.LengthPercent
+                     || before.Dock.EdgeOffsetDip != after.Dock.EdgeOffsetDip;
 
         var taskbar = before.Dock.HideWindowsTaskbar != after.Dock.HideWindowsTaskbar;
         var tray = before.Dock.ShowTray != after.Dock.ShowTray || taskbar;
@@ -40,6 +43,9 @@ public readonly record struct DockSettingsDiff(
                       || before.Appearance.MaterialReadabilityGuard != after.Appearance.MaterialReadabilityGuard
                       || before.Appearance.AnimationSpeed != after.Appearance.AnimationSpeed
                       || before.Appearance.RespectReduceMotion != after.Appearance.RespectReduceMotion
+                      || before.Appearance.IconPack != after.Appearance.IconPack
+                      || before.Appearance.IconPackFolder != after.Appearance.IconPackFolder
+                      || !Equals(before.Appearance.AppIconOverrides, after.Appearance.AppIconOverrides)
                       || power;
 
         return new DockSettingsDiff(rebuild, monitors, appBar, taskbar, tray, power);

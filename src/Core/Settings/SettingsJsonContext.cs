@@ -19,6 +19,7 @@ namespace Koy.Core.Settings;
 [JsonSerializable(typeof(MusicSettings))]
 [JsonSerializable(typeof(DisplaysSettings))]
 [JsonSerializable(typeof(ShortcutsSettings))]
+[JsonSerializable(typeof(HotCornersSettings))]
 [JsonSerializable(typeof(VoiceSettings))]
 [JsonSerializable(typeof(SearchSettings))]
 [JsonSerializable(typeof(FocusSettings))]

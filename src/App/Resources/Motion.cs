@@ -24,6 +24,15 @@ public static class Motion
 
     public static bool Enabled => Scale > 0;
 
+    // Animasyon başına anahtarlar (issue #79); Refresh ile ayarlardan gelir.
+    private static MotionSettings _toggles = new();
+
+    /// <summary>Bir animasyon türünün çarpanı: kendi anahtarı kapalıysa ya da genel çarpan 0 ise 0 (son durum anında).</summary>
+    public static double ScaleFor(MotionPolicy.MotionKind kind) => MotionPolicy.ScaleFor(kind, _toggles, Scale);
+
+    /// <summary>Bu animasyon türü kare çizecek mi; değilse çağıran son değeri doğrudan atar, Rendering bağlamaz.</summary>
+    public static bool EnabledFor(MotionPolicy.MotionKind kind) => ScaleFor(kind) > 0;
+
     /// <summary>Çarpanı ayarlardan, Windows sistem ayarından ve pil durumundan yeniden hesaplar.</summary>
     public static void Refresh(AppSettings settings)
     {
@@ -31,6 +40,7 @@ public static class Motion
         var batteryReduce = BatterySaverPolicy.ShouldReduceMotion(
             settings.Appearance.BatterySaverReduceMotion, offline, offline ? BatteryStatus.Discharging : BatteryStatus.Idle);
         Scale = MotionPolicy.Scale(settings.Appearance.AnimationSpeed, settings.Appearance.RespectReduceMotion, SystemParameters.ClientAreaAnimation, batteryReduce);
+        _toggles = settings.Appearance.Motion ?? new MotionSettings();
     }
 
     private static Duration D(double ms) => new(TimeSpan.FromMilliseconds(MotionPolicy.ScaledMilliseconds(ms, Scale)));

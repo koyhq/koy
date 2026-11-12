@@ -229,9 +229,15 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
 
     private void CreateNotchWindow(DisplayMonitor monitor)
     {
-        var controller = new NotchController();
-        controller.SetEnabledPanels(NotchPanels.ParseEnabled(settings.Notch.EnabledPanels, settings.Clipboard.HistoryEnabled));
-        controller.OpenOnHover = settings.Notch.OpenBehavior == NotchOpenBehavior.Hover;
+        var controller = new NotchController
+        {
+            OpenOnHover = settings.Notch.OpenBehavior == NotchOpenBehavior.Hover,
+            // Açılma / kapanma gecikmesi ve sekme sırası (issue #78).
+            OpenDelayMs = settings.Notch.OpenDelayMs,
+            CloseDelayMs = settings.Notch.CloseDelayMs,
+        };
+        controller.SetPanelOrder(settings.Notch.PanelOrder);
+        controller.SetEnabledPanels(NotchPanels.ParseEnabled(settings.Notch.EnabledPanels, settings.Clipboard.HistoryEnabled, settings.Notch.PanelOrder));
 
         var visibilityController = new VisibilityController(settings.Notch.Visibility)
         {
@@ -240,7 +246,9 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
 
         // Müzik kartı çubukları: ses yakalama yalnız kart görünür ve müzik çalarken (MusicViewModel.UpdateSpectrum).
         var musicVm = new MusicViewModel(_mediaService!, spectrumAcquire: () => services.AcquireSpectrumService(), spectrumRelease: services.ReleaseSpectrumService,
-            lyricsProvider: _lyricsProvider, cardStyle: settings.Music.CardStyle);
+            lyricsProvider: _lyricsProvider, cardStyle: settings.Music.CardStyle,
+            visualizerStyle: settings.Music.VisualizerStyle, visualizerColorSource: settings.Music.VisualizerColorSource,
+            visualizerBarCount: settings.Music.VisualizerBarCount);
         musicVm.Lyrics.EnabledToggled += SaveLyricsEnabled;
         // Parlaklık, çentiğin o anki ekranına bağlanır; ekran düzeni değişince state.Monitor güncellenir.
         NotchWindowState? stateRef = null;
@@ -260,7 +268,8 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         var shelfVm = new ShelfViewModel(_shelfService!);
         var calendarVm = new CalendarViewModel(settings, _sharedEvents);
         // Sistem verisi çentik açıkken ve Ana ya da Sistem görünürken alınır, yoksa bırakılır (SystemStatsViewModel.SetActive).
-        var systemVm = new SystemStatsViewModel(() => services.AcquireSystemStats(_networkService), services.ReleaseSystemStats);
+        var systemVm = new SystemStatsViewModel(() => services.AcquireSystemStats(_networkService), services.ReleaseSystemStats,
+            networkUnit: settings.General.NetworkSpeedUnit);
         var quickLaunchVm = new QuickLaunchViewModel(services.QuickLaunch);
         var clipboardVm = _clipboardHistory is null ? null : new ClipboardViewModel(_clipboardHistory);
 

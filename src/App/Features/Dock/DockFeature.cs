@@ -5,6 +5,7 @@ using Koy.Core.Diagnostics;
 using Koy.Core.Display;
 using Koy.Core.Power;
 using Koy.Core.Dock;
+using Koy.Core.Dock.Items;
 using Koy.Core.Settings;
 using Koy.Core.Shell;
 using Koy.Core.StartMenu;
@@ -101,6 +102,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             _fullscreenDetector,
             refreshDebounce: TimeSpan.FromMilliseconds(120),
             post: action => Application.Current?.Dispatcher.InvokeAsync(action));
+        ApplyWindowBehavior();
 
         // Yalnızca ReserveSpace (Yer ayır / tam genişlikte "Her zaman göster") modunda masaüstü çalışma alanından (AppBar) yer ayır
         if (EffectiveProximity == DockProximityMode.ReserveSpace)
@@ -180,8 +182,35 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             inMemorySettings.DockItems.PinnedOrder = [.. order];
     }
 
+    /// <summary>
+    /// Uygulama başına simge değişimlerini ayar dosyasına yazar (yalnız bu alan; öteki ayarlar ezilmez).
+    /// Bellekteki ayar değiştirilmez: çağıran ReloadDock ile eski/yeni farkını (DockSettingsDiff) uygulatır.
+    /// </summary>
+    public static void SaveAppIconOverrides(ValueDictionary<string> overrides)
+    {
+        var store = new SettingsStore(SettingsStore.DefaultPath);
+        var current = store.Load();
+        store.Save(current with { Appearance = current.Appearance with { AppIconOverrides = overrides } });
+    }
+
+    /// <summary>
+    /// Dock öğe dizisini (ayırıcı, boşluk, saat, çöp kutusu, özel düğme dahil) ayar dosyasına yazar. Boş liste,
+    /// dock'un PinnedOrder'dan türetilmesi demektir. Koy penceresinin kaydettiği öteki ayarlar ezilmez.
+    /// </summary>
+    public static void SaveItems(IReadOnlyList<DockItemEntry> items, AppSettings? inMemorySettings = null)
+    {
+        var store = new SettingsStore(SettingsStore.DefaultPath);
+        var current = store.Load();
+        store.Save(current with { DockItems = current.DockItems with { Items = [.. items] } });
+        if (inMemorySettings is not null)
+            inMemorySettings.DockItems.Items = [.. items];
+    }
+
     private void SavePinnedOrder(IReadOnlyList<string> order) =>
         SavePinnedOrder(order, null, settings);
+
+    private static double DpiScaleFor(DisplayMonitor monitor, DockEdge edge) =>
+        edge is DockEdge.Left or DockEdge.Right ? monitor.DpiScaleX : monitor.DpiScaleY;
 
     /// <summary>
     /// Explorer yeniden başlayınca yeni görev çubuğu görünür ve varsayılan durumda gelir; gizlemeyi yeniden uygular.
@@ -208,8 +237,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             if (state.Hwnd == 0)
                 continue;
 
-            var dpiScale = state.Monitor.DpiScaleY;
-            _appBarService.Reregister(state.Hwnd, state.Window.ReservedHeight, dpiScale);
+            var dpiScale = DpiScaleFor(state.Monitor, settings.Dock.Edge);
+            _appBarService.Reregister(state.Hwnd, state.Window.ReservedHeight, dpiScale, settings.Dock.Edge);
         }
     }
 
@@ -236,8 +265,9 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             _lastAppBarReassert[state.Hwnd] = now;
         }
 
-        var height = state.Window.ActualHeight > 0 ? state.Window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
-        _appBarService.Reassert(state.Hwnd, height, state.Monitor.DpiScaleY, onlyIfNeeded);
+        var height = state.Window.ActualThickness > 0 ? state.Window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
+        var dpiScale = DpiScaleFor(state.Monitor, settings.Dock.Edge);
+        _appBarService.Reassert(state.Hwnd, height, dpiScale, onlyIfNeeded, settings.Dock.Edge);
     }
 
     /// <summary>
@@ -457,7 +487,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     private void CreateDockWindow(DisplayMonitor monitor)
     {
         var visibilityController = new VisibilityController(settings.Dock.Visibility);
-        var viewModel = CreateViewModel(visibilityController);
+        var viewModel = CreateViewModel(visibilityController, monitor.Bounds);
 
         var window = new DockWindow { DataContext = viewModel };
         window.SetTargetMonitor(monitor);
@@ -494,9 +524,9 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
             if (_appBarService is not null)
             {
-                var dpiScale = state.Monitor.DpiScaleY;
-                var height = window.ActualHeight > 0 ? window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
-                _appBarService.Register(hwnd, height, dpiScale);
+                var dpiScale = DpiScaleFor(state.Monitor, settings.Dock.Edge);
+                var height = window.ActualThickness > 0 ? window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
+                _appBarService.Register(hwnd, height, dpiScale, settings.Dock.Edge);
             }
 
             UpdateDockBounds(window, state.VisibilityController);
@@ -506,10 +536,10 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         {
             UpdateDockBounds(window, state.VisibilityController);
 
-            if (_appBarService is not null && state.Hwnd != 0 && e.NewSize.Height > 0)
+            if (_appBarService is not null && state.Hwnd != 0 && (e.NewSize.Height > 0 || e.NewSize.Width > 0))
             {
-                var dpiScale = state.Monitor.DpiScaleY;
-                _appBarService.UpdatePosition(state.Hwnd, window.ReservedHeight, dpiScale);
+                var dpiScale = DpiScaleFor(state.Monitor, settings.Dock.Edge);
+                _appBarService.UpdatePosition(state.Hwnd, window.ReservedHeight, dpiScale, settings.Dock.Edge);
             }
         };
 
@@ -522,8 +552,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         window.DpiChanged += (s, e) =>
         {
             UpdateDockBounds(window, state.VisibilityController);
-            if (_appBarService is not null && state.Hwnd != 0 && window.ActualHeight > 0)
-                _appBarService.UpdatePosition(state.Hwnd, window.ReservedHeight, state.Monitor.DpiScaleY);
+            if (_appBarService is not null && state.Hwnd != 0 && (window.ActualHeight > 0 || window.ActualWidth > 0))
+                _appBarService.UpdatePosition(state.Hwnd, window.ReservedHeight, DpiScaleFor(state.Monitor, settings.Dock.Edge), settings.Dock.Edge);
         };
 
         window.DisplayChangeHandler = () =>
@@ -540,17 +570,34 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         window.Show();
     }
 
-    private DockViewModel CreateViewModel(VisibilityController visibilityController) =>
-        new(settings, _controller!, _shellActionService!, visibilityController, status: null,
+    private DockViewModel CreateViewModel(VisibilityController visibilityController, WindowRect monitorBounds)
+    {
+        var viewModel = new DockViewModel(settings, _controller!, _shellActionService!, visibilityController, status: null,
             mediaService: _mediaService, trayService: _trayService, recentFiles: _recentFiles, jumpLists: _jumpLists,
             startMenu: _startMenu)
         {
             ReduceMotion = _reduceMotion
         };
+        viewModel.SetMonitorBounds(monitorBounds);
+        return viewModel;
+    }
+
+    /// <summary>Pencere davranışı ayarlarını paylaşılan denetleyiciye uygular (sol tık eylemi, taşıma izleme).</summary>
+    private void ApplyWindowBehavior()
+    {
+        if (_controller is null)
+            return;
+
+        _controller.LeftClickAction = settings.Dock.LeftClickAction;
+        _controller.GroupingMode = settings.Dock.GroupingMode;
+        _controller.RefreshOnForegroundMove = settings.Dock.WindowMonitorScope == DockWindowMonitorScope.CurrentMonitor;
+    }
 
     // Çekil modunun kendi gecikmesi (DockDodgeDelayMs) ViewModel'de işler; çifte beklemesin.
     private EdgeRevealTracker NewEdgeTracker() => new(
-        EffectiveProximity == DockProximityMode.Dodge ? TimeSpan.Zero : EdgeRevealTracker.DefaultDelay);
+        EffectiveProximity == DockProximityMode.Dodge
+            ? TimeSpan.Zero
+            : DockPresentationMath.EdgeRevealDelay(settings.Dock.RevealTrigger, settings.Dock.RevealDelayMs));
 
     /// <summary>
     /// Ayarlar değişti: çalışan dock'a YERİNDE uygulanır. Dock'u durdurup başlatmak Windows görev çubuğunu geri getirir,
@@ -570,6 +617,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         // Tek canlı ayar nesnesi: yeniden kurulmayan ViewModel'ler de yenisini alır (aksi halde sabit sırası eski nesneye yazılır).
         foreach (var state in _windowStates.Values)
             state.ViewModel.AdoptSettings(next);
+
+        ApplyWindowBehavior();
 
         if (diff.IsEmpty)
             return;
@@ -618,7 +667,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         var oldVisibility = state.VisibilityController;
 
         var visibility = new VisibilityController(settings.Dock.Visibility) { NotchHandle = state.Hwnd };
-        var viewModel = CreateViewModel(visibility);
+        var viewModel = CreateViewModel(visibility, state.Monitor.Bounds);
         viewModel.EdgeWatchChanged += (_, _) => UpdateEdgeTimer();
 
         state.VisibilityController = visibility;
@@ -643,9 +692,10 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
                 if (state.Hwnd == 0)
                     continue;
 
-                var height = state.Window.ActualHeight > 0 ? state.Window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
-                _appBarService.Register(state.Hwnd, height, state.Monitor.DpiScaleY);   // kayıtlıysa dokunmaz
-                _appBarService.UpdatePosition(state.Hwnd, height, state.Monitor.DpiScaleY);
+                var dpiScale = DpiScaleFor(state.Monitor, settings.Dock.Edge);
+                var height = state.Window.ActualThickness > 0 ? state.Window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
+                _appBarService.Register(state.Hwnd, height, dpiScale, settings.Dock.Edge);   // kayıtlıysa dokunmaz
+                _appBarService.UpdatePosition(state.Hwnd, height, dpiScale, settings.Dock.Edge);
             }
         }
         else if (_appBarService is not null)
@@ -735,6 +785,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             if (_windowStates.TryGetValue(monitor.Id, out var existingState))
             {
                 existingState.Monitor = monitor;
+                existingState.ViewModel.SetMonitorBounds(monitor.Bounds);
                 existingState.Window.SetTargetMonitor(monitor);
                 UpdateDockBounds(existingState.Window, existingState.VisibilityController);
             }
@@ -1000,8 +1051,11 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
                 // Monitör başına: yalnız imlecin bulunduğu ekran. Fare kenarda ~300 ms durunca ve tuş basılı değilken açılır.
                 var monitor = state.Monitor;
                 var inZone = EdgeRevealTracker.IsInZone(
-                    x, y, monitor.Bounds.Left, monitor.Bounds.Right, monitor.Bounds.Bottom,
-                    revealed: state.ViewModel.IsVisible, dpiScaleY: monitor.DpiScaleY);
+                    settings.Dock.Edge,
+                    x, y, monitor.Bounds,
+                    revealed: state.ViewModel.IsVisible,
+                    dpiScaleX: monitor.DpiScaleX,
+                    dpiScaleY: monitor.DpiScaleY);
 
                 state.ViewModel.SetMouseAtBottom(state.EdgeTracker.Update(inZone, buttonDown, now));
             }

@@ -104,6 +104,11 @@
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource KoyTextMuted}" />
         <Setter Property="Margin" Value="2,24,0,8" />
+        <Style.Triggers>
+            <Trigger Property="m:SettingsRowState.IsFilteredOut" Value="True">
+                <Setter Property="Visibility" Value="Collapsed" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style x:Key="SettingTitleStyle" TargetType="TextBlock">
@@ -128,6 +133,15 @@
         <Setter Property="CornerRadius" Value="{DynamicResource KoyRadiusRow}" />
         <Setter Property="Padding" Value="14,8" />
         <Setter Property="Margin" Value="0,0,0,4" />
+        <Style.Triggers>
+            <!-- Ayar araması ve "yalnız değişenler" (SettingsRowState, issue #69) -->
+            <Trigger Property="m:SettingsRowState.IsHighlighted" Value="True">
+                <Setter Property="BorderBrush" Value="{DynamicResource KoyAccent}" />
+            </Trigger>
+            <Trigger Property="m:SettingsRowState.IsFilteredOut" Value="True">
+                <Setter Property="Visibility" Value="Collapsed" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <!-- Segment kapsayıcısı (SegRadioStyle düğmelerini sarar) -->

@@ -1,6 +1,7 @@
 using Koy.Core.Appearance;
 using Koy.Core.Display;
 using Koy.Core.Dock;
+using Koy.Core.Input;
 using Koy.Core.Media;
 using Koy.Core.Notch;
 using Koy.Core.Search;
@@ -178,6 +179,17 @@ public class GoldenV3ToV4Tests
         Assert.Equal(1762800000L, S.Weather.LocationUpdatedUnix);
 
         Assert.False(S.Clipboard.HistoryEnabled);
+    }
+
+    [Fact]
+    public void HotCorners_section()
+    {
+        Assert.Equal(CornerAction.OpenNotch, S.HotCorners.TopLeft);
+        Assert.Equal(CornerAction.OpenSearch, S.HotCorners.TopRight);
+        Assert.Equal(CornerAction.OpenKoyWindow, S.HotCorners.BottomLeft);
+        Assert.Equal(CornerAction.ToggleDock, S.HotCorners.BottomRight);
+        Assert.Equal(700, S.HotCorners.DwellMs);
+        Assert.False(S.HotCorners.DisableInFullscreen);
     }
 
     [Fact]

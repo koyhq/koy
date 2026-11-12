@@ -19,13 +19,18 @@ public static class IdleDisplayFormat
     /// <summary>Bu yüzde ve altında, şarj olmuyorsa halka düşük pil rengine geçer.</summary>
     public const int LowBatteryPercent = 20;
 
-    /// <summary>Kısa gün adı ve 24 saatlik saat: "Sal 19:21" / "Tue 19:21".</summary>
-    public static string DayTime(DateTime now, CultureInfo culture) =>
-        culture.DateTimeFormat.GetAbbreviatedDayName(now.DayOfWeek) + " " + now.ToString("HH:mm", culture);
+    /// <summary>Kısa gün adı ve saat: "Sal 19:21" / "Tue 7:21 PM". Desen <see cref="Clock.ClockFormatPolicy.ResolveTimePattern"/>'den gelir.</summary>
+    public static string DayTime(DateTime now, CultureInfo culture, string timePattern = "HH:mm") =>
+        culture.DateTimeFormat.GetAbbreviatedDayName(now.DayOfWeek) + " " + now.ToString(timePattern, culture);
 
-    /// <summary>Peek'te saatin yanındaki kısa tarih, dilin gün-ay sırasıyla: "18 Kas" / "Nov 18".</summary>
-    public static string ShortDate(DateTime now, CultureInfo culture)
+    /// <summary>
+    /// Peek'te saatin yanındaki kısa tarih, dilin gün-ay sırasıyla: "18 Kas" / "Nov 18". Geçerli özel biçim verilirse
+    /// o kullanılır (<see cref="Clock.ClockFormatPolicy.IsValidCustomDateFormat"/>); geçersizse yerleşik biçim.
+    /// </summary>
+    public static string ShortDate(DateTime now, CultureInfo culture, string? customFormat = null)
     {
+        if (Clock.ClockFormatPolicy.IsValidCustomDateFormat(customFormat))
+            return now.ToString(customFormat, culture);
         var pattern = culture.DateTimeFormat.MonthDayPattern.Replace("MMMM", "MMM", StringComparison.Ordinal);
         return now.ToString(pattern, culture);
     }

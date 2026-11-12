@@ -20,6 +20,14 @@ public class ClockFormatPolicyTests
     public void Time_pattern_follows_hour_and_seconds(bool twelveHour, bool seconds, string expected)
         => Assert.Equal(expected, ClockFormatPolicy.TimePattern(twelveHour, seconds));
 
+    [Theory]
+    [InlineData("en-US", ClockHourFormat.Auto, false, "h:mm tt")]
+    [InlineData("tr-TR", ClockHourFormat.Auto, false, "HH:mm")]
+    [InlineData("tr-TR", ClockHourFormat.Hour12, true, "h:mm:ss tt")]
+    [InlineData("en-US", ClockHourFormat.Hour24, false, "HH:mm")]
+    public void Resolved_pattern_follows_culture_on_auto(string culture, ClockHourFormat setting, bool seconds, string expected)
+        => Assert.Equal(expected, ClockFormatPolicy.ResolveTimePattern(setting, seconds, new System.Globalization.CultureInfo(culture)));
+
     [Fact]
     public void Time_pattern_formats_a_known_instant()
     {
@@ -106,4 +114,24 @@ public class ClockFormatPolicyTests
     [InlineData("Tokyo Standard Time", true)]
     public void Second_clock_is_on_only_with_a_time_zone_id(string? id, bool expected)
         => Assert.Equal(expected, ClockFormatPolicy.HasSecondClock(id));
+
+    [Theory]
+    [InlineData("12:00", null, null, "12:00")]
+    [InlineData("12:00", "", "  ", "12:00")]
+    [InlineData("12:00", "12 Nov", null, "12:00 · 12 Nov")]
+    [InlineData("12:00", null, "UTC+9 21:00", "12:00 · UTC+9 21:00")]
+    [InlineData("12:00", "12 Nov", "UTC+9 21:00", "12:00 · 12 Nov · UTC+9 21:00")]
+    [InlineData("", null, "UTC+9 21:00", " · UTC+9 21:00")]
+    public void Peek_line_adds_only_what_is_enabled(string time, string? date, string? second, string expected)
+        => Assert.Equal(expected, ClockFormatPolicy.ComposePeekLine(time, date, second));
+
+    [Fact]
+    public void Notch_defaults_keep_current_behaviour()
+    {
+        var notch = new Koy.Core.Settings.NotchSettings();
+
+        Assert.False(notch.ClockShowDate);
+        Assert.Equal("", notch.ClockSecondTimeZoneId);
+        Assert.False(ClockFormatPolicy.HasSecondClock(notch.ClockSecondTimeZoneId));
+    }
 }

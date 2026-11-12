@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -14,6 +16,7 @@ using Koy.Core.Animation;
 using Koy.Core.Appearance;
 using Koy.Core.Display;
 using Koy.Core.Dock;
+using Koy.Core.Dock.Items;
 using Koy.Core.JumpList;
 using Koy.Core.Media;
 using Koy.Core.Settings;
@@ -34,6 +37,12 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 {
     // Tek canlı ayar nesnesi: DockFeature.ApplySettings her uygulamada bütün ViewModel'lere aynı örneği verir (AdoptSettings).
     private AppSettings _settings;
+
+    // Ek öğeler (ayırıcı, boşluk, saat, çöp kutusu, özel düğme). Hiç ek öğe yoksa bu alanlar boş kalır, dock değişmez.
+    private IReadOnlyList<DockItemSpec> _layout = [];
+    private IReadOnlyList<string> _effectiveOrder = [];
+    private bool _hasExtras;
+    private DispatcherTimer? _clockTimer;
     private readonly DockController _controller;
     private readonly IShellActionService _shellActionService;
     private readonly VisibilityController? _visibilityController;
@@ -44,7 +53,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     private int _traySyncQueued;
     private DispatcherTimer? _trayCloseTimer;
 
-    private readonly Spring _translateSpring;
+    private readonly Spring _translateXSpring;
+    private readonly Spring _translateYSpring;
     private readonly Spring _opacitySpring;
     private bool _isAnimating;
     private bool _disposed;
@@ -65,6 +75,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     // Animasyon hızı ayarı (Sakin 1,5 / Hızlı 0,65): yay zamanı bununla bölünür. 0 ise ReduceMotion zaten anında atlar.
     private static double TimeScale => Motion.Scale > 0 ? 1.0 / Motion.Scale : 1.0;
 
+    // Büyütme yayı: genel hareket ve "Dock büyütme" anahtarı birlikte (MotionPolicy.ScaleFor).
+    private bool MagnifyAnimates => !ReduceMotion && Motion.EnabledFor(MotionPolicy.MotionKind.DockMagnify);
+
     private DisplayMonitor? _currentMonitor;
     private WindowRect _foregroundWindowBounds = WindowRect.Empty;
     private bool _isForegroundWindowMaximized;
@@ -82,7 +95,81 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     private DockItemViewModel? _pendingPreviewItem;
 
     [ObservableProperty]
+    private double _translationX;
+
+    [ObservableProperty]
     private double _translationY;
+
+    public DockEdge Edge => _settings.Dock.Edge;
+    public bool IsVertical => Edge is DockEdge.Left or DockEdge.Right;
+    public Orientation StripOrientation => IsVertical ? Orientation.Vertical : Orientation.Horizontal;
+    public int LengthPercent => _settings.Dock.LengthPercent;
+    public double EdgeOffsetDip => _settings.Dock.EdgeOffsetDip;
+    public Thickness InnerPadding => new(DockLayoutLimits.ClampInnerPaddingDip(_settings.Dock.InnerPaddingDip));
+    public Thickness SlotMargin
+    {
+        get
+        {
+            var spacing = DockLayoutLimits.ClampIconSpacingDip(_settings.Dock.IconSpacingDip);
+            return IsVertical
+                ? new Thickness(0, spacing / 2.0, 0, spacing / 2.0)
+                : new Thickness(spacing / 2.0, 0, spacing / 2.0, 0);
+        }
+    }
+    public PlacementMode PreviewPlacement => Edge switch
+    {
+        DockEdge.Top => PlacementMode.Bottom,
+        DockEdge.Left => PlacementMode.Right,
+        DockEdge.Right => PlacementMode.Left,
+        _ => PlacementMode.Top
+    };
+    public double PreviewVerticalOffset => Edge switch
+    {
+        DockEdge.Top => 10,
+        DockEdge.Bottom => -10,
+        _ => 0
+    };
+    public double PreviewHorizontalOffset => Edge switch
+    {
+        DockEdge.Left => 10,
+        DockEdge.Right => -10,
+        _ => 0
+    };
+
+    public double SeparatorWidth => IsVertical ? 24.0 : 1.0;
+    public double SeparatorHeight => IsVertical ? 1.0 : 24.0;
+    public Thickness SeparatorMargin => IsVertical ? new Thickness(0, 4, 0, 4) : new Thickness(4, 0, 4, 0);
+
+    public double DodgeHandleWidth => IsVertical ? DockPositionResolver.DodgeHandleHeightDip : DockPositionResolver.DodgeHandleWidthDip;
+    public double DodgeHandleHeight => IsVertical ? DockPositionResolver.DodgeHandleWidthDip : DockPositionResolver.DodgeHandleHeightDip;
+    public HorizontalAlignment DodgeHandleHorizontalAlignment => Edge switch
+    {
+        DockEdge.Left => HorizontalAlignment.Left,
+        DockEdge.Right => HorizontalAlignment.Right,
+        _ => HorizontalAlignment.Center
+    };
+    public VerticalAlignment DodgeHandleVerticalAlignment => Edge switch
+    {
+        DockEdge.Top => VerticalAlignment.Top,
+        DockEdge.Bottom => VerticalAlignment.Bottom,
+        _ => VerticalAlignment.Center
+    };
+    public Thickness DodgeHandleMargin => Edge switch
+    {
+        DockEdge.Top => new Thickness(0, 4, 0, 0),
+        DockEdge.Left => new Thickness(4, 0, 0, 0),
+        DockEdge.Right => new Thickness(0, 0, 4, 0),
+        _ => new Thickness(0, 0, 0, 4)
+    };
+
+    public Thickness FullWidthBorderThickness => Edge switch
+    {
+        DockEdge.Top => new Thickness(0, 0, 0, 1),
+        DockEdge.Left => new Thickness(0, 0, 1, 0),
+        DockEdge.Right => new Thickness(1, 0, 0, 0),
+        _ => new Thickness(0, 1, 0, 0)
+    };
+    public Thickness FullWidthPadding => IsVertical ? new Thickness(0, 12, 0, 12) : new Thickness(12, 0, 12, 0);
 
     [ObservableProperty]
     private double _opacity = 1.0;
@@ -103,8 +190,18 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private bool _isHandleVisible;
 
+    /// <summary>Gizli dock'un altındaki ince çizgi (ayar açık, dock gizli, tam ekran yok). Anında değişir, animasyonsuzdur.</summary>
+    [ObservableProperty]
+    private bool _isEdgeLineVisible;
+
     [ObservableProperty]
     private double _dockHeight = 60.0;
+
+    [ObservableProperty]
+    private double _capsuleWidth = double.NaN;
+
+    [ObservableProperty]
+    private double _capsuleHeight = 60.0;
 
     [ObservableProperty]
     private Thickness _dockMargin = new(12, 12, 12, 10);
@@ -120,6 +217,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     private bool _showBadges = true;
+
+    private readonly DockPresentationStyle _presentation;
 
     // Sistem tepsisi: simgeler yalnız pencere açıkken eşitlenir ve çözülür (boştayken iş yok).
     [ObservableProperty]
@@ -316,14 +415,132 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _ => HorizontalAlignment.Center
     };
 
+    /// <summary>Dikey tam genişlikte ikon şeridinin dikey yeri.</summary>
+    public VerticalAlignment VerticalStripAlignment => _settings.Dock.IconAlignment switch
+    {
+        DockIconAlignment.Left => VerticalAlignment.Top,
+        DockIconAlignment.Right => VerticalAlignment.Bottom,
+        _ => VerticalAlignment.Center
+    };
+
     /// <summary>Başlat düğmesinin simgesi. Ayar değişince ViewModel yeniden kurulur (DockSettingsDiff), bildirim gerekmez.</summary>
     public ImageSource? StartIcon { get; }
 
     public DockController Controller => _controller;
     public AppSettings Settings => _settings;
 
+    // Simge paketi ve uygulama başına değişim. Ayar değişince ViewModel yeniden kurulur (DockSettingsDiff), örnek de yenilenir.
+    private readonly DockAppIcons _appIcons;
+
+    private void AttachAppIcon(DockItemViewModel vm)
+    {
+        vm.IconOwner = this;
+        if (!_appIcons.IsActive)
+            return;
+
+        var custom = _appIcons.Resolve(vm.Model);
+        var hasOverride = _appIcons.HasOverride(vm.Model);
+        if (custom is not null || hasOverride)
+            vm.ApplyAppIcon(custom, hasOverride);
+    }
+
+    /// <summary>"Simgeyi değiştir...": PNG/ICO seçtirir, doğrulanmış yolu bütün anahtarlarıyla kaydeder, dock yeniden kurulur.</summary>
+    public void ChangeAppIcon(DockItemViewModel item)
+    {
+        var keys = AppIconKey.All(item.Model.AppUserModelId, item.Model.Id);
+        if (keys.Count == 0)
+            return;
+
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = Strings.Get("DockItemIconPickTitle"),
+            Filter = Strings.Get("DockItemIconPickFilter"),
+            CheckFileExists = true
+        };
+
+        if (dialog.ShowDialog() != true)
+            return;
+
+        // Dosya, ayara yazılmadan önce gerçekten çözülebiliyor olmalı; bozuk dosya sessizce yok sayılır.
+        if (DockStartIconLoader.LoadFile(dialog.FileName) is null)
+            return;
+
+        var overrides = new ValueDictionary<string>(_settings.Appearance.AppIconOverrides);
+        var accepted = false;
+        foreach (var key in keys)
+            accepted |= AppIconOverrides.TrySet(overrides, key, dialog.FileName);
+
+        if (accepted)
+            SaveAppIconOverrides(overrides);
+    }
+
+    /// <summary>"Simgeyi sıfırla": öğenin bütün anahtarlarındaki değişimi siler.</summary>
+    public void ResetAppIcon(DockItemViewModel item)
+    {
+        var overrides = new ValueDictionary<string>(_settings.Appearance.AppIconOverrides);
+        foreach (var key in AppIconKey.All(item.Model.AppUserModelId, item.Model.Id))
+            AppIconOverrides.Reset(overrides, key);
+
+        SaveAppIconOverrides(overrides);
+    }
+
+    // Bellekteki ayar bilerek değiştirilmez: ReloadDock eski ve yeni ayarı karşılaştırıp (DockSettingsDiff) dock'u kurar.
+    private static void SaveAppIconOverrides(ValueDictionary<string> overrides)
+    {
+        DockFeature.SaveAppIconOverrides(overrides);
+        (Application.Current as App)?.ReloadDock();
+    }
+
     /// <summary>Ayar nesnesini değiştirir (yerinde ayar uygulaması): sabit sırası/klasör yazımları ile okuyucular aynı nesneyi görür.</summary>
-    public void AdoptSettings(AppSettings settings) => _settings = settings;
+    public void AdoptSettings(AppSettings settings)
+    {
+        _settings = settings;
+        OnPropertyChanged(nameof(Edge));
+        OnPropertyChanged(nameof(IsVertical));
+        OnPropertyChanged(nameof(StripOrientation));
+        OnPropertyChanged(nameof(LengthPercent));
+        OnPropertyChanged(nameof(EdgeOffsetDip));
+        OnPropertyChanged(nameof(InnerPadding));
+        OnPropertyChanged(nameof(SlotMargin));
+        OnPropertyChanged(nameof(PreviewPlacement));
+        OnPropertyChanged(nameof(PreviewVerticalOffset));
+        OnPropertyChanged(nameof(PreviewHorizontalOffset));
+        OnPropertyChanged(nameof(SeparatorWidth));
+        OnPropertyChanged(nameof(SeparatorHeight));
+        OnPropertyChanged(nameof(SeparatorMargin));
+        OnPropertyChanged(nameof(DodgeHandleWidth));
+        OnPropertyChanged(nameof(DodgeHandleHeight));
+        OnPropertyChanged(nameof(DodgeHandleHorizontalAlignment));
+        OnPropertyChanged(nameof(DodgeHandleVerticalAlignment));
+        OnPropertyChanged(nameof(DodgeHandleMargin));
+        OnPropertyChanged(nameof(FullWidthBorderThickness));
+        OnPropertyChanged(nameof(FullWidthPadding));
+        OnPropertyChanged(nameof(StripAlignment));
+        OnPropertyChanged(nameof(VerticalStripAlignment));
+        foreach (var item in Items)
+            item.IsVertical = IsVertical;
+        RecomputeFit();
+        EvaluatePosition(_lastContentWidth);
+    }
+
+    // Bu dock'un bulunduğu monitörün sınırları (piksel). Yalnız "yalnız bu monitörün pencereleri" ayarında kullanılır.
+    private WindowRect? _monitorBounds;
+
+    /// <summary>Dock'un monitörü değişti (ekran düzeni): süzgeç yeni sınırlarla yeniden uygulanır.</summary>
+    public void SetMonitorBounds(WindowRect bounds)
+    {
+        if (_monitorBounds == bounds)
+            return;
+
+        _monitorBounds = bounds;
+        if (_settings.Dock.WindowMonitorScope == DockWindowMonitorScope.CurrentMonitor)
+            UpdateItems();
+    }
+
+    private IReadOnlyList<DockItem> VisibleModels() =>
+        _settings.Dock.WindowMonitorScope == DockWindowMonitorScope.CurrentMonitor && _monitorBounds is { } bounds
+            ? DockMonitorFilter.Apply(_controller.Items, bounds, _controller.ForegroundHandle)
+            : _controller.Items;
     public DockStatusViewModel? Status { get; }
 
     public DockViewModel(
@@ -339,6 +556,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         StartMenuActions? startMenu = null)
     {
         _settings = settings;
+        _appIcons = new DockAppIcons(settings);
         _recentFiles = recentFiles;
         JumpLists = jumpLists;
         StartContextMenu = startMenu;
@@ -361,12 +579,14 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         StartIcon = settings.Dock.ShowStartButton ? DockStartIconLoader.Load(settings) : null;
         _showFolders = settings.Dock.ShowFolders;
         _showBadges = settings.Dock.ShowBadges;
+        _presentation = DockPresentationStyle.From(settings.Dock);
 
         _materialSettings = settings;
         UpdateMaterialSurfaces();
         MaterialState.Changed += OnMaterialChanged;
 
-        _translateSpring = new Spring(0) { Stiffness = 280, Damping = 25 };
+        _translateXSpring = new Spring(0) { Stiffness = 280, Damping = 25 };
+        _translateYSpring = new Spring(0) { Stiffness = 280, Damping = 25 };
         _opacitySpring = new Spring(1.0) { Stiffness = 200, Damping = 24 };
 
         _thumbnailHoverTimer = new DispatcherTimer
@@ -522,7 +742,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         {
             timer.Stop();
             if (!IsTrayPopupOpen)
+            {
                 TrayIcons.Clear();
+                _trayExeByOwner.Clear();
+            }
         };
         return timer;
     }
@@ -557,7 +780,13 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         if (_trayService is null)
             return;
 
-        var models = _trayService.GetVisibleIcons();
+        // Uygulama başına görünürlük (issue #77): Gizli olanlar tepsi penceresine hiç girmez. Exe adı sahip pencere
+        // başına bir kez okunur; pencere kapanınca önbellek simgelerle birlikte bırakılır.
+        var perApp = _settings.Dock.TrayAppVisibility ?? new ValueDictionary<TrayIconVisibility>();
+        var newDefault = _settings.Dock.NewTrayIconVisibility;
+        var models = _trayService.GetVisibleIcons()
+            .Where(m => TrayIconVisibilityPolicy.Resolve(TrayExeName(m.OwnerHwnd), perApp, newDefault) != TrayIconVisibility.Hidden)
+            .ToList();
 
         for (var i = TrayIcons.Count - 1; i >= 0; i--)
         {
@@ -588,7 +817,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             }
             else
             {
-                vm = new TrayIconViewModel(model);
+                vm = new TrayIconViewModel(model, TrayExeName(model.OwnerHwnd));
                 TrayIcons.Insert(targetIndex, vm);
             }
 
@@ -596,6 +825,19 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
 
         HasTrayIcons = TrayIcons.Count > 0;
+    }
+
+    private readonly Dictionary<nint, string> _trayExeByOwner = [];
+
+    private string TrayExeName(nint ownerHwnd)
+    {
+        if (!_trayExeByOwner.TryGetValue(ownerHwnd, out var name))
+        {
+            name = TrayAppNames.ForOwner(ownerHwnd);
+            _trayExeByOwner[ownerHwnd] = name;
+        }
+
+        return name;
     }
 
     [RelayCommand]
@@ -684,19 +926,23 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     {
         double icon;
         double maxWidth;
+        var spacing = _settings.Dock.IconSpacingDip;
+        var isVertical = IsVertical;
 
         if (_settings.Dock.Style == DockStyleMode.FullWidth)
         {
             if (_centerWidth <= 0)
                 return;
 
-            icon = DockFitMath.FitIconSize(_preferredIconSize, Items.Count, 0, _centerWidth);
+            icon = DockFitMath.FitIconSize(_preferredIconSize, Items.Count, 0, _centerWidth, spacing);
             maxWidth = _centerWidth;
         }
         else
         {
-            var monitorWidth = _currentMonitor?.WidthDip > 0 ? _currentMonitor.WidthDip : 1920.0;
-            var available = monitorWidth - CapsuleWindowSideMargins;
+            var monitorDimension = isVertical
+                ? (_currentMonitor?.HeightDip > 0 ? _currentMonitor.HeightDip : 1080.0)
+                : (_currentMonitor?.WidthDip > 0 ? _currentMonitor.WidthDip : 1920.0);
+            var available = monitorDimension - CapsuleWindowSideMargins;
             var right = RightSection;
             var otherSlots = (ShowStartButton ? 1 : 0) + (ShowFolders ? 1 : 0) + (ShowRecents ? 1 : 0)
                              + (right.ShowFullTray ? 1 : 0) + 1; // +1: Koy menüsü
@@ -704,12 +950,12 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                              + (right.ShowFirstSeparator ? CapsuleSeparatorWidth : 0.0)
                              + (right.ShowSmallTray ? DockRightSection.SmallTrayWidthDip + 1.0 : 0.0);
 
-            icon = DockFitMath.FitIconSize(_preferredIconSize, Items.Count + otherSlots, fixedWidth, available);
-            maxWidth = DockFitMath.StripMaxWidth(available, fixedWidth + otherSlots * DockFitMath.SlotWidth(icon));
+            icon = DockFitMath.FitIconSize(_preferredIconSize, Items.Count + otherSlots, fixedWidth, available, spacing);
+            maxWidth = DockFitMath.StripMaxWidth(available, fixedWidth + otherSlots * DockFitMath.SlotWidth(icon, spacing));
         }
 
         ItemsMaxWidth = maxWidth;
-        IsStripClipped = Items.Count * DockFitMath.SlotWidth(icon) > maxWidth + 0.5;
+        IsStripClipped = Items.Count * DockFitMath.SlotWidth(icon, spacing) > maxWidth + 0.5;
 
         if (Math.Abs(icon - IconSize) < 0.01)
             return;
@@ -843,14 +1089,20 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             effectiveMouseOver,
             _isForegroundWindowFullscreen,
             _settings.Dock.HideInFullscreen,
-            _settings.Dock.EdgeReveal);
+            _settings.Dock.EdgeReveal,
+            _settings.Dock.Edge,
+            _settings.Dock.LengthPercent,
+            _settings.Dock.EdgeOffsetDip,
+            _settings.Dock.InnerPaddingDip);
 
         resolved = StabilizeSnap(resolved);
 
         IsFullWidthMode = resolved.IsFullWidth;
         IsSnapped = resolved.IsSnapped;
         IsHandleVisible = resolved.IsHandleVisible;
-        DockHeight = resolved.HeightDip;
+        DockHeight = IsVertical ? resolved.WidthDip : resolved.HeightDip;
+        CapsuleWidth = IsVertical ? DockHeight : double.NaN;
+        CapsuleHeight = IsVertical ? double.NaN : DockHeight;
 
         if (resolved.IsFullWidth)
         {
@@ -859,7 +1111,13 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
         else if (resolved.IsSnapped)
         {
-            DockMargin = new Thickness(12, 12, 12, 0);
+            DockMargin = Edge switch
+            {
+                DockEdge.Top => new Thickness(12, 0, 12, 12),
+                DockEdge.Left => new Thickness(0, 12, 12, 12),
+                DockEdge.Right => new Thickness(12, 12, 0, 12),
+                _ => new Thickness(12, 12, 12, 0)
+            };
             CapsuleCornerRadius = new CornerRadius(
                 resolved.CornerRadiusTopLeft,
                 resolved.CornerRadiusTopRight,
@@ -868,7 +1126,13 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
         else
         {
-            DockMargin = new Thickness(12, 12, 12, 10);
+            DockMargin = Edge switch
+            {
+                DockEdge.Top => new Thickness(12, 10, 12, 12),
+                DockEdge.Left => new Thickness(10, 12, 12, 12),
+                DockEdge.Right => new Thickness(12, 12, 10, 12),
+                _ => new Thickness(12, 12, 12, 10)
+            };
             CapsuleCornerRadius = new CornerRadius(18);
         }
 
@@ -882,7 +1146,11 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
 
         IsVisible = shouldShow;
+        // Çekil tutamağı zaten gizli dock'u işaret eder; ikisi üst üste çizilmez.
+        IsEdgeLineVisible = !resolved.IsHandleVisible && DockPresentationMath.ShowsHiddenEdgeLine(
+            _settings.Dock.HiddenEdgeLine, !shouldShow, isBlockedByFullscreen || _isForegroundWindowFullscreen);
         Status?.SetActive(shouldShow);
+        SyncClockTimer();
 
         // Fare izleme yalnız dock gizliyken (ya da kenardan açıldıysa, kapanışını görmek için) ve tam ekranda değilken
         // gerekir; tam ekranda kenardan açılma yok.
@@ -893,17 +1161,43 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             EdgeWatchChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        var targetY = shouldShow ? resolved.TranslationY : (resolved.IsFullWidth ? (DockPositionResolver.FullWidthHeightDip + 10.0) : 80.0);
+        double targetX, targetY;
+        if (shouldShow)
+        {
+            targetX = resolved.TranslationX;
+            targetY = resolved.TranslationY;
+        }
+        else if (resolved.IsHidden)
+        {
+            targetX = resolved.TranslationX;
+            targetY = resolved.TranslationY;
+        }
+        else
+        {
+            var thickness = resolved.IsFullWidth ? DockPositionResolver.FullWidthHeightDip : (resolved.IsSnapped ? DockPositionResolver.SnappedHeightDip : DockPositionResolver.FloatingHeightDip);
+            var offset = resolved.IsFullWidth ? _settings.Dock.EdgeOffsetDip : (resolved.IsSnapped ? _settings.Dock.EdgeOffsetDip : (DockPositionResolver.FloatingBottomMarginDip + _settings.Dock.EdgeOffsetDip));
+            var shift = thickness + offset + 10.0;
+            (targetX, targetY) = _settings.Dock.Edge switch
+            {
+                DockEdge.Top => (0.0, -shift),
+                DockEdge.Left => (-shift, 0.0),
+                DockEdge.Right => (shift, 0.0),
+                _ => (0.0, shift)
+            };
+        }
+
         var targetOpacity = shouldShow ? resolved.Opacity : 0.0;
 
         if (ReduceMotion)
         {
-            _translateSpring.SnapTo(targetY);
+            _translateXSpring.SnapTo(targetX);
+            _translateYSpring.SnapTo(targetY);
             _opacitySpring.SnapTo(targetOpacity);
         }
         else
         {
-            _translateSpring.Target = targetY;
+            _translateXSpring.Target = targetX;
+            _translateYSpring.Target = targetY;
             _opacitySpring.Target = targetOpacity;
         }
 
@@ -943,6 +1237,26 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
         _thumbnailHoverTimer.Stop();
         _thumbnailHoverTimer.Start();
+    }
+
+    /// <summary>
+    /// Sol tık "önizlemeleri göster" iken: bekleme olmadan önizleme kutucuğunu açar. Önizleme kapalıysa ya da
+    /// açık pencere yoksa false döner (çağıran varsayılan tık eylemine düşer).
+    /// </summary>
+    public bool TryShowPreviewNow(DockItemViewModel item, UIElement element)
+    {
+        if (!_settings.Dock.ThumbnailPreview || !item.HasOpenWindows)
+            return false;
+
+        _thumbnailHoverTimer.Stop();
+        _previewCloseTimer.Stop();
+        _pendingPreviewItem = item;
+        PreviewPlacementTarget = element;
+        PreviewItem = item;
+        // PlacementTarget değişince HWND konumunu güncellemesi için IsOpen tazelenir (OnItemMouseEnter ile aynı).
+        IsPreviewPopupOpen = false;
+        IsPreviewPopupOpen = true;
+        return true;
     }
 
     public void OnItemMouseLeave()
@@ -1014,6 +1328,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         // Tepe büyüme çubuğun yüksekliğine göre sınırlanır (48 px çubukta öğe taşmaz); komşu yarısı kadar büyür.
         var peak = DockFitMath.HoverPeakScale(DockHeight, ItemSize);
         var neighbor = 1.0 + (peak - 1.0) * 0.5;
+        // Büyütme animasyonu anahtarı kapalıysa büyüme yine olur ama yaysız, tek karede (issue #79).
+        var animate = MagnifyAnimates;
 
         for (var i = 0; i < Items.Count; i++)
         {
@@ -1024,7 +1340,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                 1 => neighbor,
                 _ => 1.0
             };
-            Items[i].SetTargetScale(targetScale);
+            if (animate)
+                Items[i].SetTargetScale(targetScale);
+            else
+                Items[i].SnapScale(targetScale);
         }
 
         _isAnimating = true;
@@ -1039,7 +1358,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     /// <summary>Öğe sürüklenebilir mi: sabitli, sıralama destekleniyor ve en az iki sabitli var.</summary>
     public bool CanStartReorder(DockEntryViewModel item)
-        => item.IsPinned && _controller.CanReorderPinned && Items.Count(i => i.IsPinned) > 1;
+        => !_hasExtras && item.IsPinned && _controller.CanReorderPinned && Items.Count(i => i.IsPinned) > 1;
 
     public int PinnedCount => Items.Count(i => i.IsPinned);
 
@@ -1139,9 +1458,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     public void OnHoverEnded()
     {
+        var animate = MagnifyAnimates;
         for (var i = 0; i < Items.Count; i++)
         {
-            if (ReduceMotion)
+            if (!animate)
                 Items[i].SnapScale(1.0);
             else
                 Items[i].SetTargetScale(1.0);
@@ -1158,10 +1478,12 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
         deltaSeconds *= TimeScale;
 
-        var tMoving = _translateSpring.Step(deltaSeconds);
+        var txMoving = _translateXSpring.Step(deltaSeconds);
+        var tyMoving = _translateYSpring.Step(deltaSeconds);
         var oMoving = _opacitySpring.Step(deltaSeconds);
 
-        TranslationY = _translateSpring.Value;
+        TranslationX = _translateXSpring.Value;
+        TranslationY = _translateYSpring.Value;
         Opacity = Math.Clamp(_opacitySpring.Value, 0.0, 1.0);
 
         var scaleMoving = false;
@@ -1175,7 +1497,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                 scaleMoving = true;
         }
 
-        if (!tMoving && !oMoving && !scaleMoving)
+        if (!txMoving && !tyMoving && !oMoving && !scaleMoving)
         {
             _isAnimating = false;
             AnimationStopped?.Invoke(this, EventArgs.Empty);
@@ -1233,7 +1555,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     {
         Application.Current?.Dispatcher.InvokeAsync(() =>
         {
-            var models = _controller.Items;
+            var models = VisibleModels();
             var folders = _settings.DockItems.Folders ?? [];
             var pinnedOrder = _settings.DockItems.PinnedOrder ?? [];
 
@@ -1255,8 +1577,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                 {
                     IconSize = IconSize,
                     ItemSize = ItemSize,
-                    UseLineIndicator = _settings.Dock.IndicatorStyle == DockIndicatorStyle.Line
+                    Presentation = _presentation
                 };
+                AttachAppIcon(vm);
                 itemVmCache[m.Id] = vm;
                 itemVmCache[PinnedOrder.IdOf(m.Id)] = vm;
             }
@@ -1264,6 +1587,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             // 3. Hedef dock sırasını belirle
             var availableLnkIds = models.Where(m => m.IsPinned).Select(m => PinnedOrder.IdOf(m.Id)).ToList();
             var (effectiveOrder, reconciledFolders) = PinnedOrder.Reconcile(pinnedOrder, availableLnkIds, folders);
+            _effectiveOrder = effectiveOrder;
 
             var folderDict = reconciledFolders.ToDictionary(f => f.Id, StringComparer.OrdinalIgnoreCase);
             var desiredEntries = new List<DockEntryViewModel>();
@@ -1299,8 +1623,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                                 {
                                     IconSize = IconSize,
                                     ItemSize = ItemSize,
-                                    UseLineIndicator = _settings.Dock.IndicatorStyle == DockIndicatorStyle.Line
+                                    Presentation = _presentation
                                 };
+                                AttachAppIcon(fallbackVm);
                                 folderItems.Add(fallbackVm);
                             }
                         }
@@ -1319,8 +1644,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                             var newFolderVm = new DockFolderViewModel(folder, folderItems, this)
                             {
                                 IconSize = IconSize,
-                                ItemSize = ItemSize,
-                                UseLineIndicator = _settings.Dock.IndicatorStyle == DockIndicatorStyle.Line
+                                ItemSize = ItemSize
                             };
                             desiredEntries.Add(newFolderVm);
                         }
@@ -1366,7 +1690,13 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                 }
             }
 
+            // Ek öğeler varsa şerit düzenine katılır (yoksa desiredEntries aynen kalır).
+            desiredEntries = ComposeExtras(desiredEntries);
+
             // 4. Koleksiyonu yerinde güncelle
+            foreach (var entry in desiredEntries)
+                entry.IsVertical = IsVertical;
+
             var desiredIds = new HashSet<string>(desiredEntries.Select(e => e.Id), StringComparer.OrdinalIgnoreCase);
             for (var i = Items.Count - 1; i >= 0; i--)
             {
@@ -1407,8 +1737,198 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
             RecomputeFit();
             EvaluatePosition(_lastContentWidth);
+            SyncClockTimer();
         });
     }
+
+    #region Ek öğeler
+
+    /// <summary>
+    /// Kayıtlı ek öğeleri uygulama/klasör girdileriyle birleştirir. Ek öğe yoksa girdiler değişmeden döner.
+    /// Sabitlenmemiş çalışan uygulamalar son sabitli girdinin arkasına girer.
+    /// </summary>
+    private List<DockEntryViewModel> ComposeExtras(List<DockEntryViewModel> entries)
+    {
+        var specs = DockItemRules.Resolve(_settings.DockItems.Items, _settings.DockItems.PinnedOrder ?? []);
+        _hasExtras = DockItemLayout.HasExtras(specs);
+        if (!_hasExtras)
+        {
+            _layout = specs;
+            return entries;
+        }
+
+        var layout = DockItemLayout.Merge(specs, _effectiveOrder);
+        _layout = layout;
+
+        var pinned = new Dictionary<string, DockEntryViewModel>(StringComparer.OrdinalIgnoreCase);
+        var running = new List<DockEntryViewModel>();
+        foreach (var entry in entries)
+        {
+            if (entry.IsPinned)
+                pinned.TryAdd(entry is DockFolderViewModel ? entry.Id : PinnedOrder.IdOf(entry.Id), entry);
+            else
+                running.Add(entry);
+        }
+
+        var result = new List<DockEntryViewModel>();
+        var separators = 0;
+        var spacers = 0;
+        for (var i = 0; i < layout.Count; i++)
+        {
+            var spec = layout[i];
+            var token = DockItemLayout.TokenOf(spec);
+            if (token is not null)
+            {
+                if (pinned.TryGetValue(token, out var entry))
+                    result.Add(entry);
+                continue;
+            }
+
+            var id = spec.Kind switch
+            {
+                DockItemKind.Separator => $"item:separator:{separators++}",
+                DockItemKind.Spacer => $"item:spacer:{spacers++}",
+                _ => $"item:{spec.Kind.ToString().ToLowerInvariant()}:{spec.Id}",
+            };
+
+            var extra = Items.OfType<DockExtraViewModel>().FirstOrDefault(x => string.Equals(x.Id, id, StringComparison.OrdinalIgnoreCase));
+            if (extra is null)
+                extra = new DockExtraViewModel(spec, id, i);
+            else
+                extra.Update(spec, i);
+
+            extra.IconSize = IconSize;
+            extra.ItemSize = ItemSize;
+            extra.Title = ExtraTitle(spec);
+            result.Add(extra);
+        }
+
+        var lastPinned = result.FindLastIndex(e => e.IsPinned);
+        result.InsertRange(lastPinned + 1, running);
+        return result;
+    }
+
+    private static string ExtraTitle(DockItemSpec spec) => spec.Kind switch
+    {
+        DockItemKind.Clock => Resources.Strings.Get("DockItemClock"),
+        DockItemKind.Trash => Resources.Strings.Get("DockItemTrash"),
+        DockItemKind.Custom => DockCustomCommand.TryParse(spec.Command, out var launch)
+            ? launch.Target
+            : Resources.Strings.Get("DockItemCustom"),
+        _ => string.Empty,
+    };
+
+    /// <summary>Ek öğeye tıklandı. Saat Bildirim Merkezi'ni (takvim), çöp kutusu Geri Dönüşüm Kutusu'nu, özel düğme hedefini açar.</summary>
+    public void ActivateExtra(DockExtraViewModel extra)
+    {
+        ClosePreviewNow();
+        switch (extra.Kind)
+        {
+            case DockItemKind.Clock:
+                _shellActionService.OpenNotificationCenter();
+                break;
+            case DockItemKind.Trash:
+                // Boşaltma bu sürümde yok: yalnız kutuyu açar. Doluluk durumu için yoklama gerekeceğinden simge sabittir.
+                _shellActionService.Launch("shell:RecycleBinFolder");
+                break;
+            case DockItemKind.Custom:
+                // Komut güvenilmez: Core ayrıştırır, geçersizse hiçbir şey çalışmaz. Hedef ve bağımsız değişken ayrı geçer.
+                if (DockCustomCommand.TryParse(extra.Spec.Command, out var launch))
+                    _shellActionService.Launch(launch.Target, launch.Arguments);
+                break;
+        }
+    }
+
+    [RelayCommand]
+    private void AddSeparator() => AddExtra(new DockItemSpec(DockItemKind.Separator, "", ""));
+
+    [RelayCommand]
+    private void AddSpacer() => AddExtra(new DockItemSpec(DockItemKind.Spacer, "", ""));
+
+    [RelayCommand]
+    private void AddClock() => AddExtra(new DockItemSpec(DockItemKind.Clock, nameof(DockItemKind.Clock), ""));
+
+    [RelayCommand]
+    private void AddTrash() => AddExtra(new DockItemSpec(DockItemKind.Trash, nameof(DockItemKind.Trash), ""));
+
+    [RelayCommand]
+    private void AddCustom()
+    {
+        var command = DockCustomButtonPicker.PickCommand();
+        if (command is not null)
+            AddExtra(new DockItemSpec(DockItemKind.Custom, DockItemLayout.NewCustomId(), command));
+    }
+
+    private void AddExtra(DockItemSpec spec)
+    {
+        var current = DockItemLayout.Merge(
+            DockItemRules.Resolve(_settings.DockItems.Items, _settings.DockItems.PinnedOrder ?? []),
+            _effectiveOrder);
+        SaveLayout(DockItemLayout.Add(current, spec));
+    }
+
+    public void RemoveExtra(DockExtraViewModel extra) =>
+        SaveLayout(DockItemLayout.RemoveAt(_layout, extra.LayoutIndex));
+
+    /// <summary>Ek öğeyi bir yuva sola (-1) ya da sağa (+1) kaydırır.</summary>
+    public void MoveExtra(DockExtraViewModel extra, int delta) =>
+        SaveLayout(DockItemRules.Move(_layout, extra.LayoutIndex, extra.LayoutIndex + delta));
+
+    private void SaveLayout(IReadOnlyList<DockItemSpec> layout)
+    {
+        DockFeature.SaveItems(DockItemLayout.ToStoredEntries(layout), _settings);
+        UpdateItems();
+    }
+
+    /// <summary>
+    /// Saat zamanlayıcısı yalnız dock görünürken ve şeritte saat varken çalışır; dakika başına hizalı tek uyanma
+    /// (saniye gösterilmez). Gizlenince durur (AGENTS #5).
+    /// </summary>
+    private void SyncClockTimer()
+    {
+        var clocks = Items.OfType<DockExtraViewModel>().Where(x => x.IsClock).ToList();
+        if (_disposed || !IsVisible || clocks.Count == 0)
+        {
+            _clockTimer?.Stop();
+            return;
+        }
+
+        if (_clockTimer is null)
+        {
+            _clockTimer = new DispatcherTimer(DispatcherPriority.Background);
+            _clockTimer.Tick += OnClockTimerTick;
+        }
+
+        if (_clockTimer.IsEnabled)
+        {
+            foreach (var clock in clocks.Where(c => c.TimeText.Length == 0))
+                ApplyClockText(clock, DateTime.Now);
+            return;
+        }
+
+        OnClockTimerTick(null, EventArgs.Empty);
+    }
+
+    private void OnClockTimerTick(object? sender, EventArgs e)
+    {
+        var now = DateTime.Now;
+        foreach (var clock in Items.OfType<DockExtraViewModel>().Where(x => x.IsClock))
+            ApplyClockText(clock, now);
+
+        if (_clockTimer is null)
+            return;
+
+        _clockTimer.Interval = DockClockTick.DelayToNextMinute(now);
+        _clockTimer.Start();
+    }
+
+    private static void ApplyClockText(DockExtraViewModel clock, DateTime now)
+    {
+        clock.TimeText = DockClockTick.FormatTime(now, System.Globalization.CultureInfo.CurrentCulture);
+        clock.DateText = DockClockTick.FormatDate(now, System.Globalization.CultureInfo.CurrentCulture);
+    }
+
+    #endregion
 
     private void OnMediaChanged(object? sender, MediaInfo? info)
     {
@@ -1485,6 +2005,11 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _previewCloseTimer.Stop();
         _dodgeHoverTimer.Stop();
         _snapTimer?.Stop();
+        if (_clockTimer is not null)
+        {
+            _clockTimer.Stop();
+            _clockTimer.Tick -= OnClockTimerTick;
+        }
 
         DockContextMenuManager.ActiveMenuChanged -= OnActiveMenuChanged;
 

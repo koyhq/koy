@@ -10,6 +10,7 @@ using Koy.App.Features.ClipboardPanel;
 using Koy.App.Features.ControlCenter;
 using Koy.App.Features.Focus;
 using Koy.App.Features.Home;
+using Koy.App.Features.Notch.LiveBackground;
 using Koy.App.Features.Music;
 using Koy.App.Features.Notch.OSD;
 using Koy.App.Features.Search;
@@ -18,6 +19,7 @@ using Koy.App.Features.Settings;
 using Koy.App.Features.Shelf;
 using Koy.App.Features.Status;
 using Koy.App.Features.SystemInfo;
+using Koy.Core.Clock;
 using Koy.Core.Notch;
 using Koy.Core.Power;
 using Koy.Core.Settings;
@@ -143,11 +145,28 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     public bool ReduceMotion => Settings.Appearance.BatterySaverReduceMotion && _status.IsOnBattery;
 
+    /// <summary>Canlı arka plan (issue #67): açık çentik zemini ve müzik kartı zemini için seçim ve oynatma kararı. Varsayılan kapalı.</summary>
+    public LiveBackgroundState LiveBackground { get; }
+
     /// <summary>Müzik çalarken dalga simgesi gösterilsin mi.</summary>
     public bool ShowMusicWaveform => Settings.Music.ShowWaveform;
 
+    /// <summary>Kapalı çentikteki dalga simgesi çubuklarının yükseklikleri (Settings.Music.VisualizerBarCount kadar).</summary>
+    public IReadOnlyList<double> WaveformBars { get; }
+
+    /// <summary>Dalga simgesinin rengi (VisualizerColorSource Artwork ise albüm rengi, aksi halde yeşil gösterge rengi).</summary>
+    public Brush WaveformBrush => (Settings.Music.VisualizerColorSource == NotchVisualizerColorSource.Artwork && _music.SpectrumBrush is not null)
+        ? _music.SpectrumBrush
+        : (Brush?)System.Windows.Application.Current?.TryFindResource("KoyNotchAccentMusic") ?? new SolidColorBrush(Color.FromRgb(0x4A, 0xDE, 0x80));
+
     /// <summary>Açık çentiğin üstündeki sekmeler; ayarlarda açık paneller, ayardaki sırayla.</summary>
     public ObservableCollection<NotchTabViewModel> Tabs { get; } = [];
+
+    /// <summary>Sekme çubuğu görünür mü (biçim "gizli" değilse; issue #78). Gizliyken paneller tekerlek ve kısayolla değişir.</summary>
+    public bool ShowTabBar => Settings.Notch.TabBarStyle != NotchTabBarStyle.Hidden;
+
+    /// <summary>Sekme adları görünür mü (biçim "simge ve ad").</summary>
+    public bool ShowTabLabels => Settings.Notch.TabBarStyle == NotchTabBarStyle.IconAndLabel;
 
     /// <summary>Kontrol paneli açıksa Wi-Fi / Bluetooth izlenir ve kapalı çentikte simgeleri gösterilebilir.</summary>
     public bool ShowRadioStatus { get; }
@@ -228,7 +247,16 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private string _title = "Koy";
 
     [ObservableProperty]
-    private string _clockTime = DateTime.Now.ToString("HH:mm");
+    [NotifyPropertyChangedFor(nameof(ClockDisplay))]
+    private string _clockTime = "";
+
+    /// <summary>Klasik göz atma satırının sonuna eklenen tarih ve ikinci saat (" · 12 Kas · UTC+9 21:00"); ikisi de kapalıysa boş.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ClockDisplay))]
+    private string _clockPeekExtras = "";
+
+    /// <summary>Klasik soldaki saat metni: Peek'te tarih ve ikinci saat eklenir, kapalıyken yalnız saat (genişlik korunur).</summary>
+    public string ClockDisplay => State == NotchState.Peek ? ClockTime + ClockPeekExtras : ClockTime;
 
     [ObservableProperty]
     private int _batteryPercent = 100;
@@ -249,6 +277,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     private void NotifyLayoutChanged()
     {
+        OnPropertyChanged(nameof(ClockDisplay));
         OnPropertyChanged(nameof(ShowCollapsedLayout));
         OnPropertyChanged(nameof(ShowPeekLayout));
         if (IsIdleRing)
@@ -300,8 +329,10 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         _shelf = shelf;
         _calendar = calendar;
         _clipboard = clipboard;
+        WaveformBars = GenerateWaveformBars(settings.Music.VisualizerBarCount);
+        LiveBackground = new LiveBackgroundState(settings.Notch);
         Home = new HomeViewModel(music, status, focus, systemStats, quickLaunch, shellActions, () => _controller.GoToPanel(NotchPanel.Focus),
-            controlCenter.BluetoothDevices);
+            controlCenter.BluetoothDevices, settings.Notch.HomeCards) { LiveBackground = LiveBackground };
         quickLaunch.HoldOpen = HoldOpenForPicker;
         _visibility = visibility ?? new VisibilityController(settings.Notch.Visibility);
         _dispatcher = dispatcher ?? (System.Windows.Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher);
@@ -365,6 +396,10 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         {
             UpdateBatteryState();
         }
+
+        // Fişe takılıp çıkarılınca canlı arka plan hareket ↔ ilk kare arasında geçer.
+        if (e.PropertyName == nameof(StatusViewModel.IsOnBattery))
+            UpdateLiveBackground();
     }
 
     private void UpdateBatteryState()
@@ -406,10 +441,11 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
             return;
 
         UpdateClock();
-        // Dakika başına hizalı: dakikada bir uyanır, saat dakika döner dönmez değişir (ClockTick).
+        // Saniye gösterilirken saniyede bir; değilse dakika başına hizalı, dakikada bir uyanır (ClockTick).
+        // Zamanlayıcı yalnız çentik görünürken çalışır (AGENTS #5).
         _clockTimer = new DispatcherTimer(DispatcherPriority.Background, _dispatcher)
         {
-            Interval = ClockTick.DelayToNextMinute(DateTime.Now)
+            Interval = NextClockDelay()
         };
         _clockTimer.Tick += (_, _) => OnClockTick();
         _clockTimer.Start();
@@ -431,8 +467,11 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     {
         UpdateClock();
         if (_clockTimer is not null)
-            _clockTimer.Interval = ClockTick.DelayToNextMinute(DateTime.Now);
+            _clockTimer.Interval = NextClockDelay();
     }
+
+    private TimeSpan NextClockDelay() =>
+        Settings.Notch.ClockShowSeconds ? TimeSpan.FromSeconds(1) : ClockTick.DelayToNextMinute(DateTime.Now);
 
     // SystemEvents kendi iş parçacığında çağırır; saat UI iş parçacığında yenilenir.
     private void OnSystemTimeChanged(object? sender, EventArgs e) => RunOnUi(() =>
@@ -444,12 +483,20 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private void UpdateClock()
     {
         var now = DateTime.Now;
-        ClockTime = now.ToString("HH:mm");
+        var clock = Settings.Notch;
+        ClockTime = now.ToString(ClockFormatPolicy.ResolveTimePattern(clock.ClockHourFormat, clock.ClockShowSeconds, CultureInfo.CurrentCulture), CultureInfo.CurrentCulture);
+        // İkinci saat ve tarih aynı saat tikinde güncellenir; ek zamanlayıcı yok.
+        var secondClock = SecondClock.Read(clock.ClockSecondTimeZoneId, DateTimeOffset.Now,
+            ClockFormatPolicy.ResolveTimePattern(clock.ClockHourFormat, false, CultureInfo.CurrentCulture), CultureInfo.CurrentCulture)?.Text;
+        var shortDate = clock.ClockShowDate ? IdleDisplayFormat.ShortDate(now, CultureInfo.CurrentCulture, clock.ClockCustomDateFormat) : null;
+        ClockPeekExtras = ClockFormatPolicy.ComposePeekLine("", shortDate, secondClock);
         if (IsIdleRing)
         {
             var culture = IdleCulture;
-            IdleDayTime = IdleDisplayFormat.DayTime(now, culture);
-            IdlePeekDate = "· " + IdleDisplayFormat.ShortDate(now, culture);
+            IdleDayTime = IdleDisplayFormat.DayTime(now, culture, ClockFormatPolicy.ResolveTimePattern(clock.ClockHourFormat, clock.ClockShowSeconds, culture));
+            IdlePeekDate = "· " + IdleDisplayFormat.ShortDate(now, culture, clock.ClockCustomDateFormat);
+            if (secondClock is not null)
+                IdlePeekDate += " · " + secondClock;
         }
     }
 
@@ -543,6 +590,10 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         UpdateActivePanels();
     }
 
+    // Açık ve görünür çentikte oynar; kapanınca / gizlenince Off olur (Core kararı), görünüm kareleri bırakır.
+    private void UpdateLiveBackground() =>
+        LiveBackground.Update(State == NotchState.Expanded, IsNotchVisible, ReduceMotion);
+
     private void OnEnabledPanelsChanged(object? sender, EventArgs e) => RunOnUi(RebuildTabs);
 
     // Sekmeler açık panellerden ve onların sırasından türer; liste değişince baştan kurulur.
@@ -555,6 +606,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     private void UpdateActivePanels()
     {
+        UpdateLiveBackground();
         // Arama açıkken sayfalar görünmez; servisleri de çalışmaz.
         var isExpanded = State == NotchState.Expanded && !IsSearchOpen;
         // Ses çubukları "kapak ve dalga" ayarına bağlı; pil tasarrufu hareketi kısarken hiç yakalanmaz.
@@ -774,5 +826,17 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         _clipboard?.Dispose();
         _search?.Dispose();
         Home.Dispose();
+    }
+
+    private static IReadOnlyList<double> GenerateWaveformBars(int count)
+    {
+        var clamped = NotchVisualizer.ClampBarCount(count);
+        var pattern = new double[] { 6, 12, 14, 10, 5, 11, 14, 8, 6, 13, 9, 5, 12, 14, 7, 5 };
+        var list = new List<double>(clamped);
+        for (var i = 0; i < clamped; i++)
+        {
+            list.Add(pattern[i % pattern.Length]);
+        }
+        return list;
     }
 }

@@ -137,9 +137,9 @@ public sealed class DockWindowGroupingTests
     {
         var dock = new AppSettings().Dock;
 
-        Assert.Equal(DockGroupingMode.Never, dock.GroupingMode);
+        Assert.Equal(DockGroupingMode.Always, dock.GroupingMode);
         Assert.Equal(DockWindowMonitorScope.AllMonitors, dock.WindowMonitorScope);
-        Assert.Equal(DockLeftClickAction.BringToFront, dock.LeftClickAction);
+        Assert.Equal(DockLeftClickAction.MinimizeIfActive, dock.LeftClickAction);
         Assert.Equal(DockLabelMode.Never, dock.LabelMode);
     }
 }
