@@ -591,7 +591,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private DockLeftClickAction _dockLeftClickAction = DockLeftClickAction.MinimizeIfActive;
 
     [ObservableProperty]
-    private DockGroupingMode _dockGroupingMode = DockGroupingMode.Never;
+    private DockGroupingMode _dockGroupingMode = DockGroupingMode.Always;
 
     [ObservableProperty]
     private DockLabelMode _dockLabelMode = DockLabelMode.Never;

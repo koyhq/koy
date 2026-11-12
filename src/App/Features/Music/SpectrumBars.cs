@@ -100,7 +100,7 @@ public sealed class SpectrumBars : FrameworkElement
 
     public static readonly DependencyProperty BarCountProperty = DependencyProperty.Register(
         nameof(BarCount), typeof(int), typeof(SpectrumBars),
-        new FrameworkPropertyMetadata(5, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender));
+        new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender));
 
     public int BarCount
     {
@@ -160,7 +160,7 @@ public sealed class SpectrumBars : FrameworkElement
     protected override Size MeasureOverride(Size availableSize)
     {
         var rawCount = Feed?.Levels.Length ?? 0;
-        var count = Math.Min(rawCount, NotchVisualizer.ClampBarCount(BarCount > 0 ? BarCount : 5));
+        var count = BarCount > 0 ? Math.Min(rawCount, NotchVisualizer.ClampBarCount(BarCount)) : rawCount;
         return new Size(count > 0 ? count * BarWidth + (count - 1) * Gap : 0, 0);
     }
 
@@ -170,7 +170,7 @@ public sealed class SpectrumBars : FrameworkElement
         if (rawLevels is null || rawLevels.Length == 0)
             return;
 
-        var count = Math.Min(rawLevels.Length, NotchVisualizer.ClampBarCount(BarCount > 0 ? BarCount : 5));
+        var count = BarCount > 0 ? Math.Min(rawLevels.Length, NotchVisualizer.ClampBarCount(BarCount)) : rawLevels.Length;
         if (count <= 0)
             return;
 
@@ -180,7 +180,7 @@ public sealed class SpectrumBars : FrameworkElement
         var radius = barWidth / 2;
         var total = count * barWidth + (count - 1) * gap;
         var x = Math.Max(0, (ActualWidth - total) / 2);
-        var fill = Fill;
+        var fill = Fill ?? TryFindResource("KoyNotchMusicSpectrum") as Brush ?? Brushes.White;
         var style = VisualizerStyle;
 
         for (var i = 0; i < count; i++, x += barWidth + gap)

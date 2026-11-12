@@ -151,6 +151,14 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     /// <summary>Müzik çalarken dalga simgesi gösterilsin mi.</summary>
     public bool ShowMusicWaveform => Settings.Music.ShowWaveform;
 
+    /// <summary>Kapalı çentikteki dalga simgesi çubuklarının yükseklikleri (Settings.Music.VisualizerBarCount kadar).</summary>
+    public IReadOnlyList<double> WaveformBars { get; }
+
+    /// <summary>Dalga simgesinin rengi (VisualizerColorSource Artwork ise albüm rengi, aksi halde yeşil gösterge rengi).</summary>
+    public Brush WaveformBrush => (Settings.Music.VisualizerColorSource == NotchVisualizerColorSource.Artwork && _music.SpectrumBrush is not null)
+        ? _music.SpectrumBrush
+        : (Brush?)System.Windows.Application.Current?.TryFindResource("KoyNotchAccentMusic") ?? new SolidColorBrush(Color.FromRgb(0x4A, 0xDE, 0x80));
+
     /// <summary>Açık çentiğin üstündeki sekmeler; ayarlarda açık paneller, ayardaki sırayla.</summary>
     public ObservableCollection<NotchTabViewModel> Tabs { get; } = [];
 
@@ -321,6 +329,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         _shelf = shelf;
         _calendar = calendar;
         _clipboard = clipboard;
+        WaveformBars = GenerateWaveformBars(settings.Music.VisualizerBarCount);
         LiveBackground = new LiveBackgroundState(settings.Notch);
         Home = new HomeViewModel(music, status, focus, systemStats, quickLaunch, shellActions, () => _controller.GoToPanel(NotchPanel.Focus),
             controlCenter.BluetoothDevices, settings.Notch.HomeCards) { LiveBackground = LiveBackground };
@@ -817,5 +826,17 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         _clipboard?.Dispose();
         _search?.Dispose();
         Home.Dispose();
+    }
+
+    private static IReadOnlyList<double> GenerateWaveformBars(int count)
+    {
+        var clamped = NotchVisualizer.ClampBarCount(count);
+        var pattern = new double[] { 6, 12, 14, 10, 5, 11, 14, 8, 6, 13, 9, 5, 12, 14, 7, 5 };
+        var list = new List<double>(clamped);
+        for (var i = 0; i < clamped; i++)
+        {
+            list.Add(pattern[i % pattern.Length]);
+        }
+        return list;
     }
 }
