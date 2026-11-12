@@ -368,6 +368,93 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
+        <!-- KURALLAR: ön plandaki uygulamaya göre profil (varsayılan kapalı) -->
+        <TextBlock Text="{Binding [RulesHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <StackPanel>
+                <TextBlock Text="{Binding [RulesAddTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                <TextBlock Text="{Binding [RulesAddDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                <TextBox Margin="0,8,0,0" Style="{StaticResource SettingTextBoxStyle}" MaxLength="120"
+                         Text="{Binding Rules.ProcessText, UpdateSourceTrigger=PropertyChanged}"
+                         AutomationProperties.Name="{Binding [RulesProcessHint], Source={x:Static res:Loc.Instance}}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Return" Command="{Binding Rules.AddCommand}" />
+                    </TextBox.InputBindings>
+                </TextBox>
+                <Grid Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox ItemsSource="{Binding Rules.RunningApps}" SelectedItem="{Binding Rules.PickedApp}"
+                              Style="{StaticResource SettingComboBoxStyle}"
+                              AutomationProperties.Name="{Binding [RulesPickRunning], Source={x:Static res:Loc.Instance}}" />
+                    <Button Grid.Column="1" Content="{Binding [RulesRefreshRunning], Source={x:Static res:Loc.Instance}}"
+                            Command="{Binding Rules.RefreshRunningAppsCommand}" Style="{StaticResource SettingButtonStyle}" Margin="8,0,0,0" />
+                </Grid>
+                <TextBlock Text="{Binding [RulesProfileLabel], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,10,0,0" />
+                <ComboBox Margin="0,4,0,0" ItemsSource="{Binding Rules.ProfileOptions}" SelectedItem="{Binding Rules.SelectedProfile}"
+                          DisplayMemberPath="Name" Style="{StaticResource SettingComboBoxStyle}"
+                          AutomationProperties.Name="{Binding [RulesProfileLabel], Source={x:Static res:Loc.Instance}}" />
+                <Button Content="{Binding [RulesAddButton], Source={x:Static res:Loc.Instance}}" Command="{Binding Rules.AddCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Left" Margin="0,10,0,0" />
+                <TextBlock Text="{Binding Rules.StatusText}" Margin="0,10,0,0" TextWrapping="Wrap" FontSize="12.5" AutomationProperties.LiveSetting="Polite">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Setter Property="Foreground" Value="{DynamicResource KoyTextSecondary}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Rules.HasStatus}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Rules.StatusIsError}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource KoyFgDanger}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <TextBlock Text="{Binding [RulesEmpty], Source={x:Static res:Loc.Instance}}" Margin="2,2,0,8">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource SettingDescStyle}">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Rules.HasItems}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+        <ItemsControl ItemsSource="{Binding Rules.Items}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource SettingRowStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                <TextBlock Text="{Binding Title}" Style="{StaticResource SettingTitleStyle}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding ProfileText}" Style="{StaticResource SettingDescStyle}" />
+                            </StackPanel>
+                            <CheckBox Grid.Column="1" IsChecked="{Binding IsEnabled}" Style="{StaticResource ToggleSwitchStyle}"
+                                      VerticalAlignment="Center" Margin="0,0,12,0"
+                                      AutomationProperties.Name="{Binding Title}" />
+                            <Button Grid.Column="2" Content="{Binding [ProfilesDelete], Source={x:Static res:Loc.Instance}}" Command="{Binding DeleteCommand}"
+                                    Style="{StaticResource SettingButtonStyle}" VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
         <!-- Bilgi Kutusu -->
         <Border Style="{StaticResource InfoNoticeStyle}">
             <Grid>

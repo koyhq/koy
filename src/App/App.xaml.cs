@@ -125,6 +125,9 @@ public partial class App : Application
         foreach (var feature in _features)
             feature.Start();
 
+        // Bağlam kuralları: etkin kural yoksa hiçbir şeye abone olmaz.
+        Koy.App.Features.Rules.ContextRuleService.Instance.Start(_services);
+
         // Güncellemeleri otomatik denetle ayarı: açılıştan sonra arka planda tek seferlik denetim.
         _ = AutoUpdater.RunAsync(settings);
 
@@ -506,6 +509,8 @@ public partial class App : Application
 
         _trayIconManager?.Dispose();
         _trayIconManager = null;
+
+        Koy.App.Features.Rules.ContextRuleService.Instance.Stop();
 
         foreach (var feature in _features)
             feature.Stop();
