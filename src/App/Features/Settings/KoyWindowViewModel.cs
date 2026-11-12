@@ -736,6 +736,16 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         [new FontOption("", Strings.Get("FontDefault"), new System.Windows.Media.FontFamily(FontScalePolicy.DefaultFontFamily)),
          .. ThemeManager.InstalledFonts().Select(f => new FontOption(f, f, new System.Windows.Media.FontFamily(f)))];
 
+    // Kullanıcı stil dosyası (user-theme.json): anahtar, durum satırı ve tanı listesi. Mantık Core'da
+    // (UserStyleParser) ve ThemeManager'da; burada yalnız bağlanır.
+    [ObservableProperty]
+    private bool _userStyleOverridesEnabled;
+
+    [ObservableProperty]
+    private string _userStyleStatusText = "";
+
+    public ObservableCollection<string> UserStyleDiagnostics { get; } = [];
+
     // --- KISAYOLLAR ---
     [ObservableProperty]
     private WheelAction _wheelAction;
@@ -879,6 +889,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         Weather = new WeatherLocationViewModel(_store);
         UpdateStatus.Changed += OnUpdateStatusChanged;
         OnUpdateStatusChanged();
+        ThemeManager.UserStyleApplied += RefreshUserStyle;
         LoadFromSettings();
         NotchFeature.NotificationAccessChanged += OnNotificationAccessChanged;
         RefreshNotificationPermission();
@@ -1050,6 +1061,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             SearchHistoryMode = s.Search.HistoryMode;
             LoadSearchSources(s.Search.DisabledSources);
 
+            UserStyleOverridesEnabled = s.Appearance.UserStyleOverridesEnabled;
+            RefreshUserStyle();
+
             RefreshMemory();
 
         }
@@ -1212,6 +1226,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             or nameof(SettingsSearchNoResult) or nameof(ShowChangedOnly) or nameof(CanResetPage) or nameof(IsPageResetConfirming) or nameof(PageResetDone)
             or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
             or nameof(IsResetConfirming) or nameof(UninstallAvailability) or nameof(CanUninstall) or nameof(UninstallRowDescription)
+            or nameof(UserStyleStatusText)
             or nameof(StartIconFileName) or nameof(IconPackFolderName) or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates) or nameof(DownloadProgressText))
             return;
 
@@ -1224,7 +1239,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
             or nameof(CornerRadius) or nameof(AnimationSpeed) or nameof(RespectReduceMotion) or nameof(BatterySaverReduceMotion)
             or nameof(MotionNotchOpenClose) or nameof(MotionTabTransitions) or nameof(MotionOsd) or nameof(MotionDockMagnify) or nameof(MotionFolderPanel)
-            or nameof(UiFontFamily) or nameof(ClockFontFamily) or nameof(BaseFontSize) or nameof(UiFontWeight) or nameof(UiScalePercent))
+            or nameof(UiFontFamily) or nameof(ClockFontFamily) or nameof(BaseFontSize) or nameof(UiFontWeight) or nameof(UiScalePercent)
+            or nameof(UserStyleOverridesEnabled))
         {
             // Animasyon anahtarları da buradan (Motion.Refresh) canlı uygulanır; çentik ve dock yeniden kurulmaz.
             // Yazı ve ölçek de kaynaklardan (DynamicResource) ve ThemeManager.Applied'dan canlı uygulanır.
@@ -1432,7 +1448,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 ClockFontFamily = ClockFontFamily ?? "",
                 BaseFontSize = FontScalePolicy.ClampBaseFontSize(BaseFontSize),
                 FontWeight = FontScalePolicy.ClampFontWeight(UiFontWeight),
-                UiScalePercent = FontScalePolicy.ClampUiScale(UiScalePercent)
+                UiScalePercent = FontScalePolicy.ClampUiScale(UiScalePercent),
+                UserStyleOverridesEnabled = UserStyleOverridesEnabled
             },
             Weather = current.Weather with
             {
@@ -1468,6 +1485,38 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         _store.Save(updated);
         _lastKnown = updated;
         SettingsSaved?.Invoke();
+    }
+
+    /// <summary>user-theme.json klasörünü Gezgin'de açar (klasör yoksa oluşturulur; dosyayı kullanıcı yazar).</summary>
+    [RelayCommand]
+    private void OpenUserStyleFolder()
+    {
+        try
+        {
+            System.IO.Directory.CreateDirectory(UserStyleFile.DefaultFolder);
+            Process.Start(new ProcessStartInfo { FileName = UserStyleFile.DefaultFolder, UseShellExecute = true })?.Dispose();
+        }
+        catch
+        {
+        }
+    }
+
+    [RelayCommand]
+    private void ReloadUserStyle()
+    {
+        if (Application.Current is { } app)
+            ThemeManager.ReloadUserStyle(app);
+        RefreshUserStyle();
+    }
+
+    private void RefreshUserStyle()
+    {
+        var result = ThemeManager.UserStyleResult;
+        UserStyleDiagnostics.Clear();
+        foreach (var line in UserStyleResources.DescribeAll(result))
+            UserStyleDiagnostics.Add(line);
+        UserStyleStatusText = UserStyleResources.StatusText(
+            UserStyleOverridesEnabled, UserStyleFile.GetStamp(UserStyleFile.DefaultPath).Exists, result);
     }
 
     [RelayCommand]

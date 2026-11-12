@@ -35,6 +35,9 @@ public partial class KoyWindow : Window
 
     public KoyWindowViewModel ViewModel => (KoyWindowViewModel)DataContext;
 
+    // user-theme.json izleyicisi yalnız pencere görünürken yaşar (AGENTS #5); gizlenince bırakılır.
+    private UserStyleWatcher? _userStyleWatcher;
+
     public KoyWindow(KoyWindowViewModel? viewModel = null)
     {
         InitializeComponent();
@@ -44,6 +47,7 @@ public partial class KoyWindow : Window
         // Tek örnek, hiç yok edilmez: olay aboneliği sızıntı yapmaz.
         ThemeManager.Applied += ApplyUiScale;
         ApplyUiScale();
+        IsVisibleChanged += OnIsVisibleChanged;
     }
 
     // --- Ayar araması ve "yalnız değişenler" (issue #69) ---
@@ -195,6 +199,28 @@ public partial class KoyWindow : Window
         Height = ratio > 0 ? Math.Min(Height * ratio, work.Height) : BaseHeight * scale;
         Width = Math.Max(Width, MinWidth);
         Height = Math.Max(Height, MinHeight);
+    }
+
+    private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (IsVisible)
+        {
+            if (_userStyleWatcher is not null || Application.Current is not { } app)
+                return;
+
+            // Pencere kapalıyken değişmiş dosya burada yakalanır, sonra olay tabanlı izleme başlar.
+            ThemeManager.ReloadUserStyleIfChanged(app);
+            _userStyleWatcher = new UserStyleWatcher(Dispatcher, () =>
+            {
+                if (Application.Current is { } current)
+                    ThemeManager.ReloadUserStyleIfChanged(current);
+            });
+        }
+        else
+        {
+            _userStyleWatcher?.Dispose();
+            _userStyleWatcher = null;
+        }
     }
 
     /// <summary>Sayfa değişince yeni sayfa kısa bir solmayla girer; hareket kapalıysa anında geçer.</summary>

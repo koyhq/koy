@@ -3099,5 +3099,74 @@
   <data name="DockIconSpacingTitle" xml:space="preserve">
     <value>Icon spacing</value>
   </data>
+  <data name="UserStyleHeader" xml:space="preserve">
+    <value>User style file</value>
+  </data>
+  <data name="UserStyleTitle" xml:space="preserve">
+    <value>Override theme values from a file</value>
+  </data>
+  <data name="UserStyleDesc" xml:space="preserve">
+    <value>Reads user-theme.json from the Koy folder and overrides allowed colors, sizes, corners and fonts. Nothing else in the file is used, and it cannot run code.</value>
+  </data>
+  <data name="UserStyleOpenFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
+  <data name="UserStyleReload" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+  <data name="UserStyleStatusOff" xml:space="preserve">
+    <value>Off. The file is not read.</value>
+  </data>
+  <data name="UserStyleStatusNoFile" xml:space="preserve">
+    <value>No user-theme.json in the Koy folder yet. Use "Open folder" and add one.</value>
+  </data>
+  <data name="UserStyleStatusLoaded" xml:space="preserve">
+    <value>{0} applied, {1} ignored.</value>
+  </data>
+  <data name="UserStyleDiagMore" xml:space="preserve">
+    <value>... and {0} more problems.</value>
+  </data>
+  <data name="UserStyleDiagInvalidJson" xml:space="preserve">
+    <value>The file is empty or not valid JSON.</value>
+  </data>
+  <data name="UserStyleDiagNotAnObject" xml:space="preserve">
+    <value>The top level must be a JSON object of key-value pairs.</value>
+  </data>
+  <data name="UserStyleDiagFileTooLarge" xml:space="preserve">
+    <value>The file is larger than 64 KB and was not used.</value>
+  </data>
+  <data name="UserStyleDiagFileUnreadable" xml:space="preserve">
+    <value>The file could not be read.</value>
+  </data>
+  <data name="UserStyleDiagTooManyEntries" xml:space="preserve">
+    <value>Too many entries; the rest were ignored.</value>
+  </data>
+  <data name="UserStyleDiagUnknownToken" xml:space="preserve">
+    <value>Unknown key, ignored.</value>
+  </data>
+  <data name="UserStyleDiagDuplicateToken" xml:space="preserve">
+    <value>Duplicate key; the first value is used.</value>
+  </data>
+  <data name="UserStyleDiagWrongValueType" xml:space="preserve">
+    <value>Wrong kind of value for this key.</value>
+  </data>
+  <data name="UserStyleDiagValueTooLong" xml:space="preserve">
+    <value>Value is too long.</value>
+  </data>
+  <data name="UserStyleDiagBadColor" xml:space="preserve">
+    <value>Expected a color like #RRGGBB or #AARRGGBB.</value>
+  </data>
+  <data name="UserStyleDiagBadNumber" xml:space="preserve">
+    <value>Expected a number.</value>
+  </data>
+  <data name="UserStyleDiagBadQuad" xml:space="preserve">
+    <value>Expected one number or four separated by commas (e.g. 8 or 8,8,0,0).</value>
+  </data>
+  <data name="UserStyleDiagBadFontFamily" xml:space="preserve">
+    <value>Expected a plain font name.</value>
+  </data>
+  <data name="UserStyleDiagOutOfRange" xml:space="preserve">
+    <value>Value is outside the allowed range.</value>
+  </data>
 </root>
 
