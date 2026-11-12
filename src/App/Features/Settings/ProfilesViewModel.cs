@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -163,7 +164,7 @@ public sealed partial class ProfilesViewModel : ObservableObject
     private void Report(string key, bool error = false, params object[] args)
     {
         var format = Strings.Get(key);
-        StatusText = args.Length == 0 ? format : string.Format(format, args);
+        StatusText = args.Length == 0 ? format : string.Format(CultureInfo.CurrentCulture, format, args);
         StatusIsError = error;
     }
 
@@ -301,7 +302,7 @@ public sealed partial class ProfilesViewModel : ObservableObject
         PendingSectionsText = DescribeSections(imported.Sections);
         PendingChangesText = changed.Count == 0
             ? Strings.Get("ProfileImportNoChanges")
-            : string.Format(Strings.Get("ProfileImportChanges"), DescribeSections(changed));
+            : string.Format(CultureInfo.CurrentCulture, Strings.Get("ProfileImportChanges"), DescribeSections(changed));
         HasPending = true;
         StatusText = "";
     }

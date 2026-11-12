@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -79,7 +80,7 @@ public sealed partial class WeatherLocationViewModel : ObservableObject
 
         return s.Weather.LocationSource == WeatherLocationSource.Device
             ? Strings.Get("WeatherStatusDevice")
-            : string.Format(Strings.Get("WeatherStatusCity"), s.Weather.City);
+            : string.Format(CultureInfo.CurrentCulture, Strings.Get("WeatherStatusCity"), s.Weather.City);
     }
 
     partial void OnUseLocationChanged(bool value)

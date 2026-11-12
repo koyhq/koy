@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using Koy.Core.Diagnostics;
 
@@ -76,13 +77,13 @@ public sealed class WebShortcutSearchSource(
 
     private SearchResult Row(WebShortcut shortcut, string term)
     {
-        var url = string.Format(shortcut.UrlTemplate, Uri.EscapeDataString(term));
+        var url = string.Format(CultureInfo.InvariantCulture, shortcut.UrlTemplate, Uri.EscapeDataString(term));
         return Row(shortcut.Key, shortcut.Provider, term, () => shell.Open(url));
     }
 
     private SearchResult Row(string key, string provider, string term, Action execute)
     {
-        return new SearchResult("web:" + key + ":" + term, Name, string.Format(t("SearchWebFor"), provider, term), execute)
+        return new SearchResult("web:" + key + ":" + term, Name, string.Format(CultureInfo.CurrentCulture, t("SearchWebFor"), provider, term), execute)
         {
             Glyph = SearchGlyph.Globe,
             CategoryRelevance = SearchRelevance.Highest,

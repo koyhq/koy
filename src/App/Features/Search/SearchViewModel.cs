@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -57,7 +58,7 @@ public sealed partial class SearchRowViewModel(SearchResult result, string? head
     private bool _isConfirming;
 
     public string? Subtitle => IsConfirming
-        ? Result.ConfirmationDetail is { } detail ? string.Format(Strings.Get("SearchConfirmRun"), detail) : Strings.Get("SearchConfirmHint")
+        ? Result.ConfirmationDetail is { } detail ? string.Format(CultureInfo.CurrentCulture, Strings.Get("SearchConfirmRun"), detail) : Strings.Get("SearchConfirmHint")
         : Result.Subtitle;
 
     public bool HasSubtitle => !string.IsNullOrEmpty(Subtitle);

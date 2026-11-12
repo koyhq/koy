@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -299,7 +300,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 UpdateCheckResult.Failed => Strings.Get("UpdateCheckFailed"),
                 UpdateCheckResult.NotInstalled => Strings.Get("UpdateNotInstalled"),
                 UpdateCheckResult.UpdateReady => Strings.Get("UpdateReadyOnExit"),
-                _ when UpdateStatus.LastCheck is { } t => string.Format(Strings.Get("UpdateLastCheck"), FormatCheckTime(t, DateTime.Now)),
+                _ when UpdateStatus.LastCheck is { } t => string.Format(CultureInfo.CurrentCulture, Strings.Get("UpdateLastCheck"), FormatCheckTime(t, DateTime.Now)),
                 _ => Strings.Get("UpdateNeverChecked")
             };
         }
@@ -309,7 +310,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     public bool CanCheckUpdates => !IsCheckingUpdates;
 
     private static string FormatCheckTime(DateTime t, DateTime now) =>
-        t.Date == now.Date ? string.Format(Strings.Get("UpdateToday"), t.ToString("HH:mm")) : t.ToString("d MMM HH:mm");
+        t.Date == now.Date ? string.Format(CultureInfo.CurrentCulture, Strings.Get("UpdateToday"), t.ToString("HH:mm", CultureInfo.CurrentCulture)) : t.ToString("d MMM HH:mm", CultureInfo.CurrentCulture);
 
     // --- ÇENTİK ---
     [ObservableProperty]
@@ -403,7 +404,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         var dialog = new Microsoft.Win32.OpenFileDialog
         {
             Title = Strings.Get("LiveBgPickTitle"),
-            Filter = string.Format(Strings.Get("LiveBgPickFilter"), LiveBackgroundFileValidator.DialogPattern),
+            Filter = string.Format(CultureInfo.CurrentCulture, Strings.Get("LiveBgPickFilter"), LiveBackgroundFileValidator.DialogPattern),
             CheckFileExists = true
         };
 
@@ -1025,7 +1026,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(DownloadProgressText))]
     private int _downloadProgress;
 
-    public string DownloadProgressText => string.Format(Strings.Get("UpdateDownloading"), DownloadProgress);
+    public string DownloadProgressText => string.Format(CultureInfo.CurrentCulture, Strings.Get("UpdateDownloading"), DownloadProgress);
 
     [ObservableProperty]
     private string _updateModalTitleText = "";
@@ -1053,12 +1054,12 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     {
         get
         {
-            var line = string.Format(Strings.Get("AboutVersionLine"), AppVersion);
+            var line = string.Format(CultureInfo.CurrentCulture, Strings.Get("AboutVersionLine"), AppVersion);
             var state = IsCheckingUpdates ? Strings.Get("UpdateChecking") : UpdateStatus.LastResult switch
             {
                 UpdateCheckResult.UpToDate => Strings.Get("UpdateStateUpToDate"),
                 UpdateCheckResult.UpdateReady => Strings.Get("UpdateStateReady"),
-                UpdateCheckResult.UpdateAvailable => string.Format(Strings.Get("UpdateAvailableBadge"), UpdateStatus.AvailableVersion ?? ""),
+                UpdateCheckResult.UpdateAvailable => string.Format(CultureInfo.CurrentCulture, Strings.Get("UpdateAvailableBadge"), UpdateStatus.AvailableVersion ?? ""),
                 UpdateCheckResult.Failed => Strings.Get("UpdateStateFailed"),
                 _ => Strings.Get("UpdateStateUnknown")
             };
@@ -1129,7 +1130,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     {
         HasAvailableUpdate = UpdateStatus.HasAvailableUpdate;
         AvailableVersionText = UpdateStatus.AvailableVersion is { } v
-            ? string.Format(Strings.Get("UpdateAvailableBadge"), v)
+            ? string.Format(CultureInfo.CurrentCulture, Strings.Get("UpdateAvailableBadge"), v)
             : string.Empty;
         OnPropertyChanged(nameof(LastCheckText));
         OnPropertyChanged(nameof(AboutStatusText));
@@ -1984,7 +1985,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     {
         var version = UpdateStatus.AvailableVersion ?? AppVersion;
         UpdateModalTitleText = Strings.Get("UpdateModalTitle");
-        UpdateModalIntroText = string.Format(Strings.Get("UpdateModalIntro"), version);
+        UpdateModalIntroText = string.Format(CultureInfo.CurrentCulture, Strings.Get("UpdateModalIntro"), version);
 
         // Yeni sürümün notları güncelleme beslemesinden gelir (yayın akışı CHANGELOG bölümünü paket notu yapar).
         // Gömülü CHANGELOG yalnız kurulu sürümü bilir; yeni sürüm orada yoksa eski notları göstermek yerine liste boş kalır.
@@ -2045,7 +2046,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [RelayCommand]
     public void OpenWhatsNewOverlay()
     {
-        WhatsNewTitleText = string.Format(Strings.Get("WhatsNewTitle"), AppVersion);
+        WhatsNewTitleText = string.Format(CultureInfo.CurrentCulture, Strings.Get("WhatsNewTitle"), AppVersion);
         var release = ChangelogParser.ResolveEmbedded(AppVersion, Language)
                       ?? ChangelogParser.ParseLatest(ChangelogParser.ReadEmbeddedChangelog(Language), Language);
 

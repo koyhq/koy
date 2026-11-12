@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 
 namespace Koy.Core.JumpList;
@@ -22,7 +23,7 @@ public static class JumpListAppId
         if (string.IsNullOrWhiteSpace(appId))
             return null;
 
-        return Crc64(Encoding.Unicode.GetBytes(appId.ToUpperInvariant())).ToString("x");
+        return Crc64(Encoding.Unicode.GetBytes(appId.ToUpperInvariant())).ToString("x", CultureInfo.InvariantCulture);
     }
 
     public static ulong Crc64(ReadOnlySpan<byte> data)

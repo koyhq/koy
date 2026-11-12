@@ -61,9 +61,9 @@ public static partial class ClipboardClassifier
         var score = 0;
         if (lines.Count(l => l[^1] is ';' or '{' or '}') >= 2) score++;
         if (trimmed.Contains('{') && trimmed.Contains('}')) score++;
-        if (lines.Any(l => l.EndsWith(')') || l.EndsWith(");") || l.EndsWith('{')) && trimmed.Contains('(')) score++;
+        if (lines.Any(l => l.EndsWith(')') || l.EndsWith(");", StringComparison.Ordinal) || l.EndsWith('{')) && trimmed.Contains('(')) score++;
         if (lines.Any(l => KeywordLine().IsMatch(l))) score++;
-        if (raw.Count(l => l.StartsWith("    ") || l.StartsWith('\t')) >= 2) score++;
+        if (raw.Count(l => l.StartsWith("    ", StringComparison.Ordinal) || l.StartsWith('\t')) >= 2) score++;
         if (trimmed.Contains("=>") || trimmed.Contains("->") || trimmed.Contains("==") || trimmed.Contains("!=")) score++;
         // Birden çok etiket (açılış+kapanış) tek başına yeterli kanıt.
         if (HtmlTag().Count(trimmed) >= 2) score += 2;

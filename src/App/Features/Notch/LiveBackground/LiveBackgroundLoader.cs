@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
@@ -186,7 +187,7 @@ internal static class LiveBackgroundLoader
     {
         try
         {
-            return meta?.GetQuery(query) is { } value ? Convert.ToInt32(value) : fallback;
+            return meta?.GetQuery(query) is { } value ? Convert.ToInt32(value, CultureInfo.InvariantCulture) : fallback;
         }
         catch (Exception ex) when (ex is ArgumentException or NotSupportedException or InvalidCastException or FormatException or OverflowException)
         {

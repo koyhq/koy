@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -240,7 +241,7 @@ public sealed class ShortcutsViewModel
     {
         ShortcutStatus.Invalid => Strings.Get("ShortcutErrInvalid"),
         ShortcutStatus.ReservedBySystem => Strings.Get("ShortcutErrReserved"),
-        ShortcutStatus.DuplicateOfOtherAction => string.Format(
+        ShortcutStatus.DuplicateOfOtherAction => string.Format(CultureInfo.CurrentCulture, 
             Strings.Get("ShortcutErrDuplicate"),
             Rows.FirstOrDefault(r => r.Action == result.ConflictsWith)?.Title ?? ""),
         ShortcutStatus.InUseByOtherApp => Strings.Get("ShortcutErrInUse"),

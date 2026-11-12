@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Koy.Core.Privacy;
 
 /// <summary>
@@ -46,13 +48,13 @@ public static class CaptureUsagePolicy
         var mic = state.ActiveMicrophoneApp ?? unknownApp;
 
         if (state.IsCameraInUse && state.IsMicrophoneInUse)
-            return string.Format(formatCamAndMic, cam, mic);
+            return string.Format(CultureInfo.CurrentCulture, formatCamAndMic, cam, mic);
 
         if (state.IsCameraInUse)
-            return string.Format(formatCam, cam);
+            return string.Format(CultureInfo.CurrentCulture, formatCam, cam);
 
         if (state.IsMicrophoneInUse)
-            return string.Format(formatMic, mic);
+            return string.Format(CultureInfo.CurrentCulture, formatMic, mic);
 
         return string.Empty;
     }

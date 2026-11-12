@@ -1,3 +1,4 @@
+using System.Globalization;
 using Koy.Core.Diagnostics;
 
 namespace Koy.Core.Search;
@@ -24,7 +25,7 @@ public sealed class ShellCommandSearchSource(ISearchShell shell, Func<string, st
         var shown = SearchCommandSafety.ForDisplay(query.Raw);
         return
         [
-            new SearchResult("exec:" + executable + " " + arguments, Name, string.Format(t("SearchRunCommand"), shown), () => shell.Run(executable, arguments))
+            new SearchResult("exec:" + executable + " " + arguments, Name, string.Format(CultureInfo.CurrentCulture, t("SearchRunCommand"), shown), () => shell.Run(executable, arguments))
             {
                 Glyph = SearchGlyph.Terminal,
                 CategoryRelevance = SearchRelevance.Highest,
@@ -152,8 +153,8 @@ public sealed class LocationSearchSource(ISearchShell shell, Func<string, string
             return [];
 
         var title = url.Scheme == Uri.UriSchemeMailto
-            ? string.Format(t("SearchSendMail"), text[(text.IndexOf(':') + 1)..])
-            : string.Format(t("SearchGoTo"), text);
+            ? string.Format(CultureInfo.CurrentCulture, t("SearchSendMail"), text[(text.IndexOf(':') + 1)..])
+            : string.Format(CultureInfo.CurrentCulture, t("SearchGoTo"), text);
         var target = url.AbsoluteUri;
         return
         [
@@ -167,7 +168,7 @@ public sealed class LocationSearchSource(ISearchShell shell, Func<string, string
     }
 
     private SearchResult Local(string text, string path, SearchGlyph glyph) =>
-        new("path:" + path, Name, string.Format(t("SearchOpen"), text), () => shell.Open(path))
+        new("path:" + path, Name, string.Format(CultureInfo.CurrentCulture, t("SearchOpen"), text), () => shell.Open(path))
         {
             Glyph = glyph,
             CategoryRelevance = SearchRelevance.Highest,
@@ -518,9 +519,9 @@ public sealed class KillSearchSource(
 
         return _snapshot
             .Where(p => SearchText.Fold(p.Name).Contains(term, StringComparison.Ordinal))
-            .Select(p => new SearchResult("kill:" + p.Id, Name, string.Format(t("SearchCloseProcess"), p.Name), () => requestClose(p))
+            .Select(p => new SearchResult("kill:" + p.Id, Name, string.Format(CultureInfo.CurrentCulture, t("SearchCloseProcess"), p.Name), () => requestClose(p))
             {
-                Subtitle = string.Format(t("SearchProcessId"), p.Id),
+                Subtitle = string.Format(CultureInfo.CurrentCulture, t("SearchProcessId"), p.Id),
                 Glyph = SearchGlyph.Process,
                 CategoryRelevance = SearchRelevance.Moderate,
                 Relevance = SearchText.Fold(p.Name) == term ? 1 : 0.9,

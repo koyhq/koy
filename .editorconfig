@@ -25,10 +25,6 @@ dotnet_diagnostic.CA1720.severity = none
 dotnet_diagnostic.CA1725.severity = none
 # CompositeFormat önbelleği: biçimler çoğunlukla resx metni ve arayüz yolunda, kazanç yok, okunurluk düşer.
 dotnet_diagnostic.CA1863.severity = none
-# Kültür kuralları ayrı PR'da açılıp düzeltilecek (her çağrıda CurrentCulture / InvariantCulture kararı gerekir).
-dotnet_diagnostic.CA1304.severity = none
-dotnet_diagnostic.CA1305.severity = none
-dotnet_diagnostic.CA1310.severity = none
 
 [tests/**.cs]
 # xUnit test adları alt çizgiyle okunur cümle olarak yazılır.

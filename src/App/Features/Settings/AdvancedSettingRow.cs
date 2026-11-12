@@ -1,3 +1,4 @@
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Koy.App.Resources;
@@ -68,7 +69,7 @@ public sealed partial class AdvancedSettingRow : ObservableObject
 
     public string Default { get; }
 
-    public string DefaultText => string.Format(Strings.Get("AdvancedDefault"), Default.Length == 0 ? "\"\"" : Default);
+    public string DefaultText => string.Format(CultureInfo.CurrentCulture, Strings.Get("AdvancedDefault"), Default.Length == 0 ? "\"\"" : Default);
 
     public IReadOnlyList<string> Choices { get; }
 

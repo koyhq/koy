@@ -1,3 +1,4 @@
+using System.Globalization;
 using Koy.Core.Diagnostics;
 using Koy.Core.Search;
 using Microsoft.Win32;
@@ -18,7 +19,7 @@ public static class DefaultBrowserLocator
         {
             foreach (var scheme in new[] { "https", "http" })
             {
-                using var choice = Registry.CurrentUser.OpenSubKey(string.Format(UserChoice, scheme));
+                using var choice = Registry.CurrentUser.OpenSubKey(string.Format(CultureInfo.InvariantCulture, UserChoice, scheme));
                 if (choice?.GetValue("ProgId") is not string { Length: > 0 } progId)
                     continue;
 

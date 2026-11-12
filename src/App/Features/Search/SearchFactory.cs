@@ -133,7 +133,7 @@ public static class SearchFactory
         web = new WebShortcutSearchSource(WebShortcutSearchSource.Defaults, shell, T, Koy.Platform.Search.DefaultBrowserLocator.Find)
         {
             Syntaxes = WebShortcutSearchSource.Defaults
-                .Select(s => new SearchSyntax(s.Key + ":" + T("SearchExampleWeb"), string.Format(T("SearchSyntaxWeb"), s.Provider)))
+                .Select(s => new SearchSyntax(s.Key + ":" + T("SearchExampleWeb"), string.Format(CultureInfo.CurrentCulture, T("SearchSyntaxWeb"), s.Provider)))
                 .Append(new SearchSyntax("!gg " + T("SearchExampleWeb"), T("SearchSyntaxWebBang")))
                 .ToList()
         };

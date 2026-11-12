@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Windows.Media;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -77,9 +78,9 @@ public sealed partial class ClipboardItemViewModel : ObservableObject
         var (unit, value) = ClipboardDisplay.Age(copiedAt, now);
         return unit switch
         {
-            AgeUnit.Minutes => string.Format(Strings.Get("AgeMinutes"), value),
-            AgeUnit.Hours => string.Format(Strings.Get("AgeHours"), value),
-            AgeUnit.Days => string.Format(Strings.Get("AgeDays"), value),
+            AgeUnit.Minutes => string.Format(CultureInfo.CurrentCulture, Strings.Get("AgeMinutes"), value),
+            AgeUnit.Hours => string.Format(CultureInfo.CurrentCulture, Strings.Get("AgeHours"), value),
+            AgeUnit.Days => string.Format(CultureInfo.CurrentCulture, Strings.Get("AgeDays"), value),
             _ => Strings.Get("AgeNow")
         };
     }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using Koy.Core.Appearance;
@@ -357,7 +358,7 @@ public class UserStyleOverridesTests
     {
         var sb = new StringBuilder("{");
         for (var i = 0; i < UserStyleParser.MaxEntries + 50; i++)
-            sb.Append($"\"k{i}\":\"#000000\",");
+            sb.Append(CultureInfo.InvariantCulture, $"\"k{i}\":\"#000000\",");
         sb.Append("\"KoyAccent\":\"#112233\"}");
 
         var r = Parse(sb.ToString());
@@ -372,7 +373,7 @@ public class UserStyleOverridesTests
     {
         var sb = new StringBuilder("{");
         for (var i = 0; i < 300; i++)
-            sb.Append($"\"bad{i}\":\"x\",");
+            sb.Append(CultureInfo.InvariantCulture, $"\"bad{i}\":\"x\",");
         sb.Length--;
         sb.Append('}');
 

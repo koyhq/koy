@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -93,10 +94,10 @@ public sealed class FileSearchService : IFileSearchService
 
     private static object? Value(object fields, int index)
     {
-        var field = fields.GetType().InvokeMember("Item", BindingFlags.GetProperty, null, fields, [index]);
+        var field = fields.GetType().InvokeMember("Item", BindingFlags.GetProperty, null, fields, [index], CultureInfo.InvariantCulture);
         try
         {
-            var value = field?.GetType().InvokeMember("Value", BindingFlags.GetProperty, null, field, null);
+            var value = field?.GetType().InvokeMember("Value", BindingFlags.GetProperty, null, field, null, CultureInfo.InvariantCulture);
             return value is DBNull ? null : value;
         }
         finally
@@ -106,10 +107,10 @@ public sealed class FileSearchService : IFileSearchService
     }
 
     private static object? Get(object target, string property) =>
-        target.GetType().InvokeMember(property, BindingFlags.GetProperty, null, target, null);
+        target.GetType().InvokeMember(property, BindingFlags.GetProperty, null, target, null, CultureInfo.InvariantCulture);
 
     private static object? Call(object target, string method, params object[] arguments) =>
-        target.GetType().InvokeMember(method, BindingFlags.InvokeMethod, null, target, arguments);
+        target.GetType().InvokeMember(method, BindingFlags.InvokeMethod, null, target, arguments, CultureInfo.InvariantCulture);
 
     private static void Release(object? value)
     {

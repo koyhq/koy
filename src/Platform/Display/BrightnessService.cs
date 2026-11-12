@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Management;
 using Koy.Core.Display;
 using Windows.Win32;
@@ -169,7 +170,7 @@ public sealed class BrightnessService : IBrightnessService
             {
                 if (mo["CurrentBrightness"] is { } val)
                 {
-                    value = Convert.ToInt32(val);
+                    value = Convert.ToInt32(val, CultureInfo.InvariantCulture);
                     return true;
                 }
             }
@@ -290,7 +291,7 @@ public sealed class BrightnessService : IBrightnessService
     {
         try
         {
-            var value = Convert.ToInt32(e.NewEvent[WmiBrightnessProperty]);
+            var value = Convert.ToInt32(e.NewEvent[WmiBrightnessProperty], CultureInfo.InvariantCulture);
             lock (_sync)
             {
                 if (value == _brightness)

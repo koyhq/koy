@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -47,7 +48,7 @@ public sealed partial class ShelfViewModel : ObservableObject, IDisposable
             Items.Add(item);
         }
         IsEmpty = Items.Count == 0;
-        CountText = string.Format(Koy.App.Resources.Strings.Get("ShelfCount"), Items.Count);
+        CountText = string.Format(CultureInfo.CurrentCulture, Koy.App.Resources.Strings.Get("ShelfCount"), Items.Count);
     }
 
     [RelayCommand]

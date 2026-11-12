@@ -328,18 +328,18 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject
 
         var updates = _state.UpdateCount;
         UpdatesLabel = updates > 0
-            ? string.Format(Strings.Get("ExtFilterUpdatesCount"), updates)
+            ? string.Format(CultureInfo.CurrentCulture, Strings.Get("ExtFilterUpdatesCount"), updates)
             : Strings.Get("ExtFilterUpdates");
         CountText = _state.Index is null && all.Count == 0 ? "" : BuildCountText(all.Count);
         var remaining = all.Count - Cards.Count;
-        ShowMoreText = string.Format(Strings.Get("ExtShowMore"), Math.Min(remaining, PageSize));
+        ShowMoreText = string.Format(CultureInfo.CurrentCulture, Strings.Get("ExtShowMore"), Math.Min(remaining, PageSize));
         NotifyListStates();
     }
 
     private string BuildCountText(int visible)
     {
-        var text = string.Format(Strings.Get("ExtCountFormat"), visible);
-        return _skippedItems > 0 ? text + " · " + string.Format(Strings.Get("ExtSkippedFormat"), _skippedItems) : text;
+        var text = string.Format(CultureInfo.CurrentCulture, Strings.Get("ExtCountFormat"), visible);
+        return _skippedItems > 0 ? text + " · " + string.Format(CultureInfo.CurrentCulture, Strings.Get("ExtSkippedFormat"), _skippedItems) : text;
     }
 
     [RelayCommand]
@@ -518,7 +518,7 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject
             return;
 
         card.Say("", false);
-        var title = string.Format(Strings.Get(update ? "ExtConfirmUpdateTitle" : "ExtConfirmInstallTitle"), item.Name);
+        var title = string.Format(CultureInfo.CurrentCulture, Strings.Get(update ? "ExtConfirmUpdateTitle" : "ExtConfirmInstallTitle"), item.Name);
         OpenConfirm(
             title,
             Strings.Get(update ? "ExtUpdate" : "ExtInstall"),
@@ -574,12 +574,12 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject
                 return;
             }
 
-            Report(card, string.Format(Strings.Get("ExtUpdatedAndAppliedOk"), name), false);
+            Report(card, string.Format(CultureInfo.CurrentCulture, Strings.Get("ExtUpdatedAndAppliedOk"), name), false);
             return;
         }
 
         ReloadRegistry();
-        Report(card, string.Format(Strings.Get(update ? "ExtUpdatedOk" : "ExtInstalledOk"), name), false);
+        Report(card, string.Format(CultureInfo.CurrentCulture, Strings.Get(update ? "ExtUpdatedOk" : "ExtInstalledOk"), name), false);
     }
 
     // --- Dosyadan kur ---
@@ -610,7 +610,7 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject
         StatusText = "";
         var manifest = peek.Manifest!;
         OpenConfirm(
-            string.Format(Strings.Get("ExtConfirmInstallTitle"), manifest.Manifest.Name),
+            string.Format(CultureInfo.CurrentCulture, Strings.Get("ExtConfirmInstallTitle"), manifest.Manifest.Name),
             Strings.Get("ExtInstall"),
             Strings.Get("ExtConfirmFileNote"),
             FactsOf(manifest.Kind, manifest.Manifest.Version, manifest.Manifest.Author, manifest.License, peek.Size, fromFile: true),
@@ -699,11 +699,11 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject
         var name = outcome.Entry!.Name;
         if (outcome.Files?.ImportedProfile is not null)
         {
-            Report(card, string.Format(Strings.Get(outcome.Files.ProfileAlreadyPresent ? "ExtProfileAlready" : "ExtProfileAdded"), name), false);
+            Report(card, string.Format(CultureInfo.CurrentCulture, Strings.Get(outcome.Files.ProfileAlreadyPresent ? "ExtProfileAlready" : "ExtProfileAdded"), name), false);
             return;
         }
 
-        Report(card, string.Format(Strings.Get("ExtAppliedOk"), name), false);
+        Report(card, string.Format(CultureInfo.CurrentCulture, Strings.Get("ExtAppliedOk"), name), false);
     }
 
     private sealed record ApplyOutcome(string? ErrorKey, InstalledEntry? Entry, ExtensionFileActionResult? Files);
@@ -818,11 +818,11 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject
                     RestoreSnapshot(snapshot);
                 }
 
-                card.Say(string.Format(Strings.Get("ExtUninstallFailed"), entry.Name), true);
+                card.Say(string.Format(CultureInfo.CurrentCulture, Strings.Get("ExtUninstallFailed"), entry.Name), true);
                 return;
             }
 
-            StatusText = string.Format(Strings.Get("ExtUninstalledOk"), entry.Name);
+            StatusText = string.Format(CultureInfo.CurrentCulture, Strings.Get("ExtUninstalledOk"), entry.Name);
             StatusIsError = false;
         }
         catch (Exception ex) when (ex is not OperationCanceledException)

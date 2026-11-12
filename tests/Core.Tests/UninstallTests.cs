@@ -47,8 +47,8 @@ public class UninstallTests
     {
         var files = UninstallPlan.FilesToDelete("R", "L", keepSettings: true);
 
-        Assert.DoesNotContain(files, f => f.EndsWith("settings.json"));
-        Assert.DoesNotContain(files, f => f.EndsWith("shelf.json"));
+        Assert.DoesNotContain(files, f => f.EndsWith("settings.json", StringComparison.Ordinal));
+        Assert.DoesNotContain(files, f => f.EndsWith("shelf.json", StringComparison.Ordinal));
         Assert.Contains(Path.Combine("R", "taskbar-state.json"), files);
         Assert.Contains(Path.Combine("L", "crash.log"), files);
     }
@@ -68,7 +68,7 @@ public class UninstallTests
     {
         // Velopack kök klasörü (yerel) bütünüyle silinmez; yalnız bilinen tanı dosyaları gider.
         var files = UninstallPlan.FilesToDelete("R", "L", false);
-        Assert.DoesNotContain(files, f => f.EndsWith("Update.exe") || f.EndsWith("Koy.exe"));
+        Assert.DoesNotContain(files, f => f.EndsWith("Update.exe", StringComparison.Ordinal) || f.EndsWith("Koy.exe", StringComparison.Ordinal));
     }
 
     [Fact]

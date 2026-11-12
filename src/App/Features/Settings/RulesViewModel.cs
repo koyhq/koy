@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Koy.App.Features.Rules;
@@ -24,7 +25,7 @@ public sealed partial class RuleItemViewModel(RulesViewModel owner, int index, R
         ? process + ".exe"
         : (draft.Name ?? "") + " (" + Strings.Get("RulesAdvancedRule") + ")";
 
-    public string ProfileText { get; } = string.Format(Strings.Get("RulesUsesProfile"), profileName);
+    public string ProfileText { get; } = string.Format(CultureInfo.CurrentCulture, Strings.Get("RulesUsesProfile"), profileName);
 
     public bool IsEnabled
     {

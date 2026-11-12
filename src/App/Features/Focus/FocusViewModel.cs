@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -44,7 +45,7 @@ public sealed partial class FocusViewModel : ObservableObject, IDisposable
     public TasksViewModel? Tasks { get; }
 
     public IReadOnlyList<FocusPreset> Presets { get; } =
-        CountdownPresets.Minutes.Select(m => new FocusPreset(m, string.Format(Strings.Get("TimerPresetMinutes"), m))).ToList();
+        CountdownPresets.Minutes.Select(m => new FocusPreset(m, string.Format(CultureInfo.CurrentCulture, Strings.Get("TimerPresetMinutes"), m))).ToList();
 
     public ObservableCollection<FocusLapRow> Laps { get; } = [];
 
@@ -113,7 +114,7 @@ public sealed partial class FocusViewModel : ObservableObject, IDisposable
         _timers = timers;
         _dispatcher = dispatcher ?? Dispatcher.CurrentDispatcher;
 
-        DurationsText = string.Format(
+        DurationsText = string.Format(CultureInfo.CurrentCulture, 
             Strings.Get("FocusDurations"), settings.Focus.PomodoroWorkMinutes, settings.Focus.PomodoroShortBreakMinutes, settings.Focus.PomodoroLongBreakMinutes);
 
         Tabs =
@@ -197,7 +198,7 @@ public sealed partial class FocusViewModel : ObservableObject, IDisposable
         CanEditCountdown = _timers.Countdown.State != CountdownState.Running;
         SubText = BuildSubText();
         Progress = BuildProgress(reading);
-        SessionsText = _timers.Pomodoro.CompletedWorkSessions.ToString();
+        SessionsText = _timers.Pomodoro.CompletedWorkSessions.ToString(CultureInfo.CurrentCulture);
         CountdownDurationText = DurationFormat.Countdown(_timers.Countdown.Duration);
 
         var running = _timers.Running;
@@ -219,7 +220,7 @@ public sealed partial class FocusViewModel : ObservableObject, IDisposable
         var pomodoro = _timers.Pomodoro;
         return Selected switch
         {
-            FocusKind.Focus => string.Format(Strings.Get("FocusRound"), pomodoro.CurrentRound, pomodoro.Config.SessionsBeforeLongBreak),
+            FocusKind.Focus => string.Format(CultureInfo.CurrentCulture, Strings.Get("FocusRound"), pomodoro.CurrentRound, pomodoro.Config.SessionsBeforeLongBreak),
             FocusKind.Break => pomodoro.Mode == PomodoroMode.LongBreak ? Strings.LongBreak : Strings.ShortBreak,
             FocusKind.Countdown => _timers.Countdown.State == CountdownState.Finished ? Strings.Get("FocusTimeUp") : Strings.Get("FocusCountdown"),
             _ => Strings.Get("FocusElapsed")
@@ -260,10 +261,10 @@ public sealed partial class FocusViewModel : ObservableObject, IDisposable
 
         var minutes = running.WholeMinutes;
         var amount = minutes > 0
-            ? string.Format(Strings.Get("HomeMinutes"), minutes)
-            : running.CountsDown ? Strings.Get("HomeUnderMinute") : string.Format(Strings.Get("HomeMinutes"), 0);
+            ? string.Format(CultureInfo.CurrentCulture, Strings.Get("HomeMinutes"), minutes)
+            : running.CountsDown ? Strings.Get("HomeUnderMinute") : string.Format(CultureInfo.CurrentCulture, Strings.Get("HomeMinutes"), 0);
 
-        return string.Format(Strings.Get(running.CountsDown ? "HomeLeft" : "HomeElapsed"), label, amount);
+        return string.Format(CultureInfo.CurrentCulture, Strings.Get(running.CountsDown ? "HomeLeft" : "HomeElapsed"), label, amount);
     }
 
     private void RefreshLaps()
@@ -273,7 +274,7 @@ public sealed partial class FocusViewModel : ObservableObject, IDisposable
         foreach (var lap in laps)
         {
             Laps.Add(new FocusLapRow(
-                string.Format(Strings.Get("TimerLapRow"), lap.Number),
+                string.Format(CultureInfo.CurrentCulture, Strings.Get("TimerLapRow"), lap.Number),
                 DurationFormat.Stopwatch(lap.Total),
                 "+" + DurationFormat.Stopwatch(lap.Split)));
         }

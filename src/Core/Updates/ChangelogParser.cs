@@ -216,7 +216,7 @@ public static class ChangelogParser
                 continue;
             }
 
-            if (line.StartsWith("- ") || line.StartsWith("* "))
+            if (line.StartsWith("- ", StringComparison.Ordinal) || line.StartsWith("* ", StringComparison.Ordinal))
             {
                 var bullet = CleanItem(line[2..].Trim(), language);
                 if (bullet is null)
