@@ -309,6 +309,35 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private bool _respectReduceMotion = true;
 
+    // --- SAAT VE BİRİMLER (issue #77) ---
+    [ObservableProperty]
+    private Koy.Core.Clock.ClockHourFormat _clockHourFormat = Koy.Core.Clock.ClockHourFormat.Auto;
+
+    [ObservableProperty]
+    private bool _clockShowSeconds;
+
+    [ObservableProperty]
+    private bool _clockShowWeekNumber;
+
+    [ObservableProperty]
+    private Koy.Core.Clock.WeekStartSetting _clockFirstDayOfWeek = Koy.Core.Clock.WeekStartSetting.System;
+
+    /// <summary>Kutudaki metin; geçersizse kaydedilmez, eski değer kalır (bkz. <see cref="ClockCustomDateFormatInvalid"/>).</summary>
+    [ObservableProperty]
+    private string _clockCustomDateFormat = "";
+
+    [ObservableProperty]
+    private bool _clockCustomDateFormatInvalid;
+
+    partial void OnClockCustomDateFormatChanged(string value) =>
+        ClockCustomDateFormatInvalid = !string.IsNullOrWhiteSpace(value) && !Koy.Core.Clock.ClockFormatPolicy.IsValidCustomDateFormat(value);
+
+    [ObservableProperty]
+    private Koy.Core.Units.TemperatureUnit _temperatureUnit = Koy.Core.Units.TemperatureUnit.Celsius;
+
+    [ObservableProperty]
+    private Koy.Core.Units.NetworkSpeedUnit _networkSpeedUnit = Koy.Core.Units.NetworkSpeedUnit.Bytes;
+
     // --- KISAYOLLAR ---
     [ObservableProperty]
     private WheelAction _wheelAction;
@@ -534,6 +563,13 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             AnimationSpeed = s.Appearance.AnimationSpeed;
             RespectReduceMotion = s.Appearance.RespectReduceMotion;
             BatterySaverReduceMotion = s.Appearance.BatterySaverReduceMotion;
+            ClockHourFormat = s.Notch.ClockHourFormat;
+            ClockShowSeconds = s.Notch.ClockShowSeconds;
+            ClockShowWeekNumber = s.Notch.ClockShowWeekNumber;
+            ClockFirstDayOfWeek = s.Notch.ClockFirstDayOfWeek;
+            ClockCustomDateFormat = s.Notch.ClockCustomDateFormat ?? "";
+            TemperatureUnit = s.General.TemperatureUnit;
+            NetworkSpeedUnit = s.General.NetworkSpeedUnit;
             WeatherRefreshInterval = s.Weather.RefreshInterval;
             PomodoroWorkMinutes = s.Focus.PomodoroWorkMinutes;
             PomodoroShortBreakMinutes = s.Focus.PomodoroShortBreakMinutes;
@@ -664,7 +700,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     {
         base.OnPropertyChanged(e);
         if (_isLoading) return;
-        if (e.PropertyName is nameof(SelectedPageIndex) or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
+        if (e.PropertyName is nameof(SelectedPageIndex) or nameof(ClockCustomDateFormatInvalid) or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
             or nameof(IsResetConfirming) or nameof(UninstallAvailability) or nameof(CanUninstall) or nameof(UninstallRowDescription)
             or nameof(StartIconFileName) or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates) or nameof(DownloadProgressText))
             return;
@@ -716,7 +752,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
             or nameof(PanelControlCenter) or nameof(PanelClipboard) or nameof(PanelSystem) or nameof(ClipboardHistoryEnabled)
             or nameof(VoiceHarness) or nameof(VoiceClaudePermission) or nameof(VoiceModel) or nameof(VoiceCustomCommand) or nameof(VoiceWorkingDirectory) or nameof(VoiceTimeoutSeconds)
-            or nameof(SearchRetainPrior) or nameof(SearchHistoryMode) or nameof(SearchSourcesVersion);
+            or nameof(SearchRetainPrior) or nameof(SearchHistoryMode) or nameof(SearchSourcesVersion)
+            or nameof(ClockHourFormat) or nameof(ClockShowSeconds) or nameof(ClockShowWeekNumber) or nameof(ClockFirstDayOfWeek)
+            or nameof(ClockCustomDateFormat) or nameof(TemperatureUnit) or nameof(NetworkSpeedUnit);
 
     partial void OnLanguageChanged(string value)
     {
@@ -768,7 +806,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             {
                 Language = Language,
                 AutoCheckUpdates = AutoCheckUpdates,
-                UpdateChannel = UpdateChannel
+                UpdateChannel = UpdateChannel,
+                TemperatureUnit = TemperatureUnit,
+                NetworkSpeedUnit = NetworkSpeedUnit
             },
             Dock = current.Dock with
             {
@@ -810,6 +850,13 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 OpenBehavior = NotchOpenBehavior,
                 FollowsMaterial = NotchFollowsMaterial,
                 WheelAction = WheelAction,
+                ClockHourFormat = ClockHourFormat,
+                ClockShowSeconds = ClockShowSeconds,
+                ClockShowWeekNumber = ClockShowWeekNumber,
+                ClockFirstDayOfWeek = ClockFirstDayOfWeek,
+                // Geçersiz özel biçim kaydedilmez; boş metin yerleşik biçime döner.
+                ClockCustomDateFormat = string.IsNullOrWhiteSpace(ClockCustomDateFormat) ? ""
+                    : ClockCustomDateFormatInvalid ? current.Notch.ClockCustomDateFormat : ClockCustomDateFormat,
                 EnabledPanels = new ValueList<string>(enabledPanels)
             },
             Music = current.Music with

@@ -1263,6 +1263,93 @@
   <data name="ReduceMotionDesc" xml:space="preserve">
     <value>If animations are off in Windows, Koy turns motion off too.</value>
   </data>
+  <data name="ClockHeader" xml:space="preserve">
+    <value>Clock</value>
+  </data>
+  <data name="ClockHourFormatTitle" xml:space="preserve">
+    <value>Time format</value>
+  </data>
+  <data name="ClockHourFormatDesc" xml:space="preserve">
+    <value>Automatic follows the interface language.</value>
+  </data>
+  <data name="ClockFormatAuto" xml:space="preserve">
+    <value>Automatic</value>
+  </data>
+  <data name="ClockFormat12" xml:space="preserve">
+    <value>12-hour</value>
+  </data>
+  <data name="ClockFormat24" xml:space="preserve">
+    <value>24-hour</value>
+  </data>
+  <data name="ClockShowSecondsTitle" xml:space="preserve">
+    <value>Show seconds</value>
+  </data>
+  <data name="ClockShowSecondsDesc" xml:space="preserve">
+    <value>In the notch clock. Updates every second only while the notch is visible.</value>
+  </data>
+  <data name="ClockFirstDayTitle" xml:space="preserve">
+    <value>First day of the week</value>
+  </data>
+  <data name="ClockFirstDayDesc" xml:space="preserve">
+    <value>Used by the calendar month grid and week numbers.</value>
+  </data>
+  <data name="ClockFirstDayMonday" xml:space="preserve">
+    <value>Monday</value>
+  </data>
+  <data name="ClockFirstDaySunday" xml:space="preserve">
+    <value>Sunday</value>
+  </data>
+  <data name="ClockFirstDaySaturday" xml:space="preserve">
+    <value>Saturday</value>
+  </data>
+  <data name="ClockShowWeekNumberTitle" xml:space="preserve">
+    <value>Show week number</value>
+  </data>
+  <data name="ClockShowWeekNumberDesc" xml:space="preserve">
+    <value>Next to the selected day in the calendar.</value>
+  </data>
+  <data name="ClockCustomDateTitle" xml:space="preserve">
+    <value>Custom date format</value>
+  </data>
+  <data name="ClockCustomDateDesc" xml:space="preserve">
+    <value>Date next to the clock in ring mode, e.g. dd.MM.yyyy. Leave empty for the default.</value>
+  </data>
+  <data name="ClockCustomDateInvalid" xml:space="preserve">
+    <value>This format is not valid and was not saved.</value>
+  </data>
+  <data name="CalendarWeekNumber" xml:space="preserve">
+    <value>Week {0}</value>
+  </data>
+  <data name="UnitsHeader" xml:space="preserve">
+    <value>Units</value>
+  </data>
+  <data name="UnitTemperatureTitle" xml:space="preserve">
+    <value>Temperature</value>
+  </data>
+  <data name="UnitCelsius" xml:space="preserve">
+    <value>Celsius</value>
+  </data>
+  <data name="UnitFahrenheit" xml:space="preserve">
+    <value>Fahrenheit</value>
+  </data>
+  <data name="UnitCelsiusSuffix" xml:space="preserve">
+    <value>°C</value>
+  </data>
+  <data name="UnitFahrenheitSuffix" xml:space="preserve">
+    <value>°F</value>
+  </data>
+  <data name="UnitNetworkSpeedTitle" xml:space="preserve">
+    <value>Network speed</value>
+  </data>
+  <data name="UnitNetworkSpeedDesc" xml:space="preserve">
+    <value>Bytes (MB/s) or bits (Mb/s) on the System page.</value>
+  </data>
+  <data name="UnitBytes" xml:space="preserve">
+    <value>Bytes</value>
+  </data>
+  <data name="UnitBits" xml:space="preserve">
+    <value>Bits</value>
+  </data>
   <data name="AccentBlue" xml:space="preserve">
     <value>Blue</value>
   </data>

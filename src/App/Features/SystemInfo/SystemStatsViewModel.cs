@@ -19,6 +19,7 @@ public sealed partial class SystemStatsViewModel : ObservableObject, IDisposable
     private readonly Func<ISystemStatsService> _acquire;
     private readonly Action _release;
     private readonly Dispatcher _dispatcher;
+    private readonly Koy.Core.Units.NetworkSpeedUnit _networkUnit;
     private ISystemStatsService? _service;
     private bool _disposed;
 
@@ -28,10 +29,13 @@ public sealed partial class SystemStatsViewModel : ObservableObject, IDisposable
 
     /// <param name="acquire">Servisi alır (SharedServices.AcquireSystemStats); çağrı sayılır.</param>
     /// <param name="release">Aldığı servisi bırakır (SharedServices.ReleaseSystemStats).</param>
-    public SystemStatsViewModel(Func<ISystemStatsService> acquire, Action release, Dispatcher? dispatcher = null)
+    /// <param name="networkUnit">Ağ hızı birimi (bayt ya da bit, issue #77); ayar değişince çentik yeniden kurulur.</param>
+    public SystemStatsViewModel(Func<ISystemStatsService> acquire, Action release, Dispatcher? dispatcher = null,
+        Koy.Core.Units.NetworkSpeedUnit networkUnit = Koy.Core.Units.NetworkSpeedUnit.Bytes)
     {
         _acquire = acquire;
         _release = release;
+        _networkUnit = networkUnit;
         _dispatcher = dispatcher ?? Dispatcher.CurrentDispatcher;
         Apply(SystemSnapshot.Empty);
     }
@@ -135,8 +139,8 @@ public sealed partial class SystemStatsViewModel : ObservableObject, IDisposable
         MemoryDetailText = hasData ? SystemFormat.Memory(s.RamUsedBytes, s.RamTotalBytes, CultureInfo.CurrentCulture) : "";
 
         NetworkName = string.IsNullOrWhiteSpace(s.NetworkName) ? Strings.Get("SystemNoNetwork") : s.NetworkName;
-        DownloadText = "↓ " + (hasRates ? SystemFormat.Speed(s.NetDownBytesPerSec, CultureInfo.CurrentCulture) : NoValue);
-        UploadText = "↑ " + (hasRates ? SystemFormat.Speed(s.NetUpBytesPerSec, CultureInfo.CurrentCulture) : NoValue);
+        DownloadText = "↓ " + (hasRates ? SystemFormat.Speed(s.NetDownBytesPerSec, _networkUnit, CultureInfo.CurrentCulture) : NoValue);
+        UploadText = "↑ " + (hasRates ? SystemFormat.Speed(s.NetUpBytesPerSec, _networkUnit, CultureInfo.CurrentCulture) : NoValue);
 
         KoyMemoryText = s.KoyMemoryBytes > 0 ? SystemFormat.Size(s.KoyMemoryBytes, CultureInfo.CurrentCulture) : NoValue;
     }
