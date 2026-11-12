@@ -118,6 +118,7 @@ Kısayollar sayfasındaki satır `ShortcutBindings.All` listesinden kendiliğind
 | Simgeler | `src/App/Resources/Icons.xaml`, `src/App/Resources/IconsNotch.xaml` |
 | Hareket | `src/App/Resources/Motion.cs`, `src/Core/Appearance/MotionPolicy.cs`, `src/Core/Animation/Spring.cs` |
 | Tema kararı | `src/App/Resources/ThemeManager.cs`, `src/Core/Appearance/` |
+| Kullanıcı stil dosyası (`user-theme.json`) | Core: `src/Core/Appearance/UserStyleOverrides.cs` (izinli anahtarlar `AllowedTokens`, kısıtlı ayrıştırıcı `UserStyleParser`), `UserStyleFile.cs` (okuma, boyut sınırı). App: `ThemeManager.cs` (tema sonrası uygular), `UserStyleResources.cs` (WPF'ye çevirir), `UserStyleWatcher.cs` (yalnız ayarlar açıkken izler), `Pages/GorunumPage.xaml`. Yeni renk/ölçü anahtarı eklersen `AllowedTokens`'a da ekle; `UserStyleOverridesTests` XAML ile eşitliği denetler. XAML okuyucu kullanılmaz |
 | Marka simgeleri | `assets/branding/`, sonra `python scripts/generate-icons.py` |
 
 Unutma: Animasyon `Spring` ile yapılır ve yalnız hareket varken kare çizer (AGENTS #6). Yazılımla çizim varsayılandır (AGENTS #3).
