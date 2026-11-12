@@ -126,6 +126,7 @@ Unutma: Animasyon `Spring` ile yapılır ve yalnız hareket varken kare çizer (
 - Dosyalar: `site/index.html`, `site/style.css`, `site/js/`, `site/img/`. Derleme adımı yok.
 - Dene: `python -m http.server --directory site`.
 - `main`'e `site/**` değişikliği gelince `.github/workflows/pages.yml` yayınlar.
+- Görsel, `style.css` ya da `js/` dosyası değişirse `?v=` sürüm etiketini yenile (`index.html`, `js/main.js` ve `js/notch.js` içindeki import'lar); yoksa ziyaretçi önbellekteki eskisini görür.
 
 ## Ekran görüntüsü üretmek
 ```powershell
@@ -133,7 +134,9 @@ dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix <ad> --th
 ```
 - Sahneler `tools/Koy.UiSnapshots/Program.cs` içinde: `all`, `uninstall`, `centik`, `dockbar`, `dock`, `jumplist`, `startmenu`.
 - Araç Win32 kancası, AppBar ya da görev çubuğu servisi başlatmaz; ayarları geçici dosyada tutar.
+- Sitedeki dock: `dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix site --scene sitedock --transparent --scale 2`. Simgeler görev çubuğuna sabitlenmiş gerçek uygulamalardan gelir; çıktı kırpılıp `site/img/dock.webp` olur.
 - README görselleri `docs/screenshots/` altındadır. Site için WebP'ye çevrilip `site/img/` içine konur.
+- Sitedeki çentik görüntüleri saydam zeminlidir (gece mavisi `.aurora` zemininin üstünde durur). Yeni görüntüyü WebP'ye çevirdikten sonra `python scripts/cut-notch-shots.py site/img/<dosya>.webp` ile gri zeminden ayır.
 
 ## Sürüm çıkarmak
 Sürümler release-please ile otomatiktir, elle etiket atılmaz. Ayrıntı: `CONTRIBUTING.md`.

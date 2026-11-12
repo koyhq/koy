@@ -17,10 +17,15 @@ namespace Koy.UiSnapshots;
 /// <c>--scene jumplist</c>: dock sağ tık menüsünün bölümlü atlama listesi hâli (sentetik veri).
 /// <c>--scene startmenu</c>: Başlat düğmesinin sağ tık menüsü (Win+X karşılığı), alt menü açık hâliyle.
 /// <c>--scene uninstall</c>: yalnız Hakkında sayfası ve kaldırma onay görünümü (kaldırıcı hiçbir zaman çalıştırılmaz).
+/// <c>--scene sitedock</c>: tanıtım sitesi için, görev çubuğuna sabitlenmiş gerçek uygulamalarla kapsül dock.
+/// <c>--transparent</c>: gri zemin çizilmez (siteye doğrudan konacak görüntüler). <c>--scale 2</c>: çözünürlük çarpanı (varsayılan 1,5).
 /// </summary>
 public static class Program
 {
-    private const double Scale = 1.5;
+    private static double Scale = 1.5;
+
+    /// <summary>Gri zemin yerine saydam zemin.</summary>
+    private static bool Transparent;
 
     private static readonly string[] PageNames =
         ["genel", "centik", "dock", "ekranlar", "gorunum", "kisayollar", "dikte", "performans", "hakkinda"];
@@ -38,6 +43,9 @@ public static class Program
         var prefix = Arg(args, "--prefix") ?? "snap";
         var themeArg = (Arg(args, "--theme") ?? "dark").ToLowerInvariant();
         var scene = (Arg(args, "--scene") ?? "all").ToLowerInvariant();
+        Transparent = args.Contains("--transparent");
+        if (double.TryParse(Arg(args, "--scale"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var scale) && scale is >= 1 and <= 4)
+            Scale = scale;
         // Malzeme (kati | buzlu | cam) ve saydam yüzeyin arkasındaki duvar kağıdı (light | dark; verilmezse orta gri).
         // Duvar kağıdı hiçbir zaman gerçek masaüstünden okunmaz; verilen renk okunabilirlik korumasına da girer.
         Material = Arg(args, "--material") switch
@@ -70,6 +78,8 @@ public static class Program
                 RenderCentik(outDir, prefix, theme);
             else if (scene == "arama")
                 SearchSnapshots.Render(outDir, prefix, theme, RenderElement);
+            else if (scene == "sitedock")
+                DockBarSnapshots.RenderSite(outDir, prefix, theme, RenderElement);
             else if (scene is "dockbar" or "dockbars")
                 DockBarSnapshots.Render(outDir, prefix, theme, RenderElement);
             else if (scene is "dock" or "folder" or "folders")
@@ -716,7 +726,8 @@ public static class Program
         var dv = new DrawingVisual();
         using (var dc = dv.RenderOpen())
         {
-            dc.DrawRectangle(new SolidColorBrush(Backdrop), null, new Rect(0, 0, pxW, pxH));
+            if (!Transparent)
+                dc.DrawRectangle(new SolidColorBrush(Backdrop), null, new Rect(0, 0, pxW, pxH));
             dc.DrawImage(shot, new Rect(pad * Scale, pad * Scale, shot.PixelWidth, shot.PixelHeight));
         }
         var final = new RenderTargetBitmap(pxW, pxH, 96, 96, PixelFormats.Pbgra32);

@@ -8,6 +8,7 @@ using Koy.Core.Dock;
 using Koy.Core.Settings;
 using Koy.Core.Shell;
 using Koy.Core.Tray;
+using Koy.Platform.Shell;
 
 namespace Koy.UiSnapshots;
 
@@ -102,11 +103,50 @@ internal static class DockBarSnapshots
         encoder.Save(stream);
     }
 
+    /// <summary>
+    /// Tanıtım sitesi için kapsül dock: simgeler kullanıcının görev çubuğuna sabitlediği gerçek uygulamalardan
+    /// (Koy'un kendi <see cref="PinnedAppsService"/> servisi) ve varsa Discord'dan gelir. Sabit yoksa sahte simgeler.
+    /// </summary>
+    public static void RenderSite(string outDir, string prefix, string theme, Action<FrameworkElement, double, double, string> renderElement)
+    {
+        string[] order = ["File Explorer", "Dosya Gezgini", "Visual Studio 2022", "Visual Studio Code", "Docker Desktop", "Obsidian", "Google Chrome", "Antigravity"];
+        string[] running = ["File Explorer", "Dosya Gezgini", "Visual Studio Code", "Google Chrome", "Discord"];
+
+        var apps = new PinnedAppsService().GetPinnedApps()
+            .Where(a => a.IconData is { Length: > 0 })
+            .Select(a => (a.Title, a.TargetPath ?? a.ShortcutPath, a.IconData!))
+            .OrderBy(a => Array.IndexOf(order, a.Title) is var i and >= 0 ? i : order.Length)
+            .ToList();
+
+        var discordRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Discord");
+        var discord = Directory.Exists(discordRoot)
+            ? Directory.GetDirectories(discordRoot, "app-*").OrderDescending().Select(d => Path.Combine(d, "Discord.exe")).FirstOrDefault(File.Exists)
+            : null;
+        if (discord is not null && IconHelper.GetIconBytes(discord) is { Length: > 0 } discordIcon)
+            apps.Add(("Discord", discord, discordIcon));
+
+        List<DockEntryViewModel>? entries = null;
+        if (apps.Count > 0)
+        {
+            entries = [];
+            foreach (var (title, path, icon) in apps)
+            {
+                var isRunning = running.Contains(title);
+                var model = new DockItem(title, title, path, path, icon, true, isRunning, false, isRunning ? [1] : []);
+                var vm = new DockItemViewModel(model, DockFolderSnapshots.SharedController) { ItemSize = 38, IconSize = 28 };
+                if (title == "Visual Studio Code") vm.IsActive = true;
+                entries.Add(vm);
+            }
+        }
+
+        Shoot(outDir, prefix, theme, "site-dock", renderElement, fullWidth: false, smallTray: true, appCount: 8, entries: entries, hug: true);
+    }
+
     private static void Shoot(
         string outDir, string prefix, string theme, string name,
         Action<FrameworkElement, double, double, string> renderElement,
         bool fullWidth, bool smallTray, int appCount, int pressedIndex = -1, DockIconAlignment alignment = DockIconAlignment.Center,
-        DockStartIcon startIcon = DockStartIcon.Koy, string startIconPath = "")
+        DockStartIcon startIcon = DockStartIcon.Koy, string startIconPath = "", IReadOnlyList<DockEntryViewModel>? entries = null, bool hug = false)
     {
         var settings = new AppSettings
         {
@@ -131,12 +171,20 @@ internal static class DockBarSnapshots
         // Kurucunun kuyruğa attığı ilk öğe eşitlemesi (boş denetleyici) çalışsın, sonra sahte öğeler eklensin.
         Pump();
         vm.Items.Clear();
-        foreach (var entry in BuildEntries(appCount))
+        foreach (var entry in entries ?? BuildEntries(appCount))
             vm.Items.Add(entry);
 
         vm.SetMonitor(Monitor);
 
         FrameworkElement view = fullWidth ? new DockFullWidth { DataContext = vm } : new DockCapsule { DataContext = vm };
+        // Site görüntüsü: kapsül gerçekteki gibi içeriği kadar, ekran genişliğine yayılmaz.
+        if (hug)
+        {
+            view.HorizontalAlignment = HorizontalAlignment.Center;
+            // Serbest yüzen kapsül (pencereye yapışık değil): dört köşe yuvarlak.
+            vm.CapsuleCornerRadius = new CornerRadius(18);
+            vm.DockMargin = new Thickness(12, 12, 12, 10);
+        }
 
         // Düzen iki geçişte oturur: ilk geçiş orta sütun genişliğini bildirir, simgeler yeniden boyutlanır.
         var host = new Grid { Width = Monitor.WidthDip, DataContext = vm };
@@ -155,7 +203,7 @@ internal static class DockBarSnapshots
             host.UpdateLayout();
         }
 
-        renderElement(host, Monitor.WidthDip, fullWidth ? DockPositionResolver.FullWidthHeightDip : 80, Path.Combine(outDir, $"{prefix}-{theme}-{name}.png"));
+        renderElement(host, Monitor.WidthDip, fullWidth ? DockPositionResolver.FullWidthHeightDip : hug ? 120 : 80, Path.Combine(outDir, $"{prefix}-{theme}-{name}.png"));
     }
 
     private static List<DockEntryViewModel> BuildEntries(int count)
