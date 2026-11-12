@@ -699,6 +699,48 @@
   <data name="ShortcutVoiceCommand" xml:space="preserve">
     <value>Voice command (harness)</value>
   </data>
+  <data name="ShortcutOpenKoyWindow" xml:space="preserve">
+    <value>Open Koy settings window</value>
+  </data>
+  <data name="CornersHeader" xml:space="preserve">
+    <value>Screen corners</value>
+  </data>
+  <data name="CornersHint" xml:space="preserve">
+    <value>Rest the pointer in a screen corner to run an action. No corner is set by default; while all are "None" nothing is tracked. A corner never fires while a mouse button is held.</value>
+  </data>
+  <data name="CornerTopLeft" xml:space="preserve">
+    <value>Top-left corner</value>
+  </data>
+  <data name="CornerTopRight" xml:space="preserve">
+    <value>Top-right corner</value>
+  </data>
+  <data name="CornerBottomLeft" xml:space="preserve">
+    <value>Bottom-left corner</value>
+  </data>
+  <data name="CornerBottomRight" xml:space="preserve">
+    <value>Bottom-right corner</value>
+  </data>
+  <data name="CornerActionNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="CornerActionOpenNotch" xml:space="preserve">
+    <value>Open / close Notch</value>
+  </data>
+  <data name="CornerActionOpenSearch" xml:space="preserve">
+    <value>Open search</value>
+  </data>
+  <data name="CornerActionOpenKoyWindow" xml:space="preserve">
+    <value>Open Koy settings</value>
+  </data>
+  <data name="CornerActionToggleDock" xml:space="preserve">
+    <value>Show / hide Dock</value>
+  </data>
+  <data name="CornerDwellTitle" xml:space="preserve">
+    <value>Hold time in the corner</value>
+  </data>
+  <data name="CornerFullscreenTitle" xml:space="preserve">
+    <value>Off while a full-screen app is active</value>
+  </data>
   <data name="VoiceHeader" xml:space="preserve">
     <value>VOICE COMMAND &amp; HARNESS</value>
   </data>

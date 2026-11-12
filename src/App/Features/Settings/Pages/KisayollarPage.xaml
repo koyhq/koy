@@ -173,5 +173,105 @@
                 </Border>
             </Grid>
         </Border>
+
+        <!-- EKRAN KÖŞELERİ -->
+        <TextBlock Text="{Binding [CornersHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+        <TextBlock Text="{Binding [CornersHint], Source={x:Static res:Loc.Instance}}" Style="{StaticResource PageSubtitleStyle}" Margin="0,0,0,8" TextWrapping="Wrap" />
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [CornerTopLeft], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [CornerTopLeft], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="200" SelectedValuePath="Tag"
+                          SelectedValue="{Binding HotCorners.TopLeft}" Style="{StaticResource SettingComboBoxStyle}">
+                    <ComboBoxItem Content="{Binding [CornerActionNone], Source={x:Static res:Loc.Instance}}" Tag="None" />
+                    <ComboBoxItem Content="{Binding [CornerActionOpenNotch], Source={x:Static res:Loc.Instance}}" Tag="OpenNotch" />
+                    <ComboBoxItem Content="{Binding [CornerActionOpenSearch], Source={x:Static res:Loc.Instance}}" Tag="OpenSearch" />
+                    <ComboBoxItem Content="{Binding [CornerActionOpenKoyWindow], Source={x:Static res:Loc.Instance}}" Tag="OpenKoyWindow" />
+                    <ComboBoxItem Content="{Binding [CornerActionToggleDock], Source={x:Static res:Loc.Instance}}" Tag="ToggleDock" />
+                </ComboBox>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [CornerTopRight], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [CornerTopRight], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="200" SelectedValuePath="Tag"
+                          SelectedValue="{Binding HotCorners.TopRight}" Style="{StaticResource SettingComboBoxStyle}">
+                    <ComboBoxItem Content="{Binding [CornerActionNone], Source={x:Static res:Loc.Instance}}" Tag="None" />
+                    <ComboBoxItem Content="{Binding [CornerActionOpenNotch], Source={x:Static res:Loc.Instance}}" Tag="OpenNotch" />
+                    <ComboBoxItem Content="{Binding [CornerActionOpenSearch], Source={x:Static res:Loc.Instance}}" Tag="OpenSearch" />
+                    <ComboBoxItem Content="{Binding [CornerActionOpenKoyWindow], Source={x:Static res:Loc.Instance}}" Tag="OpenKoyWindow" />
+                    <ComboBoxItem Content="{Binding [CornerActionToggleDock], Source={x:Static res:Loc.Instance}}" Tag="ToggleDock" />
+                </ComboBox>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [CornerBottomLeft], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [CornerBottomLeft], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="200" SelectedValuePath="Tag"
+                          SelectedValue="{Binding HotCorners.BottomLeft}" Style="{StaticResource SettingComboBoxStyle}">
+                    <ComboBoxItem Content="{Binding [CornerActionNone], Source={x:Static res:Loc.Instance}}" Tag="None" />
+                    <ComboBoxItem Content="{Binding [CornerActionOpenNotch], Source={x:Static res:Loc.Instance}}" Tag="OpenNotch" />
+                    <ComboBoxItem Content="{Binding [CornerActionOpenSearch], Source={x:Static res:Loc.Instance}}" Tag="OpenSearch" />
+                    <ComboBoxItem Content="{Binding [CornerActionOpenKoyWindow], Source={x:Static res:Loc.Instance}}" Tag="OpenKoyWindow" />
+                    <ComboBoxItem Content="{Binding [CornerActionToggleDock], Source={x:Static res:Loc.Instance}}" Tag="ToggleDock" />
+                </ComboBox>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [CornerBottomRight], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [CornerBottomRight], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="200" SelectedValuePath="Tag"
+                          SelectedValue="{Binding HotCorners.BottomRight}" Style="{StaticResource SettingComboBoxStyle}">
+                    <ComboBoxItem Content="{Binding [CornerActionNone], Source={x:Static res:Loc.Instance}}" Tag="None" />
+                    <ComboBoxItem Content="{Binding [CornerActionOpenNotch], Source={x:Static res:Loc.Instance}}" Tag="OpenNotch" />
+                    <ComboBoxItem Content="{Binding [CornerActionOpenSearch], Source={x:Static res:Loc.Instance}}" Tag="OpenSearch" />
+                    <ComboBoxItem Content="{Binding [CornerActionOpenKoyWindow], Source={x:Static res:Loc.Instance}}" Tag="OpenKoyWindow" />
+                    <ComboBoxItem Content="{Binding [CornerActionToggleDock], Source={x:Static res:Loc.Instance}}" Tag="ToggleDock" />
+                </ComboBox>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [CornerDwellTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [CornerDwellTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="200" SelectedValuePath="Tag"
+                          SelectedValue="{Binding HotCorners.Dwell}" Style="{StaticResource SettingComboBoxStyle}">
+                    <ComboBoxItem Content="200 ms" Tag="200" />
+                    <ComboBoxItem Content="400 ms" Tag="400" />
+                    <ComboBoxItem Content="700 ms" Tag="700" />
+                    <ComboBoxItem Content="1000 ms" Tag="1000" />
+                </ComboBox>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [CornerFullscreenTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [CornerFullscreenTitle], Source={x:Static res:Loc.Instance}}"
+                          IsChecked="{Binding HotCorners.DisableInFullscreen}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
     </StackPanel>
 </UserControl>
