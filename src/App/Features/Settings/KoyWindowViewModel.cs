@@ -664,7 +664,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     {
         base.OnPropertyChanged(e);
         if (_isLoading) return;
-        if (e.PropertyName is nameof(SelectedPageIndex) or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
+        if (e.PropertyName is nameof(SelectedPageIndex) or nameof(SettingsSearchQuery) or nameof(IsSettingsSearching) or nameof(SettingsSearchResults)
+            or nameof(SettingsSearchNoResult) or nameof(ShowChangedOnly) or nameof(CanResetPage) or nameof(IsPageResetConfirming) or nameof(PageResetDone)
+            or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
             or nameof(IsResetConfirming) or nameof(UninstallAvailability) or nameof(CanUninstall) or nameof(UninstallRowDescription)
             or nameof(StartIconFileName) or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates) or nameof(DownloadProgressText))
             return;
@@ -871,6 +873,85 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         TaskbarService.Restore(force: true);
         // Dock çalışıyorsa Koy'un tepsi penceresi de bırakılır (görev çubuğu görünürken Shell_TrayWnd sahipliği alınmaz).
         (Application.Current as App)?.NotifyTaskbarRestoredManually();
+    }
+
+    // --- AYAR ARAMASI, YALNIZ DEĞİŞENLER, SAYFA SIFIRLAMA (issue #69) ---
+    // Dizin ve satır işaretleme pencerededir (sayfaların kendisinden kurulur); burada yalnız durum ve komutlar var.
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSettingsSearching))]
+    private string _settingsSearchQuery = "";
+
+    public bool IsSettingsSearching => !string.IsNullOrWhiteSpace(SettingsSearchQuery);
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SettingsSearchNoResult))]
+    private IReadOnlyList<SettingsSearchResult> _settingsSearchResults = [];
+
+    public bool SettingsSearchNoResult => IsSettingsSearching && SettingsSearchResults.Count == 0;
+
+    partial void OnSettingsSearchQueryChanged(string value) => OnPropertyChanged(nameof(SettingsSearchNoResult));
+
+    [ObservableProperty]
+    private bool _showChangedOnly;
+
+    /// <summary>Varsayılandan farklı ayar anahtarları ("Dock.ShowTray"); pencere satırları buna göre işaretler.</summary>
+    public IReadOnlyList<string> ChangedSettingKeys() => SettingsChanges.ChangedKeys(_store.Load(), new AppSettings());
+
+    /// <summary>Sayfa dizinine göre sıfırlanacak bölümler. Dock ve Ekranlar yok (görev çubuğu / AppBar etkisi).</summary>
+    public static IReadOnlyList<string> ResetSectionsFor(int pageIndex) => pageIndex switch
+    {
+        0 => [nameof(AppSettings.General)],
+        // Hava durumu konumu kullanıcı verisidir, sayfa sıfırlamada korunur.
+        1 => [nameof(AppSettings.Notch), nameof(AppSettings.Music), nameof(AppSettings.Focus), nameof(AppSettings.Search), nameof(AppSettings.Clipboard)],
+        4 => [nameof(AppSettings.Appearance)],
+        5 => [nameof(AppSettings.Shortcuts)],
+        6 => [nameof(AppSettings.Voice)],
+        _ => [],
+    };
+
+    public bool CanResetPage => ResetSectionsFor(SelectedPageIndex).Count > 0;
+
+    [ObservableProperty]
+    private bool _isPageResetConfirming;
+
+    /// <summary>Son sıfırlamadan sonra kısa bilgi satırı; sayfa değişince kapanır.</summary>
+    [ObservableProperty]
+    private bool _pageResetDone;
+
+    partial void OnSelectedPageIndexChanged(int value)
+    {
+        IsPageResetConfirming = false;
+        PageResetDone = false;
+        OnPropertyChanged(nameof(CanResetPage));
+    }
+
+    [RelayCommand]
+    private void RequestPageReset()
+    {
+        PageResetDone = false;
+        IsPageResetConfirming = true;
+    }
+
+    [RelayCommand]
+    private void CancelPageReset() => IsPageResetConfirming = false;
+
+    [RelayCommand]
+    private void ConfirmPageReset()
+    {
+        IsPageResetConfirming = false;
+        var sections = ResetSectionsFor(SelectedPageIndex);
+        if (sections.Count == 0)
+            return;
+
+        _store.Save(SettingsPageReset.Reset(_store.Load(), sections));
+        LoadFromSettings();
+        SettingsSaved?.Invoke();
+        if (Application.Current is { } current)
+            ThemeManager.Apply(current, _store.Load());
+        if (Application.Current is App app)
+            app.ReloadAllFeatures();
+        PageResetDone = true;
     }
 
     /// <summary>Sıfırlama iki adımlı: ilk tıklama onay ister (yanlışlıkla silmeyi önler).</summary>
