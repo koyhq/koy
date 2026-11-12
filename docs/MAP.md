@@ -55,6 +55,14 @@ Unutma:
 
 Unutma: Bildirim yoklaması AGENTS #5'in tek yoklama istisnasıdır (paketsiz süreçte olay yok); yalnız ayar açıkken ve çentik varken çalışır, `Stop`'ta sökülür. Core arayüzünde WinRT tipi yok: simge `byte[]?`, kimlik `uint`. Bildirim kartı yalnız birincil ekranın çentiğinde çıkar.
 
+## Aramaya yeni kaynak eklemek
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Search/` | `SearchSource` türevi (örnekler: `UnitConverterSource` + `UnitConverter`, `ColorConverterSource` + `ColorParser`); kopyalama `ISearchShell.CopyText` ile |
+| App | `src/App/Features/Search/SearchFactory.cs` | `SourceCatalog` satırı (Ayarlar'daki aç/kapat listesi) ve `Create` içinde `Add(...)` + `Syntaxes` |
+| App | `src/App/Resources/Strings.resx`, `Strings.tr.resx` | `SearchCat<Ad>` ve `SearchSyntax<Ad>` metinleri |
+| Test | `tests/Core.Tests/Search/` | Kaynak testleri (`SearchSourceTests`, `UnitAndColorConverterTests`) |
+
 ## Yeni kullanıcı metni ya da çeviri eklemek
 | Katman | Dosya | Ne yapılır |
 |---|---|---|
