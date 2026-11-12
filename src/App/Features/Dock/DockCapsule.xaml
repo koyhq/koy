@@ -9,7 +9,7 @@
 
     <!-- Seelen UI Yüzen Kapsül Tabanı: 60 px yükseklik (aşağı yapışınca 46 px), 18 px köşe yuvarlama (yapışınca 14,14,0,0) -->
     <Border Background="{Binding CapsuleSurface}"
-            BorderBrush="#1AFFFFFF"
+            BorderBrush="{DynamicResource KoyDockCapsuleBorder}"
             BorderThickness="1"
             CornerRadius="{Binding CapsuleCornerRadius}"
             Width="{Binding CapsuleWidth}"
@@ -44,7 +44,7 @@
             <!-- 3. Dikey/Yatay Ayırıcı 1 -->
             <Rectangle Width="{Binding SeparatorWidth}"
                        Height="{Binding SeparatorHeight}"
-                       Fill="#29FFFFFF"
+                       Fill="{DynamicResource KoyDockSeparator}"
                        Margin="{Binding SeparatorMargin}"
                        Visibility="{Binding ShowRightSection, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
 
@@ -75,7 +75,7 @@
             <!-- 5. Dikey/Yatay Ayırıcı 2 -->
             <Rectangle Width="{Binding SeparatorWidth}"
                        Height="{Binding SeparatorHeight}"
-                       Fill="#29FFFFFF"
+                       Fill="{DynamicResource KoyDockSeparator}"
                        Margin="{Binding SeparatorMargin}"/>
 
             <!-- 6. Koy Sistem Menüsü Düğmesi -->

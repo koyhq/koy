@@ -65,6 +65,7 @@ Açma önce geçici klasöre, doğrulama bitince tek taşıma ile `extensions\<i
 ## Uygulama ("Uygula")
 
 - `theme`: mevcut `user-theme.json` `user-theme.backup.json` olarak saklanır, paketin `theme.json`'u kopyalanır, `UserStyleOverridesEnabled = true`.
+  Tema yalnız Koy penceresini değil çentiği ve dock'u da boyar: çentik zemini `KoyNotchSurface`, kartları ve yazısı `KoyNotch*`, dock zemini ve göstergeleri `KoyDock*` token'larından okunur (malzeme opaklığı bu taban renklere uygulanır). Pakette olmayan token varsayılanında kalır. Örnek temalar (1.1.0) üç yüzeyin de değerlerini verir.
 - `iconpack`: `IconPack = Folder`, `IconPackFolder = extensions\<id>\icons`.
 - `background`: `LiveBackgroundSource = File`, `LiveBackgroundFilePath = extensions\<id>\background.*`; hedef Kapalıysa çentik.
 - `profile`: profil kitaplığına içe alınır (uygulamaz; profiller bölümünden uygulanır).

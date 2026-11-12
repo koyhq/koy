@@ -20,7 +20,7 @@
     <Grid Grid.Column="0" Width="18" Height="18" VerticalAlignment="Center">
       <!-- Ses İkonu (Hoparlör) -->
       <Path x:Name="VolumeIcon" Width="18" Height="18" Stretch="Uniform"
-            Stroke="#F4F4F5" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+            Stroke="{DynamicResource KoyNotchText}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
             Data="M 4,9 L 4,15 L 8,15 L 13,19 L 13,5 L 8,9 Z M 16,9 A 4,4 0 0 1 16,15 M 18.5,6.5 A 8,8 0 0 1 18.5,17.5">
         <Path.Style>
           <Style TargetType="Path">
@@ -44,7 +44,7 @@
 
       <!-- Parlaklık İkonu (Güneş) -->
       <Path x:Name="BrightnessIcon" Width="18" Height="18" Stretch="Uniform"
-            Stroke="#FACC15" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+            Stroke="{DynamicResource KoyNotchBrightness}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
             Data="M 12,8 A 4,4 0 1 1 11.99,8 Z M 12,2 L 12,4 M 12,20 L 12,22 M 2,12 L 4,12 M 20,12 L 22,12 M 4.9,4.9 L 6.3,6.3 M 17.7,17.7 L 19.1,19.1 M 4.9,19.1 L 6.3,17.7 M 17.7,6.3 L 19.1,4.9">
         <Path.Style>
           <Style TargetType="Path">
@@ -83,7 +83,7 @@
                 <Setter Property="Data" Value="{StaticResource IconBatteryCharging}" />
               </DataTrigger>
               <DataTrigger Binding="{Binding BatteryKind}" Value="{x:Static power:BatteryAlertKind.Unplugged}">
-                <Setter Property="Stroke" Value="#F4F4F5" />
+                <Setter Property="Stroke" Value="{DynamicResource KoyNotchText}" />
                 <Setter Property="Data" Value="{StaticResource IconBattery}" />
               </DataTrigger>
             </Style.Triggers>
@@ -104,7 +104,7 @@
                 <Setter Property="Visibility" Value="Visible" />
               </DataTrigger>
               <DataTrigger Binding="{Binding BluetoothConnected}" Value="False">
-                <Setter Property="Stroke" Value="#71717A" />
+                <Setter Property="Stroke" Value="{DynamicResource KoyNotchDim}" />
               </DataTrigger>
             </Style.Triggers>
           </Style>
@@ -132,7 +132,7 @@
     <!-- Orta Alan: Volume/Brightness için seviye çubuğu; Battery için durum metni ve seviye çubuğu -->
     <Grid Grid.Column="1" Margin="12,0,12,0" VerticalAlignment="Center">
       <!-- Ses ve Parlaklık Seviye Çubuğu -->
-      <Border Height="6" CornerRadius="3" Background="#3F3F46" ClipToBounds="True">
+      <Border Height="6" CornerRadius="3" Background="{DynamicResource KoyNotchTrack}" ClipToBounds="True">
         <Border.Style>
           <Style TargetType="Border">
             <Setter Property="Visibility" Value="Visible" />
@@ -157,10 +157,10 @@
           <Border Grid.Column="0" CornerRadius="3">
             <Border.Style>
               <Style TargetType="Border">
-                <Setter Property="Background" Value="#F4F4F5" />
+                <Setter Property="Background" Value="{DynamicResource KoyNotchText}" />
                 <Style.Triggers>
                   <DataTrigger Binding="{Binding Type}" Value="{x:Static local:OsdType.Brightness}">
-                    <Setter Property="Background" Value="#FACC15" />
+                    <Setter Property="Background" Value="{DynamicResource KoyNotchBrightness}" />
                   </DataTrigger>
                 </Style.Triggers>
               </Style>
@@ -202,7 +202,7 @@
             </Style>
           </TextBlock.Style>
         </TextBlock>
-        <Border Grid.Row="1" Height="3" CornerRadius="1.5" Background="#3F3F46" ClipToBounds="True">
+        <Border Grid.Row="1" Height="3" CornerRadius="1.5" Background="{DynamicResource KoyNotchTrack}" ClipToBounds="True">
           <Grid>
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="{Binding FillStarWidth}" />
@@ -217,7 +217,7 @@
                       <Setter Property="Background" Value="#EF4444" />
                     </DataTrigger>
                     <DataTrigger Binding="{Binding BatteryKind}" Value="{x:Static power:BatteryAlertKind.Unplugged}">
-                      <Setter Property="Background" Value="#A1A1AA" />
+                      <Setter Property="Background" Value="{DynamicResource KoyNotchTextMuted}" />
                     </DataTrigger>
                   </Style.Triggers>
                 </Style>
@@ -247,14 +247,14 @@
                    Text="{Binding BluetoothDeviceName}"
                    FontSize="12"
                    FontWeight="SemiBold"
-                   Foreground="#F4F4F5"
+                   Foreground="{DynamicResource KoyNotchText}"
                    TextTrimming="CharacterEllipsis"
                    Margin="0,0,0,1" />
         <TextBlock Grid.Row="1"
                    Text="{Binding BluetoothStatusText}"
                    FontSize="10"
                    FontWeight="Normal"
-                   Foreground="#A1A1AA"
+                   Foreground="{DynamicResource KoyNotchTextMuted}"
                    TextTrimming="CharacterEllipsis" />
       </Grid>
 
@@ -278,7 +278,7 @@
                    Text="{Binding VoicePrompt}"
                    FontSize="12"
                    FontWeight="SemiBold"
-                   Foreground="#F4F4F5"
+                   Foreground="{DynamicResource KoyNotchText}"
                    TextTrimming="CharacterEllipsis"
                    Margin="0,0,0,1">
           <TextBlock.Style>
@@ -295,7 +295,7 @@
         <!-- Komut kutusu: Windows sesle yazma (Win+H) buraya yazar, kullanıcı da yazabilir. Enter/Esc pencerede yakalanır. -->
         <TextBox x:Name="VoiceInputBox" Grid.Row="0"
                  Text="{Binding VoiceInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 FontSize="12" FontWeight="SemiBold" Foreground="#F4F4F5" CaretBrush="#F4F4F5"
+                 FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource KoyNotchText}" CaretBrush="{DynamicResource KoyNotchText}"
                  Background="Transparent" BorderThickness="0" Padding="0" Margin="0,0,0,1"
                  AcceptsReturn="False" MaxLength="2000"
                  AutomationProperties.Name="{Binding VoiceStatusText}">
@@ -314,7 +314,7 @@
                    Text="{Binding VoiceStatusText}"
                    FontSize="11"
                    FontWeight="Normal"
-                   Foreground="#A1A1AA"
+                   Foreground="{DynamicResource KoyNotchTextMuted}"
                    TextTrimming="CharacterEllipsis" />
       </Grid>
     </Grid>
@@ -326,7 +326,7 @@
                FontWeight="SemiBold"
                MinWidth="26"
                TextAlignment="Right"
-               Foreground="#F4F4F5"
+               Foreground="{DynamicResource KoyNotchText}"
                VerticalAlignment="Center">
       <TextBlock.Style>
         <Style TargetType="TextBlock">

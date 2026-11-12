@@ -86,8 +86,8 @@
                StaysOpen="True"
                MouseEnter="OnPopupMouseEnter"
                MouseLeave="OnPopupMouseLeave">
-            <Border Background="#F51C1C1E"
-                    BorderBrush="#1AFFFFFF"
+            <Border Background="{DynamicResource KoyDockPreviewSurface}"
+                    BorderBrush="{DynamicResource KoyDockCapsuleBorder}"
                     BorderThickness="1"
                     CornerRadius="14"
                     Padding="8"
@@ -108,7 +108,7 @@
                         <Grid Margin="4,0,4,6">
                             <TextBlock Text="{Binding PreviewItem.SingleWindow.Title}"
                                        FontSize="12"
-                                       Foreground="#D4D4D8"
+                                       Foreground="{DynamicResource KoyDockPreviewText}"
                                        TextTrimming="CharacterEllipsis"
                                        VerticalAlignment="Center"
                                        MaxWidth="200"/>
@@ -124,7 +124,7 @@
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="b" Background="Transparent" CornerRadius="5">
-                                            <Path Stroke="#D4D4D8" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                            <Path Stroke="{DynamicResource KoyDockPreviewText}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
                                                   Data="M 3,3 L 11,11 M 11,3 L 3,11"/>
                                         </Border>
@@ -167,7 +167,7 @@
                                         <StackPanel>
                                             <TextBlock Text="{Binding Title}"
                                                        FontSize="11"
-                                                       Foreground="#D4D4D8"
+                                                       Foreground="{DynamicResource KoyDockPreviewText}"
                                                        TextTrimming="CharacterEllipsis"
                                                        Margin="2,0,2,4"/>
                                             <Border Height="70"

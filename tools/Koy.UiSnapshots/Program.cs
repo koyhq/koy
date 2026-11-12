@@ -19,6 +19,7 @@ namespace Koy.UiSnapshots;
 /// <c>--scene eklentiler</c>: Eklentiler sayfası (depodaki store/ klasöründen sahte ağla; kurulum, uygulama ve hata durumları).
 /// <c>--scene uninstall</c>: yalnız Hakkında sayfası ve kaldırma onay görünümü (kaldırıcı hiçbir zaman çalıştırılmaz).
 /// <c>--scene sitedock</c>: tanıtım sitesi için, görev çubuğuna sabitlenmiş gerçek uygulamalarla kapsül dock.
+/// <c>--user-theme &lt;yol&gt;</c>: o user-theme.json dosyasını (ör. store/ tema paketinin theme.json'ı) uygulayarak çizer; %AppData% dosyasına dokunulmaz.
 /// <c>--transparent</c>: gri zemin çizilmez (siteye doğrudan konacak görüntüler). <c>--scale 2</c>: çözünürlük çarpanı (varsayılan 1,5).
 /// </summary>
 public static class Program
@@ -34,6 +35,9 @@ public static class Program
     /// <summary>Görüntülerde kullanılan malzeme (Katı / Buzlu / Cam).</summary>
     internal static Koy.Core.Appearance.MaterialLevel Material { get; private set; } = Koy.Core.Appearance.MaterialLevel.Solid;
 
+    /// <summary>--user-theme ile verilen stil dosyası; null ise kullanıcı stili uygulanmaz (temasız görünüm).</summary>
+    internal static string? UserThemePath { get; private set; }
+
     /// <summary>Çizimin arkasındaki zemin; saydam yüzeyler bunu gösterir.</summary>
     private static Color Backdrop = Color.FromRgb(0x7A, 0x80, 0x8C);
 
@@ -45,6 +49,11 @@ public static class Program
         var themeArg = (Arg(args, "--theme") ?? "dark").ToLowerInvariant();
         var scene = (Arg(args, "--scene") ?? "all").ToLowerInvariant();
         Transparent = args.Contains("--transparent");
+        if (Arg(args, "--user-theme") is { Length: > 0 } userTheme)
+        {
+            UserThemePath = Path.GetFullPath(userTheme);
+            Koy.App.Resources.ThemeManager.UserStylePath = UserThemePath;
+        }
         if (double.TryParse(Arg(args, "--scale"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var scale) && scale is >= 1 and <= 4)
             Scale = scale;
         // Malzeme (kati | buzlu | cam) ve saydam yüzeyin arkasındaki duvar kağıdı (light | dark; verilmezse orta gri).

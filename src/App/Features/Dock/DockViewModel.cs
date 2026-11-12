@@ -349,15 +349,26 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     private readonly AppSettings _materialSettings;
 
+    // Taban renkler KoyDockSurface / KoyDockCapsuleSurface kaynaklarından okunur (varsayılan #121216 / #18181B); tema
+    // paketi ya da kullanıcı stil dosyası onları değiştirince ThemeManager.Applied ile yenilenir. Malzeme opaklığı
+    // taban rengin RGB'sine uygulanır (kaynağın kendi alfası yok sayılır).
+    private static readonly Color DefaultFullWidthColor = Color.FromRgb(0x12, 0x12, 0x16);
+    private static readonly Color DefaultCapsuleColor = Color.FromRgb(0x18, 0x18, 0x1B);
+
+    private static Color ReadColor(string key, Color fallback) =>
+        System.Windows.Application.Current?.TryFindResource(key) is SolidColorBrush b ? b.Color : fallback;
+
     private void UpdateMaterialSurfaces()
     {
         var level = MaterialState.ForDock(_materialSettings);
-        var full = new SolidColorBrush(Color.FromArgb(MaterialSetting.LayeredAlpha(level), 0x12, 0x12, 0x16));
+        var fullBase = ReadColor("KoyDockSurface", DefaultFullWidthColor);
+        var full = new SolidColorBrush(Color.FromArgb(MaterialSetting.LayeredAlpha(level), fullBase.R, fullBase.G, fullBase.B));
         full.Freeze();
         FullWidthSurface = full;
 
+        var capsuleBase = ReadColor("KoyDockCapsuleSurface", DefaultCapsuleColor);
         var capsuleAlpha = Math.Min((byte)0xE6, MaterialSetting.LayeredAlpha(level)); // kapsül Katı'da da %90; daha opak olmaz
-        var capsule = new SolidColorBrush(Color.FromArgb(capsuleAlpha, 0x18, 0x18, 0x1B));
+        var capsule = new SolidColorBrush(Color.FromArgb(capsuleAlpha, capsuleBase.R, capsuleBase.G, capsuleBase.B));
         capsule.Freeze();
         CapsuleSurface = capsule;
     }
@@ -584,6 +595,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _materialSettings = settings;
         UpdateMaterialSurfaces();
         MaterialState.Changed += OnMaterialChanged;
+        ThemeManager.Applied += OnMaterialChanged;
 
         _translateXSpring = new Spring(0) { Stiffness = 280, Damping = 25 };
         _translateYSpring = new Spring(0) { Stiffness = 280, Damping = 25 };
@@ -2001,6 +2013,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _disposed = true;
 
         MaterialState.Changed -= OnMaterialChanged;
+        ThemeManager.Applied -= OnMaterialChanged;
         _thumbnailHoverTimer.Stop();
         _previewCloseTimer.Stop();
         _dodgeHoverTimer.Stop();
