@@ -11,6 +11,9 @@ namespace Koy.App.Resources;
 /// Sıra: [0] tema sözlüğü (Koyu/Açık, değişince yenisiyle değiştirilir), Tokens, Icons, Styles, en sonda
 /// ezmeler (vurgu tonları, köşe yarıçapları, Buzlu / Cam yüzeyler). Hepsi DynamicResource ile okunduğu için
 /// değişiklik açık pencerelere anında yansır.
+/// En sonda, ayar açıksa, kullanıcı stil dosyası (%AppData%\Koy\user-theme.json) izinli anahtarları ezer (bkz.
+/// UserStyleParser); tema ya da ayar her uygulandığında yeniden uygulanır, ayar kapanınca ya da dosya silinince
+/// ezmeler kalkar ve tema değerleri geri gelir.
 /// Koy penceresi, ilk kurulum sihirbazı ve sağ alt menü bu kaynakları kullanır; çentik ve dock temadan bağımsız koyu
 /// kalır, yalnız malzeme saydamken çentik kartlarının (KoyNotchCard / KoyNotchChip) tonu buradan ezilir.
 /// </summary>
@@ -20,6 +23,9 @@ public static class ThemeManager
 
     private static ResourceDictionary? _themeDictionary;
     private static ResourceDictionary? _overrides;
+    private static ResourceDictionary? _userStyle;
+    private static UserStyleParseResult? _userStyleResult;
+    private static UserStyleFileStamp _userStyleStamp;
     private static AppSettings? _last;
 
     /// <summary>Son uygulanan ayarlar (pencere çerçeveleri okur); henüz uygulanmadıysa null.</summary>
@@ -27,6 +33,13 @@ public static class ThemeManager
 
     /// <summary>Kaynaklar her uygulandığında (tema, vurgu, malzeme, köşe, duvar kağıdı); pencere çerçeveleri dinler.</summary>
     public static event Action? Applied;
+
+    /// <summary>Kullanıcı stil dosyası her (yeniden) uygulandığında; ayarlar sayfası tanı listesini yeniler.</summary>
+    public static event Action? UserStyleApplied;
+
+    /// <summary>Son okunan kullanıcı stil dosyasının sonucu; ayar kapalıysa ya da hiç okunmadıysa boş.</summary>
+    public static UserStyleParseResult UserStyleResult => _userStyleResult ?? UserStyleParseResult.Empty;
+
     private static bool _watching;
     private static bool _watchingMaterial;
 
@@ -70,6 +83,7 @@ public static class ThemeManager
         _themeDictionary = wanted;
 
         BuildOverrides(settings, theme, wanted);
+        ApplyUserStyle(app, settings, reload: false);
         Motion.Refresh(settings);
 
         // Duvar kağıdı okununca ya da değişince okunabilirlik koruması yeniden değerlendirilir.
@@ -157,6 +171,68 @@ public static class ThemeManager
             // nötr (Tokens). Albüm rengi ve kapak resmi MusicViewModel fırçalarından gelir.
             o["KoyNotchMusicCard"] = new SolidColorBrush(Color.FromArgb(0x0F, 0xFF, 0xFF, 0xFF));
         }
+    }
+
+    /// <summary>
+    /// Dosyayı yeniden okuyup ezmeleri uygular ("Yeniden yükle" düğmesi). Ayar kapalıysa ezmeler zaten boştur.
+    /// </summary>
+    public static void ReloadUserStyle(Application app)
+    {
+        if (_last is not { } settings)
+            return;
+
+        ApplyUserStyle(app, settings, reload: true);
+        Applied?.Invoke();
+    }
+
+    /// <summary>
+    /// Dosya son okunduğundan beri değiştiyse yeniden okur (dosya izleyici ve ayarlar penceresi açılışı çağırır).
+    /// Değişmediyse hiçbir şey yapmaz: tekrarlanan izleyici olayları ve Koy'un kendi yazımları kaynakları titretmez.
+    /// </summary>
+    public static void ReloadUserStyleIfChanged(Application app)
+    {
+        if (_last is not { } settings || !settings.Appearance.UserStyleOverridesEnabled)
+            return;
+
+        if (UserStyleFile.GetStamp(UserStyleFile.DefaultPath) == _userStyleStamp)
+            return;
+
+        ReloadUserStyle(app);
+    }
+
+    private static void ApplyUserStyle(Application app, AppSettings settings, bool reload)
+    {
+        var merged = app.Resources.MergedDictionaries;
+        if (_userStyle is null || !merged.Contains(_userStyle))
+        {
+            // Ezme sözlükleri en sonda: kullanıcı değeri temadan ve ThemeManager'ın kendi ezmelerinden güçlüdür.
+            _userStyle = new ResourceDictionary();
+            merged.Add(_userStyle);
+        }
+
+        if (!settings.Appearance.UserStyleOverridesEnabled)
+        {
+            // Kapalıyken dosya okunmaz; önbellek de atılır ki yeniden açılınca güncel dosya okunsun.
+            var wasActive = _userStyle.Count > 0 || _userStyleResult is not null;
+            _userStyle.Clear();
+            _userStyleResult = null;
+            _userStyleStamp = default;
+            if (wasActive)
+                UserStyleApplied?.Invoke();
+            return;
+        }
+
+        // Önbellek: tema / malzeme değişince dosya yeniden okunmaz, yalnız yeniden uygulanır.
+        if (reload || _userStyleResult is null)
+        {
+            _userStyleStamp = UserStyleFile.GetStamp(UserStyleFile.DefaultPath);
+            _userStyleResult = UserStyleFile.Load(UserStyleFile.DefaultPath);
+        }
+
+        // Sözlük baştan kurulur: dosyadan silinen anahtarın eski ezmesi kalmasın.
+        _userStyle.Clear();
+        UserStyleResources.Fill(_userStyle, _userStyleResult.ValidEntries);
+        UserStyleApplied?.Invoke();
     }
 
     private static SolidColorBrush Brush(string hex) => new((Color)ColorConverter.ConvertFromString(hex));
