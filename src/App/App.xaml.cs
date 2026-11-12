@@ -54,6 +54,7 @@ public static class Program
 public partial class App : Application, IDisposable
 {
     private readonly List<IFeature> _features = [];
+    private bool _disposed;
     private TrayIconManager? _trayIconManager;
     private ShortcutController? _shortcuts;
     private HotCornerController? _hotCorners;
@@ -501,12 +502,8 @@ public partial class App : Application, IDisposable
 
     protected override void OnExit(ExitEventArgs e)
     {
+        // Sıra önemli: özellikler servisleri hâlâ kullanırken servisler atılmamalı.
         Dispose();
-
-        Koy.App.Features.Rules.ContextRuleService.Instance.Stop();
-
-        foreach (var feature in _features)
-            feature.Stop();
 
         TaskbarService.Restore();
         AppUninstaller.CleanAfterExit();
@@ -515,6 +512,10 @@ public partial class App : Application, IDisposable
 
     public void Dispose()
     {
+        if (_disposed)
+            return;
+        _disposed = true;
+
         _shortcuts?.Dispose();
         _shortcuts = null;
 
@@ -523,6 +524,11 @@ public partial class App : Application, IDisposable
 
         _trayIconManager?.Dispose();
         _trayIconManager = null;
+
+        Koy.App.Features.Rules.ContextRuleService.Instance.Stop();
+
+        foreach (var feature in _features)
+            feature.Stop();
 
         _services.Dispose();
         GC.SuppressFinalize(this);

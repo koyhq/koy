@@ -8,7 +8,7 @@ public sealed class ProfileStore(string path)
 {
     private readonly JsonListFile<SavedProfile> _file = new(path, DataJsonContext.Default.ListSavedProfile);
 
-    public static string DefaultPath { get; } = JsonListFile<SavedProfile>.InSettingsFolder("profiles.json");
+    public static string DefaultPath { get; } = JsonListFile.InSettingsFolder("profiles.json");
 
     public string Path => _file.Path;
 

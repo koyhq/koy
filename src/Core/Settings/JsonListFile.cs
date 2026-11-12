@@ -51,7 +51,11 @@ public sealed class JsonListFile<T>(string path, JsonTypeInfo<List<T>> typeInfo,
             return false;
         }
     }
+}
 
+/// <summary>JsonListFile için tipten bağımsız yardımcılar.</summary>
+public static class JsonListFile
+{
     /// <summary>Ayar klasöründe (settings.json'ın yanı) dosya yolu.</summary>
     public static string InSettingsFolder(string fileName) => System.IO.Path.Combine(
         System.IO.Path.GetDirectoryName(SettingsStore.DefaultPath)!, fileName);

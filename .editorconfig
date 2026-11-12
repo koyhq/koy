@@ -16,10 +16,12 @@ csharp_style_namespace_declarations = file_scoped:warning
 dotnet_sort_system_directives_first = true
 
 # Gürültülü isimlendirme kuralları (C# projesinde meşru adları engellemesin)
-dotnet_diagnostic.CA1000.severity = none
-dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1708.severity = none
 dotnet_diagnostic.CA1711.severity = none
 dotnet_diagnostic.CA1716.severity = none
 dotnet_diagnostic.CA1720.severity = none
 dotnet_diagnostic.CA1863.severity = none
+
+[tests/**.cs]
+# Test adları Yöntem_Durum_Sonuç biçiminde alt çizgi içerir
+dotnet_diagnostic.CA1707.severity = none

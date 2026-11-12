@@ -161,7 +161,7 @@ public static class SearchFactory
         });
         Add(new HelpSearchSource(() => sources, T));
 
-        var history = new SearchHistory(JsonListFile<string>.InSettingsFolder("search-history.txt"));
+        var history = new SearchHistory(JsonListFile.InSettingsFolder("search-history.txt"));
         var fallback = sources.Contains(web) ? web.Fallback : (Func<SearchQuery, SearchResult?>?)null;
         var panel = new SearchPanelController(
             sources,
@@ -179,7 +179,7 @@ public static class SearchFactory
     }
 
     /// <summary>Kayıtlı arama geçmişini siler (Ayarlar).</summary>
-    public static void ClearHistory() => new SearchHistory(JsonListFile<string>.InSettingsFolder("search-history.txt")).Clear();
+    public static void ClearHistory() => new SearchHistory(JsonListFile.InSettingsFolder("search-history.txt")).Clear();
 
     private static IReadOnlyList<SystemCommandEntry> SessionEntries() =>
     [
