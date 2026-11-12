@@ -407,23 +407,44 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
             return;
 
         UpdateClock();
-        // Saniye gösterilirken saniyede bir; değilse 15 sn yeter. Zamanlayıcı yalnız çentik görünürken çalışır (AGENTS #5).
+        // Saniye gösterilirken saniyede bir; değilse dakika başına hizalı, dakikada bir uyanır (ClockTick).
+        // Zamanlayıcı yalnız çentik görünürken çalışır (AGENTS #5).
         _clockTimer = new DispatcherTimer(DispatcherPriority.Background, _dispatcher)
         {
-            Interval = Settings.Notch.ClockShowSeconds ? TimeSpan.FromSeconds(1) : TimeSpan.FromSeconds(15)
+            Interval = NextClockDelay()
         };
-        _clockTimer.Tick += (_, _) => UpdateClock();
+        _clockTimer.Tick += (_, _) => OnClockTick();
         _clockTimer.Start();
+        // Saat ya da saat dilimi elle değişirse bir sonraki dakikayı beklemeden düzelt.
+        Microsoft.Win32.SystemEvents.TimeChanged += OnSystemTimeChanged;
     }
 
     private void StopClockTimer()
     {
         if (_clockTimer is not null)
         {
+            Microsoft.Win32.SystemEvents.TimeChanged -= OnSystemTimeChanged;
             _clockTimer.Stop();
             _clockTimer = null;
         }
     }
+
+    private void OnClockTick()
+    {
+        UpdateClock();
+        if (_clockTimer is not null)
+            _clockTimer.Interval = NextClockDelay();
+    }
+
+    private TimeSpan NextClockDelay() =>
+        Settings.Notch.ClockShowSeconds ? TimeSpan.FromSeconds(1) : ClockTick.DelayToNextMinute(DateTime.Now);
+
+    // SystemEvents kendi iş parçacığında çağırır; saat UI iş parçacığında yenilenir.
+    private void OnSystemTimeChanged(object? sender, EventArgs e) => RunOnUi(() =>
+    {
+        TimeZoneInfo.ClearCachedData();
+        OnClockTick();
+    });
 
     private void UpdateClock()
     {
