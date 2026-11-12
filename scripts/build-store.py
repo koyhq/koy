@@ -85,12 +85,19 @@ def plain_text_ok(value: object, max_len: int) -> bool:
     return all(unicodedata.category(ch) not in ("Cc", "Cf", "Zl", "Zp", "Co", "Cn", "Cs") for ch in value)
 
 
+def valid_id(mid: object) -> bool:
+    """ExtensionManifestValidator.IsValidId ile aynı: her nokta-ayrılmış parça için aygıt adı (con, nul, com1…) yasak."""
+    if not isinstance(mid, str) or not ID_RE.match(mid) or mid.endswith("-") or not 2 <= len(mid) <= 64:
+        return False
+    return not any(part in RESERVED for part in mid.split("."))
+
+
 def validate_manifest(m: object, expected_id: str | None) -> list[str]:
     errs: list[str] = []
     if not isinstance(m, dict):
         return ["manifest.json bir nesne olmalı"]
     mid = m.get("id")
-    if not isinstance(mid, str) or not ID_RE.match(mid) or mid.endswith("-") or not 2 <= len(mid) <= 64 or mid in RESERVED:
+    if not valid_id(mid):
         errs.append(f"geçersiz id: {mid!r}")
     elif expected_id is not None and mid != expected_id:
         errs.append(f"manifest id ({mid}) klasör adıyla ({expected_id}) aynı değil")
