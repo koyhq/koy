@@ -35,6 +35,8 @@ public static class Strings
     public static string NextPhase => Get(nameof(NextPhase));
     public static string Dock => Get(nameof(Dock));
     public static string LaunchNewInstance => Get(nameof(LaunchNewInstance));
+    public static string DockItemChangeIcon => Get(nameof(DockItemChangeIcon));
+    public static string DockItemResetIcon => Get(nameof(DockItemResetIcon));
     public static string Close => Get(nameof(Close));
     public static string EndTask => Get(nameof(EndTask));
     public static string StartMenu => Get(nameof(StartMenu));

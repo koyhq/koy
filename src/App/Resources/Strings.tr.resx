@@ -2379,5 +2379,38 @@
   <data name="NotchStyleFloating" xml:space="preserve">
     <value>Yüzen ada</value>
   </data>
+  <data name="DockItemChangeIcon" xml:space="preserve">
+    <value>Simgeyi değiştir...</value>
+  </data>
+  <data name="DockItemResetIcon" xml:space="preserve">
+    <value>Simgeyi sıfırla</value>
+  </data>
+  <data name="DockItemIconPickTitle" xml:space="preserve">
+    <value>Bu uygulama için bir simge seç</value>
+  </data>
+  <data name="DockItemIconPickFilter" xml:space="preserve">
+    <value>Görseller (*.png;*.ico)|*.png;*.ico</value>
+  </data>
+  <data name="IconPackTitle" xml:space="preserve">
+    <value>Simge paketi</value>
+  </data>
+  <data name="IconPackDesc" xml:space="preserve">
+    <value>Dock uygulama simgelerini bir klasördeki görsellerle değiştirir. Dosyaları kısayol gibi adlandır: Firefox.png, Notepad.ico. Dosyası olmayan uygulama kendi simgesini korur.</value>
+  </data>
+  <data name="IconPackBuiltin" xml:space="preserve">
+    <value>Yerleşik</value>
+  </data>
+  <data name="IconPackFolder" xml:space="preserve">
+    <value>Klasör</value>
+  </data>
+  <data name="IconPackFolderChoose" xml:space="preserve">
+    <value>Klasör seç...</value>
+  </data>
+  <data name="IconPackFolderNone" xml:space="preserve">
+    <value>Klasör seçilmedi</value>
+  </data>
+  <data name="IconPackFolderPickTitle" xml:space="preserve">
+    <value>Simge paketi klasörünü seç</value>
+  </data>
 </root>
 
