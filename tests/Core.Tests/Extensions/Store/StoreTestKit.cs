@@ -13,6 +13,9 @@ internal static class StoreTestKit
     public static readonly byte[] Gif = [.. "GIF89a"u8, 1, 0, 1, 0, 0, 0, 0];
     public static readonly byte[] Png = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0];
 
+    public const string PackageUrl = "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/p.koyext";
+    public const string PreviewUrl = "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/p.png";
+
     public const string ThemeJson = "{ \"KoyBgWindow\": \"#112233\" }";
 
     public static string ProfileJson() =>
@@ -61,7 +64,7 @@ internal static class StoreTestKit
         long downloads = 0,
         string updated = "2026-11-12") => new(
         id, name, kind, version, author, "MIT", summary, "", null, DateOnly.ParseExact(updated, "yyyy-MM-dd"), downloads,
-        new StorePackage("https://example.com/p.koyext", new string('a', 64), 1000), null);
+        new StorePackage(PackageUrl, new string('a', 64), 1000), null);
 
     public static InstalledEntry Installed(
         string id = "koyhq.ornek",
@@ -82,7 +85,7 @@ internal static class StoreTestKit
     public static string ItemJson(string id = "koyhq.ornek", string kind = "theme", string extra = "") =>
         "{ \"id\": \"" + id + "\", \"name\": \"Ornek\", \"kind\": \"" + kind + "\", \"version\": \"1.0.0\"," +
         " \"author\": \"Koy\", \"license\": \"GPL-3.0-or-later\", \"summary\": \"Ozet\", \"updated\": \"2026-11-12\"," +
-        " \"package\": { \"url\": \"https://example.com/p.koyext\", \"sha256\": \"" + new string('a', 64) + "\", \"size\": 1234 }" +
+        " \"package\": { \"url\": \"" + PackageUrl + "\", \"sha256\": \"" + new string('a', 64) + "\", \"size\": 1234 }" +
         extra + " }";
 
     public static string IndexJson(params string[] items) =>

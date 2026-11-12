@@ -16,11 +16,13 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import posixpath
 import re
 import struct
 import sys
 import zipfile
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
 STORE = ROOT / "store"
@@ -29,6 +31,9 @@ PACKAGES = STORE / "packages"
 PREVIEWS = STORE / "previews"
 INDEX = STORE / "index.json"
 BASE_URL = "https://raw.githubusercontent.com/koyhq/koy/main/store/"
+# StoreUrlPolicy (src/Core/Extensions/Store/StoreUrlPolicy.cs) ile aynı: paket/önizleme adresleri yalnız bu sunucu ve yol altında.
+ALLOWED_HOST = "raw.githubusercontent.com"
+ALLOWED_PATH_PREFIX = "/koyhq/koy/"
 
 # --- belgedeki sınırlar (docs/EXTENSION-STORE.md) ---
 MAX_DOWNLOAD = 25 * 1024 * 1024
@@ -83,6 +88,27 @@ def plain_text_ok(value: object, max_len: int) -> bool:
         return False
     import unicodedata
     return all(unicodedata.category(ch) not in ("Cc", "Cf", "Zl", "Zp", "Co", "Cn", "Cs") for ch in value)
+
+
+def trusted_asset_url(url: object) -> bool:
+    """StoreUrlPolicy.IsTrustedAssetUrl ile aynı: https, güvenilir sunucu, varsayılan kapı, kullanıcı bilgisi yok, yol öneki."""
+    if not isinstance(url, str) or not url or len(url) > 512 or any(c <= " " or c in "\x7f\\" for c in url):
+        return False
+    try:
+        parts = urlsplit(url)
+        port = parts.port
+    except ValueError:
+        return False
+    path = posixpath.normpath(parts.path) if parts.path else ""
+    return (
+        parts.scheme == "https"
+        and (parts.hostname or "").lower() == ALLOWED_HOST
+        and port in (None, 443)
+        and "@" not in parts.netloc
+        and parts.path.startswith(ALLOWED_PATH_PREFIX)
+        and ".." not in parts.path.split("/")
+        and path.startswith(ALLOWED_PATH_PREFIX.rstrip("/"))
+    )
 
 
 def valid_id(mid: object) -> bool:
@@ -477,7 +503,11 @@ def run(check: bool) -> int:
             else:
                 pending_writes.append((prev_path, preview))
 
-            items.append(build_item(mid, manifest, meta, pkg_bytes, preview))
+            item = build_item(mid, manifest, meta, pkg_bytes, preview)
+            for label, url in (("paket", item["package"]["url"]), ("önizleme", item["preview"]["url"])):
+                if not trusted_asset_url(url):
+                    errors.append(f"{mid}: {label} adresi güvenilir değil (yalnız https://{ALLOWED_HOST}{ALLOWED_PATH_PREFIX}…): {url}")
+            items.append(item)
         except StoreError as ex:
             errors.append(str(ex))
 

@@ -177,7 +177,7 @@ public static class StoreIndexParser
         }
 
         if (!element.TryGetProperty("package", out var packageElement) || packageElement.ValueKind != JsonValueKind.Object
-            || !TryString(packageElement, "url", out var packageUrl) || !StoreFieldRules.IsHttpsUrl(packageUrl)
+            || !TryString(packageElement, "url", out var packageUrl) || !StoreUrlPolicy.IsTrustedAssetUrl(packageUrl)
             || !TryString(packageElement, "sha256", out var packageHash) || !StoreFieldRules.IsSha256(packageHash)
             || !packageElement.TryGetProperty("size", out var sizeElement) || sizeElement.ValueKind != JsonValueKind.Number
             || !sizeElement.TryGetInt64(out var size) || size <= 0 || size > PackageEntryPolicy.MaxDownloadBytes)
@@ -188,7 +188,7 @@ public static class StoreIndexParser
         // Önizleme isteğe bağlı: bozuksa öğe değil yalnız önizleme düşer (güvensiz adres hiç kullanılmaz).
         StorePreview? preview = null;
         if (element.TryGetProperty("preview", out var previewElement) && previewElement.ValueKind == JsonValueKind.Object
-            && TryString(previewElement, "url", out var previewUrl) && StoreFieldRules.IsHttpsUrl(previewUrl)
+            && TryString(previewElement, "url", out var previewUrl) && StoreUrlPolicy.IsTrustedAssetUrl(previewUrl)
             && TryString(previewElement, "sha256", out var previewHash) && StoreFieldRules.IsSha256(previewHash))
         {
             preview = new StorePreview(previewUrl!, previewHash!.ToLowerInvariant());

@@ -190,7 +190,9 @@ public sealed class ExtensionStoreClient : IExtensionStoreClient
         var limit = Math.Min(PackageEntryPolicy.MaxDownloadBytes, item.Package.Size);
 
         using var response = await _http.GetAsync(item.Package.Url, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
-        if (!response.IsSuccessStatusCode)
+        // AppHttp yönlendirmeleri kendiliğinden izler (hava durumu da paylaşır, genel davranışı değiştirmeyiz):
+        // son adres güvenilir küme dışına çıktıysa içerik kabul edilmez.
+        if (!response.IsSuccessStatusCode || !StoreUrlPolicy.IsTrustedAssetUri(response.RequestMessage?.RequestUri))
         {
             return new(ExtensionInstallError.Network, 0);
         }

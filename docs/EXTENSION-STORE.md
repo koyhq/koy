@@ -44,7 +44,7 @@ arama, kurulum ve güncelleme tek yerde; kurulum ile uygulama ayrı. Koy'un değ
 }
 ```
 
-Kurallar: `id` manifest kimliği kuralları (ExtensionManifestValidator); `kind` kapalı küme; URL'ler yalnız `https`; indeks en çok 1 MB ve 500 öğe;
+Kurallar: `id` manifest kimliği kuralları (ExtensionManifestValidator); `kind` kapalı küme; paket ve önizleme URL'leri yalnız `https://raw.githubusercontent.com/koyhq/koy/` altında (`StoreUrlPolicy`; indirme sonrası yönlendirilen son adres de denetlenir), ana sayfa `https`; indeks en çok 1 MB ve 500 öğe;
 bilinmeyen alan yok sayılır, zorunlu alanı bozuk öğe atlanır (bütün indeks reddedilmez); `formatVersion` büyükse indeks reddedilir.
 
 ## Paket biçimi (`.koyext` = zip)
