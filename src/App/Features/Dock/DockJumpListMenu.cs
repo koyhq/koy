@@ -33,14 +33,13 @@ public static class DockJumpListMenu
         var version = ++_version;
         Clear(menu);
 
-        var appId = item.Model.AppUserModelId;
-        if (service is not null && !string.IsNullOrEmpty(appId))
+        var exe = item.Model.TargetPath;
+        if (service is not null)
         {
-            var sections = await LoadAsync(service, appId);
+            var sections = await LoadAsync(service, item.Model.AppUserModelId, ExeOrNull(exe));
             if (version != _version || !target.IsLoaded)
                 return;
 
-            var exe = item.Model.TargetPath;
             Populate(menu, sections, entry => service.Launch(entry, ExeOrNull(exe)));
         }
 
@@ -55,11 +54,18 @@ public static class DockJumpListMenu
         DockContextMenuManager.Open(menu, target);
     }
 
-    private static async Task<IReadOnlyList<JumpListSection>> LoadAsync(IJumpListService service, string appId)
+    /// <summary>
+    /// AppID yoksa exe'ye göre Başlat menüsü kısayolundan çözülür (paketsiz, süreç düzeyinde AUMID koyan uygulamalar).
+    /// Çözme ve okuma tek bir 700 ms bütçesini paylaşır.
+    /// </summary>
+    private static async Task<IReadOnlyList<JumpListSection>> LoadAsync(IJumpListService service, string? appId, string? exe)
     {
         try
         {
-            var load = service.GetAsync(appId);
+            if (string.IsNullOrEmpty(appId) && exe is null)
+                return [];
+
+            var load = LoadCoreAsync(service, appId, exe);
             if (load.IsCompleted)
                 return await load; // önbellekten, bekleme yok
 
@@ -72,6 +78,14 @@ public static class DockJumpListMenu
         {
             return [];
         }
+    }
+
+    private static async Task<IReadOnlyList<JumpListSection>> LoadCoreAsync(IJumpListService service, string? appId, string? exe)
+    {
+        if (string.IsNullOrEmpty(appId) && exe is not null)
+            appId = await service.ResolveAppIdAsync(exe);
+
+        return string.IsNullOrEmpty(appId) ? [] : await service.GetAsync(appId);
     }
 
     /// <summary>
