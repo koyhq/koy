@@ -1,0 +1,38 @@
+name: Store check
+
+# Eklenti mağazası: paketler, önizlemeler ve index.json kaynaklarla (store/src) uyumlu mu, paketler
+# doğrulama kurallarından (zip slip, izinli dosyalar, boyut sınırları) geçiyor mu.
+on:
+  push:
+    branches: [main, 'feat/**', 'fix/**']
+    paths:
+      - 'store/**'
+      - 'scripts/build-store.py'
+      - '.github/workflows/store-check.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'store/**'
+      - 'scripts/build-store.py'
+      - '.github/workflows/store-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: store-check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Verify store index and packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Yalnız standart kütüphane kullanılır; runner'daki python3 yeterli (kurulum adımı yok).
+      - name: Check store
+        run: python3 -I scripts/build-store.py --check

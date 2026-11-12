@@ -3444,5 +3444,323 @@
   <data name="DockLabelModeOnHover" xml:space="preserve">
     <value>On hover</value>
   </data>
+  <data name="NavExtensions" xml:space="preserve">
+    <value>Extensions</value>
+  </data>
+  <data name="ExtensionsSubtitle" xml:space="preserve">
+    <value>Themes, icon packs, live backgrounds and settings profiles. Packages contain data only and never run code.</value>
+  </data>
+  <data name="ExtFromFileHeader" xml:space="preserve">
+    <value>Local package</value>
+  </data>
+  <data name="ExtFromFileTitle" xml:space="preserve">
+    <value>Install from file</value>
+  </data>
+  <data name="ExtFromFileDesc" xml:space="preserve">
+    <value>Install a .koyext package from your computer. It goes through the same checks as store packages.</value>
+  </data>
+  <data name="ExtFromFileButton" xml:space="preserve">
+    <value>Install from file…</value>
+  </data>
+  <data name="ExtFileDialogTitle" xml:space="preserve">
+    <value>Choose an extension package</value>
+  </data>
+  <data name="ExtFileFilter" xml:space="preserve">
+    <value>Koy extension (*.koyext)|*.koyext|All files (*.*)|*.*</value>
+  </data>
+  <data name="ExtStoreHeader" xml:space="preserve">
+    <value>Store</value>
+  </data>
+  <data name="ExtSearchPlaceholder" xml:space="preserve">
+    <value>Search extensions</value>
+  </data>
+  <data name="ExtRefresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="ExtCategoryAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="ExtCategoryTheme" xml:space="preserve">
+    <value>Themes</value>
+  </data>
+  <data name="ExtCategoryIconPack" xml:space="preserve">
+    <value>Icon packs</value>
+  </data>
+  <data name="ExtCategoryBackground" xml:space="preserve">
+    <value>Backgrounds</value>
+  </data>
+  <data name="ExtCategoryProfile" xml:space="preserve">
+    <value>Profiles</value>
+  </data>
+  <data name="ExtFilterAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="ExtFilterInstalled" xml:space="preserve">
+    <value>Installed</value>
+  </data>
+  <data name="ExtFilterUpdates" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="ExtFilterUpdatesCount" xml:space="preserve">
+    <value>Updates ({0})</value>
+  </data>
+  <data name="ExtSortLabel" xml:space="preserve">
+    <value>Sort</value>
+  </data>
+  <data name="ExtSortNewest" xml:space="preserve">
+    <value>Newest</value>
+  </data>
+  <data name="ExtSortAlphabetical" xml:space="preserve">
+    <value>Alphabetical</value>
+  </data>
+  <data name="ExtSortMostDownloads" xml:space="preserve">
+    <value>Most downloaded</value>
+  </data>
+  <data name="ExtKindTheme" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="ExtKindIconPack" xml:space="preserve">
+    <value>Icon pack</value>
+  </data>
+  <data name="ExtKindBackground" xml:space="preserve">
+    <value>Background</value>
+  </data>
+  <data name="ExtKindProfile" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="ExtInstall" xml:space="preserve">
+    <value>Install</value>
+  </data>
+  <data name="ExtUpdate" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="ExtApply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="ExtAddToProfiles" xml:space="preserve">
+    <value>Add to profiles</value>
+  </data>
+  <data name="ExtApplied" xml:space="preserve">
+    <value>Applied</value>
+  </data>
+  <data name="ExtUninstall" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="ExtUninstallConfirmQuestion" xml:space="preserve">
+    <value>Remove this extension?</value>
+  </data>
+  <data name="ExtDetails" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="ExtOpenHomepage" xml:space="preserve">
+    <value>Open home page</value>
+  </data>
+  <data name="ExtOpenLinkFailed" xml:space="preserve">
+    <value>The link could not be opened.</value>
+  </data>
+  <data name="ExtVersionFormat" xml:space="preserve">
+    <value>v{0}</value>
+  </data>
+  <data name="ExtVersionUpdateFormat" xml:space="preserve">
+    <value>v{0} → v{1}</value>
+  </data>
+  <data name="ExtInstalledVersion" xml:space="preserve">
+    <value>Installed version: v{0}</value>
+  </data>
+  <data name="ExtUpdatedFormat" xml:space="preserve">
+    <value>Updated {0}</value>
+  </data>
+  <data name="ExtDownloadsFormat" xml:space="preserve">
+    <value>{0} downloads</value>
+  </data>
+  <data name="ExtInstalledFromFile" xml:space="preserve">
+    <value>Installed from a file.</value>
+  </data>
+  <data name="ExtLoading" xml:space="preserve">
+    <value>Loading the store…</value>
+  </data>
+  <data name="ExtEmpty" xml:space="preserve">
+    <value>No extensions match.</value>
+  </data>
+  <data name="ExtShowMore" xml:space="preserve">
+    <value>Show more ({0})</value>
+  </data>
+  <data name="ExtCountFormat" xml:space="preserve">
+    <value>{0} extensions</value>
+  </data>
+  <data name="ExtSkippedFormat" xml:space="preserve">
+    <value>{0} invalid entries skipped</value>
+  </data>
+  <data name="ExtGetMore" xml:space="preserve">
+    <value>Get more from the store…</value>
+  </data>
+  <data name="ExtInstalling" xml:space="preserve">
+    <value>Installing…</value>
+  </data>
+  <data name="ExtConfirmInstallTitle" xml:space="preserve">
+    <value>Install {0}?</value>
+  </data>
+  <data name="ExtConfirmUpdateTitle" xml:space="preserve">
+    <value>Update {0}?</value>
+  </data>
+  <data name="ExtConfirmKind" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="ExtConfirmVersion" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="ExtConfirmAuthor" xml:space="preserve">
+    <value>Author</value>
+  </data>
+  <data name="ExtConfirmLicense" xml:space="preserve">
+    <value>License</value>
+  </data>
+  <data name="ExtConfirmSize" xml:space="preserve">
+    <value>Download size</value>
+  </data>
+  <data name="ExtConfirmFileSize" xml:space="preserve">
+    <value>File size</value>
+  </data>
+  <data name="ExtConfirmPermissions" xml:space="preserve">
+    <value>Permissions</value>
+  </data>
+  <data name="ExtConfirmNoPermissions" xml:space="preserve">
+    <value>None requested</value>
+  </data>
+  <data name="ExtConfirmDataOnly" xml:space="preserve">
+    <value>This package does not run code; it only contains data.</value>
+  </data>
+  <data name="ExtConfirmFileNote" xml:space="preserve">
+    <value>It comes from a file on your computer. Only install packages from sources you trust.</value>
+  </data>
+  <data name="ExtConfirmNotApplied" xml:space="preserve">
+    <value>Installing does not apply it. You can apply it afterwards.</value>
+  </data>
+  <data name="ExtInstalledOk" xml:space="preserve">
+    <value>{0} installed.</value>
+  </data>
+  <data name="ExtUpdatedOk" xml:space="preserve">
+    <value>{0} updated.</value>
+  </data>
+  <data name="ExtUpdatedAndAppliedOk" xml:space="preserve">
+    <value>{0} updated and applied again.</value>
+  </data>
+  <data name="ExtAppliedOk" xml:space="preserve">
+    <value>{0} applied.</value>
+  </data>
+  <data name="ExtUninstalledOk" xml:space="preserve">
+    <value>{0} removed.</value>
+  </data>
+  <data name="ExtUninstallFailed" xml:space="preserve">
+    <value>{0} could not be removed completely.</value>
+  </data>
+  <data name="ExtProfileAdded" xml:space="preserve">
+    <value>{0} was added to your profiles. Apply it from the Profiles section in General.</value>
+  </data>
+  <data name="ExtProfileAlready" xml:space="preserve">
+    <value>{0} is already in your profiles.</value>
+  </data>
+  <data name="ExtApplyNotInstalled" xml:space="preserve">
+    <value>This extension is no longer installed.</value>
+  </data>
+  <data name="ExtApplyFileError" xml:space="preserve">
+    <value>The files could not be updated. Check that the Koy folder is writable.</value>
+  </data>
+  <data name="ExtApplySaveFailed" xml:space="preserve">
+    <value>The settings could not be saved.</value>
+  </data>
+  <data name="ExtApplyErrorInvalidPath" xml:space="preserve">
+    <value>The extension's files are missing or not usable.</value>
+  </data>
+  <data name="ExtIndexErrorNetwork" xml:space="preserve">
+    <value>The store could not be reached. Check your connection and press Refresh.</value>
+  </data>
+  <data name="ExtIndexErrorTooLarge" xml:space="preserve">
+    <value>The store catalog is too large to read.</value>
+  </data>
+  <data name="ExtIndexErrorMalformedJson" xml:space="preserve">
+    <value>The store catalog is damaged.</value>
+  </data>
+  <data name="ExtIndexErrorNotAStoreIndex" xml:space="preserve">
+    <value>The downloaded file is not a Koy store catalog.</value>
+  </data>
+  <data name="ExtIndexErrorUnsupportedFormatVersion" xml:space="preserve">
+    <value>The catalog needs a newer Koy. Update Koy to use the store.</value>
+  </data>
+  <data name="ExtIndexErrorTooManyItems" xml:space="preserve">
+    <value>The store catalog has too many entries.</value>
+  </data>
+  <data name="ExtIndexErrorCancelled" xml:space="preserve">
+    <value>Loading was cancelled.</value>
+  </data>
+  <data name="ExtInstallErrorNetwork" xml:space="preserve">
+    <value>The package could not be downloaded. Check your connection.</value>
+  </data>
+  <data name="ExtInstallErrorTimeout" xml:space="preserve">
+    <value>The download took too long and was stopped.</value>
+  </data>
+  <data name="ExtInstallErrorCancelled" xml:space="preserve">
+    <value>Installation was cancelled.</value>
+  </data>
+  <data name="ExtInstallErrorDownloadTooLarge" xml:space="preserve">
+    <value>The package is larger than the 25 MB limit.</value>
+  </data>
+  <data name="ExtInstallErrorHashMismatch" xml:space="preserve">
+    <value>The downloaded file does not match the catalog checksum and was discarded.</value>
+  </data>
+  <data name="ExtInstallErrorFileNotFound" xml:space="preserve">
+    <value>The file could not be found.</value>
+  </data>
+  <data name="ExtInstallErrorInvalidArchive" xml:space="preserve">
+    <value>The file is not a valid .koyext package.</value>
+  </data>
+  <data name="ExtInstallErrorUnsafePath" xml:space="preserve">
+    <value>The package contains an unsafe file path and was rejected.</value>
+  </data>
+  <data name="ExtInstallErrorDuplicateEntry" xml:space="preserve">
+    <value>The package lists the same file twice and was rejected.</value>
+  </data>
+  <data name="ExtInstallErrorTooManyFiles" xml:space="preserve">
+    <value>The package contains too many files.</value>
+  </data>
+  <data name="ExtInstallErrorExtractedTooLarge" xml:space="preserve">
+    <value>The package is too large once unpacked.</value>
+  </data>
+  <data name="ExtInstallErrorFileTooLarge" xml:space="preserve">
+    <value>A file inside the package is too large.</value>
+  </data>
+  <data name="ExtInstallErrorDisallowedFile" xml:space="preserve">
+    <value>The package contains a file type that is not allowed for this kind of extension.</value>
+  </data>
+  <data name="ExtInstallErrorMissingManifest" xml:space="preserve">
+    <value>The package has no manifest.json.</value>
+  </data>
+  <data name="ExtInstallErrorMissingPayload" xml:space="preserve">
+    <value>The package is missing its main file.</value>
+  </data>
+  <data name="ExtInstallErrorMultiplePayloads" xml:space="preserve">
+    <value>The package contains more than one main file.</value>
+  </data>
+  <data name="ExtInstallErrorInvalidManifest" xml:space="preserve">
+    <value>The package manifest is not valid.</value>
+  </data>
+  <data name="ExtInstallErrorManifestMismatch" xml:space="preserve">
+    <value>The package does not match its catalog entry (id, version or type).</value>
+  </data>
+  <data name="ExtInstallErrorCapabilitiesNotAllowed" xml:space="preserve">
+    <value>The package asks for permissions. Only data-only packages can be installed.</value>
+  </data>
+  <data name="ExtInstallErrorInvalidPayload" xml:space="preserve">
+    <value>The package content is not valid for its type.</value>
+  </data>
+  <data name="ExtInstallErrorTooManyInstalled" xml:space="preserve">
+    <value>Too many extensions are installed. Remove one first.</value>
+  </data>
+  <data name="ExtInstallErrorKindConflict" xml:space="preserve">
+    <value>Another extension of a different type already uses this id.</value>
+  </data>
+  <data name="ExtInstallErrorIoError" xml:space="preserve">
+    <value>A file could not be written. Check disk space and folder permissions.</value>
+  </data>
 </root>
 

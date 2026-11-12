@@ -51,7 +51,9 @@ public sealed class LiveBackgroundHost : Border
 
     private readonly Border _art = new();
     private readonly Grid _mediaHost = new();
-    private readonly Border _scrim = new() { Background = Brushes.Black, Opacity = 0.65, IsHitTestVisible = false };
+    // Perde yalnız bir arka plan gösterilirken çizilir: yoksa çentik zeminini (tema paketinin KoyNotchSurface rengi dahil)
+    // %65 siyahla koyultur ve saydam malzemede zemini neredeyse opak siyaha çevirirdi.
+    private readonly Border _scrim = new() { Background = Brushes.Black, Opacity = 0.65, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
 
     private CancellationTokenSource? _loading;
     private MediaElement? _media;
@@ -101,6 +103,7 @@ public sealed class LiveBackgroundHost : Border
 
         Clear();
         _applied = (selection, mode);
+        _scrim.Visibility = Visibility.Visible;
         var animate = mode == LiveBackgroundPlaybackMode.Animate;
 
         switch (selection.Kind)
@@ -226,6 +229,7 @@ public sealed class LiveBackgroundHost : Border
     private void Clear()
     {
         _applied = null;
+        _scrim.Visibility = Visibility.Collapsed;
 
         if (_loading is { } cts)
         {

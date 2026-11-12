@@ -18,7 +18,7 @@
       <ColumnDefinition Width="Auto" />
     </Grid.ColumnDefinitions>
 
-    <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" Background="#27272A" VerticalAlignment="Center">
+    <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" Background="{DynamicResource KoyNotchIconBg}" VerticalAlignment="Center">
       <!-- Simge: bildirimde uygulamanın logosu (CardIcon), yoksa genel zil; güncellemede indirme. -->
       <Grid>
         <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -56,7 +56,7 @@
     </Border>
 
     <StackPanel Grid.Column="1" Margin="12,0,10,0" VerticalAlignment="Center">
-      <TextBlock Text="{Binding Card.Header}" FontSize="10.5" Foreground="#A1A1AA" Margin="0,0,0,1"
+      <TextBlock Text="{Binding Card.Header}" FontSize="10.5" Foreground="{DynamicResource KoyNotchTextMuted}" Margin="0,0,0,1"
                  TextTrimming="CharacterEllipsis">
         <TextBlock.Style>
           <Style TargetType="TextBlock">
@@ -69,9 +69,9 @@
           </Style>
         </TextBlock.Style>
       </TextBlock>
-      <TextBlock Text="{Binding Card.Title}" FontSize="13" FontWeight="SemiBold" Foreground="#F4F4F5"
+      <TextBlock Text="{Binding Card.Title}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource KoyNotchText}"
                  TextTrimming="CharacterEllipsis" />
-      <TextBlock Text="{Binding Card.Subtitle}" FontSize="11" Foreground="#A1A1AA" Margin="0,2,0,0"
+      <TextBlock Text="{Binding Card.Subtitle}" FontSize="11" Foreground="{DynamicResource KoyNotchTextMuted}" Margin="0,2,0,0"
                  TextTrimming="CharacterEllipsis">
         <TextBlock.Style>
           <Style TargetType="TextBlock">
@@ -110,7 +110,7 @@
               AutomationProperties.Name="{Binding [UpdateCardDismiss], Source={x:Static res:Loc.Instance}}"
               MouseLeftButtonUp="Dismiss_MouseLeftButtonUp">
         <Path Width="10" Height="10" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
-              Stroke="#A1A1AA" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+              Stroke="{DynamicResource KoyNotchTextMuted}" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
               Data="M 0,0 L 10,10 M 10,0 L 0,10" />
       </Border>
     </StackPanel>

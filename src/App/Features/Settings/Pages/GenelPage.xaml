@@ -396,6 +396,9 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
+        <Button Content="{Binding [ExtGetMore], Source={x:Static res:Loc.Instance}}" Command="{Binding OpenStoreCommand}" CommandParameter="Profile"
+                Style="{StaticResource LinkButtonStyle}" Margin="2,4,0,0" />
+
         <!-- KURALLAR: ön plandaki uygulamaya göre profil (varsayılan kapalı) -->
         <TextBlock Text="{Binding [RulesHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 

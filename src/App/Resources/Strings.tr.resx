@@ -3444,5 +3444,323 @@
   <data name="DockLabelModeOnHover" xml:space="preserve">
     <value>Üzerine gelince</value>
   </data>
+  <data name="NavExtensions" xml:space="preserve">
+    <value>Eklentiler</value>
+  </data>
+  <data name="ExtensionsSubtitle" xml:space="preserve">
+    <value>Temalar, simge paketleri, canlı arka planlar ve ayar profilleri. Paketler yalnız veri içerir, kod çalıştırmaz.</value>
+  </data>
+  <data name="ExtFromFileHeader" xml:space="preserve">
+    <value>Yerel paket</value>
+  </data>
+  <data name="ExtFromFileTitle" xml:space="preserve">
+    <value>Dosyadan kur</value>
+  </data>
+  <data name="ExtFromFileDesc" xml:space="preserve">
+    <value>Bilgisayarındaki bir .koyext paketini kur. Mağaza paketleriyle aynı denetimlerden geçer.</value>
+  </data>
+  <data name="ExtFromFileButton" xml:space="preserve">
+    <value>Dosyadan kur…</value>
+  </data>
+  <data name="ExtFileDialogTitle" xml:space="preserve">
+    <value>Eklenti paketi seç</value>
+  </data>
+  <data name="ExtFileFilter" xml:space="preserve">
+    <value>Koy eklentisi (*.koyext)|*.koyext|Tüm dosyalar (*.*)|*.*</value>
+  </data>
+  <data name="ExtStoreHeader" xml:space="preserve">
+    <value>Mağaza</value>
+  </data>
+  <data name="ExtSearchPlaceholder" xml:space="preserve">
+    <value>Eklenti ara</value>
+  </data>
+  <data name="ExtRefresh" xml:space="preserve">
+    <value>Yenile</value>
+  </data>
+  <data name="ExtCategoryAll" xml:space="preserve">
+    <value>Tümü</value>
+  </data>
+  <data name="ExtCategoryTheme" xml:space="preserve">
+    <value>Temalar</value>
+  </data>
+  <data name="ExtCategoryIconPack" xml:space="preserve">
+    <value>Simge paketleri</value>
+  </data>
+  <data name="ExtCategoryBackground" xml:space="preserve">
+    <value>Arka planlar</value>
+  </data>
+  <data name="ExtCategoryProfile" xml:space="preserve">
+    <value>Profiller</value>
+  </data>
+  <data name="ExtFilterAll" xml:space="preserve">
+    <value>Tümü</value>
+  </data>
+  <data name="ExtFilterInstalled" xml:space="preserve">
+    <value>Kurulu</value>
+  </data>
+  <data name="ExtFilterUpdates" xml:space="preserve">
+    <value>Güncellemeler</value>
+  </data>
+  <data name="ExtFilterUpdatesCount" xml:space="preserve">
+    <value>Güncellemeler ({0})</value>
+  </data>
+  <data name="ExtSortLabel" xml:space="preserve">
+    <value>Sırala</value>
+  </data>
+  <data name="ExtSortNewest" xml:space="preserve">
+    <value>En yeni</value>
+  </data>
+  <data name="ExtSortAlphabetical" xml:space="preserve">
+    <value>Alfabetik</value>
+  </data>
+  <data name="ExtSortMostDownloads" xml:space="preserve">
+    <value>En çok indirilen</value>
+  </data>
+  <data name="ExtKindTheme" xml:space="preserve">
+    <value>Tema</value>
+  </data>
+  <data name="ExtKindIconPack" xml:space="preserve">
+    <value>Simge paketi</value>
+  </data>
+  <data name="ExtKindBackground" xml:space="preserve">
+    <value>Arka plan</value>
+  </data>
+  <data name="ExtKindProfile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="ExtInstall" xml:space="preserve">
+    <value>Kur</value>
+  </data>
+  <data name="ExtUpdate" xml:space="preserve">
+    <value>Güncelle</value>
+  </data>
+  <data name="ExtApply" xml:space="preserve">
+    <value>Uygula</value>
+  </data>
+  <data name="ExtAddToProfiles" xml:space="preserve">
+    <value>Profillere ekle</value>
+  </data>
+  <data name="ExtApplied" xml:space="preserve">
+    <value>Uygulandı</value>
+  </data>
+  <data name="ExtUninstall" xml:space="preserve">
+    <value>Kaldır</value>
+  </data>
+  <data name="ExtUninstallConfirmQuestion" xml:space="preserve">
+    <value>Eklenti kaldırılsın mı?</value>
+  </data>
+  <data name="ExtDetails" xml:space="preserve">
+    <value>Ayrıntı</value>
+  </data>
+  <data name="ExtOpenHomepage" xml:space="preserve">
+    <value>Ana sayfayı aç</value>
+  </data>
+  <data name="ExtOpenLinkFailed" xml:space="preserve">
+    <value>Bağlantı açılamadı.</value>
+  </data>
+  <data name="ExtVersionFormat" xml:space="preserve">
+    <value>v{0}</value>
+  </data>
+  <data name="ExtVersionUpdateFormat" xml:space="preserve">
+    <value>v{0} → v{1}</value>
+  </data>
+  <data name="ExtInstalledVersion" xml:space="preserve">
+    <value>Kurulu sürüm: v{0}</value>
+  </data>
+  <data name="ExtUpdatedFormat" xml:space="preserve">
+    <value>Güncellendi: {0}</value>
+  </data>
+  <data name="ExtDownloadsFormat" xml:space="preserve">
+    <value>{0} indirme</value>
+  </data>
+  <data name="ExtInstalledFromFile" xml:space="preserve">
+    <value>Dosyadan kuruldu.</value>
+  </data>
+  <data name="ExtLoading" xml:space="preserve">
+    <value>Mağaza yükleniyor…</value>
+  </data>
+  <data name="ExtEmpty" xml:space="preserve">
+    <value>Eşleşen eklenti yok.</value>
+  </data>
+  <data name="ExtShowMore" xml:space="preserve">
+    <value>Daha fazla göster ({0})</value>
+  </data>
+  <data name="ExtCountFormat" xml:space="preserve">
+    <value>{0} eklenti</value>
+  </data>
+  <data name="ExtSkippedFormat" xml:space="preserve">
+    <value>{0} geçersiz kayıt atlandı</value>
+  </data>
+  <data name="ExtGetMore" xml:space="preserve">
+    <value>Mağazadan daha fazla al…</value>
+  </data>
+  <data name="ExtInstalling" xml:space="preserve">
+    <value>Kuruluyor…</value>
+  </data>
+  <data name="ExtConfirmInstallTitle" xml:space="preserve">
+    <value>{0} kurulsun mu?</value>
+  </data>
+  <data name="ExtConfirmUpdateTitle" xml:space="preserve">
+    <value>{0} güncellensin mi?</value>
+  </data>
+  <data name="ExtConfirmKind" xml:space="preserve">
+    <value>Tür</value>
+  </data>
+  <data name="ExtConfirmVersion" xml:space="preserve">
+    <value>Sürüm</value>
+  </data>
+  <data name="ExtConfirmAuthor" xml:space="preserve">
+    <value>Yazar</value>
+  </data>
+  <data name="ExtConfirmLicense" xml:space="preserve">
+    <value>Lisans</value>
+  </data>
+  <data name="ExtConfirmSize" xml:space="preserve">
+    <value>İndirme boyutu</value>
+  </data>
+  <data name="ExtConfirmFileSize" xml:space="preserve">
+    <value>Dosya boyutu</value>
+  </data>
+  <data name="ExtConfirmPermissions" xml:space="preserve">
+    <value>Yetkiler</value>
+  </data>
+  <data name="ExtConfirmNoPermissions" xml:space="preserve">
+    <value>İstenen yetki yok</value>
+  </data>
+  <data name="ExtConfirmDataOnly" xml:space="preserve">
+    <value>Bu paket kod çalıştırmaz, yalnız veri içerir.</value>
+  </data>
+  <data name="ExtConfirmFileNote" xml:space="preserve">
+    <value>Bilgisayarındaki bir dosyadan geliyor. Yalnız güvendiğin kaynaklardan gelen paketleri kur.</value>
+  </data>
+  <data name="ExtConfirmNotApplied" xml:space="preserve">
+    <value>Kurmak eklentiyi uygulamaz; sonra Uygula düğmesine basabilirsin.</value>
+  </data>
+  <data name="ExtInstalledOk" xml:space="preserve">
+    <value>{0} kuruldu.</value>
+  </data>
+  <data name="ExtUpdatedOk" xml:space="preserve">
+    <value>{0} güncellendi.</value>
+  </data>
+  <data name="ExtUpdatedAndAppliedOk" xml:space="preserve">
+    <value>{0} güncellendi ve yeniden uygulandı.</value>
+  </data>
+  <data name="ExtAppliedOk" xml:space="preserve">
+    <value>{0} uygulandı.</value>
+  </data>
+  <data name="ExtUninstalledOk" xml:space="preserve">
+    <value>{0} kaldırıldı.</value>
+  </data>
+  <data name="ExtUninstallFailed" xml:space="preserve">
+    <value>{0} tamamen kaldırılamadı.</value>
+  </data>
+  <data name="ExtProfileAdded" xml:space="preserve">
+    <value>{0} profil listene eklendi. Genel sayfasındaki Profiller bölümünden uygulayabilirsin.</value>
+  </data>
+  <data name="ExtProfileAlready" xml:space="preserve">
+    <value>{0} zaten profillerinde.</value>
+  </data>
+  <data name="ExtApplyNotInstalled" xml:space="preserve">
+    <value>Bu eklenti artık kurulu değil.</value>
+  </data>
+  <data name="ExtApplyFileError" xml:space="preserve">
+    <value>Dosyalar güncellenemedi. Koy klasörüne yazılabildiğini denetle.</value>
+  </data>
+  <data name="ExtApplySaveFailed" xml:space="preserve">
+    <value>Ayarlar kaydedilemedi.</value>
+  </data>
+  <data name="ExtApplyErrorInvalidPath" xml:space="preserve">
+    <value>Eklentinin dosyaları eksik ya da kullanılamıyor.</value>
+  </data>
+  <data name="ExtIndexErrorNetwork" xml:space="preserve">
+    <value>Mağazaya ulaşılamadı. Bağlantını denetleyip Yenile'ye bas.</value>
+  </data>
+  <data name="ExtIndexErrorTooLarge" xml:space="preserve">
+    <value>Mağaza kataloğu okunamayacak kadar büyük.</value>
+  </data>
+  <data name="ExtIndexErrorMalformedJson" xml:space="preserve">
+    <value>Mağaza kataloğu bozuk.</value>
+  </data>
+  <data name="ExtIndexErrorNotAStoreIndex" xml:space="preserve">
+    <value>İndirilen dosya bir Koy mağaza kataloğu değil.</value>
+  </data>
+  <data name="ExtIndexErrorUnsupportedFormatVersion" xml:space="preserve">
+    <value>Katalog daha yeni bir Koy sürümü gerektiriyor. Mağazayı kullanmak için Koy'u güncelle.</value>
+  </data>
+  <data name="ExtIndexErrorTooManyItems" xml:space="preserve">
+    <value>Mağaza kataloğunda çok fazla kayıt var.</value>
+  </data>
+  <data name="ExtIndexErrorCancelled" xml:space="preserve">
+    <value>Yükleme iptal edildi.</value>
+  </data>
+  <data name="ExtInstallErrorNetwork" xml:space="preserve">
+    <value>Paket indirilemedi. Bağlantını denetle.</value>
+  </data>
+  <data name="ExtInstallErrorTimeout" xml:space="preserve">
+    <value>İndirme çok uzun sürdü ve durduruldu.</value>
+  </data>
+  <data name="ExtInstallErrorCancelled" xml:space="preserve">
+    <value>Kurulum iptal edildi.</value>
+  </data>
+  <data name="ExtInstallErrorDownloadTooLarge" xml:space="preserve">
+    <value>Paket 25 MB sınırından büyük.</value>
+  </data>
+  <data name="ExtInstallErrorHashMismatch" xml:space="preserve">
+    <value>İndirilen dosya katalogdaki özetle eşleşmedi ve atıldı.</value>
+  </data>
+  <data name="ExtInstallErrorFileNotFound" xml:space="preserve">
+    <value>Dosya bulunamadı.</value>
+  </data>
+  <data name="ExtInstallErrorInvalidArchive" xml:space="preserve">
+    <value>Dosya geçerli bir .koyext paketi değil.</value>
+  </data>
+  <data name="ExtInstallErrorUnsafePath" xml:space="preserve">
+    <value>Paket güvenli olmayan bir dosya yolu içeriyor ve reddedildi.</value>
+  </data>
+  <data name="ExtInstallErrorDuplicateEntry" xml:space="preserve">
+    <value>Paket aynı dosyayı iki kez içeriyor ve reddedildi.</value>
+  </data>
+  <data name="ExtInstallErrorTooManyFiles" xml:space="preserve">
+    <value>Pakette çok fazla dosya var.</value>
+  </data>
+  <data name="ExtInstallErrorExtractedTooLarge" xml:space="preserve">
+    <value>Paket açıldığında çok büyük.</value>
+  </data>
+  <data name="ExtInstallErrorFileTooLarge" xml:space="preserve">
+    <value>Paketin içindeki bir dosya çok büyük.</value>
+  </data>
+  <data name="ExtInstallErrorDisallowedFile" xml:space="preserve">
+    <value>Paket, bu eklenti türü için izin verilmeyen bir dosya türü içeriyor.</value>
+  </data>
+  <data name="ExtInstallErrorMissingManifest" xml:space="preserve">
+    <value>Pakette manifest.json yok.</value>
+  </data>
+  <data name="ExtInstallErrorMissingPayload" xml:space="preserve">
+    <value>Paketin ana dosyası eksik.</value>
+  </data>
+  <data name="ExtInstallErrorMultiplePayloads" xml:space="preserve">
+    <value>Pakette birden fazla ana dosya var.</value>
+  </data>
+  <data name="ExtInstallErrorInvalidManifest" xml:space="preserve">
+    <value>Paketin manifest dosyası geçerli değil.</value>
+  </data>
+  <data name="ExtInstallErrorManifestMismatch" xml:space="preserve">
+    <value>Paket katalogdaki kaydıyla uyuşmuyor (kimlik, sürüm veya tür).</value>
+  </data>
+  <data name="ExtInstallErrorCapabilitiesNotAllowed" xml:space="preserve">
+    <value>Paket yetki istiyor. Yalnız veri içeren paketler kurulabilir.</value>
+  </data>
+  <data name="ExtInstallErrorInvalidPayload" xml:space="preserve">
+    <value>Paketin içeriği türüne göre geçerli değil.</value>
+  </data>
+  <data name="ExtInstallErrorTooManyInstalled" xml:space="preserve">
+    <value>Çok fazla eklenti kurulu. Önce birini kaldır.</value>
+  </data>
+  <data name="ExtInstallErrorKindConflict" xml:space="preserve">
+    <value>Aynı kimliği başka türden bir eklenti kullanıyor.</value>
+  </data>
+  <data name="ExtInstallErrorIoError" xml:space="preserve">
+    <value>Bir dosya yazılamadı. Disk alanını ve klasör izinlerini denetle.</value>
+  </data>
 </root>
 

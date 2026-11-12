@@ -19,6 +19,12 @@ public sealed class ProfileService(SettingsStore settings, ProfileStore profiles
     /// <summary>Bir profil uygulandıktan sonra (ayarlar kaydedilmiş, özellikler yeniden kurulmuş). Açık Koy penceresi buradan yenilenir.</summary>
     public event Action<SavedProfile>? Applied;
 
+    /// <summary>
+    /// Başka bir kaynağın (eklenti mağazası) ayarı doğrudan değiştirdiği an: diskteki ayarlar yeni, çalışan özellikler
+    /// yeniden kuruldu. Açık Koy penceresi buradan yenilenir (yoksa bir sonraki kayıt eski değeri geri yazardı).
+    /// </summary>
+    public event Action? SettingsCommitted;
+
     public IReadOnlyList<SavedProfile> List() => profiles.Load();
 
     /// <summary>Diskteki geçerli ayarlar (dışa aktarma ve içe aktarma önizlemesi için).</summary>
@@ -66,19 +72,54 @@ public sealed class ProfileService(SettingsStore settings, ProfileStore profiles
             return result;
 
         settings.Save(result.Settings!);
-
-        if (Application.Current is App app)
-        {
-            var saved = settings.Load();
-            ThemeManager.Apply(app, saved);
-            app.ReloadAllFeatures();
-            // Dock / çentik açık-kapalı değiştiyse pencere ve sağ alt menü anahtarları da eşitlenir.
-            KoyWindow.SyncFeatureStates(saved.Notch.Enabled, saved.Dock.Enabled);
-            SagAltMenuWindow.SyncFeatureStates(saved.Notch.Enabled, saved.Dock.Enabled);
-        }
+        ReloadRunning();
 
         Applied?.Invoke(result.Profile!);
         return result;
+    }
+
+    /// <summary>
+    /// Hazır bir ayar nesnesini kaydeder ve profil uygulamayla aynı yoldan canlı uygular (tema, çentik, dock). Ayar
+    /// değişmediyse özellikler yeniden kurulmaz; kullanıcı stil dosyası ise (eklenti teması) yine baştan okunur.
+    /// Arayüz iş parçacığında çağrılır.
+    /// </summary>
+    public bool CommitSettings(AppSettings next)
+    {
+        var unchanged = Equals(settings.Load(), next);
+        if (!unchanged)
+        {
+            try
+            {
+                settings.Save(next);
+            }
+            catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException)
+            {
+                return false;
+            }
+
+            ReloadRunning();
+        }
+
+        // Dosya ayardan bağımsız değişmiş olabilir (yeni tema dosyası, geri yüklenen yedek).
+        if (Application.Current is { } app)
+            ThemeManager.ReloadUserStyle(app);
+
+        if (!unchanged)
+            SettingsCommitted?.Invoke();
+        return true;
+    }
+
+    private void ReloadRunning()
+    {
+        if (Application.Current is not App app)
+            return;
+
+        var saved = settings.Load();
+        ThemeManager.Apply(app, saved);
+        app.ReloadAllFeatures();
+        // Dock / çentik açık-kapalı değiştiyse pencere ve sağ alt menü anahtarları da eşitlenir.
+        KoyWindow.SyncFeatureStates(saved.Notch.Enabled, saved.Dock.Enabled);
+        SagAltMenuWindow.SyncFeatureStates(saved.Notch.Enabled, saved.Dock.Enabled);
     }
 
     private ProfileLibraryResult Persist(ProfileLibraryResult result)

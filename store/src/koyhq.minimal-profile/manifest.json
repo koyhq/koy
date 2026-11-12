@@ -1,0 +1,10 @@
+{
+  "id": "koyhq.minimal-profile",
+  "name": "Minimal",
+  "version": "1.0.0",
+  "author": "Koy",
+  "kind": "profile",
+  "license": "GPL-3.0-or-later",
+  "capabilities": [],
+  "entryKind": "data"
+}

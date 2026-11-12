@@ -1,0 +1,2 @@
+# Magaza paketleri ve indeks bayt bayt aynı kalmalı (sha256); CRLF çevirisi yapılmaz.
+store/** -text

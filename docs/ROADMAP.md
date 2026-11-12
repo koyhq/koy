@@ -652,3 +652,7 @@ Fikir kaynağı: Nusa incelemesi (`arastirma/nusa/RAPOR.md`, git dışı). Kod v
 - [x] **Arayüz ve Ayarlar (Bilet 3):** `DockPage.xaml` ve `KoyWindowViewModel` 4 segmentli kenar seçici (Alt, Üst, Sol, Sağ), uzunluk kaydırıcısı (%10–100), kenar mesafesi (0–96 px), iç dolgu (0–24 px), simge aralığı (0–16 px); İngilizce/Türkçe yerelleştirme (`Strings.resx`, `Strings.tr.resx`); `docs/MAP.md` güncellemesi.
 - [ ] Elle sınama (proje sahibi, Windows 11): 4 kenarda AppBar çalışma alanı ayrılması, dikey sürükleme, klasör paneli ve görev çubuğu güvenlik listesi (AGENTS #7).
 
+## Eklenti mağazası (#51)
+- [x] Core ve Platform: indeks, paket denetimi, kurulu kayıt, uygulama planı, istemci (`docs/EXTENSION-STORE.md`), örnek paketler ve `store/` iş akışı.
+- [x] App: Koy penceresinde "Eklentiler" sayfası (arama, kategori, süzgeç, sıralama, kartlar, önizleme önbelleği, kurulum onayı, kur / güncelle / uygula / kaldır, dosyadan kur); Görünüm, Çentik ve Genel sayfalarında "Mağazadan daha fazla al…" bağlantıları; `tools/Koy.UiSnapshots --scene eklentiler`.
+- [ ] Sahip doğrulaması (uygulama çalıştırılarak): gerçek ağdan indeks ve paket kurulumu; temayı uygula → kaldır ile `user-theme.json` geri gelir; simge paketi ve arka plan uygula / kaldır; `scripts/measure-memory.ps1` ve `docs/MEMORY.md`.

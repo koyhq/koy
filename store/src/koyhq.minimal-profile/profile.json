@@ -1,0 +1,27 @@
+{
+  "Format": "koy-profile",
+  "FormatVersion": 1,
+  "Name": "Minimal",
+  "Sections": [
+    "Appearance",
+    "Focus"
+  ],
+  "Settings": {
+    "Version": 4,
+    "Appearance": {
+      "Theme": "Dark",
+      "UseWindowsAccent": true,
+      "CornerRadius": 12.0,
+      "AnimationSpeed": "Calm",
+      "RespectReduceMotion": true,
+      "BatterySaverReduceMotion": true,
+      "Material": "Solid",
+      "BaseFontSize": 13.0
+    },
+    "Focus": {
+      "PomodoroWorkMinutes": 50,
+      "PomodoroShortBreakMinutes": 10,
+      "PomodoroLongBreakMinutes": 20
+    }
+  }
+}

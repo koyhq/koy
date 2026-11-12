@@ -54,4 +54,24 @@
     <SolidColorBrush x:Key="KoyToggleTrackOff" Color="#2A2B31" />
     <SolidColorBrush x:Key="KoyToggleKnobOff" Color="#D4D4D8" />
     <SolidColorBrush x:Key="KoyToggleKnobOn" Color="#FFFFFF" />
+
+    <!-- Dock (temadan bağımsız koyu yüzey; Koyu ve Açık aynı değerleri taşır, tema paketi ezer) -->
+    <SolidColorBrush x:Key="KoyDockSurface" Color="#121216" />
+    <SolidColorBrush x:Key="KoyDockCapsuleSurface" Color="#18181B" />
+    <SolidColorBrush x:Key="KoyDockBorder" Color="#26FFFFFF" />
+    <SolidColorBrush x:Key="KoyDockCapsuleBorder" Color="#1AFFFFFF" />
+    <SolidColorBrush x:Key="KoyDockSeparator" Color="#29FFFFFF" />
+    <SolidColorBrush x:Key="KoyDockDivider" Color="#33FFFFFF" />
+    <SolidColorBrush x:Key="KoyDockHover" Color="#22FFFFFF" />
+    <SolidColorBrush x:Key="KoyDockActive" Color="#1AFFFFFF" />
+    <SolidColorBrush x:Key="KoyDockPill" Color="#14FFFFFF" />
+    <SolidColorBrush x:Key="KoyDockCover" Color="#27272A" />
+    <SolidColorBrush x:Key="KoyDockIndicator" Color="#A1A1AA" />
+    <SolidColorBrush x:Key="KoyDockText" Color="#F4F4F5" />
+    <SolidColorBrush x:Key="KoyDockTextSecondary" Color="#A1A1AA" />
+    <SolidColorBrush x:Key="KoyDockGlyph" Color="#E6FFFFFF" />
+    <SolidColorBrush x:Key="KoyDockClockText" Color="#F2FFFFFF" />
+    <SolidColorBrush x:Key="KoyDockClockSubtext" Color="#B3FFFFFF" />
+    <SolidColorBrush x:Key="KoyDockPreviewSurface" Color="#F51C1C1E" />
+    <SolidColorBrush x:Key="KoyDockPreviewText" Color="#D4D4D8" />
 </ResourceDictionary>

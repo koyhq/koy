@@ -149,4 +149,7 @@
     <SolidColorBrush x:Key="KoyNotchDash" Color="#3F3F46" />
     <!-- Görev onay kutusu çerçevesi, tamamlanan görev yazısı -->
     <SolidColorBrush x:Key="KoyNotchCheckBorder" Color="#52525B" />
-    <SolidColorBrush x:Key="KoyNotchDoneText" Color="#71717A" /></ResourceDictionary>
+    <SolidColorBrush x:Key="KoyNotchDoneText" Color="#71717A" />
+    <!-- OSD / kart: ilerleme çubuğu rayı ve yuvarlak simge zemini -->
+    <SolidColorBrush x:Key="KoyNotchTrack" Color="#3F3F46" />
+    <SolidColorBrush x:Key="KoyNotchIconBg" Color="#27272A" /></ResourceDictionary>
