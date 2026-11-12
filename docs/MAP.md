@@ -55,6 +55,18 @@ Unutma:
 
 Unutma: Bildirim yoklaması AGENTS #5'in tek yoklama istisnasıdır (paketsiz süreçte olay yok); yalnız ayar açıkken ve çentik varken çalışır, `Stop`'ta sökülür. Core arayüzünde WinRT tipi yok: simge `byte[]?`, kimlik `uint`. Bildirim kartı yalnız birincil ekranın çentiğinde çıkar.
 
+## Canlı arka plan (çentik ve müzik kartı)
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Notch/LiveBackgroundPolicy.cs` | Hedef/kaynak enum'ları, önayar kataloğu, `LiveBackgroundPlaybackPolicy` (Off / ilk kare / oynat), yerel dosya doğrulayıcı, kare ve bellek sınırları (`GifFramePlan`, `LiveBackgroundLimits`) |
+| Core | `src/Core/Background/` | Eski dilim: `BackgroundAnimationPolicy` (hareket kuralı, `LiveBackgroundPlaybackPolicy` buna devreder) ve `BackgroundSourceValidator` (yol denetimi) |
+| Core | `src/Core/Settings/SettingsSections.cs` | `NotchSettings.LiveBackground*` (varsayılan hedef: Kapalı) |
+| App | `src/App/Features/Notch/LiveBackground/` | `LiveBackgroundState` (karar girdileri), `LiveBackgroundHost` (çizim, animasyon saatleri, video), `LiveBackgroundLoader` (GIF çözücü, 620 px, dondurulmuş kareler) |
+| App | `NotchWindow.xaml`, `Home/HomePanel.xaml` | Host, çentik zemininin ve müzik kartı zemininin içeriğin altında |
+| App | `Settings/Pages/CentikPage.xaml`, `KoyWindowViewModel.cs` | "Görseller" bölümü: hedef, kaynak, önayar, dosya seçici, perde |
+
+Unutma: çentik kapalı / gizliyken hiçbir şey oynamaz ve kare tutulmaz (AGENTS #5, #6); hareketi azalt ve pil tasarrufunda yalnız ilk kare. Tuval 620×352 büyütülmez (AGENTS #13).
+
 ## Yeni kullanıcı metni ya da çeviri eklemek
 | Katman | Dosya | Ne yapılır |
 |---|---|---|

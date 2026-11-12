@@ -183,6 +183,124 @@
             </Grid>
         </Border>
 
+        <!-- GÖRSELLER (canlı arka plan, issue #67). Varsayılan: Kapalı. Yalnız açık çentikte oynar; hareketi azalt ve pil tasarrufunda ilk kare. -->
+        <TextBlock Text="{Binding [LiveBgHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [LiveBgTargetTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [LiveBgTargetDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [LiveBgTargetNone], Source={x:Static res:Loc.Instance}}" GroupName="LiveBackgroundTarget"
+                                     IsChecked="{Binding LiveBackgroundTarget, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=None}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [LiveBgTargetNotch], Source={x:Static res:Loc.Instance}}" GroupName="LiveBackgroundTarget"
+                                     IsChecked="{Binding LiveBackgroundTarget, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Notch}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [LiveBgTargetMusicCard], Source={x:Static res:Loc.Instance}}" GroupName="LiveBackgroundTarget"
+                                     IsChecked="{Binding LiveBackgroundTarget, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=MusicCard}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [LiveBgTargetBoth], Source={x:Static res:Loc.Instance}}" GroupName="LiveBackgroundTarget"
+                                     IsChecked="{Binding LiveBackgroundTarget, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Both}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}" IsEnabled="{Binding IsLiveBackgroundEnabled}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [LiveBgSourceTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [LiveBgSourceDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [LiveBgSourceAmbient], Source={x:Static res:Loc.Instance}}" GroupName="LiveBackgroundSource"
+                                     IsChecked="{Binding LiveBackgroundSource, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=BuiltInAmbient}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [LiveBgSourceFile], Source={x:Static res:Loc.Instance}}" GroupName="LiveBackgroundSource"
+                                     IsChecked="{Binding LiveBackgroundSource, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=LocalFile}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}" IsEnabled="{Binding IsLiveBackgroundEnabled}"
+                Visibility="{Binding IsLiveBackgroundAmbientSource, Converter={StaticResource BoolToVis}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [LiveBgPresetTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [LiveBgPresetDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [LiveBgPresetTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="140" Height="32"
+                          ItemsSource="{Binding LiveBackgroundPresetOptions}" DisplayMemberPath="Name" SelectedValuePath="Id"
+                          SelectedValue="{Binding LiveBackgroundPreset}"
+                          Style="{StaticResource SettingComboBoxStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}" IsEnabled="{Binding IsLiveBackgroundEnabled}"
+                Visibility="{Binding IsLiveBackgroundFileSource, Converter={StaticResource BoolToVis}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [LiveBgFileTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding LiveBackgroundFileName}" Style="{StaticResource SettingDescStyle}"
+                               TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding LiveBackgroundFileMessage}"
+                               Foreground="{DynamicResource KoyDangerText}" TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource SettingDescStyle}">
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+                <Button Grid.Column="1" Content="{Binding [LiveBgFileChoose], Source={x:Static res:Loc.Instance}}"
+                        Command="{Binding PickLiveBackgroundFileCommand}" Style="{StaticResource SettingButtonStyle}" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}" IsEnabled="{Binding IsLiveBackgroundEnabled}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [LiveBgScrimTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [LiveBgScrimDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [LiveBgScrimTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="100" Height="32"
+                          ItemsSource="{Binding LiveBackgroundScrimOptions}" SelectedItem="{Binding LiveBackgroundScrimPercent}"
+                          Style="{StaticResource SettingComboBoxStyle}" />
+            </Grid>
+        </Border>
+
         <!-- GÖSTERGELER -->
         <TextBlock Text="{Binding [IndicatorsHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 
