@@ -14,6 +14,7 @@ using Koy.Core.Animation;
 using Koy.Core.Appearance;
 using Koy.Core.Display;
 using Koy.Core.Dock;
+using Koy.Core.Dock.Items;
 using Koy.Core.JumpList;
 using Koy.Core.Media;
 using Koy.Core.Settings;
@@ -34,6 +35,12 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 {
     // Tek canlı ayar nesnesi: DockFeature.ApplySettings her uygulamada bütün ViewModel'lere aynı örneği verir (AdoptSettings).
     private AppSettings _settings;
+
+    // Ek öğeler (ayırıcı, boşluk, saat, çöp kutusu, özel düğme). Hiç ek öğe yoksa bu alanlar boş kalır, dock değişmez.
+    private IReadOnlyList<DockItemSpec> _layout = [];
+    private IReadOnlyList<string> _effectiveOrder = [];
+    private bool _hasExtras;
+    private DispatcherTimer? _clockTimer;
     private readonly DockController _controller;
     private readonly IShellActionService _shellActionService;
     private readonly VisibilityController? _visibilityController;
@@ -1000,6 +1007,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         IsEdgeLineVisible = !resolved.IsHandleVisible && DockPresentationMath.ShowsHiddenEdgeLine(
             _settings.Dock.HiddenEdgeLine, !shouldShow, isBlockedByFullscreen || _isForegroundWindowFullscreen);
         Status?.SetActive(shouldShow);
+        SyncClockTimer();
 
         // Fare izleme yalnız dock gizliyken (ya da kenardan açıldıysa, kapanışını görmek için) ve tam ekranda değilken
         // gerekir; tam ekranda kenardan açılma yok.
@@ -1181,7 +1189,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     /// <summary>Öğe sürüklenebilir mi: sabitli, sıralama destekleniyor ve en az iki sabitli var.</summary>
     public bool CanStartReorder(DockEntryViewModel item)
-        => item.IsPinned && _controller.CanReorderPinned && Items.Count(i => i.IsPinned) > 1;
+        => !_hasExtras && item.IsPinned && _controller.CanReorderPinned && Items.Count(i => i.IsPinned) > 1;
 
     public int PinnedCount => Items.Count(i => i.IsPinned);
 
@@ -1408,6 +1416,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             // 3. Hedef dock sırasını belirle
             var availableLnkIds = models.Where(m => m.IsPinned).Select(m => PinnedOrder.IdOf(m.Id)).ToList();
             var (effectiveOrder, reconciledFolders) = PinnedOrder.Reconcile(pinnedOrder, availableLnkIds, folders);
+            _effectiveOrder = effectiveOrder;
 
             var folderDict = reconciledFolders.ToDictionary(f => f.Id, StringComparer.OrdinalIgnoreCase);
             var desiredEntries = new List<DockEntryViewModel>();
@@ -1510,6 +1519,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                 }
             }
 
+            // Ek öğeler varsa şerit düzenine katılır (yoksa desiredEntries aynen kalır).
+            desiredEntries = ComposeExtras(desiredEntries);
+
             // 4. Koleksiyonu yerinde güncelle
             var desiredIds = new HashSet<string>(desiredEntries.Select(e => e.Id), StringComparer.OrdinalIgnoreCase);
             for (var i = Items.Count - 1; i >= 0; i--)
@@ -1551,8 +1563,198 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
             RecomputeFit();
             EvaluatePosition(_lastContentWidth);
+            SyncClockTimer();
         });
     }
+
+    #region Ek öğeler
+
+    /// <summary>
+    /// Kayıtlı ek öğeleri uygulama/klasör girdileriyle birleştirir. Ek öğe yoksa girdiler değişmeden döner.
+    /// Sabitlenmemiş çalışan uygulamalar son sabitli girdinin arkasına girer.
+    /// </summary>
+    private List<DockEntryViewModel> ComposeExtras(List<DockEntryViewModel> entries)
+    {
+        var specs = DockItemRules.Resolve(_settings.DockItems.Items, _settings.DockItems.PinnedOrder ?? []);
+        _hasExtras = DockItemLayout.HasExtras(specs);
+        if (!_hasExtras)
+        {
+            _layout = specs;
+            return entries;
+        }
+
+        var layout = DockItemLayout.Merge(specs, _effectiveOrder);
+        _layout = layout;
+
+        var pinned = new Dictionary<string, DockEntryViewModel>(StringComparer.OrdinalIgnoreCase);
+        var running = new List<DockEntryViewModel>();
+        foreach (var entry in entries)
+        {
+            if (entry.IsPinned)
+                pinned.TryAdd(entry is DockFolderViewModel ? entry.Id : PinnedOrder.IdOf(entry.Id), entry);
+            else
+                running.Add(entry);
+        }
+
+        var result = new List<DockEntryViewModel>();
+        var separators = 0;
+        var spacers = 0;
+        for (var i = 0; i < layout.Count; i++)
+        {
+            var spec = layout[i];
+            var token = DockItemLayout.TokenOf(spec);
+            if (token is not null)
+            {
+                if (pinned.TryGetValue(token, out var entry))
+                    result.Add(entry);
+                continue;
+            }
+
+            var id = spec.Kind switch
+            {
+                DockItemKind.Separator => $"item:separator:{separators++}",
+                DockItemKind.Spacer => $"item:spacer:{spacers++}",
+                _ => $"item:{spec.Kind.ToString().ToLowerInvariant()}:{spec.Id}",
+            };
+
+            var extra = Items.OfType<DockExtraViewModel>().FirstOrDefault(x => string.Equals(x.Id, id, StringComparison.OrdinalIgnoreCase));
+            if (extra is null)
+                extra = new DockExtraViewModel(spec, id, i);
+            else
+                extra.Update(spec, i);
+
+            extra.IconSize = IconSize;
+            extra.ItemSize = ItemSize;
+            extra.Title = ExtraTitle(spec);
+            result.Add(extra);
+        }
+
+        var lastPinned = result.FindLastIndex(e => e.IsPinned);
+        result.InsertRange(lastPinned + 1, running);
+        return result;
+    }
+
+    private static string ExtraTitle(DockItemSpec spec) => spec.Kind switch
+    {
+        DockItemKind.Clock => Resources.Strings.Get("DockItemClock"),
+        DockItemKind.Trash => Resources.Strings.Get("DockItemTrash"),
+        DockItemKind.Custom => DockCustomCommand.TryParse(spec.Command, out var launch)
+            ? launch.Target
+            : Resources.Strings.Get("DockItemCustom"),
+        _ => string.Empty,
+    };
+
+    /// <summary>Ek öğeye tıklandı. Saat Bildirim Merkezi'ni (takvim), çöp kutusu Geri Dönüşüm Kutusu'nu, özel düğme hedefini açar.</summary>
+    public void ActivateExtra(DockExtraViewModel extra)
+    {
+        ClosePreviewNow();
+        switch (extra.Kind)
+        {
+            case DockItemKind.Clock:
+                _shellActionService.OpenNotificationCenter();
+                break;
+            case DockItemKind.Trash:
+                // Boşaltma bu sürümde yok: yalnız kutuyu açar. Doluluk durumu için yoklama gerekeceğinden simge sabittir.
+                _shellActionService.Launch("shell:RecycleBinFolder");
+                break;
+            case DockItemKind.Custom:
+                // Komut güvenilmez: Core ayrıştırır, geçersizse hiçbir şey çalışmaz. Hedef ve bağımsız değişken ayrı geçer.
+                if (DockCustomCommand.TryParse(extra.Spec.Command, out var launch))
+                    _shellActionService.Launch(launch.Target, launch.Arguments);
+                break;
+        }
+    }
+
+    [RelayCommand]
+    private void AddSeparator() => AddExtra(new DockItemSpec(DockItemKind.Separator, "", ""));
+
+    [RelayCommand]
+    private void AddSpacer() => AddExtra(new DockItemSpec(DockItemKind.Spacer, "", ""));
+
+    [RelayCommand]
+    private void AddClock() => AddExtra(new DockItemSpec(DockItemKind.Clock, nameof(DockItemKind.Clock), ""));
+
+    [RelayCommand]
+    private void AddTrash() => AddExtra(new DockItemSpec(DockItemKind.Trash, nameof(DockItemKind.Trash), ""));
+
+    [RelayCommand]
+    private void AddCustom()
+    {
+        var command = DockCustomButtonPicker.PickCommand();
+        if (command is not null)
+            AddExtra(new DockItemSpec(DockItemKind.Custom, DockItemLayout.NewCustomId(), command));
+    }
+
+    private void AddExtra(DockItemSpec spec)
+    {
+        var current = DockItemLayout.Merge(
+            DockItemRules.Resolve(_settings.DockItems.Items, _settings.DockItems.PinnedOrder ?? []),
+            _effectiveOrder);
+        SaveLayout(DockItemLayout.Add(current, spec));
+    }
+
+    public void RemoveExtra(DockExtraViewModel extra) =>
+        SaveLayout(DockItemLayout.RemoveAt(_layout, extra.LayoutIndex));
+
+    /// <summary>Ek öğeyi bir yuva sola (-1) ya da sağa (+1) kaydırır.</summary>
+    public void MoveExtra(DockExtraViewModel extra, int delta) =>
+        SaveLayout(DockItemRules.Move(_layout, extra.LayoutIndex, extra.LayoutIndex + delta));
+
+    private void SaveLayout(IReadOnlyList<DockItemSpec> layout)
+    {
+        DockFeature.SaveItems(DockItemLayout.ToStoredEntries(layout), _settings);
+        UpdateItems();
+    }
+
+    /// <summary>
+    /// Saat zamanlayıcısı yalnız dock görünürken ve şeritte saat varken çalışır; dakika başına hizalı tek uyanma
+    /// (saniye gösterilmez). Gizlenince durur (AGENTS #5).
+    /// </summary>
+    private void SyncClockTimer()
+    {
+        var clocks = Items.OfType<DockExtraViewModel>().Where(x => x.IsClock).ToList();
+        if (_disposed || !IsVisible || clocks.Count == 0)
+        {
+            _clockTimer?.Stop();
+            return;
+        }
+
+        if (_clockTimer is null)
+        {
+            _clockTimer = new DispatcherTimer(DispatcherPriority.Background);
+            _clockTimer.Tick += OnClockTimerTick;
+        }
+
+        if (_clockTimer.IsEnabled)
+        {
+            foreach (var clock in clocks.Where(c => c.TimeText.Length == 0))
+                ApplyClockText(clock, DateTime.Now);
+            return;
+        }
+
+        OnClockTimerTick(null, EventArgs.Empty);
+    }
+
+    private void OnClockTimerTick(object? sender, EventArgs e)
+    {
+        var now = DateTime.Now;
+        foreach (var clock in Items.OfType<DockExtraViewModel>().Where(x => x.IsClock))
+            ApplyClockText(clock, now);
+
+        if (_clockTimer is null)
+            return;
+
+        _clockTimer.Interval = DockClockTick.DelayToNextMinute(now);
+        _clockTimer.Start();
+    }
+
+    private static void ApplyClockText(DockExtraViewModel clock, DateTime now)
+    {
+        clock.TimeText = DockClockTick.FormatTime(now, System.Globalization.CultureInfo.CurrentCulture);
+        clock.DateText = DockClockTick.FormatDate(now, System.Globalization.CultureInfo.CurrentCulture);
+    }
+
+    #endregion
 
     private void OnMediaChanged(object? sender, MediaInfo? info)
     {
@@ -1629,6 +1831,11 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _previewCloseTimer.Stop();
         _dodgeHoverTimer.Stop();
         _snapTimer?.Stop();
+        if (_clockTimer is not null)
+        {
+            _clockTimer.Stop();
+            _clockTimer.Tick -= OnClockTimerTick;
+        }
 
         DockContextMenuManager.ActiveMenuChanged -= OnActiveMenuChanged;
 

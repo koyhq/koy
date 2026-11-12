@@ -100,6 +100,7 @@ Unutma: Servis yalnız gerektiğinde çalışır, son bırakan zamanlayıcıyı 
 | App | `src/App/Features/Dock/DockFeature.cs` | Yaşam döngüsü |
 | App | `src/App/Features/Dock/DockViewModel.cs`, `src/App/Features/Dock/DockFullWidth.xaml`, `src/App/Features/Dock/DockCapsule.xaml` | Görünüm |
 | Core, App | `src/Core/Dock/DockPresentationMath.cs`, `src/App/Features/Dock/DockPresentationStyle.cs`, `src/App/Features/Dock/DockItemsStrip.xaml` | Simge göstergesi (nokta, çizgi, arka plan), rozet, kenar açma gecikmesi ve gizli dock çizgisi: karar Core'da, fırça ve köşe eşlemesi App'te |
+| Core, App | `src/Core/Dock/Items/` (`DockItemLayout`, `DockCustomCommand`, `DockClockTick`), `src/App/Features/Dock/DockExtraViewModel.cs`, `DockViewModel.ComposeExtras` | Dock öğeleri (ayırıcı, boşluk, saat, çöp kutusu, özel düğme): düzen ve komut kuralları Core'da, çizim ve çalıştırma App'te. Eklemek için dock sağ tık menüsü "Öğe ekle" |
 | Core, Platform, App | `src/Core/StartMenu/`, `src/Platform/StartMenu/StartMenuHost.cs`, `src/App/Features/Dock/DockStartMenu.cs` | Başlat düğmesinin sağ tık (Win+X) menüsü: model ve eylemler Core'da, Windows tarafı Platform'da, çizim App'te |
 | Gözcü | `src/Watchdog/` | Koy ölürse görev çubuğunu geri getiren ayrı süreç |
 

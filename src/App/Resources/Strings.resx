@@ -2364,6 +2364,45 @@
   <data name="DockFolderDissolve" xml:space="preserve">
     <value>Dissolve folder</value>
   </data>
+  <data name="DockAddItem" xml:space="preserve">
+    <value>Add item</value>
+  </data>
+  <data name="DockAddSeparator" xml:space="preserve">
+    <value>Separator</value>
+  </data>
+  <data name="DockAddSpacer" xml:space="preserve">
+    <value>Spacer</value>
+  </data>
+  <data name="DockAddClock" xml:space="preserve">
+    <value>Clock</value>
+  </data>
+  <data name="DockAddTrash" xml:space="preserve">
+    <value>Recycle Bin</value>
+  </data>
+  <data name="DockAddCustom" xml:space="preserve">
+    <value>Custom button...</value>
+  </data>
+  <data name="DockItemClock" xml:space="preserve">
+    <value>Clock</value>
+  </data>
+  <data name="DockItemTrash" xml:space="preserve">
+    <value>Recycle Bin</value>
+  </data>
+  <data name="DockItemCustom" xml:space="preserve">
+    <value>Custom button</value>
+  </data>
+  <data name="DockItemCustomPick" xml:space="preserve">
+    <value>Choose what the button opens</value>
+  </data>
+  <data name="DockItemRemove" xml:space="preserve">
+    <value>Remove from dock</value>
+  </data>
+  <data name="DockItemMoveLeft" xml:space="preserve">
+    <value>Move left</value>
+  </data>
+  <data name="DockItemMoveRight" xml:space="preserve">
+    <value>Move right</value>
+  </data>
   <data name="UpdateAvailableBadge" xml:space="preserve">
     <value>New version: {0}</value>
   </data>

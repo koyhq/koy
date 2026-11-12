@@ -2364,6 +2364,45 @@
   <data name="DockFolderDissolve" xml:space="preserve">
     <value>Klasörü dağıt</value>
   </data>
+  <data name="DockAddItem" xml:space="preserve">
+    <value>Öğe ekle</value>
+  </data>
+  <data name="DockAddSeparator" xml:space="preserve">
+    <value>Ayırıcı</value>
+  </data>
+  <data name="DockAddSpacer" xml:space="preserve">
+    <value>Boşluk</value>
+  </data>
+  <data name="DockAddClock" xml:space="preserve">
+    <value>Saat</value>
+  </data>
+  <data name="DockAddTrash" xml:space="preserve">
+    <value>Geri Dönüşüm Kutusu</value>
+  </data>
+  <data name="DockAddCustom" xml:space="preserve">
+    <value>Özel düğme...</value>
+  </data>
+  <data name="DockItemClock" xml:space="preserve">
+    <value>Saat</value>
+  </data>
+  <data name="DockItemTrash" xml:space="preserve">
+    <value>Geri Dönüşüm Kutusu</value>
+  </data>
+  <data name="DockItemCustom" xml:space="preserve">
+    <value>Özel düğme</value>
+  </data>
+  <data name="DockItemCustomPick" xml:space="preserve">
+    <value>Düğmenin neyi açacağını seçin</value>
+  </data>
+  <data name="DockItemRemove" xml:space="preserve">
+    <value>Dock'tan kaldır</value>
+  </data>
+  <data name="DockItemMoveLeft" xml:space="preserve">
+    <value>Sola taşı</value>
+  </data>
+  <data name="DockItemMoveRight" xml:space="preserve">
+    <value>Sağa taşı</value>
+  </data>
   <data name="UpdateAvailableBadge" xml:space="preserve">
     <value>Yeni sürüm: {0}</value>
   </data>

@@ -18,6 +18,13 @@
 
     <Window.ContextMenu>
         <ContextMenu>
+            <MenuItem Header="{x:Static res:Strings.DockAddItem}">
+                <MenuItem Header="{x:Static res:Strings.DockAddSeparator}" Command="{Binding AddSeparatorCommand}"/>
+                <MenuItem Header="{x:Static res:Strings.DockAddSpacer}" Command="{Binding AddSpacerCommand}"/>
+                <MenuItem Header="{x:Static res:Strings.DockAddClock}" Command="{Binding AddClockCommand}"/>
+                <MenuItem Header="{x:Static res:Strings.DockAddTrash}" Command="{Binding AddTrashCommand}"/>
+                <MenuItem Header="{x:Static res:Strings.DockAddCustom}" Command="{Binding AddCustomCommand}"/>
+            </MenuItem>
             <MenuItem Header="{x:Static res:Strings.Settings}" Command="{Binding OpenSettingsCommand}"/>
         </ContextMenu>
     </Window.ContextMenu>
