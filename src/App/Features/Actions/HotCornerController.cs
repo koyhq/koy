@@ -26,6 +26,7 @@ public sealed class HotCornerController : IDisposable
     private readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
     private readonly HotCornerTracker _tracker = new();
     private readonly FullscreenDetector _fullscreen = new();
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1859", Justification = "Core sözleşmesi üzerinden tutulur (AGENTS.md #11).")]
     private ICornerHookService? _hook;
     private MonitorService? _monitors;
     private DispatcherTimer? _dwell;

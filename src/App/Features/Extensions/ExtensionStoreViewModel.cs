@@ -38,6 +38,7 @@ public sealed record ExtensionConfirmFact(string Label, string Value);
 /// durumu, onay adımını ve metinleri bağlar. Sayfa görünürken indeksi bir kez çeker; arka planda yoklama yoktur
 /// (AGENTS #5). Hepsi arayüz iş parçacığında çağrılır.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001", Justification = "Tek örnek KoyWindow'un ömrü kadar (süreç boyu) yaşar.")]
 public sealed partial class ExtensionStoreViewModel : ObservableObject
 {
     /// <summary>Listede bir seferde gösterilen kart sayısı ("Daha fazla göster" bu kadar ekler).</summary>

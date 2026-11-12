@@ -11,6 +11,7 @@ namespace Koy.Platform.Extensions;
 /// akışla geçici dosyaya indirir (25 MB bellekte tutulmaz), SHA256'yı doğrular ve açma/kurma işini Core'daki
 /// <see cref="ExtensionPackageInstaller"/>'a verir. Hata fırlatmaz, hata kodu döner. Kurulumlar tek sıradadır.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001", Justification = "Süreç boyu yaşar; SemaphoreSlim'in bekleme tanıtıcısı kullanılmadığı için yönetilmeyen kaynak tutmaz.")]
 public sealed class ExtensionStoreClient : IExtensionStoreClient
 {
     public const string IndexUrl = "https://raw.githubusercontent.com/koyhq/koy/main/store/index.json";

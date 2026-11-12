@@ -22,7 +22,7 @@ internal static class ShellTrayLocator
         while (!(hwnd = PInvoke.FindWindowEx(HWND.Null, hwnd, TrayClassName, null)).IsNull)
         {
             uint processId = 0;
-            PInvoke.GetWindowThreadProcessId(hwnd, &processId);
+            _ = PInvoke.GetWindowThreadProcessId(hwnd, &processId);
             if (processId != ownProcessId && (alsoSkipProcessId == 0 || processId != alsoSkipProcessId))
                 return hwnd;
         }

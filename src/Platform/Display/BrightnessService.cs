@@ -13,6 +13,9 @@ namespace Koy.Platform.Display;
 /// </summary>
 public sealed class BrightnessService : IBrightnessService
 {
+    // WMI olayındaki özellik adı (WmiMonitorBrightnessEvent); C# üye adıyla ilgisi yok.
+    private const string WmiBrightnessProperty = "Brightness";
+
     private readonly Func<DisplayMonitor?>? _monitorProvider;
     private readonly BrightnessWriteQueue _queue = new();
     private readonly object _sync = new();
@@ -287,7 +290,7 @@ public sealed class BrightnessService : IBrightnessService
     {
         try
         {
-            var value = Convert.ToInt32(e.NewEvent["Brightness"]);
+            var value = Convert.ToInt32(e.NewEvent[WmiBrightnessProperty]);
             lock (_sync)
             {
                 if (value == _brightness)

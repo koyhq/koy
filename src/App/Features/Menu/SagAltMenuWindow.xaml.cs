@@ -103,7 +103,7 @@ public partial class SagAltMenuWindow : Window
             }
         }
 
-        targetMonitor ??= monitors.FirstOrDefault(m => m.IsPrimary) ?? monitors.FirstOrDefault();
+        targetMonitor ??= monitors.FirstOrDefault(m => m.IsPrimary) ?? (monitors.Count > 0 ? monitors[0] : null);
 
         // 3. Monitör DPI ve Çalışma Alanı (WPF DIP cinsinden)
         double dpiX = targetMonitor?.DpiScaleX ?? 1.0;

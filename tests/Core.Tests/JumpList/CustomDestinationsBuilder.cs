@@ -7,6 +7,7 @@ namespace Koy.Core.Tests.JumpList;
 /// ShellLink akışı yalnız yapıyı taşır (başlık, isteğe bağlı kimlik listesi / bağlantı bilgisi, dizeler, uç blok);
 /// içeriği anlamlı bir kısayol değildir.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001", Justification = "MemoryStream yönetilmeyen kaynak tutmaz.")]
 internal sealed class CustomDestinationsBuilder
 {
     public static readonly byte[] ShellLinkClsid =

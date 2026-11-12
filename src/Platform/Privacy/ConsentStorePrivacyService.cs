@@ -37,6 +37,7 @@ public sealed class ConsentStorePrivacyService : IPrivacyMonitorService
     /// Bir Start–Stop döngüsünün tanıtıcıları. İş parçacığı kendi Run'ını sahiplenir ve çıkarken bırakır;
     /// böylece Stop iş parçacığı hâlâ beklerken tanıtıcıları altından çekmez.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001", Justification = "Tanıtıcıları sahiplenen iş parçacığı çıkarken Release ile bırakır.")]
     private sealed class Run
     {
         public readonly ManualResetEvent Cancel = new(false);

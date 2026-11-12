@@ -6,6 +6,7 @@ using Koy.App.Resources;
 
 namespace Koy.App.Features.Settings;
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001", Justification = "Tek örnek, süreç boyu yaşar; kapatınca gizlenir (AGENTS.md #4).")]
 public partial class KoyWindow : Window
 {
     private static KoyWindow? _instance;
@@ -259,7 +260,7 @@ public partial class KoyWindow : Window
         return false;
     }
 
-    private bool HasChangedSettingsOnPage(int pageIndex, ISet<string> changed)
+    private bool HasChangedSettingsOnPage(int pageIndex, HashSet<string> changed)
     {
         if (pageIndex < 0 || pageIndex >= PagesHost.Children.Count)
             return false;

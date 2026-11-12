@@ -55,6 +55,7 @@ public sealed class SharedServices : IDisposable
     private TaskService? _tasks;
     private QuickLaunchService? _quickLaunch;
     private readonly object _powerLock = new();
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1859", Justification = "Core sözleşmesi üzerinden tutulur (AGENTS.md #11).")]
     private IPowerService? _powerService;
     private int _powerServiceUsers;
     private WinRtNotificationListener? _notifications;

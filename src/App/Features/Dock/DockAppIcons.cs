@@ -20,6 +20,7 @@ internal sealed class DockAppIcons
 
     private readonly IconPack _pack;
     private readonly string _folder;
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1859", Justification = "Salt okunur görünüm bilerek; kaynak ayar sözlüğü değiştirilmez.")]
     private readonly IReadOnlyDictionary<string, string> _overrides;
     private readonly Dictionary<string, ImageSource?> _loaded = new(StringComparer.OrdinalIgnoreCase);
     private string[]? _packFiles;

@@ -337,7 +337,7 @@ public sealed partial class SearchViewModel : ObservableObject, IDisposable
         }, TaskScheduler.Default);
     }
 
-    private static ImageSource? Decode(Func<byte[]?> load)
+    private static BitmapImage? Decode(Func<byte[]?> load)
     {
         var bytes = load();
         if (bytes is null || bytes.Length == 0)

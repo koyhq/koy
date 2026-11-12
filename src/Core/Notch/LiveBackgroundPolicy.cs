@@ -254,7 +254,7 @@ public static class LiveBackgroundFileValidator
         "CONIN$", "CONOUT$"
     ];
 
-    private static readonly char[] InvalidNameChars = ['<', '>', '"', '|', '?', '*'];
+    private static readonly System.Buffers.SearchValues<char> InvalidNameChars = System.Buffers.SearchValues.Create("<>\"|?*");
 
     /// <summary>Dosya yolunu ve boyutunu denetler; ilk hatayı döner.</summary>
     public static LiveBackgroundFileError Validate(string? path, long fileSizeBytes)
@@ -278,7 +278,7 @@ public static class LiveBackgroundFileValidator
         if (path.IndexOf(':', 2) >= 0)
             return LiveBackgroundFileError.InvalidPath;
 
-        if (path.IndexOfAny(InvalidNameChars) >= 0)
+        if (path.AsSpan().ContainsAny(InvalidNameChars))
             return LiveBackgroundFileError.InvalidPath;
 
         var segments = path[3..].Split('\\');

@@ -126,7 +126,7 @@ internal static class LiveBackgroundLoader
     }
 
     /// <summary>Altlık + (varsa) yeni parça tek bitmap'te; <paramref name="clear"/> alanı altlıktan silinir. Sonuç dondurulur.</summary>
-    private static BitmapSource Render(BitmapSource? under, BitmapSource? over, Rect overRect, Rect? clear, int width, int height)
+    private static RenderTargetBitmap Render(BitmapSource? under, BitmapSource? over, Rect overRect, Rect? clear, int width, int height)
     {
         var full = new Rect(0, 0, width, height);
         var visual = new DrawingVisual();

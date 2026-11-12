@@ -53,5 +53,10 @@ public readonly record struct ExtensionVersion(int Major, int Minor, int Patch) 
     public static bool IsNewer(string? candidate, string? installed) =>
         TryParse(candidate, out var c) && TryParse(installed, out var i) && c.CompareTo(i) > 0;
 
+    public static bool operator <(ExtensionVersion left, ExtensionVersion right) => left.CompareTo(right) < 0;
+    public static bool operator <=(ExtensionVersion left, ExtensionVersion right) => left.CompareTo(right) <= 0;
+    public static bool operator >(ExtensionVersion left, ExtensionVersion right) => left.CompareTo(right) > 0;
+    public static bool operator >=(ExtensionVersion left, ExtensionVersion right) => left.CompareTo(right) >= 0;
+
     public override string ToString() => $"{Major}.{Minor}.{Patch}";
 }

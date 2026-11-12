@@ -18,7 +18,7 @@ public static class VoiceCommandParser
         "cscript", "cscript.exe"
     };
 
-    private static readonly char[] DangerousShellCharacters = ['|', '&', ';', '>', '<', '`', '$'];
+    private static readonly System.Buffers.SearchValues<char> DangerousShellCharacters = System.Buffers.SearchValues.Create("|&;><`$");
 
     /// <summary>
     /// Harness türüne ve parametrelere göre yürütülecek komut ve argümanları çözer.
@@ -90,7 +90,7 @@ public static class VoiceCommandParser
         if (string.IsNullOrWhiteSpace(customExecutable))
             throw new VoiceCommandException("Özel harness için yürütülebilir dosya adı boş olamaz.");
 
-        if (customExecutable.IndexOfAny(DangerousShellCharacters) >= 0 || (customTemplate is not null && customTemplate.IndexOfAny(DangerousShellCharacters) >= 0))
+        if (customExecutable.AsSpan().ContainsAny(DangerousShellCharacters) || (customTemplate is not null && customTemplate.AsSpan().ContainsAny(DangerousShellCharacters)))
             throw new VoiceCommandException("Komut kalıbında veya yürütülebilir dosya yolunda kabuk metakarakterleri (| & ; > < ` $) bulunamaz.");
 
         string exe;
@@ -118,7 +118,7 @@ public static class VoiceCommandParser
         if (BlockedExecutables.Contains(fileNameOnly))
             throw new VoiceCommandException($"Güvenlik kuralı gereğince kabuk yorumlayıcıları ({fileNameOnly}) harness olarak çalıştırılamaz.");
 
-        if (exe.IndexOfAny(DangerousShellCharacters) >= 0)
+        if (exe.AsSpan().ContainsAny(DangerousShellCharacters))
             throw new VoiceCommandException("Yürütülebilir dosya yolunda kabuk metakarakterleri (| & ; > < ` $) bulunamaz.");
 
         return new ResolvedCommand(exe, args);
@@ -137,7 +137,7 @@ public static class VoiceCommandParser
         return BuildArgumentsFromTokens(tokens, prompt);
     }
 
-    private static IReadOnlyList<string> BuildArgumentsFromTokens(IReadOnlyList<string> tokens, string prompt)
+    private static List<string> BuildArgumentsFromTokens(List<string> tokens, string prompt)
     {
         var promptReplaced = false;
         var result = new List<string>(tokens.Count + 1);

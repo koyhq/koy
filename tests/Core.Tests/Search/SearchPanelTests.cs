@@ -90,7 +90,7 @@ public sealed class SearchPanelTests : IDisposable
         var list = SearchLayout.Arrange(results);
 
         Assert.Equal(8, list.Count(r => r.Category == "A")); // 15 / 2 yukarı
-        Assert.True(list.Count(r => r.Category == "C") >= 1);
+        Assert.Contains(list, r => r.Category == "C");
         Assert.True(list.Count <= SearchLayout.MaxResults);
     }
 
@@ -460,7 +460,7 @@ public sealed class SearchPanelTests : IDisposable
         Assert.Null(history.Suggest(""));
     }
 
-    private SearchPanelController OpenWithHistory(SearchHistory history, params SearchResult[] results)
+    private static SearchPanelController OpenWithHistory(SearchHistory history, params SearchResult[] results)
     {
         var panel = new SearchPanelController([new FakeSource(results)], history: history, historyCategory: "Son", removeLabel: "Sil");
         panel.Open();

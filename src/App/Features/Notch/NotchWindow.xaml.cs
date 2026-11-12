@@ -255,7 +255,7 @@ public partial class NotchWindow : Window
     // Dosya seçici gibi diyaloglara sahip olabilmek için çentik geçici etkinleştirilir (kullanıcı az önce tıkladı,
     // Windows ön plana almaya izin verir); sahipli diyalog çentiğin üstünde açılır. Diyalog kapanıp pencere
     // etkinliğini kaybedince OnDeactivated odak çalmamayı geri getirir.
-    private Window? PrepareDialogOwner()
+    private NotchWindow? PrepareDialogOwner()
     {
         if (_hwnd == 0)
             return null;

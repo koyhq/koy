@@ -118,7 +118,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private static readonly Brush RingNormalBrush = Frozen(0x4A, 0xDE, 0x80);
     private static readonly Brush RingLowBrush = Frozen(0xFB, 0x71, 0x85);
 
-    private static Brush Frozen(byte r, byte g, byte b)
+    private static SolidColorBrush Frozen(byte r, byte g, byte b)
     {
         var brush = new SolidColorBrush(Color.FromRgb(r, g, b));
         brush.Freeze();
@@ -697,7 +697,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private static Color ReadSurfaceColor() =>
         System.Windows.Application.Current?.TryFindResource(SurfaceResourceKey) is SolidColorBrush b ? b.Color : DefaultSurfaceColor;
 
-    private static Brush FrozenArgb(byte a, byte r, byte g, byte b)
+    private static SolidColorBrush FrozenArgb(byte a, byte r, byte g, byte b)
     {
         var brush = new SolidColorBrush(Color.FromArgb(a, r, g, b));
         brush.Freeze();
@@ -843,7 +843,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         Home.Dispose();
     }
 
-    private static IReadOnlyList<double> GenerateWaveformBars(int count)
+    private static List<double> GenerateWaveformBars(int count)
     {
         var clamped = NotchVisualizer.ClampBarCount(count);
         var pattern = new double[] { 6, 12, 14, 10, 5, 11, 14, 8, 6, 13, 9, 5, 12, 14, 7, 5 };

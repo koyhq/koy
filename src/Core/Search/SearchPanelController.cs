@@ -361,7 +361,7 @@ public sealed class SearchPanelController : IDisposable
         _history?.Add(_query.Raw);
     }
 
-    private IReadOnlyList<SearchResult> BuildHistoryRows()
+    private List<SearchResult> BuildHistoryRows()
     {
         var entries = _history?.Entries ?? [];
         return entries.Take(SearchHistory.VisibleEntries).Select((entry, index) =>

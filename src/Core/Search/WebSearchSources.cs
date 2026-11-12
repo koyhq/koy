@@ -45,7 +45,7 @@ public sealed class WebShortcutSearchSource(
         if (defaultBrowser?.Invoke() is { } browser && DefaultBrowserSearch.SearchCommand(browser, query.Raw) is { } command)
             return Row("browser", browser.Name, query.Raw, () => shell.RunWithArguments(command.Executable, command.Arguments));
 
-        var shortcut = shortcuts.FirstOrDefault(s => s.Key == "ddg") ?? shortcuts.FirstOrDefault();
+        var shortcut = shortcuts.FirstOrDefault(s => s.Key == "ddg") ?? (shortcuts.Count > 0 ? shortcuts[0] : null);
         return shortcut is null ? null : Row(shortcut, query.Raw);
     }
 

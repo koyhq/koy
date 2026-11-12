@@ -118,7 +118,7 @@ public sealed class ShellCommandSearchSource(ISearchShell shell, Func<string, st
     private bool HasExecutableExtension(string command) =>
         Extensions().Any(e => command.EndsWith(e, StringComparison.OrdinalIgnoreCase));
 
-    private IReadOnlyList<string> Extensions()
+    private string[] Extensions()
     {
         var value = shell.GetEnvironmentVariable("PATHEXT");
         return string.IsNullOrWhiteSpace(value) ? DefaultExtensions : value.Split(';', StringSplitOptions.RemoveEmptyEntries);
@@ -386,7 +386,7 @@ public sealed class FileSearchSource(IFileSearchService service, ISearchShell sh
         };
     }
 
-    private IEnumerable<SearchResult> Build(SearchQuery query, IReadOnlyList<IndexedItem> items) => items
+    private List<SearchResult> Build(SearchQuery query, IReadOnlyList<IndexedItem> items) => items
         .GroupBy(item => CategoryKey(item.Path, item.IsFolder))
         .SelectMany(group => group.Take(PerCategory).Select(item => ToResult(query, item, t(group.Key))))
         .ToList();

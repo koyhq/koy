@@ -15,6 +15,19 @@
     <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
   </PropertyGroup>
 
+  <!--
+    Katı derleme (issue #138): uyarı hata sayılır, önerilen .NET analizcileri ve kod biçimi kuralları derlemede çalışır.
+    Kural seçimi ve susturmalar kökteki .editorconfig'te.
+    NU1901–NU1904 (paket güvenlik bildirimi) hata sayılmaz: dış veritabanına bağlıdır, kod değişmeden derlemeyi
+    kırabilir. Görünür kalırlar; CI "dotnet list package" ile açıkları ayrıca denetler.
+  -->
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
   <!-- Tekrarlanabilir derleme: PDB ve assembly içine yerel dizin yolu (C:\Users\...) gömülmesin. -->
   <PropertyGroup>
     <Deterministic>true</Deterministic>

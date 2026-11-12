@@ -14,3 +14,30 @@ indent_size = 2
 [*.cs]
 csharp_style_namespace_declarations = file_scoped:warning
 dotnet_sort_system_directives_first = true
+
+# --- Analizci susturmaları (issue #138) ---
+# Sinyal yüksek kalsın diye yalnız gürültülü kurallar kapatılır; doğruluk, dispose, platform ve performans kuralları hata olarak kalır.
+# İsimlendirme: alan dili (Event, Collection, Stop, Next…) ve WPF'in temel sınıf parametre adları bilinçli.
+dotnet_diagnostic.CA1708.severity = none
+dotnet_diagnostic.CA1711.severity = none
+dotnet_diagnostic.CA1716.severity = none
+dotnet_diagnostic.CA1720.severity = none
+dotnet_diagnostic.CA1725.severity = none
+# CompositeFormat önbelleği: biçimler çoğunlukla resx metni ve arayüz yolunda, kazanç yok, okunurluk düşer.
+dotnet_diagnostic.CA1863.severity = none
+# Kültür kuralları ayrı PR'da açılıp düzeltilecek (her çağrıda CurrentCulture / InvariantCulture kararı gerekir).
+dotnet_diagnostic.CA1304.severity = none
+dotnet_diagnostic.CA1305.severity = none
+dotnet_diagnostic.CA1310.severity = none
+
+[tests/**.cs]
+# xUnit test adları alt çizgiyle okunur cümle olarak yazılır.
+dotnet_diagnostic.CA1707.severity = none
+# Testte sabit dizi argümanı, genel Exception ile sahte hata ve mühürlü fikstürde SuppressFinalize anlamsız.
+dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.CA2201.severity = none
+dotnet_diagnostic.CA1816.severity = none
+
+[src/App/**ViewModel.cs]
+# [RelayCommand] metotları ve XAML'in bağlandığı özellikler örnek üyesi olmak zorunda; static yapmak bağlamayı bozar.
+dotnet_diagnostic.CA1822.severity = none

@@ -51,6 +51,7 @@ public static class Program
     }
 }
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001", Justification = "Süreç boyu yaşar; servisler OnExit'te sırayla kapatılır.")]
 public partial class App : Application
 {
     private readonly List<IFeature> _features = [];

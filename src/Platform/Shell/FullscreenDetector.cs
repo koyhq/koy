@@ -38,13 +38,13 @@ public sealed class FullscreenDetector : IFullscreenDetector
         var decided = false;
 
         // EnumWindows üstten alta (z sırası) gezer; hedef monitördeki ilk gerçek pencere karar verir.
-        PInvoke.EnumWindows((hwnd, _) =>
+        PInvoke.EnumWindows((hwnd, lParam) =>
         {
             if (!PInvoke.IsWindowVisible(hwnd) || PInvoke.IsIconic(hwnd) || IgnoredHandles.Contains(hwnd.Value) || hwnd.Value == NotchHandle)
                 return true;
 
             uint pid = 0;
-            PInvoke.GetWindowThreadProcessId(hwnd, &pid);
+            _ = PInvoke.GetWindowThreadProcessId(hwnd, &pid);
             if (pid == ownPid)
                 return true;
 
@@ -186,7 +186,7 @@ public sealed class FullscreenDetector : IFullscreenDetector
         }
 
         uint pid = 0;
-        PInvoke.GetWindowThreadProcessId(hwnd, &pid);
+        _ = PInvoke.GetWindowThreadProcessId(hwnd, &pid);
         if (pid != 0)
         {
             try

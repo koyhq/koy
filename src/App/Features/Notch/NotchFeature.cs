@@ -47,6 +47,7 @@ using Koy.Platform.Weather;
 
 namespace Koy.App.Features.Notch;
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001", Justification = "Kaynaklar IFeature.Stop'ta bırakılır (AGENTS.md #12).")]
 public sealed class NotchFeature(AppSettings settings, SharedServices services) : IFeature
 {
     private sealed class NotchWindowState : IDisposable

@@ -115,7 +115,7 @@ public class TrayMessageParserTests
         // Başka süreçler Koy'un penceresine her türlü veriyi gönderebilir: hiçbir uzunluk istisna fırlatmamalı.
         var valid = BuildShellTrayData(message: 0, hwnd: 1, id: 1, flags: 0x2F, tip: "X");
         for (var length = 0; length <= valid.Length; length++)
-            TrayMessageParser.TryParse(valid.AsSpan(0, length), out _);
+            _ = TrayMessageParser.TryParse(valid.AsSpan(0, length), out _);
 
         var random = new Random(1234);
         var garbage = new byte[2048];
@@ -124,7 +124,7 @@ public class TrayMessageParserTests
             random.NextBytes(garbage);
             if (round % 2 == 0)
                 BinaryPrimitives.WriteInt32LittleEndian(garbage, TrayMessageParser.Signature);
-            TrayMessageParser.TryParse(garbage, out _);
+            _ = TrayMessageParser.TryParse(garbage, out _);
         }
     }
 

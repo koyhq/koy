@@ -231,7 +231,7 @@ public sealed class WindowTracker : IWindowTracker
         var windows = new List<OpenWindowInfo>();
 
         var seenHandles = new HashSet<nint>();
-        PInvoke.EnumWindows((HWND hwnd, LPARAM _) =>
+        PInvoke.EnumWindows((HWND hwnd, LPARAM lParam) =>
         {
             if (hwnd.IsNull)
                 return true;
@@ -260,7 +260,7 @@ public sealed class WindowTracker : IWindowTracker
 
             // Süreç bilgisi
             uint pid = 0;
-            PInvoke.GetWindowThreadProcessId(hwnd, &pid);
+            _ = PInvoke.GetWindowThreadProcessId(hwnd, &pid);
 
             // Mağaza (UWP) penceresinin sahibi ApplicationFrameHost.exe'dir ve bütün Mağaza uygulamalarına ortaktır.
             // Gerçek uygulama sürecini çocuk CoreWindow'dan bul; bulunamazsa 0 (askıdaki uygulama): "Sonlandır" çalışmaz
@@ -372,7 +372,7 @@ public sealed class WindowTracker : IWindowTracker
         // Koy'un kendi pencerelerinin (dock, açılır pencereler, önizleme kutucuğu, thumbnail host, menüler)
         // olayları yoksayılır; aksi halde popup açılışında döngüsel tetiklenme (flicker) ve kilitlenme oluşur.
         uint pid = 0;
-        unsafe { PInvoke.GetWindowThreadProcessId(hwnd, &pid); }
+        unsafe { _ = PInvoke.GetWindowThreadProcessId(hwnd, &pid); }
         if (pid == (uint)Environment.ProcessId)
             return;
 
@@ -506,10 +506,10 @@ public sealed class WindowTracker : IWindowTracker
     private static unsafe uint ResolveUwpProcessId(HWND frameWindow, uint framePid)
     {
         uint result = 0;
-        PInvoke.EnumChildWindows(frameWindow, (HWND child, LPARAM _) =>
+        PInvoke.EnumChildWindows(frameWindow, (HWND child, LPARAM lParam) =>
         {
             uint childPid = 0;
-            PInvoke.GetWindowThreadProcessId(child, &childPid);
+            _ = PInvoke.GetWindowThreadProcessId(child, &childPid);
             if (childPid != 0 && childPid != framePid)
             {
                 result = childPid;

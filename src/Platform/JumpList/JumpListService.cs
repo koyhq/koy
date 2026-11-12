@@ -203,7 +203,7 @@ public sealed class JumpListService : IJumpListService
     }
 
     /// <summary>Kategori öğelerini sırayla çözer; <paramref name="cap"/> girdiye ulaşınca kalanını hiç açmaz.</summary>
-    private static IReadOnlyList<JumpListEntry> ResolveLinks(IReadOnlyList<byte[]> items, int cap)
+    private static List<JumpListEntry> ResolveLinks(IReadOnlyList<byte[]> items, int cap)
     {
         var entries = new List<JumpListEntry>();
         var count = 0;
@@ -225,7 +225,7 @@ public sealed class JumpListService : IJumpListService
     }
 
     /// <summary>IApplicationDocumentLists ile bir AppID'nin son ya da sık kullanılanları.</summary>
-    private static unsafe IReadOnlyList<JumpListEntry> ReadDocumentList(string appId, APPDOCLISTTYPE type, int max)
+    private static unsafe List<JumpListEntry> ReadDocumentList(string appId, APPDOCLISTTYPE type, int max)
     {
         var entries = new List<JumpListEntry>();
         object? lists = null;

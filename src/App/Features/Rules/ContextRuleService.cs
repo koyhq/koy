@@ -222,7 +222,7 @@ public sealed class ContextRuleService
     }
 
     // Etkin kuralların profillerinin dokunduğu bölümlerin birleşimi: kuraldan kurala geçişte de hepsi geri alınabilir.
-    private IReadOnlyList<ProfileSection> SectionsTouchedByRules() =>
+    private List<ProfileSection> SectionsTouchedByRules() =>
         _rules.Where(r => r.Enabled)
             .Select(r => _profiles.Find(r.ProfileId))
             .Where(p => p is not null)

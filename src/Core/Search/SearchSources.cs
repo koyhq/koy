@@ -6,6 +6,7 @@ using Koy.Core.Shell;
 namespace Koy.Core.Search;
 
 /// <summary>Kurulu uygulamalar. Liste ~1 sn sürdüğü için panel açılınca arka planda tazelenir, eski kopya hemen kullanılır.</summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001", Justification = "_loading'i LoadAsync bitince kendisi atar.")]
 public sealed class AppSearchSource(
     IInstalledAppsService service,
     Action<InstalledApp> launch,
@@ -13,6 +14,9 @@ public sealed class AppSearchSource(
     Func<InstalledApp, byte[]?>? loadIcon = null) : SearchSource("apps", t("SearchCatApps"))
 {
     private const double SecondaryKeyWeight = 0.6;
+
+    // Başlat menüsündeki belge kısayolları (benioku, yardım) uygulama sayılmaz.
+    private static readonly string[] DocumentExtensions = [".txt", ".pdf", ".htm", ".html", ".chm", ".rtf"];
 
     private sealed record Entry(InstalledApp App, string Name, string Key);
 
@@ -64,7 +68,7 @@ public sealed class AppSearchSource(
         if (name.Contains("uninstall", StringComparison.Ordinal) || name.Contains("kaldir", StringComparison.Ordinal))
             return false;
 
-        return !new[] { ".txt", ".pdf", ".htm", ".html", ".chm", ".rtf" }.Any(e => app.Id.EndsWith(e, StringComparison.OrdinalIgnoreCase));
+        return !DocumentExtensions.Any(e => app.Id.EndsWith(e, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
@@ -108,6 +112,11 @@ public sealed class AppSearchSource(
         catch (Exception ex)
         {
             CrashLog.Write("Uygulama listesi", ex);
+        }
+        finally
+        {
+            // Kaynağın sahibi yükleme görevidir: Release yalnız iptal eder, yükleme hâlâ token'ı kullanıyor olabilir.
+            loading.Dispose();
         }
     }
 }
@@ -285,7 +294,7 @@ public sealed class DateTimeSearchSource(ISearchShell shell, Func<string, string
             yield return Row("time", _now().ToString("T", _culture));
     }
 
-    private IEnumerable<string> Keywords(string key) => t(key).Split(';', StringSplitOptions.RemoveEmptyEntries).Select(SearchText.Fold).ToList();
+    private List<string> Keywords(string key) => t(key).Split(';', StringSplitOptions.RemoveEmptyEntries).Select(SearchText.Fold).ToList();
 
     private SearchResult Row(string id, string text) => new("datetime:" + id, Name, text, () => shell.CopyText(text))
     {
@@ -327,7 +336,7 @@ public sealed class HelpSearchSource(Func<IReadOnlyList<ISearchSource>> sources,
         }).ToList();
     }
 
-    private IEnumerable<SearchResult> Extended(ISearchSource source) => source.Syntaxes.Select((syntax, index) =>
+    private static IEnumerable<SearchResult> Extended(ISearchSource source) => source.Syntaxes.Select((syntax, index) =>
         new SearchResult("help:" + source.Id + ":" + index, source.Name, syntax.Example, () => { })
         {
             Subtitle = syntax.Description,

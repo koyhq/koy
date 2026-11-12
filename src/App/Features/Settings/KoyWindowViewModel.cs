@@ -869,7 +869,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     private static IReadOnlyList<TimeZoneOption>? _secondTimeZoneOptions;
 
-    private static IReadOnlyList<TimeZoneOption> BuildTimeZoneOptions()
+    private static List<TimeZoneOption> BuildTimeZoneOptions()
     {
         var list = new List<TimeZoneOption> { new("", Koy.App.Resources.Strings.Get("ClockSecondTimeZoneNone")) };
         list.AddRange(TimeZoneInfo.GetSystemTimeZones().Select(z => new TimeZoneOption(z.Id, z.DisplayName)));

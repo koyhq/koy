@@ -157,7 +157,7 @@ public sealed partial class ProfilesViewModel : ObservableObject
         return names.Count == 0 ? Strings.Get("ProfileCorrupt") : string.Join(", ", names);
     }
 
-    private IReadOnlyList<ProfileSection> SelectedSections() =>
+    private List<ProfileSection> SelectedSections() =>
         Sections.Where(s => s.IsSelected).Select(s => s.Section).ToList();
 
     private void Report(string key, bool error = false, params object[] args)

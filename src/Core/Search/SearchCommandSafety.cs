@@ -31,7 +31,7 @@ public static class SearchCommandSafety
             {
                 if (c == '\r' && i + 1 < text.Length && text[i + 1] == '\n')
                     i++;
-                result.Append(NewlineMark);
+                result.Append(NewlineMark.AsSpan());
             }
             else
             {
