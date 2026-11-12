@@ -59,6 +59,25 @@ public partial class DockItemsStrip : UserControl
         }
     }
 
+    private void OnExtraLeftClick(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: DockExtraViewModel { IsInteractive: true } extra })
+        {
+            ViewModel?.ActivateExtra(extra);
+            e.Handled = true;
+        }
+    }
+
+    private void OnExtraRightClick(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        if (sender is FrameworkElement { DataContext: DockExtraViewModel extra } element && ViewModel is { } dock)
+        {
+            dock.ClosePreviewNow();
+            DockContextMenuManager.Open(DockContextMenuManager.CreateExtraContextMenu(dock, extra), element);
+        }
+    }
+
     private void OnFolderRightClick(object sender, MouseButtonEventArgs e)
     {
         if (sender is FrameworkElement { DataContext: DockFolderViewModel folder } element)

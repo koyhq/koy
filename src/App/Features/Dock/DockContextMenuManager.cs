@@ -109,6 +109,29 @@ public static class DockContextMenuManager
         return menu;
     }
 
+    /// <summary>Ek öğenin (ayırıcı, boşluk, saat, çöp kutusu, özel düğme) sağ tık menüsü: sola/sağa taşı, kaldır.</summary>
+    public static ContextMenu CreateExtraContextMenu(DockViewModel dock, DockExtraViewModel extra)
+    {
+        var menu = new ContextMenu();
+
+        void Add(string key, Action action)
+        {
+            var item = new MenuItem { Header = Resources.Strings.Get(key) };
+            item.Click += (_, _) =>
+            {
+                CloseActive();
+                action();
+            };
+            menu.Items.Add(item);
+        }
+
+        Add("DockItemMoveLeft", () => dock.MoveExtra(extra, -1));
+        Add("DockItemMoveRight", () => dock.MoveExtra(extra, 1));
+        menu.Items.Add(new Separator());
+        Add("DockItemRemove", () => dock.RemoveExtra(extra));
+        return menu;
+    }
+
     /// <summary>
     /// Klasörün sağ tık menüsünü açar.
     /// </summary>

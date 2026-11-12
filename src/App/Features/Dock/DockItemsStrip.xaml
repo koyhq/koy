@@ -193,6 +193,91 @@
                 </Border>
             </DataTemplate>
 
+            <!-- Ek öğe şablonu: ayırıcı, boşluk, saat, çöp kutusu, özel düğme. Yalnız ayarlardan eklenirse çizilir. -->
+            <DataTemplate DataType="{x:Type local:DockExtraViewModel}">
+                <Border x:Name="ExtraContainer"
+                        RenderTransformOrigin="0.5,0.5"
+                        Height="{Binding ItemSize}"
+                        Margin="1,0"
+                        CornerRadius="10"
+                        Background="Transparent"
+                        ToolTip="{Binding Title}"
+                        MouseLeftButtonUp="OnExtraLeftClick"
+                        MouseRightButtonUp="OnExtraRightClick"
+                        MouseEnter="OnItemMouseEnter"
+                        MouseLeave="OnItemMouseLeave"
+                        ContextMenuOpening="OnItemContextMenuOpening">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Width" Value="{Binding ItemSize}"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSeparator}" Value="True">
+                                    <Setter Property="Width" Value="9"/>
+                                    <Setter Property="Cursor" Value="Arrow"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsSpacer}" Value="True">
+                                    <Setter Property="Width" Value="20"/>
+                                    <Setter Property="Cursor" Value="Arrow"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsClock}" Value="True">
+                                    <Setter Property="Width" Value="72"/>
+                                </DataTrigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#22FFFFFF"/>
+                                </Trigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsInteractive}" Value="False"/>
+                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Background" Value="Transparent"/>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Border.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}"/>
+                            <TranslateTransform X="{Binding OffsetX}"/>
+                        </TransformGroup>
+                    </Border.RenderTransform>
+
+                    <Grid>
+                        <!-- Ayırıcı: ince dikey çizgi -->
+                        <Border Width="1"
+                                Margin="0,8"
+                                HorizontalAlignment="Center"
+                                Background="#33FFFFFF"
+                                Visibility="{Binding IsSeparator, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
+
+                        <!-- Çöp kutusu ve özel düğme: sabit simge -->
+                        <TextBlock Text="{Binding Glyph}"
+                                   FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                   FontSize="{Binding IconSize}"
+                                   Foreground="#E6FFFFFF"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Visibility="{Binding IsGlyphButton, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
+
+                        <!-- Saat: saat ve tarih -->
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Visibility="{Binding IsClock, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                            <TextBlock Text="{Binding TimeText}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Foreground="#F2FFFFFF"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding DateText}"
+                                       FontSize="10"
+                                       Foreground="#B3FFFFFF"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </DataTemplate>
+
             <!-- Klasör Kapsayıcısı Şablonu -->
             <DataTemplate DataType="{x:Type local:DockFolderViewModel}">
                 <Grid>

@@ -5,6 +5,7 @@ using Koy.Core.Diagnostics;
 using Koy.Core.Display;
 using Koy.Core.Power;
 using Koy.Core.Dock;
+using Koy.Core.Dock.Items;
 using Koy.Core.Settings;
 using Koy.Core.Shell;
 using Koy.Core.StartMenu;
@@ -178,6 +179,19 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         store.Save(updated);
         if (inMemorySettings is not null)
             inMemorySettings.DockItems.PinnedOrder = [.. order];
+    }
+
+    /// <summary>
+    /// Dock öğe dizisini (ayırıcı, boşluk, saat, çöp kutusu, özel düğme dahil) ayar dosyasına yazar. Boş liste,
+    /// dock'un PinnedOrder'dan türetilmesi demektir. Koy penceresinin kaydettiği öteki ayarlar ezilmez.
+    /// </summary>
+    public static void SaveItems(IReadOnlyList<DockItemEntry> items, AppSettings? inMemorySettings = null)
+    {
+        var store = new SettingsStore(SettingsStore.DefaultPath);
+        var current = store.Load();
+        store.Save(current with { DockItems = current.DockItems with { Items = [.. items] } });
+        if (inMemorySettings is not null)
+            inMemorySettings.DockItems.Items = [.. items];
     }
 
     private void SavePinnedOrder(IReadOnlyList<string> order) =>
