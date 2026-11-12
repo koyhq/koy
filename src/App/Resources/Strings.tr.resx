@@ -1263,6 +1263,39 @@
   <data name="ReduceMotionDesc" xml:space="preserve">
     <value>Windows'ta animasyonlar kapalıysa Koy da hareketi kapatır.</value>
   </data>
+  <data name="FontSectionTitle" xml:space="preserve">
+    <value>Yazı</value>
+  </data>
+  <data name="FontFamilyLabel" xml:space="preserve">
+    <value>Yazı tipi</value>
+  </data>
+  <data name="ClockFontLabel" xml:space="preserve">
+    <value>Saat yazı tipi</value>
+  </data>
+  <data name="FontSizeLabel" xml:space="preserve">
+    <value>Yazı boyu</value>
+  </data>
+  <data name="FontWeightLabel" xml:space="preserve">
+    <value>Yazı kalınlığı</value>
+  </data>
+  <data name="FontWeightNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="FontWeightMedium" xml:space="preserve">
+    <value>Orta</value>
+  </data>
+  <data name="FontWeightBold" xml:space="preserve">
+    <value>Kalın</value>
+  </data>
+  <data name="UiScaleLabel" xml:space="preserve">
+    <value>Koy ölçeği</value>
+  </data>
+  <data name="UiScaleDesc" xml:space="preserve">
+    <value>Bu pencere ve sağ alt menünün boyu. Çentik boyutu değişmez.</value>
+  </data>
+  <data name="FontDefault" xml:space="preserve">
+    <value>Varsayılan</value>
+  </data>
   <data name="AccentBlue" xml:space="preserve">
     <value>Mavi</value>
   </data>

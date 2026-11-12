@@ -40,6 +40,29 @@ public partial class KoyWindow : Window
         InitializeComponent();
         DataContext = viewModel ?? new KoyWindowViewModel();
         ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+        // Tek örnek, hiç yok edilmez: olay aboneliği sızıntı yapmaz.
+        ThemeManager.Applied += ApplyUiScale;
+        ApplyUiScale();
+    }
+
+    private const double BaseWidth = 880, BaseHeight = 680, BaseMinHeight = 600;
+
+    /// <summary>
+    /// Koy ölçeği (issue #71): kök öğeye LayoutTransform, pencere boyu ölçekle; çalışma alanına sığmıyorsa sığacak
+    /// kadar küçültülür (FontScalePolicy.FitScale). Çentik tuvali sabit kalır (AGENTS #13), ölçek yalnız bu pencerede.
+    /// </summary>
+    private void ApplyUiScale()
+    {
+        var percent = ThemeManager.LastSettings?.Appearance.UiScalePercent ?? Koy.Core.Appearance.FontScalePolicy.DefaultUiScale;
+        var work = SystemParameters.WorkArea;
+        var scale = Koy.Core.Appearance.FontScalePolicy.FitScale(percent, BaseWidth, BaseHeight, work.Width, work.Height);
+        if (Content is FrameworkElement root)
+            root.LayoutTransform = scale == 1.0 ? System.Windows.Media.Transform.Identity : new System.Windows.Media.ScaleTransform(scale, scale);
+
+        MinWidth = BaseWidth * scale;
+        MinHeight = BaseMinHeight * scale;
+        Width = BaseWidth * scale;
+        Height = BaseHeight * scale;
     }
 
     /// <summary>Sayfa değişince yeni sayfa kısa bir solmayla girer; hareket kapalıysa anında geçer.</summary>

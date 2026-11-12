@@ -1263,6 +1263,39 @@
   <data name="ReduceMotionDesc" xml:space="preserve">
     <value>If animations are off in Windows, Koy turns motion off too.</value>
   </data>
+  <data name="FontSectionTitle" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="FontFamilyLabel" xml:space="preserve">
+    <value>Font</value>
+  </data>
+  <data name="ClockFontLabel" xml:space="preserve">
+    <value>Clock font</value>
+  </data>
+  <data name="FontSizeLabel" xml:space="preserve">
+    <value>Text size</value>
+  </data>
+  <data name="FontWeightLabel" xml:space="preserve">
+    <value>Text weight</value>
+  </data>
+  <data name="FontWeightNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="FontWeightMedium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="FontWeightBold" xml:space="preserve">
+    <value>Bold</value>
+  </data>
+  <data name="UiScaleLabel" xml:space="preserve">
+    <value>Koy scale</value>
+  </data>
+  <data name="UiScaleDesc" xml:space="preserve">
+    <value>Size of this window and the tray menu. The notch keeps its size.</value>
+  </data>
+  <data name="FontDefault" xml:space="preserve">
+    <value>Default</value>
+  </data>
   <data name="AccentBlue" xml:space="preserve">
     <value>Blue</value>
   </data>

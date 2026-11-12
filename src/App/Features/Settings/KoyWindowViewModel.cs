@@ -309,6 +309,35 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private bool _respectReduceMotion = true;
 
+    // --- YAZI VE KOY ÖLÇEĞİ (issue #71) ---
+    /// <summary>Arayüz yazı tipi; boş = Koy varsayılanı.</summary>
+    [ObservableProperty]
+    private string _uiFontFamily = "";
+
+    /// <summary>Saat yazı tipi; boş = arayüz yazı tipi.</summary>
+    [ObservableProperty]
+    private string _clockFontFamily = "";
+
+    [ObservableProperty]
+    private double _baseFontSize = FontScalePolicy.DefaultBaseFontSize;
+
+    [ObservableProperty]
+    private int _uiFontWeight = FontScalePolicy.DefaultFontWeight;
+
+    [ObservableProperty]
+    private int _uiScalePercent = FontScalePolicy.DefaultUiScale;
+
+    public IReadOnlyList<double> BaseFontSizeOptions { get; } = [10, 11, 12, 13, 14, 15, 16, 17, 18];
+
+    public IReadOnlyList<int> UiScaleOptions { get; } = [80, 90, 100, 110, 120, 130, 140, 150];
+
+    private IReadOnlyList<FontOption>? _fontOptions;
+
+    /// <summary>Yazı tipi listesi: önce "Varsayılan", sonra yüklü yazı tipleri. Yalnız liste ilk istendiğinde taranır.</summary>
+    public IReadOnlyList<FontOption> FontOptions => _fontOptions ??=
+        [new FontOption("", Strings.Get("FontDefault"), new System.Windows.Media.FontFamily(FontScalePolicy.DefaultFontFamily)),
+         .. ThemeManager.InstalledFonts().Select(f => new FontOption(f, f, new System.Windows.Media.FontFamily(f)))];
+
     // --- KISAYOLLAR ---
     [ObservableProperty]
     private WheelAction _wheelAction;
@@ -534,6 +563,11 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             AnimationSpeed = s.Appearance.AnimationSpeed;
             RespectReduceMotion = s.Appearance.RespectReduceMotion;
             BatterySaverReduceMotion = s.Appearance.BatterySaverReduceMotion;
+            UiFontFamily = s.Appearance.FontFamily ?? "";
+            ClockFontFamily = s.Appearance.ClockFontFamily ?? "";
+            BaseFontSize = FontScalePolicy.ClampBaseFontSize(s.Appearance.BaseFontSize);
+            UiFontWeight = FontScalePolicy.ClampFontWeight(s.Appearance.FontWeight);
+            UiScalePercent = FontScalePolicy.ClampUiScale(s.Appearance.UiScalePercent);
             WeatherRefreshInterval = s.Weather.RefreshInterval;
             PomodoroWorkMinutes = s.Focus.PomodoroWorkMinutes;
             PomodoroShortBreakMinutes = s.Focus.PomodoroShortBreakMinutes;
@@ -676,8 +710,10 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
         if (e.PropertyName is nameof(Theme) or nameof(AccentColor) or nameof(UseWindowsAccent) or nameof(Material)
             or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
-            or nameof(CornerRadius) or nameof(AnimationSpeed) or nameof(RespectReduceMotion) or nameof(BatterySaverReduceMotion))
+            or nameof(CornerRadius) or nameof(AnimationSpeed) or nameof(RespectReduceMotion) or nameof(BatterySaverReduceMotion)
+            or nameof(UiFontFamily) or nameof(ClockFontFamily) or nameof(BaseFontSize) or nameof(UiFontWeight) or nameof(UiScalePercent))
         {
+            // Yazı ve ölçek de kaynaklardan (DynamicResource) ve ThemeManager.Applied'dan canlı uygulanır.
             // Görünüm ayarları açık pencerelere anında yansır.
             ThemeManager.Apply(app, _store.Load());
         }
@@ -828,7 +864,12 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 CornerRadius = CornerRadius,
                 AnimationSpeed = AnimationSpeed,
                 RespectReduceMotion = RespectReduceMotion,
-                BatterySaverReduceMotion = BatterySaverReduceMotion
+                BatterySaverReduceMotion = BatterySaverReduceMotion,
+                FontFamily = UiFontFamily ?? "",
+                ClockFontFamily = ClockFontFamily ?? "",
+                BaseFontSize = FontScalePolicy.ClampBaseFontSize(BaseFontSize),
+                FontWeight = FontScalePolicy.ClampFontWeight(UiFontWeight),
+                UiScalePercent = FontScalePolicy.ClampUiScale(UiScalePercent)
             },
             Weather = current.Weather with
             {
