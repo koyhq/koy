@@ -92,6 +92,10 @@ public class ShortcutDefaultsTests
         var seen = new HashSet<Hotkey>();
         foreach (var action in ShortcutBindings.All)
         {
+            // Boş varsayılan = atanmamış (kullanıcı kendisi bağlar); yalnız dolu olanlar çözülür ve tekil olmalı.
+            if (string.IsNullOrEmpty(ShortcutBindings.DefaultText(action)))
+                continue;
+
             Assert.True(Hotkey.TryParse(ShortcutBindings.DefaultText(action), out var hotkey), action.ToString());
             Assert.True(seen.Add(hotkey), $"{action} varsayılanı başka eylemle aynı");
             // Arama paneli proje sahibinin kararıyla Win+Shift+Q kullanır; sistem çakışması yine aşağıda denetlenir.
@@ -259,6 +263,10 @@ public class ShortcutManagerTests
         public void Dispose() => Disposed = true;
     }
 
+    /// <summary>Varsayılanı dolu (kayıt edilecek) eylem sayısı; boş varsayılanlar atanmamış gelir.</summary>
+    private static int DefaultBoundCount =>
+        ShortcutBindings.All.Count(a => ShortcutBindings.DefaultText(a).Length > 0);
+
     private static Dictionary<ShortcutAction, string> Desired(AppSettings? settings = null) =>
         ShortcutBindings.ReadAll(settings ?? new AppSettings());
 
@@ -270,8 +278,10 @@ public class ShortcutManagerTests
 
         var results = manager.Apply(Desired());
 
-        Assert.Equal(ShortcutBindings.All.Count, fake.Registered.Count);
-        Assert.All(results.Values, r => Assert.Equal(ShortcutStatus.Registered, r.Status));
+        var withDefault = ShortcutBindings.All.Where(a => ShortcutBindings.DefaultText(a).Length > 0).ToList();
+        Assert.Equal(withDefault.Count, fake.Registered.Count);
+        Assert.All(withDefault, a => Assert.Equal(ShortcutStatus.Registered, results[a].Status));
+        Assert.Equal(ShortcutStatus.Unassigned, results[ShortcutAction.OpenKoyWindow].Status);
     }
 
     [Fact]
@@ -287,7 +297,7 @@ public class ShortcutManagerTests
         Assert.Equal(ShortcutStatus.InUseByOtherApp, results[ShortcutAction.OpenShelf].Status);
         Assert.True(results[ShortcutAction.OpenShelf].IsError);
         Assert.Equal(ShortcutStatus.Registered, results[ShortcutAction.ToggleNotch].Status);
-        Assert.Equal(ShortcutBindings.All.Count - 1, fake.Registered.Count);
+        Assert.Equal(DefaultBoundCount - 1, fake.Registered.Count);
     }
 
     [Fact]
@@ -301,7 +311,7 @@ public class ShortcutManagerTests
 
         Assert.Equal(ShortcutStatus.Unassigned, results[ShortcutAction.OpenMenu].Status);
         Assert.False(results[ShortcutAction.OpenMenu].IsError);
-        Assert.Equal(ShortcutBindings.All.Count - 1, fake.Registered.Count);
+        Assert.Equal(DefaultBoundCount - 1, fake.Registered.Count);
     }
 
     [Fact]
@@ -356,7 +366,7 @@ public class ShortcutManagerTests
         manager.Apply(Desired(settings));
 
         Assert.Equal("unreg", fake.Log[0].Split(' ')[0]);
-        Assert.Equal(ShortcutBindings.All.Count, fake.Registered.Count);
+        Assert.Equal(DefaultBoundCount, fake.Registered.Count);
         Assert.Contains(new Hotkey(HotkeyModifiers.Control | HotkeyModifiers.Alt, 0x51), fake.Registered.Values);
         Assert.DoesNotContain(new Hotkey(HotkeyModifiers.Control | HotkeyModifiers.Alt, 0x4E), fake.Registered.Values);
     }

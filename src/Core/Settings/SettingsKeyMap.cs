@@ -51,6 +51,8 @@ public static class SettingsKeyMap
         Add("Shortcuts", "ShortcutToggleNotch=ToggleNotch", "ShortcutOpenShelf=OpenShelf", "ShortcutToggleDock=ToggleDock",
             "ShortcutOpenMenu=OpenMenu", "ShortcutPlayPause=PlayPause", "ShortcutOpenSearch=OpenSearch",
             "ShortcutOpenSearchClipboard=OpenSearchClipboard", "ShortcutVoiceCommand=VoiceCommand");
+        Add("HotCorners", "HotCornerTopLeft=TopLeft", "HotCornerTopRight=TopRight", "HotCornerBottomLeft=BottomLeft",
+            "HotCornerBottomRight=BottomRight", "HotCornerDwellMs=DwellMs", "HotCornerDisableInFullscreen=DisableInFullscreen");
         Add("Voice", "VoiceHarness=Harness", "VoiceClaudePermission=ClaudePermission", "VoiceModel=Model",
             "VoiceCustomCommand=CustomCommand", "VoiceWorkingDirectory=WorkingDirectory", "VoiceTimeoutSeconds=TimeoutSeconds");
         Add("Search", "SearchRetainPrior=RetainPrior", "SearchHistoryMode=HistoryMode", "SearchDisabledSources=DisabledSources",

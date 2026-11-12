@@ -28,6 +28,7 @@ public sealed record AppSettings
     public MusicSettings Music { get; set; } = new();
     public DisplaysSettings Displays { get; set; } = new();
     public ShortcutsSettings Shortcuts { get; set; } = new();
+    public HotCornersSettings HotCorners { get; set; } = new();
     public VoiceSettings Voice { get; set; } = new();
     public SearchSettings Search { get; set; } = new();
     public FocusSettings Focus { get; set; } = new();
@@ -51,6 +52,7 @@ public sealed record AppSettings
         Music ??= new();
         Displays ??= new();
         Shortcuts ??= new();
+        HotCorners ??= new();
         Voice ??= new();
         Search ??= new();
         Focus ??= new();

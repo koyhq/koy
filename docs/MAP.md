@@ -109,6 +109,15 @@ Görev çubuğu dosyalarını değiştirirken dikkat: gözcü `TaskbarService.cs
 
 Kısayollar sayfasındaki satır `ShortcutBindings.All` listesinden kendiliğinden çıkar. Sistem kısayolları `src/Core/Shortcuts/ShortcutManager.cs` içindeki `ShortcutConflicts` ile elenir.
 
+## Ekran köşesi eylemi eklemek
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Input/CornerActions.cs` | `CornerAction` değeri ve `ToInputAction` eşlemesi; bekleme durumu `HotCornerTracker`, koordinat kararı `HotCornerMath` |
+| Core | `src/Core/Settings/SettingsSections.cs` | `HotCornersSettings` (köşe başına eylem, bekleme, tam ekranda kapalı) |
+| App | `src/App/Features/Actions/HotCornerController.cs` | Yoklama (yalnız bir köşe bağlıyken, 120 ms), tam ekran ve tuş denetimi |
+| App | `src/App/App.xaml.cs` | `RunInputAction`: eylemin ne yapacağı |
+| App | `src/App/Features/Settings/Pages/KisayollarPage.xaml`, `HotCornersViewModel.cs` | Kısayollar sayfasındaki "Ekran köşeleri" bölümü |
+
 ## Tema, renk, ikon, hareket
 | Değişiklik | Dosya |
 |---|---|
