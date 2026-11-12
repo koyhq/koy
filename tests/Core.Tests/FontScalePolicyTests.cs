@@ -8,6 +8,34 @@ public class FontScalePolicyTests
     private static readonly string[] Installed = ["Segoe UI", "Cascadia Mono", "Consolas"];
 
     [Theory]
+    [InlineData(100, 1920, 1040, 1.0)]   // sığıyor
+    [InlineData(150, 1920, 1040, 1.5)]   // 1320x1020 sığıyor
+    [InlineData(150, 1366, 728, 1.07)]   // 728/680 ≈ 1,07'ye iner
+    [InlineData(120, 800, 600, 0.88)]    // 600/680 ≈ 0,88
+    [InlineData(120, 640, 480, 0.8)]     // çok küçük ekranda alt sınır
+    [InlineData(400, 3840, 2100, 1.5)]   // önce 150'ye kısılır
+    [InlineData(130, 0, 0, 1.3)]         // çalışma alanı bilinmiyor
+    public void Fit_scale_keeps_window_on_the_work_area(int percent, double workW, double workH, double expected)
+    {
+        Assert.Equal(expected, FontScalePolicy.FitScale(percent, 880, 680, workW, workH), 2);
+    }
+
+    [Fact]
+    public void Fit_scale_ignores_nan_work_area() =>
+        Assert.Equal(1.2, FontScalePolicy.FitScale(120, 880, 680, double.NaN, 900), 3);
+
+    [Theory]
+    [InlineData(13, 13, 13)]
+    [InlineData(20, 13, 20)]
+    [InlineData(12.5, 16, 15.5)]  // 12,5 x 16/13 = 15,38 → 15,5
+    [InlineData(20, 10, 15.5)]    // 15,38 → 15,5
+    [InlineData(12, 99, 16.5)]    // boyut 18'e kısılır: 12 x 18/13 = 16,6 → 16,5
+    public void Font_tokens_scale_with_base_size(double token, double baseSize, double expected)
+    {
+        Assert.Equal(expected, FontScalePolicy.ScaleFontToken(token, baseSize));
+    }
+
+    [Theory]
     [InlineData(50, 80)]
     [InlineData(80, 80)]
     [InlineData(100, 100)]

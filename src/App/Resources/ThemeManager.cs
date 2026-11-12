@@ -94,6 +94,8 @@ public static class ThemeManager
         var o = _overrides ??= new ResourceDictionary();
         o.Clear();
 
+        ApplyTypography(o, settings.Appearance);
+
         // Köşeler
         var r = CornerRadii.For(CornerSetting.Resolve(settings.Appearance.CornerRadius));
         o["KoyRadiusWindow"] = new CornerRadius(r.Window);
@@ -158,6 +160,54 @@ public static class ThemeManager
             o["KoyNotchMusicCard"] = new SolidColorBrush(Color.FromArgb(0x0F, 0xFF, 0xFF, 0xFF));
         }
     }
+
+    // Tokens.xaml'deki yazı ölçüleri (taban 13 DIP'te); taban boyu değişince oranla ölçeklenir.
+    private static readonly (string Key, double AtDefault)[] FontTokens =
+    [
+        ("KoyFontPageTitle", 20), ("KoyFontSubtitle", 12.5), ("KoyFontSection", 11.5), ("KoyFontRowTitle", 13.5),
+        ("KoyFontBody", 13), ("KoyFontControl", 12.5), ("KoyFontCaption", 12), ("KoyFontKey", 11.5),
+    ];
+
+    private static IReadOnlyList<string>? _installedFonts;
+
+    /// <summary>
+    /// Yazı tipi, saat yazı tipi, taban boyu ve kalınlık (issue #71). Varsayılanlarda hiçbir şey ezilmez; yüklü yazı tipi
+    /// listesi yalnız kullanıcı bir yazı tipi seçtiyse okunur (açılışta gereksiz yazı tipi taraması olmasın).
+    /// </summary>
+    private static void ApplyTypography(ResourceDictionary o, AppearanceSettings a)
+    {
+        var size = FontScalePolicy.ClampBaseFontSize(a.BaseFontSize);
+        if (Math.Abs(size - FontScalePolicy.DefaultBaseFontSize) > 0.01)
+        {
+            foreach (var (key, atDefault) in FontTokens)
+                o[key] = FontScalePolicy.ScaleFontToken(atDefault, size);
+        }
+
+        var weight = FontScalePolicy.ClampFontWeight(a.FontWeight);
+        if (weight != FontScalePolicy.DefaultFontWeight)
+            o["KoyFontWeightBase"] = FontWeight.FromOpenTypeWeight(weight);
+
+        if (string.IsNullOrWhiteSpace(a.FontFamily) && string.IsNullOrWhiteSpace(a.ClockFontFamily))
+            return;
+
+        var installed = InstalledFonts();
+        // Boş ya da kaldırılmış yazı tipi: ezme yok, Tokens varsayılanı kalır (fallback boş metin).
+        var ui = FontScalePolicy.ResolveFontFamily(a.FontFamily, installed, fallback: "");
+        if (ui.Length > 0)
+        {
+            o["KoyFont"] = new FontFamily(ui);
+            o["KoyNotchFont"] = new FontFamily(ui);
+        }
+
+        var clock = FontScalePolicy.ResolveClockFontFamily(a.ClockFontFamily, ui, installed);
+        if (clock.Length > 0)
+            o["KoyClockFont"] = new FontFamily(clock);
+    }
+
+    /// <summary>Yüklü yazı tipi adları (sıralı, bir kez okunur). Ayarlar sayfasının listesi de bunu kullanır.</summary>
+    public static IReadOnlyList<string> InstalledFonts() =>
+        _installedFonts ??= Fonts.SystemFontFamilies.Select(f => f.Source).Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.CurrentCultureIgnoreCase).ToList();
 
     private static SolidColorBrush Brush(string hex) => new((Color)ColorConverter.ConvertFromString(hex));
 

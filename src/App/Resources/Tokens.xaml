@@ -10,6 +10,11 @@
     <!-- Yazı tipi -->
     <FontFamily x:Key="KoyFont">Segoe UI Variable Text, Segoe UI, sans-serif</FontFamily>
     <FontFamily x:Key="KoyFontMono">Consolas</FontFamily>
+    <!-- Çentik metni ve çentik saati. Varsayılan, çentiğin bugüne kadar kullandığı WPF sistem yazı tipi (Segoe UI);
+         kullanıcı yazı tipi seçince ThemeManager ezer (issue #71). Saat boşsa arayüz yazı tipini izler. -->
+    <FontFamily x:Key="KoyNotchFont">Segoe UI</FontFamily>
+    <FontFamily x:Key="KoyClockFont">Segoe UI</FontFamily>
+    <FontWeight x:Key="KoyFontWeightBase">Normal</FontWeight>
 
     <!-- Yazı boyutları -->
     <sys:Double x:Key="KoyFontPageTitle">20</sys:Double>

@@ -75,4 +75,27 @@ public static class FontScalePolicy
     /// </summary>
     public static double ScaleDip(double dip, int uiScalePercent) =>
         double.IsFinite(dip) ? dip * ClampUiScale(uiScalePercent) / 100.0 : 0;
+
+    /// <summary>
+    /// Pencereye uygulanacak son ölçek (1 = %100): istenen yüzde sınırlanır, sonra pencerenin taban boyu çalışma alanına
+    /// sığmıyorsa sığacak kadar küçültülür (en az <see cref="MinUiScale"/>). Çalışma alanı bilinmiyorsa (0 ya da NaN)
+    /// yalnız sınırlanmış yüzde döner.
+    /// </summary>
+    public static double FitScale(int uiScalePercent, double baseWidth, double baseHeight, double workWidth, double workHeight)
+    {
+        var scale = ClampUiScale(uiScalePercent) / 100.0;
+        if (!(baseWidth > 0) || !(baseHeight > 0) || !(workWidth > 0) || !(workHeight > 0)
+            || !double.IsFinite(workWidth) || !double.IsFinite(workHeight))
+            return scale;
+
+        var fit = Math.Min(workWidth / baseWidth, workHeight / baseHeight);
+        return Math.Max(MinUiScale / 100.0, Math.Min(scale, fit));
+    }
+
+    /// <summary>Taban yazı boyuna göre bir yazı ölçüsünün yeni değeri (oran korunur, 0,5 DIP'e yuvarlanır).</summary>
+    public static double ScaleFontToken(double tokenAtDefault, double baseFontSize)
+    {
+        var size = ClampBaseFontSize(baseFontSize);
+        return Math.Round(tokenAtDefault * size / DefaultBaseFontSize * 2, MidpointRounding.AwayFromZero) / 2;
+    }
 }

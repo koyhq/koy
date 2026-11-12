@@ -22,6 +22,7 @@
         Width="640" Height="364"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="NoResize" Topmost="True" ShowInTaskbar="False" ShowActivated="False"
+        FontFamily="{DynamicResource KoyNotchFont}"
         AllowDrop="True"
         DragEnter="Notch_DragEnter"
         DragOver="Notch_DragOver"
@@ -244,6 +245,7 @@
             <TextBlock Grid.Column="0"
                        Visibility="{Binding ShowIdleClassicClock, Converter={StaticResource BoolToVis}}"
                        Text="{Binding ClockTime}"
+                       FontFamily="{DynamicResource KoyClockFont}"
                        Foreground="#F4F4F5"
                        FontSize="13"
                        FontWeight="SemiBold"
@@ -303,7 +305,7 @@
                   </Style.Triggers>
                 </Style>
               </StackPanel.Style>
-              <TextBlock Text="{Binding IdleDayTime}" Foreground="#F4F4F5" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+              <TextBlock Text="{Binding IdleDayTime}" FontFamily="{DynamicResource KoyClockFont}" Foreground="#F4F4F5" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
               <TextBlock Text="{Binding IdlePeekDate}" Foreground="#A1A1AA" FontSize="13" Margin="5,0,0,0" VerticalAlignment="Center"
                          Visibility="{Binding ShowIdlePeekDate, Converter={StaticResource BoolToVis}}" />
             </StackPanel>

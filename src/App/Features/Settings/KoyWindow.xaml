@@ -19,6 +19,7 @@
         Background="Transparent"
         ResizeMode="CanMinimize"
         FontFamily="{DynamicResource KoyFont}"
+        FontWeight="{DynamicResource KoyFontWeightBase}"
         Foreground="{DynamicResource KoyTextPrimary}"
         TextOptions.TextFormattingMode="Display">
 
