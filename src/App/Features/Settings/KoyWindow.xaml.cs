@@ -340,4 +340,90 @@ public partial class KoyWindow : Window
     private void NavDikte_Click(object sender, RoutedEventArgs e) => Navigate(6);
     private void NavPerformans_Click(object sender, RoutedEventArgs e) => Navigate(7);
     private void NavHakkinda_Click(object sender, RoutedEventArgs e) => Navigate(8);
+    private void NavGelismis_Click(object sender, RoutedEventArgs e) => Navigate(KoyWindowViewModel.AdvancedPageIndex);
+
+    // --- settings.json canlı yeniden yükleme (issue #69) ---
+    // İzleyici yalnız Koy penceresi görünürken vardır; gizlenince bırakılır. Olaylar kısa bir tek atımlık zamanlayıcıyla
+    // birleştirilir (kaydetme geçici dosya + taşıma ile birkaç olay üretir); zamanlayıcı her seferinde durur (AGENTS #5).
+
+    private System.IO.FileSystemWatcher? _settingsWatcher;
+    private DispatcherTimer? _reloadDebounce;
+
+    protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        if (e.Property == IsVisibleProperty)
+        {
+            if (IsVisible)
+                StartSettingsWatcher();
+            else
+                StopSettingsWatcher();
+        }
+    }
+
+    private void StartSettingsWatcher()
+    {
+        if (_settingsWatcher is not null)
+            return;
+
+        var path = ViewModel.SettingsFilePath;
+        var dir = System.IO.Path.GetDirectoryName(path);
+        if (string.IsNullOrEmpty(dir) || !System.IO.Directory.Exists(dir))
+            return;
+
+        try
+        {
+            _settingsWatcher = new System.IO.FileSystemWatcher(dir, System.IO.Path.GetFileName(path))
+            {
+                NotifyFilter = System.IO.NotifyFilters.LastWrite | System.IO.NotifyFilters.FileName | System.IO.NotifyFilters.Size,
+            };
+            _settingsWatcher.Changed += OnSettingsFileEvent;
+            _settingsWatcher.Created += OnSettingsFileEvent;
+            _settingsWatcher.Renamed += OnSettingsFileEvent;
+            _settingsWatcher.EnableRaisingEvents = true;
+        }
+        catch (Exception ex) when (ex is System.IO.IOException or ArgumentException or UnauthorizedAccessException)
+        {
+            // İzlenemiyorsa canlı yükleme yok; ayarlar penceresi normal çalışır.
+            _settingsWatcher?.Dispose();
+            _settingsWatcher = null;
+        }
+    }
+
+    private void StopSettingsWatcher()
+    {
+        _reloadDebounce?.Stop();
+        if (_settingsWatcher is null)
+            return;
+
+        _settingsWatcher.EnableRaisingEvents = false;
+        _settingsWatcher.Changed -= OnSettingsFileEvent;
+        _settingsWatcher.Created -= OnSettingsFileEvent;
+        _settingsWatcher.Renamed -= OnSettingsFileEvent;
+        _settingsWatcher.Dispose();
+        _settingsWatcher = null;
+    }
+
+    // İzleyicinin iş parçacığından gelir.
+    private void OnSettingsFileEvent(object sender, System.IO.FileSystemEventArgs e) =>
+        Dispatcher.BeginInvoke(() =>
+        {
+            if (_settingsWatcher is null)
+                return;
+
+            _reloadDebounce ??= CreateReloadDebounce();
+            _reloadDebounce.Stop();
+            _reloadDebounce.Start();
+        });
+
+    private DispatcherTimer CreateReloadDebounce()
+    {
+        var timer = new DispatcherTimer(DispatcherPriority.Background, Dispatcher) { Interval = TimeSpan.FromMilliseconds(500) };
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            ViewModel.ReloadFromDiskIfChanged();
+        };
+        return timer;
+    }
 }

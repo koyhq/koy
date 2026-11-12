@@ -195,6 +195,9 @@
                             <RadioButton GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconInfo}" Click="NavHakkinda_Click"
                                          IsChecked="{Binding SelectedPageIndex, Mode=TwoWay, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=8}"
                                          Content="{Binding [NavAbout], Source={x:Static res:Loc.Instance}}" />
+                            <RadioButton GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconSettings}" Click="NavGelismis_Click"
+                                         IsChecked="{Binding SelectedPageIndex, Mode=TwoWay, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=9}"
+                                         Content="{Binding [NavAdvanced], Source={x:Static res:Loc.Instance}}" />
                         </StackPanel>
                         </DockPanel>
 
@@ -231,6 +234,29 @@
                     </Grid>
                 </Border>
 
+                <!-- Alt uyarılar (issue #69): riskli ayar için uygula/geri al geri sayımı ve okunamayan settings.json bildirimi -->
+                <StackPanel Grid.Column="1" Panel.ZIndex="2" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,16">
+                    <Border Background="{DynamicResource KoyBgRow}" BorderBrush="{DynamicResource KoyAccent}" BorderThickness="1"
+                            CornerRadius="{DynamicResource KoyRadiusRow}" Padding="14,10" Margin="0,0,0,8"
+                            Visibility="{Binding IsApplyRevertPending, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Margin="0,0,14,0" Foreground="{DynamicResource KoyTextPrimary}">
+                                <Run Text="{Binding [ApplyRevertPrompt], Source={x:Static res:Loc.Instance}, Mode=OneWay}" />
+                                <Run Text="{Binding ApplyRevertSecondsLeft, Mode=OneWay, StringFormat='({0})'}" />
+                            </TextBlock>
+                            <Button Content="{Binding [ApplyRevertRevert], Source={x:Static res:Loc.Instance}}" Command="{Binding RevertApplyRevertCommand}"
+                                    Style="{StaticResource SettingButtonStyle}" Margin="0,0,8,0" />
+                            <Button Content="{Binding [ApplyRevertKeep], Source={x:Static res:Loc.Instance}}" Command="{Binding ConfirmApplyRevertCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{DynamicResource KoyDangerBg}" BorderBrush="{DynamicResource KoyDangerBorder}" BorderThickness="1"
+                            CornerRadius="{DynamicResource KoyRadiusRow}" Padding="14,10"
+                            Visibility="{Binding SettingsFileInvalid, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}">
+                        <TextBlock Text="{Binding [SettingsFileInvalid], Source={x:Static res:Loc.Instance}}" Foreground="{DynamicResource KoyDangerText}" TextWrapping="Wrap" MaxWidth="520" />
+                    </Border>
+                </StackPanel>
+
                 <!-- Sağ içerik alanı -->
                 <ScrollViewer x:Name="ContentScrollViewer"
                               Grid.Column="1"
@@ -248,6 +274,7 @@
                         <pages:DiktePage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=6}" />
                         <pages:PerformansPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=7}" />
                         <pages:HakkindaPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=8}" />
+                        <pages:GelismisPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=9}" />
                     </Grid>
 
                     <!-- Sayfa başına "Varsayılana döndür" (issue #69): başlığın sağında, iki adımlı onay. Dock ve Ekranlar'da yok. -->

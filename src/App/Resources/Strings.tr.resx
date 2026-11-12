@@ -1446,6 +1446,39 @@
   <data name="TrayAppsEmpty" xml:space="preserve">
     <value>Dock tepsisini bir kez açın; tepsi simgesi olan uygulamalar burada listelenir.</value>
   </data>
+  <data name="NavAdvanced" xml:space="preserve">
+    <value>Gelişmiş</value>
+  </data>
+  <data name="AdvancedSubtitle" xml:space="preserve">
+    <value>Kendi denetimi olmayan her ayar, doğrudan settings.json'dan.</value>
+  </data>
+  <data name="AdvancedWarning" xml:space="preserve">
+    <value>Deneyimli kullanıcılar için. Geçersiz değer asla kaydedilmez; değişiklik çentiği ve dock'u yeniden kurar.</value>
+  </data>
+  <data name="AdvancedFilterHint" xml:space="preserve">
+    <value>Anahtara göre süz</value>
+  </data>
+  <data name="AdvancedDefault" xml:space="preserve">
+    <value>Varsayılan: {0}</value>
+  </data>
+  <data name="AdvancedInvalid" xml:space="preserve">
+    <value>Bu ayar için geçerli bir değer değil; hiçbir şey kaydedilmedi.</value>
+  </data>
+  <data name="AdvancedResetRow" xml:space="preserve">
+    <value>Sıfırla</value>
+  </data>
+  <data name="ApplyRevertPrompt" xml:space="preserve">
+    <value>Bu değişiklik kalsın mı?</value>
+  </data>
+  <data name="ApplyRevertKeep" xml:space="preserve">
+    <value>Kalsın</value>
+  </data>
+  <data name="ApplyRevertRevert" xml:space="preserve">
+    <value>Geri al</value>
+  </data>
+  <data name="SettingsFileInvalid" xml:space="preserve">
+    <value>settings.json değişti ama okunamadı. Koy son geçerli ayarları koruyor.</value>
+  </data>
   <data name="AccentBlue" xml:space="preserve">
     <value>Mavi</value>
   </data>

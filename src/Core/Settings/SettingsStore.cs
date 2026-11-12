@@ -184,5 +184,89 @@ public sealed class SettingsStore(string path)
         using (var stream = File.Create(temp))
             JsonSerializer.Serialize(stream, settings, SettingsJsonContext.Default.AppSettings);
         File.Move(temp, Path, overwrite: true);
+        RememberOwnWrite(Path);
+    }
+
+    // Koy'un kendi yazdığı dosyanın son yazma zamanı (yol başına; aynı dosyaya birden çok SettingsStore örneği yazar).
+    // Canlı yeniden yükleme bununla kendi kaydını dışarıdan düzenlemeden ayırır (issue #69).
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, DateTime> OwnWrites =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    private static void RememberOwnWrite(string path)
+    {
+        try
+        {
+            OwnWrites[System.IO.Path.GetFullPath(path)] = File.GetLastWriteTimeUtc(path);
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+    }
+
+    /// <summary>Dosyanın şu anki hali Koy'un bu süreçte yaptığı son kayıt mı (dışarıdan düzenlenmemiş).</summary>
+    public bool IsOwnWrite()
+    {
+        try
+        {
+            return File.Exists(Path)
+                && OwnWrites.TryGetValue(System.IO.Path.GetFullPath(Path), out var own)
+                && File.GetLastWriteTimeUtc(Path) == own;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Katı okuma (canlı yeniden yükleme için): dosya yoksa, JSON bozuksa ya da tek bir alan bile tanınmayıp varsayılana
+    /// dönecekse false; o durumda son geçerli ayarlar korunur. Göç gerektiren (eski sürüm) dosya da reddedilir: göç ve
+    /// yedek açılıştaki <see cref="Load"/>'un işidir. Kilitli dosya gibi G/Ç hataları false döner (yazma sürerken okunabilir).
+    /// </summary>
+    public bool TryReadStrict(out AppSettings settings)
+    {
+        settings = new AppSettings();
+        try
+        {
+            if (!File.Exists(Path))
+                return false;
+
+            JsonNode? node;
+            using (var stream = File.OpenRead(Path))
+                node = JsonNode.Parse(stream);
+
+            if (node is not JsonObject root)
+                return false;
+
+            var version = root["Version"] is JsonValue v && v.TryGetValue<int>(out var n) ? n : 0;
+            if (version != AppSettings.CurrentVersion)
+                return false;
+
+            var parsed = ParseTolerant(root, out var dropped);
+            if (dropped > 0)
+                return false;
+
+            settings = parsed.FillMissingSections();
+            return true;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return false;
+        }
     }
 }

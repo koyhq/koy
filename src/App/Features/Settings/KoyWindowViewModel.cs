@@ -45,6 +45,193 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private bool _hideWindowsTaskbar = true;
 
+    // --- GELİŞMİŞ SAYFASI VE CANLI YENİDEN YÜKLEME (issue #69) ---
+
+    /// <summary>Gelişmiş sayfasının dizini; mevcut sayfaların dizinleri değişmesin diye en sona eklendi.</summary>
+    public const int AdvancedPageIndex = 9;
+
+    // Diskteki son bilinen ayarlar (yüklenen ya da bu pencerenin yazdığı); canlı yeniden yükleme aynıysa iş yapmaz.
+    private AppSettings? _lastKnown;
+
+    public string SettingsFilePath => _store.Path;
+
+    [ObservableProperty]
+    private IReadOnlyList<AdvancedSettingRow> _advancedRows = [];
+
+    [ObservableProperty]
+    private string _advancedFilter = "";
+
+    partial void OnAdvancedFilterChanged(string value) => RebuildAdvancedRows();
+
+    /// <summary>Dış düzenlenen settings.json okunamadı; son geçerli ayarlar korunuyor.</summary>
+    [ObservableProperty]
+    private bool _settingsFileInvalid;
+
+    // Kendi arayüzü olan ayarlar Gelişmiş tablosuna girmez: VM özellikleri düz v3 adlarıyla SettingsKeyMap'te.
+    private static readonly string[] DedicatedUiKeys =
+        SettingsKeyMap.V3ToV4.Values.Select(v => $"{v.Section}.{v.Name}").ToArray();
+
+    private void RebuildAdvancedRows()
+    {
+        if (SelectedPageIndex != AdvancedPageIndex)
+        {
+            AdvancedRows = [];
+            return;
+        }
+
+        var filter = AdvancedFilter.Trim();
+        AdvancedRows = AdvancedSettings.List(_store.Load(), DedicatedUiKeys)
+            .Where(r => filter.Length == 0 || r.Key.Contains(filter, StringComparison.OrdinalIgnoreCase))
+            .Select(r => new AdvancedSettingRow(r, ApplyAdvanced, ResetAdvanced))
+            .ToList();
+    }
+
+    private AdvancedSettingError ApplyAdvanced(string key, string text)
+    {
+        var error = AdvancedSettings.TrySet(_store.Load(), key, text, out var updated);
+        if (error == AdvancedSettingError.None)
+            CommitExternalSettings(updated);
+        return error;
+    }
+
+    private AdvancedSettingError ResetAdvanced(string key)
+    {
+        var error = AdvancedSettings.Reset(_store.Load(), key, out var updated);
+        if (error == AdvancedSettingError.None)
+            CommitExternalSettings(updated);
+        return error;
+    }
+
+    // Gelişmiş tablodan yazılan ayar: kaydedilir, pencere ve özellikler yeni değerle kurulur (alan her şey olabilir).
+    // Tablo bir sonraki tura bırakılır; satırın kendi bağlaması sürerken liste değiştirilmez.
+    private void CommitExternalSettings(AppSettings updated)
+    {
+        _store.Save(updated);
+        ApplyLoadedSettings();
+        System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(RebuildAdvancedRows);
+    }
+
+    private void ApplyLoadedSettings()
+    {
+        LoadFromSettings();
+        SettingsSaved?.Invoke();
+        if (Application.Current is { } current)
+            ThemeManager.Apply(current, _store.Load());
+        if (Application.Current is App app)
+            app.ReloadAllFeatures();
+    }
+
+    /// <summary>
+    /// settings.json dışarıdan değişti (Koy penceresi açıkken dosya izleyicisi çağırır). Koy'un kendi kaydı yok sayılır;
+    /// dosya okunamıyor ya da tek bir alanı bile tanınmıyorsa yüklenmez, kısa bir uyarı gösterilir.
+    /// </summary>
+    public void ReloadFromDiskIfChanged()
+    {
+        if (_store.IsOwnWrite())
+            return;
+
+        if (!_store.TryReadStrict(out var disk))
+        {
+            SettingsFileInvalid = true;
+            return;
+        }
+
+        SettingsFileInvalid = false;
+        if (Equals(disk, _lastKnown))
+            return;
+
+        ApplyLoadedSettings();
+        RebuildAdvancedRows();
+    }
+
+    // --- UYGULA / GERİ AL (issue #69) ---
+    // Riskli ayar (bugün yalnız görev çubuğunu gizleme): değişiklik hemen uygulanır, kullanıcı ~15 sn içinde
+    // onaylamazsa önceki değere dönülür. Karar Core'da (ApplyRevertPolicy); zamanlayıcı yalnız bekleyen değişiklik
+    // varken çalışır, karar verilince durur (AGENTS #5).
+    private bool? _revertHideTaskbarTo;
+    private DateTimeOffset _appliedAt;
+    private System.Windows.Threading.DispatcherTimer? _applyRevertTimer;
+    private bool _applyingRevert;
+
+    [ObservableProperty]
+    private bool _isApplyRevertPending;
+
+    [ObservableProperty]
+    private int _applyRevertSecondsLeft;
+
+    partial void OnHideWindowsTaskbarChanged(bool oldValue, bool newValue)
+    {
+        if (_isLoading || _applyingRevert)
+            return;
+
+        // Bekleyen bir değişiklik varken yeniden değişirse ilk (bilinen iyi) değer korunur.
+        _revertHideTaskbarTo ??= oldValue;
+        if (_revertHideTaskbarTo == newValue)
+        {
+            StopApplyRevert();
+            return;
+        }
+
+        _appliedAt = DateTimeOffset.UtcNow;
+        _applyRevertTimer ??= CreateApplyRevertTimer();
+        _applyRevertTimer.Start();
+        ApplyRevertSecondsLeft = (int)Math.Ceiling(ApplyRevertPolicy.DefaultTimeout.TotalSeconds);
+        IsApplyRevertPending = true;
+    }
+
+    private System.Windows.Threading.DispatcherTimer CreateApplyRevertTimer()
+    {
+        var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        timer.Tick += (_, _) => DecideApplyRevert(ApplyRevertChoice.None);
+        return timer;
+    }
+
+    private void DecideApplyRevert(ApplyRevertChoice choice)
+    {
+        if (_revertHideTaskbarTo is not { } previous)
+        {
+            StopApplyRevert();
+            return;
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        switch (ApplyRevertPolicy.Decide(_appliedAt, now, choice, ApplyRevertPolicy.DefaultTimeout))
+        {
+            case ApplyRevertDecision.Wait:
+                ApplyRevertSecondsLeft = (int)Math.Ceiling(ApplyRevertPolicy.Remaining(_appliedAt, now, ApplyRevertPolicy.DefaultTimeout).TotalSeconds);
+                break;
+            case ApplyRevertDecision.Keep:
+                StopApplyRevert();
+                break;
+            case ApplyRevertDecision.Revert:
+                StopApplyRevert();
+                _applyingRevert = true;
+                try
+                {
+                    // Normal kaydetme ve dock yeniden kurma yolundan geçer (OnPropertyChanged).
+                    HideWindowsTaskbar = previous;
+                }
+                finally
+                {
+                    _applyingRevert = false;
+                }
+                break;
+        }
+    }
+
+    private void StopApplyRevert()
+    {
+        _applyRevertTimer?.Stop();
+        _revertHideTaskbarTo = null;
+        IsApplyRevertPending = false;
+    }
+
+    [RelayCommand]
+    private void ConfirmApplyRevert() => DecideApplyRevert(ApplyRevertChoice.Confirm);
+
+    [RelayCommand]
+    private void RevertApplyRevert() => DecideApplyRevert(ApplyRevertChoice.Revert);
+
     [ObservableProperty]
     private string _language = AppLanguage.SystemDefault;
 
@@ -570,6 +757,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         try
         {
             var s = _store.Load();
+            _lastKnown = s;
 
             RunAtStartup = StartupService.IsEnabled;
             HideWindowsTaskbar = s.Dock.HideWindowsTaskbar;
@@ -823,6 +1011,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         {
             RefreshMemory();
         }
+
+        // Gelişmiş tablosu yalnız sayfası açıkken tutulur; başka sayfaya geçince bırakılır.
+        RebuildAdvancedRows();
     }
 
     protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
@@ -830,6 +1021,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         base.OnPropertyChanged(e);
         if (_isLoading) return;
         if (e.PropertyName is nameof(SelectedPageIndex) or nameof(MotionTogglesActive) or nameof(MotionTogglesInactive) or nameof(ClockCustomDateFormatInvalid)
+            or nameof(IsApplyRevertPending) or nameof(ApplyRevertSecondsLeft) or nameof(AdvancedRows) or nameof(SettingsFileInvalid) or nameof(AdvancedFilter)
             or nameof(HasTrayAppRows)
             or nameof(SettingsSearchQuery) or nameof(IsSettingsSearching) or nameof(SettingsSearchResults)
             or nameof(SettingsSearchNoResult) or nameof(ShowChangedOnly) or nameof(CanResetPage) or nameof(IsPageResetConfirming) or nameof(PageResetDone)
@@ -1061,6 +1253,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         };
 
         _store.Save(updated);
+        _lastKnown = updated;
         SettingsSaved?.Invoke();
     }
 
