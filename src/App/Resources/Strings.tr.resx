@@ -1443,6 +1443,39 @@
   <data name="UnitFahrenheitSuffix" xml:space="preserve">
     <value>°F</value>
   </data>
+  <data name="ClockShowDateTitle" xml:space="preserve">
+    <value>Saatin yanında tarih göster</value>
+  </data>
+  <data name="ClockShowDateDesc" xml:space="preserve">
+    <value>Çentik göz attığında saatin ardına kısa tarihi ekler. Varsayılan kapalı.</value>
+  </data>
+  <data name="ClockSecondTimeZoneTitle" xml:space="preserve">
+    <value>İkinci saat dilimi</value>
+  </data>
+  <data name="ClockSecondTimeZoneDesc" xml:space="preserve">
+    <value>Göz atan ve açık çentikte küçük bir ikinci saat satırı gösterir.</value>
+  </data>
+  <data name="ClockSecondTimeZoneNone" xml:space="preserve">
+    <value>Yok</value>
+  </data>
+  <data name="UnitWindTitle" xml:space="preserve">
+    <value>Rüzgâr hızı</value>
+  </data>
+  <data name="UnitWindKmh" xml:space="preserve">
+    <value>km/sa</value>
+  </data>
+  <data name="UnitWindMs" xml:space="preserve">
+    <value>m/sn</value>
+  </data>
+  <data name="UnitWindMph" xml:space="preserve">
+    <value>mph</value>
+  </data>
+  <data name="UnitWindKnots" xml:space="preserve">
+    <value>knot</value>
+  </data>
+  <data name="WeatherWindTooltip" xml:space="preserve">
+    <value>Rüzgâr {0}</value>
+  </data>
   <data name="UnitNetworkSpeedTitle" xml:space="preserve">
     <value>Ağ hızı</value>
   </data>

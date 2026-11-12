@@ -1443,6 +1443,39 @@
   <data name="UnitFahrenheitSuffix" xml:space="preserve">
     <value>°F</value>
   </data>
+  <data name="ClockShowDateTitle" xml:space="preserve">
+    <value>Show date next to the time</value>
+  </data>
+  <data name="ClockShowDateDesc" xml:space="preserve">
+    <value>Adds the short date after the clock when the notch peeks. Off by default.</value>
+  </data>
+  <data name="ClockSecondTimeZoneTitle" xml:space="preserve">
+    <value>Second time zone</value>
+  </data>
+  <data name="ClockSecondTimeZoneDesc" xml:space="preserve">
+    <value>Shows a small second clock line in the peeking and open notch.</value>
+  </data>
+  <data name="ClockSecondTimeZoneNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="UnitWindTitle" xml:space="preserve">
+    <value>Wind speed</value>
+  </data>
+  <data name="UnitWindKmh" xml:space="preserve">
+    <value>km/h</value>
+  </data>
+  <data name="UnitWindMs" xml:space="preserve">
+    <value>m/s</value>
+  </data>
+  <data name="UnitWindMph" xml:space="preserve">
+    <value>mph</value>
+  </data>
+  <data name="UnitWindKnots" xml:space="preserve">
+    <value>knots</value>
+  </data>
+  <data name="WeatherWindTooltip" xml:space="preserve">
+    <value>Wind {0}</value>
+  </data>
   <data name="UnitNetworkSpeedTitle" xml:space="preserve">
     <value>Network speed</value>
   </data>

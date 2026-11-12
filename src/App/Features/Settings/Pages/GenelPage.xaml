@@ -97,6 +97,34 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [UnitWindTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [UnitWindKmh], Source={x:Static res:Loc.Instance}}" GroupName="WindSpeedUnit"
+                                     IsChecked="{Binding WindSpeedUnit, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=KilometersPerHour}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [UnitWindMs], Source={x:Static res:Loc.Instance}}" GroupName="WindSpeedUnit"
+                                     IsChecked="{Binding WindSpeedUnit, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=MetersPerSecond}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [UnitWindMph], Source={x:Static res:Loc.Instance}}" GroupName="WindSpeedUnit"
+                                     IsChecked="{Binding WindSpeedUnit, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=MilesPerHour}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [UnitWindKnots], Source={x:Static res:Loc.Instance}}" GroupName="WindSpeedUnit"
+                                     IsChecked="{Binding WindSpeedUnit, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Knots}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [UnitNetworkSpeedTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding [UnitNetworkSpeedDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>

@@ -760,6 +760,25 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _clockShowSeconds;
 
     [ObservableProperty]
+    private bool _clockShowDate;
+
+    /// <summary>Boş: ikinci saat kapalı. Değer Windows saat dilimi kimliğidir (<see cref="SecondTimeZoneOptions"/>).</summary>
+    [ObservableProperty]
+    private string _clockSecondTimeZoneId = "";
+
+    /// <summary>İkinci saat açılır listesi: "Yok" ve sistemdeki saat dilimleri. Liste ilk kullanımda bir kez okunur.</summary>
+    public IReadOnlyList<TimeZoneOption> SecondTimeZoneOptions => _secondTimeZoneOptions ??= BuildTimeZoneOptions();
+
+    private static IReadOnlyList<TimeZoneOption>? _secondTimeZoneOptions;
+
+    private static IReadOnlyList<TimeZoneOption> BuildTimeZoneOptions()
+    {
+        var list = new List<TimeZoneOption> { new("", Koy.App.Resources.Strings.Get("ClockSecondTimeZoneNone")) };
+        list.AddRange(TimeZoneInfo.GetSystemTimeZones().Select(z => new TimeZoneOption(z.Id, z.DisplayName)));
+        return list;
+    }
+
+    [ObservableProperty]
     private bool _clockShowWeekNumber;
 
     [ObservableProperty]
@@ -777,6 +796,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private Koy.Core.Units.TemperatureUnit _temperatureUnit = Koy.Core.Units.TemperatureUnit.Celsius;
+
+    [ObservableProperty]
+    private Koy.Core.Units.WindSpeedUnit _windSpeedUnit = Koy.Core.Units.WindSpeedUnit.KilometersPerHour;
 
     [ObservableProperty]
     private Koy.Core.Units.NetworkSpeedUnit _networkSpeedUnit = Koy.Core.Units.NetworkSpeedUnit.Bytes;
@@ -1101,9 +1123,12 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             ClockHourFormat = s.Notch.ClockHourFormat;
             ClockShowSeconds = s.Notch.ClockShowSeconds;
             ClockShowWeekNumber = s.Notch.ClockShowWeekNumber;
+            ClockShowDate = s.Notch.ClockShowDate;
+            ClockSecondTimeZoneId = s.Notch.ClockSecondTimeZoneId ?? "";
             ClockFirstDayOfWeek = s.Notch.ClockFirstDayOfWeek;
             ClockCustomDateFormat = s.Notch.ClockCustomDateFormat ?? "";
             TemperatureUnit = s.General.TemperatureUnit;
+            WindSpeedUnit = s.General.WindSpeedUnit;
             NetworkSpeedUnit = s.General.NetworkSpeedUnit;
             UiFontFamily = s.Appearance.FontFamily ?? "";
             ClockFontFamily = s.Appearance.ClockFontFamily ?? "";
@@ -1366,7 +1391,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             or nameof(VoiceHarness) or nameof(VoiceClaudePermission) or nameof(VoiceModel) or nameof(VoiceCustomCommand) or nameof(VoiceWorkingDirectory) or nameof(VoiceTimeoutSeconds)
             or nameof(SearchRetainPrior) or nameof(SearchHistoryMode) or nameof(SearchSourcesVersion)
             or nameof(ClockHourFormat) or nameof(ClockShowSeconds) or nameof(ClockShowWeekNumber) or nameof(ClockFirstDayOfWeek)
-            or nameof(ClockCustomDateFormat) or nameof(TemperatureUnit) or nameof(NetworkSpeedUnit);
+            or nameof(ClockCustomDateFormat) or nameof(TemperatureUnit) or nameof(NetworkSpeedUnit)
+            or nameof(ClockShowDate) or nameof(ClockSecondTimeZoneId) or nameof(WindSpeedUnit);
 
     partial void OnLanguageChanged(string value)
     {
@@ -1422,6 +1448,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 AutoCheckUpdates = AutoCheckUpdates,
                 UpdateChannel = UpdateChannel,
                 TemperatureUnit = TemperatureUnit,
+                WindSpeedUnit = WindSpeedUnit,
                 NetworkSpeedUnit = NetworkSpeedUnit
             },
             Dock = current.Dock with
@@ -1496,6 +1523,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 ClockHourFormat = ClockHourFormat,
                 ClockShowSeconds = ClockShowSeconds,
                 ClockShowWeekNumber = ClockShowWeekNumber,
+                ClockShowDate = ClockShowDate,
+                ClockSecondTimeZoneId = ClockSecondTimeZoneId ?? "",
                 ClockFirstDayOfWeek = ClockFirstDayOfWeek,
                 // Geçersiz özel biçim kaydedilmez; boş metin yerleşik biçime döner.
                 ClockCustomDateFormat = string.IsNullOrWhiteSpace(ClockCustomDateFormat) ? ""
