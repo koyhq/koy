@@ -19,9 +19,7 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 ### Fixed
 
 * **build:** restore shutdown order and keep advisory warnings non-fatal ([8817f55](https://github.com/koyhq/koy/commit/8817f55bc1e75c2feb3e5d75f0b5cc2ae0a923be))
-* **dock:** find the jump list for packaged and Squirrel apps ([38a6021](https://github.com/koyhq/koy/commit/38a6021bb6c5b584c404cb1fe68435c74d63a915))
 * **dock:** find the jump list for packaged and Squirrel apps ([02aecfd](https://github.com/koyhq/koy/commit/02aecfd0d5debf514a45a8abddf821d34c9c57d4))
-* **dock:** fix context menu z-order, outside-click dismiss, and jump list title fallback ([2526dbc](https://github.com/koyhq/koy/commit/2526dbce8be4141b36ff9a6c6fd3da1148fc0129))
 * **dock:** fix context menu z-order, outside-click dismiss, and jump list title fallback ([0a11ba5](https://github.com/koyhq/koy/commit/0a11ba58637757a39d350139d2378307a2487c76))
 * **extensions:** harden the extension store (theme backup, registry, URL trust, localization) ([1d66d03](https://github.com/koyhq/koy/commit/1d66d03918359dd942648aa06046e3af599f4b29))
 * **extensions:** never overwrite an unreadable or newer extension registry ([d643a03](https://github.com/koyhq/koy/commit/d643a033121ec6f092ee485f302df88625688eb5))
