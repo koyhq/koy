@@ -198,6 +198,12 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private DockIndicatorStyle _dockIndicatorStyle;
 
     [ObservableProperty]
+    private DockLeftClickAction _dockLeftClickAction = DockLeftClickAction.MinimizeIfActive;
+
+    [ObservableProperty]
+    private DockWindowMonitorScope _dockWindowMonitorScope = DockWindowMonitorScope.AllMonitors;
+
+    [ObservableProperty]
     private bool _dockShowBadges = true;
 
     [ObservableProperty]
@@ -507,6 +513,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             DockDodgeDelayMs = s.Dock.DodgeDelayMs;
             DockIconSize = s.Dock.IconSize > 0 ? s.Dock.IconSize : 28.0;
             DockIndicatorStyle = s.Dock.IndicatorStyle;
+            DockLeftClickAction = s.Dock.LeftClickAction;
+            DockWindowMonitorScope = s.Dock.WindowMonitorScope;
             // Tam genişlikte seçilemeyen mod ayar ekranında geçerli karşılığıyla görünür (çalışma anındaki eşlemeyle aynı).
             DockProximity = DockProximityMapping.Effective(DockStyle, DockProximity);
 
@@ -793,6 +801,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 DodgeDelayMs = DockDodgeDelayMs,
                 IconSize = DockIconSize,
                 IndicatorStyle = DockIndicatorStyle,
+                LeftClickAction = DockLeftClickAction,
+                WindowMonitorScope = DockWindowMonitorScope,
                 MiddleClickAction = MiddleClickAction
             },
             Notch = current.Notch with
