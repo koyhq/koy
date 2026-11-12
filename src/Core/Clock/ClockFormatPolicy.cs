@@ -87,4 +87,18 @@ public static class ClockFormatPolicy
 
     /// <summary>İkinci saat açık mı: saat dilimi kimliği dolu olmalı.</summary>
     public static bool HasSecondClock(string? timeZoneId) => !string.IsNullOrWhiteSpace(timeZoneId);
+
+    /// <summary>
+    /// Göz atan çentikteki saat satırı: "saat · tarih · ikinci saat". Tarih ve ikinci saat boş/null ise eklenmez,
+    /// yani hiçbiri açık değilse yalnız saat döner (mevcut davranış).
+    /// </summary>
+    public static string ComposePeekLine(string time, string? date, string? secondClock)
+    {
+        var line = time;
+        if (!string.IsNullOrWhiteSpace(date))
+            line += " · " + date;
+        if (!string.IsNullOrWhiteSpace(secondClock))
+            line += " · " + secondClock;
+        return line;
+    }
 }
