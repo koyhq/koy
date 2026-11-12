@@ -14,6 +14,12 @@ public sealed record ExtensionFileActionResult(string? ErrorKey, SavedProfile? I
 }
 
 /// <summary>
+/// Kullanıcı stil dosyalarının (user-theme.json, yedeği, durum dosyası) bellekteki kopyası. Ayar kaydı başarısız olursa
+/// dosyalar buna döndürülür. Her alan null ise dosya yoktu.
+/// </summary>
+public sealed record UserStyleSnapshot(byte[]? Style, byte[]? Backup, byte[]? State);
+
+/// <summary>
 /// <see cref="ExtensionApplyPlanner"/> planının dosya işlerini yapar (kararlar Core'da, burada yalnız G/Ç). Kullanıcı stil
 /// dosyası (user-theme.json) ve yedeği aynı klasörde durur; her yazma geçici dosya + taşıma ile yapılır. Beklenen G/Ç hatası
 /// fırlatmaz, anahtar döner.
@@ -24,7 +30,77 @@ public sealed class ExtensionFileActionRunner(string userStyleFolder, ProfileSer
 
     public string BackupPath { get; } = Path.Combine(userStyleFolder, ExtensionApplyPlanner.UserStyleBackupFileName);
 
-    public bool BackupExists => File.Exists(BackupPath);
+    public string StatePath { get; } = Path.Combine(userStyleFolder, UserStyleBackup.StateFileName);
+
+    /// <summary>
+    /// Diskteki özgün durum yedeği; hiç yedek yoksa null. Durum dosyası yoksa (eski sürümün yedeği) özgün
+    /// geçersiz kılma, yedek dosyasının varlığından çıkarılır.
+    /// </summary>
+    public UserStyleBackup? ReadBackup()
+    {
+        var hasFile = File.Exists(BackupPath);
+        bool? overrides = null;
+        try
+        {
+            if (File.Exists(StatePath) && UserStyleBackup.TryParseState(File.ReadAllText(StatePath, Encoding.UTF8), out var value))
+                overrides = value;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // Okunamayan durum dosyası yok sayılır.
+        }
+
+        if (!hasFile && overrides is null && !File.Exists(StatePath))
+            return null;
+
+        return new UserStyleBackup(hasFile, overrides ?? hasFile);
+    }
+
+    /// <summary>user-theme.json ve yedek dosyalarının geri yüklenebilir kopyası (okunamazsa null).</summary>
+    public UserStyleSnapshot? TakeSnapshot()
+    {
+        try
+        {
+            return new UserStyleSnapshot(ReadOrNull(UserStylePath), ReadOrNull(BackupPath), ReadOrNull(StatePath));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>Dosyaları <see cref="TakeSnapshot"/> anına döndürür (en iyi çaba; başarıyı bildirir).</summary>
+    public bool RestoreSnapshot(UserStyleSnapshot snapshot)
+    {
+        try
+        {
+            Directory.CreateDirectory(userStyleFolder);
+            WriteOrDelete(UserStylePath, snapshot.Style);
+            WriteOrDelete(BackupPath, snapshot.Backup);
+            WriteOrDelete(StatePath, snapshot.State);
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return false;
+        }
+    }
+
+    private static byte[]? ReadOrNull(string path) => File.Exists(path) ? File.ReadAllBytes(path) : null;
+
+    private static void WriteOrDelete(string path, byte[]? data)
+    {
+        if (data is null)
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+            return;
+        }
+
+        var temp = path + ".tmp";
+        File.WriteAllBytes(temp, data);
+        File.Move(temp, path, overwrite: true);
+    }
 
     public ExtensionFileActionResult Run(IEnumerable<ExtensionFileAction> actions)
     {
@@ -37,9 +113,16 @@ public sealed class ExtensionFileActionRunner(string userStyleFolder, ProfileSer
                 switch (action.Kind)
                 {
                     case ExtensionFileActionKind.BackupUserStyle:
-                        // İlk özgün dosya kalsın: yedek varsa üzerine yazılmaz.
-                        if (File.Exists(UserStylePath) && !File.Exists(BackupPath))
+                        // İlk özgün durum kalsın: yedek ya da durum dosyası varsa üzerine yazılmaz. Önce dosya, sonra durum
+                        // yazılır (arada çökerse durum yok, yedek var: eski sürümün yedeği gibi okunur).
+                        if (File.Exists(BackupPath) || File.Exists(StatePath))
+                            break;
+                        Directory.CreateDirectory(userStyleFolder);
+                        if (File.Exists(UserStylePath))
                             File.Copy(UserStylePath, BackupPath);
+                        var stateTemp = StatePath + ".tmp";
+                        File.WriteAllText(stateTemp, UserStyleBackup.SerializeState(action.OriginalOverridesEnabled), Encoding.UTF8);
+                        File.Move(stateTemp, StatePath, overwrite: true);
                         break;
 
                     case ExtensionFileActionKind.CopyThemeToUserStyle:
@@ -56,6 +139,8 @@ public sealed class ExtensionFileActionRunner(string userStyleFolder, ProfileSer
                             File.Move(BackupPath, UserStylePath, overwrite: true);
                         else if (File.Exists(UserStylePath))
                             File.Delete(UserStylePath);
+                        if (File.Exists(StatePath))
+                            File.Delete(StatePath);
                         break;
 
                     case ExtensionFileActionKind.ImportProfile:

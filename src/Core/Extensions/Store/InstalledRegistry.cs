@@ -66,6 +66,9 @@ public sealed class InstalledRegistry
         return null;
     }
 
+    /// <summary>Bu türden "uygulandı" işaretli bir kayıt var mı (tema zinciri: ilk özgün yedeği korumak için).</summary>
+    public bool HasApplied(ExtensionKind kind) => Entries.Any(e => e.Kind == kind && e.Applied);
+
     public static bool TryBuild(IEnumerable<InstalledEntry> entries, out InstalledRegistry registry, out InstalledRegistryError error)
     {
         registry = Empty;

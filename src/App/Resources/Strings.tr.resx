@@ -3669,6 +3669,12 @@
   <data name="ExtApplySaveFailed" xml:space="preserve">
     <value>Ayarlar kaydedilemedi.</value>
   </data>
+  <data name="ExtUnexpectedError" xml:space="preserve">
+    <value>Beklenmeyen bir hata oluştu. Tekrar dene.</value>
+  </data>
+  <data name="ExtRegistrySaveFailed" xml:space="preserve">
+    <value>Değişiklik eklenti listesine kaydedilemedi. Hiçbir şey değiştirilmedi.</value>
+  </data>
   <data name="ExtApplyErrorInvalidPath" xml:space="preserve">
     <value>Eklentinin dosyaları eksik ya da kullanılamıyor.</value>
   </data>
