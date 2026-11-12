@@ -128,11 +128,13 @@ public static class ExtensionManifestValidator
     }
 
     /// <summary>
-    /// Kimlik: küçük harf ile başlar, yalnız küçük harf, rakam ve tire içerir, tireyle bitmez.
-    /// Uzunluk 2 ile 64 arasında. Büyük harf ya da boşluk kabul edilmez, çünkü kimlik dosya adı ve
-    /// karşılaştırma anahtarı olarak kullanılır. Windows aygıt adları (con, nul, com1…) da reddedilir.
+    /// Kimlik: küçük harf ile başlar; yalnız küçük harf, rakam, tire ve nokta (ters alan adı biçimi,
+    /// "koyhq.nord-theme"). Tireyle ya da noktayla bitmez, art arda iki nokta ve boş parça yok. Uzunluk 2 ile 64
+    /// arasında. Büyük harf ya da boşluk kabul edilmez, çünkü kimlik dosya adı ve karşılaştırma anahtarı olarak
+    /// kullanılır. Her nokta-ayrılmış parça için Windows aygıt adları (con, nul, com1…) reddedilir: "con.x" da
+    /// klasör olarak aygıt adına çözülür.
     /// </summary>
-    private static bool IsValidId(string? id)
+    internal static bool IsValidId(string? id)
     {
         if (id is null || id.Length < MinIdLength || id.Length > MaxIdLength)
         {
@@ -146,13 +148,26 @@ public static class ExtensionManifestValidator
 
         foreach (var c in id)
         {
-            if (!IsAsciiLower(c) && !char.IsAsciiDigit(c) && c != '-')
+            if (!IsAsciiLower(c) && !char.IsAsciiDigit(c) && c is not ('-' or '.'))
             {
                 return false;
             }
         }
 
-        return id[^1] != '-' && !IsReservedDeviceName(id);
+        if (id[^1] is '-' or '.')
+        {
+            return false;
+        }
+
+        foreach (var part in id.Split('.'))
+        {
+            if (part.Length == 0 || IsReservedDeviceName(part))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     // Kimlik dosya adı olarak kullanılacak; Windows'ta bu adlar dosya değil aygıt açar (con, nul, com1…).
@@ -172,7 +187,7 @@ public static class ExtensionManifestValidator
     /// Sürüm tam olarak üç parçalı "major.minor.patch" biçiminde olmalı; her parça yalnız rakam içerir.
     /// Uzunluk önce denetlenir: aşırı uzun bir metin bölünüp parçalara kopyalanmaz.
     /// </summary>
-    private static bool IsValidVersion(string? version)
+    internal static bool IsValidVersion(string? version)
     {
         if (version is null || version.Length > MaxVersionLength)
         {
@@ -216,7 +231,7 @@ public static class ExtensionManifestValidator
     /// Ad ve yazar: boş olmayan, sınırı aşmayan, denetim karakteri içermeyen ve baştaki ya da sondaki
     /// boşluk taşımayan metin. Boşluk sessizce kırpılmaz; böyle bir değer reddedilir.
     /// </summary>
-    private static bool IsValidText(string? value, int maxLength)
+    internal static bool IsValidText(string? value, int maxLength)
     {
         if (value is null || value.Length == 0 || value.Length > maxLength)
         {

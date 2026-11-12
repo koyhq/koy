@@ -133,6 +133,11 @@ public class ExtensionManifestValidatorTests
     [InlineData("my-theme")]
     [InlineData("a1-b2")]
     [InlineData("x9")]
+    [InlineData("koyhq.nord-theme")]
+    [InlineData("org.example.breeze")]
+    [InlineData("a.b")]
+    [InlineData("a1.2b")]
+    [InlineData("console.com10")]
     public void Valid_ids_are_accepted(string id)
     {
         Assert.True(Create(id: id));
@@ -148,8 +153,16 @@ public class ExtensionManifestValidatorTests
     [InlineData("my-")]
     [InlineData("my_theme")]
     [InlineData("my theme")]
-    [InlineData("my.theme")]
     [InlineData("tema-ğ")]
+    [InlineData(".abc")]
+    [InlineData("abc.")]
+    [InlineData("a..b")]
+    [InlineData("a.-b.")]
+    [InlineData("ab-.cd.")]
+    [InlineData("a.B")]
+    [InlineData("a/b")]
+    [InlineData("a:b")]
+    [InlineData("a\\b")]
     public void Invalid_ids_are_rejected(string? id)
     {
         Assert.Equal(ExtensionManifestError.InvalidId, ErrorOf(id: id));
@@ -300,6 +313,10 @@ public class ExtensionManifestValidatorTests
     [InlineData("prn")]
     [InlineData("com1")]
     [InlineData("lpt9")]
+    [InlineData("koyhq.con")]
+    [InlineData("nul.theme")]
+    [InlineData("a.com1.b")]
+    [InlineData("org.lpt3")]
     public void Windows_device_names_are_rejected_as_ids(string id)
     {
         Assert.Equal(ExtensionManifestError.InvalidId, ErrorOf(id: id));
@@ -310,6 +327,8 @@ public class ExtensionManifestValidatorTests
     [InlineData("com10")]
     [InlineData("console")]
     [InlineData("my-con")]
+    [InlineData("koyhq.my-con")]
+    [InlineData("koyhq.com10")]
     public void Names_that_only_resemble_device_names_are_accepted(string id)
     {
         Assert.True(Create(id: id));
