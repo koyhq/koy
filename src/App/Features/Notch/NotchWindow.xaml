@@ -67,9 +67,14 @@
                       DragEnter="Notch_DragEnter"
                       DragOver="Notch_DragOver"
                       Drop="Notch_Drop"
-                      Cursor="Hand">
+                      Cursor="Hand"
+                      RenderTransformOrigin="0.5,0">
       <local:NotchShape.RenderTransform>
-        <TranslateTransform x:Name="NotchTranslate" Y="0" />
+        <!-- Ölçek üst kenarın ortasından: dosya bırakılınca çentik üstten kopmadan esneyip sekiyor. -->
+        <TransformGroup>
+          <ScaleTransform x:Name="NotchScale" ScaleX="1" ScaleY="1" />
+          <TranslateTransform x:Name="NotchTranslate" Y="0" />
+        </TransformGroup>
       </local:NotchShape.RenderTransform>
       <local:NotchShape.ContextMenu>
         <ContextMenu>

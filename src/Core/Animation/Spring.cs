@@ -15,13 +15,17 @@ public sealed class Spring
     }
 
     public double Stiffness { get; init; } = 300;
-    public double Damping { get; init; } = 26;
+    /// <summary>Sönüm. Ayarlanabilir: aynı yay yön değiştirirken farklı sönümle sürebilir (çentik kapanışı gibi).</summary>
+    public double Damping { get; set; } = 26;
     public double Mass { get; init; } = 1;
     public double RestThreshold { get; init; } = 0.01;
 
     public double Value { get; private set; }
     public double Velocity { get; private set; }
     public double Target { get; set; }
+
+    /// <summary>Sekmesiz (hedefi aşmadan) en hızlı oturan sönüm: 2·√(sertlik·kütle).</summary>
+    public double CriticalDamping => 2 * Math.Sqrt(Stiffness * Mass);
 
     public bool IsAtRest =>
         Math.Abs(Target - Value) < RestThreshold && Math.Abs(Velocity) < RestThreshold;
@@ -45,6 +49,9 @@ public sealed class Spring
         Velocity = 0;
         return false;
     }
+
+    /// <summary>Anlık bir darbe: hıza <paramref name="velocity"/> ekler (birim/sn). Yay sonra hedefine geri döner.</summary>
+    public void Kick(double velocity) => Velocity += velocity;
 
     /// <summary>Animasyonsuz olarak değere atlar.</summary>
     public void SnapTo(double value)

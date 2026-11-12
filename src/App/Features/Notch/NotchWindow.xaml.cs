@@ -21,7 +21,15 @@ public partial class NotchWindow : Window
     private readonly Spring _translateY = new(0);
     private readonly Spring _panelTranslateX = new(0);
     private readonly Spring _panelOpacity = new(1);
+    // Dosya bırakılınca verilen darbe; 0'da durur, değeri esneme miktarı (yaklaşık 0..1).
+    private readonly Spring _gulp = new(0) { Stiffness = 260, Damping = 14 };
     private TimeSpan _lastFrame;
+
+    // Açılış hafif seker (Spring varsayılanı); kapanışta kritik sönüm, çentik hedefin içine çökmez.
+    private const double OpenDamping = 26;
+    private const double GulpKickVelocity = 30;
+    private const double GulpStretchX = 0.025;
+    private const double GulpSquashY = 0.05;
     // Panel geçişinin süre çarpanından türeyen zaman ölçeği (Sakin 1/1.5, Hızlı 1/0.65); MotionPolicy ile aynı kaynak.
     private double _panelTimeScale = 1.0;
     private bool _animating;
@@ -387,7 +395,24 @@ public partial class NotchWindow : Window
             }
         }
 
+        Gulp();
         e.Handled = true;
+    }
+
+    private void Gulp()
+    {
+        if (ViewModel?.ReduceMotion == true || !Motion.Enabled)
+            return;
+
+        _gulp.Kick(GulpKickVelocity);
+        WakeAnimation();
+    }
+
+    // Küçülen eksen kritik sönümle, büyüyen eksen hafif sekmeyle hedefe gider.
+    private static void Retarget(Spring spring, double target)
+    {
+        spring.Damping = target < spring.Value ? spring.CriticalDamping : OpenDamping;
+        spring.Target = target;
     }
 
     private void AnimatePanelTransition(int direction)
@@ -480,11 +505,11 @@ public partial class NotchWindow : Window
         }
         else
         {
-            _width.Target = width;
-            _height.Target = height;
+            Retarget(_width, width);
+            Retarget(_height, height);
             if (ViewModel is not null)
             {
-                _cornerRadius.Target = ViewModel.TargetCornerRadius;
+                Retarget(_cornerRadius, ViewModel.TargetCornerRadius);
             }
         }
         WakeAnimation();
@@ -509,7 +534,12 @@ public partial class NotchWindow : Window
         if (dt <= 0)
             return;
 
-        var moving = _width.Step(dt) | _height.Step(dt) | _cornerRadius.Step(dt) | _translateY.Step(dt) | _panelTranslateX.Step(dt * _panelTimeScale) | _panelOpacity.Step(dt * _panelTimeScale);
+        var moving = _width.Step(dt) | _height.Step(dt) | _cornerRadius.Step(dt) | _translateY.Step(dt) | _panelTranslateX.Step(dt * _panelTimeScale) | _panelOpacity.Step(dt * _panelTimeScale) | _gulp.Step(dt);
+        var gulp = _gulp.Value;
+        // Yatay esneme sabit tuvalden taşmasın (açık çentik 620, tuval 640).
+        var maxScaleX = _width.Value > 0 ? NotchLayout.CanvasWidth / _width.Value : 1;
+        NotchScale.ScaleX = Math.Min(1 + GulpStretchX * gulp, maxScaleX);
+        NotchScale.ScaleY = 1 - GulpSquashY * gulp;
         Notch.Width = _width.Value;
         Notch.Height = _height.Value;
         Notch.CornerRadius = _cornerRadius.Value;
