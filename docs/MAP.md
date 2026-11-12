@@ -39,6 +39,7 @@ Unutma:
 Unutma:
 - Yansımalı `JsonSerializer` çağrısı yazılmaz (AGENTS #10).
 - Dock ayarıysa `src/Core/Dock/DockSettingsDiff.cs` neyin yeniden kurulacağına karar verir.
+- Ayar araması ve "yalnız değişenler" satırı sayfadan kendisi bulur (`src/App/Features/Settings/SettingsPageIndex.cs`): satır `SettingRowStyle` kenarlığı, başlığı `SettingTitleStyle` ve `[Anahtar]` Loc bağı olmalı. Değişti noktası için denetimin bağlandığı VM özelliği `src/Core/Settings/SettingsKeyMap.cs` içinde olmalı; yoksa satır aranır ama noktası çıkmaz. Sayfa sıfırlama bölümleri: `KoyWindowViewModel.ResetSectionsFor`, `src/Core/Settings/SettingsPageReset.cs`.
 - Test örnekleri: `tests/Core.Tests/SettingsStoreTests.cs`, `tests/Core.Tests/SettingsMigrationTests.cs`.
 
 ## Çentik kartı ve Windows bildirimleri

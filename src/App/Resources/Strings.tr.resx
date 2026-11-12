@@ -1377,6 +1377,24 @@
   <data name="UnitBits" xml:space="preserve">
     <value>Bit</value>
   </data>
+  <data name="SettingsSearchPlaceholder" xml:space="preserve">
+    <value>Ayarlarda ara</value>
+  </data>
+  <data name="SettingsSearchNoResult" xml:space="preserve">
+    <value>Eşleşen ayar yok.</value>
+  </data>
+  <data name="SettingsShowChangedOnly" xml:space="preserve">
+    <value>Yalnız değişenleri göster</value>
+  </data>
+  <data name="SettingsResetPage" xml:space="preserve">
+    <value>Varsayılana döndür</value>
+  </data>
+  <data name="SettingsResetPageConfirm" xml:space="preserve">
+    <value>Bu sayfa varsayılana dönsün mü?</value>
+  </data>
+  <data name="SettingsResetPageDone" xml:space="preserve">
+    <value>Sayfa varsayılana döndü.</value>
+  </data>
   <data name="AccentBlue" xml:space="preserve">
     <value>Mavi</value>
   </data>

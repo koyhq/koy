@@ -1377,6 +1377,24 @@
   <data name="UnitBits" xml:space="preserve">
     <value>Bits</value>
   </data>
+  <data name="SettingsSearchPlaceholder" xml:space="preserve">
+    <value>Search settings</value>
+  </data>
+  <data name="SettingsSearchNoResult" xml:space="preserve">
+    <value>No matching setting.</value>
+  </data>
+  <data name="SettingsShowChangedOnly" xml:space="preserve">
+    <value>Show changed only</value>
+  </data>
+  <data name="SettingsResetPage" xml:space="preserve">
+    <value>Restore defaults</value>
+  </data>
+  <data name="SettingsResetPageConfirm" xml:space="preserve">
+    <value>Restore this page to defaults?</value>
+  </data>
+  <data name="SettingsResetPageDone" xml:space="preserve">
+    <value>Page restored to defaults.</value>
+  </data>
   <data name="AccentBlue" xml:space="preserve">
     <value>Blue</value>
   </data>

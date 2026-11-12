@@ -40,11 +40,144 @@ public partial class KoyWindow : Window
         InitializeComponent();
         DataContext = viewModel ?? new KoyWindowViewModel();
         ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+        ViewModel.SettingsSaved += ApplyChangedMarks;
+    }
+
+    // --- Ayar araması ve "yalnız değişenler" (issue #69) ---
+
+    private SettingsPageIndex? _index;
+    private DispatcherTimer? _highlightTimer;
+    private FrameworkElement? _highlighted;
+
+    // Dizin sayfaların kendisinden kurulur; dil değişince metinler yeni dilde okunsun diye yeniden kurulur.
+    private SettingsPageIndex Index
+    {
+        get
+        {
+            if (_index is null || _index.Culture != System.Globalization.CultureInfo.CurrentUICulture.Name)
+                _index = SettingsPageIndex.Build(PagesHost);
+            return _index;
+        }
+    }
+
+    private void RunSearch()
+    {
+        var query = ViewModel.SettingsSearchQuery;
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            ViewModel.SettingsSearchResults = [];
+            return;
+        }
+
+        var rows = Index.Rows;
+        var byKey = rows.ToDictionary(r => r.Entry.Key);
+        ViewModel.SettingsSearchResults = Koy.Core.Settings.SettingsSearch.Search(rows.Select(r => r.Entry), query, limit: 12)
+            .Select(h => new SettingsSearchResult(h.Entry.Title, h.Entry.Page, byKey[h.Entry.Key]))
+            .ToList();
+    }
+
+    private void SearchResult_Click(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is SettingsSearchResult result)
+            OpenResult(result);
+    }
+
+    private void SettingsSearchBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape && ViewModel.IsSettingsSearching)
+        {
+            ViewModel.SettingsSearchQuery = "";
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Enter && ViewModel.SettingsSearchResults.Count > 0)
+        {
+            OpenResult(ViewModel.SettingsSearchResults[0]);
+            e.Handled = true;
+        }
+    }
+
+    private void OpenResult(SettingsSearchResult result)
+    {
+        ViewModel.SettingsSearchQuery = "";
+        // Süzgeç satırı gizliyorsa önce kapatılır; yoksa gidilen satır görünmezdi.
+        if (ViewModel.ShowChangedOnly && SettingsRowState.GetIsFilteredOut(result.Row.Element))
+            ViewModel.ShowChangedOnly = false;
+
+        ViewModel.SelectPage(result.Row.PageIndex);
+        ContentScrollViewer?.ScrollToTop();
+        // Sayfa görünür olup ölçüldükten sonra satıra kaydırılır ve ~1,5 sn vurgulanır.
+        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () => Highlight(result.Row.Element));
+    }
+
+    private void Highlight(FrameworkElement row)
+    {
+        ClearHighlight();
+        row.BringIntoView();
+        SettingsRowState.SetIsHighlighted(row, true);
+        _highlighted = row;
+
+        // Tek atımlık: süre dolunca vurgu kalkar ve zamanlayıcı durur (AGENTS #5).
+        _highlightTimer ??= new DispatcherTimer(DispatcherPriority.Background, Dispatcher) { Interval = TimeSpan.FromMilliseconds(1500) };
+        _highlightTimer.Tick -= OnHighlightTick;
+        _highlightTimer.Tick += OnHighlightTick;
+        _highlightTimer.Stop();
+        _highlightTimer.Start();
+    }
+
+    private void OnHighlightTick(object? sender, EventArgs e) => ClearHighlight();
+
+    private void ClearHighlight()
+    {
+        _highlightTimer?.Stop();
+        if (_highlighted is not null)
+            SettingsRowState.SetIsHighlighted(_highlighted, false);
+        _highlighted = null;
+    }
+
+    private void ChangedOnlyLabel_Click(object sender, MouseButtonEventArgs e)
+    {
+        // Kutunun kendisine tıklama zaten çevirir; yalnız metne tıklama buraya gelir.
+        if (e.OriginalSource is System.Windows.Controls.TextBlock)
+            ViewModel.ShowChangedOnly = !ViewModel.ShowChangedOnly;
+    }
+
+    /// <summary>Değişmiş satırlara nokta koyar; "yalnız değişenler" açıksa diğer satırları ve bölüm başlıklarını gizler.</summary>
+    private void ApplyChangedMarks()
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(ApplyChangedMarks);
+            return;
+        }
+
+        var changed = ViewModel.ChangedSettingKeys().ToHashSet(StringComparer.Ordinal);
+        var only = ViewModel.ShowChangedOnly;
+        foreach (var row in Index.Rows)
+        {
+            var isChanged = row.SettingKey is not null && changed.Contains(row.SettingKey);
+            SettingsRowState.SetIsChanged(row.Element, isChanged);
+            SettingsRowState.SetIsFilteredOut(row.Element, only && !isChanged);
+        }
+
+        foreach (var header in Index.Headers)
+            SettingsRowState.SetIsFilteredOut(header, only);
     }
 
     /// <summary>Sayfa değişince yeni sayfa kısa bir solmayla girer; hareket kapalıysa anında geçer.</summary>
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName == nameof(KoyWindowViewModel.SettingsSearchQuery))
+        {
+            RunSearch();
+            return;
+        }
+
+        if (e.PropertyName == nameof(KoyWindowViewModel.ShowChangedOnly))
+        {
+            ApplyChangedMarks();
+            return;
+        }
+
         if (e.PropertyName == nameof(KoyWindowViewModel.IsUninstallConfirming) && ViewModel.IsUninstallConfirming && IsVisible)
         {
             // Kart solarak girer; odak güvenli seçeneğe (İptal) verilir.
@@ -88,6 +221,7 @@ public partial class KoyWindow : Window
         var win = Instance;
         win.ViewModel.LoadFromSettings();
         win.ViewModel.SelectPage(pageIndex);
+        win.ApplyChangedMarks();
         win.ContentScrollViewer?.ScrollToTop();
 
         if (win.WindowState == WindowState.Minimized)
