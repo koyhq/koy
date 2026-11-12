@@ -1109,6 +1109,28 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    public void OpenWebsite() => OpenExternal("https://koyhq.github.io/koy");
+
+    /// <summary>Esin kaynağı: Nectar (kod ya da görsel alınmadı, yalnız teşekkür).</summary>
+    [RelayCommand]
+    public void OpenNectar() => OpenExternal("https://github.com/kua8/Nectar");
+
+    /// <summary>Esin kaynağı: Seelen UI.</summary>
+    [RelayCommand]
+    public void OpenSeelenUi() => OpenExternal("https://github.com/eythaann/Seelen-UI");
+
+    private static void OpenExternal(string url)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+        }
+        catch
+        {
+        }
+    }
+
     /// <summary>Hava durumu verisinin kaynağı (Open-Meteo, CC BY 4.0 atfı).</summary>
     [RelayCommand]
     public void OpenOpenMeteo()
