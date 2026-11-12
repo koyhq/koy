@@ -40,6 +40,9 @@ public readonly record struct DockSettingsDiff(
                       || before.Appearance.MaterialReadabilityGuard != after.Appearance.MaterialReadabilityGuard
                       || before.Appearance.AnimationSpeed != after.Appearance.AnimationSpeed
                       || before.Appearance.RespectReduceMotion != after.Appearance.RespectReduceMotion
+                      || before.Appearance.IconPack != after.Appearance.IconPack
+                      || before.Appearance.IconPackFolder != after.Appearance.IconPackFolder
+                      || !Equals(before.Appearance.AppIconOverrides, after.Appearance.AppIconOverrides)
                       || power;
 
         return new DockSettingsDiff(rebuild, monitors, appBar, taskbar, tray, power);

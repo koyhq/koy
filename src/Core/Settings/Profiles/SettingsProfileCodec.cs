@@ -66,7 +66,7 @@ public static class SettingsProfileCodec
         // Dock başlat simgesinin yolu bu makineye özgü: paylaşılan dosyaya yazılmaz (içe aktarmada yerel değer korunur).
         var shareable = current with
         {
-            Appearance = current.Appearance with { AppIconOverrides = new() },
+            Appearance = current.Appearance with { AppIconOverrides = new(), IconPackFolder = "" },
             Dock = current.Dock with { StartIconPath = "" },
         };
         var full = (JsonObject)JsonSerializer.SerializeToNode(shareable, SettingsJsonContext.Default.AppSettings)!;
@@ -286,7 +286,11 @@ public static class SettingsProfileCodec
             {
                 ProfileSection.Appearance => result with
                 {
-                    Appearance = profile.Settings.Appearance with { AppIconOverrides = current.Appearance.AppIconOverrides },
+                    Appearance = profile.Settings.Appearance with
+                    {
+                        AppIconOverrides = current.Appearance.AppIconOverrides,
+                        IconPackFolder = current.Appearance.IconPackFolder,
+                    },
                 },
                 ProfileSection.Dock => result with
                 {
