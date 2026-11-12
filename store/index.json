@@ -29,18 +29,18 @@
       "id": "koyhq.high-contrast-theme",
       "name": "High Contrast",
       "kind": "theme",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": "Koy",
       "license": "GPL-3.0-or-later",
       "summary": "Pure black surfaces, white borders and a bright yellow accent.",
-      "description": "A maximum-contrast theme for low-vision use or bright rooms: black backgrounds, white text and borders, and a yellow accent that stays visible on every surface. Changes colors only.",
+      "description": "A maximum-contrast theme for the Koy window, menus, notch and dock, for low-vision use or bright rooms: black backgrounds, white text and borders, and a yellow accent that stays visible on every surface. Changes colors only.",
       "homepage": "https://github.com/koyhq/koy",
       "updated": "2026-11-12",
       "downloads": 0,
       "package": {
-        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.high-contrast-theme-1.0.0.koyext",
-        "sha256": "4a4ed144b5b4a611a8fe4a9d35954271422a447934413aae7ecaf7580fdf8e9b",
-        "size": 2421
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.high-contrast-theme-1.1.0.koyext",
+        "sha256": "234d2f3768a71ec60fb869d33b1184dae8472af2e6a0fc2c9c97c62a42e67b80",
+        "size": 2996
       },
       "preview": {
         "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.high-contrast-theme.png",
@@ -95,18 +95,18 @@
       "id": "koyhq.nord-theme",
       "name": "Nord",
       "kind": "theme",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": "Koy",
       "license": "GPL-3.0-or-later",
       "summary": "Cool, arctic blue-gray palette with a frosty cyan accent.",
-      "description": "A calm dark theme for the Koy window and menus built around the Nord palette: deep blue-gray surfaces, soft off-white text and a frosty cyan accent. Changes colors only; sizes and layout are untouched. Palette colors are by Sven Greb (MIT).",
+      "description": "A calm dark theme for the Koy window, menus, notch and dock built around the Nord palette: deep blue-gray surfaces, soft off-white text and a frosty cyan accent. Changes colors only; sizes and layout are untouched. Palette colors are by Sven Greb (MIT).",
       "homepage": "https://github.com/koyhq/koy",
       "updated": "2026-11-12",
       "downloads": 0,
       "package": {
-        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.nord-theme-1.0.0.koyext",
-        "sha256": "3b63a8f15da4b07bc186217f93a0756e130bf2bbdfc870fdb25dfc63b06a0886",
-        "size": 2667
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.nord-theme-1.1.0.koyext",
+        "sha256": "be2e6b32a873a6271d9d46005eb9a0fef36a5059666c6903b82f752f933bf089",
+        "size": 3261
       },
       "preview": {
         "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.nord-theme.png",
@@ -117,18 +117,18 @@
       "id": "koyhq.solarized-theme",
       "name": "Solarized Dark",
       "kind": "theme",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": "Koy",
       "license": "GPL-3.0-or-later",
       "summary": "Precision-tuned dark teal palette with a blue accent.",
-      "description": "Solarized Dark colors for the Koy window and menus: dark teal surfaces, warm cream text and a blue accent, with the classic green, yellow and red status colors. Changes colors only. Palette by Ethan Schoonover (MIT).",
+      "description": "Solarized Dark colors for the Koy window, menus, notch and dock: dark teal surfaces, warm cream text and a blue accent, with the classic green, yellow and red status colors. Changes colors only. Palette by Ethan Schoonover (MIT).",
       "homepage": "https://github.com/koyhq/koy",
       "updated": "2026-11-12",
       "downloads": 0,
       "package": {
-        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.solarized-theme-1.0.0.koyext",
-        "sha256": "cf14ec18ffe18d031570adc761fe5b9220bac41beead2c0c01260183d8884cb7",
-        "size": 2664
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.solarized-theme-1.1.0.koyext",
+        "sha256": "3e04423df48bea74996b8fe469dfb22e26f50c28143e946fda3b0099ee45f2b8",
+        "size": 3266
       },
       "preview": {
         "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.solarized-theme.png",
