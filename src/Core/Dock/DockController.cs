@@ -28,6 +28,18 @@ public sealed class DockController : IDisposable
 
     public bool IsHiddenByFullscreen => _isHiddenByFullscreen;
 
+    /// <summary>Çalışan simgeye sol tık eylemi. Varsayılan bugünkü davranış: etkinse küçült, değilse öne getir.</summary>
+    public DockLeftClickAction LeftClickAction { get; set; } = DockLeftClickAction.MinimizeIfActive;
+
+    /// <summary>
+    /// Açıksa ön plan pencere taşınınca/boyutlanınca da liste yenilenir (monitör süzgeci pencerenin hangi ekranda olduğuna bakar).
+    /// Yeni olay kancası yok: <see cref="IWindowTracker.ForegroundWindowChanged"/> sınırlar değişince zaten tetiklenir.
+    /// </summary>
+    public bool RefreshOnForegroundMove { get; set; }
+
+    /// <summary>Şu an ön plandaki pencere (0 = yok).</summary>
+    public nint ForegroundHandle => _windowTracker.CurrentForeground?.Handle ?? 0;
+
     public DockController(
         IPinnedAppsService pinnedAppsService,
         IWindowTracker windowTracker,
@@ -233,14 +245,22 @@ public sealed class DockController : IDisposable
         foreach (var h in item.WindowHandles)
             _flashingHandles.Remove(h);
 
-        // Halihazırda aktifse küçült, değilse öne getir
-        if (item.IsActive)
+        var foreground = _windowTracker.CurrentForeground?.Handle ?? 0;
+        var plan = DockClickPolicy.DecideLeftClick(LeftClickAction, item.WindowHandles, foreground, item.IsActive);
+        if (plan.Kind == DockClickKind.ShowThumbnails)
         {
-            _windowTracker.MinimizeWindow(item.WindowHandles[0]);
+            // Önizlemeyi arayüz açar (DockItemsStrip); buraya düştüyse açılamamıştır: varsayılan davranış.
+            plan = DockClickPolicy.DecideLeftClick(DockLeftClickAction.MinimizeIfActive, item.WindowHandles, foreground, item.IsActive);
         }
-        else
+
+        switch (plan.Kind)
         {
-            _windowTracker.ActivateWindow(item.WindowHandles[0]);
+            case DockClickKind.Minimize:
+                _windowTracker.MinimizeWindow(plan.Handle);
+                break;
+            case DockClickKind.Activate:
+                _windowTracker.ActivateWindow(plan.Handle);
+                break;
         }
     }
 
@@ -320,6 +340,11 @@ public sealed class DockController : IDisposable
         {
             _lastForegroundHandle = e.Handle;
             Refresh();
+        }
+        else if (RefreshOnForegroundMove)
+        {
+            // Aynı pencere, değişen sınırlar: taşındı ya da boyutlandı. Sürükleme fırtınası ertelemeyle birleşir.
+            RequestRefresh();
         }
     }
 

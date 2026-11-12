@@ -40,7 +40,7 @@ public enum DockWindowMonitorScope
     CurrentMonitor
 }
 
-/// <summary>Dock simgesine sol tık: pencereyi öne getir (varsayılan) ya da başka bir eylem.</summary>
+/// <summary>Dock simgesine sol tık. Varsayılan <see cref="MinimizeIfActive"/> (bugünkü dock davranışı); BringToFront etkinken de yalnız öne getirir.</summary>
 public enum DockLeftClickAction
 {
     BringToFront,
