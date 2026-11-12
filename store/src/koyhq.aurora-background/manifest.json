@@ -1,0 +1,10 @@
+{
+  "id": "koyhq.aurora-background",
+  "name": "Aurora",
+  "version": "1.0.0",
+  "author": "Koy",
+  "kind": "background",
+  "license": "CC-BY-SA-4.0",
+  "capabilities": [],
+  "entryKind": "data"
+}

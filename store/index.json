@@ -1,0 +1,139 @@
+{
+  "format": "koy-store-index",
+  "formatVersion": 1,
+  "generated": "2026-11-12T00:00:00Z",
+  "items": [
+    {
+      "id": "koyhq.aurora-background",
+      "name": "Aurora",
+      "kind": "background",
+      "version": "1.0.0",
+      "author": "Koy",
+      "license": "CC-BY-SA-4.0",
+      "summary": "Slow looping aurora gradient for the notch.",
+      "description": "A small seamless looping GIF with soft green, teal and violet color drifts, sized for the 620x352 open notch. Choose where to show it (notch or music card) in the notch settings after applying.",
+      "homepage": "https://github.com/koyhq/koy",
+      "updated": "2026-11-12",
+      "downloads": 0,
+      "package": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.aurora-background-1.0.0.koyext",
+        "sha256": "4da91ca0803abd2a89b70117831bdeb74a29a2d32cebfdf43b7b6c28534f7914",
+        "size": 160727
+      },
+      "preview": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.aurora-background.png",
+        "sha256": "3a42980cc946426f65e4666c27a98216dadc1df233c05b28af3d59e7fdbc0964"
+      }
+    },
+    {
+      "id": "koyhq.high-contrast-theme",
+      "name": "High Contrast",
+      "kind": "theme",
+      "version": "1.0.0",
+      "author": "Koy",
+      "license": "GPL-3.0-or-later",
+      "summary": "Pure black surfaces, white borders and a bright yellow accent.",
+      "description": "A maximum-contrast theme for low-vision use or bright rooms: black backgrounds, white text and borders, and a yellow accent that stays visible on every surface. Changes colors only.",
+      "homepage": "https://github.com/koyhq/koy",
+      "updated": "2026-11-12",
+      "downloads": 0,
+      "package": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.high-contrast-theme-1.0.0.koyext",
+        "sha256": "4a4ed144b5b4a611a8fe4a9d35954271422a447934413aae7ecaf7580fdf8e9b",
+        "size": 2421
+      },
+      "preview": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.high-contrast-theme.png",
+        "sha256": "9ac70c976536ab825c9ec90bed959140d15288f68fe9b1013418eaa6ccd73187"
+      }
+    },
+    {
+      "id": "koyhq.minimal-profile",
+      "name": "Minimal",
+      "kind": "profile",
+      "version": "1.0.0",
+      "author": "Koy",
+      "license": "GPL-3.0-or-later",
+      "summary": "Calm dark look with solid surfaces and longer focus sessions.",
+      "description": "A settings profile for a quiet setup: dark theme, Windows accent color, solid material, calm animations and 50/10/20 minute focus timers. Importing adds it to your profile library; it is applied only when you choose it in Profiles.",
+      "homepage": "https://github.com/koyhq/koy",
+      "updated": "2026-11-12",
+      "downloads": 0,
+      "package": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.minimal-profile-1.0.0.koyext",
+        "sha256": "458cc69cad20cd62338113f9a20bfa019f6853a552047cd1b202564db378aa50",
+        "size": 4646
+      },
+      "preview": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.minimal-profile.png",
+        "sha256": "e385a2c2a0b120c5758a0c550cb58b857381a20bfbd9f67615b8e3da345de852"
+      }
+    },
+    {
+      "id": "koyhq.mono-icons",
+      "name": "Mono Icons",
+      "kind": "iconpack",
+      "version": "1.0.0",
+      "author": "Koy",
+      "license": "CC-BY-SA-4.0",
+      "summary": "Simple single-color icons for common apps.",
+      "description": "A small icon pack of plain geometric single-color glyphs for popular apps: Firefox, Visual Studio Code, File Explorer, Spotify, Notepad, Calculator, Windows Terminal and Settings. Drawn from scratch; not the apps' own logos. Apps without an icon here keep their normal icon.",
+      "homepage": "https://github.com/koyhq/koy",
+      "updated": "2026-11-12",
+      "downloads": 0,
+      "package": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.mono-icons-1.0.0.koyext",
+        "sha256": "38f6bf85f827fc6e3d5ee59acc2e06171550cc2a90736fb425d582a248f2e415",
+        "size": 67671
+      },
+      "preview": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.mono-icons.png",
+        "sha256": "ccc41bc2c1964eabdd0b6f47added5abf5da383ce0efd12480165f4bf7f8de3c"
+      }
+    },
+    {
+      "id": "koyhq.nord-theme",
+      "name": "Nord",
+      "kind": "theme",
+      "version": "1.0.0",
+      "author": "Koy",
+      "license": "GPL-3.0-or-later",
+      "summary": "Cool, arctic blue-gray palette with a frosty cyan accent.",
+      "description": "A calm dark theme for the Koy window and menus built around the Nord palette: deep blue-gray surfaces, soft off-white text and a frosty cyan accent. Changes colors only; sizes and layout are untouched. Palette colors are by Sven Greb (MIT).",
+      "homepage": "https://github.com/koyhq/koy",
+      "updated": "2026-11-12",
+      "downloads": 0,
+      "package": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.nord-theme-1.0.0.koyext",
+        "sha256": "3b63a8f15da4b07bc186217f93a0756e130bf2bbdfc870fdb25dfc63b06a0886",
+        "size": 2667
+      },
+      "preview": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.nord-theme.png",
+        "sha256": "e887c15b072a93584d24e471231ee056a32ee28eedbae038431788885ec2bf31"
+      }
+    },
+    {
+      "id": "koyhq.solarized-theme",
+      "name": "Solarized Dark",
+      "kind": "theme",
+      "version": "1.0.0",
+      "author": "Koy",
+      "license": "GPL-3.0-or-later",
+      "summary": "Precision-tuned dark teal palette with a blue accent.",
+      "description": "Solarized Dark colors for the Koy window and menus: dark teal surfaces, warm cream text and a blue accent, with the classic green, yellow and red status colors. Changes colors only. Palette by Ethan Schoonover (MIT).",
+      "homepage": "https://github.com/koyhq/koy",
+      "updated": "2026-11-12",
+      "downloads": 0,
+      "package": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.solarized-theme-1.0.0.koyext",
+        "sha256": "cf14ec18ffe18d031570adc761fe5b9220bac41beead2c0c01260183d8884cb7",
+        "size": 2664
+      },
+      "preview": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.solarized-theme.png",
+        "sha256": "d7e7783ff3dfa5c7d2e6dbf0320af882f881bb5a01eab666a55a8464572986bf"
+      }
+    }
+  ]
+}

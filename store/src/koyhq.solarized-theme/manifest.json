@@ -1,0 +1,10 @@
+{
+  "id": "koyhq.solarized-theme",
+  "name": "Solarized Dark",
+  "version": "1.0.0",
+  "author": "Koy",
+  "kind": "theme",
+  "license": "GPL-3.0-or-later",
+  "capabilities": [],
+  "entryKind": "data"
+}
