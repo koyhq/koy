@@ -507,6 +507,10 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             DockDodgeDelayMs = s.Dock.DodgeDelayMs;
             DockIconSize = s.Dock.IconSize > 0 ? s.Dock.IconSize : 28.0;
             DockIndicatorStyle = s.Dock.IndicatorStyle;
+            DockNewTrayIconVisibility = s.Dock.NewTrayIconVisibility == Koy.Core.Tray.TrayIconVisibility.Hidden
+                ? Koy.Core.Tray.TrayIconVisibility.Hidden
+                : Koy.Core.Tray.TrayIconVisibility.Overflow;
+            LoadTrayApps(s.Dock);
             // Tam genişlikte seçilemeyen mod ayar ekranında geçerli karşılığıyla görünür (çalışma anındaki eşlemeyle aynı).
             DockProximity = DockProximityMapping.Effective(DockStyle, DockProximity);
 
@@ -628,6 +632,51 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         }
     }
 
+    // --- TEPSİ SİMGELERİ (issue #77) ---
+    /// <summary>Kaydı olmayan (yeni) tepsi simgelerinin yeri: Overflow = tepsi penceresinde görünür, Hidden = gizli.</summary>
+    [ObservableProperty]
+    private Koy.Core.Tray.TrayIconVisibility _dockNewTrayIconVisibility = Koy.Core.Tray.TrayIconVisibilityPolicy.DefaultNewIcon;
+
+    /// <summary>Satırlardan biri değişince artar; "Dock" önekiyle kaydı ve dock'un yeniden kurulmasını tetikler.</summary>
+    [ObservableProperty]
+    private int _dockTrayAppsVersion;
+
+    public System.Collections.ObjectModel.ObservableCollection<TrayAppVisibilityRow> TrayAppRows { get; } = [];
+
+    public bool HasTrayAppRows => TrayAppRows.Count > 0;
+
+    // Kayıtlı "Shown" değerleri korunur: dock'ta satır içi gösterim gelince anlamı olacak, bugün tepsi penceresinde görünür.
+    private ValueDictionary<Koy.Core.Tray.TrayIconVisibility> _savedTrayApps = new();
+
+    private void LoadTrayApps(DockSettings dock)
+    {
+        _savedTrayApps = dock.TrayAppVisibility ?? new();
+        TrayAppRows.Clear();
+        foreach (var exe in Koy.Core.Tray.TrayIconVisibilityPolicy.SettingsApps(Koy.App.Features.Dock.Tray.TrayAppNames.Seen, _savedTrayApps.Keys))
+        {
+            var explicitRecord = _savedTrayApps.TryGetValue(exe, out var saved);
+            var visibility = explicitRecord ? saved : dock.NewTrayIconVisibility;
+            TrayAppRows.Add(new TrayAppVisibilityRow(exe, visibility != Koy.Core.Tray.TrayIconVisibility.Hidden, explicitRecord, () => DockTrayAppsVersion++));
+        }
+
+        OnPropertyChanged(nameof(HasTrayAppRows));
+    }
+
+    private ValueDictionary<Koy.Core.Tray.TrayIconVisibility> TrayAppsForSave()
+    {
+        var result = new ValueDictionary<Koy.Core.Tray.TrayIconVisibility>();
+        foreach (var row in TrayAppRows.Where(r => r.IsExplicit))
+        {
+            result[row.ExeName] = !row.IsShown
+                ? Koy.Core.Tray.TrayIconVisibility.Hidden
+                : _savedTrayApps.TryGetValue(row.ExeName, out var saved) && saved == Koy.Core.Tray.TrayIconVisibility.Shown
+                    ? Koy.Core.Tray.TrayIconVisibility.Shown
+                    : Koy.Core.Tray.TrayIconVisibility.Overflow;
+        }
+
+        return result;
+    }
+
     [ObservableProperty]
     private bool _searchRetainPrior = true;
 
@@ -664,7 +713,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     {
         base.OnPropertyChanged(e);
         if (_isLoading) return;
-        if (e.PropertyName is nameof(SelectedPageIndex) or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
+        if (e.PropertyName is nameof(SelectedPageIndex) or nameof(HasTrayAppRows) or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
             or nameof(IsResetConfirming) or nameof(UninstallAvailability) or nameof(CanUninstall) or nameof(UninstallRowDescription)
             or nameof(StartIconFileName) or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates) or nameof(DownloadProgressText))
             return;
@@ -793,7 +842,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 DodgeDelayMs = DockDodgeDelayMs,
                 IconSize = DockIconSize,
                 IndicatorStyle = DockIndicatorStyle,
-                MiddleClickAction = MiddleClickAction
+                MiddleClickAction = MiddleClickAction,
+                NewTrayIconVisibility = DockNewTrayIconVisibility,
+                TrayAppVisibility = TrayAppsForSave()
             },
             Notch = current.Notch with
             {
