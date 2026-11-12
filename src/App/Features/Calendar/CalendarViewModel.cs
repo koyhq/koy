@@ -145,7 +145,7 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
                 HeaderTitle = date.ToString("MMMM yyyy", _culture);
                 break;
             case CalendarViewMode.Week:
-                var first = EventAgenda.WeekStart(Anchor).ToDateTime(TimeOnly.MinValue);
+                var first = EventAgenda.WeekStart(Anchor, _firstDay).ToDateTime(TimeOnly.MinValue);
                 var last = first.AddDays(6);
                 HeaderTitle = first.Month == last.Month
                     ? $"{first.Day} – {last.ToString("d MMM", _culture)}"
@@ -172,7 +172,7 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
         }
         else if (ViewMode == CalendarViewMode.Week)
         {
-            WeekDays = EventAgenda.ForWeek(all, Anchor, today).Select(BuildWeekRow).ToList();
+            WeekDays = EventAgenda.ForWeek(all, Anchor, today, _firstDay).Select(BuildWeekRow).ToList();
         }
 
         DayEvents.Clear();
