@@ -2379,5 +2379,32 @@
   <data name="NotchStyleFloating" xml:space="preserve">
     <value>Yüzen ada</value>
   </data>
+  <data name="DockEdgeTitle" xml:space="preserve">
+    <value>Ekran kenarı</value>
+  </data>
+  <data name="DockEdgeBottom" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="DockEdgeTop" xml:space="preserve">
+    <value>Üst</value>
+  </data>
+  <data name="DockEdgeLeft" xml:space="preserve">
+    <value>Sol</value>
+  </data>
+  <data name="DockEdgeRight" xml:space="preserve">
+    <value>Sağ</value>
+  </data>
+  <data name="DockLengthTitle" xml:space="preserve">
+    <value>Dock uzunluğu</value>
+  </data>
+  <data name="DockEdgeOffsetTitle" xml:space="preserve">
+    <value>Kenardan uzaklık</value>
+  </data>
+  <data name="DockInnerPaddingTitle" xml:space="preserve">
+    <value>İç dolgu</value>
+  </data>
+  <data name="DockIconSpacingTitle" xml:space="preserve">
+    <value>Simge aralığı</value>
+  </data>
 </root>
 
