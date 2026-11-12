@@ -241,6 +241,24 @@ public class SettingsProfileCodecTests
     }
 
     [Fact]
+    public void Export_clears_the_local_icon_pack_folder_and_apply_keeps_the_local_one()
+    {
+        var source = Source() with
+        {
+            Appearance = Source().Appearance with { IconPack = IconPack.Folder, IconPackFolder = @"C:\Users\ornek\Paket" },
+        };
+
+        var json = SettingsProfileCodec.Export(source, "Sunum", [ProfileSection.Appearance]);
+        Assert.DoesNotContain("ornek", json);
+
+        var current = new AppSettings { Appearance = new AppearanceSettings { IconPackFolder = @"D:\yerel" } };
+        var applied = SettingsProfileCodec.Apply(current, Profile(json), [ProfileSection.Appearance]);
+
+        Assert.Equal(IconPack.Folder, applied.Appearance.IconPack);
+        Assert.Equal(@"D:\yerel", applied.Appearance.IconPackFolder);
+    }
+
+    [Fact]
     public void Apply_keeps_the_local_app_icon_overrides()
     {
         var profile = Profile(SettingsProfileCodec.Export(Source(), "P", [ProfileSection.Appearance]));

@@ -28,6 +28,27 @@ public class DockSettingsDiffTests
     }
 
     [Fact]
+    public void Icon_pack_and_app_icon_changes_rebuild_view_models_only()
+    {
+        var baseline = new AppSettings();
+        var variants = new[]
+        {
+            new AppSettings { Appearance = new AppearanceSettings { IconPack = IconPack.Folder } },
+            new AppSettings { Appearance = new AppearanceSettings { IconPackFolder = @"C:\Simgeler" } },
+            new AppSettings { Appearance = new AppearanceSettings { AppIconOverrides = new() { ["Notepad.lnk"] = @"C:\a.png" } } },
+        };
+
+        foreach (var after in variants)
+        {
+            var d = DockSettingsDiff.Compare(baseline, after);
+            Assert.True(d.RebuildViewModels);
+            Assert.False(d.ReconcileAppBar);
+            Assert.False(d.ReconcileTaskbar);
+            Assert.False(d.ReconcileTray);
+        }
+    }
+
+    [Fact]
     public void Style_change_reconciles_appbar_but_never_the_taskbar()
     {
         var d = DockSettingsDiff.Compare(new AppSettings(), new AppSettings { Dock = new DockSettings { Style = DockStyleMode.FullWidth } });

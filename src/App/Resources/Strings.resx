@@ -2631,5 +2631,38 @@
   <data name="NotchStyleFloating" xml:space="preserve">
     <value>Floating island</value>
   </data>
+  <data name="DockItemChangeIcon" xml:space="preserve">
+    <value>Change icon...</value>
+  </data>
+  <data name="DockItemResetIcon" xml:space="preserve">
+    <value>Reset icon</value>
+  </data>
+  <data name="DockItemIconPickTitle" xml:space="preserve">
+    <value>Choose an icon for this app</value>
+  </data>
+  <data name="DockItemIconPickFilter" xml:space="preserve">
+    <value>Images (*.png;*.ico)|*.png;*.ico</value>
+  </data>
+  <data name="IconPackTitle" xml:space="preserve">
+    <value>Icon pack</value>
+  </data>
+  <data name="IconPackDesc" xml:space="preserve">
+    <value>Replace dock app icons with images from a folder. Name files like the shortcut: Firefox.png, Notepad.ico. Apps without a file keep their own icon.</value>
+  </data>
+  <data name="IconPackBuiltin" xml:space="preserve">
+    <value>Built-in</value>
+  </data>
+  <data name="IconPackFolder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="IconPackFolderChoose" xml:space="preserve">
+    <value>Choose folder...</value>
+  </data>
+  <data name="IconPackFolderNone" xml:space="preserve">
+    <value>No folder chosen</value>
+  </data>
+  <data name="IconPackFolderPickTitle" xml:space="preserve">
+    <value>Choose an icon pack folder</value>
+  </data>
 </root>
 

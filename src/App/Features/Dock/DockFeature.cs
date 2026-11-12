@@ -180,6 +180,17 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             inMemorySettings.DockItems.PinnedOrder = [.. order];
     }
 
+    /// <summary>
+    /// Uygulama başına simge değişimlerini ayar dosyasına yazar (yalnız bu alan; öteki ayarlar ezilmez).
+    /// Bellekteki ayar değiştirilmez: çağıran ReloadDock ile eski/yeni farkını (DockSettingsDiff) uygulatır.
+    /// </summary>
+    public static void SaveAppIconOverrides(ValueDictionary<string> overrides)
+    {
+        var store = new SettingsStore(SettingsStore.DefaultPath);
+        var current = store.Load();
+        store.Save(current with { Appearance = current.Appearance with { AppIconOverrides = overrides } });
+    }
+
     private void SavePinnedOrder(IReadOnlyList<string> order) =>
         SavePinnedOrder(order, null, settings);
 

@@ -487,6 +487,46 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         }
     }
 
+    // --- SİMGE PAKETİ (Görünüm sayfası; etkisi dock uygulama simgelerinde) ---
+    [ObservableProperty]
+    private IconPack _iconPack = IconPack.Builtin;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IconPackFolderName))]
+    private string _iconPackFolder = "";
+
+    /// <summary>Paket satırında gösterilen klasör adı; seçilmemişse "klasör seçilmedi".</summary>
+    public string IconPackFolderName => string.IsNullOrWhiteSpace(IconPackFolder)
+        ? Strings.Get("IconPackFolderNone")
+        : System.IO.Path.GetFileName(IconPackFolder.TrimEnd('\\', '/')) is { Length: > 0 } name ? name : IconPackFolder;
+
+    /// <summary>
+    /// "Klasör" seçilince ya da "Klasör seç" düğmesine basılınca çalışır. Yalnız kullanıcı tıklamasından çağrılır
+    /// (ayar yüklenirken dosya penceresi açılmasın). Güvenli olmayan klasör (ağ yolu vb.) kabul edilmez.
+    /// </summary>
+    [RelayCommand]
+    public void PickIconPackFolder()
+    {
+        if (_isLoading)
+            return;
+
+        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = Strings.Get("IconPackFolderPickTitle") };
+        var owner = Application.Current?.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+        var accepted = owner is not null ? dialog.ShowDialog(owner) : dialog.ShowDialog();
+
+        if (accepted == true && IconPackFiles.IsSafeFolder(dialog.FolderName))
+        {
+            // Önce klasör, sonra tür: tek geçerli durum olarak kaydedilir.
+            IconPackFolder = dialog.FolderName;
+            IconPack = IconPack.Folder;
+        }
+        else if (!IconPackFiles.IsSafeFolder(IconPackFolder))
+        {
+            // İptal edildi ve elde geçerli klasör yok: "Klasör" boş kalmasın, yerleşiğe dön.
+            IconPack = IconPack.Builtin;
+        }
+    }
+
     [ObservableProperty]
     private bool _dockShowFolders = true;
 
@@ -871,6 +911,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             MaterialReadabilityGuard = s.Appearance.MaterialReadabilityGuard;
             NotchFollowsMaterial = s.Notch.FollowsMaterial;
             CornerRadius = CornerSetting.ToStored(CornerSetting.Resolve(s.Appearance.CornerRadius));
+            IconPack = s.Appearance.IconPack;
+            IconPackFolder = s.Appearance.IconPackFolder ?? "";
             AnimationSpeed = s.Appearance.AnimationSpeed;
             RespectReduceMotion = s.Appearance.RespectReduceMotion;
             BatterySaverReduceMotion = s.Appearance.BatterySaverReduceMotion;
@@ -1083,7 +1125,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             or nameof(SettingsSearchNoResult) or nameof(ShowChangedOnly) or nameof(CanResetPage) or nameof(IsPageResetConfirming) or nameof(PageResetDone)
             or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
             or nameof(IsResetConfirming) or nameof(UninstallAvailability) or nameof(CanUninstall) or nameof(UninstallRowDescription)
-            or nameof(StartIconFileName) or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates) or nameof(DownloadProgressText))
+            or nameof(StartIconFileName) or nameof(IconPackFolderName) or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates) or nameof(DownloadProgressText))
             return;
 
         SaveSettings();
@@ -1125,6 +1167,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         name is not null && name != nameof(DockEnabled) &&
         (name.StartsWith("Dock", StringComparison.Ordinal) ||
          name is nameof(HideWindowsTaskbar) or nameof(BatterySaverReduceMotion) or nameof(MiddleClickAction) or nameof(Material)
+             or nameof(IconPack) or nameof(IconPackFolder)
              or nameof(MaterialReadabilityGuard)
              or nameof(AnimationSpeed) or nameof(RespectReduceMotion));
 
@@ -1266,6 +1309,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 Material = Material,
                 MaterialReadabilityGuard = MaterialReadabilityGuard,
                 CornerRadius = CornerRadius,
+                IconPack = IconPack,
+                IconPackFolder = IconPackFolder,
                 AnimationSpeed = AnimationSpeed,
                 RespectReduceMotion = RespectReduceMotion,
                 BatterySaverReduceMotion = BatterySaverReduceMotion,

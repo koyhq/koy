@@ -59,6 +59,9 @@ public sealed record AppearanceSettings
     /// <summary>Arayüz simge kaynağı: yerleşik ya da kullanıcı klasörü (bkz. IconPack).</summary>
     public IconPack IconPack { get; set; } = IconPack.Builtin;
 
+    /// <summary>Simge paketi klasörü (IconPack.Folder iken). Bu makineye özgüdür: profil dışa aktarımına yazılmaz.</summary>
+    public string IconPackFolder { get; set; } = "";
+
     /// <summary>Uygulama başına simge değişimi (anahtar: kısayol adı, değer: doğrulanmış simge yolu). Bkz. AppIconOverrides.</summary>
     public ValueDictionary<string> AppIconOverrides { get; set; } = new();
 

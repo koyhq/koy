@@ -44,6 +44,7 @@ public sealed record AppSettings
         General ??= new();
         Appearance ??= new();
         Appearance.AppIconOverrides ??= new();
+        Appearance.IconPackFolder ??= "";
         Appearance.Motion ??= new();
         Dock ??= new();
         DockItems ??= new();

@@ -224,11 +224,40 @@ public sealed partial class DockItemViewModel : DockEntryViewModel
             OnPropertyChanged(nameof(SingleWindow));
         }
 
-        if (Icon is null && model.IconData is { Length: > 0 })
+        if (_customIcon is null && Icon is null && model.IconData is { Length: > 0 })
         {
             Icon = LoadImage(model.IconData);
         }
     }
+
+    // Kullanıcının ya da simge paketinin verdiği simge; doluyken pencereden gelen simge Icon'u ezmez.
+    private ImageSource? _customIcon;
+
+    /// <summary>Ayarlarda bu uygulamaya ait kendi simge değişimi var (menüde "Simgeyi sıfırla" etkin olur).</summary>
+    public bool HasIconOverride { get; private set; }
+
+    /// <summary>Simgenin sahibi dock; "Simgeyi değiştir / sıfırla" ayara yazmayı ona bırakır.</summary>
+    public DockViewModel? IconOwner { get; set; }
+
+    /// <summary>Değişim ya da paket simgesini uygular; null verilirse uygulamanın kendi simgesine dönülür.</summary>
+    public void ApplyAppIcon(ImageSource? custom, bool hasOverride)
+    {
+        HasIconOverride = hasOverride;
+        OnPropertyChanged(nameof(HasIconOverride));
+        var hadCustom = _customIcon is not null;
+        _customIcon = custom;
+
+        if (custom is not null)
+            Icon = custom;
+        else if (hadCustom)
+            Icon = Model.IconData is { Length: > 0 } ? LoadImage(Model.IconData) : null;
+    }
+
+    [RelayCommand]
+    private void ChangeIcon() => IconOwner?.ChangeAppIcon(this);
+
+    [RelayCommand]
+    private void ResetIcon() => IconOwner?.ResetAppIcon(this);
 
     [RelayCommand]
     private void Click()

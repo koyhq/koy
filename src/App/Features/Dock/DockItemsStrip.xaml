@@ -63,6 +63,12 @@
                             <MenuItem Header="{x:Static res:Strings.LaunchNewInstance}"
                                       Command="{Binding MiddleClickCommand}"/>
                             <Separator/>
+                            <MenuItem Header="{x:Static res:Strings.DockItemChangeIcon}"
+                                      Command="{Binding ChangeIconCommand}"/>
+                            <MenuItem Header="{x:Static res:Strings.DockItemResetIcon}"
+                                      Command="{Binding ResetIconCommand}"
+                                      IsEnabled="{Binding HasIconOverride}"/>
+                            <Separator/>
                             <MenuItem Header="{x:Static res:Strings.Close}"
                                       Command="{Binding CloseCommand}"/>
                             <MenuItem Header="{x:Static res:Strings.EndTask}"
