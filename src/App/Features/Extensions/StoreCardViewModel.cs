@@ -181,22 +181,22 @@ public sealed partial class StoreCardViewModel : ObservableObject
     private static string VersionOf(StoreEntryView view)
     {
         if (view.IsInstalled && view.HasUpdate && view.AvailableVersion is { } available)
-            return string.Format(Strings.Get("ExtVersionUpdateFormat"), view.InstalledVersion, available);
+            return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("ExtVersionUpdateFormat"), view.InstalledVersion, available);
 
         var version = view.InstalledVersion ?? view.AvailableVersion;
-        return version is null ? "" : string.Format(Strings.Get("ExtVersionFormat"), version);
+        return version is null ? "" : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("ExtVersionFormat"), version);
     }
 
     private static string DetailsOf(StoreEntryView view)
     {
         var lines = new List<string>();
         if (view.IsInstalled && view.InstalledVersion is { } installed)
-            lines.Add(string.Format(Strings.Get("ExtInstalledVersion"), installed));
+            lines.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("ExtInstalledVersion"), installed));
         if (view.Item is { } item)
         {
-            lines.Add(string.Format(Strings.Get("ExtUpdatedFormat"), item.Updated.ToString("d", System.Globalization.CultureInfo.CurrentUICulture)));
+            lines.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("ExtUpdatedFormat"), item.Updated.ToString("d", System.Globalization.CultureInfo.CurrentCulture)));
             if (item.Downloads > 0)
-                lines.Add(string.Format(Strings.Get("ExtDownloadsFormat"), item.Downloads));
+                lines.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("ExtDownloadsFormat"), item.Downloads));
         }
 
         return string.Join(" · ", lines);
@@ -238,7 +238,7 @@ public sealed partial class StoreCardViewModel : ObservableObject
     private void ToggleExpanded() => IsExpanded = !IsExpanded;
 
     [RelayCommand]
-    private void OpenHomepage() => _owner.OpenHomepage(this);
+    private void OpenHomepage() => ExtensionStoreViewModel.OpenHomepage(this);
 
     internal void Say(string text, bool error)
     {

@@ -33,19 +33,19 @@ public sealed class SignalBarsIcon : Control
         set => SetValue(BarsProperty, value);
     }
 
-    protected override Size MeasureOverride(Size availableSize) =>
+    protected override Size MeasureOverride(Size constraint) =>
         new(Count * BarWidth + (Count - 1) * BarGap, FullHeight);
 
-    protected override void OnRender(DrawingContext dc)
+    protected override void OnRender(DrawingContext drawingContext)
     {
         var filled = Foreground;
         for (var i = 0; i < Count; i++)
         {
             var height = FullHeight * (i + 1) / Count;
             var rect = new Rect(i * (BarWidth + BarGap), FullHeight - height, BarWidth, height);
-            dc.PushOpacity(i < Bars ? 1.0 : 0.28);
-            dc.DrawRoundedRectangle(filled, null, rect, 1, 1);
-            dc.Pop();
+            drawingContext.PushOpacity(i < Bars ? 1.0 : 0.28);
+            drawingContext.DrawRoundedRectangle(filled, null, rect, 1, 1);
+            drawingContext.Pop();
         }
     }
 }

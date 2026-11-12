@@ -15,7 +15,7 @@ public static class WindowStyles
         var handle = new HWND(hwnd);
         var exStyle = (WINDOW_EX_STYLE)PInvoke.GetWindowLong(handle, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
         exStyle |= WINDOW_EX_STYLE.WS_EX_TOOLWINDOW | WINDOW_EX_STYLE.WS_EX_NOACTIVATE;
-        PInvoke.SetWindowLong(handle, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, (int)exStyle);
+        _ = PInvoke.SetWindowLong(handle, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, (int)exStyle);
 
         PInvoke.SetWindowPos(
             handle,
@@ -41,7 +41,7 @@ public static class WindowStyles
         else
             exStyle &= ~WINDOW_EX_STYLE.WS_EX_NOACTIVATE;
 
-        PInvoke.SetWindowLong(handle, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, (int)exStyle);
+        _ = PInvoke.SetWindowLong(handle, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, (int)exStyle);
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public static class WindowStyles
         else
             exStyle &= ~WINDOW_EX_STYLE.WS_EX_TRANSPARENT;
 
-        PInvoke.SetWindowLong(handle, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, (int)exStyle);
+        _ = PInvoke.SetWindowLong(handle, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, (int)exStyle);
         PInvoke.SetWindowPos(
             handle,
             HWND.Null,
@@ -139,7 +139,7 @@ public static class WindowStyles
     {
         if (hwnd == 0) return 0;
         uint pid = 0;
-        unsafe { PInvoke.GetWindowThreadProcessId(new HWND(hwnd), &pid); }
+        unsafe { _ = PInvoke.GetWindowThreadProcessId(new HWND(hwnd), &pid); }
         return pid;
     }
 

@@ -24,7 +24,7 @@ public sealed class ShellCommandSearchSource(ISearchShell shell, Func<string, st
         var shown = SearchCommandSafety.ForDisplay(query.Raw);
         return
         [
-            new SearchResult("exec:" + executable + " " + arguments, Name, string.Format(t("SearchRunCommand"), shown), () => shell.Run(executable, arguments))
+            new SearchResult("exec:" + executable + " " + arguments, Name, string.Format(System.Globalization.CultureInfo.CurrentCulture, t("SearchRunCommand"), shown), () => shell.Run(executable, arguments))
             {
                 Glyph = SearchGlyph.Terminal,
                 CategoryRelevance = SearchRelevance.Highest,
@@ -118,7 +118,7 @@ public sealed class ShellCommandSearchSource(ISearchShell shell, Func<string, st
     private bool HasExecutableExtension(string command) =>
         Extensions().Any(e => command.EndsWith(e, StringComparison.OrdinalIgnoreCase));
 
-    private IReadOnlyList<string> Extensions()
+    private string[] Extensions()
     {
         var value = shell.GetEnvironmentVariable("PATHEXT");
         return string.IsNullOrWhiteSpace(value) ? DefaultExtensions : value.Split(';', StringSplitOptions.RemoveEmptyEntries);
@@ -152,8 +152,8 @@ public sealed class LocationSearchSource(ISearchShell shell, Func<string, string
             return [];
 
         var title = url.Scheme == Uri.UriSchemeMailto
-            ? string.Format(t("SearchSendMail"), text[(text.IndexOf(':') + 1)..])
-            : string.Format(t("SearchGoTo"), text);
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, t("SearchSendMail"), text[(text.IndexOf(':') + 1)..])
+            : string.Format(System.Globalization.CultureInfo.CurrentCulture, t("SearchGoTo"), text);
         var target = url.AbsoluteUri;
         return
         [
@@ -167,7 +167,7 @@ public sealed class LocationSearchSource(ISearchShell shell, Func<string, string
     }
 
     private SearchResult Local(string text, string path, SearchGlyph glyph) =>
-        new("path:" + path, Name, string.Format(t("SearchOpen"), text), () => shell.Open(path))
+        new("path:" + path, Name, string.Format(System.Globalization.CultureInfo.CurrentCulture, t("SearchOpen"), text), () => shell.Open(path))
         {
             Glyph = glyph,
             CategoryRelevance = SearchRelevance.Highest,
@@ -386,7 +386,7 @@ public sealed class FileSearchSource(IFileSearchService service, ISearchShell sh
         };
     }
 
-    private IEnumerable<SearchResult> Build(SearchQuery query, IReadOnlyList<IndexedItem> items) => items
+    private List<SearchResult> Build(SearchQuery query, IReadOnlyList<IndexedItem> items) => items
         .GroupBy(item => CategoryKey(item.Path, item.IsFolder))
         .SelectMany(group => group.Take(PerCategory).Select(item => ToResult(query, item, t(group.Key))))
         .ToList();
@@ -518,9 +518,9 @@ public sealed class KillSearchSource(
 
         return _snapshot
             .Where(p => SearchText.Fold(p.Name).Contains(term, StringComparison.Ordinal))
-            .Select(p => new SearchResult("kill:" + p.Id, Name, string.Format(t("SearchCloseProcess"), p.Name), () => requestClose(p))
+            .Select(p => new SearchResult("kill:" + p.Id, Name, string.Format(System.Globalization.CultureInfo.CurrentCulture, t("SearchCloseProcess"), p.Name), () => requestClose(p))
             {
-                Subtitle = string.Format(t("SearchProcessId"), p.Id),
+                Subtitle = string.Format(System.Globalization.CultureInfo.CurrentCulture, t("SearchProcessId"), p.Id),
                 Glyph = SearchGlyph.Process,
                 CategoryRelevance = SearchRelevance.Moderate,
                 Relevance = SearchText.Fold(p.Name) == term ? 1 : 0.9,

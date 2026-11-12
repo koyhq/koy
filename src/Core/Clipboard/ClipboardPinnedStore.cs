@@ -9,7 +9,7 @@ public sealed class ClipboardPinnedStore
 
     public ClipboardPinnedStore(string? path = null, Action<string, Exception>? onError = null) =>
         _file = new JsonListFile<ClipboardItem>(
-            path ?? JsonListFile<ClipboardItem>.InSettingsFolder("clipboard-pinned.json"),
+            path ?? JsonListFile.InSettingsFolder("clipboard-pinned.json"),
             DataJsonContext.Default.ListClipboardItem,
             onError);
 

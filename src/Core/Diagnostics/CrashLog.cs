@@ -23,7 +23,7 @@ public static class CrashLog
     public static string Format(string source, object? error, DateTime now)
     {
         var sb = new StringBuilder();
-        sb.Append('[').Append(now.ToString("yyyy-MM-dd HH:mm:ss")).Append("] ").AppendLine(source);
+        sb.Append('[').Append(now.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)).Append("] ").AppendLine(source);
 
         if (error is Exception ex)
         {

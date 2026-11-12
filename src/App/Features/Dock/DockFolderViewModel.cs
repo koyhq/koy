@@ -45,7 +45,10 @@ public sealed partial class DockFolderViewModel : DockEntryViewModel
 
     public ObservableCollection<DockItemViewModel> Items { get; } = [];
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "XAML binding")]
     public string RenameTooltip => Resources.Strings.Get("DockFolderRename");
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "XAML binding")]
     public string DissolveTooltip => Resources.Strings.Get("DockFolderDissolve");
 
     /// <summary>

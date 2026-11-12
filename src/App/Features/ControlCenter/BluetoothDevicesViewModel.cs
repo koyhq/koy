@@ -234,7 +234,7 @@ public sealed partial class BluetoothDevicesViewModel : ObservableObject, IDispo
     }
 
     // Koleksiyonu yerinde günceller: satır nesneleri korunur (busy / hata durumu kaybolmaz), liste titremez.
-    private static void Reconcile(ObservableCollection<BluetoothDeviceRowViewModel> target, IReadOnlyList<BluetoothDeviceRowViewModel> desired)
+    private static void Reconcile(ObservableCollection<BluetoothDeviceRowViewModel> target, List<BluetoothDeviceRowViewModel> desired)
     {
         for (var i = target.Count - 1; i >= 0; i--)
         {

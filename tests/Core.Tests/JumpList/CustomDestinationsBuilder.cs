@@ -7,8 +7,9 @@ namespace Koy.Core.Tests.JumpList;
 /// ShellLink akışı yalnız yapıyı taşır (başlık, isteğe bağlı kimlik listesi / bağlantı bilgisi, dizeler, uç blok);
 /// içeriği anlamlı bir kısayol değildir.
 /// </summary>
-internal sealed class CustomDestinationsBuilder
+internal sealed class CustomDestinationsBuilder : IDisposable
 {
+    public void Dispose() => _body.Dispose();
     public static readonly byte[] ShellLinkClsid =
         [0x01, 0x14, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46];
 

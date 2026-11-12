@@ -27,8 +27,9 @@ namespace Koy.App.Features.Dock;
 /// Açıldığında Windows görev çubuğunu gizler, kapandığında güvenle geri yükler (AGENTS.md #7 & #12).
 /// Çoklu monitör ortamında hedef ekranların her biri için bağımsız bir DockWindow örneği yönetir (M6.2).
 /// </summary>
-public sealed class DockFeature(AppSettings settings, SharedServices services) : IFeature
+public sealed class DockFeature(AppSettings settings, SharedServices services) : IFeature, IDisposable
 {
+    public void Dispose() => Stop();
     private sealed class DockWindowState : IDisposable
     {
         public required DisplayMonitor Monitor { get; set; }

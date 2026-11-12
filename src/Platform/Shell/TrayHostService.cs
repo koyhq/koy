@@ -219,7 +219,7 @@ public sealed class TrayHostService : ITrayService
 
         var owner = new HWND(icon.OwnerHwnd);
         uint processId = 0;
-        PInvoke.GetWindowThreadProcessId(owner, &processId);
+        _ = PInvoke.GetWindowThreadProcessId(owner, &processId);
         // Son girdiyi Koy aldığı için öne geçme hakkını uygulamaya devredebilir; menüsü ve penceresi öne gelsin.
         if (processId != 0)
             PInvoke.AllowSetForegroundWindow(processId);
@@ -452,7 +452,7 @@ public sealed class TrayHostService : ITrayService
         if (data.OwnerHwnd != 0)
         {
             uint processId = 0;
-            PInvoke.GetWindowThreadProcessId(new HWND(data.OwnerHwnd), &processId);
+            _ = PInvoke.GetWindowThreadProcessId(new HWND(data.OwnerHwnd), &processId);
             // Koy'un kendi simgesi (dock kapalıyken menüye erişim için) dock'un tepsisinde gösterilmez.
             if (TrayHostPolicy.IsOwnIcon(processId, _ownProcessId))
                 return true;
@@ -478,7 +478,7 @@ public sealed class TrayHostService : ITrayService
         return success;
     }
 
-    private unsafe LRESULT Forward(uint msg, WPARAM wParam, LPARAM lParam)
+    private static unsafe LRESULT Forward(uint msg, WPARAM wParam, LPARAM lParam)
     {
         var explorer = ShellTrayLocator.FindExplorerTray();
         if (explorer.IsNull)
@@ -546,7 +546,7 @@ public sealed class TrayHostService : ITrayService
     private unsafe string GetAppName(nint ownerHwnd)
     {
         uint processId = 0;
-        PInvoke.GetWindowThreadProcessId(new HWND(ownerHwnd), &processId);
+        _ = PInvoke.GetWindowThreadProcessId(new HWND(ownerHwnd), &processId);
         if (processId == 0)
             return string.Empty;
 

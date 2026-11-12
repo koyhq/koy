@@ -35,8 +35,8 @@ public class CrashLogTests
         var path = Path.Combine(dir, "alt", "crash.log");
         try
         {
-            CrashLog.WriteTo(path, "A", new Exception("bir"));
-            CrashLog.WriteTo(path, "B", new Exception("iki"));
+            CrashLog.WriteTo(path, "A", new InvalidOperationException("bir"));
+            CrashLog.WriteTo(path, "B", new InvalidOperationException("iki"));
 
             var content = File.ReadAllText(path);
             Assert.Contains("bir", content);
@@ -51,7 +51,7 @@ public class CrashLogTests
     [Fact]
     public void WriteTo_GecersizYolIstisnaFirlatmaz()
     {
-        CrashLog.WriteTo("Z:\\olmayan\\\0\\crash.log", "X", new Exception("x"));
+        CrashLog.WriteTo("Z:\\olmayan\\\0\\crash.log", "X", new InvalidOperationException("x"));
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class CrashLogTests
         {
             CrashLog.LogPath = path;
             var ran = false;
-            CrashLog.Guard("test", () => { ran = true; throw new Exception("sizmamali"); });
+            CrashLog.Guard("test", () => { ran = true; throw new InvalidOperationException("sizmamali"); });
 
             Assert.True(ran);
             Assert.Contains("sizmamali", File.ReadAllText(path));

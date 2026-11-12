@@ -81,16 +81,18 @@ public sealed class SearchPanelTests : IDisposable
         Assert.Equal(SearchLayout.MaxResults, list.Count);
     }
 
+    private static readonly string[] TestCategories = ["A", "B", "C"];
+
     [Fact]
     public void First_category_gets_at_most_half_and_every_category_is_shown()
     {
-        var results = new[] { "A", "B", "C" }.SelectMany(c => Enumerable.Range(0, 20).Select(i => R(c + i, c,
+        var results = TestCategories.SelectMany(c => Enumerable.Range(0, 20).Select(i => R(c + i, c,
             c == "A" ? SearchRelevance.High : c == "B" ? SearchRelevance.Moderate : SearchRelevance.Low)));
 
         var list = SearchLayout.Arrange(results);
 
         Assert.Equal(8, list.Count(r => r.Category == "A")); // 15 / 2 yukarı
-        Assert.True(list.Count(r => r.Category == "C") >= 1);
+        Assert.Contains(list, r => r.Category == "C");
         Assert.True(list.Count <= SearchLayout.MaxResults);
     }
 
@@ -460,7 +462,7 @@ public sealed class SearchPanelTests : IDisposable
         Assert.Null(history.Suggest(""));
     }
 
-    private SearchPanelController OpenWithHistory(SearchHistory history, params SearchResult[] results)
+    private static SearchPanelController OpenWithHistory(SearchHistory history, params SearchResult[] results)
     {
         var panel = new SearchPanelController([new FakeSource(results)], history: history, historyCategory: "Son", removeLabel: "Sil");
         panel.Open();

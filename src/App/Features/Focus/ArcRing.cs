@@ -50,7 +50,7 @@ public sealed class ArcRing : FrameworkElement
         set => SetValue(FillBrushProperty, value);
     }
 
-    protected override void OnRender(DrawingContext dc)
+    protected override void OnRender(DrawingContext drawingContext)
     {
         var size = Math.Min(ActualWidth, ActualHeight);
         var radius = (size - Thickness) / 2;
@@ -60,7 +60,7 @@ public sealed class ArcRing : FrameworkElement
         var center = new Point(ActualWidth / 2, ActualHeight / 2);
 
         if (TrackBrush is not null)
-            dc.DrawEllipse(null, new Pen(TrackBrush, Thickness), center, radius, radius);
+            drawingContext.DrawEllipse(null, new Pen(TrackBrush, Thickness), center, radius, radius);
 
         var progress = Math.Clamp(Progress, 0, 1);
         if (FillBrush is null || progress <= 0)
@@ -69,7 +69,7 @@ public sealed class ArcRing : FrameworkElement
         var pen = new Pen(FillBrush, Thickness) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
         if (progress >= 0.999)
         {
-            dc.DrawEllipse(null, pen, center, radius, radius);
+            drawingContext.DrawEllipse(null, pen, center, radius, radius);
             return;
         }
 
@@ -85,6 +85,6 @@ public sealed class ArcRing : FrameworkElement
         }
 
         geometry.Freeze();
-        dc.DrawGeometry(null, pen, geometry);
+        drawingContext.DrawGeometry(null, pen, geometry);
     }
 }

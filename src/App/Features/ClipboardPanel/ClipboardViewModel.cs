@@ -77,9 +77,9 @@ public sealed partial class ClipboardItemViewModel : ObservableObject
         var (unit, value) = ClipboardDisplay.Age(copiedAt, now);
         return unit switch
         {
-            AgeUnit.Minutes => string.Format(Strings.Get("AgeMinutes"), value),
-            AgeUnit.Hours => string.Format(Strings.Get("AgeHours"), value),
-            AgeUnit.Days => string.Format(Strings.Get("AgeDays"), value),
+            AgeUnit.Minutes => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("AgeMinutes"), value),
+            AgeUnit.Hours => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("AgeHours"), value),
+            AgeUnit.Days => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("AgeDays"), value),
             _ => Strings.Get("AgeNow")
         };
     }

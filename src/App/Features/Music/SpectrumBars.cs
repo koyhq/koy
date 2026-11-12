@@ -164,7 +164,7 @@ public sealed class SpectrumBars : FrameworkElement
         return new Size(count > 0 ? count * BarWidth + (count - 1) * Gap : 0, 0);
     }
 
-    protected override void OnRender(DrawingContext dc)
+    protected override void OnRender(DrawingContext drawingContext)
     {
         var rawLevels = Feed?.Levels;
         if (rawLevels is null || rawLevels.Length == 0)
@@ -191,19 +191,19 @@ public sealed class SpectrumBars : FrameworkElement
                 case NotchVisualizerStyle.Wave:
                     var midY = height / 2;
                     var halfH = Math.Max(MinBar / 2, Math.Round((level * height) / 2));
-                    dc.DrawRoundedRectangle(fill, null, new Rect(x, midY - halfH, barWidth, halfH * 2), radius, radius);
+                    drawingContext.DrawRoundedRectangle(fill, null, new Rect(x, midY - halfH, barWidth, halfH * 2), radius, radius);
                     break;
 
                 case NotchVisualizerStyle.Dots:
                     var dotBarHeight = Math.Max(MinBar, Math.Round(level * height));
                     var dotY = Math.Max(radius, Math.Min(height - radius, height - dotBarHeight));
-                    dc.DrawEllipse(fill, null, new Point(x + radius, dotY), radius, radius);
+                    drawingContext.DrawEllipse(fill, null, new Point(x + radius, dotY), radius, radius);
                     break;
 
                 case NotchVisualizerStyle.Bars:
                 default:
                     var barHeight = Math.Max(MinBar, Math.Round(level * height));
-                    dc.DrawRoundedRectangle(fill, null, new Rect(x, height - barHeight, barWidth, barHeight), radius, radius);
+                    drawingContext.DrawRoundedRectangle(fill, null, new Rect(x, height - barHeight, barWidth, barHeight), radius, radius);
                     break;
             }
         }

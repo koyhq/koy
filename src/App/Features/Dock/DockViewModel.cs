@@ -244,6 +244,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     public bool ShowSmallTray => RightSection.ShowSmallTray;
 
     /// <summary>Küçük tepsi okunun genişliği (DIP).</summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "XAML binding")]
     public double SmallTrayWidth => DockRightSection.SmallTrayWidthDip;
 
     // Son kullanılanlar: yığın düğmesi; liste yalnız düğmeye tıklanınca okunur (sürekli izleme yok), kapanınca bırakılır.
@@ -907,6 +908,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     private void OpenSettings()
     {
         KoyWindow.ShowInstance(2);

@@ -431,7 +431,7 @@ public class SearchSourceTests
                 for (var i = 0; i < 300; i++)
                 {
                     _ = source.IsBusy;
-                    source.Search(Q("rapor" + i % 7)).ToList();
+                    _ = source.Search(Q("rapor" + i % 7)).ToList();
                     if (i % 25 == 0)
                         source.Release();
                 }
@@ -445,7 +445,7 @@ public class SearchSourceTests
         for (var i = 0; i < 300; i++)
         {
             _ = source.IsBusy;
-            source.Search(Q("belge" + i % 5)).ToList();
+            _ = source.Search(Q("belge" + i % 5)).ToList();
         }
 
         await worker;
@@ -491,7 +491,7 @@ public class SearchSourceTests
         var calls = 0;
         var source = Kill([], () => ++calls);
 
-        source.Search(Q("kill note")).Single();
+        _ = source.Search(Q("kill note")).Single();
         source.Search(Q("kill notep"));
 
         Assert.Equal(1, calls);

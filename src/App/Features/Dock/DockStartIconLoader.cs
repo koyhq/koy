@@ -54,7 +54,7 @@ internal static class DockStartIconLoader
         }
     }
 
-    private static ImageSource LoadBitmap(string path)
+    private static BitmapImage LoadBitmap(string path)
     {
         var bitmap = new BitmapImage();
         bitmap.BeginInit();
