@@ -1572,6 +1572,15 @@
   <data name="AdvancedWarning" xml:space="preserve">
     <value>Deneyimli kullanıcılar için. Geçersiz değer asla kaydedilmez; değişiklik çentiği ve dock'u yeniden kurar.</value>
   </data>
+  <data name="DeveloperModeTitle" xml:space="preserve">
+    <value>Gelişmiş ayarları göster</value>
+  </data>
+  <data name="DeveloperModeDesc" xml:space="preserve">
+    <value>Sol menüye gelişmiş yapılandırma sekmesini ekler</value>
+  </data>
+  <data name="AdvancedFilterPlaceholder" xml:space="preserve">
+    <value>Ayar adı veya anahtar ara...</value>
+  </data>
   <data name="AdvancedFilterHint" xml:space="preserve">
     <value>Anahtara göre süz</value>
   </data>

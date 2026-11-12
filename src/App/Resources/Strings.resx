@@ -1572,6 +1572,15 @@
   <data name="AdvancedWarning" xml:space="preserve">
     <value>For experienced users. Invalid values are never saved; a change rebuilds the notch and dock.</value>
   </data>
+  <data name="DeveloperModeTitle" xml:space="preserve">
+    <value>Show advanced settings</value>
+  </data>
+  <data name="DeveloperModeDesc" xml:space="preserve">
+    <value>Adds the advanced configuration tab to the sidebar</value>
+  </data>
+  <data name="AdvancedFilterPlaceholder" xml:space="preserve">
+    <value>Search setting or key...</value>
+  </data>
   <data name="AdvancedFilterHint" xml:space="preserve">
     <value>Filter by key</value>
   </data>
