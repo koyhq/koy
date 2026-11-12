@@ -10,6 +10,8 @@ public enum ProfileLibraryError
     LimitReached,
     /// <summary>Kayıtlı metin artık doğrulamadan geçmiyor (dosya elle bozulmuş).</summary>
     CorruptProfile,
+    /// <summary>İşlem geçerliydi ama profil dosyası yazılamadı (disk dolu, kilit). Kütüphane üretmez, çağıran ekler.</summary>
+    SaveFailed,
 }
 
 /// <summary>Kütüphane işleminin sonucu: hata yoksa <see cref="Profiles"/> yeni liste, <see cref="Profile"/> etkilenen kayıt.</summary>
