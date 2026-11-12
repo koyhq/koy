@@ -1,3 +1,5 @@
+using Koy.Core.Shell;
+
 namespace Koy.Core.Dock;
 
 /// <summary>
@@ -59,5 +61,48 @@ public sealed class EdgeRevealTracker(TimeSpan delay)
 
         var zone = revealed ? (int)Math.Ceiling(RevealedZoneDip * Math.Max(dpiScaleY, 1.0)) : EdgeZonePx;
         return y >= bottom - zone && y <= bottom;
+    }
+
+    /// <summary>
+    /// Fare bu monitörün seçili kenar bölgesinde mi (Bottom, Top, Left, Right).
+    /// </summary>
+    public static bool IsInZone(
+        DockEdge edge,
+        int x,
+        int y,
+        WindowRect monitorBounds,
+        bool revealed,
+        double dpiScaleX,
+        double dpiScaleY)
+    {
+        if (!Enum.IsDefined(edge)) edge = DockEdge.Bottom;
+
+        switch (edge)
+        {
+            case DockEdge.Top:
+            {
+                if (x < monitorBounds.Left || x >= monitorBounds.Right)
+                    return false;
+                var zone = revealed ? (int)Math.Ceiling(RevealedZoneDip * Math.Max(dpiScaleY, 1.0)) : EdgeZonePx;
+                return y >= monitorBounds.Top && y <= monitorBounds.Top + zone;
+            }
+            case DockEdge.Left:
+            {
+                if (y < monitorBounds.Top || y >= monitorBounds.Bottom)
+                    return false;
+                var zone = revealed ? (int)Math.Ceiling(RevealedZoneDip * Math.Max(dpiScaleX, 1.0)) : EdgeZonePx;
+                return x >= monitorBounds.Left && x <= monitorBounds.Left + zone;
+            }
+            case DockEdge.Right:
+            {
+                if (y < monitorBounds.Top || y >= monitorBounds.Bottom)
+                    return false;
+                var zone = revealed ? (int)Math.Ceiling(RevealedZoneDip * Math.Max(dpiScaleX, 1.0)) : EdgeZonePx;
+                return x >= monitorBounds.Right - zone && x <= monitorBounds.Right;
+            }
+            case DockEdge.Bottom:
+            default:
+                return IsInZone(x, y, monitorBounds.Left, monitorBounds.Right, monitorBounds.Bottom, revealed, dpiScaleY);
+        }
     }
 }

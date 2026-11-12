@@ -71,10 +71,14 @@ internal sealed class DockReorderHelper
         }
 
         var position = Position(e);
+        var isVertical = vm.IsVertical;
+        var dragDelta = isVertical ? (position.Y - _start.Y) : (position.X - _start.X);
+        var minDragDistance = isVertical ? SystemParameters.MinimumVerticalDragDistance : SystemParameters.MinimumHorizontalDragDistance;
+
         if (!_dragging)
         {
             if (!DockReorderMath.ExceedsThreshold(
-                    position.X - _start.X, position.Y - _start.Y, SystemParameters.MinimumHorizontalDragDistance))
+                    position.X - _start.X, position.Y - _start.Y, minDragDistance))
                 return;
 
             _originalIndex = vm.Items.IndexOf(_item);
@@ -84,7 +88,9 @@ internal sealed class DockReorderHelper
                 return;
             }
 
-            _slotWidth = _element.ActualWidth + _element.Margin.Left + _element.Margin.Right;
+            _slotWidth = isVertical
+                ? (_element.ActualHeight + _element.Margin.Top + _element.Margin.Bottom)
+                : (_element.ActualWidth + _element.Margin.Left + _element.Margin.Right);
             _dragging = true;
             // Sürükleme başladı: basma geri bildirimi iptal (öğe imleci izlerken içe çökük kalmaz).
             ReleasePress();
@@ -96,7 +102,7 @@ internal sealed class DockReorderHelper
         var count = vm.PinnedCount;
         var min = -_originalIndex * _slotWidth;
         var max = (count - 1 - _originalIndex) * _slotWidth;
-        _lastOffset = Math.Clamp(position.X - _start.X, min, max);
+        _lastOffset = Math.Clamp(dragDelta, min, max);
 
         var targetIndex = DockReorderMath.TargetIndex(count, _originalIndex, _lastOffset, _slotWidth);
 

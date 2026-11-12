@@ -85,6 +85,25 @@ public class EdgeRevealTrackerTests
     {
         Assert.Equal(expected, EdgeRevealTracker.IsInZone(x, y, left, right, bottom, revealed, dpi));
     }
+
+    [Theory]
+    [InlineData(DockEdge.Top, 500, 2, false, true)]
+    [InlineData(DockEdge.Top, 500, 10, false, false)]
+    [InlineData(DockEdge.Top, 500, 50, true, true)]
+    [InlineData(DockEdge.Left, 2, 500, false, true)]
+    [InlineData(DockEdge.Left, 10, 500, false, false)]
+    [InlineData(DockEdge.Left, 50, 500, true, true)]
+    [InlineData(DockEdge.Right, 1918, 500, false, true)]
+    [InlineData(DockEdge.Right, 1900, 500, false, false)]
+    [InlineData(DockEdge.Right, 1850, 500, true, true)]
+    [InlineData(DockEdge.Bottom, 500, 1078, false, true)]
+    [InlineData(DockEdge.Bottom, 500, 1050, false, false)]
+    [InlineData(DockEdge.Bottom, 500, 1010, true, true)]
+    public void IsInZone_FourEdges(DockEdge edge, int x, int y, bool revealed, bool expected)
+    {
+        var bounds = new WindowRect(0, 0, 1920, 1080);
+        Assert.Equal(expected, EdgeRevealTracker.IsInZone(edge, x, y, bounds, revealed, 1.0, 1.0));
+    }
 }
 
 public class FullscreenRuleStateTests

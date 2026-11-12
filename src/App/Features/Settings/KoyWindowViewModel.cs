@@ -408,6 +408,21 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private DockStyleMode _dockStyle = DockStyleMode.FloatingCapsule;
 
     [ObservableProperty]
+    private DockEdge _dockEdge = DockEdge.Bottom;
+
+    [ObservableProperty]
+    private int _dockLengthPercent = DockLayoutLimits.DefaultLengthPercent;
+
+    [ObservableProperty]
+    private double _dockEdgeOffsetDip = DockLayoutLimits.DefaultEdgeOffsetDip;
+
+    [ObservableProperty]
+    private double _dockInnerPaddingDip = DockLayoutLimits.DefaultInnerPaddingDip;
+
+    [ObservableProperty]
+    private double _dockIconSpacingDip = DockLayoutLimits.DefaultIconSpacingDip;
+
+    [ObservableProperty]
     private DockIconAlignment _dockIconAlignment = DockIconAlignment.Center;
 
     [ObservableProperty]
@@ -915,6 +930,11 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             NotchVisibility = s.Notch.Visibility;
             DockEnabled = s.Dock.Enabled;
             DockStyle = s.Dock.Style;
+            DockEdge = Enum.IsDefined(s.Dock.Edge) ? s.Dock.Edge : DockEdge.Bottom;
+            DockLengthPercent = DockLayoutLimits.ClampLengthPercent(s.Dock.LengthPercent);
+            DockEdgeOffsetDip = DockLayoutLimits.ClampEdgeOffsetDip(s.Dock.EdgeOffsetDip);
+            DockInnerPaddingDip = DockLayoutLimits.ClampInnerPaddingDip(s.Dock.InnerPaddingDip);
+            DockIconSpacingDip = DockLayoutLimits.ClampIconSpacingDip(s.Dock.IconSpacingDip);
             DockIconAlignment = s.Dock.IconAlignment;
             DockProximity = s.Dock.Proximity;
             DockHideInFullscreen = s.Dock.HideInFullscreen;
@@ -1313,6 +1333,11 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 HideWindowsTaskbar = HideWindowsTaskbar,
                 Enabled = DockEnabled,
                 Style = DockStyle,
+                Edge = DockEdge,
+                LengthPercent = DockLayoutLimits.ClampLengthPercent(DockLengthPercent),
+                EdgeOffsetDip = DockLayoutLimits.ClampEdgeOffsetDip(DockEdgeOffsetDip),
+                InnerPaddingDip = DockLayoutLimits.ClampInnerPaddingDip(DockInnerPaddingDip),
+                IconSpacingDip = DockLayoutLimits.ClampIconSpacingDip(DockIconSpacingDip),
                 IconAlignment = DockIconAlignment,
                 Proximity = DockProximity,
                 HideInFullscreen = DockHideInFullscreen,

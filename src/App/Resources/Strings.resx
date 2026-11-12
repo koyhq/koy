@@ -3072,5 +3072,32 @@
   <data name="RulesErrorNotFound" xml:space="preserve">
     <value>That rule no longer exists.</value>
   </data>
+  <data name="DockEdgeTitle" xml:space="preserve">
+    <value>Screen edge</value>
+  </data>
+  <data name="DockEdgeBottom" xml:space="preserve">
+    <value>Bottom</value>
+  </data>
+  <data name="DockEdgeTop" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="DockEdgeLeft" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="DockEdgeRight" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="DockLengthTitle" xml:space="preserve">
+    <value>Dock length</value>
+  </data>
+  <data name="DockEdgeOffsetTitle" xml:space="preserve">
+    <value>Distance from edge</value>
+  </data>
+  <data name="DockInnerPaddingTitle" xml:space="preserve">
+    <value>Inner padding</value>
+  </data>
+  <data name="DockIconSpacingTitle" xml:space="preserve">
+    <value>Icon spacing</value>
+  </data>
 </root>
 

@@ -96,12 +96,12 @@ Unutma: Servis yalnız gerektiğinde çalışır, son bırakan zamanlayıcıyı 
 ## Dock davranışı ve görev çubuğu güvenliği
 | Katman | Dosya | Ne yapılır |
 |---|---|---|
-| Core | `src/Core/Dock/` | Konum, yakınlık ve hiza kararları |
+| Core | `src/Core/Dock/` | Konum, yakınlık, kenar ve hiza kararları (`DockPositionResolver`, `DockLayoutMath`, `DockFitMath`) |
 | Core | `src/Core/Shell/TaskbarStatePolicy.cs`, `src/Core/Shell/WatchdogPolicy.cs` | Görev çubuğu durumu ve gözcü kararları |
 | Platform | `src/Platform/Shell/TaskbarService.cs`, `src/Platform/Shell/ShellTrayLocator.cs` | Görev çubuğunu gizleme ve geri getirme |
 | Core | `src/Core/Dock/DockClickPolicy.cs`, `src/Core/Dock/DockMonitorFilter.cs`, `src/Core/Dock/DockWindowGrouping.cs` | Sol tık eylemi kararı, "yalnız bu monitörün pencereleri" süzgeci (pencere sınırlarının merkezi); gruplama kararı henüz bağlı değil |
 | App | `src/App/Features/Dock/DockFeature.cs` | Yaşam döngüsü |
-| App | `src/App/Features/Dock/DockViewModel.cs`, `src/App/Features/Dock/DockFullWidth.xaml`, `src/App/Features/Dock/DockCapsule.xaml` | Görünüm |
+| App | `src/App/Features/Dock/DockViewModel.cs`, `src/App/Features/Dock/DockFullWidth.xaml`, `src/App/Features/Dock/DockCapsule.xaml`, `src/App/Features/Settings/Pages/DockPage.xaml` | Görünüm, kenar/uzunluk/boşluk bağlamaları ve ayar sayfası |
 | Core, App | `src/Core/Dock/DockPresentationMath.cs`, `src/App/Features/Dock/DockPresentationStyle.cs`, `src/App/Features/Dock/DockItemsStrip.xaml` | Simge göstergesi (nokta, çizgi, arka plan), rozet, kenar açma gecikmesi ve gizli dock çizgisi: karar Core'da, fırça ve köşe eşlemesi App'te |
 | Core, App | `src/Core/Dock/Items/` (`DockItemLayout`, `DockCustomCommand`, `DockClockTick`), `src/App/Features/Dock/DockExtraViewModel.cs`, `DockViewModel.ComposeExtras` | Dock öğeleri (ayırıcı, boşluk, saat, çöp kutusu, özel düğme): düzen ve komut kuralları Core'da, çizim ve çalıştırma App'te. Eklemek için dock sağ tık menüsü "Öğe ekle" |
 | Core, Platform, App | `src/Core/StartMenu/`, `src/Platform/StartMenu/StartMenuHost.cs`, `src/App/Features/Dock/DockStartMenu.cs` | Başlat düğmesinin sağ tık (Win+X) menüsü: model ve eylemler Core'da, Windows tarafı Platform'da, çizim App'te |

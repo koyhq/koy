@@ -11,13 +11,15 @@ namespace Koy.App.Features.Dock;
 
 public partial class DockWindow : Window
 {
-    private DockViewModel? ViewModel => DataContext as DockViewModel;
+    public DockViewModel? ViewModel => DataContext as DockViewModel;
     private bool _isRenderingHooked;
     private TimeSpan _lastRenderTime;
     private DisplayMonitor? _targetMonitor;
 
     public DisplayMonitor? TargetMonitor => _targetMonitor;
     public nint Handle => new WindowInteropHelper(this).Handle;
+    public bool IsVertical => ViewModel?.IsVertical == true;
+    public double ActualThickness => IsVertical ? ActualWidth : ActualHeight;
 
     /// <summary>
     /// Çalışma alanından ayrılacak yükseklik:
@@ -32,6 +34,8 @@ public partial class DockWindow : Window
                 return DockPositionResolver.FullWidthHeightDip;
             if (ViewModel?.EffectiveProximity == DockProximityMode.ReserveSpace)
                 return DockPositionResolver.SnappedHeightDip;
+            if (IsVertical)
+                return ActualWidth > 0 ? ActualWidth : 70;
             return ActualHeight > 0 ? ActualHeight : 70;
         }
     }
@@ -129,7 +133,8 @@ public partial class DockWindow : Window
         viewModel.AnimationStopped += OnAnimationStopped;
         viewModel.RequestReposition += OnRequestReposition;
         viewModel.SetMonitor(_targetMonitor);
-        viewModel.EvaluatePosition(ActualWidth);
+        var contentDimension = viewModel.IsVertical ? ActualHeight : ActualWidth;
+        viewModel.EvaluatePosition(contentDimension);
         Reposition(_targetMonitor);
     }
 
@@ -153,7 +158,8 @@ public partial class DockWindow : Window
 
     private void OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-        ViewModel?.EvaluatePosition(ActualWidth);
+        var contentDimension = ViewModel?.IsVertical == true ? ActualHeight : ActualWidth;
+        ViewModel?.EvaluatePosition(contentDimension);
         Reposition(_targetMonitor);
     }
 
@@ -169,6 +175,13 @@ public partial class DockWindow : Window
         _targetMonitor = targetMonitor ?? _targetMonitor;
 
         var hwnd = Handle;
+        var edge = ViewModel?.Edge ?? DockEdge.Bottom;
+        var isVertical = ViewModel?.IsVertical == true;
+        var edgeOffset = ViewModel?.EdgeOffsetDip ?? 0.0;
+        var capsuleMargin = (ViewModel?.IsSnapped == true) ? edgeOffset : (DockPositionResolver.FloatingBottomMarginDip + edgeOffset);
+        var lengthDip = isVertical ? ActualHeight : ActualWidth;
+        var thicknessDip = isVertical ? ActualWidth : ActualHeight;
+
         if (hwnd != 0 && _targetMonitor is { PixelWidth: > 100 } monitor)
         {
             // Pencere oluşmuşsa konum hedef ekranın kendi ölçeğiyle pikselde verilir (karışık DPI'da DIP Left/Top yanıltır).
@@ -177,13 +190,12 @@ public partial class DockWindow : Window
             if (ViewModel?.IsFullWidthMode == true)
             {
                 SizeToContent = SizeToContent.Manual;
-                WindowStyles.SetBounds(hwnd, WindowPlacementMath.BottomFullWidth(monitor, DockPositionResolver.FullWidthHeightDip), resize: sameDpi);
+                WindowStyles.SetBounds(hwnd, WindowPlacementMath.EdgeBar(monitor, edge, DockPositionResolver.FullWidthHeightDip, ViewModel?.LengthPercent ?? 100, edgeOffset), resize: sameDpi);
             }
             else
             {
                 SizeToContent = SizeToContent.WidthAndHeight;
-                var margin = (ViewModel?.IsSnapped == true) ? 0.0 : 10.0;
-                WindowStyles.SetBounds(hwnd, WindowPlacementMath.BottomCenter(monitor, ActualWidth, ActualHeight, margin), resize: false);
+                WindowStyles.SetBounds(hwnd, WindowPlacementMath.EdgeCapsule(monitor, edge, lengthDip, thicknessDip, capsuleMargin), resize: false);
             }
             return;
         }
@@ -195,31 +207,61 @@ public partial class DockWindow : Window
             var screenHeight = _targetMonitor?.HeightDip ?? SystemParameters.PrimaryScreenHeight;
             var screenLeft = _targetMonitor?.LeftDip ?? 0.0;
             var screenTop = _targetMonitor?.TopDip ?? 0.0;
+            var lengthFraction = DockLayoutLimits.ClampLengthPercent(ViewModel?.LengthPercent ?? 100) / 100.0;
 
-            Width = screenWidth;
-            Height = DockPositionResolver.FullWidthHeightDip;
-            Left = screenLeft;
-            Top = screenTop + screenHeight - DockPositionResolver.FullWidthHeightDip;
+            if (edge is DockEdge.Bottom or DockEdge.Top)
+            {
+                var width = screenWidth * lengthFraction;
+                var left = screenLeft + (screenWidth - width) / 2.0;
+                var top = edge == DockEdge.Bottom
+                    ? screenTop + screenHeight - DockPositionResolver.FullWidthHeightDip - edgeOffset
+                    : screenTop + edgeOffset;
+                Width = width;
+                Height = DockPositionResolver.FullWidthHeightDip;
+                Left = left;
+                Top = top;
+            }
+            else
+            {
+                var height = screenHeight * lengthFraction;
+                var top = screenTop + (screenHeight - height) / 2.0;
+                var left = edge == DockEdge.Left
+                    ? screenLeft + edgeOffset
+                    : screenLeft + screenWidth - DockPositionResolver.FullWidthHeightDip - edgeOffset;
+                Width = DockPositionResolver.FullWidthHeightDip;
+                Height = height;
+                Left = left;
+                Top = top;
+            }
             return;
         }
 
         SizeToContent = SizeToContent.WidthAndHeight;
 
-        // Yüzen dock: 60 px yükseklik, alttan 10 px boşluk (aşağı yapışınca alttan 0 px)
-        var bottomMargin = (ViewModel?.IsSnapped == true) ? 0.0 : 10.0;
+        var monLeft = _targetMonitor?.LeftDip ?? 0.0;
+        var monTop = _targetMonitor?.TopDip ?? 0.0;
+        var monWidth = (_targetMonitor is not null && _targetMonitor.WidthDip > 100) ? _targetMonitor.WidthDip : SystemParameters.PrimaryScreenWidth;
+        var monHeight = (_targetMonitor is not null && _targetMonitor.HeightDip > 100) ? _targetMonitor.HeightDip : SystemParameters.PrimaryScreenHeight;
 
-        if (_targetMonitor is not null && _targetMonitor.WidthDip > 100)
+        switch (edge)
         {
-            Left = Math.Max(_targetMonitor.LeftDip, _targetMonitor.LeftDip + (_targetMonitor.WidthDip - ActualWidth) / 2);
-            Top = Math.Max(_targetMonitor.TopDip, _targetMonitor.TopDip + _targetMonitor.HeightDip - ActualHeight - bottomMargin);
-        }
-        else
-        {
-            var screenWidth = SystemParameters.PrimaryScreenWidth;
-            var screenHeight = SystemParameters.PrimaryScreenHeight;
-
-            Left = Math.Max(0, (screenWidth - ActualWidth) / 2);
-            Top = Math.Max(0, screenHeight - ActualHeight - bottomMargin);
+            case DockEdge.Top:
+                Left = Math.Max(monLeft, monLeft + (monWidth - ActualWidth) / 2);
+                Top = Math.Max(monTop, monTop + capsuleMargin);
+                break;
+            case DockEdge.Left:
+                Left = Math.Max(monLeft, monLeft + capsuleMargin);
+                Top = Math.Max(monTop, monTop + (monHeight - ActualHeight) / 2);
+                break;
+            case DockEdge.Right:
+                Left = Math.Max(monLeft, monLeft + monWidth - ActualWidth - capsuleMargin);
+                Top = Math.Max(monTop, monTop + (monHeight - ActualHeight) / 2);
+                break;
+            case DockEdge.Bottom:
+            default:
+                Left = Math.Max(monLeft, monLeft + (monWidth - ActualWidth) / 2);
+                Top = Math.Max(monTop, monTop + monHeight - ActualHeight - capsuleMargin);
+                break;
         }
     }
 

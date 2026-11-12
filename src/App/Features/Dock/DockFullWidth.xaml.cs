@@ -14,8 +14,13 @@ public partial class DockFullWidth : UserControl
         InitializeComponent();
     }
 
-    // Orta sütunun gerçek genişliği ViewModel'e bildirilir: simgeler yan sütunlara taşmadan sığacak biçimde küçülür.
-    private void OnCenterSizeChanged(object sender, SizeChangedEventArgs e) => ViewModel?.ReportCenterWidth(e.NewSize.Width);
+    // Orta sütun/satırın gerçek boyutu ViewModel'e bildirilir: simgeler yan bölümlere taşmadan sığacak biçimde küçülür.
+    private void OnCenterSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (ViewModel is null) return;
+        var dimension = ViewModel.IsVertical ? e.NewSize.Height : e.NewSize.Width;
+        ViewModel.ReportCenterWidth(dimension);
+    }
 
     // Olay işlenmiş sayılır: yoksa pencerenin kendi sağ tık menüsü (Ayarlar) da açılırdı.
     private void OnStartRightClick(object sender, MouseButtonEventArgs e)
