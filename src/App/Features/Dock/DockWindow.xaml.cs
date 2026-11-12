@@ -11,13 +11,15 @@ namespace Koy.App.Features.Dock;
 
 public partial class DockWindow : Window
 {
-    private DockViewModel? ViewModel => DataContext as DockViewModel;
+    public DockViewModel? ViewModel => DataContext as DockViewModel;
     private bool _isRenderingHooked;
     private TimeSpan _lastRenderTime;
     private DisplayMonitor? _targetMonitor;
 
     public DisplayMonitor? TargetMonitor => _targetMonitor;
     public nint Handle => new WindowInteropHelper(this).Handle;
+    public bool IsVertical => ViewModel?.IsVertical == true;
+    public double ActualThickness => IsVertical ? ActualWidth : ActualHeight;
 
     /// <summary>
     /// Çalışma alanından ayrılacak yükseklik:
@@ -32,7 +34,7 @@ public partial class DockWindow : Window
                 return DockPositionResolver.FullWidthHeightDip;
             if (ViewModel?.EffectiveProximity == DockProximityMode.ReserveSpace)
                 return DockPositionResolver.SnappedHeightDip;
-            if (ViewModel?.IsVertical == true)
+            if (IsVertical)
                 return ActualWidth > 0 ? ActualWidth : 70;
             return ActualHeight > 0 ? ActualHeight : 70;
         }
@@ -175,8 +177,8 @@ public partial class DockWindow : Window
         var hwnd = Handle;
         var edge = ViewModel?.Edge ?? DockEdge.Bottom;
         var isVertical = ViewModel?.IsVertical == true;
-        var edgeOffset = ViewModel?.EdgeOffsetDip ?? 10.0;
-        var margin = (ViewModel?.IsSnapped == true) ? 0.0 : edgeOffset;
+        var edgeOffset = ViewModel?.EdgeOffsetDip ?? 0.0;
+        var capsuleMargin = (ViewModel?.IsSnapped == true) ? edgeOffset : (DockPositionResolver.FloatingBottomMarginDip + edgeOffset);
         var lengthDip = isVertical ? ActualHeight : ActualWidth;
         var thicknessDip = isVertical ? ActualWidth : ActualHeight;
 
@@ -188,12 +190,12 @@ public partial class DockWindow : Window
             if (ViewModel?.IsFullWidthMode == true)
             {
                 SizeToContent = SizeToContent.Manual;
-                WindowStyles.SetBounds(hwnd, WindowPlacementMath.EdgeBar(monitor, edge, DockPositionResolver.FullWidthHeightDip, ViewModel?.LengthPercent ?? 100, margin), resize: sameDpi);
+                WindowStyles.SetBounds(hwnd, WindowPlacementMath.EdgeBar(monitor, edge, DockPositionResolver.FullWidthHeightDip, ViewModel?.LengthPercent ?? 100, edgeOffset), resize: sameDpi);
             }
             else
             {
                 SizeToContent = SizeToContent.WidthAndHeight;
-                WindowStyles.SetBounds(hwnd, WindowPlacementMath.EdgeCapsule(monitor, edge, lengthDip, thicknessDip, margin), resize: false);
+                WindowStyles.SetBounds(hwnd, WindowPlacementMath.EdgeCapsule(monitor, edge, lengthDip, thicknessDip, capsuleMargin), resize: false);
             }
             return;
         }
@@ -205,34 +207,31 @@ public partial class DockWindow : Window
             var screenHeight = _targetMonitor?.HeightDip ?? SystemParameters.PrimaryScreenHeight;
             var screenLeft = _targetMonitor?.LeftDip ?? 0.0;
             var screenTop = _targetMonitor?.TopDip ?? 0.0;
+            var lengthFraction = DockLayoutLimits.ClampLengthPercent(ViewModel?.LengthPercent ?? 100) / 100.0;
 
-            switch (edge)
+            if (edge is DockEdge.Bottom or DockEdge.Top)
             {
-                case DockEdge.Top:
-                    Width = screenWidth;
-                    Height = DockPositionResolver.FullWidthHeightDip;
-                    Left = screenLeft;
-                    Top = screenTop + margin;
-                    break;
-                case DockEdge.Left:
-                    Width = DockPositionResolver.FullWidthHeightDip;
-                    Height = screenHeight;
-                    Left = screenLeft + margin;
-                    Top = screenTop;
-                    break;
-                case DockEdge.Right:
-                    Width = DockPositionResolver.FullWidthHeightDip;
-                    Height = screenHeight;
-                    Left = screenLeft + screenWidth - DockPositionResolver.FullWidthHeightDip - margin;
-                    Top = screenTop;
-                    break;
-                case DockEdge.Bottom:
-                default:
-                    Width = screenWidth;
-                    Height = DockPositionResolver.FullWidthHeightDip;
-                    Left = screenLeft;
-                    Top = screenTop + screenHeight - DockPositionResolver.FullWidthHeightDip - margin;
-                    break;
+                var width = screenWidth * lengthFraction;
+                var left = screenLeft + (screenWidth - width) / 2.0;
+                var top = edge == DockEdge.Bottom
+                    ? screenTop + screenHeight - DockPositionResolver.FullWidthHeightDip - edgeOffset
+                    : screenTop + edgeOffset;
+                Width = width;
+                Height = DockPositionResolver.FullWidthHeightDip;
+                Left = left;
+                Top = top;
+            }
+            else
+            {
+                var height = screenHeight * lengthFraction;
+                var top = screenTop + (screenHeight - height) / 2.0;
+                var left = edge == DockEdge.Left
+                    ? screenLeft + edgeOffset
+                    : screenLeft + screenWidth - DockPositionResolver.FullWidthHeightDip - edgeOffset;
+                Width = DockPositionResolver.FullWidthHeightDip;
+                Height = height;
+                Left = left;
+                Top = top;
             }
             return;
         }
@@ -248,20 +247,20 @@ public partial class DockWindow : Window
         {
             case DockEdge.Top:
                 Left = Math.Max(monLeft, monLeft + (monWidth - ActualWidth) / 2);
-                Top = Math.Max(monTop, monTop + margin);
+                Top = Math.Max(monTop, monTop + capsuleMargin);
                 break;
             case DockEdge.Left:
-                Left = Math.Max(monLeft, monLeft + margin);
+                Left = Math.Max(monLeft, monLeft + capsuleMargin);
                 Top = Math.Max(monTop, monTop + (monHeight - ActualHeight) / 2);
                 break;
             case DockEdge.Right:
-                Left = Math.Max(monLeft, monLeft + monWidth - ActualWidth - margin);
+                Left = Math.Max(monLeft, monLeft + monWidth - ActualWidth - capsuleMargin);
                 Top = Math.Max(monTop, monTop + (monHeight - ActualHeight) / 2);
                 break;
             case DockEdge.Bottom:
             default:
                 Left = Math.Max(monLeft, monLeft + (monWidth - ActualWidth) / 2);
-                Top = Math.Max(monTop, monTop + monHeight - ActualHeight - margin);
+                Top = Math.Max(monTop, monTop + monHeight - ActualHeight - capsuleMargin);
                 break;
         }
     }

@@ -33,6 +33,7 @@ public sealed class AppBarService : IAppBarService
     };
 
     private readonly HashSet<nint> _registeredHandles = [];
+    private readonly Dictionary<nint, DockEdge> _registeredEdges = [];
 
     // Her pencere için en son uygulanan alan: aynı alan için SETPOS tekrarlanmaz (yerleşim fırtınasında ~20 çağrı oluyordu).
     private readonly AppBarPlacementCache _placements = new();
@@ -83,6 +84,7 @@ public sealed class AppBarService : IAppBarService
         if (registered != 0)
         {
             _registeredHandles.Add(windowHandle);
+            _registeredEdges[windowHandle] = edge;
             UpdatePositionInternal(hwnd, heightDip, dpiScale, force: true, edge);
         }
     }
@@ -179,6 +181,7 @@ public sealed class AppBarService : IAppBarService
         if (windowHandle == 0 || !_registeredHandles.Remove(windowHandle))
             return;
 
+        _registeredEdges.Remove(windowHandle);
         var hwnd = new HWND(windowHandle);
         _placements.Forget(windowHandle);
         _unresolvedWorkEdge.Remove(windowHandle);
@@ -193,6 +196,16 @@ public sealed class AppBarService : IAppBarService
 
     private unsafe void UpdatePositionInternal(HWND hwnd, double heightDip, double dpiScale, bool force, DockEdge edge = DockEdge.Bottom)
     {
+        if (_registeredEdges.TryGetValue(hwnd.Value, out var prevEdge) && prevEdge != edge)
+        {
+            // Win32 AppBar: Kenar değiştiğinde eski kenarın çalışma alanını geri vermek için ABM_REMOVE
+            // ve yeni kenarda ABM_NEW zorunludur; aksi halde eski kenar payı Windows'ta asılı kalır.
+            Reregister(hwnd.Value, heightDip, dpiScale, edge);
+            return;
+        }
+
+        _registeredEdges[hwnd.Value] = edge;
+
         if (heightDip <= 0)
             heightDip = 46;
 

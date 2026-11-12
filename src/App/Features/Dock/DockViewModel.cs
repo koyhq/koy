@@ -130,6 +130,37 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     public double SeparatorHeight => IsVertical ? 1.0 : 24.0;
     public Thickness SeparatorMargin => IsVertical ? new Thickness(0, 4, 0, 4) : new Thickness(4, 0, 4, 0);
 
+    public double DodgeHandleWidth => IsVertical ? DockPositionResolver.DodgeHandleHeightDip : DockPositionResolver.DodgeHandleWidthDip;
+    public double DodgeHandleHeight => IsVertical ? DockPositionResolver.DodgeHandleWidthDip : DockPositionResolver.DodgeHandleHeightDip;
+    public HorizontalAlignment DodgeHandleHorizontalAlignment => Edge switch
+    {
+        DockEdge.Left => HorizontalAlignment.Left,
+        DockEdge.Right => HorizontalAlignment.Right,
+        _ => HorizontalAlignment.Center
+    };
+    public VerticalAlignment DodgeHandleVerticalAlignment => Edge switch
+    {
+        DockEdge.Top => VerticalAlignment.Top,
+        DockEdge.Bottom => VerticalAlignment.Bottom,
+        _ => VerticalAlignment.Center
+    };
+    public Thickness DodgeHandleMargin => Edge switch
+    {
+        DockEdge.Top => new Thickness(0, 4, 0, 0),
+        DockEdge.Left => new Thickness(4, 0, 0, 0),
+        DockEdge.Right => new Thickness(0, 0, 4, 0),
+        _ => new Thickness(0, 0, 0, 4)
+    };
+
+    public Thickness FullWidthBorderThickness => Edge switch
+    {
+        DockEdge.Top => new Thickness(0, 0, 0, 1),
+        DockEdge.Left => new Thickness(0, 0, 1, 0),
+        DockEdge.Right => new Thickness(1, 0, 0, 0),
+        _ => new Thickness(0, 1, 0, 0)
+    };
+    public Thickness FullWidthPadding => IsVertical ? new Thickness(0, 12, 0, 12) : new Thickness(12, 0, 12, 0);
+
     [ObservableProperty]
     private double _opacity = 1.0;
 
@@ -368,6 +399,14 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _ => HorizontalAlignment.Center
     };
 
+    /// <summary>Dikey tam genişlikte ikon şeridinin dikey yeri.</summary>
+    public VerticalAlignment VerticalStripAlignment => _settings.Dock.IconAlignment switch
+    {
+        DockIconAlignment.Left => VerticalAlignment.Top,
+        DockIconAlignment.Right => VerticalAlignment.Bottom,
+        _ => VerticalAlignment.Center
+    };
+
     /// <summary>Başlat düğmesinin simgesi. Ayar değişince ViewModel yeniden kurulur (DockSettingsDiff), bildirim gerekmez.</summary>
     public ImageSource? StartIcon { get; }
 
@@ -391,6 +430,17 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(SeparatorWidth));
         OnPropertyChanged(nameof(SeparatorHeight));
         OnPropertyChanged(nameof(SeparatorMargin));
+        OnPropertyChanged(nameof(DodgeHandleWidth));
+        OnPropertyChanged(nameof(DodgeHandleHeight));
+        OnPropertyChanged(nameof(DodgeHandleHorizontalAlignment));
+        OnPropertyChanged(nameof(DodgeHandleVerticalAlignment));
+        OnPropertyChanged(nameof(DodgeHandleMargin));
+        OnPropertyChanged(nameof(FullWidthBorderThickness));
+        OnPropertyChanged(nameof(FullWidthPadding));
+        OnPropertyChanged(nameof(StripAlignment));
+        OnPropertyChanged(nameof(VerticalStripAlignment));
+        foreach (var item in Items)
+            item.IsVertical = IsVertical;
         RecomputeFit();
         EvaluatePosition(_lastContentWidth);
     }
@@ -1488,6 +1538,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             }
 
             // 4. Koleksiyonu yerinde güncelle
+            foreach (var entry in desiredEntries)
+                entry.IsVertical = IsVertical;
+
             var desiredIds = new HashSet<string>(desiredEntries.Select(e => e.Id), StringComparer.OrdinalIgnoreCase);
             for (var i = Items.Count - 1; i >= 0; i--)
             {

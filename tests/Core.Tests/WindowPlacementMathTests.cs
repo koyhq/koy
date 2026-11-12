@@ -161,4 +161,37 @@ public class WindowPlacementMathTests
         Assert.Equal(500, rect.Height);
         Assert.Equal((1080 - 500) / 2, rect.Top);
     }
+
+    [Fact]
+    public void EdgeCapsule_RightEdge_PlacesVerticallyCentered()
+    {
+        var rect = WindowPlacementMath.EdgeCapsule(Main, DockEdge.Right, 500, 60, 10);
+
+        Assert.Equal(1920 - 10 - 60, rect.Left);
+        Assert.Equal(60, rect.Width);
+        Assert.Equal(500, rect.Height);
+        Assert.Equal((1080 - 500) / 2, rect.Top);
+    }
+
+    [Fact]
+    public void EdgeCapsule_TopEdge_PlacesHorizontallyCentered()
+    {
+        var rect = WindowPlacementMath.EdgeCapsule(Main, DockEdge.Top, 500, 60, 10);
+
+        Assert.Equal((1920 - 500) / 2, rect.Left);
+        Assert.Equal(10, rect.Top);
+        Assert.Equal(500, rect.Width);
+        Assert.Equal(60, rect.Height);
+    }
+
+    [Fact]
+    public void EdgeCapsule_BottomEdge_PlacesHorizontallyCentered()
+    {
+        var rect = WindowPlacementMath.EdgeCapsule(Main, DockEdge.Bottom, 500, 60, 10);
+
+        Assert.Equal((1920 - 500) / 2, rect.Left);
+        Assert.Equal(1080 - 10 - 60, rect.Top);
+        Assert.Equal(500, rect.Width);
+        Assert.Equal(60, rect.Height);
+    }
 }

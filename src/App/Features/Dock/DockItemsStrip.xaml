@@ -55,7 +55,7 @@
                     </Border.Style>
 
                     <Border.RenderTransform>
-                        <TranslateTransform X="{Binding OffsetX}"/>
+                        <TranslateTransform X="{Binding TranslateX}" Y="{Binding TranslateY}"/>
                     </Border.RenderTransform>
 
                     <Border.ContextMenu>
@@ -237,7 +237,7 @@
                             <TransformGroup>
                                 <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}"/>
                                 <ScaleTransform ScaleX="{Binding PressScale}" ScaleY="{Binding PressScale}"/>
-                                <TranslateTransform X="{Binding OffsetX}"/>
+                                <TranslateTransform X="{Binding TranslateX}" Y="{Binding TranslateY}"/>
                             </TransformGroup>
                         </Border.RenderTransform>
 

@@ -85,14 +85,36 @@ public abstract partial class DockEntryViewModel : ObservableObject
         OnPropertyChanged(nameof(PressScale));
         OnPropertyChanged(nameof(PressOpacity));
     }
+    private bool _isVertical;
+    public bool IsVertical
+    {
+        get => _isVertical;
+        set
+        {
+            if (_isVertical != value)
+            {
+                _isVertical = value;
+                OnPropertyChanged(nameof(IsVertical));
+                OnPropertyChanged(nameof(TranslateX));
+                OnPropertyChanged(nameof(TranslateY));
+            }
+        }
+    }
+
     protected readonly Spring OffsetSpring = new(0) { Stiffness = 380, Damping = 30 };
 
     public double OffsetX => OffsetSpring.Value;
+    public double OffsetY => OffsetSpring.Value;
+    public double TranslateX => IsVertical ? 0.0 : OffsetSpring.Value;
+    public double TranslateY => IsVertical ? OffsetSpring.Value : 0.0;
     public void SetTargetOffset(double target) => OffsetSpring.Target = target;
     public void SnapOffset(double offset)
     {
         OffsetSpring.SnapTo(offset);
         OnPropertyChanged(nameof(OffsetX));
+        OnPropertyChanged(nameof(OffsetY));
+        OnPropertyChanged(nameof(TranslateX));
+        OnPropertyChanged(nameof(TranslateY));
     }
 
     public bool StepOffset(double dt)
@@ -102,6 +124,9 @@ public abstract partial class DockEntryViewModel : ObservableObject
 
         var moving = OffsetSpring.Step(dt);
         OnPropertyChanged(nameof(OffsetX));
+        OnPropertyChanged(nameof(OffsetY));
+        OnPropertyChanged(nameof(TranslateX));
+        OnPropertyChanged(nameof(TranslateY));
         return moving;
     }
 
