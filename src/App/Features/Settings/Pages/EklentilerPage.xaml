@@ -1,0 +1,323 @@
+<UserControl x:Class="Koy.App.Features.Settings.Pages.EklentilerPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Koy.App.Features.Settings"
+             xmlns:ext="clr-namespace:Koy.App.Features.Extensions"
+             xmlns:res="clr-namespace:Koy.App.Resources"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:KoyWindowViewModel}">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <!-- Kart: ayar satırıyla aynı yüzey, ama arama dizinine girmez (SettingRowStyle değil) -->
+        <Style x:Key="ExtCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource KoyBgRow}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource KoyBorderHairline}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="{DynamicResource KoyRadiusRow}" />
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <!-- Etiket (tür, sürüm) -->
+        <Style x:Key="ExtChipStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource KoyBgControl}" />
+            <Setter Property="CornerRadius" Value="{DynamicResource KoyRadiusSmall}" />
+            <Setter Property="Padding" Value="6,1" />
+            <Setter Property="Margin" Value="8,0,0,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="ExtChipTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="{DynamicResource KoyFontKey}" />
+            <Setter Property="Foreground" Value="{DynamicResource KoyTextSecondary}" />
+        </Style>
+
+        <!-- Önizleme yokken tür simgesi görünür -->
+        <Style x:Key="ExtPlaceholderIconStyle" TargetType="res:KoyIcon">
+            <Setter Property="Foreground" Value="{DynamicResource KoyTextMuted}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasPreview}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Kartın iletisi: hata kırmızı, başarı ikincil renk -->
+        <Style x:Key="ExtMessageStyle" TargetType="TextBlock" BasedOn="{StaticResource SettingDescStyle}">
+            <Setter Property="Margin" Value="0,6,0,0" />
+            <Setter Property="Foreground" Value="{DynamicResource KoyTextSecondary}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding MessageIsError}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource KoyDangerText}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ExtChevronStyle" TargetType="res:KoyIcon">
+            <Setter Property="Data" Value="{StaticResource IconChevronDown}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                    <Setter Property="Data" Value="{StaticResource IconChevronUp}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel Margin="0,0,16,24">
+        <TextBlock Text="{Binding [NavExtensions], Source={x:Static res:Loc.Instance}}" Style="{StaticResource PageTitleStyle}" />
+        <TextBlock Text="{Binding [ExtensionsSubtitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource PageSubtitleStyle}" />
+
+        <!-- DOSYADAN KUR -->
+        <TextBlock Text="{Binding [ExtFromFileHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [ExtFromFileTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ExtFromFileDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Button Grid.Column="1" Content="{Binding [ExtFromFileButton], Source={x:Static res:Loc.Instance}}"
+                        Command="{Binding Extensions.InstallFromFileCommand}" IsEnabled="{Binding Extensions.CanInstallFromFile}"
+                        Style="{StaticResource SettingButtonStyle}" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <TextBlock Text="{Binding Extensions.StatusText}" Margin="2,4,0,0" TextWrapping="Wrap" FontSize="12.5" AutomationProperties.LiveSetting="Polite">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="{DynamicResource KoyTextSecondary}" />
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Extensions.HasStatus}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Extensions.StatusIsError}" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource KoyDangerText}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <!-- MAĞAZA -->
+        <TextBlock Text="{Binding [ExtStoreHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+
+        <!-- Arama ve yenile -->
+        <Grid Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <TextBox Style="{StaticResource SettingTextBoxStyle}"
+                         Text="{Binding Extensions.SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         AutomationProperties.Name="{Binding [ExtSearchPlaceholder], Source={x:Static res:Loc.Instance}}" />
+                <TextBlock Text="{Binding [ExtSearchPlaceholder], Source={x:Static res:Loc.Instance}}" IsHitTestVisible="False"
+                           Margin="11,0,0,0" VerticalAlignment="Center" FontSize="{DynamicResource KoyFontControl}"
+                           Foreground="{DynamicResource KoyTextMuted}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Extensions.SearchText}" Value="">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+            <Button Grid.Column="1" Command="{Binding Extensions.RefreshCommand}" Style="{StaticResource SettingButtonStyle}" Margin="8,0,0,0"
+                    AutomationProperties.Name="{Binding [ExtRefresh], Source={x:Static res:Loc.Instance}}">
+                <StackPanel Orientation="Horizontal">
+                    <res:KoyIcon Data="{StaticResource IconRefreshCw}" Size="14" />
+                    <TextBlock Text="{Binding [ExtRefresh], Source={x:Static res:Loc.Instance}}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- Kategori -->
+        <Border Style="{StaticResource SegmentContainerStyle}" HorizontalAlignment="Left" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton GroupName="ExtCategory" Style="{StaticResource SegRadioStyle}"
+                             Content="{Binding [ExtCategoryAll], Source={x:Static res:Loc.Instance}}"
+                             IsChecked="{Binding Extensions.CategoryKey, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=All}" />
+                <RadioButton GroupName="ExtCategory" Style="{StaticResource SegRadioStyle}"
+                             Content="{Binding [ExtCategoryTheme], Source={x:Static res:Loc.Instance}}"
+                             IsChecked="{Binding Extensions.CategoryKey, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Theme}" />
+                <RadioButton GroupName="ExtCategory" Style="{StaticResource SegRadioStyle}"
+                             Content="{Binding [ExtCategoryIconPack], Source={x:Static res:Loc.Instance}}"
+                             IsChecked="{Binding Extensions.CategoryKey, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=IconPack}" />
+                <RadioButton GroupName="ExtCategory" Style="{StaticResource SegRadioStyle}"
+                             Content="{Binding [ExtCategoryBackground], Source={x:Static res:Loc.Instance}}"
+                             IsChecked="{Binding Extensions.CategoryKey, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Background}" />
+                <RadioButton GroupName="ExtCategory" Style="{StaticResource SegRadioStyle}"
+                             Content="{Binding [ExtCategoryProfile], Source={x:Static res:Loc.Instance}}"
+                             IsChecked="{Binding Extensions.CategoryKey, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Profile}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Süzgeç ve sıralama -->
+        <Grid Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Style="{StaticResource SegmentContainerStyle}" HorizontalAlignment="Left">
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton GroupName="ExtFilter" Style="{StaticResource SegRadioStyle}"
+                                 Content="{Binding [ExtFilterAll], Source={x:Static res:Loc.Instance}}"
+                                 IsChecked="{Binding Extensions.FilterKey, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=All}" />
+                    <RadioButton GroupName="ExtFilter" Style="{StaticResource SegRadioStyle}"
+                                 Content="{Binding [ExtFilterInstalled], Source={x:Static res:Loc.Instance}}"
+                                 IsChecked="{Binding Extensions.FilterKey, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Installed}" />
+                    <RadioButton GroupName="ExtFilter" Style="{StaticResource SegRadioStyle}"
+                                 Content="{Binding Extensions.UpdatesLabel}"
+                                 IsChecked="{Binding Extensions.FilterKey, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Updates}" />
+                </StackPanel>
+            </Border>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{Binding [ExtSortLabel], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}"
+                           VerticalAlignment="Center" Margin="0,0,8,0" />
+                <ComboBox Style="{StaticResource SettingComboBoxStyle}" MinWidth="150"
+                          ItemsSource="{Binding Extensions.SortOptions}" DisplayMemberPath="Label" SelectedValuePath="Key"
+                          SelectedValue="{Binding Extensions.SortKey}"
+                          AutomationProperties.Name="{Binding [ExtSortLabel], Source={x:Static res:Loc.Instance}}" />
+            </StackPanel>
+        </Grid>
+
+        <TextBlock Text="{Binding Extensions.CountText}" Style="{StaticResource SettingDescStyle}" Margin="2,0,0,8" />
+
+        <!-- Katalog alınamadı -->
+        <Border Background="{DynamicResource KoyDangerBg}" BorderBrush="{DynamicResource KoyDangerBorder}" BorderThickness="1"
+                CornerRadius="{DynamicResource KoyRadiusRow}" Padding="14,10" Margin="0,0,0,8"
+                Visibility="{Binding Extensions.HasIndexError, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="{Binding Extensions.IndexErrorText}" Foreground="{DynamicResource KoyDangerText}" TextWrapping="Wrap" />
+        </Border>
+
+        <TextBlock Text="{Binding [ExtLoading], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="2,8,0,8"
+                   Visibility="{Binding Extensions.ShowLoading, Converter={StaticResource BoolToVis}}" />
+        <TextBlock Text="{Binding [ExtEmpty], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="2,8,0,8"
+                   Visibility="{Binding Extensions.ShowEmpty, Converter={StaticResource BoolToVis}}" />
+
+        <!-- Kartlar -->
+        <ItemsControl ItemsSource="{Binding Extensions.Cards}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type ext:StoreCardViewModel}">
+                    <Border Style="{StaticResource ExtCardStyle}" AutomationProperties.Name="{Binding Name}">
+                        <StackPanel>
+                            <!-- Karta tıklayınca ayrıntı açılır; düğmeler tıklamayı kendileri tüketir -->
+                            <Grid Background="Transparent" Cursor="Hand">
+                                <Grid.InputBindings>
+                                    <MouseBinding Gesture="LeftClick" Command="{Binding ToggleExpandedCommand}" />
+                                </Grid.InputBindings>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="144"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Önizleme -->
+                                <Border Grid.Column="0" Width="144" Height="81" VerticalAlignment="Top" CornerRadius="{DynamicResource KoyRadiusSmall}"
+                                        Background="{DynamicResource KoyBgControl}" ClipToBounds="True">
+                                    <Grid>
+                                        <res:KoyIcon Data="{Binding KindIcon}" Size="28" StrokeWidth="1.5" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                     Style="{StaticResource ExtPlaceholderIconStyle}" />
+                                        <Image Source="{Binding Preview}" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality" />
+                                    </Grid>
+                                </Border>
+
+                                <!-- Bilgi -->
+                                <StackPanel Grid.Column="1" Margin="14,0,12,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Name}" FontSize="{DynamicResource KoyFontRowTitle}" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource KoyTextPrimary}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                        <Border Style="{StaticResource ExtChipStyle}">
+                                            <TextBlock Text="{Binding KindLabel}" Style="{StaticResource ExtChipTextStyle}" />
+                                        </Border>
+                                        <Border Style="{StaticResource ExtChipStyle}" Background="{DynamicResource KoyAccentSubtle}"
+                                                Visibility="{Binding IsApplied, Converter={StaticResource BoolToVis}}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <res:KoyIcon Data="{StaticResource IconCheck}" Size="11" StrokeWidth="3" Foreground="{DynamicResource KoyAccentText}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding [ExtApplied], Source={x:Static res:Loc.Instance}}" Style="{StaticResource ExtChipTextStyle}"
+                                                           Foreground="{DynamicResource KoyAccentText}" Margin="4,0,0,0" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding MetaText}" Style="{StaticResource SettingDescStyle}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Summary}" Foreground="{DynamicResource KoyTextSecondary}" FontSize="{DynamicResource KoyFontCaption}"
+                                               TextWrapping="Wrap" Margin="0,6,0,0" MaxHeight="52" TextTrimming="CharacterEllipsis"
+                                               Visibility="{Binding HasSummary, Converter={StaticResource BoolToVis}}" />
+                                    <ProgressBar Minimum="0" Maximum="1" Value="{Binding Progress, Mode=OneWay}" Height="4" Margin="0,8,0,0" BorderThickness="0"
+                                                 Foreground="{DynamicResource KoyAccent}" Background="{DynamicResource KoyBgControl}"
+                                                 Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" />
+                                    <TextBlock Text="{Binding Message}" Style="{StaticResource ExtMessageStyle}" AutomationProperties.LiveSetting="Polite"
+                                               Visibility="{Binding HasMessage, Converter={StaticResource BoolToVis}}" />
+                                </StackPanel>
+
+                                <!-- Düğmeler -->
+                                <StackPanel Grid.Column="2" MinWidth="104" VerticalAlignment="Top">
+                                    <Button Content="{Binding [ExtUpdate], Source={x:Static res:Loc.Instance}}" Command="{Binding UpdateExtensionCommand}"
+                                            Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,0,6"
+                                            Visibility="{Binding ShowUpdate, Converter={StaticResource BoolToVis}}" />
+                                    <Button Content="{Binding [ExtInstall], Source={x:Static res:Loc.Instance}}" Command="{Binding InstallCommand}"
+                                            Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,0,6"
+                                            Visibility="{Binding ShowInstall, Converter={StaticResource BoolToVis}}" />
+                                    <Button Content="{Binding ApplyLabel}" Command="{Binding ApplyCommand}"
+                                            Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,0,6"
+                                            Visibility="{Binding ShowApply, Converter={StaticResource BoolToVis}}" />
+                                    <Button Content="{Binding [ExtUninstall], Source={x:Static res:Loc.Instance}}" Command="{Binding RequestUninstallCommand}"
+                                            Style="{StaticResource SettingButtonStyle}" Margin="0,0,0,6"
+                                            Visibility="{Binding ShowUninstallButton, Converter={StaticResource BoolToVis}}" />
+                                    <StackPanel Visibility="{Binding ShowUninstallConfirm, Converter={StaticResource BoolToVis}}" Margin="0,0,0,6">
+                                        <TextBlock Text="{Binding [ExtUninstallConfirmQuestion], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}"
+                                                   Margin="0,0,0,6" MaxWidth="120" />
+                                        <Button Content="{Binding [ExtUninstall], Source={x:Static res:Loc.Instance}}" Command="{Binding ConfirmUninstallCommand}"
+                                                Style="{StaticResource DangerButtonStyle}" Margin="0,0,0,6" />
+                                        <Button Content="{Binding [Cancel], Source={x:Static res:Loc.Instance}}" Command="{Binding CancelUninstallCommand}"
+                                                Style="{StaticResource SettingButtonStyle}" />
+                                    </StackPanel>
+                                    <Button Command="{Binding ToggleExpandedCommand}" Style="{StaticResource SettingButtonStyle}"
+                                            AutomationProperties.Name="{Binding [ExtDetails], Source={x:Static res:Loc.Instance}}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding [ExtDetails], Source={x:Static res:Loc.Instance}}" VerticalAlignment="Center" />
+                                            <res:KoyIcon Size="14" Margin="6,0,0,0" Style="{StaticResource ExtChevronStyle}" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Ayrıntı -->
+                            <StackPanel Margin="0,12,0,0" Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}">
+                                <Border Height="1" Background="{DynamicResource KoyBorderHairline}" Margin="0,0,0,10" />
+                                <TextBlock Text="{Binding Description}" Foreground="{DynamicResource KoyTextPrimary}" FontSize="{DynamicResource KoyFontCaption}"
+                                           TextWrapping="Wrap" Visibility="{Binding HasDescription, Converter={StaticResource BoolToVis}}" />
+                                <TextBlock Text="{Binding DetailsText}" Style="{StaticResource SettingDescStyle}" Margin="0,8,0,0" />
+                                <Button Command="{Binding OpenHomepageCommand}" Style="{StaticResource SettingButtonStyle}" HorizontalAlignment="Left" Margin="0,10,0,0"
+                                        Visibility="{Binding HasHomepage, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <res:KoyIcon Data="{StaticResource IconExternalLink}" Size="14" />
+                                        <TextBlock Text="{Binding [ExtOpenHomepage], Source={x:Static res:Loc.Instance}}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Button Content="{Binding Extensions.ShowMoreText}" Command="{Binding Extensions.ShowMoreCommand}" Style="{StaticResource SettingButtonStyle}"
+                HorizontalAlignment="Center" Margin="0,4,0,0"
+                Visibility="{Binding Extensions.HasMore, Converter={StaticResource BoolToVis}}" />
+    </StackPanel>
+</UserControl>

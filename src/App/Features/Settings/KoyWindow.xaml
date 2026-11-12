@@ -183,6 +183,9 @@
                             <RadioButton GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconPalette}" Click="NavGorunum_Click"
                                          IsChecked="{Binding SelectedPageIndex, Mode=TwoWay, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=4}"
                                          Content="{Binding [NavAppearance], Source={x:Static res:Loc.Instance}}" />
+                            <RadioButton GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconPackage}" Click="NavEklentiler_Click"
+                                         IsChecked="{Binding SelectedPageIndex, Mode=TwoWay, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=10}"
+                                         Content="{Binding [NavExtensions], Source={x:Static res:Loc.Instance}}" />
                             <RadioButton GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconKeyboard}" Click="NavKisayollar_Click"
                                          IsChecked="{Binding SelectedPageIndex, Mode=TwoWay, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=5}"
                                          Content="{Binding [NavShortcuts], Source={x:Static res:Loc.Instance}}" />
@@ -275,6 +278,7 @@
                         <pages:PerformansPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=7}" />
                         <pages:HakkindaPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=8}" />
                         <pages:GelismisPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=9}" />
+                        <pages:EklentilerPage Visibility="{Binding SelectedPageIndex, Converter={x:Static local:PageIndexToVisibilityConverter.Instance}, ConverterParameter=10}" />
                     </Grid>
 
                     <!-- Sayfa başına "Varsayılana döndür" (issue #69): başlığın sağında, iki adımlı onay. Dock ve Ekranlar'da yok. -->
@@ -586,6 +590,67 @@
                                     Style="{StaticResource PrimaryButtonStyle}" MinWidth="90" />
                         </StackPanel>
                     </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Eklenti kurulum onayı: ad, yazar, lisans, boyut, yetkiler ve "kod çalıştırmaz" notu -->
+            <Grid x:Name="ExtensionConfirmOverlay" Grid.RowSpan="2" Focusable="False">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Extensions.IsConfirming}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Border Background="{DynamicResource KoyScrim}" />
+                <Border x:Name="ExtensionConfirmCard" Width="440" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Background="{DynamicResource KoyBgRow}" BorderBrush="{DynamicResource KoyBorderStrong}" BorderThickness="1"
+                        CornerRadius="{DynamicResource KoyRadiusRow}" Padding="24"
+                        AutomationProperties.Name="{Binding Extensions.ConfirmTitle}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <res:KoyIcon Data="{StaticResource IconPackage}" Size="20" StrokeWidth="2" Foreground="{DynamicResource KoyAccent}" />
+                            <TextBlock Text="{Binding Extensions.ConfirmTitle}" FontSize="{DynamicResource KoyFontPageTitle}" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource KoyTextPrimary}" Margin="10,0,0,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+
+                        <ItemsControl ItemsSource="{Binding Extensions.ConfirmFacts}" Margin="0,16,0,0" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="120" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding Label}" Style="{StaticResource SettingDescStyle}" Margin="0" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Value}" Style="{StaticResource SettingTitleStyle}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Border Style="{StaticResource InfoNoticeStyle}" Margin="0,16,0,0">
+                            <StackPanel>
+                                <TextBlock Text="{Binding [ExtConfirmDataOnly], Source={x:Static res:Loc.Instance}}" Foreground="{DynamicResource KoyFgInfo}"
+                                           FontSize="{DynamicResource KoyFontCaption}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Extensions.ConfirmFileNote}" Foreground="{DynamicResource KoyFgInfo}"
+                                           FontSize="{DynamicResource KoyFontCaption}" TextWrapping="Wrap" Margin="0,6,0,0"
+                                           Visibility="{Binding Extensions.HasConfirmFileNote, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
+                            </StackPanel>
+                        </Border>
+                        <TextBlock Text="{Binding [ExtConfirmNotApplied], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,10,0,0" />
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                            <Button x:Name="ExtensionConfirmCancelButton" Content="{Binding [Cancel], Source={x:Static res:Loc.Instance}}"
+                                    Command="{Binding Extensions.CancelConfirmCommand}"
+                                    Style="{StaticResource SettingButtonStyle}" IsCancel="True" Margin="0,0,8,0" />
+                            <Button Content="{Binding Extensions.ConfirmButton}" Command="{Binding Extensions.ConfirmInstallCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}" MinWidth="90" />
+                        </StackPanel>
+                    </StackPanel>
                 </Border>
             </Grid>
         </Grid>

@@ -42,7 +42,7 @@
                                     <Setter Property="BorderThickness" Value="1.5"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                    <Setter Property="Background" Value="#1AFFFFFF"/>
+                                    <Setter Property="Background" Value="{DynamicResource KoyDockActive}"/>
                                 </DataTrigger>
                                 <!-- Gösterge stili "Arka plan": çalışan uygulamanın zemini vurgu rengiyle boyanır (nokta/çizgi çizilmez) -->
                                 <MultiDataTrigger>
@@ -64,7 +64,7 @@
                                     <Setter Property="Background" Value="#2EF97316"/>
                                 </DataTrigger>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#22FFFFFF"/>
+                                    <Setter Property="Background" Value="{DynamicResource KoyDockHover}"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
@@ -215,7 +215,7 @@
                                             <Setter Property="Width" Value="6"/>
                                             <Setter Property="Height" Value="3"/>
                                             <Setter Property="CornerRadius" Value="1.5"/>
-                                            <Setter Property="Background" Value="#A1A1AA"/>
+                                            <Setter Property="Background" Value="{DynamicResource KoyDockIndicator}"/>
                                         </MultiDataTrigger>
                                         <!-- Gösterge stili "Çizgi": çalışan uygulama da 16×3 px çizgi alır -->
                                         <MultiDataTrigger>
@@ -317,7 +317,7 @@
                                     <Setter Property="Width" Value="72"/>
                                 </DataTrigger>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#22FFFFFF"/>
+                                    <Setter Property="Background" Value="{DynamicResource KoyDockHover}"/>
                                 </Trigger>
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
@@ -341,14 +341,14 @@
                         <Border Width="1"
                                 Margin="0,8"
                                 HorizontalAlignment="Center"
-                                Background="#33FFFFFF"
+                                Background="{DynamicResource KoyDockDivider}"
                                 Visibility="{Binding IsSeparator, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
 
                         <!-- Çöp kutusu ve özel düğme: sabit simge -->
                         <TextBlock Text="{Binding Glyph}"
                                    FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
                                    FontSize="{Binding IconSize}"
-                                   Foreground="#E6FFFFFF"
+                                   Foreground="{DynamicResource KoyDockGlyph}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    Visibility="{Binding IsGlyphButton, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
@@ -360,11 +360,11 @@
                             <TextBlock Text="{Binding TimeText}"
                                        FontSize="13"
                                        FontWeight="SemiBold"
-                                       Foreground="#F2FFFFFF"
+                                       Foreground="{DynamicResource KoyDockClockText}"
                                        HorizontalAlignment="Center"/>
                             <TextBlock Text="{Binding DateText}"
                                        FontSize="10"
-                                       Foreground="#B3FFFFFF"
+                                       Foreground="{DynamicResource KoyDockClockSubtext}"
                                        HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Grid>
@@ -393,7 +393,7 @@
                             ContextMenuOpening="OnItemContextMenuOpening">
                         <Border.Style>
                             <Style TargetType="Border">
-                                <Setter Property="Background" Value="#1AFFFFFF"/>
+                                <Setter Property="Background" Value="{DynamicResource KoyDockActive}"/>
                                 <Setter Property="BorderBrush" Value="#2E2E33"/>
                                 <Setter Property="BorderThickness" Value="1"/>
                                 <Style.Triggers>

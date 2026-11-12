@@ -670,6 +670,31 @@ public class UserStyleOverridesTests
         }
     }
 
+    // --- Mağaza tema paketleri ---
+
+    public static IEnumerable<object[]> StoreThemes() =>
+        new[] { "koyhq.nord-theme", "koyhq.solarized-theme", "koyhq.high-contrast-theme" }.Select(id => new object[] { id });
+
+    [Theory]
+    [MemberData(nameof(StoreThemes))]
+    public void Store_theme_packs_parse_cleanly_and_paint_window_notch_and_dock(string id)
+    {
+        var path = Path.Combine(ResourcesDir(), "..", "..", "..", "store", "src", id, "theme.json");
+        var result = UserStyleFile.Load(Path.GetFullPath(path));
+
+        Assert.Empty(result.Diagnostics);
+        Assert.Contains(result.ValidEntries.Keys, k => k.StartsWith("KoyNotch", StringComparison.Ordinal));
+        // Çentik zemini, kartları, yazısı ve dock zemini her pakette verilir; yoksa o yüzey temadan kopuk kalır.
+        foreach (var key in new[]
+                 {
+                     "KoyNotchSurface", "KoyNotchCard", "KoyNotchChip", "KoyNotchText", "KoyNotchTextSecondary", "KoyNotchTextMuted",
+                     "KoyNotchHover", "KoyNotchDivider", "KoyNotchMusicCard", "KoyNotchAccentControl", "KoyNotchAccentFocus",
+                     "KoyDockSurface", "KoyDockCapsuleSurface", "KoyDockBorder", "KoyDockIndicator", "KoyDockText", "KoyDockHover"
+                 })
+            Assert.True(result.ValidEntries.ContainsKey(key), $"{id}: {key}");
+        Assert.True(result.ValidEntries.Count < UserStyleParser.MaxEntries);
+    }
+
     private static string TempFile() => Path.Combine(Path.GetTempPath(), "koy-user-theme-" + Guid.NewGuid() + ".json");
 
     private static string ResourcesDir()

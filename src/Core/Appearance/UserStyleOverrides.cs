@@ -110,7 +110,12 @@ public static class AllowedTokens
         "KoyTextPrimary", "KoyTextSecondary", "KoyTextMuted", "KoyTextDisabled", "KoyAccent", "KoyAccentHover",
         "KoyAccentPressed", "KoyOnAccent", "KoyAccentText", "KoyFocusRing", "KoyAccentSubtle", "KoyBgInfo", "KoyFgInfo",
         "KoyDangerText", "KoyDangerBorder", "KoyDangerBg", "KoyScrim", "KoyStatusOk", "KoyStatusWarn",
-        "KoyToggleTrackOff", "KoyToggleKnobOff", "KoyToggleKnobOn"
+        "KoyToggleTrackOff", "KoyToggleKnobOff", "KoyToggleKnobOn",
+        // Dock (Koyu ve Açık aynı değerleri taşır; dock temadan bağımsız koyu yüzeydir, tema paketi ezer).
+        "KoyDockSurface", "KoyDockCapsuleSurface", "KoyDockBorder", "KoyDockCapsuleBorder", "KoyDockSeparator",
+        "KoyDockDivider", "KoyDockHover", "KoyDockActive", "KoyDockPill", "KoyDockCover", "KoyDockIndicator",
+        "KoyDockText", "KoyDockTextSecondary", "KoyDockGlyph", "KoyDockClockText", "KoyDockClockSubtext",
+        "KoyDockPreviewSurface", "KoyDockPreviewText"
     ];
 
     // Tokens.xaml fırçaları: bağlam menüsü, kaydırma çubuğu ve çentik (temadan bağımsız koyu yüzey).
@@ -130,7 +135,7 @@ public static class AllowedTokens
         "KoyNotchAccentCalendar", "KoyNotchCalendarCard", "KoyNotchCalendarChip", "KoyNotchCalendarSoft",
         "KoyNotchClipCard", "KoyNotchClipChip", "KoyNotchClipChipText", "KoyNotchClipSoft",
         "KoyNotchSystemCard", "KoyNotchSystemTrack", "KoyNotchSystemSoft", "KoyNotchNetCard", "KoyNotchNetSoft",
-        "KoyNotchDash", "KoyNotchCheckBorder", "KoyNotchDoneText"
+        "KoyNotchDash", "KoyNotchCheckBorder", "KoyNotchDoneText", "KoyNotchTrack", "KoyNotchIconBg"
     ];
 
     private static readonly FrozenDictionary<string, UserStyleToken> ByKey = Build();

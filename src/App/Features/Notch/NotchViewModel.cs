@@ -366,6 +366,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         UpdateBatteryState();
         UpdateGlassSurface();
         MaterialState.Changed += OnMaterialChanged;
+        Koy.App.Resources.ThemeManager.Applied += OnThemeApplied;
         UpdateTargetSize();
         UpdateActivePanels();
 
@@ -677,15 +678,24 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     }
 
     // --- MALZEME (Katı / Buzlu / Cam) ---
-    // Kapalı çentik, Peek ve HUD fiziksel çentik yanılsaması için hep opak #0A0A0B; açık çentik ve kart etkin malzemenin
+    // Kapalı çentik, Peek ve HUD fiziksel çentik yanılsaması için hep opak taban renk; açık çentik ve kart etkin malzemenin
     // opaklığında (onaylı kaynak CamDurumlar.dc.html). Geçiş durum değişimiyle anlık; boyut yayı aynı kalır, Storyboard yok.
+    // Taban renk KoyNotchSurface kaynağından okunur (varsayılan #0A0A0B); tema paketi ya da kullanıcı stil dosyası onu
+    // değiştirince ThemeManager.Applied ile yenilenir. Malzeme opaklığı taban rengin RGB'sine uygulanır.
 
-    private static readonly Brush OpaqueSurface = FrozenArgb(0xFF, 0x0A, 0x0A, 0x0B);
-    private Brush _glassSurface = OpaqueSurface;
+    private const string SurfaceResourceKey = "KoyNotchSurface";
+    private static readonly Color DefaultSurfaceColor = Color.FromRgb(0x0A, 0x0A, 0x0B);
+    private static readonly Brush DefaultSurface = FrozenArgb(0xFF, DefaultSurfaceColor.R, DefaultSurfaceColor.G, DefaultSurfaceColor.B);
+
+    private Brush _opaqueSurface = DefaultSurface;
+    private Brush _glassSurface = DefaultSurface;
 
     /// <summary>Çentik şeklinin zemini.</summary>
     [ObservableProperty]
-    private Brush _surfaceBrush = OpaqueSurface;
+    private Brush _surfaceBrush = DefaultSurface;
+
+    private static Color ReadSurfaceColor() =>
+        System.Windows.Application.Current?.TryFindResource(SurfaceResourceKey) is SolidColorBrush b ? b.Color : DefaultSurfaceColor;
 
     private static Brush FrozenArgb(byte a, byte r, byte g, byte b)
     {
@@ -697,9 +707,11 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private void UpdateGlassSurface()
     {
         var level = MaterialState.ForNotch(Settings);
+        var baseColor = ReadSurfaceColor();
+        _opaqueSurface = FrozenArgb(0xFF, baseColor.R, baseColor.G, baseColor.B);
         _glassSurface = level == Koy.Core.Appearance.MaterialLevel.Solid
-            ? OpaqueSurface
-            : FrozenArgb(Koy.Core.Appearance.MaterialSetting.LayeredAlpha(level), 0x0A, 0x0A, 0x0B);
+            ? _opaqueSurface
+            : FrozenArgb(Koy.Core.Appearance.MaterialSetting.LayeredAlpha(level), baseColor.R, baseColor.G, baseColor.B);
         // Albüm rengi müzik kartı da aynı opaklıkta (kart yalnız açık çentikte görünür).
         _music.SetCardAlpha(Koy.Core.Appearance.MaterialSetting.LayeredAlpha(level));
     }
@@ -707,8 +719,10 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private void UpdateSurface()
     {
         var glassy = Osd.IsActive ? Osd.Type == OsdType.Card : State == NotchState.Expanded;
-        SurfaceBrush = glassy ? _glassSurface : OpaqueSurface;
+        SurfaceBrush = glassy ? _glassSurface : _opaqueSurface;
     }
+
+    private void OnThemeApplied() => OnMaterialChanged();
 
     private void OnMaterialChanged()
     {
@@ -800,6 +814,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
         _disposed = true;
         MaterialState.Changed -= OnMaterialChanged;
+        Koy.App.Resources.ThemeManager.Applied -= OnThemeApplied;
         StopClockTimer();
         _controller.StateChanged -= OnStateChanged;
         _controller.PanelChanged -= OnPanelChanged;

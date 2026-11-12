@@ -14,6 +14,7 @@ using Koy.Core.Updates;
 using Koy.Core.Visibility;
 using Koy.Core.Weather;
 using Koy.Core.Voice;
+using Koy.App.Features.Extensions;
 using Koy.App.Features.Notch;
 using Koy.App.Features.Notch.LiveBackground;
 using Koy.Core.Notifications;
@@ -30,6 +31,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     /// <summary>Kısayollar sayfası: tuş yakalama, kayıt ve hata durumu.</summary>
     public ShortcutsViewModel Shortcuts { get; }
     public ProfilesViewModel Profiles { get; }
+
+    /// <summary>Eklentiler sayfası: mağaza, kurulu eklentiler, kur / uygula / kaldır.</summary>
+    public ExtensionStoreViewModel Extensions { get; }
 
     /// <summary>Kısayollar sayfasındaki ekran köşeleri bölümü.</summary>
     public HotCornersViewModel HotCorners { get; }
@@ -55,6 +59,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     /// <summary>Gelişmiş sayfasının dizini; mevcut sayfaların dizinleri değişmesin diye en sona eklendi.</summary>
     public const int AdvancedPageIndex = 9;
+
+    /// <summary>Eklentiler sayfasının dizini (kenar çubuğunda Görünüm'den sonra durur, dizin yine de en sona eklendi).</summary>
+    public const int ExtensionsPageIndex = 10;
 
     // Diskteki son bilinen ayarlar (yüklenen ya da bu pencerenin yazdığı); canlı yeniden yükleme aynıysa iş yapmaz.
     private AppSettings? _lastKnown;
@@ -1035,12 +1042,15 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     private bool _isLoading;
 
-    public KoyWindowViewModel(SettingsStore? store = null)
+    public KoyWindowViewModel(SettingsStore? store = null, ExtensionStoreViewModel? extensions = null)
     {
         _store = store ?? new SettingsStore(SettingsStore.DefaultPath);
         Shortcuts = new ShortcutsViewModel(_store);
         Profiles = new ProfilesViewModel(ProfileService.Instance);
         ProfileService.Instance.Applied += OnProfileApplied;
+        ProfileService.Instance.SettingsCommitted += OnSettingsCommitted;
+        Extensions = extensions ?? ExtensionStoreViewModel.CreateDefault();
+        Extensions.ProfilesChanged += Profiles.Refresh;
         HotCorners = new HotCornersViewModel(_store);
         Rules = new RulesViewModel(ProfileService.Instance, Koy.App.Features.Rules.ContextRuleService.Instance);
         Profiles.ListChanged += Rules.Refresh;
@@ -1060,6 +1070,21 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     {
         LoadFromSettings();
         SettingsSaved?.Invoke();
+    }
+
+    // Eklenti uygulandı / kaldırıldı: ayarı mağaza yazdı, değerler diskten okunur (aksi halde bir sonraki kayıt eskisini geri yazardı).
+    private void OnSettingsCommitted()
+    {
+        LoadFromSettings();
+        SettingsSaved?.Invoke();
+    }
+
+    /// <summary>"Mağazadan daha fazla al…" bağlantısı: Eklentiler sayfasını verilen kategoriyle açar (Theme, IconPack, Background, Profile).</summary>
+    [RelayCommand]
+    private void OpenStore(string? category)
+    {
+        Extensions.ShowCategory(category);
+        SelectPage(ExtensionsPageIndex);
     }
 
     partial void OnNotchShowNotificationsChanged(bool value) => RefreshNotificationPermission();
@@ -1486,6 +1511,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             OnPropertyChanged(nameof(DownloadProgressText));
             OnPropertyChanged(nameof(StartIconFileName));
             Profiles.RefreshLanguage();
+            Extensions.RefreshLanguage();
             Rules.Refresh();
             LoadHomeCards(_homeCards);
         }

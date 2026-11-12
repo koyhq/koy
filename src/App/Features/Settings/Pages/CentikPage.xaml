@@ -504,6 +504,9 @@
             </Grid>
         </Border>
 
+        <Button Content="{Binding [ExtGetMore], Source={x:Static res:Loc.Instance}}" Command="{Binding OpenStoreCommand}" CommandParameter="Background"
+                Style="{StaticResource LinkButtonStyle}" Margin="2,4,0,0" />
+
         <!-- GÖSTERGELER -->
         <TextBlock Text="{Binding [IndicatorsHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 

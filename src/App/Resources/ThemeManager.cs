@@ -14,8 +14,10 @@ namespace Koy.App.Resources;
 /// En sonda, ayar açıksa, kullanıcı stil dosyası (%AppData%\Koy\user-theme.json) izinli anahtarları ezer (bkz.
 /// UserStyleParser); tema ya da ayar her uygulandığında yeniden uygulanır, ayar kapanınca ya da dosya silinince
 /// ezmeler kalkar ve tema değerleri geri gelir.
-/// Koy penceresi, ilk kurulum sihirbazı ve sağ alt menü bu kaynakları kullanır; çentik ve dock temadan bağımsız koyu
-/// kalır, yalnız malzeme saydamken çentik kartlarının (KoyNotchCard / KoyNotchChip) tonu buradan ezilir.
+/// Koy penceresi, ilk kurulum sihirbazı ve sağ alt menü bu kaynakları kullanır; çentik (KoyNotch*) ve dock (KoyDock*)
+/// açık/koyu temadan bağımsız koyu kalır ama kendi token'larını taşır: tema paketi ya da kullanıcı stil dosyası onları
+/// ezince çentik ve dock da boyanır (NotchViewModel / DockViewModel Applied olayında zemini yeniden okur). Malzeme
+/// saydamken çentik kartlarının (KoyNotchCard / KoyNotchChip) tonu buradan ezilir.
 /// </summary>
 public static class ThemeManager
 {
@@ -39,6 +41,12 @@ public static class ThemeManager
 
     /// <summary>Son okunan kullanıcı stil dosyasının sonucu; ayar kapalıysa ya da hiç okunmadıysa boş.</summary>
     public static UserStyleParseResult UserStyleResult => _userStyleResult ?? UserStyleParseResult.Empty;
+
+    /// <summary>
+    /// Kullanıcı stil dosyasının yolu (varsayılan: %AppData%/Koy/user-theme.json). Yalnız görüntü aracı başka bir dosya
+    /// göstermek için değiştirir; uygulama değiştirmez.
+    /// </summary>
+    public static string UserStylePath { get; set; } = UserStyleFile.DefaultPath;
 
     private static bool _watching;
     private static bool _watchingMaterial;
@@ -244,7 +252,7 @@ public static class ThemeManager
         if (_last is not { } settings || !settings.Appearance.UserStyleOverridesEnabled)
             return;
 
-        if (UserStyleFile.GetStamp(UserStyleFile.DefaultPath) == _userStyleStamp)
+        if (UserStyleFile.GetStamp(UserStylePath) == _userStyleStamp)
             return;
 
         ReloadUserStyle(app);
@@ -275,8 +283,8 @@ public static class ThemeManager
         // Önbellek: tema / malzeme değişince dosya yeniden okunmaz, yalnız yeniden uygulanır.
         if (reload || _userStyleResult is null)
         {
-            _userStyleStamp = UserStyleFile.GetStamp(UserStyleFile.DefaultPath);
-            _userStyleResult = UserStyleFile.Load(UserStyleFile.DefaultPath);
+            _userStyleStamp = UserStyleFile.GetStamp(UserStylePath);
+            _userStyleResult = UserStyleFile.Load(UserStylePath);
         }
 
         // Sözlük baştan kurulur: dosyadan silinen anahtarın eski ezmesi kalmasın.
