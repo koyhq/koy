@@ -77,5 +77,5 @@ Kaldırma, uygulanmış bir paketse ayarı varsayılana döndürür (simge paket
 |---|---|
 | Core | `src/Core/Extensions/Store/`: indeks modeli ve ayrıştırıcı, paket giriş denetimi (zip slip, sınırlar, tür uzantıları), sürüm karşılaştırma, mağaza listesi durumu (süzgeç, sıralama, arama, kurulu/güncelleme), kurulu kayıt (`extensions.json`), uygulama planı, `IExtensionStoreClient` |
 | Platform | `src/Platform/Extensions/`: `AppHttp` ile indeks ve paket indirme (boyut sınırlı akış), SHA256, zip açma, kurulum klasörü |
-| App | `src/App/Features/Settings/Pages/EklentilerPage.xaml` + `ExtensionStoreViewModel`: KoyWindow'da "Eklentiler" sayfası |
+| App | `src/App/Features/Extensions/` (`ExtensionStoreViewModel`, `StoreCardViewModel`, `ExtensionFileActionRunner`), `src/Platform/Extensions/StorePreviewLoader.cs` (önizleme + önbellek), `src/App/Features/Settings/Pages/EklentilerPage.xaml`: KoyWindow'da "Eklentiler" sayfası. Yapıldı; ayrıntı `docs/MAP.md` › Eklenti mağazası |
 | Depo | `store/index.json`, `store/packages/`, `store/src/<id>/` (paket kaynakları), `scripts/build-store.py` (zip + sha256 + indeks), `store/README.md` (gönderim kuralları) |

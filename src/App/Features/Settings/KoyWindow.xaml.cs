@@ -201,8 +201,13 @@ public partial class KoyWindow : Window
         Height = Math.Max(Height, MinHeight);
     }
 
+    // Eklentiler sayfası yalnız pencere görünür ve sayfa seçiliyken canlıdır (indeks ve görseller; AGENTS #5).
+    private void SyncExtensionsActive() =>
+        ViewModel.Extensions.SetActive(IsVisible && ViewModel.SelectedPageIndex == KoyWindowViewModel.ExtensionsPageIndex);
+
     private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
+        SyncExtensionsActive();
         if (IsVisible)
         {
             if (_userStyleWatcher is not null || Application.Current is not { } app)
@@ -269,6 +274,9 @@ public partial class KoyWindow : Window
 
         if (e.PropertyName != nameof(KoyWindowViewModel.SelectedPageIndex) || !IsVisible)
             return;
+
+        SyncExtensionsActive();
+        ContentScrollViewer?.ScrollToTop();
 
         // Hemen başlatılır: Loaded önceliğine ertelenince yeni sayfa bir kare tam opak çizilip sonra sönüyordu (titreme).
         var index = ViewModel.SelectedPageIndex;
@@ -367,6 +375,7 @@ public partial class KoyWindow : Window
     private void NavPerformans_Click(object sender, RoutedEventArgs e) => Navigate(7);
     private void NavHakkinda_Click(object sender, RoutedEventArgs e) => Navigate(8);
     private void NavGelismis_Click(object sender, RoutedEventArgs e) => Navigate(KoyWindowViewModel.AdvancedPageIndex);
+    private void NavEklentiler_Click(object sender, RoutedEventArgs e) => Navigate(KoyWindowViewModel.ExtensionsPageIndex);
 
     // --- settings.json canlı yeniden yükleme (issue #69) ---
     // İzleyici yalnız Koy penceresi görünürken vardır; gizlenince bırakılır. Olaylar kısa bir tek atımlık zamanlayıcıyla

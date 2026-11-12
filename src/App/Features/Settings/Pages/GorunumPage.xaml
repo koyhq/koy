@@ -345,6 +345,8 @@
                     <Button Grid.Column="1" Content="{Binding [IconPackFolderChoose], Source={x:Static res:Loc.Instance}}"
                             Command="{Binding PickIconPackFolderCommand}" Style="{StaticResource SettingButtonStyle}" />
                 </Grid>
+                <Button Content="{Binding [ExtGetMore], Source={x:Static res:Loc.Instance}}" Command="{Binding OpenStoreCommand}" CommandParameter="IconPack"
+                Style="{StaticResource LinkButtonStyle}" Margin="0,10,0,0" />
             </StackPanel>
         </Border>
 
@@ -503,6 +505,8 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+                    <Button Content="{Binding [ExtGetMore], Source={x:Static res:Loc.Instance}}" Command="{Binding OpenStoreCommand}" CommandParameter="Theme"
+                Style="{StaticResource LinkButtonStyle}" Margin="0,8,0,0" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Content="{Binding [UserStyleOpenFolder], Source={x:Static res:Loc.Instance}}"

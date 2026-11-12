@@ -13,9 +13,10 @@ namespace Koy.UiSnapshots;
 /// <summary>
 /// Koy'un pencerelerini ekrana çıkarmadan PNG'ye çevirir. Hiçbir Win32 kancası, AppBar ya da görev çubuğu
 /// servisi başlatılmaz; pencereler gösterilmez, yalnız ölçülüp çizilir.
-/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall|centik|dock|dockbar|jumplist|startmenu]
+/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall|centik|dock|dockbar|jumplist|startmenu|eklentiler]
 /// <c>--scene jumplist</c>: dock sağ tık menüsünün bölümlü atlama listesi hâli (sentetik veri).
 /// <c>--scene startmenu</c>: Başlat düğmesinin sağ tık menüsü (Win+X karşılığı), alt menü açık hâliyle.
+/// <c>--scene eklentiler</c>: Eklentiler sayfası (depodaki store/ klasöründen sahte ağla; kurulum, uygulama ve hata durumları).
 /// <c>--scene uninstall</c>: yalnız Hakkında sayfası ve kaldırma onay görünümü (kaldırıcı hiçbir zaman çalıştırılmaz).
 /// <c>--scene sitedock</c>: tanıtım sitesi için, görev çubuğuna sabitlenmiş gerçek uygulamalarla kapsül dock.
 /// <c>--transparent</c>: gri zemin çizilmez (siteye doğrudan konacak görüntüler). <c>--scale 2</c>: çözünürlük çarpanı (varsayılan 1,5).
@@ -88,12 +89,15 @@ public static class Program
                 JumpListSnapshots.Render(outDir, prefix, theme, RenderElement);
             else if (scene is "startmenu" or "baslat")
                 StartMenuSnapshots.Render(outDir, prefix, theme, RenderElement);
+            else if (scene is "eklentiler" or "extensions")
+                ExtensionSnapshots.Render(outDir, prefix, theme, RenderElement);
             else
             {
                 RenderAll(outDir, prefix, theme);
                 RenderDockFolders(outDir, prefix, theme);
                 JumpListSnapshots.Render(outDir, prefix, theme, RenderElement);
                 StartMenuSnapshots.Render(outDir, prefix, theme, RenderElement);
+                ExtensionSnapshots.Render(outDir, prefix, theme, RenderElement);
             }
         }
 

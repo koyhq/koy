@@ -24,7 +24,7 @@ public sealed record SettingsRow(SettingSearchEntry Entry, int PageIndex, Framew
 public sealed class SettingsPageIndex
 {
     private static readonly string[] PageNameKeys =
-        ["NavGeneral", "NavNotch", "NavDock", "NavDisplays", "NavAppearance", "NavShortcuts", "NavDictation", "NavPerformance", "NavAbout"];
+        ["NavGeneral", "NavNotch", "NavDock", "NavDisplays", "NavAppearance", "NavShortcuts", "NavDictation", "NavPerformance", "NavAbout", "NavAdvanced", "NavExtensions"];
 
     private static readonly DependencyProperty[] ValueProperties =
         [ToggleButton.IsCheckedProperty, Selector.SelectedItemProperty, Selector.SelectedValueProperty, RangeBase.ValueProperty, TextBox.TextProperty];

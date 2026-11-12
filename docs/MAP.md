@@ -208,3 +208,20 @@ Sürümler release-please ile otomatiktir, elle etiket atılmaz. Ayrıntı: `CON
 | App | `src/App/Resources/MaterialState.cs` | Ne zaman okunur, etkin seviye (pencere / çentik / dock), `Changed` olayı |
 | App | `src/App/Resources/ThemeManager.cs` | Pencere, satır, segment ve çentik kartı tonları |
 | App | `NotchViewModel.SurfaceBrush`, `DockViewModel.FullWidthSurface` / `CapsuleSurface` | Çentik ve dock zemini |
+
+## Eklenti mağazası (#51)
+Tasarım ve dosya biçimleri: `docs/EXTENSION-STORE.md`. Yalnız veri paketi (tema, simge paketi, canlı arka plan, ayar profili); kod çalıştıran tür yok.
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Extensions/Store/` | İndeks ayrıştırıcı, paket giriş denetimi, kurulum (`ExtensionPackageInstaller`), kurulu kayıt (`InstalledRegistry`, `extensions.json`), liste durumu (`StoreListState`, `StoreCatalog`), uygulama planı (`ExtensionApplyPlanner`: Uygula / Kaldırırken geri al / `IsActive`) |
+| Platform | `src/Platform/Extensions/ExtensionStoreClient.cs` | İndeks ve paket indirme (boyut sınırlı, SHA256), kurulum, kaldırma |
+| Platform | `src/Platform/Extensions/StorePreviewLoader.cs` | Kart önizlemesi: https, en çok 1 MB, SHA256 doğrulama, `%LocalAppData%\Koy\store-cache\` önbelleği (en çok 200 dosya) |
+| App | `src/App/Features/Extensions/ExtensionStoreViewModel.cs`, `StoreCardViewModel.cs` | Sayfa durumu: sorgu, kartlar, kurulum onayı, kur / güncelle / uygula / kaldır, dosyadan kur. `SetActive` ile yalnız sayfa görünürken indeks çekilir (AGENTS #5) |
+| App | `src/App/Features/Extensions/ExtensionFileActionRunner.cs` | Planın dosya işleri: `user-theme.json` yedeği / kopyası / geri yükleme, profil içe alma |
+| App | `src/App/Features/Settings/ProfileService.cs` | `CommitSettings`: hazır ayarı kaydedip tema ve özellikleri canlı yeniden kurar; `SettingsCommitted` olayıyla Koy penceresi değerleri yeniler |
+| App | `src/App/Features/Settings/Pages/EklentilerPage.xaml`, `KoyWindow.xaml` | Sayfa (dizin 10, `KoyWindowViewModel.ExtensionsPageIndex`; kenar çubuğunda Görünüm'den sonra), kurulum onayı katmanı |
+| App | `Pages/GorunumPage.xaml`, `CentikPage.xaml`, `GenelPage.xaml` | "Mağazadan daha fazla al…" bağlantıları (`OpenStoreCommand`, parametre: `IconPack`, `Theme`, `Background`, `Profile`) |
+| Araç | `tools/Koy.UiSnapshots/ExtensionSnapshots.cs` | `--scene eklentiler`: depodaki `store/` klasöründen sahte ağla sayfanın görüntüleri |
+| Depo | `store/`, `scripts/build-store.py` | İndeks, paketler, önizlemeler, kaynaklar |
+
+Unutma: Kurulum uygulama demek değildir. Kaldırmadan önce `RevertOnUninstall` uygulanır. Yeni hata enum değeri eklenirse `Strings*.resx` içine `ExtInstallError<Ad>`, `ExtIndexError<Ad>`, `ExtApplyError<Ad>` anahtarı da eklenir. Sayfa dizini en sona eklendi (Gelişmiş 9, Eklentiler 10); `SettingsPageIndex.PageNameKeys` buna bağlı.
