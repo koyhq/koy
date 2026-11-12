@@ -5,6 +5,21 @@ using Koy.Core.Settings;
 
 namespace Koy.App.Features.Settings;
 
+/// <summary>Gelişmiş sayfasında bölüm bazında gruplanmış satırlar.</summary>
+public sealed class AdvancedSettingGroupRow
+{
+    public string Section { get; }
+    public string Title { get; }
+    public IReadOnlyList<AdvancedSettingRow> Rows { get; }
+
+    public AdvancedSettingGroupRow(string section, string title, IReadOnlyList<AdvancedSettingRow> rows)
+    {
+        Section = section;
+        Title = title;
+        Rows = rows;
+    }
+}
+
 /// <summary>
 /// Gelişmiş sayfasında bir satır (issue #69). Değer doğrulanmadan yazılmaz: <see cref="Commit"/> Core'a gider
 /// (<see cref="AdvancedSettings.TrySet"/>), geçersizse satır kırmızı ipucu gösterir ve dosyaya dokunulmaz.
@@ -21,6 +36,10 @@ public sealed partial class AdvancedSettingRow : ObservableObject
         _reset = reset;
         _value = model.Value;
         Key = model.Key;
+        Section = model.Section;
+        PropertyName = model.PropertyName;
+        Title = model.Title;
+        SectionTitle = model.SectionTitle;
         Kind = model.Kind;
         Default = model.Default;
         Choices = model.Choices;
@@ -30,6 +49,14 @@ public sealed partial class AdvancedSettingRow : ObservableObject
     }
 
     public string Key { get; }
+
+    public string Section { get; }
+
+    public string PropertyName { get; }
+
+    public string Title { get; }
+
+    public string SectionTitle { get; }
 
     public AdvancedSettingKind Kind { get; }
 

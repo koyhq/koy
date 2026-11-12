@@ -103,6 +103,23 @@
             </Grid>
         </Border>
 
+        <!-- Geliştirici modu: Gelişmiş ayarlar sekmesini göster/gizle -->
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DeveloperModeTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DeveloperModeDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [DeveloperModeTitle], Source={x:Static res:Loc.Instance}}"
+                          IsChecked="{Binding DeveloperMode}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
         <!-- BAĞLANTILAR -->
         <TextBlock Text="{Binding [LinksHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 

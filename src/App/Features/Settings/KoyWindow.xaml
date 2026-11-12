@@ -195,9 +195,10 @@
                             <RadioButton GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconInfo}" Click="NavHakkinda_Click"
                                          IsChecked="{Binding SelectedPageIndex, Mode=TwoWay, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=8}"
                                          Content="{Binding [NavAbout], Source={x:Static res:Loc.Instance}}" />
-                            <RadioButton GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconSettings}" Click="NavGelismis_Click"
+                            <RadioButton x:Name="NavGelismis" GroupName="Nav" Style="{StaticResource NavItemStyle}" Tag="{StaticResource IconSettings}" Click="NavGelismis_Click"
                                          IsChecked="{Binding SelectedPageIndex, Mode=TwoWay, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=9}"
-                                         Content="{Binding [NavAdvanced], Source={x:Static res:Loc.Instance}}" />
+                                         Content="{Binding [NavAdvanced], Source={x:Static res:Loc.Instance}}"
+                                         Visibility="{Binding DeveloperMode, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
                         </StackPanel>
                         </DockPanel>
 

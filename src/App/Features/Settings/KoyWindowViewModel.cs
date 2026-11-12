@@ -51,6 +51,15 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private bool _hideWindowsTaskbar = true;
 
+    [ObservableProperty]
+    private bool _developerMode;
+
+    partial void OnDeveloperModeChanged(bool value)
+    {
+        if (!value && SelectedPageIndex == AdvancedPageIndex)
+            SelectedPageIndex = 8;
+    }
+
     // --- GELİŞMİŞ SAYFASI VE CANLI YENİDEN YÜKLEME (issue #69) ---
 
     /// <summary>Gelişmiş sayfasının dizini; mevcut sayfaların dizinleri değişmesin diye en sona eklendi.</summary>
@@ -63,6 +72,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private IReadOnlyList<AdvancedSettingRow> _advancedRows = [];
+
+    [ObservableProperty]
+    private IReadOnlyList<AdvancedSettingGroupRow> _advancedGroups = [];
 
     [ObservableProperty]
     private string _advancedFilter = "";
@@ -82,13 +94,29 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         if (SelectedPageIndex != AdvancedPageIndex)
         {
             AdvancedRows = [];
+            AdvancedGroups = [];
             return;
         }
 
         var filter = AdvancedFilter.Trim();
-        AdvancedRows = AdvancedSettings.List(_store.Load(), DedicatedUiKeys)
-            .Where(r => filter.Length == 0 || r.Key.Contains(filter, StringComparison.OrdinalIgnoreCase))
+        var allSettings = AdvancedSettings.List(_store.Load(), DedicatedUiKeys);
+
+        var filteredSettings = allSettings
+            .Where(r => filter.Length == 0
+                        || r.Key.Contains(filter, StringComparison.OrdinalIgnoreCase)
+                        || r.Title.Contains(filter, StringComparison.OrdinalIgnoreCase)
+                        || r.SectionTitle.Contains(filter, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var rows = filteredSettings
             .Select(r => new AdvancedSettingRow(r, ApplyAdvanced, ResetAdvanced))
+            .ToList();
+
+        AdvancedRows = rows;
+
+        AdvancedGroups = rows
+            .GroupBy(r => (r.Section, r.SectionTitle))
+            .Select(g => new AdvancedSettingGroupRow(g.Key.Section, g.Key.SectionTitle, g.ToList()))
             .ToList();
     }
 
@@ -1095,6 +1123,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             Language = s.General.Language;
             AutoCheckUpdates = s.General.AutoCheckUpdates;
             UpdateChannel = s.General.UpdateChannel;
+            DeveloperMode = s.General.DeveloperMode;
 
             NotchEnabled = s.Notch.Enabled;
             NotchVisibility = s.Notch.Visibility;
@@ -1393,7 +1422,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         base.OnPropertyChanged(e);
         if (_isLoading) return;
         if (e.PropertyName is nameof(SelectedPageIndex) or nameof(MotionTogglesActive) or nameof(MotionTogglesInactive) or nameof(ClockCustomDateFormatInvalid)
-            or nameof(IsApplyRevertPending) or nameof(ApplyRevertSecondsLeft) or nameof(AdvancedRows) or nameof(SettingsFileInvalid) or nameof(AdvancedFilter)
+            or nameof(IsApplyRevertPending) or nameof(ApplyRevertSecondsLeft) or nameof(AdvancedRows) or nameof(AdvancedGroups) or nameof(SettingsFileInvalid) or nameof(AdvancedFilter)
             or nameof(HasTrayAppRows)
             or nameof(SettingsSearchQuery) or nameof(IsSettingsSearching) or nameof(SettingsSearchResults)
             or nameof(SettingsSearchNoResult) or nameof(ShowChangedOnly) or nameof(CanResetPage) or nameof(IsPageResetConfirming) or nameof(PageResetDone)
@@ -1520,7 +1549,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 UpdateChannel = UpdateChannel,
                 TemperatureUnit = TemperatureUnit,
                 WindSpeedUnit = WindSpeedUnit,
-                NetworkSpeedUnit = NetworkSpeedUnit
+                NetworkSpeedUnit = NetworkSpeedUnit,
+                DeveloperMode = DeveloperMode
             },
             Dock = current.Dock with
             {
