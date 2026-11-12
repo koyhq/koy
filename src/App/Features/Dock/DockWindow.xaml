@@ -28,7 +28,7 @@
               IsHitTestVisible="{Binding IsVisible}">
             <Grid.RenderTransform>
                 <TransformGroup>
-                    <TranslateTransform Y="{Binding TranslationY}"/>
+                    <TranslateTransform X="{Binding TranslationX}" Y="{Binding TranslationY}"/>
                 </TransformGroup>
             </Grid.RenderTransform>
             <Grid.Opacity>
@@ -60,8 +60,9 @@
         <Popup x:Name="ThumbnailPreviewPopup"
                IsOpen="{Binding IsPreviewPopupOpen}"
                PlacementTarget="{Binding PreviewPlacementTarget}"
-               Placement="Top"
-               VerticalOffset="-10"
+               Placement="{Binding PreviewPlacement}"
+               VerticalOffset="{Binding PreviewVerticalOffset}"
+               HorizontalOffset="{Binding PreviewHorizontalOffset}"
                AllowsTransparency="True"
                StaysOpen="True"
                MouseEnter="OnPopupMouseEnter"

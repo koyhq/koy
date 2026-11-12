@@ -17,7 +17,7 @@
                 <Border x:Name="ItemContainer"
                         Width="{Binding ItemSize}"
                         Height="{Binding ItemSize}"
-                        Margin="1,0"
+                        Margin="{Binding DataContext.SlotMargin, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}"
                         CornerRadius="10"
                         Cursor="Hand"
                         ToolTip="{Binding Title}"
@@ -200,7 +200,7 @@
                             RenderTransformOrigin="0.5,0.5"
                             Width="{Binding ItemSize}"
                             Height="{Binding ItemSize}"
-                            Margin="1,0"
+                            Margin="{Binding DataContext.SlotMargin, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}"
                             CornerRadius="10"
                             Cursor="Hand"
                             ToolTip="{Binding Title}"
@@ -283,7 +283,7 @@
         </ItemsControl.Resources>
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-                <StackPanel Orientation="Horizontal"/>
+                <StackPanel Orientation="{Binding DataContext.StripOrientation, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}"/>
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
     </ItemsControl>

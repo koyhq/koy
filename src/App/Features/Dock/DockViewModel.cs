@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -44,7 +46,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     private int _traySyncQueued;
     private DispatcherTimer? _trayCloseTimer;
 
-    private readonly Spring _translateSpring;
+    private readonly Spring _translateXSpring;
+    private readonly Spring _translateYSpring;
     private readonly Spring _opacitySpring;
     private bool _isAnimating;
     private bool _disposed;
@@ -82,7 +85,50 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     private DockItemViewModel? _pendingPreviewItem;
 
     [ObservableProperty]
+    private double _translationX;
+
+    [ObservableProperty]
     private double _translationY;
+
+    public DockEdge Edge => _settings.Dock.Edge;
+    public bool IsVertical => Edge is DockEdge.Left or DockEdge.Right;
+    public Orientation StripOrientation => IsVertical ? Orientation.Vertical : Orientation.Horizontal;
+    public int LengthPercent => _settings.Dock.LengthPercent;
+    public double EdgeOffsetDip => _settings.Dock.EdgeOffsetDip;
+    public Thickness InnerPadding => new(DockLayoutLimits.ClampInnerPaddingDip(_settings.Dock.InnerPaddingDip));
+    public Thickness SlotMargin
+    {
+        get
+        {
+            var spacing = DockLayoutLimits.ClampIconSpacingDip(_settings.Dock.IconSpacingDip);
+            return IsVertical
+                ? new Thickness(0, spacing / 2.0, 0, spacing / 2.0)
+                : new Thickness(spacing / 2.0, 0, spacing / 2.0, 0);
+        }
+    }
+    public PlacementMode PreviewPlacement => Edge switch
+    {
+        DockEdge.Top => PlacementMode.Bottom,
+        DockEdge.Left => PlacementMode.Right,
+        DockEdge.Right => PlacementMode.Left,
+        _ => PlacementMode.Top
+    };
+    public double PreviewVerticalOffset => Edge switch
+    {
+        DockEdge.Top => 10,
+        DockEdge.Bottom => -10,
+        _ => 0
+    };
+    public double PreviewHorizontalOffset => Edge switch
+    {
+        DockEdge.Left => 10,
+        DockEdge.Right => -10,
+        _ => 0
+    };
+
+    public double SeparatorWidth => IsVertical ? 24.0 : 1.0;
+    public double SeparatorHeight => IsVertical ? 1.0 : 24.0;
+    public Thickness SeparatorMargin => IsVertical ? new Thickness(0, 4, 0, 4) : new Thickness(4, 0, 4, 0);
 
     [ObservableProperty]
     private double _opacity = 1.0;
@@ -105,6 +151,12 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     private double _dockHeight = 60.0;
+
+    [ObservableProperty]
+    private double _capsuleWidth = double.NaN;
+
+    [ObservableProperty]
+    private double _capsuleHeight = 60.0;
 
     [ObservableProperty]
     private Thickness _dockMargin = new(12, 12, 12, 10);
@@ -323,7 +375,25 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     public AppSettings Settings => _settings;
 
     /// <summary>Ayar nesnesini değiştirir (yerinde ayar uygulaması): sabit sırası/klasör yazımları ile okuyucular aynı nesneyi görür.</summary>
-    public void AdoptSettings(AppSettings settings) => _settings = settings;
+    public void AdoptSettings(AppSettings settings)
+    {
+        _settings = settings;
+        OnPropertyChanged(nameof(Edge));
+        OnPropertyChanged(nameof(IsVertical));
+        OnPropertyChanged(nameof(StripOrientation));
+        OnPropertyChanged(nameof(LengthPercent));
+        OnPropertyChanged(nameof(EdgeOffsetDip));
+        OnPropertyChanged(nameof(InnerPadding));
+        OnPropertyChanged(nameof(SlotMargin));
+        OnPropertyChanged(nameof(PreviewPlacement));
+        OnPropertyChanged(nameof(PreviewVerticalOffset));
+        OnPropertyChanged(nameof(PreviewHorizontalOffset));
+        OnPropertyChanged(nameof(SeparatorWidth));
+        OnPropertyChanged(nameof(SeparatorHeight));
+        OnPropertyChanged(nameof(SeparatorMargin));
+        RecomputeFit();
+        EvaluatePosition(_lastContentWidth);
+    }
     public DockStatusViewModel? Status { get; }
 
     public DockViewModel(
@@ -366,7 +436,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         UpdateMaterialSurfaces();
         MaterialState.Changed += OnMaterialChanged;
 
-        _translateSpring = new Spring(0) { Stiffness = 280, Damping = 25 };
+        _translateXSpring = new Spring(0) { Stiffness = 280, Damping = 25 };
+        _translateYSpring = new Spring(0) { Stiffness = 280, Damping = 25 };
         _opacitySpring = new Spring(1.0) { Stiffness = 200, Damping = 24 };
 
         _thumbnailHoverTimer = new DispatcherTimer
@@ -684,19 +755,23 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     {
         double icon;
         double maxWidth;
+        var spacing = _settings.Dock.IconSpacingDip;
+        var isVertical = IsVertical;
 
         if (_settings.Dock.Style == DockStyleMode.FullWidth)
         {
             if (_centerWidth <= 0)
                 return;
 
-            icon = DockFitMath.FitIconSize(_preferredIconSize, Items.Count, 0, _centerWidth);
+            icon = DockFitMath.FitIconSize(_preferredIconSize, Items.Count, 0, _centerWidth, spacing);
             maxWidth = _centerWidth;
         }
         else
         {
-            var monitorWidth = _currentMonitor?.WidthDip > 0 ? _currentMonitor.WidthDip : 1920.0;
-            var available = monitorWidth - CapsuleWindowSideMargins;
+            var monitorDimension = isVertical
+                ? (_currentMonitor?.HeightDip > 0 ? _currentMonitor.HeightDip : 1080.0)
+                : (_currentMonitor?.WidthDip > 0 ? _currentMonitor.WidthDip : 1920.0);
+            var available = monitorDimension - CapsuleWindowSideMargins;
             var right = RightSection;
             var otherSlots = (ShowStartButton ? 1 : 0) + (ShowFolders ? 1 : 0) + (ShowRecents ? 1 : 0)
                              + (right.ShowFullTray ? 1 : 0) + 1; // +1: Koy menüsü
@@ -704,12 +779,12 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                              + (right.ShowFirstSeparator ? CapsuleSeparatorWidth : 0.0)
                              + (right.ShowSmallTray ? DockRightSection.SmallTrayWidthDip + 1.0 : 0.0);
 
-            icon = DockFitMath.FitIconSize(_preferredIconSize, Items.Count + otherSlots, fixedWidth, available);
-            maxWidth = DockFitMath.StripMaxWidth(available, fixedWidth + otherSlots * DockFitMath.SlotWidth(icon));
+            icon = DockFitMath.FitIconSize(_preferredIconSize, Items.Count + otherSlots, fixedWidth, available, spacing);
+            maxWidth = DockFitMath.StripMaxWidth(available, fixedWidth + otherSlots * DockFitMath.SlotWidth(icon, spacing));
         }
 
         ItemsMaxWidth = maxWidth;
-        IsStripClipped = Items.Count * DockFitMath.SlotWidth(icon) > maxWidth + 0.5;
+        IsStripClipped = Items.Count * DockFitMath.SlotWidth(icon, spacing) > maxWidth + 0.5;
 
         if (Math.Abs(icon - IconSize) < 0.01)
             return;
@@ -843,14 +918,20 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             effectiveMouseOver,
             _isForegroundWindowFullscreen,
             _settings.Dock.HideInFullscreen,
-            _settings.Dock.EdgeReveal);
+            _settings.Dock.EdgeReveal,
+            _settings.Dock.Edge,
+            _settings.Dock.LengthPercent,
+            _settings.Dock.EdgeOffsetDip,
+            _settings.Dock.InnerPaddingDip);
 
         resolved = StabilizeSnap(resolved);
 
         IsFullWidthMode = resolved.IsFullWidth;
         IsSnapped = resolved.IsSnapped;
         IsHandleVisible = resolved.IsHandleVisible;
-        DockHeight = resolved.HeightDip;
+        DockHeight = IsVertical ? resolved.WidthDip : resolved.HeightDip;
+        CapsuleWidth = IsVertical ? DockHeight : double.NaN;
+        CapsuleHeight = IsVertical ? double.NaN : DockHeight;
 
         if (resolved.IsFullWidth)
         {
@@ -859,7 +940,13 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
         else if (resolved.IsSnapped)
         {
-            DockMargin = new Thickness(12, 12, 12, 0);
+            DockMargin = Edge switch
+            {
+                DockEdge.Top => new Thickness(12, 0, 12, 12),
+                DockEdge.Left => new Thickness(0, 12, 12, 12),
+                DockEdge.Right => new Thickness(12, 12, 0, 12),
+                _ => new Thickness(12, 12, 12, 0)
+            };
             CapsuleCornerRadius = new CornerRadius(
                 resolved.CornerRadiusTopLeft,
                 resolved.CornerRadiusTopRight,
@@ -868,7 +955,13 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
         else
         {
-            DockMargin = new Thickness(12, 12, 12, 10);
+            DockMargin = Edge switch
+            {
+                DockEdge.Top => new Thickness(12, 10, 12, 12),
+                DockEdge.Left => new Thickness(10, 12, 12, 12),
+                DockEdge.Right => new Thickness(12, 12, 10, 12),
+                _ => new Thickness(12, 12, 12, 10)
+            };
             CapsuleCornerRadius = new CornerRadius(18);
         }
 
@@ -893,17 +986,43 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             EdgeWatchChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        var targetY = shouldShow ? resolved.TranslationY : (resolved.IsFullWidth ? (DockPositionResolver.FullWidthHeightDip + 10.0) : 80.0);
+        double targetX, targetY;
+        if (shouldShow)
+        {
+            targetX = resolved.TranslationX;
+            targetY = resolved.TranslationY;
+        }
+        else if (resolved.IsHidden)
+        {
+            targetX = resolved.TranslationX;
+            targetY = resolved.TranslationY;
+        }
+        else
+        {
+            var thickness = resolved.IsFullWidth ? DockPositionResolver.FullWidthHeightDip : (resolved.IsSnapped ? DockPositionResolver.SnappedHeightDip : DockPositionResolver.FloatingHeightDip);
+            var offset = resolved.IsFullWidth ? _settings.Dock.EdgeOffsetDip : (resolved.IsSnapped ? _settings.Dock.EdgeOffsetDip : (DockPositionResolver.FloatingBottomMarginDip + _settings.Dock.EdgeOffsetDip));
+            var shift = thickness + offset + 10.0;
+            (targetX, targetY) = _settings.Dock.Edge switch
+            {
+                DockEdge.Top => (0.0, -shift),
+                DockEdge.Left => (-shift, 0.0),
+                DockEdge.Right => (shift, 0.0),
+                _ => (0.0, shift)
+            };
+        }
+
         var targetOpacity = shouldShow ? resolved.Opacity : 0.0;
 
         if (ReduceMotion)
         {
-            _translateSpring.SnapTo(targetY);
+            _translateXSpring.SnapTo(targetX);
+            _translateYSpring.SnapTo(targetY);
             _opacitySpring.SnapTo(targetOpacity);
         }
         else
         {
-            _translateSpring.Target = targetY;
+            _translateXSpring.Target = targetX;
+            _translateYSpring.Target = targetY;
             _opacitySpring.Target = targetOpacity;
         }
 
@@ -1158,10 +1277,12 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
         deltaSeconds *= TimeScale;
 
-        var tMoving = _translateSpring.Step(deltaSeconds);
+        var txMoving = _translateXSpring.Step(deltaSeconds);
+        var tyMoving = _translateYSpring.Step(deltaSeconds);
         var oMoving = _opacitySpring.Step(deltaSeconds);
 
-        TranslationY = _translateSpring.Value;
+        TranslationX = _translateXSpring.Value;
+        TranslationY = _translateYSpring.Value;
         Opacity = Math.Clamp(_opacitySpring.Value, 0.0, 1.0);
 
         var scaleMoving = false;
@@ -1175,7 +1296,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                 scaleMoving = true;
         }
 
-        if (!tMoving && !oMoving && !scaleMoving)
+        if (!txMoving && !tyMoving && !oMoving && !scaleMoving)
         {
             _isAnimating = false;
             AnimationStopped?.Invoke(this, EventArgs.Empty);

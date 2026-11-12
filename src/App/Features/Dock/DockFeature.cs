@@ -209,7 +209,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
                 continue;
 
             var dpiScale = state.Monitor.DpiScaleY;
-            _appBarService.Reregister(state.Hwnd, state.Window.ReservedHeight, dpiScale);
+            _appBarService.Reregister(state.Hwnd, state.Window.ReservedHeight, dpiScale, settings.Dock.Edge);
         }
     }
 
@@ -237,7 +237,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         }
 
         var height = state.Window.ActualHeight > 0 ? state.Window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
-        _appBarService.Reassert(state.Hwnd, height, state.Monitor.DpiScaleY, onlyIfNeeded);
+        _appBarService.Reassert(state.Hwnd, height, state.Monitor.DpiScaleY, onlyIfNeeded, settings.Dock.Edge);
     }
 
     /// <summary>
@@ -496,7 +496,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             {
                 var dpiScale = state.Monitor.DpiScaleY;
                 var height = window.ActualHeight > 0 ? window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
-                _appBarService.Register(hwnd, height, dpiScale);
+                _appBarService.Register(hwnd, height, dpiScale, settings.Dock.Edge);
             }
 
             UpdateDockBounds(window, state.VisibilityController);
@@ -506,10 +506,10 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         {
             UpdateDockBounds(window, state.VisibilityController);
 
-            if (_appBarService is not null && state.Hwnd != 0 && e.NewSize.Height > 0)
+            if (_appBarService is not null && state.Hwnd != 0 && (e.NewSize.Height > 0 || e.NewSize.Width > 0))
             {
                 var dpiScale = state.Monitor.DpiScaleY;
-                _appBarService.UpdatePosition(state.Hwnd, window.ReservedHeight, dpiScale);
+                _appBarService.UpdatePosition(state.Hwnd, window.ReservedHeight, dpiScale, settings.Dock.Edge);
             }
         };
 
@@ -522,8 +522,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         window.DpiChanged += (s, e) =>
         {
             UpdateDockBounds(window, state.VisibilityController);
-            if (_appBarService is not null && state.Hwnd != 0 && window.ActualHeight > 0)
-                _appBarService.UpdatePosition(state.Hwnd, window.ReservedHeight, state.Monitor.DpiScaleY);
+            if (_appBarService is not null && state.Hwnd != 0 && (window.ActualHeight > 0 || window.ActualWidth > 0))
+                _appBarService.UpdatePosition(state.Hwnd, window.ReservedHeight, state.Monitor.DpiScaleY, settings.Dock.Edge);
         };
 
         window.DisplayChangeHandler = () =>
@@ -644,8 +644,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
                     continue;
 
                 var height = state.Window.ActualHeight > 0 ? state.Window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
-                _appBarService.Register(state.Hwnd, height, state.Monitor.DpiScaleY);   // kayıtlıysa dokunmaz
-                _appBarService.UpdatePosition(state.Hwnd, height, state.Monitor.DpiScaleY);
+                _appBarService.Register(state.Hwnd, height, state.Monitor.DpiScaleY, settings.Dock.Edge);   // kayıtlıysa dokunmaz
+                _appBarService.UpdatePosition(state.Hwnd, height, state.Monitor.DpiScaleY, settings.Dock.Edge);
             }
         }
         else if (_appBarService is not null)
@@ -1000,8 +1000,11 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
                 // Monitör başına: yalnız imlecin bulunduğu ekran. Fare kenarda ~300 ms durunca ve tuş basılı değilken açılır.
                 var monitor = state.Monitor;
                 var inZone = EdgeRevealTracker.IsInZone(
-                    x, y, monitor.Bounds.Left, monitor.Bounds.Right, monitor.Bounds.Bottom,
-                    revealed: state.ViewModel.IsVisible, dpiScaleY: monitor.DpiScaleY);
+                    settings.Dock.Edge,
+                    x, y, monitor.Bounds,
+                    revealed: state.ViewModel.IsVisible,
+                    dpiScaleX: monitor.DpiScaleX,
+                    dpiScaleY: monitor.DpiScaleY);
 
                 state.ViewModel.SetMouseAtBottom(state.EdgeTracker.Update(inZone, buttonDown, now));
             }
