@@ -22,6 +22,39 @@ public class IconPackFilesTests
     public void Key_is_null_when_nothing_valid(string? aumid, string? id)
         => Assert.Null(AppIconKey.For(aumid, id));
 
+    [Theory]
+    [InlineData(@"\\server\share\icons")]
+    [InlineData(@"\\?\C:\icons")]
+    [InlineData(@"C:\icons\..\other")]
+    [InlineData(@"relative\icons")]
+    [InlineData(@"C:\CON")]
+    [InlineData("")]
+    [InlineData(null)]
+    public void Pack_folder_rejects_network_relative_and_unsafe_paths(string? folder)
+        => Assert.False(IconPackFiles.IsSafeFolder(folder));
+
+    // Sürücü harfli yol çözümü yol kütüphanesine bağlı: yalnız Windows'ta anlamlı (Linux taban çizgisi AppIconOverrideTests ile aynı).
+    [Theory]
+    [InlineData(@"C:\Icons")]
+    [InlineData(@"C:\Icons\")]
+    [InlineData(@"  D:\Packs\Mine  ")]
+    public void Pack_folder_accepts_local_drive_paths_on_windows(string folder)
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        Assert.True(IconPackFiles.IsSafeFolder(folder));
+    }
+
+    [Fact]
+    public void All_lists_aumid_then_shortcut_name_without_duplicates()
+    {
+        Assert.Equal(["App!Main", "Notepad.lnk"], AppIconKey.All("App!Main", @"C:\x\Notepad.lnk"));
+        Assert.Equal(["Notepad.lnk"], AppIconKey.All(null, "Notepad.lnk"));
+        Assert.Equal(["notepad.lnk"], AppIconKey.All("notepad.lnk", "Notepad.lnk"));
+        Assert.Empty(AppIconKey.All(null, null));
+    }
+
     [Fact]
     public void Matches_by_stem_ignoring_case_and_shortcut_extension()
     {

@@ -8,11 +8,27 @@ public static class AppIconKey
 {
     /// <param name="appUserModelId">Dock öğesinin AUMID'i; yoksa null.</param>
     /// <param name="itemId">Dock öğesi kimliği (kısayol dosya adı ya da yolu).</param>
-    public static string? For(string? appUserModelId, string? itemId)
-    {
-        if (AppIconOverrides.IsValidKey(appUserModelId))
-            return appUserModelId!.Trim();
+    public static string? For(string? appUserModelId, string? itemId) => All(appUserModelId, itemId).FirstOrDefault();
 
+    /// <summary>
+    /// Öğenin bütün geçerli anahtarları, tercih sırasıyla (AUMID, kısayol adı). Sabitli bir uygulamanın AUMID'i yalnız
+    /// çalışırken bilinebilir; bu yüzden kaydederken ve silerken hepsi, okurken ilk eşleşen kullanılır ve değişim
+    /// uygulama kapalıyken de kaybolmaz.
+    /// </summary>
+    public static IReadOnlyList<string> All(string? appUserModelId, string? itemId)
+    {
+        var keys = new List<string>(2);
+        if (AppIconOverrides.IsValidKey(appUserModelId))
+            keys.Add(appUserModelId!.Trim());
+
+        if (ShortcutName(itemId) is { } name && !keys.Contains(name, StringComparer.OrdinalIgnoreCase))
+            keys.Add(name);
+
+        return keys;
+    }
+
+    private static string? ShortcutName(string? itemId)
+    {
         if (string.IsNullOrWhiteSpace(itemId))
             return null;
 

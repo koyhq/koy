@@ -10,6 +10,14 @@ public static class IconPackFiles
     private static readonly string[] ExtensionOrder = [".png", ".ico", ".svg"];
     private const int SvgRank = 2;
 
+    /// <summary>
+    /// Paket klasörü, tek simge dosyası yolu gibi sınanır: yalnız sürücü harfli mutlak yol; ağ (UNC), aygıt yolu,
+    /// nokta bileşeni ve yasak karakter yok. Klasörün var olduğuna bakmaz.
+    /// </summary>
+    public static bool IsSafeFolder(string? folder)
+        => !string.IsNullOrWhiteSpace(folder)
+           && AppIconOverrides.TryValidateSource(folder.Trim().TrimEnd('\\', '/') + "\\x.png", out _);
+
     /// <param name="fileNames">Paket klasöründeki dosya adları (yol değil).</param>
     /// <param name="appKey">Uygulama anahtarı (<see cref="AppIconKey"/>).</param>
     /// <param name="allowSvg">Çizici SVG gösteremiyorsa false: SVG dosyaları yok sayılır.</param>
