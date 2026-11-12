@@ -552,6 +552,33 @@ public class UserStyleOverridesTests
         Assert.Equal(8, r.ValidEntries.Count);
     }
 
+    // --- Ayar ---
+
+    [Fact]
+    public void Setting_is_off_by_default_and_survives_a_save_and_load_round_trip()
+    {
+        Assert.False(new Koy.Core.Settings.AppSettings().Appearance.UserStyleOverridesEnabled);
+
+        var dir = Path.Combine(Path.GetTempPath(), "koy-userstyle-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            var store = new Koy.Core.Settings.SettingsStore(Path.Combine(dir, "settings.json"));
+            var settings = new Koy.Core.Settings.AppSettings
+            {
+                Appearance = new Koy.Core.Settings.AppearanceSettings { UserStyleOverridesEnabled = true }
+            };
+
+            store.Save(settings);
+
+            Assert.True(store.Load().Appearance.UserStyleOverridesEnabled);
+        }
+        finally
+        {
+            if (Directory.Exists(dir))
+                Directory.Delete(dir, recursive: true);
+        }
+    }
+
     // --- Dosya okuma ---
 
     [Fact]

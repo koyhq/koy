@@ -87,6 +87,12 @@ public sealed record AppearanceSettings
 
     /// <summary>Koy'un kendi ölçeği (yüzde, 80-150), monitör DPI'sinin üstüne uygulanır.</summary>
     public int UiScalePercent { get; set; } = FontScalePolicy.DefaultUiScale;
+
+    /// <summary>
+    /// Açıksa %AppData%\Koy\user-theme.json izinli tema anahtarlarını ezer (bkz. UserStyleParser). Varsayılan kapalı:
+    /// dosya olsa bile okunmaz.
+    /// </summary>
+    public bool UserStyleOverridesEnabled { get; set; }
 }
 
 /// <summary>Animasyon başına açma/kapama (issue #79). Azaltılmış hareket ve pil tasarrufu hepsini ezer.</summary>
