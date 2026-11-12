@@ -954,9 +954,11 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
             if (!isFullscreen && !monitorMaximized && state.Hwnd != 0 && info.Handle != state.Hwnd)
             {
-                // Uygulamanın bağlam menüsü açıkken dock kendini öne almaz: menü dock'un arkasında kalırdı
+                // Uygulamanın veya Koy'un kendi bağlam menüsü açıkken dock kendini öne almaz: menü dock'un arkasında kalırdı
                 // (menü kapanınca ön plan yine değişir ve dock öne alınır).
-                if (!FullscreenDetector.IsScreenClippingHost(info.Handle) && !PopupMenuProbe.AnyVisibleMenu())
+                if (!FullscreenDetector.IsScreenClippingHost(info.Handle)
+                    && !PopupMenuProbe.AnyVisibleMenu()
+                    && !DockContextMenuManager.HasActiveMenu)
                 {
                     WindowStyles.ReassertTopmost(state.Hwnd);
                 }

@@ -31,6 +31,7 @@ public sealed class JumpListService : IJumpListService
     private static readonly Guid ObjectArrayIid = new("92CA9DCD-5622-4BBA-A805-5E9F541BD8C9");
 
     private readonly JumpListCache _cache = new();
+    private readonly ExeAppIdCache _exeAppIds = new();
     private readonly object _gate = new();
     private readonly Dictionary<string, Task<IReadOnlyList<JumpListSection>>> _inFlight = new(StringComparer.OrdinalIgnoreCase);
 
@@ -53,12 +54,12 @@ public sealed class JumpListService : IJumpListService
         {
             if (!_inFlight.TryGetValue(appUserModelId, out task!))
             {
-                task = RunOnStaThread(() =>
+                task = RunOnStaThread<IReadOnlyList<JumpListSection>>(() =>
                 {
                     var sections = Read(appUserModelId, customPath);
                     _cache.Set(appUserModelId, custom, automatic, sections);
                     return sections;
-                });
+                }, []);
                 _inFlight[appUserModelId] = task;
                 // Devam eden işi, bittiğinde (başarısız olsa da) listeden çıkar.
                 _ = task.ContinueWith(_ =>
@@ -69,6 +70,24 @@ public sealed class JumpListService : IJumpListService
             }
         }
 
+        return cancellationToken.CanBeCanceled ? task.WaitAsync(cancellationToken) : task;
+    }
+
+    public Task<string?> ResolveAppIdAsync(string exePath, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(exePath))
+            return Task.FromResult<string?>(null);
+
+        if (_exeAppIds.TryGet(exePath, out var cached))
+            return Task.FromResult(cached);
+
+        // Başlat menüsü taraması yalnız sağ tıkta, kısa ömürlü STA iş parçacığında; sonuç (bulunamadı dahil) önbelleğe girer.
+        var task = RunOnStaThread<string?>(() =>
+        {
+            var id = StartMenuAppIdResolver.Resolve(exePath);
+            _exeAppIds.Set(exePath, id);
+            return id;
+        }, null);
         return cancellationToken.CanBeCanceled ? task.WaitAsync(cancellationToken) : task;
     }
 
@@ -101,6 +120,7 @@ public sealed class JumpListService : IJumpListService
     public void Clear()
     {
         _cache.Clear();
+        _exeAppIds.Clear();
     }
 
     private static FileStamp Stamp(string path)
@@ -116,9 +136,9 @@ public sealed class JumpListService : IJumpListService
         }
     }
 
-    private static Task<IReadOnlyList<JumpListSection>> RunOnStaThread(Func<IReadOnlyList<JumpListSection>> work)
+    private static Task<T> RunOnStaThread<T>(Func<T> work, T onError)
     {
-        var tcs = new TaskCompletionSource<IReadOnlyList<JumpListSection>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
         var thread = new Thread(() =>
         {
             try
@@ -127,7 +147,7 @@ public sealed class JumpListService : IJumpListService
             }
             catch
             {
-                tcs.SetResult([]); // hata menüyü bozmaz; sonuç önbelleğe alınmaz
+                tcs.SetResult(onError); // hata menüyü bozmaz; sonuç önbelleğe alınmaz
             }
         })
         {
