@@ -4,6 +4,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Koy.App.Features;
+using Koy.App.Features.Actions;
 using Koy.App.Features.Dock;
 using Koy.App.Features.Menu;
 using Koy.App.Features.Notch;
@@ -12,6 +13,7 @@ using Koy.App.Features.Shortcuts;
 using Koy.App.Features.Wizard;
 using Koy.App.Resources;
 using Koy.Core.Diagnostics;
+using Koy.Core.Input;
 using Koy.Core.Settings;
 using Koy.Core.Shortcuts;
 using Koy.Core.Tray;
@@ -54,6 +56,7 @@ public partial class App : Application
     private readonly List<IFeature> _features = [];
     private TrayIconManager? _trayIconManager;
     private ShortcutController? _shortcuts;
+    private HotCornerController? _hotCorners;
     private readonly SharedServices _services = new();
 
     private static readonly TimeSpan PauseDuration = TimeSpan.FromHours(1);
@@ -130,6 +133,10 @@ public partial class App : Application
         _shortcuts.Triggered += OnShortcutTriggered;
         _shortcuts.Start(settings);
 
+        // Ekran köşeleri: hiçbir köşeye eylem bağlı değilse (varsayılan) zamanlayıcı hiç kurulmaz.
+        _hotCorners = new HotCornerController(RunInputAction);
+        _hotCorners.Apply(settings.HotCorners);
+
         // İlk kurulumdan hemen sonra ana uygulama doğrudan ekrana çıksın
         if (isFirstRun)
         {
@@ -165,10 +172,42 @@ public partial class App : Application
         _shortcuts?.Apply(new SettingsStore(SettingsStore.DefaultPath).Load());
     }
 
+    /// <summary>Köşe ayarı değişti: diskteki ayarlarla köşe takibini açar, kapatır ya da günceller.</summary>
+    public void ApplyHotCorners()
+    {
+        _hotCorners?.Apply(new SettingsStore(SettingsStore.DefaultPath).Load().HotCorners);
+    }
+
+    /// <summary>
+    /// Kısayol dışı tetikleyicilerin (ekran köşeleri) ortak eylem dağıtıcısı. Yalnız Koy'un var olan yeteneklerine bağlanır;
+    /// burada karşılığı olmayan eylem sessizce yok sayılır.
+    /// </summary>
+    private void RunInputAction(InputAction action)
+    {
+        switch (action)
+        {
+            case InputAction.OpenNotch:
+                OnShortcutTriggered(ShortcutAction.ToggleNotch);
+                break;
+            case InputAction.OpenSearch:
+                OnShortcutTriggered(ShortcutAction.OpenSearch);
+                break;
+            case InputAction.OpenKoyWindow:
+                OnShortcutTriggered(ShortcutAction.OpenKoyWindow);
+                break;
+            case InputAction.ToggleDock:
+                OnShortcutTriggered(ShortcutAction.ToggleDock);
+                break;
+        }
+    }
+
     private void OnShortcutTriggered(ShortcutAction action)
     {
         switch (action)
         {
+            case ShortcutAction.OpenKoyWindow:
+                KoyWindow.ShowInstance();
+                break;
             case ShortcutAction.ToggleNotch:
                 _features.OfType<NotchFeature>().FirstOrDefault()?.ToggleExpanded();
                 break;
@@ -461,6 +500,9 @@ public partial class App : Application
     {
         _shortcuts?.Dispose();
         _shortcuts = null;
+
+        _hotCorners?.Dispose();
+        _hotCorners = null;
 
         _trayIconManager?.Dispose();
         _trayIconManager = null;

@@ -18,5 +18,8 @@ public enum InputAction
     MoveDockToNextMonitor,
 
     /// <summary>Kullanıcının tanımladığı bir <see cref="CustomAction"/>; hangisi olduğu binding'de tutulur.</summary>
-    RunCustomAction
+    RunCustomAction,
+
+    /// <summary>Dock'u göster/gizle (ayar da kaydedilir). Sona eklendi: mevcut adlar ve sıra değişmez.</summary>
+    ToggleDock
 }

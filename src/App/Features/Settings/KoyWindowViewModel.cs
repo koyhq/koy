@@ -30,6 +30,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     public ShortcutsViewModel Shortcuts { get; }
     public ProfilesViewModel Profiles { get; }
 
+    /// <summary>Kısayollar sayfasındaki ekran köşeleri bölümü.</summary>
+    public HotCornersViewModel HotCorners { get; }
+
     /// <summary>Ekranlar sayfası: monitör şeması ve ekran başına ayarlar.</summary>
     public DisplaysViewModel Displays { get; }
 
@@ -853,6 +856,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         Shortcuts = new ShortcutsViewModel(_store);
         Profiles = new ProfilesViewModel(ProfileService.Instance);
         ProfileService.Instance.Applied += OnProfileApplied;
+        HotCorners = new HotCornersViewModel(_store);
         Displays = new DisplaysViewModel(_store);
         Weather = new WeatherLocationViewModel(_store);
         UpdateStatus.Changed += OnUpdateStatusChanged;
@@ -1008,6 +1012,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             WheelAction = s.Notch.WheelAction;
             MiddleClickAction = s.Dock.MiddleClickAction;
             Shortcuts.Load(s);
+            HotCorners.Load(s);
             Weather.Load(s);
 
             var panels = NotchPanels.ParseEnabled(s.Notch.EnabledPanels ?? ["home", "focus", "calendar", "shelf", "clipboard", "system", "controlcenter"]);

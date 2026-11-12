@@ -732,6 +732,36 @@
   <data name="ShortcutVoiceCommand" xml:space="preserve">
     <value>Sesli komut (harness)</value>
   </data>
+  <data name="ShortcutOpenKoyWindow" xml:space="preserve">
+    <value>Koy ayar penceresini aç</value>
+  </data>
+  <data name="CornersHeader" xml:space="preserve">
+    <value>Ekran köşeleri</value>
+  </data>
+  <data name="CornersHint" xml:space="preserve">
+    <value>İmleci bir ekran köşesinde bekletince eylem çalışır. Varsayılanda hiçbir köşe ayarlı değil; hepsi "Yok" iken hiçbir şey izlenmez. Fare tuşu basılıyken köşe tetiklenmez.</value>
+  </data>
+  <data name="CornerActionNone" xml:space="preserve">
+    <value>Yok</value>
+  </data>
+  <data name="CornerActionOpenNotch" xml:space="preserve">
+    <value>Çentiği aç / kapat</value>
+  </data>
+  <data name="CornerActionOpenSearch" xml:space="preserve">
+    <value>Aramayı aç</value>
+  </data>
+  <data name="CornerActionOpenKoyWindow" xml:space="preserve">
+    <value>Koy ayarlarını aç</value>
+  </data>
+  <data name="CornerActionToggleDock" xml:space="preserve">
+    <value>Dock'u göster / gizle</value>
+  </data>
+  <data name="CornerDwellTitle" xml:space="preserve">
+    <value>Köşede bekleme süresi</value>
+  </data>
+  <data name="CornerFullscreenTitle" xml:space="preserve">
+    <value>Tam ekran uygulama açıkken kapalı</value>
+  </data>
   <data name="VoiceHeader" xml:space="preserve">
     <value>SESLİ KOMUT VE HARNESS</value>
   </data>

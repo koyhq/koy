@@ -397,6 +397,25 @@ public sealed record ShortcutsSettings
     public string OpenSearch { get; set; } = "Win+Shift+Q";
     public string OpenSearchClipboard { get; set; } = "Alt+Shift+F2";
     public string VoiceCommand { get; set; } = "Ctrl+Alt+V";
+    public string OpenKoyWindow { get; set; } = "";
+}
+
+/// <summary>
+/// Ekran köşeleri (sıcak köşeler). Varsayılan: hiçbir köşeye eylem bağlı değil; hepsi None iken köşe takibi hiç çalışmaz.
+/// Eylem listesi Koy'un var olan yeteneklerine bağlıdır (bkz. CornerActions).
+/// </summary>
+public sealed record HotCornersSettings
+{
+    public Koy.Core.Input.CornerAction TopLeft { get; set; } = Koy.Core.Input.CornerAction.None;
+    public Koy.Core.Input.CornerAction TopRight { get; set; } = Koy.Core.Input.CornerAction.None;
+    public Koy.Core.Input.CornerAction BottomLeft { get; set; } = Koy.Core.Input.CornerAction.None;
+    public Koy.Core.Input.CornerAction BottomRight { get; set; } = Koy.Core.Input.CornerAction.None;
+
+    /// <summary>İmleç köşede bu kadar (ms) kesintisiz kalınca eylem çalışır; sınırlar için bkz. CornerActions.ClampDwell.</summary>
+    public int DwellMs { get; set; } = Koy.Core.Input.CornerActions.DefaultDwellMs;
+
+    /// <summary>Tam ekran uygulama (oyun, sunum, video) öndeyken köşeler tetiklenmez.</summary>
+    public bool DisableInFullscreen { get; set; } = true;
 }
 
 /// <summary>Sesli komut.</summary>
