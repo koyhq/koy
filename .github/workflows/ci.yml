@@ -47,6 +47,35 @@ jobs:
           path: "**/TestResults/*.trx"
           retention-days: 14
 
+  # Kultur duyarsizligi: ayni testler tr-TR (noktasiz/noktali I, virgul ondalik) ve de-DE altinda da gecmeli.
+  # KOY_TEST_CULTURE'i tests/Core.Tests/TestCulture.cs okur.
+  test-cultures:
+    name: Tests (${{ matrix.culture }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        culture: [tr-TR, de-DE]
+    env:
+      KOY_TEST_CULTURE: ${{ matrix.culture }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          global-json-file: global.json
+
+      - name: Restore dependencies
+        run: dotnet restore Koy.slnx
+
+      - name: Build (Release, zero warnings)
+        run: dotnet build Koy.slnx --no-restore -c Release -warnaserror
+
+      - name: Run xUnit tests (${{ matrix.culture }})
+        run: dotnet test Koy.slnx --no-build -c Release --verbosity normal
+
   # Surum PR'inda notlar iki dilde de olmali; "Neler Geldi" uygulamanin diline gore okur.
   changelog-languages:
     name: Release notes in both languages
