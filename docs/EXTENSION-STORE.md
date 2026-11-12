@@ -32,8 +32,8 @@ arama, kurulum ve güncelleme tek yerde; kurulum ile uygulama ayrı. Koy'un değ
       "version": "1.0.0",
       "author": "Koy",
       "license": "GPL-3.0-or-later",
-      "summary": "Kısa açıklama (en çok 200 karakter)",
-      "description": "Uzun açıklama (en çok 2000 karakter, düz metin)",
+      "summary": { "en": "Short summary (at most 200 characters)", "tr": "Kısa açıklama (en çok 200 karakter)" },
+      "description": { "en": "Long description (at most 2000 characters, plain text)", "tr": "Uzun açıklama (en çok 2000 karakter, düz metin)" },
       "homepage": "https://github.com/koyhq/koy",
       "updated": "2026-11-12",
       "downloads": 0,
@@ -43,6 +43,10 @@ arama, kurulum ve güncelleme tek yerde; kurulum ile uygulama ayrı. Koy'un değ
   ]
 }
 ```
+
+Yerelleştirme: `summary` ve `description` düz metin (her dilde aynı, "en" sayılır) ya da `{ "dil": "metin" }` nesnesi olabilir. Nesne biçiminde `en` zorunludur;
+dil kodu iki küçük harftir (`tr`, `de`…), en çok 32 dil, yinelenen dil yok. Her dil değeri aynı düz metin ve uzunluk kurallarından geçer. Uygulama arayüz dilinin
+iki harfli kodunu seçer, o dil yoksa `en`'e düşer (`LocalizedText.Resolve`). Eklenti adı (`name`) yerelleştirilmez.
 
 Kurallar: `id` manifest kimliği kuralları (ExtensionManifestValidator); `kind` kapalı küme; paket ve önizleme URL'leri yalnız `https://raw.githubusercontent.com/koyhq/koy/` altında (`StoreUrlPolicy`; indirme sonrası yönlendirilen son adres de denetlenir), ana sayfa `https`; indeks en çok 1 MB ve 500 öğe;
 bilinmeyen alan yok sayılır, zorunlu alanı bozuk öğe atlanır (bütün indeks reddedilmez); `formatVersion` büyükse indeks reddedilir.

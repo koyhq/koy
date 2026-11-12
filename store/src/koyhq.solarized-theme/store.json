@@ -1,6 +1,12 @@
 {
-  "summary": "Precision-tuned dark teal palette with a blue accent.",
-  "description": "Solarized Dark colors for the Koy window, menus, notch and dock: dark teal surfaces, warm cream text and a blue accent, with the classic green, yellow and red status colors. Changes colors only. Palette by Ethan Schoonover (MIT).",
+  "summary": {
+    "en": "Precision-tuned dark teal palette with a blue accent.",
+    "tr": "Hassas ayarlı koyu petrol yeşili palet ve mavi vurgu."
+  },
+  "description": {
+    "en": "Solarized Dark colors for the Koy window, menus, notch and dock: dark teal surfaces, warm cream text and a blue accent, with the classic green, yellow and red status colors. Changes colors only. Palette by Ethan Schoonover (MIT).",
+    "tr": "Koy penceresi, menüler, çentik ve dock için Solarized Dark renkleri: koyu petrol yeşili yüzeyler, sıcak krem yazı ve mavi vurgu; klasik yeşil, sarı ve kırmızı durum renkleriyle birlikte. Yalnız renkleri değiştirir. Palet Ethan Schoonover'a aittir (MIT)."
+  },
   "homepage": "https://github.com/koyhq/koy",
   "updated": "2026-11-12",
   "downloads": 0

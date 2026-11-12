@@ -1,6 +1,12 @@
 {
-  "summary": "Simple single-color icons for common apps.",
-  "description": "A small icon pack of plain geometric single-color glyphs for popular apps: Firefox, Visual Studio Code, File Explorer, Spotify, Notepad, Calculator, Windows Terminal and Settings. Drawn from scratch; not the apps' own logos. Apps without an icon here keep their normal icon.",
+  "summary": {
+    "en": "Simple single-color icons for common apps.",
+    "tr": "Yaygın uygulamalar için sade, tek renkli simgeler."
+  },
+  "description": {
+    "en": "A small icon pack of plain geometric single-color glyphs for popular apps: Firefox, Visual Studio Code, File Explorer, Spotify, Notepad, Calculator, Windows Terminal and Settings. Drawn from scratch; not the apps' own logos. Apps without an icon here keep their normal icon.",
+    "tr": "Popüler uygulamalar için düz geometrik, tek renkli glifler içeren küçük bir simge paketi: Firefox, Visual Studio Code, Dosya Gezgini, Spotify, Not Defteri, Hesap Makinesi, Windows Terminal ve Ayarlar. Sıfırdan çizildi; uygulamaların kendi logoları değildir. Burada simgesi olmayan uygulamalar normal simgesini korur."
+  },
   "homepage": "https://github.com/koyhq/koy",
   "updated": "2026-11-12",
   "downloads": 0

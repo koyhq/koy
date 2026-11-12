@@ -43,6 +43,7 @@ MAX_INDEX_BYTES = 1024 * 1024
 MAX_ITEMS = 500
 MAX_SUMMARY = 200
 MAX_DESCRIPTION = 2000
+MAX_LANGUAGES = 32               # StoreIndexParser.MaxLanguages
 MAX_PREVIEW = 1024 * 1024
 MAX_THEME_BYTES = 64 * 1024      # UserStyleParser.MaxBytes
 MAX_THEME_ENTRIES = 512          # UserStyleParser.MaxEntries
@@ -55,6 +56,7 @@ KINDS = ("theme", "iconpack", "background", "profile")
 # Nokta: "koyhq.nord-theme" gibi ad alanlı kimlikler (belgedeki örnekler). Noktalar tek ve arada olmalı.
 ID_RE = re.compile(r"^[a-z][a-z0-9-]*(\.[a-z0-9][a-z0-9-]*)*$")
 VERSION_RE = re.compile(r"^(0|[1-9][0-9]{0,5})\.(0|[1-9][0-9]{0,5})\.(0|[1-9][0-9]{0,5})$")
+LANG_RE = re.compile(r"^[a-z]{2}$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 RESERVED = {"con", "prn", "aux", "nul"} | {f"com{i}" for i in range(1, 10)} | {f"lpt{i}" for i in range(1, 10)}
 # Windows'ta aygıt adı olan dosya adı kökleri (uzantı yok sayılır).
@@ -109,6 +111,40 @@ def trusted_asset_url(url: object) -> bool:
         and ".." not in parts.path.split("/")
         and path.startswith(ALLOWED_PATH_PREFIX.rstrip("/"))
     )
+
+
+def store_text_ok(value: object, max_len: int, newlines: bool, allow_empty: bool) -> bool:
+    """StoreFieldRules.IsPlainText ile aynı: sınırda, boş değil (istenirse), denetim/biçim/yön karakteri yok."""
+    if not isinstance(value, str) or len(value) > max_len or (not allow_empty and not value.strip()):
+        return False
+    import unicodedata
+    for ch in value:
+        if newlines and ch in "\n\r\t":
+            continue
+        if unicodedata.category(ch) in ("Cc", "Cf", "Zl", "Zp", "Co", "Cn", "Cs"):
+            return False
+    return True
+
+
+def check_localized(mid: str, field: str, value: object, max_len: int, newlines: bool, allow_empty: bool) -> list[str]:
+    """summary/description: düz metin ya da {"en": "...", "tr": "..."}; nesnede "en" zorunlu, dil kodu iki küçük harf.
+    StoreIndexParser.TryLocalized ile aynı kurallar."""
+    rule = f"en çok {max_len} karakter, düz metin" + ("" if allow_empty else ", boş olamaz")
+    if isinstance(value, str):
+        return [] if store_text_ok(value, max_len, newlines, allow_empty) else [f"{mid}: {field} geçersiz ({rule})"]
+    if not isinstance(value, dict) or not value:
+        return [f"{mid}: {field} metin ya da {{dil: metin}} nesnesi olmalı"]
+    errs: list[str] = []
+    if len(value) > MAX_LANGUAGES:
+        errs.append(f"{mid}: {field} en çok {MAX_LANGUAGES} dil içerebilir")
+    if "en" not in value:
+        errs.append(f'{mid}: {field} nesne biçiminde "en" zorunlu')
+    for lang, text in value.items():
+        if not LANG_RE.match(lang):
+            errs.append(f"{mid}: {field} dil kodu iki küçük harf olmalı: {lang!r}")
+        elif not store_text_ok(text, max_len, newlines, allow_empty):
+            errs.append(f"{mid}: {field}[{lang}] geçersiz ({rule})")
+    return errs
 
 
 def valid_id(mid: object) -> bool:
@@ -328,10 +364,8 @@ def load_store_meta(folder: Path, mid: str) -> tuple[dict, list[str]]:
     if not isinstance(meta, dict):
         return {}, [f"{mid}: store.json nesne olmalı"]
     summary, desc = meta.get("summary"), meta.get("description")
-    if not isinstance(summary, str) or not summary.strip() or len(summary) > MAX_SUMMARY:
-        errs.append(f"{mid}: summary zorunlu, en çok {MAX_SUMMARY} karakter")
-    if not isinstance(desc, str) or not desc.strip() or len(desc) > MAX_DESCRIPTION:
-        errs.append(f"{mid}: description zorunlu, en çok {MAX_DESCRIPTION} karakter")
+    errs += check_localized(mid, "summary", summary, MAX_SUMMARY, newlines=False, allow_empty=False)
+    errs += check_localized(mid, "description", desc, MAX_DESCRIPTION, newlines=True, allow_empty=False)
     home = meta.get("homepage")
     if not isinstance(home, str) or not home.startswith("https://"):
         errs.append(f"{mid}: homepage https adresi olmalı")
