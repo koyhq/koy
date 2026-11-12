@@ -550,7 +550,9 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
     // Çekil modunun kendi gecikmesi (DockDodgeDelayMs) ViewModel'de işler; çifte beklemesin.
     private EdgeRevealTracker NewEdgeTracker() => new(
-        EffectiveProximity == DockProximityMode.Dodge ? TimeSpan.Zero : EdgeRevealTracker.DefaultDelay);
+        EffectiveProximity == DockProximityMode.Dodge
+            ? TimeSpan.Zero
+            : DockPresentationMath.EdgeRevealDelay(settings.Dock.RevealTrigger, settings.Dock.RevealDelayMs));
 
     /// <summary>
     /// Ayarlar değişti: çalışan dock'a YERİNDE uygulanır. Dock'u durdurup başlatmak Windows görev çubuğunu geri getirir,

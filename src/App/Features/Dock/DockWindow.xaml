@@ -56,6 +56,18 @@
                 MouseEnter="OnDodgeHandleMouseEnter"
                 MouseLeave="OnDodgeHandleMouseLeave"/>
 
+        <!-- 3b. Gizli dock kenar çizgisi: dock gizliyken alt kenarda 160×2 px ince çizgi (ayar: HiddenEdgeLine).
+             Tıklamayı yakalamaz; açılma kenar izleyicisinden gelir. Animasyonsuz, anında görünür/kaybolur. -->
+        <Border Width="160"
+                Height="2"
+                CornerRadius="1"
+                Background="{DynamicResource KoyAccent}"
+                Opacity="0.7"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                IsHitTestVisible="False"
+                Visibility="{Binding IsEdgeLineVisible, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
+
         <!-- 4. Canlı DWM Pencere Küçük Resim Önizlemesi -->
         <Popup x:Name="ThumbnailPreviewPopup"
                IsOpen="{Binding IsPreviewPopupOpen}"
