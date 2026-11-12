@@ -645,6 +645,12 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     public bool HasTrayAppRows => TrayAppRows.Count > 0;
 
+    partial void OnDockNewTrayIconVisibilityChanged(Koy.Core.Tray.TrayIconVisibility value)
+    {
+        foreach (var row in TrayAppRows)
+            row.FollowDefault(value != Koy.Core.Tray.TrayIconVisibility.Hidden);
+    }
+
     // Kayıtlı "Shown" değerleri korunur: dock'ta satır içi gösterim gelince anlamı olacak, bugün tepsi penceresinde görünür.
     private ValueDictionary<Koy.Core.Tray.TrayIconVisibility> _savedTrayApps = new();
 
