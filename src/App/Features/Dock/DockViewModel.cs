@@ -322,6 +322,68 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     public DockController Controller => _controller;
     public AppSettings Settings => _settings;
 
+    // Simge paketi ve uygulama başına değişim. Ayar değişince ViewModel yeniden kurulur (DockSettingsDiff), örnek de yenilenir.
+    private readonly DockAppIcons _appIcons;
+
+    private void AttachAppIcon(DockItemViewModel vm)
+    {
+        vm.IconOwner = this;
+        if (!_appIcons.IsActive)
+            return;
+
+        var custom = _appIcons.Resolve(vm.Model);
+        var hasOverride = _appIcons.HasOverride(vm.Model);
+        if (custom is not null || hasOverride)
+            vm.ApplyAppIcon(custom, hasOverride);
+    }
+
+    /// <summary>"Simgeyi değiştir...": PNG/ICO seçtirir, doğrulanmış yolu bütün anahtarlarıyla kaydeder, dock yeniden kurulur.</summary>
+    public void ChangeAppIcon(DockItemViewModel item)
+    {
+        var keys = AppIconKey.All(item.Model.AppUserModelId, item.Model.Id);
+        if (keys.Count == 0)
+            return;
+
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = Strings.Get("DockItemIconPickTitle"),
+            Filter = Strings.Get("DockItemIconPickFilter"),
+            CheckFileExists = true
+        };
+
+        if (dialog.ShowDialog() != true)
+            return;
+
+        // Dosya, ayara yazılmadan önce gerçekten çözülebiliyor olmalı; bozuk dosya sessizce yok sayılır.
+        if (DockStartIconLoader.LoadFile(dialog.FileName) is null)
+            return;
+
+        var overrides = new ValueDictionary<string>(_settings.Appearance.AppIconOverrides);
+        var accepted = false;
+        foreach (var key in keys)
+            accepted |= AppIconOverrides.TrySet(overrides, key, dialog.FileName);
+
+        if (accepted)
+            SaveAppIconOverrides(overrides);
+    }
+
+    /// <summary>"Simgeyi sıfırla": öğenin bütün anahtarlarındaki değişimi siler.</summary>
+    public void ResetAppIcon(DockItemViewModel item)
+    {
+        var overrides = new ValueDictionary<string>(_settings.Appearance.AppIconOverrides);
+        foreach (var key in AppIconKey.All(item.Model.AppUserModelId, item.Model.Id))
+            AppIconOverrides.Reset(overrides, key);
+
+        SaveAppIconOverrides(overrides);
+    }
+
+    // Bellekteki ayar bilerek değiştirilmez: ReloadDock eski ve yeni ayarı karşılaştırıp (DockSettingsDiff) dock'u kurar.
+    private static void SaveAppIconOverrides(ValueDictionary<string> overrides)
+    {
+        DockFeature.SaveAppIconOverrides(overrides);
+        (Application.Current as App)?.ReloadDock();
+    }
+
     /// <summary>Ayar nesnesini değiştirir (yerinde ayar uygulaması): sabit sırası/klasör yazımları ile okuyucular aynı nesneyi görür.</summary>
     public void AdoptSettings(AppSettings settings) => _settings = settings;
     public DockStatusViewModel? Status { get; }
@@ -339,6 +401,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         StartMenuActions? startMenu = null)
     {
         _settings = settings;
+        _appIcons = new DockAppIcons(settings);
         _recentFiles = recentFiles;
         JumpLists = jumpLists;
         StartContextMenu = startMenu;
@@ -1257,6 +1320,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                     ItemSize = ItemSize,
                     UseLineIndicator = _settings.Dock.IndicatorStyle == DockIndicatorStyle.Line
                 };
+                AttachAppIcon(vm);
                 itemVmCache[m.Id] = vm;
                 itemVmCache[PinnedOrder.IdOf(m.Id)] = vm;
             }
@@ -1301,6 +1365,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                                     ItemSize = ItemSize,
                                     UseLineIndicator = _settings.Dock.IndicatorStyle == DockIndicatorStyle.Line
                                 };
+                                AttachAppIcon(fallbackVm);
                                 folderItems.Add(fallbackVm);
                             }
                         }
