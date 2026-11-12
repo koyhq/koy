@@ -243,7 +243,7 @@
             <!-- Sol: Saat (HH:mm, 13px, font-weight 600, foreground #F4F4F5) -->
             <TextBlock Grid.Column="0"
                        Visibility="{Binding ShowIdleClassicClock, Converter={StaticResource BoolToVis}}"
-                       Text="{Binding ClockTime}"
+                       Text="{Binding ClockDisplay}"
                        Foreground="#F4F4F5"
                        FontSize="13"
                        FontWeight="SemiBold"
@@ -517,7 +517,7 @@
 
             <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="12" TextTrimming="CharacterEllipsis">
               <Run Text="{Binding Status.CurrentTime, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource KoyNotchText}" />
-              <Run Text="{Binding Status.DayDate, Mode=OneWay, StringFormat=' · {0}'}" Foreground="{DynamicResource KoyNotchMuted}" />
+              <Run Text="{Binding Status.DayDate, Mode=OneWay, StringFormat=' · {0}'}" Foreground="{DynamicResource KoyNotchMuted}" /><Run Text="{Binding Status.SecondClockSuffix, Mode=OneWay}" Foreground="{DynamicResource KoyNotchMuted}" />
             </TextBlock>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -535,6 +535,7 @@
               <!-- Hava: konum seçilmişse sıcaklık ve küçük yer adı (tıklayınca yenilenir); seçilmemişse konum seçtirir -->
               <Button Style="{StaticResource NotchPlainButtonStyle}" Margin="0,0,12,0" VerticalAlignment="Center"
                       Command="{Binding Status.RefreshWeatherCommand}"
+                      ToolTip="{Binding Status.WindToolTip}"
                       Visibility="{Binding Status.HasWeatherLocation, Converter={StaticResource BoolToVis}}">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                   <Viewbox Width="15" Height="15" Margin="0,0,5,0" VerticalAlignment="Center">

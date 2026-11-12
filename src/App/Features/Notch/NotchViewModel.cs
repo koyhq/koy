@@ -229,7 +229,16 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private string _title = "Koy";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ClockDisplay))]
     private string _clockTime = "";
+
+    /// <summary>Klasik göz atma satırının sonuna eklenen tarih ve ikinci saat (" · 12 Kas · UTC+9 21:00"); ikisi de kapalıysa boş.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ClockDisplay))]
+    private string _clockPeekExtras = "";
+
+    /// <summary>Klasik soldaki saat metni: Peek'te tarih ve ikinci saat eklenir, kapalıyken yalnız saat (genişlik korunur).</summary>
+    public string ClockDisplay => State == NotchState.Peek ? ClockTime + ClockPeekExtras : ClockTime;
 
     [ObservableProperty]
     private int _batteryPercent = 100;
@@ -250,6 +259,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     private void NotifyLayoutChanged()
     {
+        OnPropertyChanged(nameof(ClockDisplay));
         OnPropertyChanged(nameof(ShowCollapsedLayout));
         OnPropertyChanged(nameof(ShowPeekLayout));
         if (IsIdleRing)
@@ -451,11 +461,18 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         var now = DateTime.Now;
         var clock = Settings.Notch;
         ClockTime = now.ToString(ClockFormatPolicy.ResolveTimePattern(clock.ClockHourFormat, clock.ClockShowSeconds, CultureInfo.CurrentCulture), CultureInfo.CurrentCulture);
+        // İkinci saat ve tarih aynı saat tikinde güncellenir; ek zamanlayıcı yok.
+        var secondClock = SecondClock.Read(clock.ClockSecondTimeZoneId, DateTimeOffset.Now,
+            ClockFormatPolicy.ResolveTimePattern(clock.ClockHourFormat, false, CultureInfo.CurrentCulture), CultureInfo.CurrentCulture)?.Text;
+        var shortDate = clock.ClockShowDate ? IdleDisplayFormat.ShortDate(now, CultureInfo.CurrentCulture, clock.ClockCustomDateFormat) : null;
+        ClockPeekExtras = ClockFormatPolicy.ComposePeekLine("", shortDate, secondClock);
         if (IsIdleRing)
         {
             var culture = IdleCulture;
             IdleDayTime = IdleDisplayFormat.DayTime(now, culture, ClockFormatPolicy.ResolveTimePattern(clock.ClockHourFormat, clock.ClockShowSeconds, culture));
             IdlePeekDate = "· " + IdleDisplayFormat.ShortDate(now, culture, clock.ClockCustomDateFormat);
+            if (secondClock is not null)
+                IdlePeekDate += " · " + secondClock;
         }
     }
 

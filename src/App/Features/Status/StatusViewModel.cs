@@ -42,6 +42,10 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private string _dayDate = "";
 
+    /// <summary>Açık çentik durum satırında tarihin ardındaki ikinci saat (" · UTC+9 21:00"); ikinci saat kapalıysa boş.</summary>
+    [ObservableProperty]
+    private string _secondClockSuffix = "";
+
     /// <summary>Günün dilimine göre selamlama ("Günaydın"): müzik çalmıyorken Ana kartında.</summary>
     [ObservableProperty]
     private string _greeting = "";
@@ -79,6 +83,10 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
     /// <summary>Durum satırı için kısa sıcaklık ("14°"); veri yoksa "--°".</summary>
     [ObservableProperty]
     private string _temperatureShort = "--°";
+
+    /// <summary>Rüzgâr ipucu ("Rüzgâr 14 km/sa"); rüzgâr verisi yoksa boş.</summary>
+    [ObservableProperty]
+    private string _windToolTip = "";
 
     [ObservableProperty]
     private string _weatherDescription = "";
@@ -270,6 +278,9 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
         ShortDate = now.ToString("d MMM ddd", culture);
         FullDate = now.ToString("d MMMM yyyy dddd", culture);
         DayDate = now.ToString("dddd, d MMMM", culture);
+        var pattern = Koy.Core.Clock.ClockFormatPolicy.ResolveTimePattern(_settings.Notch.ClockHourFormat, showSeconds: false, culture);
+        SecondClockSuffix = Koy.Core.Clock.ClockFormatPolicy.ComposePeekLine("", null,
+            Koy.Core.Clock.SecondClock.Read(_settings.Notch.ClockSecondTimeZoneId, DateTimeOffset.Now, pattern, culture)?.Text);
         Greeting = Strings.Get(Koy.Core.Notch.Greeting.ForHour(now.Hour) switch
         {
             Koy.Core.Notch.DayPart.Morning => "GreetMorning",
@@ -348,6 +359,7 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
             TemperatureShort = "--°";
             WeatherDescription = Strings.Loading;
             WeatherIconKind = "Cloud";
+            WindToolTip = "";
             return;
         }
 
@@ -358,6 +370,10 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
         TemperatureShort = $"{degrees}°";
         WeatherDescription = Strings.Get(weather.DescriptionKey);
         WeatherIconKind = weather.IconKind;
+        var wind = weather.WindSpeedKmh is { } kmh
+            ? WindSpeedFormatter.Format(kmh, _settings.General.WindSpeedUnit, CultureInfo.CurrentCulture)
+            : null;
+        WindToolTip = wind is null ? "" : string.Format(CultureInfo.CurrentCulture, Strings.Get("WeatherWindTooltip"), wind);
     }
 
     private string TemperatureSuffix => Strings.Get(_settings.General.TemperatureUnit == TemperatureUnit.Fahrenheit ? "UnitFahrenheitSuffix" : "UnitCelsiusSuffix");
