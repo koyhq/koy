@@ -5,6 +5,7 @@ using Koy.App.Features.ControlCenter;
 using Koy.App.Features.Focus;
 using Koy.App.Features.SystemInfo;
 using Koy.App.Features.Music;
+using Koy.App.Features.Notch.LiveBackground;
 using Koy.App.Features.Settings;
 using Koy.App.Features.Status;
 using Koy.Core.Diagnostics;
@@ -23,6 +24,9 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     private bool _disposed;
 
     public MusicViewModel Music { get; }
+
+    /// <summary>Müzik kartı zemini için canlı arka plan kararı (NotchViewModel verir; yoksa kart eski zeminini korur).</summary>
+    public LiveBackgroundState? LiveBackground { get; init; }
     public StatusViewModel Status { get; }
     public FocusViewModel Focus { get; }
 

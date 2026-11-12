@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:Koy.App.Features.Home"
              xmlns:status="clr-namespace:Koy.App.Features.Status"
              xmlns:music="clr-namespace:Koy.App.Features.Music"
+             xmlns:livebg="clr-namespace:Koy.App.Features.Notch.LiveBackground"
              xmlns:res="clr-namespace:Koy.App.Resources"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:HomeViewModel}"
@@ -155,6 +156,24 @@
           </Border.Style>
           <Border CornerRadius="22" Background="{StaticResource MusicArtworkVeil}" />
         </Border>
+
+        <!-- Canlı arka plan (issue #67): yalnız müzik kartı görünürken ve hedef müzik kartını içeriyorsa; kapalıyken (varsayılan)
+             hiçbir şey çizilmez. Albüm kapağı katmanının üstünde, içeriğin altında; koyu perde yazıyı korur. -->
+        <livebg:LiveBackgroundHost Margin="-16" CornerRadius="22"
+                                   Selection="{Binding LiveBackground.Selection}"
+                                   Mode="{Binding LiveBackground.MusicCardMode}"
+                                   ScrimOpacity="{Binding LiveBackground.ScrimOpacity}">
+          <livebg:LiveBackgroundHost.Style>
+            <Style TargetType="livebg:LiveBackgroundHost">
+              <Setter Property="Visibility" Value="Collapsed" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding ShowMusic}" Value="True">
+                  <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </livebg:LiveBackgroundHost.Style>
+        </livebg:LiveBackgroundHost>
 
         <!-- Müzik yok: selamlama, büyük saat, gün ve tarih -->
         <Grid>

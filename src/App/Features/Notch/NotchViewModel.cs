@@ -10,6 +10,7 @@ using Koy.App.Features.ClipboardPanel;
 using Koy.App.Features.ControlCenter;
 using Koy.App.Features.Focus;
 using Koy.App.Features.Home;
+using Koy.App.Features.Notch.LiveBackground;
 using Koy.App.Features.Music;
 using Koy.App.Features.Notch.OSD;
 using Koy.App.Features.Search;
@@ -142,6 +143,9 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     public double TopOffsetDip => NotchStyle.TopOffsetDip(Settings.Notch.Style);
 
     public bool ReduceMotion => Settings.Appearance.BatterySaverReduceMotion && _status.IsOnBattery;
+
+    /// <summary>Canlı arka plan (issue #67): açık çentik zemini ve müzik kartı zemini için seçim ve oynatma kararı. Varsayılan kapalı.</summary>
+    public LiveBackgroundState LiveBackground { get; }
 
     /// <summary>Müzik çalarken dalga simgesi gösterilsin mi.</summary>
     public bool ShowMusicWaveform => Settings.Music.ShowWaveform;
@@ -300,8 +304,9 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         _shelf = shelf;
         _calendar = calendar;
         _clipboard = clipboard;
+        LiveBackground = new LiveBackgroundState(settings.Notch);
         Home = new HomeViewModel(music, status, focus, systemStats, quickLaunch, shellActions, () => _controller.GoToPanel(NotchPanel.Focus),
-            controlCenter.BluetoothDevices);
+            controlCenter.BluetoothDevices) { LiveBackground = LiveBackground };
         quickLaunch.HoldOpen = HoldOpenForPicker;
         _visibility = visibility ?? new VisibilityController(settings.Notch.Visibility);
         _dispatcher = dispatcher ?? (System.Windows.Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher);
@@ -365,6 +370,10 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         {
             UpdateBatteryState();
         }
+
+        // Fişe takılıp çıkarılınca canlı arka plan hareket ↔ ilk kare arasında geçer.
+        if (e.PropertyName == nameof(StatusViewModel.IsOnBattery))
+            UpdateLiveBackground();
     }
 
     private void UpdateBatteryState()
@@ -543,6 +552,10 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         UpdateActivePanels();
     }
 
+    // Açık ve görünür çentikte oynar; kapanınca / gizlenince Off olur (Core kararı), görünüm kareleri bırakır.
+    private void UpdateLiveBackground() =>
+        LiveBackground.Update(State == NotchState.Expanded, IsNotchVisible, ReduceMotion);
+
     private void OnEnabledPanelsChanged(object? sender, EventArgs e) => RunOnUi(RebuildTabs);
 
     // Sekmeler açık panellerden ve onların sırasından türer; liste değişince baştan kurulur.
@@ -555,6 +568,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     private void UpdateActivePanels()
     {
+        UpdateLiveBackground();
         // Arama açıkken sayfalar görünmez; servisleri de çalışmaz.
         var isExpanded = State == NotchState.Expanded && !IsSearchOpen;
         // Ses çubukları "kapak ve dalga" ayarına bağlı; pil tasarrufu hareketi kısarken hiç yakalanmaz.

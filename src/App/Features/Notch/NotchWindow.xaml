@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Koy.App.Features.Notch"
         xmlns:osd="clr-namespace:Koy.App.Features.Notch.OSD"
         xmlns:home="clr-namespace:Koy.App.Features.Home"
+        xmlns:livebg="clr-namespace:Koy.App.Features.Notch.LiveBackground"
         xmlns:focus="clr-namespace:Koy.App.Features.Focus"
         xmlns:cc="clr-namespace:Koy.App.Features.ControlCenter"
         xmlns:status="clr-namespace:Koy.App.Features.Status"
@@ -83,6 +84,12 @@
       </local:NotchShape.ContextMenu>
 
       <Grid>
+        <!-- 0. Canlı arka plan (issue #67): içeriğin altında, çentik şekline kırpılır. Varsayılan kapalı; yalnız açık çentikte çizilir,
+             kapanınca animasyon ve kareler bırakılır. Koyu perde yazının okunmasını korur. -->
+        <livebg:LiveBackgroundHost Selection="{Binding LiveBackground.Selection}"
+                                   Mode="{Binding LiveBackground.NotchMode}"
+                                   ScrimOpacity="{Binding LiveBackground.ScrimOpacity}" />
+
         <!-- 1. Collapsed Durumu (236x34 px, köşe yuvarlaklığı 0 0 18 18, arka plan #0A0A0B) -->
         <Grid x:Name="CollapsedView">
           <Grid.Style>
