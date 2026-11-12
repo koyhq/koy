@@ -28,7 +28,7 @@ public static class Program
     private static bool Transparent;
 
     private static readonly string[] PageNames =
-        ["genel", "centik", "dock", "ekranlar", "gorunum", "kisayollar", "dikte", "performans", "hakkinda"];
+        ["genel", "centik", "dock", "ekranlar", "gorunum", "kisayollar", "dikte", "performans", "hakkinda", "gelismis"];
 
     /// <summary>Görüntülerde kullanılan malzeme (Katı / Buzlu / Cam).</summary>
     internal static Koy.Core.Appearance.MaterialLevel Material { get; private set; } = Koy.Core.Appearance.MaterialLevel.Solid;
