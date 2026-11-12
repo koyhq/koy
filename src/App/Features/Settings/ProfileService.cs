@@ -44,9 +44,24 @@ public sealed class ProfileService(SettingsStore settings, ProfileStore profiles
     /// yeni ayarla yeniden kurulur (dock ayarları <c>DockFeature.ApplySettings</c> / <c>DockSettingsDiff</c> üzerinden,
     /// ayarlar sıfırlamasıyla aynı yol). Profil zaten geçerli ayarlarla aynıysa hiçbir şey yeniden kurulmaz.
     /// </summary>
-    public ProfileApplyResult Apply(string? idOrName)
+    public ProfileApplyResult Apply(string? idOrName) => ApplyFrom(List(), idOrName);
+
+    /// <summary>
+    /// Geçerli ayarların, verilen bölümler için kayıtsız (kütüphaneye eklenmeyen) anlık görüntüsü. Bağlam kuralları
+    /// bir kural profili uygulanmadan önce bunu alır ve kural bitince <see cref="ApplyUnsaved"/> ile döner.
+    /// </summary>
+    public SavedProfile? Snapshot(IEnumerable<ProfileSection> sections)
     {
-        var result = ProfileLibrary.Apply(List(), settings.Load(), idOrName);
+        var result = ProfileLibrary.Create([], settings.Load(), "snapshot", sections, NewId());
+        return result.IsSuccess ? result.Profile : null;
+    }
+
+    /// <summary>Kütüphanede olmayan bir profili (<see cref="Snapshot"/>) aynı yoldan uygular.</summary>
+    public ProfileApplyResult ApplyUnsaved(SavedProfile profile) => ApplyFrom([profile], profile.Id);
+
+    private ProfileApplyResult ApplyFrom(IReadOnlyList<SavedProfile> library, string? idOrName)
+    {
+        var result = ProfileLibrary.Apply(library, settings.Load(), idOrName);
         if (!result.IsSuccess || result.ChangedSections.Count == 0)
             return result;
 

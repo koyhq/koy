@@ -139,12 +139,16 @@ public sealed partial class ProfilesViewModel : ObservableObject
         Refresh();
     }
 
+    /// <summary>Liste yeniden okundu (kaydet / sil / yeniden adlandır / içe aktar sonrası). Profil seçen başka bölümler yenilenir.</summary>
+    public event Action? ListChanged;
+
     public void Refresh()
     {
         Items.Clear();
         foreach (var profile in _service.List())
             Items.Add(new ProfileItemViewModel(this, profile));
         OnPropertyChanged(nameof(HasItems));
+        ListChanged?.Invoke();
     }
 
     public static string DescribeSections(IEnumerable<ProfileSection> sections)
