@@ -395,6 +395,25 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     /// <summary>Ayar nesnesini değiştirir (yerinde ayar uygulaması): sabit sırası/klasör yazımları ile okuyucular aynı nesneyi görür.</summary>
     public void AdoptSettings(AppSettings settings) => _settings = settings;
+
+    // Bu dock'un bulunduğu monitörün sınırları (piksel). Yalnız "yalnız bu monitörün pencereleri" ayarında kullanılır.
+    private WindowRect? _monitorBounds;
+
+    /// <summary>Dock'un monitörü değişti (ekran düzeni): süzgeç yeni sınırlarla yeniden uygulanır.</summary>
+    public void SetMonitorBounds(WindowRect bounds)
+    {
+        if (_monitorBounds == bounds)
+            return;
+
+        _monitorBounds = bounds;
+        if (_settings.Dock.WindowMonitorScope == DockWindowMonitorScope.CurrentMonitor)
+            UpdateItems();
+    }
+
+    private IReadOnlyList<DockItem> VisibleModels() =>
+        _settings.Dock.WindowMonitorScope == DockWindowMonitorScope.CurrentMonitor && _monitorBounds is { } bounds
+            ? DockMonitorFilter.Apply(_controller.Items, bounds, _controller.ForegroundHandle)
+            : _controller.Items;
     public DockStatusViewModel? Status { get; }
 
     public DockViewModel(
@@ -1043,6 +1062,26 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _thumbnailHoverTimer.Start();
     }
 
+    /// <summary>
+    /// Sol tık "önizlemeleri göster" iken: bekleme olmadan önizleme kutucuğunu açar. Önizleme kapalıysa ya da
+    /// açık pencere yoksa false döner (çağıran varsayılan tık eylemine düşer).
+    /// </summary>
+    public bool TryShowPreviewNow(DockItemViewModel item, UIElement element)
+    {
+        if (!_settings.Dock.ThumbnailPreview || !item.HasOpenWindows)
+            return false;
+
+        _thumbnailHoverTimer.Stop();
+        _previewCloseTimer.Stop();
+        _pendingPreviewItem = item;
+        PreviewPlacementTarget = element;
+        PreviewItem = item;
+        // PlacementTarget değişince HWND konumunu güncellemesi için IsOpen tazelenir (OnItemMouseEnter ile aynı).
+        IsPreviewPopupOpen = false;
+        IsPreviewPopupOpen = true;
+        return true;
+    }
+
     public void OnItemMouseLeave()
     {
         _thumbnailHoverTimer.Stop();
@@ -1337,7 +1376,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     {
         Application.Current?.Dispatcher.InvokeAsync(() =>
         {
-            var models = _controller.Items;
+            var models = VisibleModels();
             var folders = _settings.DockItems.Folders ?? [];
             var pinnedOrder = _settings.DockItems.PinnedOrder ?? [];
 

@@ -215,8 +215,8 @@ public sealed record DockSettings
     /// <summary>Dock'ta gösterilen pencereler: tüm monitörler (varsayılan) ya da yalnız dock'un monitörü.</summary>
     public DockWindowMonitorScope WindowMonitorScope { get; set; } = DockWindowMonitorScope.AllMonitors;
 
-    /// <summary>Dock simgesine sol tık: öne getir (varsayılan) ya da başka bir pencere eylemi.</summary>
-    public DockLeftClickAction LeftClickAction { get; set; } = DockLeftClickAction.BringToFront;
+    /// <summary>Dock simgesine sol tık: etkinse küçült, değilse öne getir (varsayılan, bugünkü davranış) ya da başka bir pencere eylemi.</summary>
+    public DockLeftClickAction LeftClickAction { get; set; } = DockLeftClickAction.MinimizeIfActive;
 
     /// <summary>Dock simgelerinin altındaki uygulama adı etiketi: hiç (varsayılan), her zaman ya da üzerine gelince.</summary>
     public DockLabelMode LabelMode { get; set; } = DockLabelMode.Never;

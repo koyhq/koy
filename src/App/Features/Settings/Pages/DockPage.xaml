@@ -499,6 +499,61 @@
             </StackPanel>
         </Border>
 
+        <!-- PENCERE DAVRANIŞI -->
+        <TextBlock Text="{Binding [DockWindowBehaviorHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockLeftClickTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DockLeftClickDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [DockLeftClickMinimize], Source={x:Static res:Loc.Instance}}" GroupName="DockLeftClick"
+                                     IsChecked="{Binding DockLeftClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=MinimizeIfActive}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [DockLeftClickFront], Source={x:Static res:Loc.Instance}}" GroupName="DockLeftClick"
+                                     IsChecked="{Binding DockLeftClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=BringToFront}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [DockLeftClickCycle], Source={x:Static res:Loc.Instance}}" GroupName="DockLeftClick"
+                                     IsChecked="{Binding DockLeftClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=CycleWindows}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [DockLeftClickThumbnails], Source={x:Static res:Loc.Instance}}" GroupName="DockLeftClick"
+                                     IsChecked="{Binding DockLeftClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=ShowThumbnails}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockMonitorScopeTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DockMonitorScopeDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [DockMonitorScopeAll], Source={x:Static res:Loc.Instance}}" GroupName="DockMonitorScope"
+                                     IsChecked="{Binding DockWindowMonitorScope, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=AllMonitors}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [DockMonitorScopeCurrent], Source={x:Static res:Loc.Instance}}" GroupName="DockMonitorScope"
+                                     IsChecked="{Binding DockWindowMonitorScope, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=CurrentMonitor}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
         <!-- BÖLÜMLER -->
         <TextBlock Text="{Binding [SectionsHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 

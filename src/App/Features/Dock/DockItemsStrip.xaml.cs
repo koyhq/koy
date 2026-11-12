@@ -36,8 +36,17 @@ public partial class DockItemsStrip : UserControl
             return;
         }
 
-        if (sender is FrameworkElement { DataContext: DockItemViewModel item })
+        if (sender is FrameworkElement { DataContext: DockItemViewModel item } element)
         {
+            // "Önizlemeleri göster" eylemi: çalışan simgede kutucuk açılır; açılamazsa denetleyici varsayılan eyleme düşer.
+            if (ViewModel is { } vm &&
+                vm.Controller.LeftClickAction == DockLeftClickAction.ShowThumbnails &&
+                item.Model.IsRunning &&
+                vm.TryShowPreviewNow(item, element))
+            {
+                return;
+            }
+
             ViewModel?.ClosePreviewNow();
             item.ClickCommand.Execute(null);
         }

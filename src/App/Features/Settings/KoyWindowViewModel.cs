@@ -438,6 +438,12 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private DockIndicatorStyle _dockIndicatorStyle;
 
     [ObservableProperty]
+    private DockLeftClickAction _dockLeftClickAction = DockLeftClickAction.MinimizeIfActive;
+
+    [ObservableProperty]
+    private DockWindowMonitorScope _dockWindowMonitorScope = DockWindowMonitorScope.AllMonitors;
+
+    [ObservableProperty]
     private bool _dockShowBadges = true;
 
     [ObservableProperty]
@@ -934,6 +940,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 ? Koy.Core.Tray.TrayIconVisibility.Hidden
                 : Koy.Core.Tray.TrayIconVisibility.Overflow;
             LoadTrayApps(s.Dock);
+            DockLeftClickAction = s.Dock.LeftClickAction;
+            DockWindowMonitorScope = s.Dock.WindowMonitorScope;
             // Tam genişlikte seçilemeyen mod ayar ekranında geçerli karşılığıyla görünür (çalışma anındaki eşlemeyle aynı).
             DockProximity = DockProximityMapping.Effective(DockStyle, DockProximity);
 
@@ -1324,9 +1332,11 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 RevealTrigger = DockRevealTrigger,
                 RevealDelayMs = DockRevealDelayMs,
                 HiddenEdgeLine = DockHiddenEdgeLine,
-                MiddleClickAction = MiddleClickAction,
                 NewTrayIconVisibility = DockNewTrayIconVisibility,
-                TrayAppVisibility = TrayAppsForSave()
+                TrayAppVisibility = TrayAppsForSave(),
+                LeftClickAction = DockLeftClickAction,
+                WindowMonitorScope = DockWindowMonitorScope,
+                MiddleClickAction = MiddleClickAction
             },
             Notch = current.Notch with
             {

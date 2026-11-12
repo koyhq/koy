@@ -489,6 +489,39 @@
   <data name="IndicatorLine" xml:space="preserve">
     <value>Çizgi</value>
   </data>
+  <data name="DockWindowBehaviorHeader" xml:space="preserve">
+    <value>Pencere davranışı</value>
+  </data>
+  <data name="DockLeftClickTitle" xml:space="preserve">
+    <value>Çalışan uygulamaya tık</value>
+  </data>
+  <data name="DockLeftClickDesc" xml:space="preserve">
+    <value>Küçült: etkin uygulamaya tıklayınca küçültür. Öne: her zaman öne getirir. Döngü: pencereleri sırayla gezer. Önizleme: pencere küçük resimlerini açar.</value>
+  </data>
+  <data name="DockLeftClickMinimize" xml:space="preserve">
+    <value>Küçült</value>
+  </data>
+  <data name="DockLeftClickFront" xml:space="preserve">
+    <value>Öne</value>
+  </data>
+  <data name="DockLeftClickCycle" xml:space="preserve">
+    <value>Döngü</value>
+  </data>
+  <data name="DockLeftClickThumbnails" xml:space="preserve">
+    <value>Önizleme</value>
+  </data>
+  <data name="DockMonitorScopeTitle" xml:space="preserve">
+    <value>Dock'ta gösterilen pencereler</value>
+  </data>
+  <data name="DockMonitorScopeDesc" xml:space="preserve">
+    <value>Birden çok monitörde yalnız bu dock'un monitöründeki pencereleri göster. Küçültülmüş pencereler her dock'ta görünür kalır.</value>
+  </data>
+  <data name="DockMonitorScopeAll" xml:space="preserve">
+    <value>Tüm monitörler</value>
+  </data>
+  <data name="DockMonitorScopeCurrent" xml:space="preserve">
+    <value>Bu monitör</value>
+  </data>
   <data name="StartButtonTitle" xml:space="preserve">
     <value>Windows Başlat düğmesi</value>
   </data>

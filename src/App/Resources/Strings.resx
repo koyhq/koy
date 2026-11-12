@@ -489,6 +489,39 @@
   <data name="IndicatorLine" xml:space="preserve">
     <value>Line</value>
   </data>
+  <data name="DockWindowBehaviorHeader" xml:space="preserve">
+    <value>Window behavior</value>
+  </data>
+  <data name="DockLeftClickTitle" xml:space="preserve">
+    <value>Click on a running app</value>
+  </data>
+  <data name="DockLeftClickDesc" xml:space="preserve">
+    <value>Minimize: click the active app to minimize it. Front: always bring it to front. Cycle: step through its windows. Previews: show window thumbnails.</value>
+  </data>
+  <data name="DockLeftClickMinimize" xml:space="preserve">
+    <value>Minimize</value>
+  </data>
+  <data name="DockLeftClickFront" xml:space="preserve">
+    <value>Front</value>
+  </data>
+  <data name="DockLeftClickCycle" xml:space="preserve">
+    <value>Cycle</value>
+  </data>
+  <data name="DockLeftClickThumbnails" xml:space="preserve">
+    <value>Previews</value>
+  </data>
+  <data name="DockMonitorScopeTitle" xml:space="preserve">
+    <value>Windows shown in the dock</value>
+  </data>
+  <data name="DockMonitorScopeDesc" xml:space="preserve">
+    <value>With several monitors, show only the windows that are on this dock's monitor. Minimized windows stay visible on every dock.</value>
+  </data>
+  <data name="DockMonitorScopeAll" xml:space="preserve">
+    <value>All monitors</value>
+  </data>
+  <data name="DockMonitorScopeCurrent" xml:space="preserve">
+    <value>This monitor</value>
+  </data>
   <data name="StartButtonTitle" xml:space="preserve">
     <value>Windows Start button</value>
   </data>

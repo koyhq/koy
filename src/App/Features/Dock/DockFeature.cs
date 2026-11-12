@@ -101,6 +101,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             _fullscreenDetector,
             refreshDebounce: TimeSpan.FromMilliseconds(120),
             post: action => Application.Current?.Dispatcher.InvokeAsync(action));
+        ApplyWindowBehavior();
 
         // Yalnızca ReserveSpace (Yer ayır / tam genişlikte "Her zaman göster") modunda masaüstü çalışma alanından (AppBar) yer ayır
         if (EffectiveProximity == DockProximityMode.ReserveSpace)
@@ -468,7 +469,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     private void CreateDockWindow(DisplayMonitor monitor)
     {
         var visibilityController = new VisibilityController(settings.Dock.Visibility);
-        var viewModel = CreateViewModel(visibilityController);
+        var viewModel = CreateViewModel(visibilityController, monitor.Bounds);
 
         var window = new DockWindow { DataContext = viewModel };
         window.SetTargetMonitor(monitor);
@@ -551,13 +552,27 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         window.Show();
     }
 
-    private DockViewModel CreateViewModel(VisibilityController visibilityController) =>
-        new(settings, _controller!, _shellActionService!, visibilityController, status: null,
+    private DockViewModel CreateViewModel(VisibilityController visibilityController, WindowRect monitorBounds)
+    {
+        var viewModel = new DockViewModel(settings, _controller!, _shellActionService!, visibilityController, status: null,
             mediaService: _mediaService, trayService: _trayService, recentFiles: _recentFiles, jumpLists: _jumpLists,
             startMenu: _startMenu)
         {
             ReduceMotion = _reduceMotion
         };
+        viewModel.SetMonitorBounds(monitorBounds);
+        return viewModel;
+    }
+
+    /// <summary>Pencere davranışı ayarlarını paylaşılan denetleyiciye uygular (sol tık eylemi, taşıma izleme).</summary>
+    private void ApplyWindowBehavior()
+    {
+        if (_controller is null)
+            return;
+
+        _controller.LeftClickAction = settings.Dock.LeftClickAction;
+        _controller.RefreshOnForegroundMove = settings.Dock.WindowMonitorScope == DockWindowMonitorScope.CurrentMonitor;
+    }
 
     // Çekil modunun kendi gecikmesi (DockDodgeDelayMs) ViewModel'de işler; çifte beklemesin.
     private EdgeRevealTracker NewEdgeTracker() => new(
@@ -583,6 +598,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         // Tek canlı ayar nesnesi: yeniden kurulmayan ViewModel'ler de yenisini alır (aksi halde sabit sırası eski nesneye yazılır).
         foreach (var state in _windowStates.Values)
             state.ViewModel.AdoptSettings(next);
+
+        ApplyWindowBehavior();
 
         if (diff.IsEmpty)
             return;
@@ -631,7 +648,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         var oldVisibility = state.VisibilityController;
 
         var visibility = new VisibilityController(settings.Dock.Visibility) { NotchHandle = state.Hwnd };
-        var viewModel = CreateViewModel(visibility);
+        var viewModel = CreateViewModel(visibility, state.Monitor.Bounds);
         viewModel.EdgeWatchChanged += (_, _) => UpdateEdgeTimer();
 
         state.VisibilityController = visibility;
@@ -748,6 +765,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             if (_windowStates.TryGetValue(monitor.Id, out var existingState))
             {
                 existingState.Monitor = monitor;
+                existingState.ViewModel.SetMonitorBounds(monitor.Bounds);
                 existingState.Window.SetTargetMonitor(monitor);
                 UpdateDockBounds(existingState.Window, existingState.VisibilityController);
             }
