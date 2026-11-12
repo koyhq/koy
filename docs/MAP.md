@@ -42,6 +42,15 @@ Unutma:
 - Ayar araması ve "yalnız değişenler" satırı sayfadan kendisi bulur (`src/App/Features/Settings/SettingsPageIndex.cs`): satır `SettingRowStyle` kenarlığı, başlığı `SettingTitleStyle` ve `[Anahtar]` Loc bağı olmalı. Değişti noktası için denetimin bağlandığı VM özelliği `src/Core/Settings/SettingsKeyMap.cs` içinde olmalı; yoksa satır aranır ama noktası çıkmaz. Sayfa sıfırlama bölümleri: `KoyWindowViewModel.ResetSectionsFor`, `src/Core/Settings/SettingsPageReset.cs`.
 - Test örnekleri: `tests/Core.Tests/SettingsStoreTests.cs`, `tests/Core.Tests/SettingsMigrationTests.cs`.
 
+## Ayar profilleri (kaydet, uygula, içe/dışa aktar)
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Settings/Profiles/SettingsProfileCodec.cs` | Dosya biçimi: dışa aktar, doğrulamalı oku, bölümleri uygula. Yeni taşınabilir bölüm `ProfileSection`'a eklenir |
+| Core | `src/Core/Settings/Profiles/ProfileLibrary.cs` | Kayıtlı liste mantığı (oluştur, içe al, adlandır, çoğalt, sil, `Find`, `Apply`); saf, testli |
+| Core | `src/Core/Settings/Profiles/ProfileStore.cs` | `profiles.json` (ayar klasöründe) |
+| App | `src/App/Features/Settings/ProfileService.cs` | Listele / uygula girişi (`ProfileService.Instance.Apply(idOrName)`): ayarı kaydeder, tema ve özellikleri yeniden kurar. Kurallar da bunu çağırır |
+| App | `src/App/Features/Settings/ProfilesViewModel.cs` + `Pages/GenelPage.xaml` | Genel sayfasındaki Profiller bölümü |
+
 ## Çentik kartı ve Windows bildirimleri
 | Katman | Dosya | Ne yapılır |
 |---|---|---|

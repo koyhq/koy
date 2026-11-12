@@ -166,6 +166,208 @@
             </Grid>
         </Border>
 
+        <!-- PROFİLLER: geçerli ayarlardan kaydet, uygula, içe/dışa aktar -->
+        <TextBlock Text="{Binding [ProfilesHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <StackPanel>
+                <TextBlock Text="{Binding [ProfilesSaveTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                <TextBlock Text="{Binding [ProfilesSaveDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                <TextBox Margin="0,8,0,0" Style="{StaticResource SettingTextBoxStyle}" MaxLength="60"
+                         Text="{Binding Profiles.NewName, UpdateSourceTrigger=PropertyChanged}"
+                         AutomationProperties.Name="{Binding [ProfilesNameHint], Source={x:Static res:Loc.Instance}}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Return" Command="{Binding Profiles.SaveCurrentCommand}" />
+                    </TextBox.InputBindings>
+                </TextBox>
+                <ItemsControl ItemsSource="{Binding Profiles.Sections}" Margin="0,10,0,0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,18,6">
+                                <CheckBox IsChecked="{Binding IsSelected}" Style="{StaticResource ModernCheckBoxStyle}" VerticalAlignment="Center"
+                                          AutomationProperties.Name="{Binding Label}" />
+                                <TextBlock Text="{Binding Label}" Margin="8,0,0,0" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource KoyTextPrimary}" FontSize="13" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                    <Button Content="{Binding [ProfilesSaveButton], Source={x:Static res:Loc.Instance}}" Command="{Binding Profiles.SaveCurrentCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
+                    <Button Content="{Binding [ProfilesExportCurrentButton], Source={x:Static res:Loc.Instance}}" Command="{Binding Profiles.ExportCurrentCommand}"
+                            Style="{StaticResource SettingButtonStyle}" Margin="0,0,8,0" />
+                    <Button Content="{Binding [ProfilesImportButton], Source={x:Static res:Loc.Instance}}" Command="{Binding Profiles.ImportCommand}"
+                            Style="{StaticResource SettingButtonStyle}" />
+                </StackPanel>
+                <TextBlock Text="{Binding Profiles.StatusText}" Margin="0,10,0,0" TextWrapping="Wrap" FontSize="12.5" AutomationProperties.LiveSetting="Polite">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{DynamicResource KoyTextSecondary}" />
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Profiles.HasStatus}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Profiles.StatusIsError}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource KoyDangerText}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- İçe aktarma önizlemesi: onaylanmadan hiçbir şey kaydedilmez ya da uygulanmaz -->
+        <Border>
+            <Border.Style>
+                <Style TargetType="Border" BasedOn="{StaticResource SettingRowStyle}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Profiles.HasPending}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <StackPanel>
+                <TextBlock Text="{Binding [ProfilesImportPreviewTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                <TextBlock Text="{Binding Profiles.PendingName}" Margin="0,4,0,0" FontWeight="SemiBold" Foreground="{DynamicResource KoyTextPrimary}" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Profiles.PendingSectionsText}" Style="{StaticResource SettingDescStyle}" />
+                <TextBlock Text="{Binding Profiles.PendingChangesText}" Style="{StaticResource SettingDescStyle}" />
+                <TextBlock Text="{Binding [ProfilesImportMachineNote], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                    <Button Content="{Binding [ProfilesImportSave], Source={x:Static res:Loc.Instance}}" Command="{Binding Profiles.ConfirmImportSaveCommand}"
+                            Style="{StaticResource SettingButtonStyle}" Margin="0,0,8,0" />
+                    <Button Content="{Binding [ProfilesImportApply], Source={x:Static res:Loc.Instance}}" Command="{Binding Profiles.ConfirmImportApplyCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
+                    <Button Content="{Binding [Cancel], Source={x:Static res:Loc.Instance}}" Command="{Binding Profiles.CancelImportCommand}"
+                            Style="{StaticResource SettingButtonStyle}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Kayıtlı profiller -->
+        <TextBlock Text="{Binding [ProfilesEmpty], Source={x:Static res:Loc.Instance}}" Margin="2,2,0,8">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource SettingDescStyle}">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Profiles.HasItems}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+        <ItemsControl ItemsSource="{Binding Profiles.Items}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource SettingRowStyle}">
+                        <StackPanel>
+                            <!-- Normal görünüm -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsRenaming}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsDeleteConfirming}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                    <TextBlock Text="{Binding Name}" Style="{StaticResource SettingTitleStyle}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding SectionsText}" Style="{StaticResource SettingDescStyle}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Content="{Binding [ProfilesApply], Source={x:Static res:Loc.Instance}}" Command="{Binding ApplyCommand}"
+                                            Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,6,0" />
+                                    <Button Content="{Binding [ProfilesRename], Source={x:Static res:Loc.Instance}}" Command="{Binding BeginRenameCommand}"
+                                            Style="{StaticResource SettingButtonStyle}" Margin="0,0,6,0" />
+                                    <Button Content="{Binding [ProfilesDuplicate], Source={x:Static res:Loc.Instance}}" Command="{Binding DuplicateCommand}"
+                                            Style="{StaticResource SettingButtonStyle}" Margin="0,0,6,0" />
+                                    <Button Content="{Binding [ProfilesExport], Source={x:Static res:Loc.Instance}}" Command="{Binding ExportCommand}"
+                                            Style="{StaticResource SettingButtonStyle}" Margin="0,0,6,0" />
+                                    <Button Content="{Binding [ProfilesDelete], Source={x:Static res:Loc.Instance}}" Command="{Binding RequestDeleteCommand}"
+                                            Style="{StaticResource SettingButtonStyle}" />
+                                </StackPanel>
+                            </Grid>
+                            <!-- Yeniden adlandırma -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsRenaming}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <TextBox Style="{StaticResource SettingTextBoxStyle}" MaxLength="60" Margin="0,0,8,0"
+                                         Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="{Binding [ProfilesNameHint], Source={x:Static res:Loc.Instance}}">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Return" Command="{Binding CommitRenameCommand}" />
+                                        <KeyBinding Key="Escape" Command="{Binding CancelRenameCommand}" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Button Content="{Binding [Cancel], Source={x:Static res:Loc.Instance}}" Command="{Binding CancelRenameCommand}"
+                                            Style="{StaticResource SettingButtonStyle}" Margin="0,0,6,0" />
+                                    <Button Content="{Binding [ProfilesRenameConfirm], Source={x:Static res:Loc.Instance}}" Command="{Binding CommitRenameCommand}"
+                                            Style="{StaticResource PrimaryButtonStyle}" />
+                                </StackPanel>
+                            </Grid>
+                            <!-- Silme onayı (iki adım) -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsDeleteConfirming}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <TextBlock Text="{Binding Name}" Style="{StaticResource SettingTitleStyle}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Button Content="{Binding [Cancel], Source={x:Static res:Loc.Instance}}" Command="{Binding CancelDeleteCommand}"
+                                            Style="{StaticResource SettingButtonStyle}" Margin="0,0,6,0" />
+                                    <Button Content="{Binding [ProfilesDeleteConfirm], Source={x:Static res:Loc.Instance}}" Command="{Binding ConfirmDeleteCommand}"
+                                            Style="{StaticResource DangerButtonStyle}" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
         <!-- Bilgi Kutusu -->
         <Border Style="{StaticResource InfoNoticeStyle}">
             <Grid>

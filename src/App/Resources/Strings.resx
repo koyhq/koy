@@ -2664,5 +2664,167 @@
   <data name="IconPackFolderPickTitle" xml:space="preserve">
     <value>Choose an icon pack folder</value>
   </data>
+  <data name="ProfilesHeader" xml:space="preserve">
+    <value>Profiles</value>
+  </data>
+  <data name="ProfilesSaveTitle" xml:space="preserve">
+    <value>Save current settings as a profile</value>
+  </data>
+  <data name="ProfilesSaveDesc" xml:space="preserve">
+    <value>Pick the parts to keep. A profile can be applied later or exported to a file. Machine-specific values (displays, weather location, pinned apps, local icon paths) are never included.</value>
+  </data>
+  <data name="ProfilesNameHint" xml:space="preserve">
+    <value>Profile name</value>
+  </data>
+  <data name="ProfilesSaveButton" xml:space="preserve">
+    <value>Save profile</value>
+  </data>
+  <data name="ProfilesExportCurrentButton" xml:space="preserve">
+    <value>Export to file...</value>
+  </data>
+  <data name="ProfilesImportButton" xml:space="preserve">
+    <value>Import from file...</value>
+  </data>
+  <data name="ProfilesImportPreviewTitle" xml:space="preserve">
+    <value>Import preview</value>
+  </data>
+  <data name="ProfilesImportMachineNote" xml:space="preserve">
+    <value>Nothing has been saved or changed yet. Machine-specific values are never imported.</value>
+  </data>
+  <data name="ProfilesImportSave" xml:space="preserve">
+    <value>Add to my profiles</value>
+  </data>
+  <data name="ProfilesImportApply" xml:space="preserve">
+    <value>Add and apply</value>
+  </data>
+  <data name="ProfilesEmpty" xml:space="preserve">
+    <value>No saved profiles yet.</value>
+  </data>
+  <data name="ProfilesApply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="ProfilesRename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="ProfilesDuplicate" xml:space="preserve">
+    <value>Duplicate</value>
+  </data>
+  <data name="ProfilesExport" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="ProfilesDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="ProfilesRenameConfirm" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="ProfilesDeleteConfirm" xml:space="preserve">
+    <value>Delete profile</value>
+  </data>
+  <data name="ProfileSectionAppearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="ProfileSectionDock" xml:space="preserve">
+    <value>Dock</value>
+  </data>
+  <data name="ProfileSectionNotch" xml:space="preserve">
+    <value>Notch</value>
+  </data>
+  <data name="ProfileSectionMusic" xml:space="preserve">
+    <value>Music</value>
+  </data>
+  <data name="ProfileSectionShortcuts" xml:space="preserve">
+    <value>Shortcuts</value>
+  </data>
+  <data name="ProfileSectionFocus" xml:space="preserve">
+    <value>Focus</value>
+  </data>
+  <data name="ProfileCorrupt" xml:space="preserve">
+    <value>This profile is damaged and cannot be applied.</value>
+  </data>
+  <data name="ProfileSaved" xml:space="preserve">
+    <value>Saved profile "{0}".</value>
+  </data>
+  <data name="ProfileApplied" xml:space="preserve">
+    <value>Applied profile "{0}".</value>
+  </data>
+  <data name="ProfileAppliedNoChange" xml:space="preserve">
+    <value>Profile "{0}" already matches your settings. Nothing changed.</value>
+  </data>
+  <data name="ProfileRenamed" xml:space="preserve">
+    <value>Renamed to "{0}".</value>
+  </data>
+  <data name="ProfileDeleted" xml:space="preserve">
+    <value>Deleted profile "{0}".</value>
+  </data>
+  <data name="ProfileExported" xml:space="preserve">
+    <value>Exported to {0}.</value>
+  </data>
+  <data name="ProfileExportFailed" xml:space="preserve">
+    <value>Could not write the file. Check the location and try again.</value>
+  </data>
+  <data name="ProfileExportDialogTitle" xml:space="preserve">
+    <value>Export profile</value>
+  </data>
+  <data name="ProfileImportDialogTitle" xml:space="preserve">
+    <value>Import profile</value>
+  </data>
+  <data name="ProfileFileFilter" xml:space="preserve">
+    <value>Koy profile (*.json)|*.json|All files (*.*)|*.*</value>
+  </data>
+  <data name="ProfileImportReadFailed" xml:space="preserve">
+    <value>Could not read the file.</value>
+  </data>
+  <data name="ProfileImportNoChanges" xml:space="preserve">
+    <value>Applying it would change nothing: your settings already match.</value>
+  </data>
+  <data name="ProfileImportChanges" xml:space="preserve">
+    <value>Applying it would change: {0}.</value>
+  </data>
+  <data name="ProfileImportErrorTooLarge" xml:space="preserve">
+    <value>The file is too large to be a Koy profile.</value>
+  </data>
+  <data name="ProfileImportErrorMalformedJson" xml:space="preserve">
+    <value>The file is not valid JSON.</value>
+  </data>
+  <data name="ProfileImportErrorNotAProfile" xml:space="preserve">
+    <value>This is not a Koy profile file.</value>
+  </data>
+  <data name="ProfileImportErrorUnsupportedFormatVersion" xml:space="preserve">
+    <value>This profile was made by a newer version of Koy. Update Koy and try again.</value>
+  </data>
+  <data name="ProfileImportErrorInvalidName" xml:space="preserve">
+    <value>The profile has an invalid name.</value>
+  </data>
+  <data name="ProfileImportErrorUnknownSection" xml:space="preserve">
+    <value>The profile contains a part this version does not know.</value>
+  </data>
+  <data name="ProfileImportErrorNoSections" xml:space="preserve">
+    <value>The profile contains no settings.</value>
+  </data>
+  <data name="ProfileImportErrorInvalidValues" xml:space="preserve">
+    <value>The profile contains values that are out of range. Nothing was imported.</value>
+  </data>
+  <data name="ProfileErrorInvalidName" xml:space="preserve">
+    <value>Enter a name up to 60 characters, without control characters.</value>
+  </data>
+  <data name="ProfileErrorDuplicateName" xml:space="preserve">
+    <value>A profile with this name already exists.</value>
+  </data>
+  <data name="ProfileErrorNoSections" xml:space="preserve">
+    <value>Select at least one part to include.</value>
+  </data>
+  <data name="ProfileErrorNotFound" xml:space="preserve">
+    <value>That profile no longer exists.</value>
+  </data>
+  <data name="ProfileErrorLimitReached" xml:space="preserve">
+    <value>You can keep up to 50 profiles. Delete one first.</value>
+  </data>
+  <data name="ProfileErrorCorruptProfile" xml:space="preserve">
+    <value>This profile is damaged and cannot be used.</value>
+  </data>
+  <data name="ProfileErrorSaveFailed" xml:space="preserve">
+    <value>Could not save the profile list. Check disk space and try again.</value>
+  </data>
 </root>
 

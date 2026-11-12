@@ -2664,5 +2664,167 @@
   <data name="IconPackFolderPickTitle" xml:space="preserve">
     <value>Simge paketi klasörünü seç</value>
   </data>
+  <data name="ProfilesHeader" xml:space="preserve">
+    <value>Profiller</value>
+  </data>
+  <data name="ProfilesSaveTitle" xml:space="preserve">
+    <value>Geçerli ayarları profil olarak kaydet</value>
+  </data>
+  <data name="ProfilesSaveDesc" xml:space="preserve">
+    <value>Saklanacak bölümleri seç. Profil sonra uygulanabilir ya da dosyaya aktarılabilir. Makineye özgü değerler (ekranlar, hava durumu konumu, sabit uygulamalar, yerel simge yolları) hiçbir zaman eklenmez.</value>
+  </data>
+  <data name="ProfilesNameHint" xml:space="preserve">
+    <value>Profil adı</value>
+  </data>
+  <data name="ProfilesSaveButton" xml:space="preserve">
+    <value>Profili kaydet</value>
+  </data>
+  <data name="ProfilesExportCurrentButton" xml:space="preserve">
+    <value>Dosyaya aktar...</value>
+  </data>
+  <data name="ProfilesImportButton" xml:space="preserve">
+    <value>Dosyadan içe aktar...</value>
+  </data>
+  <data name="ProfilesImportPreviewTitle" xml:space="preserve">
+    <value>İçe aktarma önizlemesi</value>
+  </data>
+  <data name="ProfilesImportMachineNote" xml:space="preserve">
+    <value>Henüz hiçbir şey kaydedilmedi ya da değiştirilmedi. Makineye özgü değerler içe aktarılmaz.</value>
+  </data>
+  <data name="ProfilesImportSave" xml:space="preserve">
+    <value>Profillerime ekle</value>
+  </data>
+  <data name="ProfilesImportApply" xml:space="preserve">
+    <value>Ekle ve uygula</value>
+  </data>
+  <data name="ProfilesEmpty" xml:space="preserve">
+    <value>Henüz kayıtlı profil yok.</value>
+  </data>
+  <data name="ProfilesApply" xml:space="preserve">
+    <value>Uygula</value>
+  </data>
+  <data name="ProfilesRename" xml:space="preserve">
+    <value>Yeniden adlandır</value>
+  </data>
+  <data name="ProfilesDuplicate" xml:space="preserve">
+    <value>Çoğalt</value>
+  </data>
+  <data name="ProfilesExport" xml:space="preserve">
+    <value>Dışa aktar</value>
+  </data>
+  <data name="ProfilesDelete" xml:space="preserve">
+    <value>Sil</value>
+  </data>
+  <data name="ProfilesRenameConfirm" xml:space="preserve">
+    <value>Adlandır</value>
+  </data>
+  <data name="ProfilesDeleteConfirm" xml:space="preserve">
+    <value>Profili sil</value>
+  </data>
+  <data name="ProfileSectionAppearance" xml:space="preserve">
+    <value>Görünüm</value>
+  </data>
+  <data name="ProfileSectionDock" xml:space="preserve">
+    <value>Dock</value>
+  </data>
+  <data name="ProfileSectionNotch" xml:space="preserve">
+    <value>Çentik</value>
+  </data>
+  <data name="ProfileSectionMusic" xml:space="preserve">
+    <value>Müzik</value>
+  </data>
+  <data name="ProfileSectionShortcuts" xml:space="preserve">
+    <value>Kısayollar</value>
+  </data>
+  <data name="ProfileSectionFocus" xml:space="preserve">
+    <value>Odak</value>
+  </data>
+  <data name="ProfileCorrupt" xml:space="preserve">
+    <value>Bu profil bozuk, uygulanamaz.</value>
+  </data>
+  <data name="ProfileSaved" xml:space="preserve">
+    <value>"{0}" profili kaydedildi.</value>
+  </data>
+  <data name="ProfileApplied" xml:space="preserve">
+    <value>"{0}" profili uygulandı.</value>
+  </data>
+  <data name="ProfileAppliedNoChange" xml:space="preserve">
+    <value>"{0}" profili zaten ayarlarınla aynı. Hiçbir şey değişmedi.</value>
+  </data>
+  <data name="ProfileRenamed" xml:space="preserve">
+    <value>Yeni ad: "{0}".</value>
+  </data>
+  <data name="ProfileDeleted" xml:space="preserve">
+    <value>"{0}" profili silindi.</value>
+  </data>
+  <data name="ProfileExported" xml:space="preserve">
+    <value>{0} dosyasına aktarıldı.</value>
+  </data>
+  <data name="ProfileExportFailed" xml:space="preserve">
+    <value>Dosya yazılamadı. Konumu kontrol edip yeniden dene.</value>
+  </data>
+  <data name="ProfileExportDialogTitle" xml:space="preserve">
+    <value>Profili dışa aktar</value>
+  </data>
+  <data name="ProfileImportDialogTitle" xml:space="preserve">
+    <value>Profili içe aktar</value>
+  </data>
+  <data name="ProfileFileFilter" xml:space="preserve">
+    <value>Koy profili (*.json)|*.json|Tüm dosyalar (*.*)|*.*</value>
+  </data>
+  <data name="ProfileImportReadFailed" xml:space="preserve">
+    <value>Dosya okunamadı.</value>
+  </data>
+  <data name="ProfileImportNoChanges" xml:space="preserve">
+    <value>Uygulansa hiçbir şey değişmez: ayarların zaten aynı.</value>
+  </data>
+  <data name="ProfileImportChanges" xml:space="preserve">
+    <value>Uygulanırsa değişecek bölümler: {0}.</value>
+  </data>
+  <data name="ProfileImportErrorTooLarge" xml:space="preserve">
+    <value>Dosya bir Koy profili olamayacak kadar büyük.</value>
+  </data>
+  <data name="ProfileImportErrorMalformedJson" xml:space="preserve">
+    <value>Dosya geçerli bir JSON değil.</value>
+  </data>
+  <data name="ProfileImportErrorNotAProfile" xml:space="preserve">
+    <value>Bu bir Koy profil dosyası değil.</value>
+  </data>
+  <data name="ProfileImportErrorUnsupportedFormatVersion" xml:space="preserve">
+    <value>Bu profil Koy'un daha yeni bir sürümüyle oluşturulmuş. Koy'u güncelleyip yeniden dene.</value>
+  </data>
+  <data name="ProfileImportErrorInvalidName" xml:space="preserve">
+    <value>Profilin adı geçersiz.</value>
+  </data>
+  <data name="ProfileImportErrorUnknownSection" xml:space="preserve">
+    <value>Profil, bu sürümün tanımadığı bir bölüm içeriyor.</value>
+  </data>
+  <data name="ProfileImportErrorNoSections" xml:space="preserve">
+    <value>Profilde hiç ayar yok.</value>
+  </data>
+  <data name="ProfileImportErrorInvalidValues" xml:space="preserve">
+    <value>Profil, aralık dışı değerler içeriyor. Hiçbir şey içe aktarılmadı.</value>
+  </data>
+  <data name="ProfileErrorInvalidName" xml:space="preserve">
+    <value>En fazla 60 karakterlik, denetim karakteri içermeyen bir ad gir.</value>
+  </data>
+  <data name="ProfileErrorDuplicateName" xml:space="preserve">
+    <value>Bu adda bir profil zaten var.</value>
+  </data>
+  <data name="ProfileErrorNoSections" xml:space="preserve">
+    <value>En az bir bölüm seç.</value>
+  </data>
+  <data name="ProfileErrorNotFound" xml:space="preserve">
+    <value>Bu profil artık yok.</value>
+  </data>
+  <data name="ProfileErrorLimitReached" xml:space="preserve">
+    <value>En fazla 50 profil saklanabilir. Önce birini sil.</value>
+  </data>
+  <data name="ProfileErrorCorruptProfile" xml:space="preserve">
+    <value>Bu profil bozuk, kullanılamaz.</value>
+  </data>
+  <data name="ProfileErrorSaveFailed" xml:space="preserve">
+    <value>Profil listesi kaydedilemedi. Disk alanını kontrol edip yeniden dene.</value>
+  </data>
 </root>
 
