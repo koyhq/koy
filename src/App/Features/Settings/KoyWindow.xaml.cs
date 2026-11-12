@@ -62,7 +62,12 @@ public partial class KoyWindow : Window
         get
         {
             if (_index is null || _index.Culture != System.Globalization.CultureInfo.CurrentUICulture.Name)
+            {
                 _index = SettingsPageIndex.Build(PagesHost);
+                _sectionRows = null;
+                _sectionExtras = null;
+                _infoBoxes = null;
+            }
             return _index;
         }
     }
@@ -148,7 +153,242 @@ public partial class KoyWindow : Window
             ViewModel.ShowChangedOnly = !ViewModel.ShowChangedOnly;
     }
 
-    /// <summary>Değişmiş satırlara nokta koyar; "yalnız değişenler" açıksa diğer satırları ve bölüm başlıklarını gizler.</summary>
+    private Dictionary<FrameworkElement, List<SettingsRow>>? _sectionRows;
+    private Dictionary<FrameworkElement, List<FrameworkElement>>? _sectionExtras;
+    private List<FrameworkElement>? _infoBoxes;
+
+    private static IEnumerable<DependencyObject> WalkTree(DependencyObject root)
+    {
+        var stack = new Stack<DependencyObject>();
+        stack.Push(root);
+        while (stack.Count > 0)
+        {
+            var current = stack.Pop();
+            yield return current;
+            var children = LogicalTreeHelper.GetChildren(current).OfType<DependencyObject>().Reverse();
+            foreach (var child in children)
+                stack.Push(child);
+        }
+    }
+
+    private void EnsureSectionMap()
+    {
+        if (_sectionRows is not null && _sectionExtras is not null && _infoBoxes is not null)
+            return;
+
+        _sectionRows = new Dictionary<FrameworkElement, List<SettingsRow>>();
+        _sectionExtras = new Dictionary<FrameworkElement, List<FrameworkElement>>();
+        _infoBoxes = [];
+
+        var headers = Index.Headers.ToHashSet();
+        var rowByElement = Index.Rows.ToDictionary(r => r.Element);
+        var infoStyle = Application.Current?.TryFindResource("InfoNoticeStyle") as Style;
+        var descStyle = Application.Current?.TryFindResource("SettingDescStyle") as Style;
+        var rowStyle = Application.Current?.TryFindResource("SettingRowStyle") as Style;
+
+        for (var page = 0; page < PagesHost.Children.Count; page++)
+        {
+            var pageElement = PagesHost.Children[page];
+            FrameworkElement? currentHeader = null;
+
+            foreach (var obj in WalkTree(pageElement))
+            {
+                if (obj is not FrameworkElement el)
+                    continue;
+
+                // Bilgi kutuları (InfoNoticeStyle)
+                if (el is System.Windows.Controls.Border infoBorder && infoBorder.Style == infoStyle && infoStyle is not null)
+                {
+                    _infoBoxes.Add(infoBorder);
+                    continue;
+                }
+
+                // Bölüm başlıkları (SectionHeaderStyle)
+                if (headers.Contains(el))
+                {
+                    currentHeader = el;
+                    if (!_sectionRows.ContainsKey(currentHeader))
+                        _sectionRows[currentHeader] = [];
+                    if (!_sectionExtras.ContainsKey(currentHeader))
+                        _sectionExtras[currentHeader] = [];
+                    continue;
+                }
+
+                // Ayar satırları (SettingRowStyle)
+                if (rowByElement.TryGetValue(el, out var row))
+                {
+                    if (currentHeader is not null)
+                    {
+                        if (!_sectionRows.TryGetValue(currentHeader, out var list))
+                            _sectionRows[currentHeader] = list = [];
+                        list.Add(row);
+                    }
+                    continue;
+                }
+
+                // Bölüm başlığı altındaki doğrudan başlık altı metinleri veya listeler
+                if (currentHeader is not null && !headers.Contains(el) && !rowByElement.ContainsKey(el))
+                {
+                    // Satır içine gömülü öğeleri atla
+                    if (IsInsideStyle(el, rowStyle))
+                        continue;
+
+                    if ((el is System.Windows.Controls.TextBlock tb && tb.Style == descStyle && descStyle is not null) ||
+                        (el is System.Windows.Controls.ItemsControl ic && ic.Name != "SchemaItems"))
+                    {
+                        if (!_sectionExtras.TryGetValue(currentHeader, out var extras))
+                            _sectionExtras[currentHeader] = extras = [];
+                        extras.Add(el);
+                    }
+                }
+            }
+        }
+    }
+
+    private static bool IsInsideStyle(DependencyObject obj, Style? targetStyle)
+    {
+        if (targetStyle is null)
+            return false;
+        var parent = LogicalTreeHelper.GetParent(obj);
+        while (parent is not null)
+        {
+            if (parent is FrameworkElement fe && fe.Style == targetStyle)
+                return true;
+            parent = LogicalTreeHelper.GetParent(parent);
+        }
+        return false;
+    }
+
+    private bool HasChangedSettingsOnPage(int pageIndex, ISet<string> changed)
+    {
+        if (pageIndex < 0 || pageIndex >= PagesHost.Children.Count)
+            return false;
+
+        // Sayfa 9 (Gelişmiş): Özel arayüzü olmayan ayarlar
+        if (pageIndex == KoyWindowViewModel.AdvancedPageIndex)
+        {
+            var dedicated = Koy.Core.Settings.SettingsKeyMap.V3ToV4.Values.Select(v => $"{v.Section}.{v.Name}").ToHashSet(StringComparer.Ordinal);
+            return changed.Any(k => !dedicated.Contains(k));
+        }
+
+        // Sayfa 3 (Ekranlar): Ekran başına ayarlar veya yeni ekran varsayılanı
+        if (pageIndex == 3 && changed.Contains("Displays.Monitors"))
+            return true;
+
+        // Sayfadaki satırlardan en az birinin ayar anahtarı değişenler kümesinde mi?
+        return Index.Rows.Any(r => r.PageIndex == pageIndex && r.SettingKey is not null && changed.Contains(r.SettingKey));
+    }
+
+    private void ApplyPageCustomFilterState(bool only, HashSet<string> changed)
+    {
+        // Sayfa 0 (Genel): Değişen ayar yoksa profil/kural boş durum metinlerini ve alt blokları gizle
+        if (PagesHost.Children.Count > 0 && PagesHost.Children[0] is FrameworkElement page0)
+        {
+            var hasChangedGeneral = HasChangedSettingsOnPage(0, changed);
+            var rootPanel = LogicalTreeHelper.GetChildren(page0).OfType<System.Windows.Controls.Panel>().FirstOrDefault();
+            if (rootPanel is not null)
+            {
+                for (var i = 2; i < rootPanel.Children.Count; i++)
+                {
+                    var child = rootPanel.Children[i] as FrameworkElement;
+                    if (child is not null && child.Style != Application.Current?.TryFindResource("SectionHeaderStyle") && child.Style != Application.Current?.TryFindResource("SettingRowStyle"))
+                    {
+                        if (only && !hasChangedGeneral)
+                            child.Visibility = Visibility.Collapsed;
+                        else
+                            child.ClearValue(VisibilityProperty);
+                    }
+                }
+            }
+        }
+
+        // Sayfa 1 (Çentik): Hava durumu ayarı değişmemişse durum bildirim satırını gizle
+        if (PagesHost.Children.Count > 1 && PagesHost.Children[1] is FrameworkElement page1)
+        {
+            var hasChangedWeather = changed.Any(k => k.StartsWith("Weather.", StringComparison.Ordinal));
+            if (only && !hasChangedWeather)
+            {
+                var weatherRows = Index.Rows.Where(r => r.PageIndex == 1 && r.SettingKey is null).Select(r => r.Element);
+                foreach (var el in weatherRows)
+                    el.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                var weatherRows = Index.Rows.Where(r => r.PageIndex == 1 && r.SettingKey is null).Select(r => r.Element);
+                foreach (var el in weatherRows)
+                    el.ClearValue(VisibilityProperty);
+            }
+        }
+
+        // Sayfa 3 (Ekranlar): Değişen ayar yoksa şemayı ve seçim panelini gizle
+        if (PagesHost.Children.Count > 3 && PagesHost.Children[3] is FrameworkElement page3)
+        {
+            var hasChangedDisplays = HasChangedSettingsOnPage(3, changed);
+            var rootPanel = LogicalTreeHelper.GetChildren(page3).OfType<System.Windows.Controls.Panel>().FirstOrDefault();
+            if (rootPanel is not null && rootPanel.Children.Count > 2)
+            {
+                var schemaBorder = rootPanel.Children[1] as FrameworkElement;
+                var selectionPanel = rootPanel.Children[2] as FrameworkElement;
+                var identifyBtn = (rootPanel.Children[0] as System.Windows.Controls.Grid)?.Children.OfType<System.Windows.Controls.Button>().FirstOrDefault();
+
+                if (only && !hasChangedDisplays)
+                {
+                    if (schemaBorder is not null) schemaBorder.Visibility = Visibility.Collapsed;
+                    if (selectionPanel is not null) selectionPanel.Visibility = Visibility.Collapsed;
+                    if (identifyBtn is not null) identifyBtn.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    schemaBorder?.ClearValue(VisibilityProperty);
+                    selectionPanel?.ClearValue(VisibilityProperty);
+                    identifyBtn?.ClearValue(VisibilityProperty);
+                }
+            }
+        }
+
+        // Sayfa 9 (Gelişmiş): Değişen gelişmiş ayar yoksa filtre kutusunu ve uyarıyı gizle
+        if (PagesHost.Children.Count > KoyWindowViewModel.AdvancedPageIndex &&
+            PagesHost.Children[KoyWindowViewModel.AdvancedPageIndex] is FrameworkElement page9)
+        {
+            var hasChangedAdvanced = HasChangedSettingsOnPage(KoyWindowViewModel.AdvancedPageIndex, changed);
+            var rootPanel = LogicalTreeHelper.GetChildren(page9).OfType<System.Windows.Controls.Panel>().FirstOrDefault();
+            if (rootPanel is not null)
+            {
+                for (var i = 2; i < rootPanel.Children.Count; i++)
+                {
+                    var child = rootPanel.Children[i] as FrameworkElement;
+                    if (only && !hasChangedAdvanced)
+                        child?.SetValue(VisibilityProperty, Visibility.Collapsed);
+                    else
+                        child?.ClearValue(VisibilityProperty);
+                }
+            }
+        }
+    }
+
+    private void UpdateEmptyPageState(bool? onlyOverride = null, HashSet<string>? changedOverride = null)
+    {
+        var only = onlyOverride ?? ViewModel.ShowChangedOnly;
+        var selectedPage = ViewModel.SelectedPageIndex;
+        var changed = changedOverride ?? ViewModel.ChangedSettingKeys().ToHashSet(StringComparer.Ordinal);
+        var hasChangedOnSelected = HasChangedSettingsOnPage(selectedPage, changed);
+
+        if (EmptyChangedState is not null)
+        {
+            EmptyChangedState.Visibility = only && !hasChangedOnSelected
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+
+        if (ResetPageHost is not null)
+        {
+            ResetPageHost.Visibility = (!only || hasChangedOnSelected) && ViewModel.CanResetPage
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+    }
+
+    /// <summary>Değişmiş satırlara nokta koyar; "yalnız değişenler" açıksa diğer satırları ve değişmeyen bölüm başlıklarını gizler.</summary>
     private void ApplyChangedMarks()
     {
         if (!Dispatcher.CheckAccess())
@@ -166,8 +406,46 @@ public partial class KoyWindow : Window
             SettingsRowState.SetIsFilteredOut(row.Element, only && !isChanged);
         }
 
+        EnsureSectionMap();
+
         foreach (var header in Index.Headers)
-            SettingsRowState.SetIsFilteredOut(header, only);
+        {
+            if (!only)
+            {
+                SettingsRowState.SetIsFilteredOut(header, false);
+                if (_sectionExtras is not null && _sectionExtras.TryGetValue(header, out var extras))
+                {
+                    foreach (var extra in extras)
+                        extra.ClearValue(VisibilityProperty);
+                }
+                continue;
+            }
+
+            var hasChangedRows = _sectionRows is not null &&
+                                 _sectionRows.TryGetValue(header, out var rows) &&
+                                 rows.Any(r => r.SettingKey is not null && changed.Contains(r.SettingKey));
+
+            SettingsRowState.SetIsFilteredOut(header, !hasChangedRows);
+            if (_sectionExtras is not null && _sectionExtras.TryGetValue(header, out var extrasList))
+            {
+                foreach (var extra in extrasList)
+                    extra.Visibility = hasChangedRows ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        if (_infoBoxes is not null)
+        {
+            foreach (var info in _infoBoxes)
+            {
+                if (only)
+                    info.Visibility = Visibility.Collapsed;
+                else
+                    info.ClearValue(VisibilityProperty);
+            }
+        }
+
+        ApplyPageCustomFilterState(only, changed);
+        UpdateEmptyPageState(only, changed);
     }
 
     private const double BaseWidth = 880, BaseHeight = 680, BaseMinHeight = 600;
@@ -272,16 +550,20 @@ public partial class KoyWindow : Window
             return;
         }
 
-        if (e.PropertyName != nameof(KoyWindowViewModel.SelectedPageIndex) || !IsVisible)
+        if (e.PropertyName == nameof(KoyWindowViewModel.SelectedPageIndex))
+        {
+            UpdateEmptyPageState();
+            SyncExtensionsActive();
+            ContentScrollViewer?.ScrollToTop();
+            if (!IsVisible)
+                return;
+
+            // Hemen başlatılır: Loaded önceliğine ertelenince yeni sayfa bir kare tam opak çizilip sonra sönüyordu (titreme).
+            var index = ViewModel.SelectedPageIndex;
+            if (index >= 0 && index < PagesHost.Children.Count && PagesHost.Children[index] is FrameworkElement page)
+                Motion.PageEnter(page);
             return;
-
-        SyncExtensionsActive();
-        ContentScrollViewer?.ScrollToTop();
-
-        // Hemen başlatılır: Loaded önceliğine ertelenince yeni sayfa bir kare tam opak çizilip sonra sönüyordu (titreme).
-        var index = ViewModel.SelectedPageIndex;
-        if (index >= 0 && index < PagesHost.Children.Count && PagesHost.Children[index] is FrameworkElement page)
-            Motion.PageEnter(page);
+        }
     }
 
     public static void ShowInstance(int pageIndex = 0)

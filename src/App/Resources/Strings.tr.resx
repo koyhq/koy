@@ -1497,6 +1497,12 @@
   <data name="SettingsShowChangedOnly" xml:space="preserve">
     <value>Yalnız değişenleri göster</value>
   </data>
+  <data name="SettingsNoChangedOnPage" xml:space="preserve">
+    <value>Bu sayfada değiştirilmiş ayar yok</value>
+  </data>
+  <data name="SettingsNoChangedOnPageDesc" xml:space="preserve">
+    <value>Bu sayfadaki tüm ayarlar varsayılan değerindedir.</value>
+  </data>
   <data name="SettingsResetPage" xml:space="preserve">
     <value>Varsayılana döndür</value>
   </data>
@@ -1565,6 +1571,15 @@
   </data>
   <data name="AdvancedWarning" xml:space="preserve">
     <value>Deneyimli kullanıcılar için. Geçersiz değer asla kaydedilmez; değişiklik çentiği ve dock'u yeniden kurar.</value>
+  </data>
+  <data name="DeveloperModeTitle" xml:space="preserve">
+    <value>Gelişmiş ayarları göster</value>
+  </data>
+  <data name="DeveloperModeDesc" xml:space="preserve">
+    <value>Sol menüye gelişmiş yapılandırma sekmesini ekler</value>
+  </data>
+  <data name="AdvancedFilterPlaceholder" xml:space="preserve">
+    <value>Ayar adı veya anahtar ara...</value>
   </data>
   <data name="AdvancedFilterHint" xml:space="preserve">
     <value>Anahtara göre süz</value>

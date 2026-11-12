@@ -30,7 +30,7 @@ public static class Program
     private static bool Transparent;
 
     private static readonly string[] PageNames =
-        ["genel", "centik", "dock", "ekranlar", "gorunum", "kisayollar", "dikte", "performans", "hakkinda"];
+        ["genel", "centik", "dock", "ekranlar", "gorunum", "kisayollar", "dikte", "performans", "hakkinda", "gelismis"];
 
     /// <summary>Görüntülerde kullanılan malzeme (Katı / Buzlu / Cam).</summary>
     internal static Koy.Core.Appearance.MaterialLevel Material { get; private set; } = Koy.Core.Appearance.MaterialLevel.Solid;
@@ -141,6 +141,17 @@ public static class Program
                 vm.SelectPage(i);
                 RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-{PageNames[i]}.png"));
             }
+
+            // "Yalnız değişenleri göster" filtre görünümü: değişmeyen sayfada boş durum, değişen sayfada gruplu satırlar
+            vm.SelectPage(0);
+            vm.ShowChangedOnly = true;
+            RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-genel-yalniz-degisenler.png"));
+
+            vm.MusicLyricsEnabled = true;
+            vm.NotchOpenBehavior = Koy.Core.Notch.NotchOpenBehavior.Click;
+            vm.SelectPage(1);
+            RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-centik-yalniz-degisenler.png"));
+            vm.ShowChangedOnly = false;
 
             var wizardVm = new SetupWizardViewModel(store);
             var wizard = new SetupWizardWindow(wizardVm);

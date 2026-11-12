@@ -42,6 +42,9 @@ public sealed record GeneralSettings
 
     /// <summary>Ağ hızı birimi: bayt ya da bit.</summary>
     public NetworkSpeedUnit NetworkSpeedUnit { get; set; } = NetworkSpeedUnit.Bytes;
+
+    /// <summary>Gelişmiş ayarlar sekmesini sol menüde gösterir.</summary>
+    public bool DeveloperMode { get; set; }
 }
 
 /// <summary>Görünüm: tema, vurgu, köşe, hareket ve malzeme.</summary>

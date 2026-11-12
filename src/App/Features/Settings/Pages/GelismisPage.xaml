@@ -11,68 +11,156 @@
     <!-- Gelişmiş (issue #69): kendi arayüzü olmayan her basit ayar, modelden kendiliğinden (AdvancedSettings). -->
     <StackPanel Margin="0,0,16,24">
         <TextBlock Text="{Binding [NavAdvanced], Source={x:Static res:Loc.Instance}}" Style="{StaticResource PageTitleStyle}" />
-        <TextBlock Text="{Binding [AdvancedSubtitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource PageSubtitleStyle}" Margin="0,4,0,8" />
-        <TextBlock Text="{Binding [AdvancedWarning], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}"
-                   Foreground="{DynamicResource KoyDangerText}" Margin="0,0,0,12" />
+        <TextBlock Text="{Binding [AdvancedSubtitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource PageSubtitleStyle}" Margin="0,4,0,16" />
 
-        <TextBox Style="{StaticResource SettingTextBoxStyle}" Margin="0,0,0,12"
-                 Text="{Binding AdvancedFilter, UpdateSourceTrigger=PropertyChanged}"
-                 AutomationProperties.Name="{Binding [AdvancedFilterHint], Source={x:Static res:Loc.Instance}}" />
+        <!-- Şık Bilgi / Uyarı Kartı -->
+        <Border Background="{DynamicResource KoyBgInfo}"
+                BorderBrush="{DynamicResource KoyFgInfo}"
+                BorderThickness="1"
+                CornerRadius="{DynamicResource KoyRadiusRow}"
+                Padding="14,12"
+                Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <res:KoyIcon Grid.Column="0" Data="{StaticResource IconTriangleAlert}" Size="18"
+                             Foreground="{DynamicResource KoyFgInfo}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                <TextBlock Grid.Column="1" Text="{Binding [AdvancedWarning], Source={x:Static res:Loc.Instance}}"
+                           FontSize="{DynamicResource KoyFontCaption}" Foreground="{DynamicResource KoyFgInfo}"
+                           VerticalAlignment="Center" TextWrapping="Wrap" LineHeight="18" />
+            </Grid>
+        </Border>
 
-        <ItemsControl ItemsSource="{Binding AdvancedRows}" Focusable="False"
-                      VirtualizingPanel.IsVirtualizing="True">
+        <!-- Modern Arama Kutusu -->
+        <Grid Margin="0,0,0,16">
+            <TextBox x:Name="AdvancedSearchBox"
+                     Style="{StaticResource SettingTextBoxStyle}"
+                     Padding="32,0,10,0"
+                     Text="{Binding AdvancedFilter, UpdateSourceTrigger=PropertyChanged}"
+                     AutomationProperties.Name="{Binding [AdvancedFilterPlaceholder], Source={x:Static res:Loc.Instance}}" />
+            <res:KoyIcon Data="{StaticResource IconSearch}" Size="15"
+                         Foreground="{DynamicResource KoyTextMuted}"
+                         Margin="10,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"
+                         IsHitTestVisible="False" />
+            <TextBlock Text="{Binding [AdvancedFilterPlaceholder], Source={x:Static res:Loc.Instance}}"
+                       IsHitTestVisible="False"
+                       Margin="33,0,0,0" VerticalAlignment="Center"
+                       FontSize="{DynamicResource KoyFontControl}"
+                       Foreground="{DynamicResource KoyTextMuted}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding AdvancedFilter}" Value="">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+
+        <!-- Arama Sonucu Bulunamadı -->
+        <TextBlock Text="{Binding [SettingsSearchNoResult], Source={x:Static res:Loc.Instance}}"
+                   Margin="4,4,0,12">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource SettingDescStyle}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding AdvancedRows.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <!-- Bölümlere Göre Gruplanmış Ayarlar -->
+        <ItemsControl ItemsSource="{Binding AdvancedGroups}" Focusable="False">
             <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type local:AdvancedSettingRow}">
-                    <Border Style="{StaticResource SettingRowStyle}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,12,0">
-                                <TextBlock Text="{Binding Key}" FontFamily="{DynamicResource KoyFontMono}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock" BasedOn="{StaticResource SettingTitleStyle}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsChanged}" Value="True">
-                                                    <Setter Property="Foreground" Value="{DynamicResource KoyAccentText}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                                <TextBlock Text="{Binding DefaultText}" Style="{StaticResource SettingDescStyle}" />
-                                <TextBlock Text="{Binding Error}" Foreground="{DynamicResource KoyDangerText}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock" BasedOn="{StaticResource SettingDescStyle}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Error}" Value="">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </StackPanel>
+                <DataTemplate DataType="{x:Type local:AdvancedSettingGroupRow}">
+                    <StackPanel Margin="0,0,0,12">
+                        <!-- Bölüm Başlığı -->
+                        <TextBlock Text="{Binding Title}" Style="{StaticResource SectionHeaderStyle}" Margin="2,12,0,8" />
 
-                            <Grid Grid.Column="1" VerticalAlignment="Center">
-                                <CheckBox IsChecked="{Binding BoolValue}" Style="{StaticResource ToggleSwitchStyle}" HorizontalAlignment="Right"
-                                          AutomationProperties.Name="{Binding Key}"
-                                          Visibility="{Binding IsBool, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
-                                <ComboBox ItemsSource="{Binding Choices}" SelectedItem="{Binding Text}" Width="180" Height="32"
-                                          Style="{StaticResource SettingComboBoxStyle}" AutomationProperties.Name="{Binding Key}"
-                                          Visibility="{Binding IsChoice, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
-                                <TextBox Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}" Width="180" Style="{StaticResource SettingTextBoxStyle}"
-                                         AutomationProperties.Name="{Binding Key}" LostFocus="ValueBox_LostFocus" KeyDown="ValueBox_KeyDown"
-                                         Visibility="{Binding IsTextual, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
-                            </Grid>
+                        <!-- Bölüm İçindeki Ayar Satırları -->
+                        <ItemsControl ItemsSource="{Binding Rows}" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type local:AdvancedSettingRow}">
+                                    <Border Style="{StaticResource SettingRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
 
-                            <Button Grid.Column="2" Margin="8,0,0,0" Command="{Binding ResetCommand}" Style="{StaticResource SettingButtonStyle}"
-                                    Content="{Binding [AdvancedResetRow], Source={x:Static res:Loc.Instance}}"
-                                    Visibility="{Binding IsChanged, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
-                        </Grid>
-                    </Border>
+                                            <!-- Sol: Dost Başlık, Teknik Anahtar + Varsayılan, Hata -->
+                                            <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock" BasedOn="{StaticResource SettingTitleStyle}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsChanged}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource KoyAccentText}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+
+                                                <!-- İkincil Bilgi Satırı: Teknik Anahtar (küçük mono font) + Varsayılan Değer -->
+                                                <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                                    <TextBlock Text="{Binding Key}" FontFamily="{DynamicResource KoyFontMono}"
+                                                               FontSize="{DynamicResource KoyFontCaption}" Foreground="{DynamicResource KoyTextMuted}"
+                                                               Margin="0,0,8,0" VerticalAlignment="Center" />
+                                                    <TextBlock Text="•" FontSize="{DynamicResource KoyFontCaption}" Foreground="{DynamicResource KoyTextMuted}"
+                                                               Margin="0,0,8,0" VerticalAlignment="Center" />
+                                                    <TextBlock Text="{Binding DefaultText}" Style="{StaticResource SettingDescStyle}"
+                                                               VerticalAlignment="Center" />
+                                                </StackPanel>
+
+                                                <!-- Hata Mesajı -->
+                                                <TextBlock Text="{Binding Error}" Foreground="{DynamicResource KoyDangerText}" Margin="0,3,0,0">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock" BasedOn="{StaticResource SettingDescStyle}">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Error}" Value="">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <!-- Orta / Sağ: Denetim (Toggle, ComboBox, TextBox) -->
+                                            <Grid Grid.Column="1" VerticalAlignment="Center">
+                                                <CheckBox IsChecked="{Binding BoolValue}" Style="{StaticResource ToggleSwitchStyle}" HorizontalAlignment="Right"
+                                                          AutomationProperties.Name="{Binding Title}"
+                                                          Visibility="{Binding IsBool, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
+                                                <ComboBox ItemsSource="{Binding Choices}" SelectedItem="{Binding Text}" Width="180" Height="32"
+                                                          Style="{StaticResource SettingComboBoxStyle}" AutomationProperties.Name="{Binding Title}"
+                                                          Visibility="{Binding IsChoice, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
+                                                <TextBox Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}" Width="180" Style="{StaticResource SettingTextBoxStyle}"
+                                                         AutomationProperties.Name="{Binding Title}" LostFocus="ValueBox_LostFocus" KeyDown="ValueBox_KeyDown"
+                                                         Visibility="{Binding IsTextual, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
+                                            </Grid>
+
+                                            <!-- Sağ: Sıfırla Düğmesi -->
+                                            <Button Grid.Column="2" Margin="8,0,0,0" Command="{Binding ResetCommand}" Style="{StaticResource SettingButtonStyle}"
+                                                    Content="{Binding [AdvancedResetRow], Source={x:Static res:Loc.Instance}}"
+                                                    AutomationProperties.Name="{Binding [AdvancedResetRow], Source={x:Static res:Loc.Instance}}"
+                                                    Visibility="{Binding IsChanged, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

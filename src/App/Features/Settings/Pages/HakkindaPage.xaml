@@ -103,6 +103,23 @@
             </Grid>
         </Border>
 
+        <!-- Geliştirici modu: Gelişmiş ayarlar sekmesini göster/gizle -->
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DeveloperModeTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DeveloperModeDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [DeveloperModeTitle], Source={x:Static res:Loc.Instance}}"
+                          IsChecked="{Binding DeveloperMode}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
         <!-- BAĞLANTILAR -->
         <TextBlock Text="{Binding [LinksHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 
@@ -177,47 +194,6 @@
             </Grid>
         </Border>
 
-        <!-- TEŞEKKÜR: esin alınan projeler; kod, görsel ya da metin alınmadı -->
-        <TextBlock Text="{Binding [AboutThanksTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
-        <TextBlock Text="{Binding [AboutThanksDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" TextWrapping="Wrap" Margin="0,0,0,8" />
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [AboutNectarTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [AboutNectarDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                </StackPanel>
-                <Button Grid.Column="1" Command="{Binding OpenNectarCommand}" HorizontalAlignment="Right" Style="{StaticResource SettingButtonStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding [OpenGitHubAction], Source={x:Static res:Loc.Instance}}" />
-                        <res:KoyIcon Data="{StaticResource IconExternalLink}" Size="14" Margin="8,0,0,0" />
-                    </StackPanel>
-                </Button>
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [AboutSeelenTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [AboutSeelenDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                </StackPanel>
-                <Button Grid.Column="1" Command="{Binding OpenSeelenUiCommand}" HorizontalAlignment="Right" Style="{StaticResource SettingButtonStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding [OpenGitHubAction], Source={x:Static res:Loc.Instance}}" />
-                        <res:KoyIcon Data="{StaticResource IconExternalLink}" Size="14" Margin="8,0,0,0" />
-                    </StackPanel>
-                </Button>
-            </Grid>
-        </Border>
 
         <!-- KALDIRMA: yalnız kurulu sürümde etkin -->
         <Border Style="{StaticResource SettingRowStyle}" Margin="0,24,0,0">
