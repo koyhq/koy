@@ -229,9 +229,15 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
 
     private void CreateNotchWindow(DisplayMonitor monitor)
     {
-        var controller = new NotchController();
-        controller.SetEnabledPanels(NotchPanels.ParseEnabled(settings.Notch.EnabledPanels, settings.Clipboard.HistoryEnabled));
-        controller.OpenOnHover = settings.Notch.OpenBehavior == NotchOpenBehavior.Hover;
+        var controller = new NotchController
+        {
+            OpenOnHover = settings.Notch.OpenBehavior == NotchOpenBehavior.Hover,
+            // Açılma / kapanma gecikmesi ve sekme sırası (issue #78).
+            OpenDelayMs = settings.Notch.OpenDelayMs,
+            CloseDelayMs = settings.Notch.CloseDelayMs,
+        };
+        controller.SetPanelOrder(settings.Notch.PanelOrder);
+        controller.SetEnabledPanels(NotchPanels.ParseEnabled(settings.Notch.EnabledPanels, settings.Clipboard.HistoryEnabled, settings.Notch.PanelOrder));
 
         var visibilityController = new VisibilityController(settings.Notch.Visibility)
         {

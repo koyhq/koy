@@ -269,8 +269,11 @@ public sealed record NotchSettings
     /// <summary>İmleç çentikten çıkınca kapanma gecikmesi (ms, 0–2000). Varsayılan bugünkü 400 ms.</summary>
     public int CloseDelayMs { get; set; } = NotchOpenPolicy.DefaultCloseDelayMs;
 
-    /// <summary>Sekme çubuğu: yalnız simge (varsayılan), simge ve ad, ya da gizli.</summary>
-    public NotchTabBarStyle TabBarStyle { get; set; } = NotchTabBarStyle.IconOnly;
+    /// <summary>
+    /// Sekme çubuğu: simge ve ad (varsayılan, bugünkü görünüm), yalnız simge ya da gizli. Varsayılan arayüz bağlanırken
+    /// IconOnly'den buna çekildi; aksi halde güncellemeyle herkesin sekme adları kaybolurdu (issue #78).
+    /// </summary>
+    public NotchTabBarStyle TabBarStyle { get; set; } = NotchTabBarStyle.IconAndLabel;
 
     /// <summary>
     /// Sekmelerin kullanıcı sırası (panel anahtarları). Boşsa ya da eksikse varsayılan sıra kullanılır; görünürlük
