@@ -94,8 +94,8 @@
                     <Slider Width="140" Minimum="10" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True"
                             Value="{Binding DockLengthPercent}" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding DockLengthPercent, StringFormat='{}{0}%'}"
-                               Foreground="{DynamicResource KoyNotchTextSecondary}"
-                               FontSize="{StaticResource FontSizeSmall}"
+                               Foreground="{DynamicResource KoyTextSecondary}"
+                               FontSize="{DynamicResource KoyFontCaption}"
                                Width="44" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
                 </StackPanel>
             </Grid>
@@ -115,8 +115,8 @@
                     <Slider Width="140" Minimum="0" Maximum="96" TickFrequency="2" IsSnapToTickEnabled="True"
                             Value="{Binding DockEdgeOffsetDip}" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding DockEdgeOffsetDip, StringFormat='{}{0:0} px'}"
-                               Foreground="{DynamicResource KoyNotchTextSecondary}"
-                               FontSize="{StaticResource FontSizeSmall}"
+                               Foreground="{DynamicResource KoyTextSecondary}"
+                               FontSize="{DynamicResource KoyFontCaption}"
                                Width="44" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
                 </StackPanel>
             </Grid>
@@ -136,8 +136,8 @@
                     <Slider Width="140" Minimum="0" Maximum="24" TickFrequency="2" IsSnapToTickEnabled="True"
                             Value="{Binding DockInnerPaddingDip}" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding DockInnerPaddingDip, StringFormat='{}{0:0} px'}"
-                               Foreground="{DynamicResource KoyNotchTextSecondary}"
-                               FontSize="{StaticResource FontSizeSmall}"
+                               Foreground="{DynamicResource KoyTextSecondary}"
+                               FontSize="{DynamicResource KoyFontCaption}"
                                Width="44" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
                 </StackPanel>
             </Grid>
@@ -404,8 +404,8 @@
                     <Slider Width="140" Minimum="0" Maximum="16" TickFrequency="1" IsSnapToTickEnabled="True"
                             Value="{Binding DockIconSpacingDip}" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding DockIconSpacingDip, StringFormat='{}{0:0} px'}"
-                               Foreground="{DynamicResource KoyNotchTextSecondary}"
-                               FontSize="{StaticResource FontSizeSmall}"
+                               Foreground="{DynamicResource KoyTextSecondary}"
+                               FontSize="{DynamicResource KoyFontCaption}"
                                Width="44" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
                 </StackPanel>
             </Grid>
@@ -661,6 +661,60 @@
                                      Style="{StaticResource SegRadioStyle}" />
                         <RadioButton Content="{Binding [DockMonitorScopeCurrent], Source={x:Static res:Loc.Instance}}" GroupName="DockMonitorScope"
                                      IsChecked="{Binding DockWindowMonitorScope, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=CurrentMonitor}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Pencere Gruplama -->
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockGroupingModeTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DockGroupingModeDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [DockGroupingModeNever], Source={x:Static res:Loc.Instance}}" GroupName="DockGroupingMode"
+                                     IsChecked="{Binding DockGroupingMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Never}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [DockGroupingModeAlways], Source={x:Static res:Loc.Instance}}" GroupName="DockGroupingMode"
+                                     IsChecked="{Binding DockGroupingMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Always}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [DockGroupingModeWhenSpaceRunsOut], Source={x:Static res:Loc.Instance}}" GroupName="DockGroupingMode"
+                                     IsChecked="{Binding DockGroupingMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=WhenSpaceRunsOut}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Uygulama Etiketleri -->
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockLabelModeTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DockLabelModeDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [DockLabelModeNever], Source={x:Static res:Loc.Instance}}" GroupName="DockLabelMode"
+                                     IsChecked="{Binding DockLabelMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Never}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [DockLabelModeAlways], Source={x:Static res:Loc.Instance}}" GroupName="DockLabelMode"
+                                     IsChecked="{Binding DockLabelMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Always}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [DockLabelModeOnHover], Source={x:Static res:Loc.Instance}}" GroupName="DockLabelMode"
+                                     IsChecked="{Binding DockLabelMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=OnHover}"
                                      Style="{StaticResource SegRadioStyle}" />
                     </StackPanel>
                 </Border>

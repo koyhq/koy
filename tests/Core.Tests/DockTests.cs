@@ -556,4 +556,30 @@ public class DockTests
 
         Assert.Single(controller.Items);
     }
+
+    [Fact]
+    public void DockController_GroupingMode_Never_Ayrik_Simgeler_Uretir()
+    {
+        var pinnedService = new FakePinnedAppsService();
+        var win1 = new OpenWindowInfo(1001, "Window 1", @"C:\App.exe", 10, new WindowRect(0, 0, 400, 400));
+        var win2 = new OpenWindowInfo(1002, "Window 2", @"C:\App.exe", 10, new WindowRect(0, 0, 400, 400));
+        var windowTracker = new FakeWindowTracker
+        {
+            Windows = [win1, win2],
+            CurrentForeground = new WindowInfo(1001, new WindowRect(0, 0, 400, 400))
+        };
+        var shell = new FakeShellActionService();
+
+        using var controller = new DockController(pinnedService, windowTracker, shell)
+        {
+            GroupingMode = DockGroupingMode.Never
+        };
+        controller.Refresh();
+
+        Assert.Equal(2, controller.Items.Count);
+        Assert.NotNull(controller.Items[0].Windows);
+        Assert.Single(controller.Items[0].Windows!);
+        Assert.NotNull(controller.Items[1].Windows);
+        Assert.Single(controller.Items[1].Windows!);
+    }
 }

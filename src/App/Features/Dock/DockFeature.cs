@@ -589,6 +589,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             return;
 
         _controller.LeftClickAction = settings.Dock.LeftClickAction;
+        _controller.GroupingMode = settings.Dock.GroupingMode;
         _controller.RefreshOnForegroundMove = settings.Dock.WindowMonitorScope == DockWindowMonitorScope.CurrentMonitor;
     }
 

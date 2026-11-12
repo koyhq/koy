@@ -31,6 +31,9 @@ public sealed class DockController : IDisposable
     /// <summary>Çalışan simgeye sol tık eylemi. Varsayılan bugünkü davranış: etkinse küçült, değilse öne getir.</summary>
     public DockLeftClickAction LeftClickAction { get; set; } = DockLeftClickAction.MinimizeIfActive;
 
+    /// <summary>Pencere gruplama kipi. Varsayılan <see cref="DockGroupingMode.Always"/> (bugünkü dock davranışı: aynı uygulamanın pencereleri tek simgede).</summary>
+    public DockGroupingMode GroupingMode { get; set; } = DockGroupingMode.Always;
+
     /// <summary>
     /// Açıksa ön plan pencere taşınınca/boyutlanınca da liste yenilenir (monitör süzgeci pencerenin hangi ekranda olduğuna bakar).
     /// Yeni olay kancası yok: <see cref="IWindowTracker.ForegroundWindowChanged"/> sınırlar değişince zaten tetiklenir.
@@ -126,9 +129,20 @@ public sealed class DockController : IDisposable
         }
 
         // 2. Sabitlenmemiş açık pencereleri grupla ve ilk görülme sırasını koru (Alt+Tab zıplamasını engelle)
-        var unpinnedGroups = remainingWindows
-            .GroupBy(w => !string.IsNullOrEmpty(w.ProcessPath) ? w.ProcessPath : w.ProcessId.ToString())
-            .ToList();
+        var shouldGroup = GroupingMode switch
+        {
+            DockGroupingMode.Always => true,
+            DockGroupingMode.WhenSpaceRunsOut => (newItems.Count + remainingWindows.Count) > 16,
+            _ => false
+        };
+
+        var unpinnedGroups = shouldGroup
+            ? remainingWindows
+                .GroupBy(w => !string.IsNullOrEmpty(w.ProcessPath) ? w.ProcessPath : w.ProcessId.ToString())
+                .ToList()
+            : remainingWindows
+                .GroupBy(w => $"{w.ProcessPath ?? w.ProcessId.ToString()}:{w.Handle}")
+                .ToList();
 
         var activeKeys = new HashSet<string>(unpinnedGroups.Select(g => g.Key), StringComparer.OrdinalIgnoreCase);
         _stableUnpinnedOrder.RemoveAll(k => !activeKeys.Contains(k));

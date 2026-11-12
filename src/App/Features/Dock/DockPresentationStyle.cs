@@ -38,6 +38,7 @@ public sealed class DockPresentationStyle
     public HorizontalAlignment BadgeHorizontal { get; private init; }
     public VerticalAlignment BadgeVertical { get; private init; }
     public Thickness BadgeMargin { get; private init; }
+    public DockLabelMode LabelMode { get; private init; }
 
     public static DockPresentationStyle From(Koy.Core.Settings.DockSettings dock)
     {
@@ -59,7 +60,8 @@ public sealed class DockPresentationStyle
             BadgeHorizontal = right ? HorizontalAlignment.Right : HorizontalAlignment.Left,
             BadgeVertical = top ? VerticalAlignment.Top : VerticalAlignment.Bottom,
             // Alt köşede gösterge noktasının üstüne binmesin diye biraz yukarıda durur.
-            BadgeMargin = new Thickness(right ? 0 : 2, top ? 2 : 0, right ? 2 : 0, top ? 0 : 6)
+            BadgeMargin = new Thickness(right ? 0 : 2, top ? 2 : 0, right ? 2 : 0, top ? 0 : 6),
+            LabelMode = dock.LabelMode
         };
     }
 

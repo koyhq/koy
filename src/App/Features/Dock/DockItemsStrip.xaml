@@ -253,6 +253,35 @@
                             </Border.Style>
                         </Border>
                         </Grid>
+
+                        <!-- Uygulama Etiketi (DockLabelMode: Always ya da OnHover) -->
+                        <TextBlock Text="{Binding Title}"
+                                   FontSize="9"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource KoyTextPrimary}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Bottom"
+                                   Margin="2,0,2,1"
+                                   TextTrimming="CharacterEllipsis"
+                                   IsHitTestVisible="False">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Presentation.LabelMode}" Value="Always">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Presentation.LabelMode}" Value="OnHover"/>
+                                                <Condition Binding="{Binding Path=IsMouseOver, RelativeSource={RelativeSource AncestorType=Border, AncestorLevel=1}}" Value="True"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </Grid>
                 </Border>
             </DataTemplate>
