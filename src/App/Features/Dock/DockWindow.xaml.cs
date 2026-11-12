@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using Koy.Core.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -68,6 +69,15 @@ public partial class DockWindow : Window
                 ViewModel?.ClosePreviewNow();
             }
         };
+    }
+
+    private void OnWindowContextMenuOpening(object sender, ContextMenuEventArgs e)
+    {
+        if (ContextMenu is not { } menu)
+            return;
+
+        e.Handled = true;
+        DockContextMenuManager.Open(menu, this);
     }
 
     private const int WmDisplayChange = 0x007E;
