@@ -23,9 +23,13 @@ public sealed partial class TrayIconViewModel : ObservableObject
     [ObservableProperty]
     private ImageSource? _icon;
 
-    public TrayIconViewModel(TrayIcon model)
+    /// <summary>Simgenin sahibi uygulamanın exe adı (küçük harfli anahtar, bkz. TrayIconVisibilityPolicy.AppKey); bulunamazsa boş.</summary>
+    public string ExeName { get; }
+
+    public TrayIconViewModel(TrayIcon model, string exeName = "")
     {
         Key = model.Key;
+        ExeName = exeName;
         _tooltip = NullIfEmpty(model.Tooltip);
     }
 

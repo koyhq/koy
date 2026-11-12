@@ -1428,6 +1428,24 @@
   <data name="FontDefault" xml:space="preserve">
     <value>Varsayılan</value>
   </data>
+  <data name="DockNewTrayIconTitle" xml:space="preserve">
+    <value>Yeni tepsi simgeleri</value>
+  </data>
+  <data name="DockNewTrayIconDesc" xml:space="preserve">
+    <value>Aşağıda kendi seçimi olmayan uygulamalar buna uyar.</value>
+  </data>
+  <data name="TrayIconShow" xml:space="preserve">
+    <value>Göster</value>
+  </data>
+  <data name="TrayIconHide" xml:space="preserve">
+    <value>Gizle</value>
+  </data>
+  <data name="TrayAppsHeader" xml:space="preserve">
+    <value>Tepsi simgeleri</value>
+  </data>
+  <data name="TrayAppsEmpty" xml:space="preserve">
+    <value>Dock tepsisini bir kez açın; tepsi simgesi olan uygulamalar burada listelenir.</value>
+  </data>
   <data name="AccentBlue" xml:space="preserve">
     <value>Mavi</value>
   </data>

@@ -20,4 +20,15 @@ public static class TrayIconVisibilityPolicy
 
         return newIconDefault;
     }
+
+    /// <summary>
+    /// Ayarlar listesindeki uygulamalar: bu oturumda tepside görülen exe adları ile kaydı olanların birleşimi,
+    /// anahtar biçiminde (küçük harf), tekrarsız ve sıralı. Boş adlar atlanır.
+    /// </summary>
+    public static IReadOnlyList<string> SettingsApps(IEnumerable<string?> seenExeNames, IEnumerable<string> savedKeys) =>
+        seenExeNames.Select(AppKey).Concat(savedKeys.Select(AppKey))
+            .Where(k => k.Length > 0)
+            .Distinct(StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
+            .ToList();
 }

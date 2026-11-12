@@ -387,6 +387,51 @@
             </Grid>
         </Border>
 
+        <!-- Tepsi simgeleri (issue #77): yeni simge varsayılanı ve uygulama başına göster/gizle. Yalnız gösterim katmanı. -->
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockNewTrayIconTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DockNewTrayIconDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [TrayIconShow], Source={x:Static res:Loc.Instance}}" GroupName="NewTrayIcon"
+                                     IsChecked="{Binding DockNewTrayIconVisibility, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Overflow}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [TrayIconHide], Source={x:Static res:Loc.Instance}}" GroupName="NewTrayIcon"
+                                     IsChecked="{Binding DockNewTrayIconVisibility, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Hidden}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <TextBlock Text="{Binding [TrayAppsHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+        <TextBlock Text="{Binding [TrayAppsEmpty], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="2,0,0,8"
+                   Visibility="{Binding HasTrayAppRows, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=False}" />
+        <ItemsControl ItemsSource="{Binding TrayAppRows}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource SettingRowStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding ExeName}" Style="{StaticResource SettingTitleStyle}" VerticalAlignment="Center" />
+                            <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding ExeName}" IsChecked="{Binding IsShown}"
+                                      HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource ToggleSwitchStyle}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
         <!-- GÖREV ÇUBUĞU KURTARMA -->
         <TextBlock Text="{Binding [TaskbarRecoveryHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 

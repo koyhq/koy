@@ -525,7 +525,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         {
             timer.Stop();
             if (!IsTrayPopupOpen)
+            {
                 TrayIcons.Clear();
+                _trayExeByOwner.Clear();
+            }
         };
         return timer;
     }
@@ -560,7 +563,13 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         if (_trayService is null)
             return;
 
-        var models = _trayService.GetVisibleIcons();
+        // Uygulama başına görünürlük (issue #77): Gizli olanlar tepsi penceresine hiç girmez. Exe adı sahip pencere
+        // başına bir kez okunur; pencere kapanınca önbellek simgelerle birlikte bırakılır.
+        var perApp = _settings.Dock.TrayAppVisibility ?? new ValueDictionary<TrayIconVisibility>();
+        var newDefault = _settings.Dock.NewTrayIconVisibility;
+        var models = _trayService.GetVisibleIcons()
+            .Where(m => TrayIconVisibilityPolicy.Resolve(TrayExeName(m.OwnerHwnd), perApp, newDefault) != TrayIconVisibility.Hidden)
+            .ToList();
 
         for (var i = TrayIcons.Count - 1; i >= 0; i--)
         {
@@ -591,7 +600,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             }
             else
             {
-                vm = new TrayIconViewModel(model);
+                vm = new TrayIconViewModel(model, TrayExeName(model.OwnerHwnd));
                 TrayIcons.Insert(targetIndex, vm);
             }
 
@@ -599,6 +608,19 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
 
         HasTrayIcons = TrayIcons.Count > 0;
+    }
+
+    private readonly Dictionary<nint, string> _trayExeByOwner = [];
+
+    private string TrayExeName(nint ownerHwnd)
+    {
+        if (!_trayExeByOwner.TryGetValue(ownerHwnd, out var name))
+        {
+            name = TrayAppNames.ForOwner(ownerHwnd);
+            _trayExeByOwner[ownerHwnd] = name;
+        }
+
+        return name;
     }
 
     [RelayCommand]

@@ -1428,6 +1428,24 @@
   <data name="FontDefault" xml:space="preserve">
     <value>Default</value>
   </data>
+  <data name="DockNewTrayIconTitle" xml:space="preserve">
+    <value>New tray icons</value>
+  </data>
+  <data name="DockNewTrayIconDesc" xml:space="preserve">
+    <value>Apps without their own choice below follow this.</value>
+  </data>
+  <data name="TrayIconShow" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="TrayIconHide" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="TrayAppsHeader" xml:space="preserve">
+    <value>Tray icons</value>
+  </data>
+  <data name="TrayAppsEmpty" xml:space="preserve">
+    <value>Open the dock tray once; apps with tray icons will be listed here.</value>
+  </data>
   <data name="AccentBlue" xml:space="preserve">
     <value>Blue</value>
   </data>
