@@ -2541,5 +2541,62 @@
   <data name="ProfileErrorSaveFailed" xml:space="preserve">
     <value>Profil listesi kaydedilemedi. Disk alanını kontrol edip yeniden dene.</value>
   </data>
+  <data name="RulesHeader" xml:space="preserve">
+    <value>Kurallar</value>
+  </data>
+  <data name="RulesAddTitle" xml:space="preserve">
+    <value>Uygulamaya göre profil değiştir</value>
+  </data>
+  <data name="RulesAddDesc" xml:space="preserve">
+    <value>Uygulama ön plandayken Koy seçtiğin profili uygular; uygulamadan çıkınca profilin değiştirdiği ayarlar eski haline döner. Kural, uygulama yaklaşık bir saniye ön planda kalınca uygulanır. Yeni kurallar kapalı başlar. Profil uygulamak kuralları değiştirmez.</value>
+  </data>
+  <data name="RulesProcessHint" xml:space="preserve">
+    <value>Uygulamanın exe adı, örneğin chrome.exe</value>
+  </data>
+  <data name="RulesPickRunning" xml:space="preserve">
+    <value>Çalışan uygulamalardan seç</value>
+  </data>
+  <data name="RulesRefreshRunning" xml:space="preserve">
+    <value>Listeyi yenile</value>
+  </data>
+  <data name="RulesProfileLabel" xml:space="preserve">
+    <value>Uygulanacak profil</value>
+  </data>
+  <data name="RulesAddButton" xml:space="preserve">
+    <value>Kural ekle</value>
+  </data>
+  <data name="RulesEmpty" xml:space="preserve">
+    <value>Henüz kural yok. Bir kural açılana kadar Koy ön plandaki uygulamayı izlemez.</value>
+  </data>
+  <data name="RulesUsesProfile" xml:space="preserve">
+    <value>Uygulanan profil: {0}</value>
+  </data>
+  <data name="RulesMissingProfile" xml:space="preserve">
+    <value>(silinmiş profil)</value>
+  </data>
+  <data name="RulesAdvancedRule" xml:space="preserve">
+    <value>özel koşullar</value>
+  </data>
+  <data name="RulesAdded" xml:space="preserve">
+    <value>Kural eklendi. Kapalı; kullanmak için aç.</value>
+  </data>
+  <data name="RulesSaveFailed" xml:space="preserve">
+    <value>Kurallar kaydedilemedi. Disk alanını kontrol edip yeniden dene.</value>
+  </data>
+  <data name="RulesErrorInvalidProcess" xml:space="preserve">
+    <value>chrome.exe gibi bir exe adı yaz (klasör yolu olmadan).</value>
+  </data>
+  <data name="RulesErrorNoProfile" xml:space="preserve">
+    <value>Önce bir profil seç. Yukarıdaki Profiller bölümünden bir profil kaydedebilirsin.</value>
+  </data>
+  <data name="RulesErrorLimitReached" xml:space="preserve">
+    <value>Çok fazla kural var. Önce birini sil.</value>
+  </data>
+  <data name="RulesErrorDuplicate" xml:space="preserve">
+    <value>Bu uygulama için zaten bir kural var.</value>
+  </data>
+  <data name="RulesErrorNotFound" xml:space="preserve">
+    <value>Bu kural artık yok.</value>
+  </data>
 </root>
 

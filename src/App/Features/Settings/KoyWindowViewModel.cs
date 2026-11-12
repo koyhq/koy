@@ -30,6 +30,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     public ShortcutsViewModel Shortcuts { get; }
     public ProfilesViewModel Profiles { get; }
 
+    public RulesViewModel Rules { get; }
+
     /// <summary>Ekranlar sayfası: monitör şeması ve ekran başına ayarlar.</summary>
     public DisplaysViewModel Displays { get; }
 
@@ -446,6 +448,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         Shortcuts = new ShortcutsViewModel(_store);
         Profiles = new ProfilesViewModel(ProfileService.Instance);
         ProfileService.Instance.Applied += OnProfileApplied;
+        Rules = new RulesViewModel(ProfileService.Instance, Koy.App.Features.Rules.ContextRuleService.Instance);
+        Profiles.ListChanged += Rules.Refresh;
         Displays = new DisplaysViewModel(_store);
         Weather = new WeatherLocationViewModel(_store);
         UpdateStatus.Changed += OnUpdateStatusChanged;
@@ -751,6 +755,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             OnPropertyChanged(nameof(DownloadProgressText));
             OnPropertyChanged(nameof(StartIconFileName));
             Profiles.RefreshLanguage();
+            Rules.Refresh();
         }
         catch { }
     }

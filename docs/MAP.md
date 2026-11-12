@@ -49,6 +49,9 @@ Unutma:
 | Core | `src/Core/Settings/Profiles/ProfileStore.cs` | `profiles.json` (ayar klasöründe) |
 | App | `src/App/Features/Settings/ProfileService.cs` | Listele / uygula girişi (`ProfileService.Instance.Apply(idOrName)`): ayarı kaydeder, tema ve özellikleri yeniden kurar. Kurallar da bunu çağırır |
 | App | `src/App/Features/Settings/ProfilesViewModel.cs` + `Pages/GenelPage.xaml` | Genel sayfasındaki Profiller bölümü |
+| Core | `src/Core/Rules/` | Bağlam kuralları: `RuleEvaluator` (eşleşme), `ContextProfileSwitcher` (titreşim önleme, tekrar uygulamama, geri dönüş), `RuleListEditor`, `RuleStore` (`rules.json`, settings.json dışında), `RuleSources` |
+| App | `src/App/Features/Rules/ContextRuleService.cs` | Ön plan olayını (`WindowTracker`) dinler, kural profilini `ProfileService` ile uygular/geri alır; etkin kural yoksa hiçbir şeye abone olmaz |
+| App | `src/App/Features/Settings/RulesViewModel.cs` + `Pages/GenelPage.xaml` | Genel sayfasındaki Kurallar bölümü |
 
 ## Çentik kartı ve Windows bildirimleri
 | Katman | Dosya | Ne yapılır |
