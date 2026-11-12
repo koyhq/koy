@@ -16,7 +16,7 @@ public sealed class FileSearchService : IFileSearchService
     private const string DirectoryItemType = "Directory";
 
     public Task<IReadOnlyList<IndexedItem>> SearchAsync(string term, int limit, CancellationToken cancellationToken = default) =>
-        Task.Run(() => Query(term, limit, cancellationToken), cancellationToken);
+        Task.Run<IReadOnlyList<IndexedItem>>(() => Query(term, limit, cancellationToken), cancellationToken);
 
     /// <summary>Kullanıcının yazdığı metni dizin sözdiziminden arındırır; SQL'e yalnız harf, rakam ve güvenli işaretler girer.</summary>
     public static string BuildSql(string term, int limit)
@@ -42,7 +42,7 @@ public sealed class FileSearchService : IFileSearchService
         return sb.ToString();
     }
 
-    private static IReadOnlyList<IndexedItem> Query(string term, int limit, CancellationToken cancellationToken)
+    private static List<IndexedItem> Query(string term, int limit, CancellationToken cancellationToken)
     {
         var sql = BuildSql(term, limit);
         var connectionType = Type.GetTypeFromProgID("ADODB.Connection");
@@ -93,10 +93,10 @@ public sealed class FileSearchService : IFileSearchService
 
     private static object? Value(object fields, int index)
     {
-        var field = fields.GetType().InvokeMember("Item", BindingFlags.GetProperty, null, fields, [index]);
+        var field = fields.GetType().InvokeMember("Item", BindingFlags.GetProperty, null, fields, [index], System.Globalization.CultureInfo.InvariantCulture);
         try
         {
-            var value = field?.GetType().InvokeMember("Value", BindingFlags.GetProperty, null, field, null);
+            var value = field?.GetType().InvokeMember("Value", BindingFlags.GetProperty, null, field, null, System.Globalization.CultureInfo.InvariantCulture);
             return value is DBNull ? null : value;
         }
         finally
@@ -106,10 +106,10 @@ public sealed class FileSearchService : IFileSearchService
     }
 
     private static object? Get(object target, string property) =>
-        target.GetType().InvokeMember(property, BindingFlags.GetProperty, null, target, null);
+        target.GetType().InvokeMember(property, BindingFlags.GetProperty, null, target, null, System.Globalization.CultureInfo.InvariantCulture);
 
     private static object? Call(object target, string method, params object[] arguments) =>
-        target.GetType().InvokeMember(method, BindingFlags.InvokeMethod, null, target, arguments);
+        target.GetType().InvokeMember(method, BindingFlags.InvokeMethod, null, target, arguments, System.Globalization.CultureInfo.InvariantCulture);
 
     private static void Release(object? value)
     {

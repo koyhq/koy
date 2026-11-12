@@ -299,7 +299,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 UpdateCheckResult.Failed => Strings.Get("UpdateCheckFailed"),
                 UpdateCheckResult.NotInstalled => Strings.Get("UpdateNotInstalled"),
                 UpdateCheckResult.UpdateReady => Strings.Get("UpdateReadyOnExit"),
-                _ when UpdateStatus.LastCheck is { } t => string.Format(Strings.Get("UpdateLastCheck"), FormatCheckTime(t, DateTime.Now)),
+                _ when UpdateStatus.LastCheck is { } t => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("UpdateLastCheck"), FormatCheckTime(t, DateTime.Now)),
                 _ => Strings.Get("UpdateNeverChecked")
             };
         }
@@ -309,7 +309,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     public bool CanCheckUpdates => !IsCheckingUpdates;
 
     private static string FormatCheckTime(DateTime t, DateTime now) =>
-        t.Date == now.Date ? string.Format(Strings.Get("UpdateToday"), t.ToString("HH:mm")) : t.ToString("d MMM HH:mm");
+        t.Date == now.Date
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("UpdateToday"), t.ToString("HH:mm", System.Globalization.CultureInfo.CurrentCulture))
+            : t.ToString("d MMM HH:mm", System.Globalization.CultureInfo.CurrentCulture);
 
     // --- ÇENTİK ---
     [ObservableProperty]
@@ -403,7 +405,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         var dialog = new Microsoft.Win32.OpenFileDialog
         {
             Title = Strings.Get("LiveBgPickTitle"),
-            Filter = string.Format(Strings.Get("LiveBgPickFilter"), LiveBackgroundFileValidator.DialogPattern),
+            Filter = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("LiveBgPickFilter"), LiveBackgroundFileValidator.DialogPattern),
             CheckFileExists = true
         };
 
@@ -865,11 +867,12 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private string _clockSecondTimeZoneId = "";
 
     /// <summary>İkinci saat açılır listesi: "Yok" ve sistemdeki saat dilimleri. Liste ilk kullanımda bir kez okunur.</summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "XAML binding")]
     public IReadOnlyList<TimeZoneOption> SecondTimeZoneOptions => _secondTimeZoneOptions ??= BuildTimeZoneOptions();
 
     private static IReadOnlyList<TimeZoneOption>? _secondTimeZoneOptions;
 
-    private static IReadOnlyList<TimeZoneOption> BuildTimeZoneOptions()
+    private static List<TimeZoneOption> BuildTimeZoneOptions()
     {
         var list = new List<TimeZoneOption> { new("", Koy.App.Resources.Strings.Get("ClockSecondTimeZoneNone")) };
         list.AddRange(TimeZoneInfo.GetSystemTimeZones().Select(z => new TimeZoneOption(z.Id, z.DisplayName)));
@@ -1025,7 +1028,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(DownloadProgressText))]
     private int _downloadProgress;
 
-    public string DownloadProgressText => string.Format(Strings.Get("UpdateDownloading"), DownloadProgress);
+    public string DownloadProgressText => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("UpdateDownloading"), DownloadProgress);
 
     [ObservableProperty]
     private string _updateModalTitleText = "";
@@ -1053,12 +1056,12 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     {
         get
         {
-            var line = string.Format(Strings.Get("AboutVersionLine"), AppVersion);
+            var line = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("AboutVersionLine"), AppVersion);
             var state = IsCheckingUpdates ? Strings.Get("UpdateChecking") : UpdateStatus.LastResult switch
             {
                 UpdateCheckResult.UpToDate => Strings.Get("UpdateStateUpToDate"),
                 UpdateCheckResult.UpdateReady => Strings.Get("UpdateStateReady"),
-                UpdateCheckResult.UpdateAvailable => string.Format(Strings.Get("UpdateAvailableBadge"), UpdateStatus.AvailableVersion ?? ""),
+                UpdateCheckResult.UpdateAvailable => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("UpdateAvailableBadge"), UpdateStatus.AvailableVersion ?? ""),
                 UpdateCheckResult.Failed => Strings.Get("UpdateStateFailed"),
                 _ => Strings.Get("UpdateStateUnknown")
             };
@@ -1129,7 +1132,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     {
         HasAvailableUpdate = UpdateStatus.HasAvailableUpdate;
         AvailableVersionText = UpdateStatus.AvailableVersion is { } v
-            ? string.Format(Strings.Get("UpdateAvailableBadge"), v)
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("UpdateAvailableBadge"), v)
             : string.Empty;
         OnPropertyChanged(nameof(LastCheckText));
         OnPropertyChanged(nameof(AboutStatusText));
@@ -1427,6 +1430,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     private void ClearSearchHistory() => Koy.App.Features.Search.SearchFactory.ClearHistory();
 
     [RelayCommand]
@@ -1736,6 +1740,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     /// <summary>user-theme.json klasörünü Gezgin'de açar (klasör yoksa oluşturulur; dosyayı kullanıcı yazar).</summary>
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     private void OpenUserStyleFolder()
     {
         try
@@ -1767,6 +1772,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     public void RestoreTaskbar()
     {
         TaskbarService.Restore(force: true);
@@ -1984,7 +1990,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     {
         var version = UpdateStatus.AvailableVersion ?? AppVersion;
         UpdateModalTitleText = Strings.Get("UpdateModalTitle");
-        UpdateModalIntroText = string.Format(Strings.Get("UpdateModalIntro"), version);
+        UpdateModalIntroText = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("UpdateModalIntro"), version);
 
         // Yeni sürümün notları güncelleme beslemesinden gelir (yayın akışı CHANGELOG bölümünü paket notu yapar).
         // Gömülü CHANGELOG yalnız kurulu sürümü bilir; yeni sürüm orada yoksa eski notları göstermek yerine liste boş kalır.
@@ -2045,7 +2051,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [RelayCommand]
     public void OpenWhatsNewOverlay()
     {
-        WhatsNewTitleText = string.Format(Strings.Get("WhatsNewTitle"), AppVersion);
+        WhatsNewTitleText = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("WhatsNewTitle"), AppVersion);
         var release = ChangelogParser.ResolveEmbedded(AppVersion, Language)
                       ?? ChangelogParser.ParseLatest(ChangelogParser.ReadEmbeddedChangelog(Language), Language);
 
@@ -2074,6 +2080,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     public void OpenGitHub()
     {
         try
@@ -2090,14 +2097,17 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     public void OpenWebsite() => OpenExternal("https://koyhq.github.io/koy");
 
     /// <summary>Esin kaynağı: Nectar (kod ya da görsel alınmadı, yalnız teşekkür).</summary>
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     public void OpenNectar() => OpenExternal("https://github.com/kua8/Nectar");
 
     /// <summary>Esin kaynağı: Seelen UI.</summary>
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     public void OpenSeelenUi() => OpenExternal("https://github.com/eythaann/Seelen-UI");
 
     private static void OpenExternal(string url)
@@ -2113,6 +2123,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     /// <summary>Hava durumu verisinin kaynağı (Open-Meteo, CC BY 4.0 atfı).</summary>
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     public void OpenOpenMeteo()
     {
         try
@@ -2130,6 +2141,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     /// <summary>Cihaz konumunun yer adı kaynağı (OpenStreetMap Nominatim, ODbL atfı).</summary>
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     public void OpenOpenStreetMap()
     {
         try
@@ -2146,6 +2158,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     public void ExitApp()
     {
         TaskbarService.Restore();

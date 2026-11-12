@@ -79,7 +79,7 @@ public sealed partial class WeatherLocationViewModel : ObservableObject
 
         return s.Weather.LocationSource == WeatherLocationSource.Device
             ? Strings.Get("WeatherStatusDevice")
-            : string.Format(Strings.Get("WeatherStatusCity"), s.Weather.City);
+            : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("WeatherStatusCity"), s.Weather.City);
     }
 
     partial void OnUseLocationChanged(bool value)
@@ -201,6 +201,7 @@ public sealed partial class WeatherLocationViewModel : ObservableObject
     }
 
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     private void OpenLocationSettings()
     {
         try

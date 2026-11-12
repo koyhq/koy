@@ -59,7 +59,7 @@ internal static unsafe class WlanProfiles
         finally
         {
             if (client != default)
-                PInvoke.WlanCloseHandle(client, null);
+                _ = PInvoke.WlanCloseHandle(client, null);
         }
 
         return names;

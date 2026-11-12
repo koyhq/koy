@@ -280,6 +280,6 @@ public class DockItemRulesTests
         Assert.Equal(pinned.Take(DockItemRules.MaxItemCount), result.Select(r => r.Id));
     }
 
-    private static IReadOnlyList<DockItemSpec> Specs(params string[] ids) =>
+    private static List<DockItemSpec> Specs(params string[] ids) =>
         ids.Select(id => new DockItemSpec(DockItemKind.App, id, "")).ToList();
 }

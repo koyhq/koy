@@ -24,7 +24,7 @@ public sealed partial class RuleItemViewModel(RulesViewModel owner, int index, R
         ? process + ".exe"
         : (draft.Name ?? "") + " (" + Strings.Get("RulesAdvancedRule") + ")";
 
-    public string ProfileText { get; } = string.Format(Strings.Get("RulesUsesProfile"), profileName);
+    public string ProfileText { get; } = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("RulesUsesProfile"), profileName);
 
     public bool IsEnabled
     {

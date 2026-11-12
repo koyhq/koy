@@ -51,7 +51,7 @@ public static class Program
     }
 }
 
-public partial class App : Application
+public partial class App : Application, IDisposable
 {
     private readonly List<IFeature> _features = [];
     private TrayIconManager? _trayIconManager;
@@ -501,6 +501,20 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        Dispose();
+
+        Koy.App.Features.Rules.ContextRuleService.Instance.Stop();
+
+        foreach (var feature in _features)
+            feature.Stop();
+
+        TaskbarService.Restore();
+        AppUninstaller.CleanAfterExit();
+        base.OnExit(e);
+    }
+
+    public void Dispose()
+    {
         _shortcuts?.Dispose();
         _shortcuts = null;
 
@@ -510,15 +524,7 @@ public partial class App : Application
         _trayIconManager?.Dispose();
         _trayIconManager = null;
 
-        Koy.App.Features.Rules.ContextRuleService.Instance.Stop();
-
-        foreach (var feature in _features)
-            feature.Stop();
-
         _services.Dispose();
-
-        TaskbarService.Restore();
-        AppUninstaller.CleanAfterExit();
-        base.OnExit(e);
+        GC.SuppressFinalize(this);
     }
 }

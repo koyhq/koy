@@ -164,7 +164,7 @@ public class LiveBackgroundPolicyTests
     [Fact]
     public void AllowedExtensions_are_exactly_the_four_formats()
     {
-        Assert.Equal(new[] { ".gif", ".mp4", ".webm", ".webp" }, LiveBackgroundFileValidator.AllowedExtensions);
+        Assert.Equal([".gif", ".mp4", ".webm", ".webp"], LiveBackgroundFileValidator.AllowedExtensions);
         Assert.Equal("*.gif;*.mp4;*.webm;*.webp", LiveBackgroundFileValidator.DialogPattern);
     }
 

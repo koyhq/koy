@@ -151,6 +151,7 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
 
     /// <summary>Konum seçilmemişse Koy penceresinin Çentik sayfası açılır (hava konumu orada seçilir).</summary>
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     private void ChooseWeatherLocation() => KoyWindow.ShowInstance(1);
 
     public void Dispose()

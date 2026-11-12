@@ -20,7 +20,7 @@ internal sealed class DockAppIcons
 
     private readonly IconPack _pack;
     private readonly string _folder;
-    private readonly IReadOnlyDictionary<string, string> _overrides;
+    private readonly ValueDictionary<string> _overrides;
     private readonly Dictionary<string, ImageSource?> _loaded = new(StringComparer.OrdinalIgnoreCase);
     private string[]? _packFiles;
 

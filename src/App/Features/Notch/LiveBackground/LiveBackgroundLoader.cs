@@ -126,7 +126,7 @@ internal static class LiveBackgroundLoader
     }
 
     /// <summary>Altlık + (varsa) yeni parça tek bitmap'te; <paramref name="clear"/> alanı altlıktan silinir. Sonuç dondurulur.</summary>
-    private static BitmapSource Render(BitmapSource? under, BitmapSource? over, Rect overRect, Rect? clear, int width, int height)
+    private static RenderTargetBitmap Render(BitmapSource? under, BitmapSource? over, Rect overRect, Rect? clear, int width, int height)
     {
         var full = new Rect(0, 0, width, height);
         var visual = new DrawingVisual();
@@ -186,7 +186,7 @@ internal static class LiveBackgroundLoader
     {
         try
         {
-            return meta?.GetQuery(query) is { } value ? Convert.ToInt32(value) : fallback;
+            return meta?.GetQuery(query) is { } value ? Convert.ToInt32(value, System.Globalization.CultureInfo.InvariantCulture) : fallback;
         }
         catch (Exception ex) when (ex is ArgumentException or NotSupportedException or InvalidCastException or FormatException or OverflowException)
         {

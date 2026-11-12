@@ -134,7 +134,7 @@ internal static class DockFolderSnapshots
         renderElement(body, 280, 0, Path.Combine(outDir, $"{prefix}-{theme}-dock-klasor-panel.png"));
     }
 
-    private static FrameworkElement BuildDockItemBox(DockFolderViewModel vm)
+    private static System.Windows.Controls.Border BuildDockItemBox(DockFolderViewModel vm)
     {
         var box = new Border
         {
@@ -216,7 +216,7 @@ internal static class DockFolderSnapshots
         return capsule;
     }
 
-    private static FrameworkElement BuildDockStrip(params DockEntryViewModel[] entries)
+    private static System.Windows.Controls.Border BuildDockStrip(params DockEntryViewModel[] entries)
     {
         var capsule = new Border
         {

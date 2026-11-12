@@ -357,7 +357,7 @@ public class UserStyleOverridesTests
     {
         var sb = new StringBuilder("{");
         for (var i = 0; i < UserStyleParser.MaxEntries + 50; i++)
-            sb.Append($"\"k{i}\":\"#000000\",");
+            sb.Append(System.Globalization.CultureInfo.InvariantCulture, $"\"k{i}\":\"#000000\",");
         sb.Append("\"KoyAccent\":\"#112233\"}");
 
         var r = Parse(sb.ToString());
@@ -372,7 +372,7 @@ public class UserStyleOverridesTests
     {
         var sb = new StringBuilder("{");
         for (var i = 0; i < 300; i++)
-            sb.Append($"\"bad{i}\":\"x\",");
+            sb.Append(System.Globalization.CultureInfo.InvariantCulture, $"\"bad{i}\":\"x\",");
         sb.Length--;
         sb.Append('}');
 
@@ -672,8 +672,10 @@ public class UserStyleOverridesTests
 
     // --- Mağaza tema paketleri ---
 
+    private static readonly string[] StoreThemeIds = ["koyhq.nord-theme", "koyhq.solarized-theme", "koyhq.high-contrast-theme"];
+
     public static IEnumerable<object[]> StoreThemes() =>
-        new[] { "koyhq.nord-theme", "koyhq.solarized-theme", "koyhq.high-contrast-theme" }.Select(id => new object[] { id });
+        StoreThemeIds.Select(id => new object[] { id });
 
     [Theory]
     [MemberData(nameof(StoreThemes))]

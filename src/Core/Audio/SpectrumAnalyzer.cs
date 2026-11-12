@@ -32,8 +32,7 @@ public sealed class SpectrumAnalyzer
 
     public SpectrumAnalyzer(int bandCount)
     {
-        if (bandCount <= 0)
-            throw new ArgumentOutOfRangeException(nameof(bandCount));
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(bandCount);
 
         _levels = new float[bandCount];
         for (var i = 0; i < FftSize; i++)

@@ -166,7 +166,7 @@ public sealed class BrightnessService : IBrightnessService
             {
                 if (mo["CurrentBrightness"] is { } val)
                 {
-                    value = Convert.ToInt32(val);
+                    value = Convert.ToInt32(val, System.Globalization.CultureInfo.InvariantCulture);
                     return true;
                 }
             }
@@ -287,7 +287,7 @@ public sealed class BrightnessService : IBrightnessService
     {
         try
         {
-            var value = Convert.ToInt32(e.NewEvent["Brightness"]);
+            var value = Convert.ToInt32(e.NewEvent[nameof(Brightness)], System.Globalization.CultureInfo.InvariantCulture);
             lock (_sync)
             {
                 if (value == _brightness)

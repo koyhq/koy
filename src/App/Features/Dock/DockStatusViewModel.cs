@@ -56,6 +56,7 @@ public sealed partial class DockStatusViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private string _dateText = string.Empty;
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "XAML binding")]
     public string NotificationsGlyph => TrayGlyphs.Notifications;
 
     public DockStatusViewModel(

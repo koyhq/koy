@@ -47,7 +47,7 @@ public sealed partial class ShelfViewModel : ObservableObject, IDisposable
             Items.Add(item);
         }
         IsEmpty = Items.Count == 0;
-        CountText = string.Format(Koy.App.Resources.Strings.Get("ShelfCount"), Items.Count);
+        CountText = string.Format(System.Globalization.CultureInfo.CurrentCulture, Koy.App.Resources.Strings.Get("ShelfCount"), Items.Count);
     }
 
     [RelayCommand]
@@ -63,6 +63,7 @@ public sealed partial class ShelfViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     private void OpenItem(ShelfItem item)
     {
         if (item.Kind is ShelfItemKind.File or ShelfItemKind.Directory)

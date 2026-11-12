@@ -452,7 +452,7 @@ public static class AdvancedSettings
         _ => value.ToString() ?? "",
     };
 
-    private static JsonNode? ToNode(AdvancedSettingKind kind, Type type, string text)
+    private static System.Text.Json.Nodes.JsonValue? ToNode(AdvancedSettingKind kind, Type type, string text)
     {
         switch (kind)
         {

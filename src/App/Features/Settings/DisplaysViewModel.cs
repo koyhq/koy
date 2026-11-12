@@ -199,6 +199,7 @@ public sealed partial class DisplaysViewModel(SettingsStore store) : ObservableO
 
     /// <summary>"Ekranları tanımla": her monitörde 2 saniye ekran numarası.</summary>
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     private void Identify()
     {
         // Şema yenilenmemiş olabilir (ekran yeni takıldı); güncel liste okunur.

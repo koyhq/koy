@@ -55,7 +55,7 @@ public sealed class SharedServices : IDisposable
     private TaskService? _tasks;
     private QuickLaunchService? _quickLaunch;
     private readonly object _powerLock = new();
-    private IPowerService? _powerService;
+    private PowerService? _powerService;
     private int _powerServiceUsers;
     private WinRtNotificationListener? _notifications;
     private int _notificationsUsers;
@@ -241,7 +241,7 @@ public sealed class SharedServices : IDisposable
 
     public void ReleasePowerService()
     {
-        IPowerService? toDispose = null;
+        PowerService? toDispose = null;
         lock (_powerLock)
         {
             if (_powerServiceUsers == 0)

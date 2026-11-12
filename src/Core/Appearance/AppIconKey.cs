@@ -8,7 +8,11 @@ public static class AppIconKey
 {
     /// <param name="appUserModelId">Dock öğesinin AUMID'i; yoksa null.</param>
     /// <param name="itemId">Dock öğesi kimliği (kısayol dosya adı ya da yolu).</param>
-    public static string? For(string? appUserModelId, string? itemId) => All(appUserModelId, itemId).FirstOrDefault();
+    public static string? For(string? appUserModelId, string? itemId)
+    {
+        var all = All(appUserModelId, itemId);
+        return all.Count > 0 ? all[0] : null;
+    }
 
     /// <summary>
     /// Öğenin bütün geçerli anahtarları, tercih sırasıyla (AUMID, kısayol adı). Sabitli bir uygulamanın AUMID'i yalnız

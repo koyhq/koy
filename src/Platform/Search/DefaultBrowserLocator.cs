@@ -10,15 +10,15 @@ namespace Koy.Platform.Search;
 /// </summary>
 public static class DefaultBrowserLocator
 {
-    private const string UserChoice = @"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\{0}\UserChoice";
+    private static readonly string[] Schemes = ["https", "http"];
 
     public static DefaultBrowser? Find()
     {
         try
         {
-            foreach (var scheme in new[] { "https", "http" })
+            foreach (var scheme in Schemes)
             {
-                using var choice = Registry.CurrentUser.OpenSubKey(string.Format(UserChoice, scheme));
+                using var choice = Registry.CurrentUser.OpenSubKey($@"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\{scheme}\UserChoice");
                 if (choice?.GetValue("ProgId") is not string { Length: > 0 } progId)
                     continue;
 

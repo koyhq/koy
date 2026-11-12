@@ -6,8 +6,16 @@ using Koy.App.Resources;
 
 namespace Koy.App.Features.Settings;
 
-public partial class KoyWindow : Window
+public partial class KoyWindow : Window, IDisposable
 {
+    public void Dispose()
+    {
+        _settingsWatcher?.Dispose();
+        _settingsWatcher = null;
+        _userStyleWatcher?.Dispose();
+        _userStyleWatcher = null;
+        GC.SuppressFinalize(this);
+    }
     private static KoyWindow? _instance;
 
     public static KoyWindow Instance => _instance ??= new KoyWindow();
@@ -259,7 +267,7 @@ public partial class KoyWindow : Window
         return false;
     }
 
-    private bool HasChangedSettingsOnPage(int pageIndex, ISet<string> changed)
+    private bool HasChangedSettingsOnPage(int pageIndex, HashSet<string> changed)
     {
         if (pageIndex < 0 || pageIndex >= PagesHost.Children.Count)
             return false;

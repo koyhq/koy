@@ -44,8 +44,7 @@ public sealed class FullscreenDetector : IFullscreenDetector
                 return true;
 
             uint pid = 0;
-            PInvoke.GetWindowThreadProcessId(hwnd, &pid);
-            if (pid == ownPid)
+            if (PInvoke.GetWindowThreadProcessId(hwnd, &pid) == 0 || pid == ownPid)
                 return true;
 
             // Gizlenmiş (cloaked) UWP/başka sanal masaüstü pencereleri görünür sayılmaz.
@@ -186,7 +185,7 @@ public sealed class FullscreenDetector : IFullscreenDetector
         }
 
         uint pid = 0;
-        PInvoke.GetWindowThreadProcessId(hwnd, &pid);
+        _ = PInvoke.GetWindowThreadProcessId(hwnd, &pid);
         if (pid != 0)
         {
             try

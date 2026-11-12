@@ -34,6 +34,11 @@ public readonly record struct ExtensionVersion(int Major, int Minor, int Patch) 
         return minor != 0 ? minor : Patch.CompareTo(other.Patch);
     }
 
+    public static bool operator <(ExtensionVersion left, ExtensionVersion right) => left.CompareTo(right) < 0;
+    public static bool operator <=(ExtensionVersion left, ExtensionVersion right) => left.CompareTo(right) <= 0;
+    public static bool operator >(ExtensionVersion left, ExtensionVersion right) => left.CompareTo(right) > 0;
+    public static bool operator >=(ExtensionVersion left, ExtensionVersion right) => left.CompareTo(right) >= 0;
+
     /// <summary>
     /// İki metni karşılaştırır. Geçersiz sürüm her zaman geçerliden küçük sayılır; ikisi de geçersizse eşittir.
     /// </summary>

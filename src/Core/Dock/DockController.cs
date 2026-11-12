@@ -138,10 +138,10 @@ public sealed class DockController : IDisposable
 
         var unpinnedGroups = shouldGroup
             ? remainingWindows
-                .GroupBy(w => !string.IsNullOrEmpty(w.ProcessPath) ? w.ProcessPath : w.ProcessId.ToString())
+                .GroupBy(w => !string.IsNullOrEmpty(w.ProcessPath) ? w.ProcessPath : w.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture))
                 .ToList()
             : remainingWindows
-                .GroupBy(w => $"{w.ProcessPath ?? w.ProcessId.ToString()}:{w.Handle}")
+                .GroupBy(w => $"{w.ProcessPath ?? w.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture)}:{w.Handle}")
                 .ToList();
 
         var activeKeys = new HashSet<string>(unpinnedGroups.Select(g => g.Key), StringComparer.OrdinalIgnoreCase);

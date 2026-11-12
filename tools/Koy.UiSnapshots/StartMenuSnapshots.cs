@@ -45,7 +45,7 @@ internal static class StartMenuSnapshots
         renderElement(BuildWithSubmenu(), 560, 0, Path_("baslat-menu-altmenu"));
     }
 
-    private static FrameworkElement BuildWithSubmenu()
+    private static System.Windows.Controls.Grid BuildWithSubmenu()
     {
         var groups = StartMenuModel.Build(hasBattery: true);
         var parent = groups.SelectMany(g => g.Items).Single(i => i.Kind == StartMenuActionKind.Submenu);

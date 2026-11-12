@@ -22,7 +22,7 @@ public static class SearchFactory
 
     private static string T(string key) => Strings.Get(key);
 
-    private static IReadOnlyList<string> Keywords(string key) => T(key).Split(';', StringSplitOptions.RemoveEmptyEntries);
+    private static string[] Keywords(string key) => T(key).Split(';', StringSplitOptions.RemoveEmptyEntries);
 
     /// <summary>Ayarlar sayfasındaki anahtarlar için: kimlik ve ad.</summary>
     public static IReadOnlyList<(string Id, string Name)> SourceCatalog { get; } =
@@ -133,7 +133,7 @@ public static class SearchFactory
         web = new WebShortcutSearchSource(WebShortcutSearchSource.Defaults, shell, T, Koy.Platform.Search.DefaultBrowserLocator.Find)
         {
             Syntaxes = WebShortcutSearchSource.Defaults
-                .Select(s => new SearchSyntax(s.Key + ":" + T("SearchExampleWeb"), string.Format(T("SearchSyntaxWeb"), s.Provider)))
+                .Select(s => new SearchSyntax(s.Key + ":" + T("SearchExampleWeb"), string.Format(System.Globalization.CultureInfo.CurrentCulture, T("SearchSyntaxWeb"), s.Provider)))
                 .Append(new SearchSyntax("!gg " + T("SearchExampleWeb"), T("SearchSyntaxWebBang")))
                 .ToList()
         };
@@ -191,7 +191,7 @@ public static class SearchFactory
         new(SystemCommand.Shutdown, T("SearchCmdShutdown"), Keywords("SearchKwShutdown"))
     ];
 
-    private static IReadOnlyList<string> RecentDocuments() =>
+    private static List<string> RecentDocuments() =>
         new RecentFilesService().GetRecent(MaxRecentDocuments).Select(f => f.OpenPath).ToList();
 
     private static void CopyText(string text)

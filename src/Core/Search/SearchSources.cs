@@ -10,9 +10,10 @@ public sealed class AppSearchSource(
     IInstalledAppsService service,
     Action<InstalledApp> launch,
     Func<string, string> t,
-    Func<InstalledApp, byte[]?>? loadIcon = null) : SearchSource("apps", t("SearchCatApps"))
+    Func<InstalledApp, byte[]?>? loadIcon = null) : SearchSource("apps", t("SearchCatApps")), IDisposable
 {
     private const double SecondaryKeyWeight = 0.6;
+    private static readonly string[] IgnoredExtensions = [".txt", ".pdf", ".htm", ".html", ".chm", ".rtf"];
 
     private sealed record Entry(InstalledApp App, string Name, string Key);
 
@@ -31,8 +32,11 @@ public sealed class AppSearchSource(
     public override void Release()
     {
         _loading?.Cancel();
+        _loading?.Dispose();
         _loading = null;
     }
+
+    public void Dispose() => Release();
 
     public override IEnumerable<SearchResult> Search(SearchQuery query)
     {
@@ -64,7 +68,7 @@ public sealed class AppSearchSource(
         if (name.Contains("uninstall", StringComparison.Ordinal) || name.Contains("kaldir", StringComparison.Ordinal))
             return false;
 
-        return !new[] { ".txt", ".pdf", ".htm", ".html", ".chm", ".rtf" }.Any(e => app.Id.EndsWith(e, StringComparison.OrdinalIgnoreCase));
+        return !IgnoredExtensions.Any(e => app.Id.EndsWith(e, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
@@ -285,7 +289,7 @@ public sealed class DateTimeSearchSource(ISearchShell shell, Func<string, string
             yield return Row("time", _now().ToString("T", _culture));
     }
 
-    private IEnumerable<string> Keywords(string key) => t(key).Split(';', StringSplitOptions.RemoveEmptyEntries).Select(SearchText.Fold).ToList();
+    private List<string> Keywords(string key) => t(key).Split(';', StringSplitOptions.RemoveEmptyEntries).Select(SearchText.Fold).ToList();
 
     private SearchResult Row(string id, string text) => new("datetime:" + id, Name, text, () => shell.CopyText(text))
     {
@@ -327,7 +331,7 @@ public sealed class HelpSearchSource(Func<IReadOnlyList<ISearchSource>> sources,
         }).ToList();
     }
 
-    private IEnumerable<SearchResult> Extended(ISearchSource source) => source.Syntaxes.Select((syntax, index) =>
+    private static IEnumerable<SearchResult> Extended(ISearchSource source) => source.Syntaxes.Select((syntax, index) =>
         new SearchResult("help:" + source.Id + ":" + index, source.Name, syntax.Example, () => { })
         {
             Subtitle = syntax.Description,

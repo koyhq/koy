@@ -11,7 +11,7 @@ namespace Koy.Platform.Extensions;
 /// akışla geçici dosyaya indirir (25 MB bellekte tutulmaz), SHA256'yı doğrular ve açma/kurma işini Core'daki
 /// <see cref="ExtensionPackageInstaller"/>'a verir. Hata fırlatmaz, hata kodu döner. Kurulumlar tek sıradadır.
 /// </summary>
-public sealed class ExtensionStoreClient : IExtensionStoreClient
+public sealed class ExtensionStoreClient : IExtensionStoreClient, IDisposable
 {
     public const string IndexUrl = "https://raw.githubusercontent.com/koyhq/koy/main/store/index.json";
 
@@ -25,6 +25,8 @@ public sealed class ExtensionStoreClient : IExtensionStoreClient
     private readonly string _indexUrl;
     private readonly ExtensionPackageInstaller _installer;
     private readonly SemaphoreSlim _installGate = new(1, 1);
+
+    public void Dispose() => _installGate.Dispose();
 
     public ExtensionStoreClient(
         InstalledRegistryStore? registry = null, string? extensionsFolder = null, HttpClient? http = null, string? indexUrl = null)

@@ -105,31 +105,31 @@ public class LegacyValueMigrationTests
     [InlineData(2, IdleDisplayMode.Nothing)]
     [InlineData(3, IdleDisplayMode.RingClockDay)]
     public void Idle_display_ints(int stored, IdleDisplayMode expected) =>
-        Assert.Equal(expected, LoadWith("IdleDisplayMode", stored.ToString()).Notch.IdleDisplay);
+        Assert.Equal(expected, LoadWith("IdleDisplayMode", stored.ToString(System.Globalization.CultureInfo.InvariantCulture)).Notch.IdleDisplay);
 
     [Theory]
     [InlineData(0, NotchOpenBehavior.Hover)]
     [InlineData(1, NotchOpenBehavior.Click)]
     public void Open_behavior_ints(int stored, NotchOpenBehavior expected) =>
-        Assert.Equal(expected, LoadWith("NotchOpenBehavior", stored.ToString()).Notch.OpenBehavior);
+        Assert.Equal(expected, LoadWith("NotchOpenBehavior", stored.ToString(System.Globalization.CultureInfo.InvariantCulture)).Notch.OpenBehavior);
 
     [Theory]
     [InlineData(0, WheelAction.SwitchPanel)]
     [InlineData(1, WheelAction.Volume)]
     public void Wheel_action_ints(int stored, WheelAction expected) =>
-        Assert.Equal(expected, LoadWith("WheelAction", stored.ToString()).Notch.WheelAction);
+        Assert.Equal(expected, LoadWith("WheelAction", stored.ToString(System.Globalization.CultureInfo.InvariantCulture)).Notch.WheelAction);
 
     [Theory]
     [InlineData(0, MiddleClickAction.NewWindow)]
     [InlineData(1, MiddleClickAction.Close)]
     public void Middle_click_ints(int stored, MiddleClickAction expected) =>
-        Assert.Equal(expected, LoadWith("MiddleClickAction", stored.ToString()).Dock.MiddleClickAction);
+        Assert.Equal(expected, LoadWith("MiddleClickAction", stored.ToString(System.Globalization.CultureInfo.InvariantCulture)).Dock.MiddleClickAction);
 
     [Theory]
     [InlineData(0, DockIndicatorStyle.Dot)]
     [InlineData(1, DockIndicatorStyle.Line)]
     public void Dock_indicator_ints(int stored, DockIndicatorStyle expected) =>
-        Assert.Equal(expected, LoadWith("DockIndicatorStyle", stored.ToString()).Dock.IndicatorStyle);
+        Assert.Equal(expected, LoadWith("DockIndicatorStyle", stored.ToString(System.Globalization.CultureInfo.InvariantCulture)).Dock.IndicatorStyle);
 
     [Fact]
     public void An_unknown_value_resets_only_its_own_field_and_keeps_the_rest_of_the_file()

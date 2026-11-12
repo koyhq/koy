@@ -54,7 +54,7 @@ public sealed class KoyIcon : Control
 
     protected override Size MeasureOverride(Size constraint) => new(Size, Size);
 
-    protected override void OnRender(DrawingContext dc)
+    protected override void OnRender(DrawingContext drawingContext)
     {
         if (Data is null || Foreground is null)
             return;
@@ -66,8 +66,8 @@ public sealed class KoyIcon : Control
             EndLineCap = PenLineCap.Round,
             LineJoin = PenLineJoin.Round
         };
-        dc.PushTransform(new ScaleTransform(scale, scale));
-        dc.DrawGeometry(null, pen, Data);
-        dc.Pop();
+        drawingContext.PushTransform(new ScaleTransform(scale, scale));
+        drawingContext.DrawGeometry(null, pen, Data);
+        drawingContext.Pop();
     }
 }
