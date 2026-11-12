@@ -31,7 +31,7 @@ public static class SettingsKeyMap
         }
 
         Add("General", "Language", "FirstRunCompleted", "LastSeenVersion", "AutoCheckUpdates", "UpdateChannel",
-            "TemperatureUnit", "WindSpeedUnit", "NetworkSpeedUnit");
+            "TemperatureUnit", "WindSpeedUnit", "NetworkSpeedUnit", "DeveloperMode");
         Add("Appearance", "Theme", "AccentColor", "UseWindowsAccent", "CornerRadius", "AnimationSpeed",
             "RespectReduceMotion", "BatterySaverReduceMotion", "Material", "MaterialReadabilityGuard");
         Add("Dock", "DockEnabled=Enabled", "HideWindowsTaskbar", "DockVisibility=Visibility", "DockStyle=Style",

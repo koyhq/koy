@@ -96,4 +96,88 @@ public class AdvancedSettingsTests
         Assert.Equal(AdvancedSettingError.None, AdvancedSettings.Reset(changed, "Appearance.UiScalePercent", out var reset));
         Assert.Equal(new AppSettings().Appearance.UiScalePercent, reset.Appearance.UiScalePercent);
     }
+
+    [Fact]
+    public void AdvancedSetting_populates_section_and_property_name_correctly()
+    {
+        var rows = AdvancedSettings.List(new AppSettings(), []);
+        var fontRow = rows.Single(r => r.Key == "Appearance.BaseFontSize");
+
+        Assert.Equal("Appearance", fontRow.Section);
+        Assert.Equal("BaseFontSize", fontRow.PropertyName);
+        Assert.Equal("Taban Yazı Boyutu", fontRow.GetFriendlyTitle("tr"));
+        Assert.Equal("Base Font Size", fontRow.GetFriendlyTitle("en"));
+        Assert.Equal("Görünüm", fontRow.GetSectionTitle("tr"));
+        Assert.Equal("Appearance", fontRow.GetSectionTitle("en"));
+    }
+
+    [Theory]
+    [InlineData("Appearance", "Görünüm", "Appearance")]
+    [InlineData("Dock", "Dock", "Dock")]
+    [InlineData("Notch", "Çentik", "Notch")]
+    [InlineData("Music", "Müzik", "Music")]
+    [InlineData("General", "Genel", "General")]
+    public void Section_titles_match_expected_translations(string section, string expectedTr, string expectedEn)
+    {
+        Assert.Equal(expectedTr, AdvancedSettings.GetSectionTitle(section, "tr"));
+        Assert.Equal(expectedEn, AdvancedSettings.GetSectionTitle(section, "en"));
+    }
+
+    [Theory]
+    [InlineData("BaseFontSize", "Taban Yazı Boyutu", "Base Font Size")]
+    [InlineData("ClockFontFamily", "Saat Yazı Tipi", "Clock Font")]
+    [InlineData("FontFamily", "Yazı Tipi Ailesi", "Font Family")]
+    [InlineData("FontWeight", "Yazı Kalınlığı", "Font Weight")]
+    [InlineData("IconPack", "Simge Paketi", "Icon Pack")]
+    [InlineData("IconPackFolder", "Simge Paketi Klasörü", "Icon Pack Folder")]
+    [InlineData("UiScalePercent", "Arayüz Ölçeği (%)", "UI Scale (%)")]
+    [InlineData("UserStyleOverridesEnabled", "Kullanıcı Stil Dosyası", "User Style Overrides")]
+    [InlineData("DeveloperMode", "Geliştirici Modu", "Developer Mode")]
+    public void Property_titles_match_expected_translations(string propertyName, string expectedTr, string expectedEn)
+    {
+        Assert.Equal(expectedTr, AdvancedSettings.GetFriendlyTitle(propertyName, "tr"));
+        Assert.Equal(expectedEn, AdvancedSettings.GetFriendlyTitle(propertyName, "en"));
+        // Also supports full key format e.g. "Appearance.BaseFontSize"
+        Assert.Equal(expectedTr, AdvancedSettings.GetFriendlyTitle($"Section.{propertyName}", "tr"));
+    }
+
+    [Theory]
+    [InlineData("SomeFutureCustomSetting", "Some Future Custom Setting")]
+    [InlineData("EnableFastRenderingMode", "Enable Fast Rendering Mode")]
+    [InlineData("Simple", "Simple")]
+    public void Fallback_formatter_splits_pascal_case_into_words(string input, string expected)
+    {
+        Assert.Equal(expected, AdvancedSettings.SplitPascalCase(input));
+        // When untranslated, GetFriendlyTitle falls back to SplitPascalCase
+        Assert.Equal(expected, AdvancedSettings.GetFriendlyTitle(input, "tr"));
+        Assert.Equal(expected, AdvancedSettings.GetFriendlyTitle(input, "en"));
+    }
+
+    [Fact]
+    public void GroupBySection_and_ListGrouped_organize_items_by_section()
+    {
+        var groups = AdvancedSettings.ListGrouped(new AppSettings(), [], "tr");
+
+        Assert.NotEmpty(groups);
+        var appearanceGroup = groups.FirstOrDefault(g => g.Section == "Appearance");
+        Assert.NotNull(appearanceGroup);
+        Assert.Equal("Görünüm", appearanceGroup.Title);
+        Assert.Equal("Görünüm", appearanceGroup.SectionTitle);
+        Assert.Contains(appearanceGroup.Items, i => i.PropertyName == "BaseFontSize");
+    }
+
+    [Fact]
+    public void DeveloperMode_setting_defaults_to_false_and_is_mapped_in_settings_key_map()
+    {
+        var general = new GeneralSettings();
+        Assert.False(general.DeveloperMode);
+
+        general.DeveloperMode = true;
+        Assert.True(general.DeveloperMode);
+
+        Assert.True(SettingsKeyMap.V3ToV4.ContainsKey("DeveloperMode"));
+        var (section, name) = SettingsKeyMap.V3ToV4["DeveloperMode"];
+        Assert.Equal("General", section);
+        Assert.Equal("DeveloperMode", name);
+    }
 }
