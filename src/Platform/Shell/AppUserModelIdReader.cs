@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.System.Threading;
 using Windows.Win32.UI.Shell.PropertiesSystem;
 
 namespace Koy.Platform.Shell;
@@ -35,6 +36,37 @@ internal static class AppUserModelIdReader
             {
                 Marshal.ReleaseComObject(store);
             }
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Paketli (MSIX / Mağaza) sürecin uygulama kimliği. Bu uygulamalar pencereye değil pakete AUMID verir
+    /// (<c>Aile_yayıncı!Uygulama</c>). Paketsiz süreçte APPMODEL_ERROR_NO_APPLICATION döner: null.
+    /// </summary>
+    public static unsafe string? ForProcess(uint pid)
+    {
+        if (pid == 0)
+            return null;
+
+        try
+        {
+            using var process = PInvoke.OpenProcess_SafeHandle(PROCESS_ACCESS_RIGHTS.PROCESS_QUERY_LIMITED_INFORMATION, false, pid);
+            if (process.IsInvalid)
+                return null;
+
+            Span<char> buffer = stackalloc char[130]; // APPLICATION_USER_MODEL_ID_MAX_LENGTH = 130
+            var length = (uint)buffer.Length;
+            fixed (char* p = buffer)
+            {
+                if (PInvoke.GetApplicationUserModelId(process, ref length, p) != WIN32_ERROR.ERROR_SUCCESS || length < 2)
+                    return null;
+            }
+
+            return buffer[..(int)(length - 1)].ToString(); // sondaki NUL hariç
         }
         catch
         {

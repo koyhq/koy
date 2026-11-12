@@ -14,7 +14,8 @@
         SizeToContent="WidthAndHeight"
         ResizeMode="NoResize"
         MouseEnter="OnWindowMouseEnter"
-        MouseLeave="OnWindowMouseLeave">
+        MouseLeave="OnWindowMouseLeave"
+        ContextMenuOpening="OnWindowContextMenuOpening">
 
     <Window.ContextMenu>
         <ContextMenu>

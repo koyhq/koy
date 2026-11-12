@@ -271,7 +271,7 @@ public sealed class WindowTracker : IWindowTracker
                 pid = ResolveUwpProcessId(hwnd, pid);
 
             // AUMID: Windows görev çubuğu düğmeleri bununla gruplar; sabitli kısayolla eşleşmede önce o kullanılır.
-            var aumid = GetAppUserModelId(hwnd);
+            var aumid = GetAppUserModelId(hwnd, pid);
 
             var procPath = GetProcessPath(pid);
 
@@ -539,7 +539,7 @@ public sealed class WindowTracker : IWindowTracker
     private readonly object _aumidGate = new();
     private static readonly TimeSpan EmptyAumidRetry = TimeSpan.FromSeconds(10);
 
-    private string? GetAppUserModelId(HWND hwnd)
+    private string? GetAppUserModelId(HWND hwnd, uint pid)
     {
         lock (_aumidGate)
         {
@@ -548,7 +548,8 @@ public sealed class WindowTracker : IWindowTracker
                 return cached.Value;
         }
 
-        var value = AppUserModelIdReader.ForWindow(hwnd);
+        // Paketli uygulamalar (Spotify, Claude…) pencereye değil pakete AUMID verir: süreçten oku.
+        var value = AppUserModelIdReader.ForWindow(hwnd) ?? AppUserModelIdReader.ForProcess(pid);
         lock (_aumidGate)
             _aumidCache[hwnd.Value] = (value, DateTime.UtcNow);
         return value;
