@@ -136,8 +136,8 @@ public static class StoreIndexParser
             || !TryString(element, "author", out var author)
             || !ExtensionManifestValidator.IsValidText(author, ExtensionManifestValidator.MaxAuthorLength)
             || !TryString(element, "license", out var license) || !StoreFieldRules.IsValidLicense(license)
-            || !TryString(element, "summary", out var summary)
-            || !StoreFieldRules.IsPlainText(summary, StoreFieldRules.MaxSummaryLength, allowNewlines: false, allowEmpty: false)
+            || !element.TryGetProperty("summary", out var summaryElement)
+            || !TryLocalized(summaryElement, StoreFieldRules.MaxSummaryLength, allowNewlines: false, allowEmpty: false, out var summary)
             || !TryString(element, "updated", out var updatedText)
             || !DateOnly.TryParseExact(updatedText, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var updated))
         {
@@ -145,11 +145,10 @@ public static class StoreIndexParser
         }
 
         // Uzun açıklama isteğe bağlı; var ama bozuksa öğe bozuktur.
-        var description = "";
-        if (element.TryGetProperty("description", out _))
+        var description = LocalizedText.Empty;
+        if (element.TryGetProperty("description", out var descriptionElement))
         {
-            if (!TryString(element, "description", out var text)
-                || !StoreFieldRules.IsPlainText(text, StoreFieldRules.MaxDescriptionLength, allowNewlines: true, allowEmpty: true))
+            if (!TryLocalized(descriptionElement, StoreFieldRules.MaxDescriptionLength, allowNewlines: true, allowEmpty: true, out var text))
             {
                 return false;
             }
@@ -197,6 +196,55 @@ public static class StoreIndexParser
         item = new StoreItem(
             id!, name!, kind, version!, author!, license!, summary!, description, homepage, updated, downloads,
             new StorePackage(packageUrl!, packageHash!.ToLowerInvariant(), size), preview);
+        return true;
+    }
+
+    /// <summary>En çok bu kadar dil (kötü niyetli dev nesne ayrıştırılmaz).</summary>
+    private const int MaxLanguages = 32;
+
+    // Düz metin ya da { "dil": "metin" } nesnesi. Nesne biçiminde "en" zorunlu; dil kodu iki küçük harf; her değer
+    // alanın düz metin kuralından geçer. Yinelenen dil ya da boş nesne bozuktur.
+    private static bool TryLocalized(JsonElement element, int maxLength, bool allowNewlines, bool allowEmpty, out LocalizedText? text)
+    {
+        text = null;
+        if (element.ValueKind == JsonValueKind.String)
+        {
+            var plain = element.GetString();
+            if (!StoreFieldRules.IsPlainText(plain, maxLength, allowNewlines, allowEmpty))
+            {
+                return false;
+            }
+
+            text = LocalizedText.Plain(plain!);
+            return true;
+        }
+
+        if (element.ValueKind != JsonValueKind.Object)
+        {
+            return false;
+        }
+
+        var values = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var property in element.EnumerateObject())
+        {
+            var code = property.Name;
+            if (values.Count >= MaxLanguages
+                || code.Length != 2 || !char.IsAsciiLetterLower(code[0]) || !char.IsAsciiLetterLower(code[1])
+                || property.Value.ValueKind != JsonValueKind.String
+                || property.Value.GetString() is not { } value
+                || !StoreFieldRules.IsPlainText(value, maxLength, allowNewlines, allowEmpty)
+                || !values.TryAdd(code, value))
+            {
+                return false;
+            }
+        }
+
+        if (!values.ContainsKey(LocalizedText.FallbackLanguage))
+        {
+            return false;
+        }
+
+        text = new LocalizedText(values);
         return true;
     }
 

@@ -281,7 +281,7 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject
 
     private void Rebuild()
     {
-        _state = _state with { Query = BuildQuery() };
+        _state = _state with { Query = BuildQuery(), Language = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName };
         var all = _state.Visible();
         var wanted = new List<StoreCardViewModel>();
         foreach (var view in all.Take(_displayCount))

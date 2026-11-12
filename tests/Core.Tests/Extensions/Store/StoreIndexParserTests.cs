@@ -18,7 +18,7 @@ public class StoreIndexParserTests
         Assert.Equal(ExtensionKind.Theme, item.Kind);
         Assert.Equal(7, item.Downloads);
         Assert.Equal(new DateOnly(2026, 11, 12), item.Updated);
-        Assert.Equal("a\nb", item.Description);
+        Assert.Equal("a\nb", item.Description.Resolve("en"));
         Assert.Equal(1234, item.Package.Size);
         Assert.Equal(new string('a', 64), item.Package.Sha256);
         Assert.Equal(new DateTimeOffset(2026, 11, 12, 0, 0, 0, TimeSpan.Zero), result.Index.Generated);
@@ -168,7 +168,7 @@ public class StoreIndexParserTests
         var result = StoreIndexParser.Parse(IndexJson(atLimit, over));
 
         Assert.Equal(1, result.SkippedItems);
-        Assert.Equal(2000, Assert.Single(result.Index!.Items).Description.Length);
+        Assert.Equal(2000, Assert.Single(result.Index!.Items).Description.Resolve("en").Length);
     }
 
     [Fact]

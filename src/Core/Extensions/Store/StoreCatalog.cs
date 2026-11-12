@@ -45,6 +45,7 @@ public sealed record StoreEntryView(
     ExtensionKind Kind,
     string Author,
     string Summary,
+    string Description,
     string License,
     string? AvailableVersion,
     string? InstalledVersion,
@@ -61,11 +62,13 @@ public sealed record StoreEntryView(
 /// Mağaza sayfasının girdileri: indeks (henüz çekilmediyse null), kurulu kayıt, işlemi süren kimlikler ve sorgu.
 /// Değişmez; <see cref="Visible"/> her çağrıda hesaplar (en çok 500 + 64 satır).
 /// </summary>
+/// <param name="Language">Özet ve açıklamanın gösterileceği iki harfli dil kodu (arayüz dili); metin yoksa "en".</param>
 public sealed record StoreListState(
     StoreIndex? Index,
     InstalledRegistry Registry,
     IReadOnlySet<string> BusyIds,
-    StoreQuery Query)
+    StoreQuery Query,
+    string Language = LocalizedText.FallbackLanguage)
 {
     public static StoreListState Initial { get; } = new(
         null, InstalledRegistry.Empty, new HashSet<string>(), new StoreQuery());
@@ -94,7 +97,7 @@ public static class StoreCatalog
             {
                 indexed.Add(item.Id);
                 var installed = state.Registry.Find(item.Id);
-                rows.Add(FromItem(item, installed, state.BusyIds.Contains(item.Id)));
+                rows.Add(FromItem(item, installed, state.BusyIds.Contains(item.Id), state.Language));
             }
         }
 
@@ -144,7 +147,7 @@ public static class StoreCatalog
         return ordered.ThenBy(r => r.Id, StringComparer.Ordinal).ToList().AsReadOnly();
     }
 
-    private static StoreEntryView FromItem(StoreItem item, InstalledEntry? installed, bool busy)
+    private static StoreEntryView FromItem(StoreItem item, InstalledEntry? installed, bool busy, string language)
     {
         // Aynı kimlik farklı türde ise güncelleme sayılmaz (kurulu olan başka bir şeydir).
         var hasUpdate = installed is not null
@@ -152,7 +155,7 @@ public static class StoreCatalog
             && ExtensionVersion.IsNewer(item.Version, installed.Version);
 
         return new StoreEntryView(
-            item.Id, item.Name, item.Kind, item.Author, item.Summary, item.License,
+            item.Id, item.Name, item.Kind, item.Author, item.Summary.Resolve(language), item.Description.Resolve(language), item.License,
             item.Version, installed?.Version,
             StatusOf(installed is not null, hasUpdate, busy),
             installed is not null, hasUpdate, installed?.Applied ?? false,
@@ -160,7 +163,7 @@ public static class StoreCatalog
     }
 
     private static StoreEntryView FromInstalledOnly(InstalledEntry entry, bool busy) => new(
-        entry.Id, entry.Name, entry.Kind, entry.Author, "", entry.License,
+        entry.Id, entry.Name, entry.Kind, entry.Author, "", "", entry.License,
         null, entry.Version,
         StatusOf(true, false, busy),
         true, false, entry.Applied,

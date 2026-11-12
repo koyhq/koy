@@ -162,7 +162,7 @@ public sealed partial class StoreCardViewModel : ObservableObject
         Summary = view.Summary.Length > 0 || view.Item is not null
             ? view.Summary
             : Strings.Get("ExtInstalledFromFile");
-        Description = view.Item?.Description ?? "";
+        Description = view.Description;
         Homepage = view.Item?.Homepage;
         DetailsText = DetailsOf(view);
 
