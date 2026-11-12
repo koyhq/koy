@@ -2379,5 +2379,74 @@
   <data name="NotchStyleFloating" xml:space="preserve">
     <value>Yüzen ada</value>
   </data>
+  <data name="UserStyleHeader" xml:space="preserve">
+    <value>Kullanıcı stil dosyası</value>
+  </data>
+  <data name="UserStyleTitle" xml:space="preserve">
+    <value>Tema değerlerini dosyadan ez</value>
+  </data>
+  <data name="UserStyleDesc" xml:space="preserve">
+    <value>Koy klasöründeki user-theme.json dosyasını okur ve izinli renk, ölçü, köşe ve yazı tiplerini ezer. Dosyadaki başka hiçbir şey kullanılmaz, kod çalıştıramaz.</value>
+  </data>
+  <data name="UserStyleOpenFolder" xml:space="preserve">
+    <value>Klasörü aç</value>
+  </data>
+  <data name="UserStyleReload" xml:space="preserve">
+    <value>Yeniden yükle</value>
+  </data>
+  <data name="UserStyleStatusOff" xml:space="preserve">
+    <value>Kapalı. Dosya okunmaz.</value>
+  </data>
+  <data name="UserStyleStatusNoFile" xml:space="preserve">
+    <value>Koy klasöründe henüz user-theme.json yok. "Klasörü aç" ile bir tane ekleyebilirsin.</value>
+  </data>
+  <data name="UserStyleStatusLoaded" xml:space="preserve">
+    <value>{0} uygulandı, {1} yok sayıldı.</value>
+  </data>
+  <data name="UserStyleDiagMore" xml:space="preserve">
+    <value>... ve {0} sorun daha.</value>
+  </data>
+  <data name="UserStyleDiagInvalidJson" xml:space="preserve">
+    <value>Dosya boş ya da geçerli bir JSON değil.</value>
+  </data>
+  <data name="UserStyleDiagNotAnObject" xml:space="preserve">
+    <value>En üst düzey, anahtar-değer çiftlerinden oluşan bir JSON nesnesi olmalı.</value>
+  </data>
+  <data name="UserStyleDiagFileTooLarge" xml:space="preserve">
+    <value>Dosya 64 KB'tan büyük, kullanılmadı.</value>
+  </data>
+  <data name="UserStyleDiagFileUnreadable" xml:space="preserve">
+    <value>Dosya okunamadı.</value>
+  </data>
+  <data name="UserStyleDiagTooManyEntries" xml:space="preserve">
+    <value>Çok fazla girdi var, kalanı yok sayıldı.</value>
+  </data>
+  <data name="UserStyleDiagUnknownToken" xml:space="preserve">
+    <value>Bilinmeyen anahtar, yok sayıldı.</value>
+  </data>
+  <data name="UserStyleDiagDuplicateToken" xml:space="preserve">
+    <value>Anahtar tekrarlanmış, ilk değer kullanılır.</value>
+  </data>
+  <data name="UserStyleDiagWrongValueType" xml:space="preserve">
+    <value>Bu anahtar için değer türü yanlış.</value>
+  </data>
+  <data name="UserStyleDiagValueTooLong" xml:space="preserve">
+    <value>Değer çok uzun.</value>
+  </data>
+  <data name="UserStyleDiagBadColor" xml:space="preserve">
+    <value>#RRGGBB ya da #AARRGGBB gibi bir renk bekleniyordu.</value>
+  </data>
+  <data name="UserStyleDiagBadNumber" xml:space="preserve">
+    <value>Bir sayı bekleniyordu.</value>
+  </data>
+  <data name="UserStyleDiagBadQuad" xml:space="preserve">
+    <value>Bir sayı ya da virgülle ayrılmış dört sayı bekleniyordu (örn. 8 ya da 8,8,0,0).</value>
+  </data>
+  <data name="UserStyleDiagBadFontFamily" xml:space="preserve">
+    <value>Düz bir yazı tipi adı bekleniyordu.</value>
+  </data>
+  <data name="UserStyleDiagOutOfRange" xml:space="preserve">
+    <value>Değer izinli aralığın dışında.</value>
+  </data>
 </root>
 

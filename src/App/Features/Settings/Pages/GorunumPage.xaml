@@ -248,5 +248,60 @@
                           IsChecked="{Binding RespectReduceMotion}" Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
+
+        <!-- KULLANICI STİLİ (user-theme.json) -->
+        <TextBlock Text="{Binding [UserStyleHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [UserStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [UserStyleDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [UserStyleTitle], Source={x:Static res:Loc.Instance}}"
+                          IsChecked="{Binding UserStyleOverridesEnabled}" Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding UserStyleStatusText}" Style="{StaticResource SettingDescStyle}" Margin="0" />
+                    <ItemsControl ItemsSource="{Binding UserStyleDiagnostics}" Focusable="False" Margin="0,6,0,0">
+                        <ItemsControl.Style>
+                            <Style TargetType="ItemsControl">
+                                <Style.Triggers>
+                                    <Trigger Property="HasItems" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ItemsControl.Style>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,1,0,1"
+                                           FontSize="{DynamicResource KoyFontCaption}"
+                                           Foreground="{DynamicResource KoyDangerText}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="{Binding [UserStyleOpenFolder], Source={x:Static res:Loc.Instance}}"
+                            Command="{Binding OpenUserStyleFolderCommand}" Style="{StaticResource SettingButtonStyle}" Margin="0,0,8,0" />
+                    <Button Content="{Binding [UserStyleReload], Source={x:Static res:Loc.Instance}}"
+                            Command="{Binding ReloadUserStyleCommand}" Style="{StaticResource SettingButtonStyle}"
+                            IsEnabled="{Binding UserStyleOverridesEnabled}" />
+                </StackPanel>
+            </Grid>
+        </Border>
     </StackPanel>
 </UserControl>
