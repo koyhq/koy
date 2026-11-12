@@ -156,6 +156,58 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private NotchOpenBehavior _notchOpenBehavior = NotchOpenBehavior.Click;
 
+    // --- ÇENTİK DÜZENİ (issue #78) ---
+    public IReadOnlyList<int> NotchDelayOptions { get; } = [0, 150, 300, 500, 800, 1200, 2000];
+
+    [ObservableProperty]
+    private int _notchOpenDelayMs;
+
+    [ObservableProperty]
+    private int _notchCloseDelayMs = NotchOpenPolicy.DefaultCloseDelayMs;
+
+    [ObservableProperty]
+    private NotchTabBarStyle _notchTabBarStyle = NotchTabBarStyle.IconAndLabel;
+
+    /// <summary>Sekme sırası satırları (bütün paneller, görünürlükten bağımsız).</summary>
+    public ObservableCollection<NotchTabOrderItem> NotchTabOrder { get; } = [];
+
+    /// <summary>Sıra değişince artar; kaydı ve çentiğin yeniden kurulmasını tetikler.</summary>
+    [ObservableProperty]
+    private int _notchTabOrderVersion;
+
+    private List<string> _panelOrder = [];
+
+    private void LoadTabOrder(IEnumerable<string>? order)
+    {
+        _panelOrder = NotchPanels.NormalizeOrder(order).Select(NotchPanels.ToKey).ToList();
+        NotchTabOrder.Clear();
+        foreach (var panel in NotchPanels.NormalizeOrder(_panelOrder))
+            NotchTabOrder.Add(new NotchTabOrderItem(panel, NotchTabOrderItem.LabelOf(panel)));
+    }
+
+    [RelayCommand]
+    private void MoveTabUp(NotchPanel panel) => MoveTab(panel, -1);
+
+    [RelayCommand]
+    private void MoveTabDown(NotchPanel panel) => MoveTab(panel, 1);
+
+    // Dosyadaki (elle yazılmış) gecikme listede yoksa en yakın seçenek gösterilir; kaydedilince o değer yazılır.
+    private int NearestDelay(int ms)
+    {
+        var clamped = NotchOpenPolicy.ClampDelay(ms);
+        return NotchDelayOptions.OrderBy(o => Math.Abs(o - clamped)).First();
+    }
+
+    private void MoveTab(NotchPanel panel, int step)
+    {
+        var moved = NotchPanels.Move(_panelOrder, panel, step);
+        if (moved.SequenceEqual(_panelOrder))
+            return;
+
+        LoadTabOrder(moved);
+        NotchTabOrderVersion++;
+    }
+
     // --- DOCK ---
     [ObservableProperty]
     private bool _dockEnabled = true;
@@ -522,6 +574,10 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             IdleDisplayMode = s.Notch.IdleDisplay;
             NotchStyle = s.Notch.Style;
             NotchOpenBehavior = s.Notch.OpenBehavior;
+            NotchOpenDelayMs = NearestDelay(s.Notch.OpenDelayMs);
+            NotchCloseDelayMs = NearestDelay(s.Notch.CloseDelayMs);
+            NotchTabBarStyle = s.Notch.TabBarStyle;
+            LoadTabOrder(s.Notch.PanelOrder);
 
             // Eski sürümlerin karışık değerleri ("Koyu", 18 vb.) seçenek değerlerine indirilir.
             Theme = s.Appearance.Theme;
@@ -712,6 +768,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             or nameof(ShowVolumeOsd) or nameof(ShowBrightnessOsd) or nameof(ShowPrivacyIndicator) or nameof(NotchShowNotifications) or nameof(NotchNotificationsHideBody) or nameof(IdleDisplayMode) or nameof(NotchStyle)
             or nameof(Material) or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
             or nameof(NotchOpenBehavior) or nameof(WheelAction) or nameof(BatterySaverReduceMotion)
+            or nameof(NotchOpenDelayMs) or nameof(NotchCloseDelayMs) or nameof(NotchTabBarStyle) or nameof(NotchTabOrderVersion)
             or nameof(WeatherRefreshInterval) or nameof(PomodoroWorkMinutes) or nameof(PomodoroShortBreakMinutes) or nameof(PomodoroLongBreakMinutes)
             or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
             or nameof(PanelControlCenter) or nameof(PanelClipboard) or nameof(PanelSystem) or nameof(ClipboardHistoryEnabled)
@@ -808,6 +865,11 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 IdleDisplay = IdleDisplayMode,
                 Style = NotchStyle,
                 OpenBehavior = NotchOpenBehavior,
+                OpenDelayMs = NotchOpenPolicy.ClampDelay(NotchOpenDelayMs),
+                CloseDelayMs = NotchOpenPolicy.ClampDelay(NotchCloseDelayMs),
+                TabBarStyle = NotchTabBarStyle,
+                // Varsayılan sıra boş liste olarak kalır ("yalnız değişenler" onu değişmiş saymasın).
+                PanelOrder = _panelOrder.SequenceEqual(NotchPanels.Order.Select(NotchPanels.ToKey)) ? [] : new ValueList<string>(_panelOrder),
                 FollowsMaterial = NotchFollowsMaterial,
                 WheelAction = WheelAction,
                 EnabledPanels = new ValueList<string>(enabledPanels)

@@ -341,7 +341,9 @@ public partial class NotchWindow : Window
         if (e.Data.GetDataPresent(DataFormats.FileDrop) || e.Data.GetDataPresent(DataFormats.Text))
         {
             e.Effects = DragDropEffects.Copy;
-            ViewModel?.ExpandToShelf();
+            _dragEnteredAt = Environment.TickCount64;
+            if (DragShouldOpen())
+                ViewModel?.ExpandToShelf();
         }
         else
         {
@@ -350,12 +352,22 @@ public partial class NotchWindow : Window
         e.Handled = true;
     }
 
+    // "Sürükleyince aç" kipinde açılma gecikmesi (issue #78): DragOver sürekli geldiği için zamanlayıcı kurulmaz.
+    private long _dragEnteredAt;
+
+    private bool DragShouldOpen()
+    {
+        var notch = ViewModel?.Settings.Notch;
+        return notch is null || NotchOpenPolicy.DragShouldOpen(notch.OpenBehavior, Environment.TickCount64 - _dragEnteredAt, notch.OpenDelayMs);
+    }
+
     private void Notch_DragOver(object sender, DragEventArgs e)
     {
         if (e.Data.GetDataPresent(DataFormats.FileDrop) || e.Data.GetDataPresent(DataFormats.Text))
         {
             e.Effects = DragDropEffects.Copy;
-            if (ViewModel is not null && (ViewModel.State != Core.Notch.NotchState.Expanded || ViewModel.CurrentPanel != Core.Notch.NotchPanel.Shelf))
+            if (ViewModel is not null && (ViewModel.State != Core.Notch.NotchState.Expanded || ViewModel.CurrentPanel != Core.Notch.NotchPanel.Shelf)
+                && DragShouldOpen())
             {
                 ViewModel.ExpandToShelf();
             }

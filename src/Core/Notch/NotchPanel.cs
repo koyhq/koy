@@ -94,6 +94,31 @@ public static class NotchPanels
         return Order.Where(enabled.Contains).ToList();
     }
 
+    /// <summary>
+    /// Açık paneller, kullanıcının sekme sırasıyla (issue #78): görünürlük <see cref="ParseEnabled"/>'dan, sıra
+    /// <see cref="NormalizeOrder"/>'dan gelir. Sıra boşsa sonuç <see cref="ParseEnabled"/> ile aynıdır.
+    /// </summary>
+    public static List<NotchPanel> ParseEnabled(IEnumerable<string>? keys, bool clipboardHistoryEnabled, IEnumerable<string>? order)
+    {
+        var enabled = ParseEnabled(keys, clipboardHistoryEnabled);
+        return NormalizeOrder(order).Where(enabled.Contains).ToList();
+    }
+
+    /// <summary>Sekme sırasında bir paneli bir adım yukarı (-1) ya da aşağı (+1) taşır; sonuç anahtar listesi.</summary>
+    public static List<string> Move(IEnumerable<string>? order, NotchPanel panel, int step)
+    {
+        var list = NormalizeOrder(order);
+        var index = list.IndexOf(panel);
+        var target = Math.Clamp(index + Math.Sign(step), 0, list.Count - 1);
+        if (index >= 0 && target != index)
+        {
+            list.RemoveAt(index);
+            list.Insert(target, panel);
+        }
+
+        return list.Select(ToKey).ToList();
+    }
+
     /// <summary>Sekme sırasındaki yeri (listede olmayan sona gider).</summary>
     public static int SortIndex(NotchPanel panel)
     {

@@ -1263,6 +1263,42 @@
   <data name="ReduceMotionDesc" xml:space="preserve">
     <value>If animations are off in Windows, Koy turns motion off too.</value>
   </data>
+  <data name="OpenOnDragOver" xml:space="preserve">
+    <value>On drag</value>
+  </data>
+  <data name="NotchOpenDelayTitle" xml:space="preserve">
+    <value>Open delay</value>
+  </data>
+  <data name="NotchOpenDelayDesc" xml:space="preserve">
+    <value>Wait before opening on hover or on drag. Clicking always opens at once.</value>
+  </data>
+  <data name="NotchCloseDelayTitle" xml:space="preserve">
+    <value>Close delay after the pointer leaves</value>
+  </data>
+  <data name="NotchTabBarTitle" xml:space="preserve">
+    <value>Tab bar</value>
+  </data>
+  <data name="NotchTabBarDesc" xml:space="preserve">
+    <value>When hidden, switch pages with the mouse wheel or shortcuts.</value>
+  </data>
+  <data name="NotchTabBarIconLabel" xml:space="preserve">
+    <value>Icon and name</value>
+  </data>
+  <data name="NotchTabBarIcon" xml:space="preserve">
+    <value>Icon only</value>
+  </data>
+  <data name="NotchTabBarHidden" xml:space="preserve">
+    <value>Hidden</value>
+  </data>
+  <data name="NotchTabOrderTitle" xml:space="preserve">
+    <value>Tab order</value>
+  </data>
+  <data name="NotchTabMoveUp" xml:space="preserve">
+    <value>Move up</value>
+  </data>
+  <data name="NotchTabMoveDown" xml:space="preserve">
+    <value>Move down</value>
+  </data>
   <data name="AccentBlue" xml:space="preserve">
     <value>Blue</value>
   </data>

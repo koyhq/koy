@@ -149,6 +149,12 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     /// <summary>Açık çentiğin üstündeki sekmeler; ayarlarda açık paneller, ayardaki sırayla.</summary>
     public ObservableCollection<NotchTabViewModel> Tabs { get; } = [];
 
+    /// <summary>Sekme çubuğu görünür mü (biçim "gizli" değilse; issue #78). Gizliyken paneller tekerlek ve kısayolla değişir.</summary>
+    public bool ShowTabBar => Settings.Notch.TabBarStyle != NotchTabBarStyle.Hidden;
+
+    /// <summary>Sekme adları görünür mü (biçim "simge ve ad").</summary>
+    public bool ShowTabLabels => Settings.Notch.TabBarStyle == NotchTabBarStyle.IconAndLabel;
+
     /// <summary>Kontrol paneli açıksa Wi-Fi / Bluetooth izlenir ve kapalı çentikte simgeleri gösterilebilir.</summary>
     public bool ShowRadioStatus { get; }
 

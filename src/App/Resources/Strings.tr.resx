@@ -1263,6 +1263,42 @@
   <data name="ReduceMotionDesc" xml:space="preserve">
     <value>Windows'ta animasyonlar kapalıysa Koy da hareketi kapatır.</value>
   </data>
+  <data name="OpenOnDragOver" xml:space="preserve">
+    <value>Sürükleyince</value>
+  </data>
+  <data name="NotchOpenDelayTitle" xml:space="preserve">
+    <value>Açılma gecikmesi</value>
+  </data>
+  <data name="NotchOpenDelayDesc" xml:space="preserve">
+    <value>Üzerine gelince ya da sürükleyince açılmadan önce bekler. Tıklama her zaman hemen açar.</value>
+  </data>
+  <data name="NotchCloseDelayTitle" xml:space="preserve">
+    <value>İmleç çıkınca kapanma gecikmesi</value>
+  </data>
+  <data name="NotchTabBarTitle" xml:space="preserve">
+    <value>Sekme çubuğu</value>
+  </data>
+  <data name="NotchTabBarDesc" xml:space="preserve">
+    <value>Gizliyken sayfalar fare tekerleği ya da kısayollarla değişir.</value>
+  </data>
+  <data name="NotchTabBarIconLabel" xml:space="preserve">
+    <value>Simge ve ad</value>
+  </data>
+  <data name="NotchTabBarIcon" xml:space="preserve">
+    <value>Yalnız simge</value>
+  </data>
+  <data name="NotchTabBarHidden" xml:space="preserve">
+    <value>Gizli</value>
+  </data>
+  <data name="NotchTabOrderTitle" xml:space="preserve">
+    <value>Sekme sırası</value>
+  </data>
+  <data name="NotchTabMoveUp" xml:space="preserve">
+    <value>Yukarı taşı</value>
+  </data>
+  <data name="NotchTabMoveDown" xml:space="preserve">
+    <value>Aşağı taşı</value>
+  </data>
   <data name="AccentBlue" xml:space="preserve">
     <value>Mavi</value>
   </data>

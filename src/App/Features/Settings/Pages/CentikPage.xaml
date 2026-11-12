@@ -366,10 +366,96 @@
                         <RadioButton Content="{Binding [OpenOnClick], Source={x:Static res:Loc.Instance}}" GroupName="OpenBeh"
                                      IsChecked="{Binding NotchOpenBehavior, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Click}"
                                      Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [OpenOnDragOver], Source={x:Static res:Loc.Instance}}" GroupName="OpenBeh"
+                                     IsChecked="{Binding NotchOpenBehavior, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=DragOver}"
+                                     Style="{StaticResource SegRadioStyle}" />
                     </StackPanel>
                 </Border>
             </Grid>
         </Border>
+
+        <!-- Açılma / kapanma gecikmesi (issue #78) -->
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [NotchOpenDelayTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [NotchOpenDelayDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <ComboBox Grid.Column="1" Width="100" Height="32" HorizontalAlignment="Right" Style="{StaticResource SettingComboBoxStyle}"
+                          AutomationProperties.Name="{Binding [NotchOpenDelayTitle], Source={x:Static res:Loc.Instance}}"
+                          ItemsSource="{Binding NotchDelayOptions}" SelectedItem="{Binding NotchOpenDelayMs}" ItemStringFormat="{}{0} ms" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [NotchCloseDelayTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <ComboBox Grid.Column="1" Width="100" Height="32" HorizontalAlignment="Right" Style="{StaticResource SettingComboBoxStyle}"
+                          AutomationProperties.Name="{Binding [NotchCloseDelayTitle], Source={x:Static res:Loc.Instance}}"
+                          ItemsSource="{Binding NotchDelayOptions}" SelectedItem="{Binding NotchCloseDelayMs}" ItemStringFormat="{}{0} ms" />
+            </Grid>
+        </Border>
+
+        <!-- Sekme çubuğu biçimi ve sırası (issue #78) -->
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [NotchTabBarTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [NotchTabBarDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [NotchTabBarIconLabel], Source={x:Static res:Loc.Instance}}" GroupName="TabBar"
+                                     IsChecked="{Binding NotchTabBarStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=IconAndLabel}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [NotchTabBarIcon], Source={x:Static res:Loc.Instance}}" GroupName="TabBar"
+                                     IsChecked="{Binding NotchTabBarStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=IconOnly}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [NotchTabBarHidden], Source={x:Static res:Loc.Instance}}" GroupName="TabBar"
+                                     IsChecked="{Binding NotchTabBarStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Hidden}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <TextBlock Text="{Binding [NotchTabOrderTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+        <ItemsControl ItemsSource="{Binding NotchTabOrder}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource SettingRowStyle}" MinHeight="40">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Label}" Style="{StaticResource SettingTitleStyle}" VerticalAlignment="Center" />
+                            <Button Grid.Column="1" Content="↑" Width="32" Margin="0,0,6,0" Style="{StaticResource SettingButtonStyle}"
+                                    Command="{Binding DataContext.MoveTabUpCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding Panel}"
+                                    AutomationProperties.Name="{Binding [NotchTabMoveUp], Source={x:Static res:Loc.Instance}}" />
+                            <Button Grid.Column="2" Content="↓" Width="32" Style="{StaticResource SettingButtonStyle}"
+                                    Command="{Binding DataContext.MoveTabDownCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding Panel}"
+                                    AutomationProperties.Name="{Binding [NotchTabMoveDown], Source={x:Static res:Loc.Instance}}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
 
         <!-- HAVA DURUMU: konum yoksa çentikte hava durumu hiç gösterilmez -->
         <TextBlock Text="{Binding [WeatherHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />

@@ -29,6 +29,30 @@ public sealed class NotchController : IDisposable
     /// </summary>
     public bool OpenOnHover { get; set; }
 
+    /// <summary>Üzerine gelince açılmadan önce bekleme (ms, 0–2000; issue #78). Beklerken çentik ipucu (Peek) gösterir.</summary>
+    public int OpenDelayMs
+    {
+        get => _openDelayMs;
+        set => _openDelayMs = NotchOpenPolicy.ClampDelay(value);
+    }
+
+    /// <summary>İmleç çıkınca kapanmadan önce bekleme (ms, 0–2000). Varsayılan bugünkü 400 ms.</summary>
+    public int CloseDelayMs
+    {
+        get => _closeDelayMs;
+        set => _closeDelayMs = NotchOpenPolicy.ClampDelay(value);
+    }
+
+    private int _openDelayMs;
+    private int _closeDelayMs = NotchOpenPolicy.DefaultCloseDelayMs;
+    private ITimer? _hoverOpenTimer;
+
+    // Sekme sırası (kullanıcının sırası; boşsa varsayılan). Geçici eklenen panel (sürükle-bırakta Raf) bu sıraya göre yerleşir.
+    private List<NotchPanel> _panelOrder = [.. NotchPanels.Order];
+
+    /// <summary>Kullanıcının sekme sırasını kurar (<see cref="NotchPanels.NormalizeOrder"/>).</summary>
+    public void SetPanelOrder(IEnumerable<string>? keys) => _panelOrder = NotchPanels.NormalizeOrder(keys);
+
     public NotchController(TimeProvider? timeProvider = null)
     {
         _timeProvider = timeProvider ?? TimeProvider.System;
@@ -106,7 +130,7 @@ public sealed class NotchController : IDisposable
             {
                 // Ayarlarda kapalı panel (ör. sürükle-bırakta Raf) geçici olarak listeye girer; sekme çubuğu da bilsin.
                 _enabledPanels.Add(panel.Value);
-                _enabledPanels.Sort((a, b) => NotchPanels.SortIndex(a).CompareTo(NotchPanels.SortIndex(b)));
+                _enabledPanels.Sort((a, b) => _panelOrder.IndexOf(a).CompareTo(_panelOrder.IndexOf(b)));
                 EnabledPanelsChanged?.Invoke(this, EventArgs.Empty);
             }
             SelectPanel(panel.Value);
@@ -118,7 +142,7 @@ public sealed class NotchController : IDisposable
         IsMouseOver = true;
         _mouseLeaveTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
 
-        if (OpenOnHover && State != NotchState.Expanded)
+        if (OpenOnHover && State != NotchState.Expanded && OpenDelayMs == 0)
         {
             _autoPeekTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
             SetState(NotchState.Expanded);
@@ -127,11 +151,33 @@ public sealed class NotchController : IDisposable
         {
             SetState(NotchStateTransitions.Transition(State, NotchTrigger.MouseEnter));
         }
+
+        // Gecikmeli açılma: imleç süre boyunca üstünde kalırsa açılır; çıkarsa zamanlayıcı bırakılır.
+        if (OpenOnHover && State != NotchState.Expanded && OpenDelayMs > 0)
+        {
+            _hoverOpenTimer?.Dispose();
+            _hoverOpenTimer = _timeProvider.CreateTimer(_ => OnHoverOpenTimeout(), null,
+                TimeSpan.FromMilliseconds(OpenDelayMs), Timeout.InfiniteTimeSpan);
+        }
+    }
+
+    /// <summary>Gecikmeli açılmanın süresi doldu (zamanlayıcı ya da test çağırır).</summary>
+    public void OnHoverOpenTimeout()
+    {
+        _hoverOpenTimer?.Dispose();
+        _hoverOpenTimer = null;
+        if (IsMouseOver && OpenOnHover && State != NotchState.Expanded && !_disposed)
+        {
+            _autoPeekTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+            SetState(NotchState.Expanded);
+        }
     }
 
     public void OnMouseLeave()
     {
         IsMouseOver = false;
+        _hoverOpenTimer?.Dispose();
+        _hoverOpenTimer = null;
 
         if (State == NotchState.Peek)
         {
@@ -150,7 +196,7 @@ public sealed class NotchController : IDisposable
         _mouseLeaveTimer = _timeProvider.CreateTimer(
             _ => OnMouseLeaveTimeout(),
             null,
-            TimeSpan.FromMilliseconds(NotchOpenPolicy.DefaultCloseDelayMs),
+            TimeSpan.FromMilliseconds(CloseDelayMs),
             Timeout.InfiniteTimeSpan);
     }
 
@@ -265,7 +311,9 @@ public sealed class NotchController : IDisposable
         _disposed = true;
         _autoPeekTimer?.Dispose();
         _mouseLeaveTimer?.Dispose();
+        _hoverOpenTimer?.Dispose();
         _autoPeekTimer = null;
         _mouseLeaveTimer = null;
+        _hoverOpenTimer = null;
     }
 }

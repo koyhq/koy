@@ -606,7 +606,8 @@
           </ContentControl>
 
           <!-- Sekme çubuğu: sekmeler listeden üretilir (NotchTabs); seçili sekme kendi sayfa rengini alır -->
-          <ItemsControl Grid.Row="2" ItemsSource="{Binding Tabs}" Focusable="False">
+          <ItemsControl Grid.Row="2" ItemsSource="{Binding Tabs}" Focusable="False"
+                        Visibility="{Binding ShowTabBar, Converter={StaticResource BoolToVis}}">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate>
                 <UniformGrid Rows="1" />
@@ -637,6 +638,10 @@
                           <Setter TargetName="Pill" Property="Background" Value="{DynamicResource KoyNotchChip}" />
                           <Setter TargetName="Label" Property="Foreground" Value="{DynamicResource KoyNotchText}" />
                           <Setter TargetName="Glyph" Property="Foreground" Value="{Binding Accent}" />
+                        </DataTrigger>
+                        <!-- Sekme çubuğu biçimi "yalnız simge" (issue #78): ad gizlenir, simge dikey ortada kalır -->
+                        <DataTrigger Binding="{Binding DataContext.ShowTabLabels, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="False">
+                          <Setter TargetName="Label" Property="Visibility" Value="Collapsed" />
                         </DataTrigger>
                       </ControlTemplate.Triggers>
                     </ControlTemplate>
