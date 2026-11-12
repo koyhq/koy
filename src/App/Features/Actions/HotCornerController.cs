@@ -10,116 +10,151 @@ using Microsoft.Win32;
 namespace Koy.App.Features.Actions;
 
 /// <summary>
-/// Ekran köşesi eylemleri. Uygulamada hiçbir fare kancası yok; bu yüzden imleç konumu
-/// <see cref="CornerActions.PollIntervalMs"/> aralıklı hafif bir yoklamayla okunur. Yoklama yalnız en az bir köşeye
-/// eylem bağlıyken çalışır, hepsi "yok" olunca zamanlayıcı durur ve ekran değişikliği aboneliği bırakılır.
+/// Ekran köşesi eylemleri. Yoklama yok (AGENTS #5): imleç köşeye girince fare kancası (<see cref="CornerHookService"/>)
+/// haber verir, bekleme süresi için yalnız o an tek seferlik bir zamanlayıcı kurulur; köşeden çıkınca durur.
+/// Kanca yalnız en az bir köşeye eylem bağlıyken kurulur; hepsi "yok" olunca kanca ve ekran aboneliği bırakılır.
 /// Kararlar Core'dadır (<see cref="HotCornerTracker"/>, <see cref="HotCornerMath"/>); burası yalnız zaman ve Win32 okur.
 /// Tam ekran uygulama öndeyken ve fare tuşu basılıyken (sürükleme) hiçbir şey tetiklenmez.
 /// </summary>
 public sealed class HotCornerController : IDisposable
 {
+    // Zamanlayıcı ile TickCount64 çözünürlüğü farkı yüzünden bekleme bir tık eksik ölçülmesin.
+    private static readonly TimeSpan DwellMargin = TimeSpan.FromMilliseconds(20);
+    private static readonly TimeSpan RetryDelay = TimeSpan.FromMilliseconds(50);
+
     private readonly Action<InputAction> _run;
+    private readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
     private readonly HotCornerTracker _tracker = new();
     private readonly FullscreenDetector _fullscreen = new();
+    private ICornerHookService? _hook;
     private MonitorService? _monitors;
-    private DispatcherTimer? _timer;
+    private DispatcherTimer? _dwell;
     private HotCornersSettings _settings = new();
     private IReadOnlyList<DisplayMonitor> _monitorList = [];
-    private IReadOnlyList<ScreenRect> _rects = [];
-    private volatile bool _monitorsStale = true;
-    private bool _subscribed;
+    private CornerHit? _hit;
 
     public HotCornerController(Action<InputAction> run) => _run = run;
 
-    /// <summary>Çalışan bir zamanlayıcı var mı (testler ve tanılama için).</summary>
-    public bool IsRunning => _timer is not null;
+    /// <summary>Kanca kurulu mu (tanılama için).</summary>
+    public bool IsRunning => _hook is not null;
 
-    /// <summary>Ayarı uygular: gerekiyorsa yoklamayı başlatır, gerekmiyorsa durdurur.</summary>
+    /// <summary>Ayarı uygular: gerekiyorsa kancayı kurar, gerekmiyorsa kaldırır.</summary>
     public void Apply(HotCornersSettings settings)
     {
         _settings = settings;
+        StopDwell();
+        _tracker.Reset();
 
         if (CornerActions.IsActive(settings))
-            StartPolling();
+            StartTracking();
         else
-            StopPolling();
+            StopTracking();
     }
 
-    private void StartPolling()
+    private void StartTracking()
     {
-        if (_timer is not null)
+        if (_hook is not null)
             return;
 
         _monitors ??= new MonitorService();
-        _monitorsStale = true;
         SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
-        _subscribed = true;
-
-        _tracker.Reset();
-        _timer = new DispatcherTimer(DispatcherPriority.Background)
-        {
-            Interval = TimeSpan.FromMilliseconds(Math.Max(100, CornerActions.PollIntervalMs))
-        };
-        _timer.Tick += OnTick;
-        _timer.Start();
+        _hook = new CornerHookService(action => _dispatcher.BeginInvoke(action));
+        _hook.CornerChanged += OnCornerChanged;
+        RefreshScreens();
     }
 
-    private void StopPolling()
+    private void StopTracking()
     {
-        if (_timer is not null)
-        {
-            _timer.Stop();
-            _timer.Tick -= OnTick;
-            _timer = null;
-        }
-
-        if (_subscribed)
+        StopDwell();
+        if (_hook is not null)
         {
             SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
-            _subscribed = false;
+            _hook.CornerChanged -= OnCornerChanged;
+            _hook.Dispose();
+            _hook = null;
         }
 
         _tracker.Reset();
+        _hit = null;
         _monitorList = [];
-        _rects = [];
     }
 
-    private void OnDisplaySettingsChanged(object? sender, EventArgs e) => _monitorsStale = true;
+    // SystemEvents kendi iş parçacığından da çağırabilir; ekran listesi arayüz iş parçacığında yenilenir.
+    private void OnDisplaySettingsChanged(object? sender, EventArgs e) =>
+        _dispatcher.BeginInvoke(() => CrashLog.Guard("Ekran köşesi", RefreshScreens));
 
-    private void OnTick(object? sender, EventArgs e) => CrashLog.Guard("Ekran köşesi", Tick);
-
-    private void Tick()
+    private void RefreshScreens()
     {
-        if (!CursorHelper.GetPosition(out var x, out var y))
+        if (_hook is null || _monitors is null)
+            return;
+
+        _monitorList = _monitors.GetMonitors();
+        var rects = _monitorList
+            .Select(m => new ScreenRect(m.Bounds.Left, m.Bounds.Top, m.Bounds.Width, m.Bounds.Height))
+            .ToList();
+        _hook.SetScreens(rects, CornerActions.CornerSizePx);
+    }
+
+    private void OnCornerChanged(object? sender, CornerHit? hit) => CrashLog.Guard("Ekran köşesi", () =>
+    {
+        StopDwell();
+        _tracker.Reset();
+        _hit = hit;
+
+        // Eylemi olmayan köşe "köşe değil" sayılır.
+        if (hit is not { } h || ActionAt(h.Corner) is null)
+            return;
+
+        _tracker.Update(h.Corner, false, Environment.TickCount64, _settings.DwellMs);
+        StartDwell(TimeSpan.FromMilliseconds(CornerActions.ClampDwell(_settings.DwellMs)) + DwellMargin);
+    });
+
+    private void OnDwellElapsed(object? sender, EventArgs e) => CrashLog.Guard("Ekran köşesi", () =>
+    {
+        StopDwell();
+        if (_hit is not { } h || ActionAt(h.Corner) is null)
+            return;
+
+        // Tam ekran öndeyse bu girişte hiçbir şey yapılmaz; köşeden çıkıp yeniden girmek gerekir.
+        if (_settings.DisableInFullscreen && h.ScreenIndex < _monitorList.Count &&
+            _fullscreen.IsFullscreen(_monitorList[h.ScreenIndex].Handle))
+            return;
+
+        // Sürükleme köşede bitebilir: tuş bırakılınca bekleme baştan sayılır. Yalnız imleç köşedeyken yeniden kurulur.
+        if (CursorHelper.IsAnyMouseButtonDown())
         {
             _tracker.Reset();
+            _tracker.Update(h.Corner, false, Environment.TickCount64, _settings.DwellMs);
+            StartDwell(TimeSpan.FromMilliseconds(CornerActions.ClampDwell(_settings.DwellMs)) + DwellMargin);
             return;
         }
 
-        if (_monitorsStale && _monitors is not null)
-        {
-            _monitorList = _monitors.GetMonitors();
-            _rects = _monitorList
-                .Select(m => new ScreenRect(m.Bounds.Left, m.Bounds.Top, m.Bounds.Width, m.Bounds.Height))
-                .ToList();
-            _monitorsStale = false;
-        }
-
-        var hit = HotCornerMath.HitTest(x, y, _rects, CornerActions.CornerSizePx);
-        var action = hit is { } h ? CornerActions.ToInputAction(CornerActions.ActionFor(_settings, h.Corner)) : null;
-
-        // Eylemi olmayan köşe "köşe değil" sayılır. Pahalı denetimler (tuş durumu, tam ekran) yalnız köşedeyken çalışır.
-        var suppressed = false;
-        if (hit is { } found && action is not null)
-        {
-            suppressed = CursorHelper.IsAnyMouseButtonDown() ||
-                         (_settings.DisableInFullscreen && _fullscreen.IsFullscreen(_monitorList[found.ScreenIndex].Handle));
-        }
-
-        var fired = _tracker.Update(action is null ? null : hit?.Corner, suppressed, Environment.TickCount64, _settings.DwellMs);
-        if (fired is { } corner && CornerActions.ToInputAction(CornerActions.ActionFor(_settings, corner)) is { } toRun)
+        var fired = _tracker.Update(h.Corner, false, Environment.TickCount64, _settings.DwellMs);
+        if (fired is { } corner && ActionAt(corner) is { } toRun)
             _run(toRun);
+        else if (fired is null)
+            StartDwell(RetryDelay);
+    });
+
+    private InputAction? ActionAt(ScreenCorner corner) =>
+        CornerActions.ToInputAction(CornerActions.ActionFor(_settings, corner));
+
+    private void StartDwell(TimeSpan delay)
+    {
+        _dwell = new DispatcherTimer(DispatcherPriority.Background, _dispatcher) { Interval = delay };
+        _dwell.Tick += OnDwellElapsed;
+        _dwell.Start();
     }
 
-    public void Dispose() => StopPolling();
+    private void StopDwell()
+    {
+        if (_dwell is null)
+            return;
+
+        _dwell.Stop();
+        _dwell.Tick -= OnDwellElapsed;
+        _dwell = null;
+    }
+
+    public void Dispose() => StopTracking();
 }

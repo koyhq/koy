@@ -80,10 +80,6 @@ public class HotCornerActionsTests
         => Assert.Equal(expected, CornerActions.ClampDwell(input));
 
     [Fact]
-    public void Poll_interval_is_never_below_100_ms()
-        => Assert.True(CornerActions.PollIntervalMs >= 100);
-
-    [Fact]
     public void Settings_survive_a_save_and_load_round_trip()
     {
         var path = Path.Combine(Path.GetTempPath(), "koy-corners-" + Guid.NewGuid().ToString("N") + ".json");

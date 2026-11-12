@@ -25,12 +25,6 @@ public static class CornerActions
     /// <summary>Köşe bölgesinin boyu (fiziksel piksel). İmleç ekran kenarına dayandığı için küçük bir kare yeter.</summary>
     public const int CornerSizePx = 6;
 
-    /// <summary>
-    /// Köşe yoklamasının aralığı (ms). Fare kancası yok; yoklama yalnız en az bir köşe bağlıyken çalışır.
-    /// 100 ms'nin altına inilmez.
-    /// </summary>
-    public const int PollIntervalMs = 120;
-
     public static int ClampDwell(int dwellMs) => Math.Clamp(dwellMs, MinDwellMs, MaxDwellMs);
 
     public static CornerAction ActionFor(HotCornersSettings settings, ScreenCorner corner) => corner switch

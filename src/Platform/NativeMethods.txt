@@ -73,6 +73,7 @@ SetWindowsHookEx
 UnhookWindowsHookEx
 CallNextHookEx
 KBDLLHOOKSTRUCT
+MSLLHOOKSTRUCT
 PostThreadMessage
 GetCurrentThreadId
 ExtractIconEx
