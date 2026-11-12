@@ -3333,5 +3333,101 @@
   <data name="LiveBgErrorInvalid" xml:space="preserve">
     <value>Bu dosya yolu geçerli değil.</value>
   </data>
+  <data name="HomeCardSectionTitle" xml:space="preserve">
+    <value>Ana sayfa kartları</value>
+  </data>
+  <data name="HomeCardSectionDesc" xml:space="preserve">
+    <value>Ana sayfada gösterilecek kartları ve sıralarını belirleyin.</value>
+  </data>
+  <data name="HomeCardMusic" xml:space="preserve">
+    <value>Müzik / Ses çalar</value>
+  </data>
+  <data name="HomeCardHeadphoneBattery" xml:space="preserve">
+    <value>Bağlı ses cihazı / Pil</value>
+  </data>
+  <data name="HomeCardSystemNetwork" xml:space="preserve">
+    <value>Sistem ve ağ</value>
+  </data>
+  <data name="HomeCardQuickLaunch" xml:space="preserve">
+    <value>Hızlı başlat</value>
+  </data>
+  <data name="HomeCardWeather" xml:space="preserve">
+    <value>Hava durumu</value>
+  </data>
+  <data name="HomeCardTimers" xml:space="preserve">
+    <value>Zamanlayıcılar</value>
+  </data>
+  <data name="HomeCardMoveUp" xml:space="preserve">
+    <value>Yukarı taşı</value>
+  </data>
+  <data name="HomeCardMoveDown" xml:space="preserve">
+    <value>Aşağı taşı</value>
+  </data>
+  <data name="VisualizerSectionTitle" xml:space="preserve">
+    <value>Ses görselleştiricisi</value>
+  </data>
+  <data name="VisualizerStyleTitle" xml:space="preserve">
+    <value>Görselleştirici çizim biçimi</value>
+  </data>
+  <data name="VisualizerStyleDesc" xml:space="preserve">
+    <value>Müzik çalarken hareket eden ses spektrumunun çizim biçimi.</value>
+  </data>
+  <data name="VisualizerStyleBars" xml:space="preserve">
+    <value>Çubuklar</value>
+  </data>
+  <data name="VisualizerStyleWave" xml:space="preserve">
+    <value>Dalga</value>
+  </data>
+  <data name="VisualizerStyleDots" xml:space="preserve">
+    <value>Noktalar</value>
+  </data>
+  <data name="VisualizerColorSourceTitle" xml:space="preserve">
+    <value>Görselleştirici rengi</value>
+  </data>
+  <data name="VisualizerColorSourceDesc" xml:space="preserve">
+    <value>Spektrum rengi tema vurgusunu mu yoksa albüm kapağını mı izlesin.</value>
+  </data>
+  <data name="VisualizerColorSourceAccent" xml:space="preserve">
+    <value>Tema vurgusu</value>
+  </data>
+  <data name="VisualizerColorSourceArtwork" xml:space="preserve">
+    <value>Albüm kapağı</value>
+  </data>
+  <data name="VisualizerBarCountTitle" xml:space="preserve">
+    <value>Çubuk sayısı</value>
+  </data>
+  <data name="VisualizerBarCountDesc" xml:space="preserve">
+    <value>Spektrumda çizilecek çubuk adedi (3–16 arası).</value>
+  </data>
+  <data name="DockGroupingModeTitle" xml:space="preserve">
+    <value>Pencere gruplama</value>
+  </data>
+  <data name="DockGroupingModeDesc" xml:space="preserve">
+    <value>Aynı uygulamanın birden çok penceresi tek bir dock simgesinde toplansın mı.</value>
+  </data>
+  <data name="DockGroupingModeNever" xml:space="preserve">
+    <value>Hiçbir zaman</value>
+  </data>
+  <data name="DockGroupingModeAlways" xml:space="preserve">
+    <value>Her zaman</value>
+  </data>
+  <data name="DockGroupingModeWhenSpaceRunsOut" xml:space="preserve">
+    <value>Yer kalmayınca</value>
+  </data>
+  <data name="DockLabelModeTitle" xml:space="preserve">
+    <value>Uygulama etiketleri</value>
+  </data>
+  <data name="DockLabelModeDesc" xml:space="preserve">
+    <value>Dock simgelerinin altında uygulama adı etiketleri gösterilsin mi.</value>
+  </data>
+  <data name="DockLabelModeNever" xml:space="preserve">
+    <value>Hiçbir zaman</value>
+  </data>
+  <data name="DockLabelModeAlways" xml:space="preserve">
+    <value>Her zaman</value>
+  </data>
+  <data name="DockLabelModeOnHover" xml:space="preserve">
+    <value>Üzerine gelince</value>
+  </data>
 </root>
 

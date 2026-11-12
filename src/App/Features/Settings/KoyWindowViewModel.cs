@@ -301,6 +301,15 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private MusicCardStyle _musicCardStyle = MusicCardStyle.Tinted;
 
+    [ObservableProperty]
+    private NotchVisualizerStyle _visualizerStyle = NotchVisualizerStyle.Bars;
+
+    [ObservableProperty]
+    private NotchVisualizerColorSource _visualizerColorSource = NotchVisualizerColorSource.Accent;
+
+    [ObservableProperty]
+    private int _visualizerBarCount = 5;
+
     // ---- Canlı arka plan (issue #67). Kararlar ve doğrulama Core'da (LiveBackground*); burası yalnız bağlar. ----
 
     [ObservableProperty]
@@ -474,6 +483,54 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         NotchTabOrderVersion++;
     }
 
+    /// <summary>Ana sayfa kartları satırları (bütün kartlar, görünürlük ve sıra ayarı).</summary>
+    public ObservableCollection<HomeCardOrderItem> HomeCardOrder { get; } = [];
+
+    /// <summary>Kart sırası veya görünürlüğü değişince artar; kaydı ve çentiğin yeniden kurulmasını tetikler.</summary>
+    [ObservableProperty]
+    private int _homeCardOrderVersion;
+
+    private List<HomeCard> _homeCards = [];
+
+    private void LoadHomeCards(IEnumerable<HomeCard>? cards)
+    {
+        var normalized = HomeCardLayout.Normalize(cards);
+        _homeCards = [.. normalized];
+        HomeCardOrder.Clear();
+        foreach (var card in _homeCards)
+            HomeCardOrder.Add(new HomeCardOrderItem(card, HomeCardOrderItem.LabelOf(card), isEnabled: true, OnHomeCardChanged));
+        foreach (var card in Enum.GetValues<HomeCard>())
+        {
+            if (!_homeCards.Contains(card))
+                HomeCardOrder.Add(new HomeCardOrderItem(card, HomeCardOrderItem.LabelOf(card), isEnabled: false, OnHomeCardChanged));
+        }
+    }
+
+    private void OnHomeCardChanged()
+    {
+        _homeCards = HomeCardOrder.Where(x => x.IsEnabled).Select(x => x.Card).ToList();
+        HomeCardOrderVersion++;
+    }
+
+    [RelayCommand]
+    private void MoveHomeCardUp(HomeCard card) => MoveHomeCard(card, -1);
+
+    [RelayCommand]
+    private void MoveHomeCardDown(HomeCard card) => MoveHomeCard(card, 1);
+
+    private void MoveHomeCard(HomeCard card, int step)
+    {
+        var item = HomeCardOrder.FirstOrDefault(x => x.Card == card);
+        if (item is null) return;
+        var index = HomeCardOrder.IndexOf(item);
+        var targetIndex = index + step;
+        if (targetIndex < 0 || targetIndex >= HomeCardOrder.Count) return;
+
+        HomeCardOrder.Move(index, targetIndex);
+        _homeCards = HomeCardOrder.Where(x => x.IsEnabled).Select(x => x.Card).ToList();
+        HomeCardOrderVersion++;
+    }
+
     // --- DOCK ---
     [ObservableProperty]
     private bool _dockEnabled = true;
@@ -532,6 +589,12 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private DockLeftClickAction _dockLeftClickAction = DockLeftClickAction.MinimizeIfActive;
+
+    [ObservableProperty]
+    private DockGroupingMode _dockGroupingMode = DockGroupingMode.Never;
+
+    [ObservableProperty]
+    private DockLabelMode _dockLabelMode = DockLabelMode.Never;
 
     [ObservableProperty]
     private DockWindowMonitorScope _dockWindowMonitorScope = DockWindowMonitorScope.AllMonitors;
@@ -1075,6 +1138,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 : Koy.Core.Tray.TrayIconVisibility.Overflow;
             LoadTrayApps(s.Dock);
             DockLeftClickAction = s.Dock.LeftClickAction;
+            DockGroupingMode = s.Dock.GroupingMode;
+            DockLabelMode = s.Dock.LabelMode;
             DockWindowMonitorScope = s.Dock.WindowMonitorScope;
             // Tam genişlikte seçilemeyen mod ayar ekranında geçerli karşılığıyla görünür (çalışma anındaki eşlemeyle aynı).
             DockProximity = DockProximityMapping.Effective(DockStyle, DockProximity);
@@ -1088,6 +1153,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             MusicShowWaveform = s.Music.ShowWaveform;
             MusicCardStyle = s.Music.CardStyle;
             MusicLyricsEnabled = s.Music.LyricsEnabled;
+            VisualizerStyle = s.Music.VisualizerStyle;
+            VisualizerColorSource = s.Music.VisualizerColorSource;
+            VisualizerBarCount = NotchVisualizer.ClampBarCount(s.Music.VisualizerBarCount);
             LiveBackgroundTarget = s.Notch.LiveBackgroundTarget;
             LiveBackgroundSource = s.Notch.LiveBackgroundSource;
             LiveBackgroundPreset = LiveBackgroundPresets.Find(s.Notch.LiveBackgroundPreset).Id;
@@ -1100,6 +1168,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             NotchCloseDelayMs = NearestDelay(s.Notch.CloseDelayMs);
             NotchTabBarStyle = s.Notch.TabBarStyle;
             LoadTabOrder(s.Notch.PanelOrder);
+            LoadHomeCards(s.Notch.HomeCards);
 
             // Eski sürümlerin karışık değerleri ("Koyu", 18 vb.) seçenek değerlerine indirilir.
             Theme = s.Appearance.Theme;
@@ -1384,6 +1453,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             or nameof(Material) or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
             or nameof(NotchOpenBehavior) or nameof(WheelAction) or nameof(BatterySaverReduceMotion)
             or nameof(NotchOpenDelayMs) or nameof(NotchCloseDelayMs) or nameof(NotchTabBarStyle) or nameof(NotchTabOrderVersion)
+            or nameof(HomeCardOrderVersion) or nameof(VisualizerStyle) or nameof(VisualizerColorSource) or nameof(VisualizerBarCount)
             or nameof(LiveBackgroundTarget) or nameof(LiveBackgroundSource) or nameof(LiveBackgroundPreset) or nameof(LiveBackgroundFilePath) or nameof(LiveBackgroundScrimPercent)
             or nameof(WeatherRefreshInterval) or nameof(PomodoroWorkMinutes) or nameof(PomodoroShortBreakMinutes) or nameof(PomodoroLongBreakMinutes)
             or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
@@ -1417,6 +1487,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             OnPropertyChanged(nameof(StartIconFileName));
             Profiles.RefreshLanguage();
             Rules.Refresh();
+            LoadHomeCards(_homeCards);
         }
         catch { }
     }
@@ -1492,6 +1563,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 NewTrayIconVisibility = DockNewTrayIconVisibility,
                 TrayAppVisibility = TrayAppsForSave(),
                 LeftClickAction = DockLeftClickAction,
+                GroupingMode = DockGroupingMode,
+                LabelMode = DockLabelMode,
                 WindowMonitorScope = DockWindowMonitorScope,
                 MiddleClickAction = MiddleClickAction
             },
@@ -1529,13 +1602,17 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 // Geçersiz özel biçim kaydedilmez; boş metin yerleşik biçime döner.
                 ClockCustomDateFormat = string.IsNullOrWhiteSpace(ClockCustomDateFormat) ? ""
                     : ClockCustomDateFormatInvalid ? current.Notch.ClockCustomDateFormat : ClockCustomDateFormat,
+                HomeCards = new ValueList<HomeCard>(_homeCards),
                 EnabledPanels = new ValueList<string>(enabledPanels)
             },
             Music = current.Music with
             {
                 ShowWaveform = MusicShowWaveform,
                 CardStyle = MusicCardStyle,
-                LyricsEnabled = MusicLyricsEnabled
+                LyricsEnabled = MusicLyricsEnabled,
+                VisualizerStyle = VisualizerStyle,
+                VisualizerColorSource = VisualizerColorSource,
+                VisualizerBarCount = NotchVisualizer.ClampBarCount(VisualizerBarCount)
             },
             Appearance = current.Appearance with
             {
