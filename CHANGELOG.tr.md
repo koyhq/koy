@@ -5,6 +5,29 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.9](https://github.com/koyhq/koy/compare/v0.2.8...v0.2.9) (2026-11-12)
+Öne çıkanlar:
+- **Dock sağ tık menüsü:** Menü artık dock'un arkasında kalmıyor, dock'un dışında açılıyor; menü açıkken başka bir yere tıklayınca kapanıyor.
+- **Atlama listeleri daha çok uygulamada:** Spotify, Claude gibi Mağaza uygulamaları ve Discord gibi kendini güncelleyen uygulamalarda da Windows görev çubuğundaki sağ tık listesi geliyor.
+- **Eklenti Mağazası sağlamlaştırıldı:** Tema yedeği ve geri alma, kayıt defteri koruması, yalnız mağaza deposundan indirme; mağaza açıklamaları arayüz diline göre gösteriliyor.
+- **Güvenlik:** Derleme, .NET runtime 10.0.14'ü getiren SDK'ya sabitlendi (GHSA-p3jp-9v83-76w9).
+
+### Eklenenler
+
+* **extensions:** mağaza özeti ve açıklaması arayüz diline göre ([9b60859](https://github.com/koyhq/koy/commit/9b60859e13fa2c40877c0c969e9a50000e83d889))
+* **store:** örnek paketlere Türkçe metinler ve yerelleştirme belgesi ([f6dffad](https://github.com/koyhq/koy/commit/f6dffadc78673240e53d862d5d717bad435091bd))
+
+### Düzeltmeler
+
+* **build:** kapanış sırası düzeltildi (önce özellikler, sonra servisler); paket güvenlik uyarıları derlemeyi kırmıyor ([8817f55](https://github.com/koyhq/koy/commit/8817f55bc1e75c2feb3e5d75f0b5cc2ae0a923be))
+* **dock:** paketli ve Squirrel uygulamalarının atlama listesi bulunuyor ([02aecfd](https://github.com/koyhq/koy/commit/02aecfd0d5debf514a45a8abddf821d34c9c57d4))
+* **dock:** sağ tık menüsünün z-sırası, dışarı tıklayınca kapanma ve atlama listesi başlık yedeği ([0a11ba5](https://github.com/koyhq/koy/commit/0a11ba58637757a39d350139d2378307a2487c76))
+* **extensions:** eklenti mağazası sağlamlaştırıldı (tema yedeği, kayıt defteri, URL güveni, yerelleştirme) ([1d66d03](https://github.com/koyhq/koy/commit/1d66d03918359dd942648aa06046e3af599f4b29))
+* **extensions:** okunamayan ya da daha yeni eklenti kaydının üzerine yazılmıyor ([d643a03](https://github.com/koyhq/koy/commit/d643a033121ec6f092ee485f302df88625688eb5))
+* **extensions:** paket ve önizlemeler yalnız mağaza deposundan indiriliyor ([4c5a81c](https://github.com/koyhq/koy/commit/4c5a81c1c37906119e56bad9f4cb93998d3d16bd))
+* **extensions:** temanın özgün durumu geri yükleniyor, yarım kalan değişiklikler geri alınıyor ([2e15586](https://github.com/koyhq/koy/commit/2e155861612b72dd1b653e3265ffffba4be9c3ce))
+* **store:** kimliğin noktayla ayrılmış her parçasında ayrılmış aygıt adları reddediliyor ([e0728d5](https://github.com/koyhq/koy/commit/e0728d56509d9b66ec785366845fa81fa776ae37))
+
 ## [0.2.8](https://github.com/koyhq/koy/compare/v0.2.7...v0.2.8) (2026-11-12)
 Öne çıkanlar:
 - **Gelişmiş ayarlar sayfası yenilendi:** Ham anahtarlar yerine anlaşılır Türkçe başlıklar ve mono teknik etiketler, arama çubuğu ve modern uyarı paneli getirildi.

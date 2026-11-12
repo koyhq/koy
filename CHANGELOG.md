@@ -7,6 +7,26 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.9](https://github.com/koyhq/koy/compare/v0.2.8...v0.2.9) (2026-11-12)
+
+
+### Added
+
+* **extensions:** localize store summary and description by UI language ([9b60859](https://github.com/koyhq/koy/commit/9b60859e13fa2c40877c0c969e9a50000e83d889))
+* **store:** add Turkish texts to the sample packages and document localization ([f6dffad](https://github.com/koyhq/koy/commit/f6dffadc78673240e53d862d5d717bad435091bd))
+
+
+### Fixed
+
+* **build:** restore shutdown order and keep advisory warnings non-fatal ([8817f55](https://github.com/koyhq/koy/commit/8817f55bc1e75c2feb3e5d75f0b5cc2ae0a923be))
+* **dock:** find the jump list for packaged and Squirrel apps ([02aecfd](https://github.com/koyhq/koy/commit/02aecfd0d5debf514a45a8abddf821d34c9c57d4))
+* **dock:** fix context menu z-order, outside-click dismiss, and jump list title fallback ([0a11ba5](https://github.com/koyhq/koy/commit/0a11ba58637757a39d350139d2378307a2487c76))
+* **extensions:** harden the extension store (theme backup, registry, URL trust, localization) ([1d66d03](https://github.com/koyhq/koy/commit/1d66d03918359dd942648aa06046e3af599f4b29))
+* **extensions:** never overwrite an unreadable or newer extension registry ([d643a03](https://github.com/koyhq/koy/commit/d643a033121ec6f092ee485f302df88625688eb5))
+* **extensions:** only download packages and previews from the store repository ([4c5a81c](https://github.com/koyhq/koy/commit/4c5a81c1c37906119e56bad9f4cb93998d3d16bd))
+* **extensions:** restore the original theme state and roll back half-applied changes ([2e15586](https://github.com/koyhq/koy/commit/2e155861612b72dd1b653e3265ffffba4be9c3ce))
+* **store:** reject reserved device names in any dot-separated id part ([e0728d5](https://github.com/koyhq/koy/commit/e0728d56509d9b66ec785366845fa81fa776ae37))
+
 ## [0.2.8](https://github.com/koyhq/koy/compare/v0.2.7...v0.2.8) (2026-11-12)
 
 
