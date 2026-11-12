@@ -28,6 +28,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     /// <summary>Kısayollar sayfası: tuş yakalama, kayıt ve hata durumu.</summary>
     public ShortcutsViewModel Shortcuts { get; }
+    public ProfilesViewModel Profiles { get; }
 
     /// <summary>Ekranlar sayfası: monitör şeması ve ekran başına ayarlar.</summary>
     public DisplaysViewModel Displays { get; }
@@ -443,6 +444,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     {
         _store = store ?? new SettingsStore(SettingsStore.DefaultPath);
         Shortcuts = new ShortcutsViewModel(_store);
+        Profiles = new ProfilesViewModel(ProfileService.Instance);
+        ProfileService.Instance.Applied += OnProfileApplied;
         Displays = new DisplaysViewModel(_store);
         Weather = new WeatherLocationViewModel(_store);
         UpdateStatus.Changed += OnUpdateStatusChanged;
@@ -450,6 +453,14 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         LoadFromSettings();
         NotchFeature.NotificationAccessChanged += OnNotificationAccessChanged;
         RefreshNotificationPermission();
+    }
+
+    // Profil (bu pencereden ya da bir kuraldan) uygulandı: değerler diskteki yeni ayarlardan okunur, aksi halde bir
+    // sonraki kayıt eski değerleri geri yazardı. Ayarlar sıfırlamasıyla aynı yenileme.
+    private void OnProfileApplied(Koy.Core.Settings.Profiles.SavedProfile profile)
+    {
+        LoadFromSettings();
+        SettingsSaved?.Invoke();
     }
 
     partial void OnNotchShowNotificationsChanged(bool value) => RefreshNotificationPermission();
@@ -739,6 +750,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             OnPropertyChanged(nameof(UninstallRowDescription));
             OnPropertyChanged(nameof(DownloadProgressText));
             OnPropertyChanged(nameof(StartIconFileName));
+            Profiles.RefreshLanguage();
         }
         catch { }
     }
