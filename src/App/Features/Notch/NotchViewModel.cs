@@ -406,22 +406,40 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
             return;
 
         UpdateClock();
+        // Dakika başına hizalı: dakikada bir uyanır, saat dakika döner dönmez değişir (ClockTick).
         _clockTimer = new DispatcherTimer(DispatcherPriority.Background, _dispatcher)
         {
-            Interval = TimeSpan.FromSeconds(15)
+            Interval = ClockTick.DelayToNextMinute(DateTime.Now)
         };
-        _clockTimer.Tick += (_, _) => UpdateClock();
+        _clockTimer.Tick += (_, _) => OnClockTick();
         _clockTimer.Start();
+        // Saat ya da saat dilimi elle değişirse bir sonraki dakikayı beklemeden düzelt.
+        Microsoft.Win32.SystemEvents.TimeChanged += OnSystemTimeChanged;
     }
 
     private void StopClockTimer()
     {
         if (_clockTimer is not null)
         {
+            Microsoft.Win32.SystemEvents.TimeChanged -= OnSystemTimeChanged;
             _clockTimer.Stop();
             _clockTimer = null;
         }
     }
+
+    private void OnClockTick()
+    {
+        UpdateClock();
+        if (_clockTimer is not null)
+            _clockTimer.Interval = ClockTick.DelayToNextMinute(DateTime.Now);
+    }
+
+    // SystemEvents kendi iş parçacığında çağırır; saat UI iş parçacığında yenilenir.
+    private void OnSystemTimeChanged(object? sender, EventArgs e) => RunOnUi(() =>
+    {
+        TimeZoneInfo.ClearCachedData();
+        OnClockTick();
+    });
 
     private void UpdateClock()
     {

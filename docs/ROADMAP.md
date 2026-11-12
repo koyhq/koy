@@ -638,6 +638,14 @@ Karar (2026-11-11): paketsiz süreçte `NotificationChanged` aboneliği 0x800704
 - [x] `DockItems` (sıra, klasörler) değişince dock yeniden kurulmaz (`DockSettingsDiff`).
 - [ ] Sahip doğrulaması (uygulama çalıştırılarak): gerçek v0.2.6 `settings.json` ile her sayfa değerlerini korur mu; görev çubuğu kill → geri gelir (AGENTS #7); `scripts/measure-memory.ps1` ve `docs/MEMORY.md` satırı.
 
+## Çentik hareketi: sekmesiz kapanış ve raf darbesi (2026-11-11)
+Fikir kaynağı: Nusa incelemesi (`arastirma/nusa/RAPOR.md`, git dışı). Kod ve değerler bizim.
+- [x] **Core (testli):** `Spring.Damping` ayarlanabilir, `CriticalDamping` (2·√(sertlik·kütle)) ve `Kick(hız)` eklendi.
+- [x] **Kapanış:** `NotchWindow.Retarget` küçülen eksende kritik sönüm, büyüyen eksende eski hafif sekme (26). Eskiden 620→236 kapanışta ~8,5 DIP içe çöküyordu.
+- [x] **Raf darbesi:** dosya ya da metin bırakılınca çentik üst ortadan esneyip seker (`_gulp`, 260/14, darbe 30; yatay +%2,5, dikey −%5; yatay esneme tuvali aşmaz). Hareket azaltma ve Animasyon: Kapalı iken yok.
+- [x] **Saat:** çentik saati 15 sn yerine dakika başına hizalı zamanlayıcıyla yenilenir (`Core/Notch/ClockTick`, testli: dakika dönünce +30 ms, en az 100 ms). Saat ya da saat dilimi elle değişince `SystemEvents.TimeChanged` hemen düzeltir.
+- [ ] Elle sınama: kapanışın oturması, rafa dosya bırakınca esneme, hareket azaltmada darbenin çıkmaması, saatin dakika döner dönmez ve elle saat değişince güncellenmesi.
+
 ## Dört kenarda dock ve geometri kontrolleri (#73, N15)
 - [x] **Core (Bilet 1, testli):** `DockPositionResolver` 4 kenar yerleşimi, saklanma ötelemeleri (`TranslationX`/`TranslationY`), yönlü köşe yuvarlatmaları, `DockLayoutLimits`, `DockFitMath.SlotWidth/FitIconSize` simge aralığı (`iconSpacingDip`), `EdgeRevealTracker` 4 kenar algılama, `AppBarMath` ve `AppBarOwnership` 4 kenar çalışma alanı matematiği, `DockSettingsDiff` kenar/uzunluk/ofset tepkisi, `WindowPlacementMath.EdgeBar` ve `EdgeCapsule` çoklu kenar pencere yerleşimleri.
 - [x] **Platform & App Dock Window (Bilet 2):** `IAppBarService`/`AppBarService` `DockEdge` desteği (`ABE_LEFT`, `ABE_TOP`, `ABE_RIGHT`, `ABE_BOTTOM`), HWND başına kenar takibi ve sızıntısız yeniden kayıt (`Reregister`: `ABM_REMOVE` + `ABM_NEW`), `DockFeature` eksene duyarlı DPI ve kalınlık senkronizasyonu, `DockViewModel` dikey mod ve 2B öteleme, `DockWindow.xaml` 2B Transform ve kenara duyarlı dodge tutamağı, `DockItemsStrip` dikey/yatay şerit ve sürükle-bırak (`DockReorderHelper`), `FolderPanel` 4 kenara doğru açılma ve yay animasyonu, `DockFullWidth` dikey kenar için 3 satırlı düzen.
