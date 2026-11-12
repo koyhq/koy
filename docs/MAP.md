@@ -119,6 +119,7 @@ Kısayollar sayfasındaki satır `ShortcutBindings.All` listesinden kendiliğind
 | Hareket | `src/App/Resources/Motion.cs`, `src/Core/Appearance/MotionPolicy.cs`, `src/Core/Animation/Spring.cs` |
 | Tema kararı | `src/App/Resources/ThemeManager.cs`, `src/Core/Appearance/` |
 | Marka simgeleri | `assets/branding/`, sonra `python scripts/generate-icons.py` |
+| Dock uygulama simgesi: paket klasörü, uygulama başına değişim | Karar: `src/Core/Appearance/` (`IconResolver`, `IconPackFiles`, `AppIconKey`, `AppIconOverrides`). Yükleme: `src/App/Features/Dock/DockAppIcons.cs`. Menü: `DockItemsStrip.xaml`, kayıt: `DockViewModel.ChangeAppIcon`. Ayar satırı: `GorunumPage.xaml` |
 
 Unutma: Animasyon `Spring` ile yapılır ve yalnız hareket varken kare çizer (AGENTS #6). Yazılımla çizim varsayılandır (AGENTS #3).
 

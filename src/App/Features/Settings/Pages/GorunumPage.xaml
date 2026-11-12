@@ -202,6 +202,46 @@
             </Grid>
         </Border>
 
+        <!-- SİMGE PAKETİ -->
+        <Border Style="{StaticResource SettingRowStyle}">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [IconPackTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                        <TextBlock Text="{Binding [IconPackDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                    </StackPanel>
+                    <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton GroupName="IconPack" Style="{StaticResource SegRadioStyle}"
+                                         Content="{Binding [IconPackBuiltin], Source={x:Static res:Loc.Instance}}"
+                                         IsChecked="{Binding IconPack, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Builtin}" />
+                            <RadioButton GroupName="IconPack" Style="{StaticResource SegRadioStyle}"
+                                         Content="{Binding [IconPackFolder], Source={x:Static res:Loc.Instance}}"
+                                         IsChecked="{Binding IconPack, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Folder}"
+                                         Command="{Binding PickIconPackFolderCommand}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                <Grid Margin="0,10,0,0">
+                    <Grid.Visibility>
+                        <Binding Path="IconPack" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="Folder" />
+                    </Grid.Visibility>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding IconPackFolderName}" Style="{StaticResource SettingDescStyle}"
+                               VerticalAlignment="Center" Margin="0,0,16,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                    <Button Grid.Column="1" Content="{Binding [IconPackFolderChoose], Source={x:Static res:Loc.Instance}}"
+                            Command="{Binding PickIconPackFolderCommand}" Style="{StaticResource SettingButtonStyle}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
         <!-- HAREKET -->
         <TextBlock Text="{Binding [MotionHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 
