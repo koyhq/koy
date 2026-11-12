@@ -68,6 +68,8 @@ public static class SettingsProfileCodec
         {
             Appearance = current.Appearance with { AppIconOverrides = new() },
             Dock = current.Dock with { StartIconPath = "" },
+            // Canlı arka plan dosyasının yolu da bu makineye özgü.
+            Notch = current.Notch with { LiveBackgroundFilePath = "" },
         };
         var full = (JsonObject)JsonSerializer.SerializeToNode(shareable, SettingsJsonContext.Default.AppSettings)!;
         var settings = new JsonObject { ["Version"] = AppSettings.CurrentVersion };
@@ -218,7 +220,8 @@ public static class SettingsProfileCodec
                     || !IsSaneList(s.Notch.EnabledPanels) || !IsSaneList(s.Notch.ControlCenterLayout)
                     || !Enum.IsDefined(s.Notch.TabBarStyle) || !IsSaneList(s.Notch.PanelOrder)
                     || s.Notch.HomeCards is null || s.Notch.HomeCards.Count > MaxListItems || !s.Notch.HomeCards.All(Enum.IsDefined)
-                    || !Enum.IsDefined(s.Notch.ClockHourFormat) || !Enum.IsDefined(s.Notch.ClockFirstDayOfWeek),
+                    || !Enum.IsDefined(s.Notch.ClockHourFormat) || !Enum.IsDefined(s.Notch.ClockFirstDayOfWeek)
+                    || !Enum.IsDefined(s.Notch.LiveBackgroundTarget) || !Enum.IsDefined(s.Notch.LiveBackgroundSource),
                 ProfileSection.Music =>
                     !Enum.IsDefined(s.Music.CardStyle) || !Enum.IsDefined(s.Music.VisualizerStyle)
                     || !Enum.IsDefined(s.Music.VisualizerColorSource),
@@ -298,6 +301,7 @@ public static class SettingsProfileCodec
                     {
                         EnabledPanels = new ValueList<string>(profile.Settings.Notch.EnabledPanels),
                         ControlCenterLayout = new ValueList<string>(profile.Settings.Notch.ControlCenterLayout),
+                        LiveBackgroundFilePath = current.Notch.LiveBackgroundFilePath,
                     },
                 },
                 ProfileSection.Music => result with { Music = profile.Settings.Music with { } },
