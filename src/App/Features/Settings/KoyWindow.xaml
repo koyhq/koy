@@ -278,7 +278,7 @@
                     </Grid>
 
                     <!-- Sayfa başına "Varsayılana döndür" (issue #69): başlığın sağında, iki adımlı onay. Dock ve Ekranlar'da yok. -->
-                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,16,0" Orientation="Horizontal"
+                    <StackPanel x:Name="ResetPageHost" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,16,0" Orientation="Horizontal"
                                 Background="{DynamicResource KoyBgWindow}"
                                 Visibility="{Binding CanResetPage, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}">
                         <TextBlock Text="{Binding [SettingsResetPageDone], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}"
@@ -297,6 +297,34 @@
                                     Style="{StaticResource DangerButtonStyle}" />
                         </StackPanel>
                     </StackPanel>
+
+                    <!-- "Yalnız değişenler" açıkken sayfada değişmiş ayar yoksa temiz boş durum bildirimi (issue #69) -->
+                    <Border x:Name="EmptyChangedState"
+                            Visibility="Collapsed"
+                            Margin="0,96,0,0"
+                            Padding="32,48"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Top">
+                        <StackPanel HorizontalAlignment="Center">
+                            <Border Width="48" Height="48" CornerRadius="24"
+                                    Background="{DynamicResource KoyBgControl}"
+                                    BorderBrush="{DynamicResource KoyBorderHairline}"
+                                    BorderThickness="1"
+                                    HorizontalAlignment="Center" Margin="0,0,0,16">
+                                <res:KoyIcon Data="{StaticResource IconCheck}" Size="22" StrokeWidth="2.5"
+                                             Foreground="{DynamicResource KoyStatusOk}"
+                                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="{Binding [SettingsNoChangedOnPage], Source={x:Static res:Loc.Instance}}"
+                                       FontSize="15" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource KoyTextPrimary}"
+                                       HorizontalAlignment="Center" Margin="0,0,0,6" />
+                            <TextBlock Text="{Binding [SettingsNoChangedOnPageDesc], Source={x:Static res:Loc.Instance}}"
+                                       FontSize="{DynamicResource KoyFontCaption}"
+                                       Foreground="{DynamicResource KoyTextMuted}"
+                                       HorizontalAlignment="Center" TextAlignment="Center" />
+                        </StackPanel>
+                    </Border>
                     </Grid>
                 </ScrollViewer>
             </Grid>

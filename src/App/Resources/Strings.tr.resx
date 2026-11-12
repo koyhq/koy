@@ -1497,6 +1497,12 @@
   <data name="SettingsShowChangedOnly" xml:space="preserve">
     <value>Yalnız değişenleri göster</value>
   </data>
+  <data name="SettingsNoChangedOnPage" xml:space="preserve">
+    <value>Bu sayfada değiştirilmiş ayar yok</value>
+  </data>
+  <data name="SettingsNoChangedOnPageDesc" xml:space="preserve">
+    <value>Bu sayfadaki tüm ayarlar varsayılan değerindedir.</value>
+  </data>
   <data name="SettingsResetPage" xml:space="preserve">
     <value>Varsayılana döndür</value>
   </data>

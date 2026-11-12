@@ -1497,6 +1497,12 @@
   <data name="SettingsShowChangedOnly" xml:space="preserve">
     <value>Show changed only</value>
   </data>
+  <data name="SettingsNoChangedOnPage" xml:space="preserve">
+    <value>No changed settings on this page</value>
+  </data>
+  <data name="SettingsNoChangedOnPageDesc" xml:space="preserve">
+    <value>All settings on this page are set to their default values.</value>
+  </data>
   <data name="SettingsResetPage" xml:space="preserve">
     <value>Restore defaults</value>
   </data>
