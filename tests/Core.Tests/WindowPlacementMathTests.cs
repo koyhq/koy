@@ -1,4 +1,5 @@
 using Koy.Core.Display;
+using Koy.Core.Dock;
 using Koy.Core.Shell;
 using Xunit;
 
@@ -122,5 +123,42 @@ public class WindowPlacementMathTests
 
         Assert.Equal(9, onMain.Top - Main.Bounds.Top);
         Assert.Equal(14, onSide.Top - Side.Bounds.Top);
+    }
+
+    [Theory]
+    [InlineData(DockEdge.Bottom, 0, 1032, 1920, 48)]
+    [InlineData(DockEdge.Top, 0, 0, 1920, 48)]
+    [InlineData(DockEdge.Left, 0, 0, 48, 1080)]
+    [InlineData(DockEdge.Right, 1872, 0, 48, 1080)]
+    public void EdgeBar_FullLength_PlacesOnAllEdges(DockEdge edge, int expX, int expY, int expW, int expH)
+    {
+        var rect = WindowPlacementMath.EdgeBar(Main, edge, 48, 100, 0);
+
+        Assert.Equal(expX, rect.Left);
+        Assert.Equal(expY, rect.Top);
+        Assert.Equal(expW, rect.Width);
+        Assert.Equal(expH, rect.Height);
+    }
+
+    [Fact]
+    public void EdgeBar_WithLengthPercentAndOffset()
+    {
+        var rect = WindowPlacementMath.EdgeBar(Main, DockEdge.Top, 48, lengthPercent: 50, edgeOffsetDip: 10);
+
+        Assert.Equal(480, rect.Left);
+        Assert.Equal(960, rect.Width);
+        Assert.Equal(10, rect.Top);
+        Assert.Equal(48, rect.Height);
+    }
+
+    [Fact]
+    public void EdgeCapsule_LeftEdge_PlacesVerticallyCentered()
+    {
+        var rect = WindowPlacementMath.EdgeCapsule(Main, DockEdge.Left, 500, 60, 10);
+
+        Assert.Equal(10, rect.Left);
+        Assert.Equal(60, rect.Width);
+        Assert.Equal(500, rect.Height);
+        Assert.Equal((1080 - 500) / 2, rect.Top);
     }
 }

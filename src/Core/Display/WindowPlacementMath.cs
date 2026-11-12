@@ -1,3 +1,4 @@
+using Koy.Core.Dock;
 using Koy.Core.Shell;
 
 namespace Koy.Core.Display;
@@ -52,6 +53,71 @@ public static class WindowPlacementMath
     {
         var height = ToPixels(heightDip, monitor.DpiScaleY);
         return new WindowRect(monitor.Bounds.Left, monitor.Bounds.Bottom - height, monitor.Bounds.Right, monitor.Bounds.Bottom);
+    }
+
+    /// <summary>Verilen kenarda tam boy (veya uzunluk yüzdeli) dock penceresi yerleşimi (piksel).</summary>
+    public static WindowRect EdgeBar(
+        DisplayMonitor monitor,
+        DockEdge edge,
+        double thicknessDip,
+        int lengthPercent = DockLayoutLimits.DefaultLengthPercent,
+        double edgeOffsetDip = DockLayoutLimits.DefaultEdgeOffsetDip)
+    {
+        if (!Enum.IsDefined(edge)) edge = DockEdge.Bottom;
+        var thickness = ToPixels(thicknessDip, edge is DockEdge.Bottom or DockEdge.Top ? monitor.DpiScaleY : monitor.DpiScaleX);
+        var offset = ToPixels(Math.Max(0.0, edgeOffsetDip), edge is DockEdge.Bottom or DockEdge.Top ? monitor.DpiScaleY : monitor.DpiScaleX);
+        var lengthFraction = DockLayoutLimits.ClampLengthPercent(lengthPercent) / 100.0;
+
+        if (edge is DockEdge.Bottom or DockEdge.Top)
+        {
+            var width = (int)Math.Round(monitor.Bounds.Width * lengthFraction);
+            var left = monitor.Bounds.Left + (monitor.Bounds.Width - width) / 2;
+            var top = edge == DockEdge.Bottom
+                ? monitor.Bounds.Bottom - offset - thickness
+                : monitor.Bounds.Top + offset;
+            return new WindowRect(left, top, left + width, top + thickness);
+        }
+        else
+        {
+            var height = (int)Math.Round(monitor.Bounds.Height * lengthFraction);
+            var top = monitor.Bounds.Top + (monitor.Bounds.Height - height) / 2;
+            var left = edge == DockEdge.Left
+                ? monitor.Bounds.Left + offset
+                : monitor.Bounds.Right - offset - thickness;
+            return new WindowRect(left, top, left + thickness, top + height);
+        }
+    }
+
+    /// <summary>Verilen kenarda kapsül dock penceresi yerleşimi (piksel).</summary>
+    public static WindowRect EdgeCapsule(
+        DisplayMonitor monitor,
+        DockEdge edge,
+        double lengthDip,
+        double thicknessDip,
+        double edgeMarginDip)
+    {
+        if (!Enum.IsDefined(edge)) edge = DockEdge.Bottom;
+        var thickness = ToPixels(thicknessDip, edge is DockEdge.Bottom or DockEdge.Top ? monitor.DpiScaleY : monitor.DpiScaleX);
+        var margin = ToPixels(Math.Max(0.0, edgeMarginDip), edge is DockEdge.Bottom or DockEdge.Top ? monitor.DpiScaleY : monitor.DpiScaleX);
+
+        if (edge is DockEdge.Bottom or DockEdge.Top)
+        {
+            var width = Math.Min(ToPixels(lengthDip, monitor.DpiScaleX), monitor.Bounds.Width);
+            var left = monitor.Bounds.Left + (monitor.Bounds.Width - width) / 2;
+            var top = edge == DockEdge.Bottom
+                ? monitor.Bounds.Bottom - margin - thickness
+                : monitor.Bounds.Top + margin;
+            return new WindowRect(left, top, left + width, top + thickness);
+        }
+        else
+        {
+            var height = Math.Min(ToPixels(lengthDip, monitor.DpiScaleY), monitor.Bounds.Height);
+            var top = monitor.Bounds.Top + (monitor.Bounds.Height - height) / 2;
+            var left = edge == DockEdge.Left
+                ? monitor.Bounds.Left + margin
+                : monitor.Bounds.Right - margin - thickness;
+            return new WindowRect(left, top, left + thickness, top + height);
+        }
     }
 
     /// <summary>

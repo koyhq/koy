@@ -170,4 +170,37 @@ public class DockSettingsDiffTests
         Assert.True(d.ReconcilePower);
         Assert.True(d.RebuildViewModels);
     }
+
+    [Fact]
+    public void Edge_change_reconciles_appbar_and_rebuilds()
+    {
+        var d = DockSettingsDiff.Compare(
+            new AppSettings { Dock = new DockSettings { Edge = DockEdge.Bottom } },
+            new AppSettings { Dock = new DockSettings { Edge = DockEdge.Top } });
+
+        Assert.True(d.ReconcileAppBar);
+        Assert.True(d.RebuildViewModels);
+    }
+
+    [Fact]
+    public void LengthPercent_change_reconciles_appbar_and_rebuilds()
+    {
+        var d = DockSettingsDiff.Compare(
+            new AppSettings { Dock = new DockSettings { LengthPercent = 100 } },
+            new AppSettings { Dock = new DockSettings { LengthPercent = 80 } });
+
+        Assert.True(d.ReconcileAppBar);
+        Assert.True(d.RebuildViewModels);
+    }
+
+    [Fact]
+    public void EdgeOffsetDip_change_reconciles_appbar_and_rebuilds()
+    {
+        var d = DockSettingsDiff.Compare(
+            new AppSettings { Dock = new DockSettings { EdgeOffsetDip = 0.0 } },
+            new AppSettings { Dock = new DockSettings { EdgeOffsetDip = 10.0 } });
+
+        Assert.True(d.ReconcileAppBar);
+        Assert.True(d.RebuildViewModels);
+    }
 }

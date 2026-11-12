@@ -515,4 +515,113 @@ public class DockPositionResolverTests
 
         Assert.Equal(without, withMouse);
     }
+
+    [Fact]
+    public void TopEdge_FloatingCapsule_SnapsToTopWithCorrectCorners()
+    {
+        // Approaching window at top (top <= 80)
+        var approaching = new WindowRect(100, 20, 800, 500);
+        var result = DockPositionResolver.Resolve(
+            monitor: Primary1080p,
+            dockStyle: DockStyleMode.FloatingCapsule,
+            proximityMode: DockProximityMode.DockDown,
+            contentWidthDip: 500.0,
+            foregroundWindowBoundsDip: approaching,
+            edge: DockEdge.Top);
+
+        Assert.True(result.IsSnapped);
+        Assert.Equal(0.0, result.TopDip);
+        Assert.Equal(46.0, result.HeightDip);
+        Assert.Equal(0.0, result.CornerRadiusTopLeft);
+        Assert.Equal(0.0, result.CornerRadiusTopRight);
+        Assert.Equal(14.0, result.CornerRadiusBottomRight);
+        Assert.Equal(14.0, result.CornerRadiusBottomLeft);
+    }
+
+    [Fact]
+    public void LeftEdge_FloatingCapsule_SnapsToLeftWithCorrectCorners()
+    {
+        // Approaching window at left (left <= 80)
+        var approaching = new WindowRect(30, 200, 800, 700);
+        var result = DockPositionResolver.Resolve(
+            monitor: Primary1080p,
+            dockStyle: DockStyleMode.FloatingCapsule,
+            proximityMode: DockProximityMode.DockDown,
+            contentWidthDip: 500.0,
+            foregroundWindowBoundsDip: approaching,
+            edge: DockEdge.Left);
+
+        Assert.True(result.IsSnapped);
+        Assert.Equal(0.0, result.LeftDip);
+        Assert.Equal(46.0, result.WidthDip);
+        Assert.Equal(500.0, result.HeightDip);
+        Assert.Equal(0.0, result.CornerRadiusTopLeft);
+        Assert.Equal(14.0, result.CornerRadiusTopRight);
+        Assert.Equal(14.0, result.CornerRadiusBottomRight);
+        Assert.Equal(0.0, result.CornerRadiusBottomLeft);
+    }
+
+    [Fact]
+    public void RightEdge_FloatingCapsule_SnapsToRightWithCorrectCorners()
+    {
+        // Approaching window at right (right >= 1920 - 80 = 1840)
+        var approaching = new WindowRect(1500, 200, 1900, 700);
+        var result = DockPositionResolver.Resolve(
+            monitor: Primary1080p,
+            dockStyle: DockStyleMode.FloatingCapsule,
+            proximityMode: DockProximityMode.DockDown,
+            contentWidthDip: 500.0,
+            foregroundWindowBoundsDip: approaching,
+            edge: DockEdge.Right);
+
+        Assert.True(result.IsSnapped);
+        Assert.Equal(1920 - 46.0, result.LeftDip);
+        Assert.Equal(46.0, result.WidthDip);
+        Assert.Equal(500.0, result.HeightDip);
+        Assert.Equal(14.0, result.CornerRadiusTopLeft);
+        Assert.Equal(0.0, result.CornerRadiusTopRight);
+        Assert.Equal(0.0, result.CornerRadiusBottomRight);
+        Assert.Equal(14.0, result.CornerRadiusBottomLeft);
+    }
+
+    [Theory]
+    [InlineData(DockEdge.Bottom, 0.0, 58.0)]
+    [InlineData(DockEdge.Top, 0.0, -58.0)]
+    [InlineData(DockEdge.Left, -58.0, 0.0)]
+    [InlineData(DockEdge.Right, 58.0, 0.0)]
+    public void FullWidth_HiddenTranslation_DirectsAwayFromEdge(DockEdge edge, double expectedTx, double expectedTy)
+    {
+        var result = DockPositionResolver.Resolve(
+            monitor: Primary1080p,
+            dockStyle: DockStyleMode.FullWidth,
+            proximityMode: DockProximityMode.AlwaysHidden,
+            contentWidthDip: 500.0,
+            foregroundWindowBoundsDip: WindowRect.Empty,
+            isMouseAtBottomEdge: false,
+            isMouseOverDock: false,
+            edge: edge);
+
+        Assert.True(result.IsHidden);
+        Assert.Equal(expectedTx, result.TranslationX);
+        Assert.Equal(expectedTy, result.TranslationY);
+    }
+
+    [Fact]
+    public void FullWidth_LengthPercent_And_EdgeOffset_AppliedCorrectly()
+    {
+        var result = DockPositionResolver.Resolve(
+            monitor: Primary1080p,
+            dockStyle: DockStyleMode.FullWidth,
+            proximityMode: DockProximityMode.ReserveSpace,
+            contentWidthDip: 0,
+            foregroundWindowBoundsDip: WindowRect.Empty,
+            edge: DockEdge.Bottom,
+            lengthPercent: 50,
+            edgeOffsetDip: 12.0);
+
+        Assert.Equal(960.0, result.WidthDip);
+        Assert.Equal(480.0, result.LeftDip);
+        Assert.Equal(1080.0 - 12.0 - 48.0, result.TopDip);
+        Assert.Equal(48.0, result.HeightDip);
+    }
 }
