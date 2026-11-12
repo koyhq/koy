@@ -129,6 +129,17 @@ public static class Program
                 RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-{PageNames[i]}.png"));
             }
 
+            // "Yalnız değişenleri göster" filtre görünümü: değişmeyen sayfada boş durum, değişen sayfada gruplu satırlar
+            vm.SelectPage(0);
+            vm.ShowChangedOnly = true;
+            RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-genel-yalniz-degisenler.png"));
+
+            vm.MusicLyricsEnabled = true;
+            vm.NotchOpenBehavior = Koy.Core.Notch.NotchOpenBehavior.Click;
+            vm.SelectPage(1);
+            RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-centik-yalniz-degisenler.png"));
+            vm.ShowChangedOnly = false;
+
             var wizardVm = new SetupWizardViewModel(store);
             var wizard = new SetupWizardWindow(wizardVm);
             for (var step = 1; step <= SetupWizardViewModel.LastStep; step++)

@@ -281,6 +281,45 @@ public partial class KoyWindow : Window
 
     private void ApplyPageCustomFilterState(bool only, HashSet<string> changed)
     {
+        // Sayfa 0 (Genel): Değişen ayar yoksa profil/kural boş durum metinlerini ve alt blokları gizle
+        if (PagesHost.Children.Count > 0 && PagesHost.Children[0] is FrameworkElement page0)
+        {
+            var hasChangedGeneral = HasChangedSettingsOnPage(0, changed);
+            var rootPanel = LogicalTreeHelper.GetChildren(page0).OfType<System.Windows.Controls.Panel>().FirstOrDefault();
+            if (rootPanel is not null)
+            {
+                for (var i = 2; i < rootPanel.Children.Count; i++)
+                {
+                    var child = rootPanel.Children[i] as FrameworkElement;
+                    if (child is not null && child.Style != Application.Current?.TryFindResource("SectionHeaderStyle") && child.Style != Application.Current?.TryFindResource("SettingRowStyle"))
+                    {
+                        if (only && !hasChangedGeneral)
+                            child.Visibility = Visibility.Collapsed;
+                        else
+                            child.ClearValue(VisibilityProperty);
+                    }
+                }
+            }
+        }
+
+        // Sayfa 1 (Çentik): Hava durumu ayarı değişmemişse durum bildirim satırını gizle
+        if (PagesHost.Children.Count > 1 && PagesHost.Children[1] is FrameworkElement page1)
+        {
+            var hasChangedWeather = changed.Any(k => k.StartsWith("Weather.", StringComparison.Ordinal));
+            if (only && !hasChangedWeather)
+            {
+                var weatherRows = Index.Rows.Where(r => r.PageIndex == 1 && r.SettingKey is null).Select(r => r.Element);
+                foreach (var el in weatherRows)
+                    el.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                var weatherRows = Index.Rows.Where(r => r.PageIndex == 1 && r.SettingKey is null).Select(r => r.Element);
+                foreach (var el in weatherRows)
+                    el.ClearValue(VisibilityProperty);
+            }
+        }
+
         // Sayfa 3 (Ekranlar): Değişen ayar yoksa şemayı ve seçim panelini gizle
         if (PagesHost.Children.Count > 3 && PagesHost.Children[3] is FrameworkElement page3)
         {
