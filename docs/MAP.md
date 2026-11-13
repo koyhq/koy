@@ -74,6 +74,7 @@ Unutma: Bildirim yoklaması AGENTS #5'in tek yoklama istisnasıdır (paketsiz s�
 | Core | `src/Core/Notch/LiveBackgroundPolicy.cs` | Hedef/kaynak enum'ları, önayar kataloğu, `LiveBackgroundPlaybackPolicy` (Off / ilk kare / oynat), yerel dosya doğrulayıcı, kare ve bellek sınırları (`GifFramePlan`, `LiveBackgroundLimits`) |
 | Core | `src/Core/Background/` | Eski dilim: `BackgroundAnimationPolicy` (hareket kuralı, `LiveBackgroundPlaybackPolicy` buna devreder) ve `BackgroundSourceValidator` (yol denetimi) |
 | Core | `src/Core/Settings/SettingsSections.cs` | `NotchSettings.LiveBackground*` (varsayılan hedef: Kapalı) |
+| Core | `src/Core/Notch/Effects/` | Kodlu efektler: `BackgroundEffect` (küçük tampon, `Downscale`, 15 fps), `BackgroundEffects.All`, `EffectMath` (gürültü, fbm, palet, ışık noktası). Yeni efekt: sınıf + `All` + `LiveBackgroundPresets`'e `Effect` alanlı satır + `LiveBgPreset<Ad>` (iki resx). Testler `tests/Core.Tests/Notch/BackgroundEffectsTests.cs` (kare süresi bütçesi dahil); görsel `Koy.UiSnapshots --scene efektler`, CPU `--scene efekt-cpu` |
 | App | `src/App/Features/Notch/LiveBackground/` | `LiveBackgroundState` (karar girdileri), `LiveBackgroundHost` (çizim, animasyon saatleri, video), `LiveBackgroundLoader` (GIF çözücü, 620 px, dondurulmuş kareler) |
 | App | `NotchWindow.xaml`, `Home/HomePanel.xaml` | Host, çentik zemininin ve müzik kartı zemininin içeriğin altında |
 | App | `Settings/Pages/CentikPage.xaml`, `KoyWindowViewModel.cs` | "Görseller" bölümü: hedef, kaynak, önayar, dosya seçici, perde |

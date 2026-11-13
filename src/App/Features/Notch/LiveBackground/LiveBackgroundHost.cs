@@ -1,8 +1,12 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Diagnostics;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Koy.Core.Notch;
+using Koy.Core.Notch.Effects;
 
 namespace Koy.App.Features.Notch.LiveBackground;
 
@@ -12,7 +16,8 @@ namespace Koy.App.Features.Notch.LiveBackground;
 /// Kararı vermez: <see cref="Mode"/> Core'dan gelir (<see cref="LiveBackgroundPlaybackPolicy.Decide"/>).
 /// <see cref="LiveBackgroundPlaybackMode.Off"/> iken (çentik kapalı / gizli, yüzey hedef dışı), öğe ağaçtan çıkınca ya da
 /// görünmez olunca bütün animasyon saatleri durdurulur, kareler ve medya bırakılır: boşta CPU ve bellek sıfır (AGENTS #5, #6).
-/// Zamanlayıcı ya da CompositionTarget.Rendering kullanılmaz; yalnız WPF animasyon saatleri.
+/// Renk geçişi, GIF ve video WPF animasyon saatleriyle döner. Kodlu efektler (<see cref="BackgroundEffect"/>) küçük bir
+/// tampona çizilir ve efektin kare hızında bir zamanlayıcıyla yenilenir; zamanlayıcı yalnız oynarken kuruludur.
 /// </summary>
 public sealed class LiveBackgroundHost : Border
 {
@@ -56,6 +61,7 @@ public sealed class LiveBackgroundHost : Border
     private readonly Border _scrim = new() { Background = Brushes.Black, Opacity = 0.65, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
 
     private CancellationTokenSource? _loading;
+    private DispatcherTimer? _effectTimer;
     private MediaElement? _media;
     private (LiveBackgroundSelection Selection, LiveBackgroundPlaybackMode Mode)? _applied;
 
@@ -108,6 +114,10 @@ public sealed class LiveBackgroundHost : Border
 
         switch (selection.Kind)
         {
+            case LiveBackgroundContentKind.Ambient when selection.Preset is { Effect: { } effectId } preset
+                                                        && BackgroundEffects.Find(effectId) is { } effect:
+                ShowEffect(effect, preset, animate);
+                break;
             case LiveBackgroundContentKind.Ambient when selection.Preset is { } preset:
                 ShowAmbient(preset, animate);
                 break;
@@ -143,6 +153,51 @@ public sealed class LiveBackgroundHost : Border
             Timeline.SetDesiredFrameRate(animation, DesiredFrameRate);
             brush.GradientStops[i].BeginAnimation(GradientStop.ColorProperty, animation);
         }
+    }
+
+    // ---- Kodlu efekt: küçük tampon, yumuşak büyütme; hareketsizse tek kare ----
+
+    private void ShowEffect(BackgroundEffect effect, LiveBackgroundPreset preset, bool animate)
+    {
+        // Ölçü henüz yoksa (ilk açılış) açık çentiğin ölçüsü: tuval sabit (AGENTS #13).
+        var width = ActualWidth > 0 ? ActualWidth : NotchLayout.ExpandedWidth;
+        var height = ActualHeight > 0 ? ActualHeight : NotchLayout.ExpandedHeight;
+        var w = Math.Max(8, (int)Math.Ceiling(width / effect.Downscale));
+        var h = Math.Max(8, (int)Math.Ceiling(height / effect.Downscale));
+
+        var palette = preset.Colors.Select(EffectColor.Parse).ToArray();
+        var pixels = new uint[w * h];
+        var bitmap = new WriteableBitmap(w, h, 96, 96, PixelFormats.Bgr32, null);
+        var brush = new ImageBrush(bitmap) { Stretch = Stretch.Fill };
+        RenderOptions.SetBitmapScalingMode(brush, BitmapScalingMode.Linear);
+        _art.Background = brush;
+
+        // Hareketsizde de canlı görünen bir an seçilir (t = 0'da bazı efektler boş başlar).
+        const float stillTime = 12f;
+        var clock = Stopwatch.StartNew();
+
+        void Draw(float time)
+        {
+            effect.Render(new EffectFrame(pixels, w, h, time, palette));
+            bitmap.WritePixels(new Int32Rect(0, 0, w, h), pixels, w * 4, 0);
+        }
+
+        Draw(stillTime);
+        if (!animate)
+            return;
+
+        var timer = new DispatcherTimer(DispatcherPriority.Render, Dispatcher)
+        {
+            Interval = TimeSpan.FromSeconds(1.0 / effect.FramesPerSecond),
+        };
+        timer.Tick += (_, _) =>
+        {
+            if (!ReferenceEquals(_effectTimer, timer))
+                return;
+            Draw(stillTime + (float)clock.Elapsed.TotalSeconds);
+        };
+        _effectTimer = timer;
+        timer.Start();
     }
 
     private static Color Parse(string hex) => (Color)ColorConverter.ConvertFromString(hex);
@@ -236,6 +291,12 @@ public sealed class LiveBackgroundHost : Border
             _loading = null;
             cts.Cancel();
             cts.Dispose();
+        }
+
+        if (_effectTimer is { } timer)
+        {
+            _effectTimer = null;
+            timer.Stop();
         }
 
         switch (_art.Background)
