@@ -9,7 +9,7 @@ Windows 11 için hafif bir **notch** (ekranın üst ortasında, yay animasyonlu 
 
 - Hedefler, mimari, kararlar: `docs/PLAN.md`
 - Görev odaklı harita ("şunu değiştirmek için nereye bakarım"): `docs/MAP.md`
-- Sıradaki iş ve dosya dosya yapılacaklar: `docs/ROADMAP.md`
+- Sıradaki iş: GitHub issue'ları (`gh issue list`). `docs/ROADMAP.md` yapılanların tarihçesi ve eski planların arşivi; yeni kutu eklenmez.
 - Bellek ölçümleri: `docs/MEMORY.md`
 - Arayüz tasarımı (dock, çentik, Koy penceresi, her sayfanın ayarları): `docs/DESIGN.md`. Arayüz işinden önce oku. Ekranların görseli: `docs/design/index.html` (tarayıcıda aç).
 
@@ -126,7 +126,7 @@ Bağımlılık yönü: `App → Platform → Core` ve `App → Core`. Core hiçb
 - `dotnet build` uyarısız ve hatasız, `dotnet test` yeşil.
 - Davranış uygulama çalıştırılarak denendi (ekran görüntüsü ya da kısa açıklama).
 - Aşama bittiyse bellek ölçüldü ve `docs/MEMORY.md` güncellendi.
-- `docs/ROADMAP.md` içindeki ilgili kutu işaretlendi.
+- İlgili issue PR'da `Closes #N` ile bağlandı; elle sınanamayan ya da ölçülemeyen kısım #155 / #156 / #157 listelerine eklendi.
 
 ## Git
 - Ana dal `main`. Her iş kendi dalında: `feat/m1-music-panel`, `fix/...`.

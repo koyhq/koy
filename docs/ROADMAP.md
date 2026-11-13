@@ -1,7 +1,8 @@
 # ROADMAP — dosya dosya yapılacaklar
 
 Her aşama kendi dalında yapılır, sonunda bellek ölçülür (`docs/MEMORY.md`).
-Kutuları iş bittikçe işaretle. Dosya yolları önerilir; daha iyi bir ad varsa kullan ama yapıyı (Core / Platform / App) bozma.
+**2026-11-13'ten beri açık işler GitHub issue'larında takip edilir** (https://github.com/koyhq/koy/issues); bu dosya yapılanların tarihçesi ve ayrıntılı planların arşividir. Yeni iş için issue aç; bu dosyaya yeni kutu ekleme. Dosya yolları önerilir; daha iyi bir ad varsa kullan ama yapıyı (Core / Platform / App) bozma.
+
 
 ---
 
@@ -144,8 +145,8 @@ Kutuları iş bittikçe işaretle. Dosya yolları önerilir; daha iyi bir ad var
 - [x] `DockPositionResolver`: pencere yakınlığından ve büyütülmüşlükten etkilenmeden hep yüzen kapsül geometrisi (60 px, alttan 10 px, AppBar payı yok). Tam ekranda gizlenme kuralları aynı. Testli.
 - [x] `DockProximityMapping`: tam genişlikte seçilemez, etkin karşılığı Yer ayır. `DockSettingsDiff` AppBar'ı yalnız Yer ayır'a girip çıkışta yeniden kurar. Testli.
 - [x] Ayarlar › Dock: yeni seçenek ve tek cümlelik açıklaması; Çekil "Pencereden çekil" olarak, Hep gizli açıklamasıyla farkları net olacak şekilde yeniden adlandırıldı/anlatıldı (davranışları değişmedi, enum değerleri korundu).
-- [ ] Elle sınama: Hep havada seçiliyken büyütülmüş pencere, pencereyi dock'a sürükleme, Alt+Tab, tam ekran (oyun/F11), "Tam ekranda gizle" kapalıyken, akıllı görünürlük açıkken, çok monitör; Yer ayır ↔ Hep havada geçişinde çalışma alanının yerinde kalması.
-- [ ] Bellek ölçümü (`scripts/measure-memory.ps1`, AGENTS #1) ve `docs/MEMORY.md` güncellemesi.
+- [ ] Elle sınama: Hep havada seçiliyken büyütülmüş pencere, pencereyi dock'a sürükleme, Alt+Tab, tam ekran (oyun/F11), "Tam ekranda gizle" kapalıyken, akıllı görünürlük açıkken, çok monitör; Yer ayır ↔ Hep havada geçişinde çalışma alanının yerinde kalması. → #155
+- [ ] Bellek ölçümü (`scripts/measure-memory.ps1`, AGENTS #1) ve `docs/MEMORY.md` güncellemesi. → #157
 
 ### 6.4 Çentik genişler
 - [x] Ses ve parlaklık değişince çentikte gösterge: Paket C'de `AudioService` ve `BrightnessService` olaylarına bağlandı, ayrı ayrı kapatılır. Windows'un kendi göstergesini gizleme hâlâ deneysel.
@@ -190,7 +191,7 @@ Kod incelemesinden çıkan işler paketlere bölündü.
 - [x] #11: `main`'e entegre edildi ve PR birleştirildi (aşağıda "Dock sistem tepsisi"); kalan kapsam (taşma simgeleri, balon bildirimleri) "Sonraya kalanlar"da.
 - [x] #9: `main`'de farklı bir yapıyla (Ekranlar sayfası, D2) çözüldü ve kapatıldı.
 
-**Hâlâ açık olan eksikler:** iki sütunlu ana görünüm ve kapalı/Peek çentikte tarih ve ağ simgesi (tasarım bekliyor; veri tarafı hazır: `HomeViewModel`, `NotchLayout.ShowPeekDetails`); UWP uygulama sabitlemeleri (AUMID); ses görselleştirici; gerçek çoklu monitör ve karışık DPI doğrulaması; bellek ölçümü.
+**Hâlâ açık olan eksikler** (issue'lara taşındı: Peek'te tarih ve ağ #148, iki sütunlu ana görünüm #149, UWP #147, çoklu monitör doğrulaması #156, bellek #157; ses görselleştirici #78 ile geldi): iki sütunlu ana görünüm ve kapalı/Peek çentikte tarih ve ağ simgesi (tasarım bekliyor; veri tarafı hazır: `HomeViewModel`, `NotchLayout.ShowPeekDetails`); UWP uygulama sabitlemeleri (AUMID); ses görselleştirici; gerçek çoklu monitör ve karışık DPI doğrulaması; bellek ölçümü.
 
 ---
 
@@ -215,7 +216,7 @@ Kod incelemesinden çıkan işler paketlere bölündü.
 - [x] **Tepsi düğmesi kaybolması düzeltildi:** ilk kurulum hatası kalıcı bayrağa dönüşüyordu (`_trayAcquireFailed`) ve ölen tepsi penceresi yalnız bir sonraki pencere olayında fark ediliyordu. Karar `Core/Tray/TrayHostRecovery` (üstel beklemeli yeniden deneme), sayaç `TrayHostLease`; `TrayHostService.Exited` beklenmedik kapanışı bildirir ve `crash.log`'a yazar. Testli.
 - [x] **Tepsi menüsü dock'un altında kalması düzeltildi:** `DockFeature` ön plan değişiminde dock'u `ReassertTopmost` ile menünün üstüne çıkarıyordu. Menü (`#32768`) varken dock öne alınmaz, `PopupMenuProbe` yoklaması (yalnız tepsi penceresi açıkken, 50 ms) menüleri odak çalmadan topmost'un önüne alır, menü çıpası `Core/Tray/TrayMenuAnchor` ile dock'un üst kenarının üstüne sıkıştırılır. Testli.
 - [x] **Elle sınama** (proje sahibi): Görev Yöneticisi'nden Koy'u öldür → görev çubuğu birkaç sn içinde kendiliğinden gelmeli; Koy'dan çık / dock'u kapat → gözcü kalmamalı (Görev Yöneticisi'nde `Koy.Watchdog.exe`); simge sürükleyerek sırala, yeniden başlatınca sıra korunmalı; büyütülmüş pencerede alt kenara git (tuş basılı değilken ~300 ms sonra çıkar), oyun / F11 / tam ekran videoda çıkmasın; tepsi simgesine sağ tık → pencere açık kalsın, menüden seçince / dışarı tıklayınca kapansın; dock açıkken bildirim alanında Koy simgesi olmasın, dock kapanınca gelsin; son kullanılanlar yığını; ikinci ekran takınca çentik ve dock açılsın. **Proje sahibi sınadı (2026-11-07), sorun yok.**
-- [ ] Gözcü AOT paketinin gerçek CI/`pack.ps1` çıktısından boyut ve bellek ölçümü; paket sonrası Koy belleğinin yeniden ölçümü (`docs/MEMORY.md`).
+- [ ] Gözcü AOT paketinin gerçek CI/`pack.ps1` çıktısından boyut ve bellek ölçümü; paket sonrası Koy belleğinin yeniden ölçümü (`docs/MEMORY.md`). → #157
 
 ## Üçüncü test düzeltmeleri (2026-11-07)
 - [x] **Küçültülmüş pencere düğmesi kaldırıldı:** komuta bağlı değildi; `DockShowMinimized` ayarı da silindi (eski ayar dosyasındaki alan yok sayılır).
@@ -237,7 +238,7 @@ Kod incelemesinden çıkan işler paketlere bölündü.
 - [x] **Hızlı başlat "+" çentiği kapatıyordu:** dosya seçici sahipsiz açılıyordu (Koy ön planda değilken görünmez kalabiliyor, görev çubuğu gizli) ve açıkken çentiğe tıklamak çentiği kapatıp seçiciyi yetim bırakıyordu; fare çıkınca kapanmayı yalnız iğne engelliyordu. Şimdi çentik denetleyicisinde sayaçlı "tutma" var (`NotchController.HoldOpen/ReleaseHold`: fare ayrılsa da tıklansa da kapanmaz; iğneden ayrı, iğne simgesi yanmaz); seçici kapanınca normal davranış döner (fare dışarıdaysa 400 ms sonra kapanır). Seçicinin sahibi çentik penceresi: çentik seçici için geçici etkinleştirilir, diyalog onun üstünde açılır. Ekleme yolu (`Add` kaydeder ve `Changed` yükseltir) testli.
 - [x] **Klasör ekleme:** hızlı başlata klasör seçici (`OpenFolderDialog`) ve bağlam menüsü eklendi (bkz. İş sırası #7).
 - [x] **Elle sınama (proje sahibi):** laptop + ikinci ekranla parlaklık (ikinci ekran açıkken ve kapatınca; dahili panel kaydırıcısı değişiyor mu, çentik donmuyor mu; harici monitörde DDC/CI; ekran çıkarılıp takılınca kaynağın yenilenmesi; hiç yol yokken kaydırıcı devre dışı mı); Sistem ve Ana sekmesinden çıkıp dönünce değerlerin hemen görünmesi; Hızlı başlat "+": diyalog çentiğin üstünde açılıyor mu, açıkken çentik kapanmıyor mu, seçilen öğe eklenip kalıyor mu, kapanınca çentik normale dönüyor mu; yeni kurulumda dock varsayılanı Yer ayır, mevcut ayar korunuyor mu. **Proje sahibi sınadı (2026-11-07), sorun yok.**
-- [ ] **Gerçek donanımda sınanamadı:** WMI / DDC/CI yolları, DisplayConfig dahili-harici ayrımı ve seçicinin ön plana gelmesi bu geliştirmede çalıştırılamadı (uygulama çalıştırılmadı; yalnız derleme, testler ve `tools/Koy.UiSnapshots`).
+- [ ] **Gerçek donanımda sınanamadı:** WMI / DDC/CI yolları, DisplayConfig dahili-harici ayrımı ve seçicinin ön plana gelmesi bu geliştirmede çalıştırılamadı (uygulama çalıştırılmadı; yalnız derleme, testler ve `tools/Koy.UiSnapshots`). → #156
 
 ## H servisleri (çentik H tasarımının veri katmanı; arayüz ayrı iş)
 Servisler Core'da sözleşme + Platform'da uygulama; arayüz bağlanmadı. `SharedServices` üzerinden alınır.
@@ -247,7 +248,7 @@ Servisler Core'da sözleşme + Platform'da uygulama; arayüz bağlanmadı. `Shar
 - [x] **Odak görevleri** (`Core/Tasks/`): `tasks.json`; Bugün görünümü (saatli → saatsiz → tamamlanan; eski günün tamamlananı gizli, silinmez), gün ve aralık sorgusu, en çok 200 kayıt (eski tamamlananlar önce budanır).
 - [x] **Elle sınama** (proje sahibi): tarayıcı/Notepad'den kopyala → listede görünüyor mu; aynı metin başa taşınıyor mu; parola yöneticisinden (Bitwarden/KeePass) kopyalanan kaydedilmiyor mu; panoya geri yaz → başka uygulamaya yapıştır ve listede yeniden çıkmadığını doğrula; Windows Pano Geçmişi (Win+V) ile birlikte çalışıyor mu. **Proje sahibi sınadı (2026-11-07), sorun yok.**
 - [x] **Elle sınama**: Sistem verisi çentik açıkken Görev Yöneticisi ile uyuşuyor mu (CPU, RAM, Koy belleği = "Bellek" sütunu, ağ hızı); VPN/Hyper-V varken hız çift sayılmıyor mu; çentik kapanınca `Koy` CPU'su boşta %0. **Proje sahibi sınadı (2026-11-07), sorun yok.**
-- [ ] Bellek ve CPU ölçümü (AGENTS #1): bu iş ölçülmedi, yalnız tasarım gereği hesaplandı (uygulama çalıştırılmadı). Arayüz bağlanınca `scripts/measure-memory.ps1` ile çentik kapalı/açık karşılaştır.
+- [ ] Bellek ve CPU ölçümü (AGENTS #1): bu iş ölçülmedi, yalnız tasarım gereği hesaplandı (uygulama çalıştırılmadı). Arayüz bağlanınca `scripts/measure-memory.ps1` ile çentik kapalı/açık karşılaştır. → #157
 - [x] Arayüz bağlama: Pano, Sistem, Ana sağ sütunu (CPU / RAM, ağ, hızlı başlat), Odak görev listesi ve Koy penceresinde Pano geçmişi anahtarı bağlandı (aşağıdaki "Çentik H arayüzü" maddeleri). Gün · Hafta · Ay `TaskViews.Load` ile `GetToday` / `GetRange`'e bağlı.
 
 ## Çentik H arayüzü
@@ -261,7 +262,7 @@ Kaynak tasarım: `docs/design/source/CentikH.dc.html`. Pano, Sistem, görev list
 - [x] Görsel kanıt: `dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix h --scene centik --theme dark` (Ana, Odak, Raf, Kontrol, kapalı çentik).
 - [x] Elle sına (uygulama çalıştırılarak): sekme geçişinde kayma ve solma; tekerlekle sekme değişimi; "çentiği açık tut"; Bildirim Merkezi düğmesi (Win+N); çalışan zamanlayıcıyla çentik kapanıp açılınca süre; kapalı çentikte süre ve bitişte Peek + titreme; Raf'a dosya sürükleyince Raf'ın açılması; iki monitörde aynı zamanlayıcı; karışık DPI'da 640×364 tuvalin yerleşimi. **Proje sahibi sınadı (2026-11-07), sorun yok.**
 - [x] Görsel kanıt (H bağlama): `dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix hb --scene centik --theme dark` (Ana müzikli / müziksiz / zamanlayıcılı, Odak görevleri ve hafta kapsamı, Takvim ay / hafta / gün, Pano, Sistem).
-- [ ] Bellek ve CPU ölçümü: tuval 500×260'dan 640×364'e çıktı; `scripts/measure-memory.ps1` uygulamayı başlattığı (görev çubuğunu gizleyebildiği) için bu çalışmada ölçülmedi. Önce ve sonra ölçüp `docs/MEMORY.md` dosyasına yaz; açık çentik açılış / kapanışında fps ve CPU'ya bak.
+- [ ] Bellek ve CPU ölçümü: tuval 500×260'dan 640×364'e çıktı; `scripts/measure-memory.ps1` uygulamayı başlattığı (görev çubuğunu gizleyebildiği) için bu çalışmada ölçülmedi. Önce ve sonra ölçüp `docs/MEMORY.md` dosyasına yaz; açık çentik açılış / kapanışında fps ve CPU'ya bak. → #157
 - [x] Pano sekmesi: arama, süzgeçler, kart listesi (geri kopyala, sabitle / çöz, sil), Temizle, açıklama satırı. Servis yalnız `ClipboardHistoryEnabled` açıkken alınır (NotchFeature.Start), Stop'ta bırakılır; Koy penceresi › Çentik'te anahtar var, değişince çentik yeniden kurulur. Ayar kapalıyken sekme görünmez.
 - [x] Elle sına (Pano): kopyalanan metin listede görünüyor mu; karta tıklayınca panoya yazılıyor mu ve listede yeniden çıkmıyor mu; arama / süzgeç; iğne ile sabitle, çentik yeniden kurulunca sabit kalıyor mu; Temizle; 50+ öğede kaydırma ve tekerleğin sekme değiştirmemesi; ayarı kapatınca sekmenin kaybolması. **Proje sahibi sınadı (2026-11-07), sorun yok.**
 - [x] Sistem sekmesi: iki halka (işlemci + en çok kullanan, bellek), ağ kartı, Koy belleği. Servis yaşam döngüsü `SystemStatsViewModel.SetActive`: yalnız çentik açık, görünür ve Ana ya da Sistem sekmesindeyken `AcquireSystemStats`, aksi halde `ReleaseSystemStats`.
@@ -284,14 +285,14 @@ Kontrol'deki Wi-Fi / Bluetooth döşemeleri Windows 11 hızlı ayarları gibi b�
 - [x] Yeni Bluetooth rune simgesi (`IconBluetooth`, 14 px'te açık), Ana kulaklık kartı (bağlı ses cihazı yoksa görünmez; varken CPU kartının ayrıntı satırları gizlenir), Kontrol "Bağlı cihazlar" (ad + pil).
 - [x] Görsel kanıt: `dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix wb --scene centik --theme dark` (kontrol-bolunmus, kontrol-ok-hover, kontrol-ok-basili, wifi-liste, wifi-sifre, wifi-baglaniyor-hata, wifi-izin-yok, bluetooth-liste, ana-kulaklik, ana-kulaklik-yok).
 - [x] Elle sınama (gerçek donanım; uygulama çalıştırılmadı): Wi-Fi listesi ve sinyal; bağlı ağ üstte; kayıtlı ağa doğrudan bağlanma (WiFiAdapter kayıtlı profili şifresiz kullanıyor mu); şifre kutusuyla yeni ağ, yanlış şifre; açık ağ; bağlantıyı kes; konum izni kapalıyken mesaj; profil adı SSID'den farklıysa "Kayıtlı" doğru mu; Bluetooth listesi, tür simgeleri, pil yüzdesi; kulaklık bağlan/kes (KS yolu belgesiz ortamda; hangi sürücülerde çalıştığı belirsiz, çalışmazsa "Bağlanamadı"/"Koy bu cihaza bağlanamıyor" görünür); fare/klavye satırı Ayarlar'ı açıyor mu; LE ses cihazları; çift modlu cihaz tek satır mı; çentik kapanınca/sekme değişince Wi-Fi taramasının ve izleyicilerin durması (CPU %0); sekme çubuğu liste sayfasında kalıyor mu; tekerlek. **Proje sahibi sınadı (2026-11-07), sorun yok.**
-- [ ] Bellek ve CPU ölçümü (AGENTS #1): ölçülmedi (measure-memory çalıştırılmadı).
+- [ ] Bellek ve CPU ölçümü (AGENTS #1): ölçülmedi (measure-memory çalıştırılmadı). → #157
 
 ## Müzik kartını büyütme (2026-11-07)
 - [x] Ana'daki müzik kartına (düğme ve ilerleme dışında) tıklanınca kart Ana gövdesinin tamamını kaplar: 172 px kapak, tam başlık, geniş çubuklar, büyük denetimler; sağ sütun gizlenir, çentik boyutu değişmez. Tekrar tıklayınca eski boyutuna döner. Seçim çentik kapanıp açılınca korunur; parça yokken kartta saat vardır, büyütme etkisizdir.
 - [x] Ana kart düğmelerinin boşlukları da tıklanır (hızlı başlat "+" ortasına tıklayınca çentik kapanıyordu).
 - [x] Elle sınama: büyütme/küçültme tıklaması, düğmeler ve ilerlemeye tıklayınca kartın büyümemesi, hızlı başlata ekleme. **Proje sahibi sınadı (2026-11-07), sorun yok.**
 
-## Dock'ta uygulama bazlı sağ tık menüsü (atlama listesi) — AÇIK, almak isteyen alabilir
+## Dock'ta uygulama bazlı sağ tık menüsü (atlama listesi) ✅ (iş sırası 5)
 
 Windows görev çubuğunda bir uygulamaya sağ tıklayınca açılan menünün aynısı. Örnekler: VS Code'da "Yeni Pencere" ve son klasörler, Edge'de "Yeni InPrivate penceresi", Steam'de Mağaza, Kütüphane ve son oynanan oyunlar. Bugün dock menüsünde yalnız yeni pencere, kapat ve görevi sonlandır var.
 
@@ -316,8 +317,8 @@ Araştırma bitti; Windows 11 build 26200'de deneme programıyla doğrulandı. K
 - [x] Platform: `Platform/JumpList/JumpListService`. Yalnız menü açılınca okunur, iki kaynak dosyanın boyut + yazılma zamanına göre en çok 16 uygulama önbelleklenir; zamanlayıcı, izleyici, kalıcı iş parçacığı yok. Her okuma bitince biten kısa ömürlü STA iş parçacığında (kabuk nesneleri apartman ister). Son / sık: `IApplicationDocumentLists`; görevler ve kategoriler: `customDestinations-ms` + `IPersistStream.Load` (ShellLink). Son / sık yalnız uygulamanın listesi istiyorsa (ya da hiç listesi yoksa son kullanılanlar). Başlık `PKEY_Title` (BSTR ya da LPWSTR), `@dll,-id` ise `SHLoadIndirectString`; ayırıcı = boş başlık + boş hedef ya da `IsDestListSeparator`; başlığı boş ama hedefi olan öğe atlanır. COM nesneleri `FinalReleaseComObject` ile bırakılır.
 - [x] App: dock menüsü bölümlere ayrıldı (`DockJumpListMenu`). Sıra: uygulamanın kategorileri → sık → son kullanılanlar → görevler → Koy'un kendi öğeleri. Bölüm başına sınır (özel 6, son 5, sık 3, görev 6, en çok 3 özel kategori) ve toplam 14. Tıklanınca görev kısayolu olduğu gibi, belge uygulamanın kendi exe'siyle (olmazsa varsayılan ilişkiyle) çalışır. Okuma 700 ms'yi aşarsa menü listesiz açılır. AppID yoksa exe'den `IJumpListService.ResolveAppIdAsync` ile Başlat menüsü kısayolu taranır (yalnız sağ tıkta, kısa ömürlü STA, en çok 2000 kısayol / 4 derinlik, sonuç ve bulunamadı exe yoluna göre en çok 64 girdilik önbellekte, aynı 700 ms bütçe); yine yoksa yalnız Koy'un öğeleri görünür.
 - [x] Snapshot: `dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix jl --theme both [--scene jumplist]` (VS Code ve Steam benzeri, sınır ve yalnız-Koy sahneleri; sentetik veri).
-- [ ] Elle sınama (gerçek uygulamalarla; uygulama çalıştırılmadı): VS Code'da son klasörler + son dosyalar + Yeni Pencere; Edge / Chrome görevleri; Explorer sık kullanılanları; Windows Terminal profilleri; Steam / Spotify; sabitli ama çalışmayan uygulamada menü; AppID'siz klasik uygulamada yalnız Koy'un öğeleri; listedeki girdinin tıklanınca doğru uygulamada açılması (özellikle klasör ve belge girdileri, `.url` oyunlar); menü ekrandan taşmıyor mu (özellikle dock üstte / yanda); sağ tık gecikmesi; menü kapanınca sonraki sağ tıkta liste tazelenmiş mi (uygulama yeni belge açtıktan sonra).
-- [ ] Bellek ve CPU ölçümü (AGENTS #1): ölçülmedi (`measure-memory` çalıştırılmadı). Menü açıkken ve kapandıktan sonra private bellek, boşta CPU %0 doğrulanmalı.
+- [ ] Elle sınama (gerçek uygulamalarla; uygulama çalıştırılmadı): VS Code'da son klasörler + son dosyalar + Yeni Pencere; Edge / Chrome görevleri; Explorer sık kullanılanları; Windows Terminal profilleri; Steam / Spotify; sabitli ama çalışmayan uygulamada menü; AppID'siz klasik uygulamada yalnız Koy'un öğeleri; listedeki girdinin tıklanınca doğru uygulamada açılması (özellikle klasör ve belge girdileri, `.url` oyunlar); menü ekrandan taşmıyor mu (özellikle dock üstte / yanda); sağ tık gecikmesi; menü kapanınca sonraki sağ tıkta liste tazelenmiş mi (uygulama yeni belge açtıktan sonra). → #155
+- [ ] Bellek ve CPU ölçümü (AGENTS #1): ölçülmedi (`measure-memory` çalıştırılmadı). Menü açıkken ve kapandıktan sonra private bellek, boşta CPU %0 doğrulanmalı. → #157
 
 **Açık sorular:**
 - Spotify öğelerinde `PKEY_Title` boş; başlık başka bir anahtarda olmalı.
@@ -346,7 +347,7 @@ Proje sahibi aşağıdakilerin hepsinin yapılmasına karar verdi. Sıra öneril
 **Özellikler:**
 4. [x] **Dock klasörleri:** aşağıdaki "Dock klasörleri" bölümü. Flash ajanına verilecekse önce **Adım 4A (Core + Test)**, ardından **Adım 4B (App + UI + Snapshot)** olarak iki parçada çalıştırılır.
 5. [x] **Atlama listesi:** "Dock'ta uygulama bazlı sağ tık menüsü" bölümü, araştırma hazır.
-6. [ ] **UWP (Store) uygulama sabitleme:** kimlik AUMID, simge `shell:AppsFolder`, pencere eşleme `SHGetPropertyStoreForWindow` (ayrıntı "Sonraya kalanlar"daki maddede). Windows'un sabitleri arasındaki Spotify, WhatsApp gibi uygulamalar dock'ta görünsün.
+6. [ ] → #147 **UWP (Store) uygulama sabitleme:** kimlik AUMID, simge `shell:AppsFolder`, pencere eşleme `SHGetPropertyStoreForWindow` (ayrıntı "Sonraya kalanlar"daki maddede). Windows'un sabitleri arasındaki Spotify, WhatsApp gibi uygulamalar dock'ta görünsün.
 7. [x] **Hızlı başlata klasör ekleme:**
    - **Mevcut durum:** `Core/QuickLaunch/QuickLaunchService.cs` zaten `Directory.Exists(p)` ve klasör adı gösterimini (`DisplayName`) destekliyor; `IconHelper.GetIconBytes` da klasör simgesi çözebiliyor. Eksik olan yalnız UI'daki seçici.
    - **Yapılacak (`src/App/Features/Home/` + `Resources/`):**
@@ -374,13 +375,13 @@ Proje sahibi aşağıdakilerin hepsinin yapılmasına karar verdi. Sıra öneril
    - **Yapılacak:**
      1. **`Core/Bluetooth/BluetoothHudPolicy.cs` (saf C#, testli):** İlk cihaz listesi yüklemesinde (tohum) bildirim üretmez; sonrasında bir cihazın `IsConnected` durumu `false → true` veya `true → false` olduğunda `BluetoothHudEvent(string Name, bool Connected, int? BatteryPercent)` üretir. Aynı cihaz için 3 sn içindeki tekrarları (titreşim) bastırır. Testleri: `tests/Core.Tests/BluetoothHudPolicyTests.cs`.
      2. **`App/Features/Notch/OSD/`:** `OsdType.Bluetooth` ve `ShowBluetoothDevice(string name, bool connected, int? battery)` ekle; çentik kapalıyken veya Peek durumundayken 2 sn gösterilir.
-11. [ ] **Mikrofon / kamera noktası:** kullanımdayken çentikte nokta (önce olay tabanlı yol araştırılır; yoklama yapılmaz).
+11. [x] (#29) **Mikrofon / kamera noktası:** kullanımdayken çentikte nokta (önce olay tabanlı yol araştırılır; yoklama yapılmaz).
 
 **Planda (büyük, sonra):** README güzelleştirme + GitHub Pages tanıtım sayfası (gerçek ekran görüntüleriyle); bildirimleri çentikte gösterme + kod imzası (SignPath; SmartScreen uyarısını da kaldırır); düzenlenebilir çentik arayüzü; Google / Outlook takvim.
 
 **Sonraya bırakıldı:** çentik açık ve müzik çalarken bellek/CPU ölçümü (görselleştirici maliyeti).
 
-## Dock klasörleri (iOS/macOS tarzı) — AÇIK, sıradaki iş
+## Dock klasörleri (iOS/macOS tarzı) ✅ (iş sırası 4)
 Proje sahibi istedi (2026-11-07). Sabitli uygulamalar dock'ta klasörlere toplanır. Kod yazılmadı. Tahmini iş ~1–1,5 gün.
 
 **Davranış:**
@@ -406,9 +407,9 @@ Proje sahibi istedi (2026-11-07). Sabitli uygulamalar dock'ta klasörlere toplan
 - [x] Sağ tık menüsü (`DockContextMenuManager`): klasör için "Adını değiştir", "Klasörü dağıt".
 - [x] Boşta %0 CPU: panel kapalıyken zamanlayıcı/olay yok; simgeler mevcut önbellekten (`IconHelper`). Bellek ölçümü (AGENTS #1, `docs/MEMORY.md`).
 - [x] Görsel kanıt: `tools/Koy.UiSnapshots` sahnesi (klasör kutusu 2, 4, 6 uygulamayla; açık panel; birleştirme önizlemesi; koyu ve açık tema).
-- [ ] Elle sınama (proje sahibi, Claude ile): sürükle-birleştir, ekle, panelden çıkar, tek kalınca dağılma, ad değiştirme, yeniden başlatınca korunma, çalışma noktası, iki ekranda aynı klasörler, tam genişlik ve kapsül dock.
+- [ ] Elle sınama (proje sahibi, Claude ile): sürükle-birleştir, ekle, panelden çıkar, tek kalınca dağılma, ad değiştirme, yeniden başlatınca korunma, çalışma noktası, iki ekranda aynı klasörler, tam genişlik ve kapsül dock. → #155
 
-## Dock: sağ bölüm, kayıp açık uygulamalar, Windows tarzı tam genişlik — AÇIK (2026-11-07)
+## Dock: sağ bölüm, kayıp açık uygulamalar, Windows tarzı tam genişlik (2026-11-07; kod bitti, doğrulama #155)
 Proje sahibi istedi. Kod yazılmadı; önce bu plan onaylanır.
 
 **Bugünkü durum (kodda bakıldı):**
@@ -456,14 +457,14 @@ Proje sahibi istedi. Kod yazılmadı; önce bu plan onaylanır.
 - **Çalışma alanı salınımı (2026-11-07, elle sınamadan sonra) — kök neden ve ölçüm:** 1920x1080, kapsül + Yer ayır, iki büyütülmüş pencere arasında 5 sn'de bir geçiş, SPI_GETWORKAREA 20 ms'de bir örneklendi. Her geçişte çalışma alanı alt sınırı 1034 → 1080 (≈100-450 ms) → 1034, büyütülmüş pencere 1042 → 1088 → 1042; aynı anda Gezgin'in Shell_TrayWnd'i görünür (v1) oluyor. Koy günlüğü (geçici ölçüm kaydı) her seferinde `Hide()` çağrısını gösterdi. Zincir: `TrayHostService.Resync` Gezgin'in tepsisi öne geçince (her ön plan değişimi) en sık 5 sn'de bir `TaskbarCreated` yayınlar → yayın Koy'un `TrayIconManager` penceresine de gelir → `ExplorerRestarted` → `DockFeature.ReapplyTaskbarHiding` (`TaskbarService.Hide` = ABM_SETSTATE + AppBar ABM_REMOVE/NEW) → Gezgin çalışma alanını yeniden hesaplar. İkinci besleme: `MonitorService` imzası WorkArea içeriyordu; Koy'un kendi AppBar'ı ve Gezgin'in her oynatması "ekran düzeni değişti" sayılıp `OnMonitorsChanged` → `ApplyTaskbarPolicy` → `Hide()` çağırıyordu. Düzeltmeler: kendi yayın yankısı yok sayılır (`TaskbarCreatedPolicy`), imzadan WorkArea çıkarıldı (`MonitorLayoutSignature`), `Hide()` zaten otomatik gizlemedeyse SETSTATE göndermez, AppBar `UpdatePosition` aynı alan için tekrar etmez, `Hide()` sonrası pay hemen yeniden iddia edilir. Denenmedi: ABN_POSCHANGED ile yeniden iddia (kendi SETPOS'umuzla Gezgin arasında ping-pong riski; ölçülmeden eklenmedi). Düzeltme sonrası canlı yeniden ölçüm yapılamadı: çalışan Koy'u kapatma izni verilmedi.
 - **Elle sınama listesi:** bkz. aşağıdaki Doğrulama maddesi; eklenenler: küçük tepsi okunun konumu (Koy menüsünün sağı) ve tepsi paneli, tam genişlikte İndirilenler/Başlat anahtarları, tam genişlikte ayırıcıların gizlenmesi, 125%/150% ölçekte büyütülmüş pencere ile çubuk arasında boşluk olmaması, Otomatik gizle, uygulama basınca çökme ve sürüklemede iptal, Windows "animasyonları azalt" açıkken yalnız renk, çok uygulamada küçülme.
 
-5. [ ] **Doğrulama:** Core testleri (pencere kuralı, AppBar yüksekliği, taşma ölçüsü), UiSnapshots sahnesi (tam genişlik açık/koyu, küçük tepsi), bellek ölçümü, elle sınama (büyütülmüş pencere ile boşluk yok, otomatik gizle, iki ekran, tepsi paneli).
+5. [ ] **Doğrulama:** Core testleri (pencere kuralı, AppBar yüksekliği, taşma ölçüsü), UiSnapshots sahnesi (tam genişlik açık/koyu, küçük tepsi), bellek ölçümü, elle sınama (büyütülmüş pencere ile boşluk yok, otomatik gizle, iki ekran, tepsi paneli). → #155
 
 ## Tam genişlik dock'ta ikon hizası (2026-11-08)
 Proje sahibi istedi. Yalnız tam genişlik çubuk; kapsül değişmez.
 - [x] `AppSettings.DockIconAlignment` (`Left` / `Center` / `Right`, varsayılan `Center`); Koy › Dock'ta yalnız tam genişlikte görünen "İkon hizası" satırı. Değişince yalnız ViewModel yeniden kurulur, görev çubuğu ve AppBar oynamaz. Testli.
 - [x] Orta hizada yan sütunlar eşit kalır (ikonlar ekranın tam ortasında); sola ve sağa hizada serbest bırakılır, yoksa ikonlarla Başlat ya da sağ düğmeler arasında boşluk kalır.
 - [x] Görsel kanıt: `--scene dockbar` (`dockbar-tam-genislik-sola`, `dockbar-tam-genislik-saga`).
-- [ ] Elle sınama (proje sahibi): Sol / Orta / Sağ geçişi çalışan dock'ta; yeniden başlatınca korunma; ikon sürükleyerek sıralama, klasör paneli ve pencere önizlemesi üç hizada doğru yerde mi; iki ekran.
+- [ ] Elle sınama (proje sahibi): Sol / Orta / Sağ geçişi çalışan dock'ta; yeniden başlatınca korunma; ikon sürükleyerek sıralama, klasör paneli ve pencere önizlemesi üç hizada doğru yerde mi; iki ekran. → #155
 
 ## Başlat düğmesi simgesi (2026-11-09)
 Proje sahibi istedi. Dock'un Başlat düğmesi artık varsayılan olarak Koy'un kendi simgesini gösterir; Windows logosu seçenek olarak kalır.
@@ -472,10 +473,10 @@ Proje sahibi istedi. Dock'un Başlat düğmesi artık varsayılan olarak Koy'un 
 - [x] Değişince yalnız ViewModel yeniden kurulur (`DockSettingsDiff`); görev çubuğu, AppBar ve ekranlara dokunulmaz. Testli.
 - [x] Koy › Dock › Bölümler: "Başlat düğmesi simgesi" satırı (Koy / Windows / Özel). Başlat düğmesi kapalıysa satır görünmez. Dosya penceresi yalnız "Özel"e ya da "Görsel seç"e tıklayınca açılır, ayar yüklenirken asla açılmaz; iptalde geçerli dosya yoksa Koy'a dönülür.
 - [x] Görsel kanıt: `--scene dockbar` (`dockbar-*-baslat-windows`, `-ozel`, `-bozuk`, `-yok`; varsayılan Koy simgesi bütün öteki dockbar çekimlerinde) ve `--scene all` (`koy-dock`).
-- [ ] Elle sınama (proje sahibi): Koy / Windows / Özel geçişi çalışan dock'ta (kapsül ve tam genişlik), yeniden başlatınca korunma, yüksek DPI'da keskinlik, PNG / JPG / ICO seçimi, seçili dosyayı silip dock'u yeniden kurma (Koy'a dönmeli).
+- [ ] Elle sınama (proje sahibi): Koy / Windows / Özel geçişi çalışan dock'ta (kapsül ve tam genişlik), yeniden başlatınca korunma, yüksek DPI'da keskinlik, PNG / JPG / ICO seçimi, seçili dosyayı silip dock'u yeniden kurma (Koy'a dönmeli). → #155
 
-## Güncelleme akışı yeniden: sor, güncelle, "neler geldi" — AÇIK, yapılacak (2026-11-07)
-Proje sahibi istedi. Kod yazılmadı.
+## Güncelleme akışı yeniden: sor, güncelle, "neler geldi" ✅ (2026-11-07 planı; kodda: `Core/Updates/UpdateFlowPolicy`, onay katmanı, güncelleme kartı #65)
+Proje sahibi istedi. Uygulandı; aşağıdaki plan tarihçe olarak duruyor.
 
 **Bugün:** `AutoUpdater` açılıştan 45 sn sonra sessizce denetler, indirir ve Koy kapanınca uygular (`WaitExitThenApplyUpdates(silent: true)`). Ayarlar › Genel › "Şimdi denetle" de aynı yolu çalıştırır. Kullanıcı neyin geldiğini görmez.
 
@@ -495,21 +496,21 @@ Proje sahibi istedi. Kod yazılmadı.
 - [x] **Kaynaklar:** uygulamalar, pencereler, hesap (işlevler, hex/bin/oct), oturum komutları, komut satırı (PATH), konumlar ve adresler, bilinen klasörler, son belgeler, dosyalar (Windows dizini, türe göre gruplu), web kısayolları (`gg:`, `!gg`, varsayılan arama), yer imleri (Chrome ailesi), süreç sonlandırma (`kill ad`), pano, tarih ve saat, `?` yardımı. Her biri Koy › Çentik'ten kapatılabilir.
 - [x] **Klavye:** oklar, Ctrl+J/K, Ctrl+oklar ve PageUp/Down (kategori), Home/End, Tab (eylemler), Üst+Enter (ilk eylem), sağ ok (öneriyi al), boş kutuda aşağı ok (son aramalar), boş kutuda Enter ve Esc (kapat).
 - [x] **Doğrulandı (deneme programı, salt okunur):** 241 uygulama 468–687 ms, dizin sorgusu 16–130 ms, özel karakterli sorgu hatasız, simgeler geliyor.
-- [ ] **Elle sınama (proje sahibi):** kısayolla klavye odağı (en büyük risk); Esc sonrası odağın önceki pencereye dönmesi; her kaynaktan bir sonuç çalıştırma; kapat/yeniden başlat onayı; iğne; iki ekran; tam ekranda kısayolun bir şey yapmaması.
-- [ ] Bellek ve CPU ölçümü (AGENTS #1): panel açıkken ve kapanınca.
-- [ ] **Henüz yok:** birim çevirici, sözlük, özel karakter, renk, yazım denetimi; Firefox yer imleri (SQLite paketi gerekir); uygulamaların atlama listesi eylemleri (#26 sonrası); uygulama mağazası araması; sonuç sürükleme; ayrı süreçte eklentiler (AGENTS #4 izin vermez).
+- [ ] **Elle sınama (proje sahibi):** kısayolla klavye odağı (en büyük risk); Esc sonrası odağın önceki pencereye dönmesi; her kaynaktan bir sonuç çalıştırma; kapat/yeniden başlat onayı; iğne; iki ekran; tam ekranda kısayolun bir şey yapmaması. → #156
+- [ ] Bellek ve CPU ölçümü (AGENTS #1): panel açıkken ve kapanınca. → #157
+- [ ] → #154 **Henüz yok** (birim ve renk çevirici geldi): birim çevirici, sözlük, özel karakter, renk, yazım denetimi; Firefox yer imleri (SQLite paketi gerekir); uygulamaların atlama listesi eylemleri (#26 sonrası); uygulama mağazası araması; sonuç sürükleme; ayrı süreçte eklentiler (AGENTS #4 izin vermez).
 
 ## Kısayollarda serbestlik (#47)
 - [x] Ana değiştirici zorunluluğu kalktı: `F9`, `Shift+F9`, tek başına harf (uyarıyla) atanabilir.
 - [x] Yalnız değiştiriciler (tek başına `Win`) ve Windows'un kendi kısayolları klavye kancasıyla alınır (`KeyboardHookEngine`, `KeyboardHookService`). Kanca yalnız böyle bir kısayol atanmışken ya da yakalama sürerken kuruludur.
 - [x] `Win+L` ve `Ctrl+Alt+Del` ezilemez, reddedilir. Başka uygulamanın tuttuğu Win'siz kısayol hata olarak görünür.
-- [ ] Elle sınama (proje sahibi): tek başına `Win` Başlat'ı açmadan aramayı açıyor; `Win+S` ezildiğinde Başlat açılmıyor; yakalama kutusu `Win`'i alıyor; yönetici penceresi öndeyken davranış; bellek ve gecikme.
+- [ ] Elle sınama (proje sahibi): tek başına `Win` Başlat'ı açmadan aramayı açıyor; `Win+S` ezildiğinde Başlat açılmıyor; yakalama kutusu `Win`'i alıyor; yönetici penceresi öndeyken davranış; bellek ve gecikme. → #156
 
 ## Bağlı Bluetooth cihazlarında pil seviyesi (#50)
 - [x] **Araştırma (`arastirma/21-bluetooth-pil.md`):** Windows `DEVPKEY_Bluetooth_Battery` alanı boş dönen bağlı LE klavye/fare/kulaklıklar için WinRT üzerinden standart GATT Battery Service (`0x180F` / `0x2A19`) yedek okuma yolu.
 - [x] **Core (`Core/Bluetooth/`, testli):** `GattBatteryParser` (0-100 aralığı ve çoklu pil durumunda en düşük pil seçimi) ve `BluetoothBatteryFilter` (tuş basımı/RGB voltaj sıçramalarını süzen histerezis filtresi).
 - [x] **Platform (`Platform/Bluetooth/BluetoothService.cs`):** Yalnız `DEVPKEY_Bluetooth_Battery` boş döndüğünde ve ilgili sayfa görünürken GATT okuması; bağlantı kopup yeniden sağlandığında ve 60 sn sonra tazeleme.
-- [ ] Elle sınama (proje sahibi): Pil göstermeyen BLE fare veya klavyenin çentikte pilinin görünmesi, pil zıplamalarının filtrelenmesi.
+- [ ] Elle sınama (proje sahibi): Pil göstermeyen BLE fare veya klavyenin çentikte pilinin görünmesi, pil zıplamalarının filtrelenmesi. → #156
 
 ## Çentikte sesli komut ve harness (#48)
 - [x] **Araştırma (`arastirma/22-sesli-komut-harness.md`):** WinRT `SpeechRecognizer` dikte mimarisi, güvenli argüman listesiyle harness yürütme ve çentik OSD durum makinesi.
@@ -519,7 +520,7 @@ Proje sahibi istedi. Kod yazılmadı.
 - [x] **Gizlilik (karar 2026-11-09):** Sesle yazma Microsoft'un çevrimiçi konuşma tanımasını kullanır; ses yalnız kutu açıkken gider ve Ayarlar › Çentik'teki harness açıklamasında yazıyor.
 - [x] **Arayüz (App):** `Ctrl+Alt+V` varsayılan kısayolu, çentikte 260×40 OSD ses göstergesi, onaylama için geçici pencere odak yönetimi (Enter/Esc veya çentiğe tıklama), Ayarlar › Çentik altında Harness ve onaylama ayarları.
 - [x] **Dikte sekmesi, izin modu, model ve yanıt kartı (#62):** sesli komut ayarları Ayarlar › Dikte'ye taşındı; Claude izni Salt okunur / Düzenleme / Otomatik, model Varsayılan / Fable / Opus / Sonnet / Haiku; yanıt çentiğin altındaki kartta okunur. **Varsayılan izin salt okunur** (proje sahibi kararı, 2026-11-11): dikte yanlış duyulsa da onaysız değişiklik olmaz, eski ayar dosyası güncellemeyle izin genişletmez (testli). Geçersiz model adı Core'da `VoiceFailure.InvalidModel` kodu olur, metin App'te.
-- [ ] Elle sınama (proje sahibi): `Ctrl+Alt+V` ile konuşma, metni onaylayıp çalıştırma, model çıktısının çentikte ve yanıt kartında görünmesi, kartın açık çentikle çakışmaması; bellek ölçümü.
+- [ ] Elle sınama (proje sahibi): `Ctrl+Alt+V` ile konuşma, metni onaylayıp çalıştırma, model çıktısının çentikte ve yanıt kartında görünmesi, kartın açık çentikle çakışmaması; bellek ölçümü. → #156
 
 ## Dock önizlemesine orta tık pencereyi kapatır (#61)
 - [x] Önizlemedeki küçük resme (tek pencere ve grup) orta tık o pencereyi kapatır, önizleme kapanır; gruptaki diğer pencereler kalır. `MiddleClickAction` ayarına bakılmaz. `DockWindow.xaml(.cs)`.
@@ -529,13 +530,13 @@ Proje sahibi istedi. Kod yazılmadı.
 - [x] Sözler varsayılan kapalı (çalan başlık, tarayıcı videoları dahil, LRCLIB'e gider). Ana sayfadaki müzik kartında küçük düğmeyle açılıp kapanır, ayar kalıcı kaydedilir; Ayarlar › Çentik'teki seçenek aynı ayar.
 
 ## Sonraya kalanlar
-- CsWin32 0.3.106 → güncel sürüme geçiş: 0.3.369'da üretilen türler değişti (Platform'da 70 derleme hatası: HWND/işaretçi imzaları, `unsafe` gereken yerler). Platform ve Watchdog birlikte, aynı sürüme geçirilir; Watchdog'un görev çubuğu geri getirme yolu elle sınanır. O zamana dek Dependabot bu paketi yoksayar (`.github/dependabot.yml`).
-- Bildirimleri çentikte gösterme: Windows bildirimleri gelince çentik kısa süre gösterir (Claude Code gibi ajanların "iş bitti" bildirimleri de bu yoldan gelir). `UserNotificationListener` paket kimliği ister; Velopack kurulumu için seyrek (sparse) paket ve imza gerekir. Ara çözüm: Claude Code kancasının çağırdığı yerel komutla doğrudan bildirim.
-- Kullanıcının düzenleyebildiği çentik arayüzü: sayfaların ve kartların sırası, hangilerinin görüneceği kullanıcı tarafından seçilir.
-- Google / Outlook takvim (OAuth).
-- Tepsi: gizli (taşma) simgeleri ayrı gösterme, balon bildirimleri (`NIF_INFO`), animasyonlu simgelerin ölçümü.
-- UWP (Store) uygulamalarının dock'ta sabitlenmesi: kimlik AUMID, simge `shell:AppsFolder`, pencere eşleme `SHGetPropertyStoreForWindow`. Windows'un sabitleri arasında Spotify, WhatsApp gibi UWP uygulamalar var; Koy bugün yalnız `.lnk` sabitlerini gösteriyor.
-- Kod imzalama.
+- CsWin32 0.3.106 → güncel sürüme geçiş: 0.3.369'da üretilen türler değişti (Platform'da 70 derleme hatası: HWND/işaretçi imzaları, `unsafe` gereken yerler). Platform ve Watchdog birlikte, aynı sürüme geçirilir; Watchdog'un görev çubuğu geri getirme yolu elle sınanır. O zamana dek Dependabot bu paketi yoksayar (`.github/dependabot.yml`). → #150
+- Bildirimleri çentikte gösterme: Windows bildirimleri gelince çentik kısa süre gösterir (Claude Code gibi ajanların "iş bitti" bildirimleri de bu yoldan gelir). `UserNotificationListener` paket kimliği ister; Velopack kurulumu için seyrek (sparse) paket ve imza gerekir. Ara çözüm: Claude Code kancasının çağırdığı yerel komutla doğrudan bildirim. ✅ (#64)
+- Kullanıcının düzenleyebildiği çentik arayüzü: sayfaların ve kartların sırası, hangilerinin görüneceği kullanıcı tarafından seçilir. ✅ (#78)
+- Google / Outlook takvim (OAuth). → #152
+- Tepsi: gizli (taşma) simgeleri ayrı gösterme, balon bildirimleri (`NIF_INFO`), animasyonlu simgelerin ölçümü. → #151
+- UWP (Store) uygulamalarının dock'ta sabitlenmesi: kimlik AUMID, simge `shell:AppsFolder`, pencere eşleme `SHGetPropertyStoreForWindow`. Windows'un sabitleri arasında Spotify, WhatsApp gibi UWP uygulamalar var; Koy bugün yalnız `.lnk` sabitlerini gösteriyor. → #147
+- Kod imzalama. → #153
 
 ## Şarkı sözleri (2026-11-09)
 Tasarım ve doğrulama: `docs/ARASTIRMA-SARKI-SOZLERI.md`.
@@ -543,15 +544,15 @@ Tasarım ve doğrulama: `docs/ARASTIRMA-SARKI-SOZLERI.md`.
 - [x] `Platform/Lyrics/LrclibSource.cs`: önce tam eşleşme, sonra arama; geçici hatalar önbelleğe yazılmaz.
 - [x] Ana sayfadaki müzik kartında (küçük ve büyük) `LyricsView`: etkin satır yayla kayar, satıra tıklayınca o yere gider. Ağ ve zamanlayıcı yalnız Ana sayfa görünürken; söz varken ses çubukları için yakalama durur, söz yoksa çubuklar kalır.
 - [x] Ayar: `MusicLyricsEnabled` (Çentik sayfası, varsayılan açık); kapalıyken söz yok, istek yok.
-- [ ] Elle sınama (proje sahibi): Spotify ve tarayıcıda senkron, duraklat/devam, satıra tıklama, parça değişimi, çevrim dışı, çok monitör.
-- [ ] Bellek ölçümü (AGENTS #1): sözler kapalı ve açıkken, `docs/MEMORY.md`.
+- [ ] Elle sınama (proje sahibi): Spotify ve tarayıcıda senkron, duraklat/devam, satıra tıklama, parça değişimi, çevrim dışı, çok monitör. → #156
+- [ ] Bellek ölçümü (AGENTS #1): sözler kapalı ve açıkken, `docs/MEMORY.md`. → #157
 
 ## Uygulamada İngilizce (2026-11-08)
 - [x] Görünen sabit metinler resx'e alındı; hava durumu ve gizlilik metinleri Core'dan anahtar ya da kalıpla geçer, `SystemFormat` kültürü dışarıdan alır.
 - [x] İlk açılış dili sistem diline göre (`AppLanguage`); kayıtlı ayar korunur.
 - [x] "Neler Geldi" uygulamanın diline göre: `CHANGELOG.md` (İngilizce, release-please), `CHANGELOG.tr.md` (Türkçe, sürüm PR'ında elle). O dilde not yoksa öbür dile düşer. Güncelleme penceresi için iki dil tek paket notunda (`ChangelogParser.TurkishNotesMarker`).
 - [x] CI: sürüm PR'ında iki günlükte de yeni sürüm başlığı olmalı (`scripts/check-changelogs.ps1`).
-- [ ] Elle sınama (proje sahibi): iki dilde çentik, dock, sihirbaz ve "Neler Geldi"; İngilizce Windows'ta ilk açılış.
+- [ ] Elle sınama (proje sahibi): iki dilde çentik, dock, sihirbaz ve "Neler Geldi"; İngilizce Windows'ta ilk açılış. → #156
 
 ## Başlat düğmesi sağ tık menüsü (2026-11-09)
 - [x] Dock'taki Başlat düğmesine sağ tık, Windows'un Win+X menüsünün Koy tasarımındaki karşılığını açar (yüzen ve tam genişlik dock). Gerçek Windows menüsü açılmaz.
@@ -559,25 +560,25 @@ Tasarım ve doğrulama: `docs/ARASTIRMA-SARKI-SOZLERI.md`.
 - [x] **Platform (`Platform/StartMenu/StartMenuHost.cs`):** kabuk üzerinden başlatma (`ms-settings:`, `.msc`, `taskmgr`, `explorer`), Win+D / Win+S / Win+R, pil sorgusu (`GetSystemPowerStatus`, menü açılırken tek çağrı). Oturum komutları aramanın `SystemCommandService`'ini kullanır. Yeni zamanlayıcı ya da servis yok.
 - [x] **App:** `DockStartMenu` menüyü `DockContextMenuManager` ile açar (menü açıkken dock gizlenmez); `MenuItem` şablonuna alt menü (Popup ve ok) eklendi. Metinler `StartItem*` anahtarlarıyla iki dilde, Windows'un kendi ifadeleriyle.
 - [x] Görsel kanıt: `dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix baslat --theme both --scene startmenu` (TR ve EN, pilli, pilsiz, alt menü açık).
-- [ ] Elle sınama (proje sahibi): iki dock biçiminde sağ tık; alt menünün açılıp tıklanabilmesi ve dışarı tıklayınca kapanması; Terminal (Yönetici) UAC'i reddedince hiçbir şey olmaması; Windows Terminal yokken PowerShell'e düşmesi; Masaüstü, Ara, Çalıştır; pilsiz makinede Mobilite Merkezi'nin görünmemesi.
+- [ ] Elle sınama (proje sahibi): iki dock biçiminde sağ tık; alt menünün açılıp tıklanabilmesi ve dışarı tıklayınca kapanması; Terminal (Yönetici) UAC'i reddedince hiçbir şey olmaması; Windows Terminal yokken PowerShell'e düşmesi; Masaüstü, Ara, Çalıştır; pilsiz makinede Mobilite Merkezi'nin görünmemesi. → #155
 
 ## Tanıtım sayfası (2026-11-07)
 - [x] `site/` (düz HTML/CSS/JS, derleme yok): hero (çentik sayfanın tepesinden sarkar, yayla açılır), çentik sekmeleri (gerçek ekran görüntüleri), dock, hafiflik, ayrıntılar, kurulum (SmartScreen uyarısı ve SHA256 doğrulama dahil). Koyu/açık tema sistemi izler. Son sürüm numarası GitHub API'den gelir, gelmezse rozet görünmez.
 - [x] `.github/workflows/pages.yml`: `main`'e `site/**` girince koyhq.github.io/koy adresinde yayınlar (SHA'ya sabit action'lar). Pages kaynağı "GitHub Actions" olarak açıldı.
 - [x] Depo ve org "Website" alanı siteye bağlandı; sosyal medya görseli (mavi, yalnız yazı, `scripts/generate-og-banner.py`) ve `og`/Twitter etiketleri yayında; hero başlığı "Masaüstünü hafifçe değiştir."; org avatarı ve social preview yüklendi.
 - [x] Hero çentiği her masaüstü genişliğinde (900 px ve üstü) sayfanın en tepesinden sarkar; dar masaüstünde (900–1359 px) üst çubukta yalnız logo ve İndir kalır.
-- [ ] README rozetleri ve uygulamadaki Hakkında düğmesi site adresine bağlanır (güncelleme akışı GitHub Releases'ta kalır). Alan adı alınırsa `canonical` ve `og:url` güncellenir.
+- [x] README rozetleri ve uygulamadaki Hakkında düğmesi site adresine bağlanır (güncelleme akışı GitHub Releases'ta kalır). Alan adı alınırsa `canonical` ve `og:url` güncellenir. README ve Hakkında bağlantısı yapıldı; alan adı yok.
 - [x] Hero'daki çentik fareyle açılır olsun (Dock bölümündeki demo gibi: üst kenara gelince yayla açılır, çıkınca 400 ms sonra kapanır; dokunmatikte dokununca).
-- [ ] İngilizce sürüm (şimdilik yalnız Türkçe).
-- [ ] Uygulamadaki Hakkında sayfasına teşekkür ve tanıtım kartı (Nectar ve Seelen UI esinlenmesi, site bağlantısı; TR ve EN).
+- [x] İngilizce sürüm (şimdilik yalnız Türkçe). Yapıldı (`site/js/i18n.js`).
+- [x] Uygulamadaki Hakkında sayfasına teşekkür ve tanıtım kartı (Nectar ve Seelen UI esinlenmesi, site bağlantısı; TR ve EN).
 
 ## Çentik kartı altyapısı ve güncelleme kartı (#65)
 - [x] **Core (testli):** `Core/Notch/NotchCard.cs` (içerik türünden bağımsız kart modeli: `Kind`, `Title`, `Subtitle`, `PrimaryActionLabel`, `AppName`, `Timestamp`, `Icon`; `NotchLayout.CardWidth/CardHeight` 380×72, tuvalin içinde) ve `Core/Updates/UpdateCardPolicy.cs` (sürüm başına oturumda bir kez, × sonrası bir daha yok, farklı sürüm yeniden, çentik açıkken bekler, 15 sn sonra kapanır).
 - [x] **App:** `OsdType.Card`, `OsdIndicatorViewModel.ShowCard` + `PrimaryActionRequested` / `DismissRequested`, `OSD/NotchCardView.xaml` (36 px daire içinde indirme simgesi, iki satır metin, hap "Güncelle" düğmesi ve ×; düğmeler `Border` + `MouseLeftButtonUp`, çentik odak almaz ve karta basmak çentiği açmaz). Çentik kart ölçüsüne mevcut `Spring` ile büyür; yeni animasyon yok.
 - [x] **Bağlama:** `NotchFeature`, `UpdateStatus.Changed` ile yalnız birincil ekranın çentiğinde kartı gösterir; çentik açıksa kapanınca gösterir; "Güncelle" Koy penceresini açıp var olan `OpenUpdateOverlay` akışını çağırır (görev çubuğu güvenliği `StartUpdateAsync` içinde, AGENTS #7). Metinler `UpdateCard*` anahtarlarıyla iki dilde. Yeni ayar yok.
 - [x] Elle sınama (proje sahibi, 2026-11-11, geçici sahte güncelleme kancasıyla, tek monitör): kart yayla açılıyor, 15 sn sonra kapanıyor, aynı sürüm ikinci kez çıkmıyor, yeni sürüm çıkıyor, çentik açıkken bekleyip kapanınca çıkıyor, × kapatıyor, Güncelle Koy penceresini ve onay katmanını açıyor.
-- [ ] Denenmedi: ikinci ekranda çıkmaması (tek monitör), hareket azaltmada yay, Akıllı/Fareyle modunda kartın 15 sn görünür kalması.
-- [ ] Bellek ölçümü (AGENTS #1): kart görünmezken ek nesne yok; ölçüm `docs/MEMORY.md`.
+- [ ] Denenmedi: ikinci ekranda çıkmaması (tek monitör), hareket azaltmada yay, Akıllı/Fareyle modunda kartın 15 sn görünür kalması. → #156
+- [ ] Bellek ölçümü (AGENTS #1): kart görünmezken ek nesne yok; ölçüm `docs/MEMORY.md`. → #157
 
 ## Windows bildirimleri çentikte (#64)
 Karar (2026-11-11): paketsiz süreçte `NotificationChanged` aboneliği 0x80070490 ile reddedilir, liste okuması çalışır; bu yüzden olay değil **yoklama**. Deneme sonucu: `arastirma/23-bildirim-dinleyici-denemesi.md` (depo dışı).
@@ -587,7 +588,7 @@ Karar (2026-11-11): paketsiz süreçte `NotificationChanged` aboneliği 0x800704
 - [x] Yoklama istisnası `AGENTS.md` kural 5 ve `docs/MAP.md` içinde belgelendi.
 - [x] Elle sınama (proje sahibiyle, 2026-11-11, geçti): Claude ve PowerShell bildirimleri kart oldu; simge yedeği (boş daire yerine uygulama simgesi); × ve sıradaki kart; art arda kartlar 6 sn aralıkla; çentik açıkken bekleyip kapanınca çıkma; "İçeriği gizle"; Odaklanma oturumunda susma.
 - [x] Son derlemede sınandı (2026-11-11): Lightshot'ın yenilenen bildirimi kart olarak çıkıyor (Lightshot logo ve kabuk simgesi vermiyor, zil yedeği görünüyor); Kontrol döşemesi Odaklanma kapalıyken "Ayarlarda aç", açıkken "Odaklanma açık".
-- [ ] Henüz sınanmadı: logo kırpma (Claude bildirimi yeni derlemede gelmedi); izin diyaloğu (izin zaten verilmişti); ayar kapanınca yoklamanın durması.
+- [ ] Henüz sınanmadı: logo kırpma (Claude bildirimi yeni derlemede gelmedi); izin diyaloğu (izin zaten verilmişti); ayar kapanınca yoklamanın durması. → #156
 - [x] Bellek ve CPU ölçümü (2026-11-11, `docs/MEMORY.md`): Release, açılıştan 25 sn sonra 70,3 MB (60 sn sonra 66,0 MB); boşta CPU 60 sn'de tek çekirdeğin %0,96'sı (578 ms). Yoklama maliyeti ölçüm saçılmasının altında.
 - Bilinen kısıt: Windows 11 Rahatsız etmeyin düğmesi tek başına algılanmıyor (belgelenmiş API yok); kartlar Odaklanma oturumunda ve sunum modunda susar. Kontrol sekmesindeki Rahatsız Etme döşemesi bu yüzden yalnız "Odaklanma açık" gösterir, aksi halde "Ayarlarda aç" kalır.
 
@@ -596,7 +597,7 @@ Karar (2026-11-11): paketsiz süreçte `NotificationChanged` aboneliği 0x800704
 - [x] **App:** `NotchShape` kulak yarıçapı 0 iken üst köşeleri de dışbükey yuvarlar; `NotchWindow` `EarRadius` ve Top ofsetini ViewModel'den alır (tuval 640×364 değişmez, yalnız pencere Top'u kayar); kulaksız şekil Collapsed, Peek, Expanded, OSD HUD ve kartta aynı `NotchShape`'ten gelir; kenar açma bölgesi (`CheckEdgePeek`) ve `NotchBounds` 9 DIP boşluğu hesaba katar.
 - [x] **Ayar:** Ayarlar › Çentik › "Çentik biçimi: Ekrana yapışık / Yüzen ada"; değişince çentik `ReloadNotch` ile yeniden kurulup yerleşir. Metinler `NotchStyle*` anahtarlarıyla iki dilde.
 - [x] Elle sınama (proje sahibi, 2026-11-11, tek monitör, hepsi geçti): yüzen ada kapalı hâlde kulaksız kapsül ve üstten boşluklu; açık hâl kulaksız; ses göstergesi kulaksız; üst kenara gelince açılıyor; Ekrana yapışık'a dönünce hemen yerine oturuyor.
-- [ ] Denenmedi: iki ekran ve karışık DPI, tam ekranda gizlenme, hareket azaltma, bildirim/güncelleme kartı yüzen biçimde.
+- [ ] Denenmedi: iki ekran ve karışık DPI, tam ekranda gizlenme, hareket azaltma, bildirim/güncelleme kartı yüzen biçimde. → #156
 - [x] Bellek ölçümü (AGENTS #1): 59,0 MB private, fark yok (`docs/MEMORY.md`).
 
 ## Halka pil ve gün/saat boşta görünümü (#63, P5B)
@@ -604,8 +605,8 @@ Karar (2026-11-11): paketsiz süreçte `NotificationChanged` aboneliği 0x800704
 - [x] **App:** kapalı çentikte halka modu: solda 18 px halka (kalınlık 2,5, iz beyaz %28, dolu kısım `#4ADE80`, düşük pilde `#FB7185`), yanında yüzde, şarjda şimşek; sağda gün ve saat, Peek'te "· 17 Kas" ve radyo simgeleri. Pilsiz kasada yalnız gün/saat ortada; zamanlayıcı çalışırken süre halkanın yerine. Halka yalnız yüzde değişince yeniden kurulur (dondurulmuş `Geometry`), saat mevcut 15 sn zamanlayıcıyı kullanır.
 - [x] **Ayar:** Ayarlar › Çentik › Boştayken › "Halka ve gün" (`IdleRingClockDay`, açıklaması ipucunda). UiSnapshots sahneleri: `halka`, `halka-peek`, `halka-zamanlayici`, `halka-dusuk`, `halka-sarj`, `halka-pilsiz`, `halka-en`.
 - [x] Elle sınama (proje sahibi, 2026-11-11): kapalı çentikte halka, yüzde ve "Çar 18:xx"; Peek'te tarih ve Wi-Fi / Bluetooth simgeleri çıkıp kayboluyor. Şarja takınca pil göstergesi (HUD) çıktı.
-- [ ] Henüz sınanmadı: HUD kaybolunca halkanın yanındaki şimşek, İngilizce, iki ekran.
-- [ ] Bellek ölçümü (AGENTS #1): ölçülmedi (uygulama çalıştırılmadı). Beklenen fark yok: yeni servis ya da zamanlayıcı eklenmedi.
+- [ ] Henüz sınanmadı: HUD kaybolunca halkanın yanındaki şimşek, İngilizce, iki ekran. → #156
+- [ ] Bellek ölçümü (AGENTS #1): ölçülmedi (uygulama çalıştırılmadı). Beklenen fark yok: yeni servis ya da zamanlayıcı eklenmedi. → #157
 
 ## Cam malzeme (P4B, onaylı tasarım `CamKoy.dc.html` / `CamCentik.dc.html`)
 - [x] **Core (testli):** `MaterialSetting` üç seviye: Katı 1 / Buzlu 0,86 / Cam 0,72 (`Normalize`, `SurfaceOpacity`, `SurfaceAlpha`); eski "Yarı saydam" Buzlu'ya düşer (`Normalize` yükleme sırasında çevirir, ilk kayıtta yeni adla yazılır; şema sürümü değişmedi). `ReadabilityGuard`: duvar kağıdı ortalamasından ikincil metin kontrastı, Cam → Buzlu → Katı (demodaki hesapla aynı), BGRA ortalaması. `AppSettings.MaterialReadabilityGuard` ve `NotchFollowsMaterial` (varsayılan açık).
@@ -615,7 +616,7 @@ Karar (2026-11-11): paketsiz süreçte `NotificationChanged` aboneliği 0x800704
 - [x] Elle sınama (proje sahibi, 2026-11-11), ilk tur: dock geçti; Koy penceresinde bulanıksız Cam "gerçekten rezalet" bulundu (arkadaki pencereler çamur griye karışıyor, köşelerde açık renk sızıyor); açık çentikte %72 arkadaki metni okunur bırakıyordu ("fazla saydam").
 - [x] **Düzeltme (proje sahibi kararı "Gerçek bulanıklık"):** Koy penceresi katmansız pencereye geçti (`WindowChrome`, `GlassFrameThickness=-1`, `CompositionTarget.BackgroundColor` saydam) ve DWM'den sistem akriliği, koyu / açık çerçeve ve köşe tercihi alıyor (`BackdropService.ApplyWindowFrame`); başlık ve kenar menüsü içerikle aynı ton. Çentik ve dock için ayrı opaklık: `MaterialSetting.LayeredOpacity` Buzlu 0,94 / Cam 0,88; koruma her yüzeyi kendi opaklığıyla hesaplar (`ReadabilityGuard.Surface.Layered`).
 - [x] Elle sınama (proje sahibi, 2026-11-11), ikinci tur: Koy penceresi ("tamam kalsın böyle") ve açık çentik geçti.
-- [ ] Henüz sınanmadı: açık tema, duvar kağıdını değiştirince korumanın güncellenmesi, "Açık çentik malzemeyi izlesin" kapalıyken, hareket azalt, iki ekran.
+- [ ] Henüz sınanmadı: açık tema, duvar kağıdını değiştirince korumanın güncellenmesi, "Açık çentik malzemeyi izlesin" kapalıyken, hareket azalt, iki ekran. → #156
 - [x] **Sağ alt menü ve kurulum sihirbazı da DWM akriliğe geçti** (proje sahibi kararı): ortak `App/Resources/WindowFrame` (katmansız pencere + `WindowChrome`; tema, malzeme, köşe ya da duvar kağıdı değişince `ThemeManager.Applied` ile yenilenir); menünün elle çizilen gölgesi ve 16 px kenar boşluğu kalktı, gölge ve köşe DWM'den. Elle sınama (2026-11-11): sağ alt menü geçti. Sihirbaz canlıda sınanmadı (yalnız ilk kurulumda açılır, o anda malzeme Katı).
 - [x] Bellek ve CPU ölçümü (AGENTS #1, 2026-11-11, `docs/MEMORY.md`): Cam + halka + albüm rengi birlikte, Release, boşta 71,9–72,1 MB private, durağan boşta CPU tek çekirdeğin %1,25'i (bildirim yoklaması dahil). Katı ile ayrı karşılaştırma yapılmadı.
 - Kapsam dışı (demoda vardı): "Pil tasarrufunda saydamlığı kapat"; renkli Ana kartları (müzik, ağ, sistem) opak kalır, müzik kartı P6-App'te.
@@ -625,8 +626,8 @@ Karar (2026-11-11): paketsiz süreçte `NotificationChanged` aboneliği 0x800704
 - [x] **P6-App, ayar:** `MusicCardStyle` (`Neutral` Düz, `Tinted` Albüm rengi varsayılan, `Artwork` Albüm kapağı); Core'da `MusicCardStyleSetting.Normalize` + testler; Ayarlar › Çentik'te üç seçenek (TR/EN).
 - [x] **P6-App, palet:** `MusicViewModel` parça değişince bir kez, arka planda 32 px ikinci çözüm + `CoverPaletteExtractor`; `CardBrush/SubTextBrush/SpectrumBrush` (Spectrum alfa 0,75) dondurulmuş; aynı kapak için `CoverFingerprint` ile yeniden hesaplanmaz; gri/kapaksız parçada Tokens fırçaları.
 - [x] **P6-App, kapak arka planı:** `Artwork` modunda 32 px bitmap `UniformToFill` + `Linear`, üstünde Card tonu (0,30) ve `#0A0A0B` 0,55 → 0,85 perde; `BlurEffect` yok; küçük ve büyütülmüş kart aynı katmanı kullanır (`HomePanel.xaml`).
-- [ ] **P6-App, elle sınama:** Spotify'da renkli, koyu ve siyah-beyaz kapaklar; YouTube'da kapaksız video; parça değişince geçiş; üç mod ve büyütülmüş kart; açık tema; Ayarlar'dan stil değişince çentik yeniden kurulur.
-- [ ] **P6-App, bellek:** şarkı çalarken önce/sonra ölçüm (`measure-memory.ps1`), `docs/MEMORY.md`.
+- [ ] **P6-App, elle sınama:** Spotify'da renkli, koyu ve siyah-beyaz kapaklar; YouTube'da kapaksız video; parça değişince geçiş; üç mod ve büyütülmüş kart; açık tema; Ayarlar'dan stil değişince çentik yeniden kurulur. → #156
+- [ ] **P6-App, bellek:** şarkı çalarken önce/sonra ölçüm (`measure-memory.ps1`), `docs/MEMORY.md`. → #157
 - [x] **P6-App, cam uyumu (demo `CamMuzikKarti.dc.html`):** Albüm rengi kart zemini çentiğin etkin malzemesinin alfasında (`MusicViewModel.SetCardAlpha`, `NotchViewModel` malzeme değişince verir; Katı 255 / Buzlu 219 / Cam 184); Kapak resmi opak kalır (okunurluk perdeden); palet yokken (Düz, gri ya da kapaksız) kart her malzemede nötr: demodaki "Düz nötr" (proje sahibi kararı 2026-11-11, eski yeşil `#0E2A18` bırakıldı); `KoyNotchMusicCard` Katı'da `#141416`, camda beyaz %6, ikincil metin beyaz %62, çubuklar beyaz %60, kapaksız yer tutucu (kart ve kapalı çentik) `#27272A`. UiSnapshots ile Katı ve Cam'da üç stil kontrol edildi.
 - [x] **P6-App, elle sınama (proje sahibi, 2026-11-11):** parça değişince renk değişiyor, büyütülmüş kart aynı renkte; siyah-beyaz kapakta kart nötr griye dönüyor (Spotify). Kapaksız video ve Albüm kapağı stili ayrıca denenmedi.
 
@@ -636,7 +637,7 @@ Karar (2026-11-11): paketsiz süreçte `NotificationChanged` aboneliği 0x800704
 - [x] Göç yedeği: ilk v3 → v4 okumada `settings.v3.json` bir kez yazılır, sonra asla üzerine yazılmaz.
 - [x] Testler: altın dosya (`Fixtures/settings-v3.json`) her alanın doğru bölüme geldiğini doğrular; anahtar kapsam testi her v3 anahtarının eşlendiğini ya da bilerek atıldığını (`MonitorTarget`) denetler; boş bölüm ve null liste testleri; tam kayıt/okuma döngüsü.
 - [x] `DockItems` (sıra, klasörler) değişince dock yeniden kurulmaz (`DockSettingsDiff`).
-- [ ] Sahip doğrulaması (uygulama çalıştırılarak): gerçek v0.2.6 `settings.json` ile her sayfa değerlerini korur mu; görev çubuğu kill → geri gelir (AGENTS #7); `scripts/measure-memory.ps1` ve `docs/MEMORY.md` satırı.
+- [ ] Sahip doğrulaması (uygulama çalıştırılarak): gerçek v0.2.6 `settings.json` ile her sayfa değerlerini korur mu; görev çubuğu kill → geri gelir (AGENTS #7); `scripts/measure-memory.ps1` ve `docs/MEMORY.md` satırı. → #156
 
 ## Çentik hareketi: sekmesiz kapanış ve raf darbesi (2026-11-11)
 Fikir kaynağı: Nusa incelemesi (`arastirma/nusa/RAPOR.md`, git dışı). Kod ve değerler bizim.
@@ -644,15 +645,15 @@ Fikir kaynağı: Nusa incelemesi (`arastirma/nusa/RAPOR.md`, git dışı). Kod v
 - [x] **Kapanış:** `NotchWindow.Retarget` küçülen eksende kritik sönüm, büyüyen eksende eski hafif sekme (26). Eskiden 620→236 kapanışta ~8,5 DIP içe çöküyordu.
 - [x] **Raf darbesi:** dosya ya da metin bırakılınca çentik üst ortadan esneyip seker (`_gulp`, 260/14, darbe 30; yatay +%2,5, dikey −%5; yatay esneme tuvali aşmaz). Hareket azaltma ve Animasyon: Kapalı iken yok.
 - [x] **Saat:** çentik saati 15 sn yerine dakika başına hizalı zamanlayıcıyla yenilenir (`Core/Notch/ClockTick`, testli: dakika dönünce +30 ms, en az 100 ms). Saat ya da saat dilimi elle değişince `SystemEvents.TimeChanged` hemen düzeltir.
-- [ ] Elle sınama: kapanışın oturması, rafa dosya bırakınca esneme, hareket azaltmada darbenin çıkmaması, saatin dakika döner dönmez ve elle saat değişince güncellenmesi.
+- [ ] Elle sınama: kapanışın oturması, rafa dosya bırakınca esneme, hareket azaltmada darbenin çıkmaması, saatin dakika döner dönmez ve elle saat değişince güncellenmesi. → #156
 
 ## Dört kenarda dock ve geometri kontrolleri (#73, N15)
 - [x] **Core (Bilet 1, testli):** `DockPositionResolver` 4 kenar yerleşimi, saklanma ötelemeleri (`TranslationX`/`TranslationY`), yönlü köşe yuvarlatmaları, `DockLayoutLimits`, `DockFitMath.SlotWidth/FitIconSize` simge aralığı (`iconSpacingDip`), `EdgeRevealTracker` 4 kenar algılama, `AppBarMath` ve `AppBarOwnership` 4 kenar çalışma alanı matematiği, `DockSettingsDiff` kenar/uzunluk/ofset tepkisi, `WindowPlacementMath.EdgeBar` ve `EdgeCapsule` çoklu kenar pencere yerleşimleri.
 - [x] **Platform & App Dock Window (Bilet 2):** `IAppBarService`/`AppBarService` `DockEdge` desteği (`ABE_LEFT`, `ABE_TOP`, `ABE_RIGHT`, `ABE_BOTTOM`), HWND başına kenar takibi ve sızıntısız yeniden kayıt (`Reregister`: `ABM_REMOVE` + `ABM_NEW`), `DockFeature` eksene duyarlı DPI ve kalınlık senkronizasyonu, `DockViewModel` dikey mod ve 2B öteleme, `DockWindow.xaml` 2B Transform ve kenara duyarlı dodge tutamağı, `DockItemsStrip` dikey/yatay şerit ve sürükle-bırak (`DockReorderHelper`), `FolderPanel` 4 kenara doğru açılma ve yay animasyonu, `DockFullWidth` dikey kenar için 3 satırlı düzen.
 - [x] **Arayüz ve Ayarlar (Bilet 3):** `DockPage.xaml` ve `KoyWindowViewModel` 4 segmentli kenar seçici (Alt, Üst, Sol, Sağ), uzunluk kaydırıcısı (%10–100), kenar mesafesi (0–96 px), iç dolgu (0–24 px), simge aralığı (0–16 px); İngilizce/Türkçe yerelleştirme (`Strings.resx`, `Strings.tr.resx`); `docs/MAP.md` güncellemesi.
-- [ ] Elle sınama (proje sahibi, Windows 11): 4 kenarda AppBar çalışma alanı ayrılması, dikey sürükleme, klasör paneli ve görev çubuğu güvenlik listesi (AGENTS #7).
+- [ ] Elle sınama (proje sahibi, Windows 11): 4 kenarda AppBar çalışma alanı ayrılması, dikey sürükleme, klasör paneli ve görev çubuğu güvenlik listesi (AGENTS #7). → #155
 
 ## Eklenti mağazası (#51)
 - [x] Core ve Platform: indeks, paket denetimi, kurulu kayıt, uygulama planı, istemci (`docs/EXTENSION-STORE.md`), örnek paketler ve `store/` iş akışı.
 - [x] App: Koy penceresinde "Eklentiler" sayfası (arama, kategori, süzgeç, sıralama, kartlar, önizleme önbelleği, kurulum onayı, kur / güncelle / uygula / kaldır, dosyadan kur); Görünüm, Çentik ve Genel sayfalarında "Mağazadan daha fazla al…" bağlantıları; `tools/Koy.UiSnapshots --scene eklentiler`.
-- [ ] Sahip doğrulaması (uygulama çalıştırılarak): gerçek ağdan indeks ve paket kurulumu; temayı uygula → kaldır ile `user-theme.json` geri gelir; simge paketi ve arka plan uygula / kaldır; `scripts/measure-memory.ps1` ve `docs/MEMORY.md`.
+- [ ] Sahip doğrulaması (uygulama çalıştırılarak): gerçek ağdan indeks ve paket kurulumu; temayı uygula → kaldır ile `user-theme.json` geri gelir; simge paketi ve arka plan uygula / kaldır; `scripts/measure-memory.ps1` ve `docs/MEMORY.md`. → #156
