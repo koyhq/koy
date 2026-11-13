@@ -44,41 +44,6 @@ def save_png(img: Image.Image, path: Path) -> None:
     img.save(path, "PNG", optimize=True)
 
 
-# ---------------------------------------------------------------- temalar
-
-def theme_preview(theme_id: str) -> None:
-    folder = SRC / theme_id
-    t = json.loads((folder / "theme.json").read_text(encoding="utf-8"))
-    c = {k: hex_rgb(v) for k, v in t.items() if isinstance(v, str) and v.startswith("#")}
-    img = Image.new("RGB", PREVIEW, c["KoyBgShell"])
-    d = ImageDraw.Draw(img)
-    # Pencere
-    d.rounded_rectangle((14, 14, 306, 166), 10, fill=c["KoyBgWindow"], outline=c["KoyBorderShell"], width=2)
-    # Gezinme sütunu
-    d.rectangle((16, 16, 78, 164), fill=c["KoyBgShell"])
-    for i in range(5):
-        y = 28 + i * 24
-        if i == 1:
-            d.rounded_rectangle((22, y, 72, y + 16), 5, fill=c["KoyBgNavActive"])
-        d.rounded_rectangle((28, y + 5, 28 + 26 - (i % 2) * 6, y + 11), 3, fill=c["KoyTextSecondary"])
-    # Başlık ve satırlar
-    d.rounded_rectangle((92, 26, 92 + 80, 34), 4, fill=c["KoyTextPrimary"])
-    for i in range(3):
-        y = 46 + i * 28
-        d.rounded_rectangle((92, y, 294, y + 22), 6, fill=c["KoyBgRow"], outline=c["KoyBorderHairline"])
-        d.rounded_rectangle((100, y + 8, 100 + 60 + i * 14, y + 14), 3, fill=c["KoyTextSecondary"])
-        on = i != 1
-        d.rounded_rectangle((262, y + 5, 286, y + 17), 6, fill=c["KoyAccent"] if on else c["KoyToggleTrackOff"])
-        kx = 276 if on else 268
-        d.ellipse((kx - 4, y + 7, kx + 4, y + 15), fill=c["KoyToggleKnobOn"] if on else c["KoyToggleKnobOff"])
-    # Düğme ve durum noktaları
-    d.rounded_rectangle((92, 136, 150, 156), 6, fill=c["KoyAccent"])
-    d.rounded_rectangle((100, 143, 142, 149), 3, fill=c["KoyOnAccent"])
-    for i, key in enumerate(("KoyStatusOk", "KoyStatusWarn", "KoyDangerBorder")):
-        d.ellipse((166 + i * 18, 140, 178 + i * 18, 152), fill=c[key])
-    save_png(img, folder / "preview.png")
-
-
 # ---------------------------------------------------------------- simge paketi
 
 ICON_SIZE = 128
@@ -271,8 +236,7 @@ def profile_preview(pack_id: str) -> None:
 
 
 def main() -> None:
-    for theme_id in ("koyhq.nord-theme", "koyhq.solarized-theme", "koyhq.high-contrast-theme"):
-        theme_preview(theme_id)
+    # Tema önizlemeleri scripts/make-theme.py ile çizilir (çentik, pencere, menü ve dock birlikte).
     iconpack("koyhq.mono-icons")
     aurora("koyhq.aurora-background")
     profile_preview("koyhq.minimal-profile")

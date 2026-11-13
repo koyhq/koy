@@ -1,7 +1,7 @@
 {
   "format": "koy-store-index",
   "formatVersion": 1,
-  "generated": "2026-11-12T00:00:00Z",
+  "generated": "2026-11-14T00:00:00Z",
   "items": [
     {
       "id": "koyhq.aurora-background",
@@ -32,10 +32,122 @@
       }
     },
     {
+      "id": "koyhq.catppuccin-mocha-theme",
+      "name": "Catppuccin Mocha",
+      "kind": "theme",
+      "version": "1.0.0",
+      "author": "Koy",
+      "license": "GPL-3.0-or-later",
+      "summary": {
+        "en": "Soothing pastel palette with a mauve accent.",
+        "tr": "Göz yormayan pastel palet ve leylak vurgu."
+      },
+      "description": {
+        "en": "A soothing dark theme for the Koy window, menus, notch and dock built around the Catppuccin Mocha flavor: deep indigo-gray surfaces, lavender-white text and a mauve accent, with pastel pink, peach, green and sky tones. Changes colors only; sizes and layout are untouched. Palette colors are by the Catppuccin project (MIT).",
+        "tr": "Catppuccin Mocha paletiyle hazırlanmış göz yormayan bir koyu tema; Koy penceresini, menüleri, çentiği ve dock'u boyar: derin çivit-gri yüzeyler, lavanta beyazı yazı ve leylak vurgu, pastel pembe, şeftali, yeşil ve gök mavisi tonlarla. Yalnız renkleri değiştirir; boyutlara ve yerleşime dokunmaz. Palet renkleri Catppuccin projesine aittir (MIT)."
+      },
+      "homepage": "https://github.com/koyhq/koy",
+      "updated": "2026-11-14",
+      "downloads": 0,
+      "package": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.catppuccin-mocha-theme-1.0.0.koyext",
+        "sha256": "e486db6fca8792b72175ddb472642bec8981de3927260ebe7b1f027bfd402d99",
+        "size": 17114
+      },
+      "preview": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.catppuccin-mocha-theme.png",
+        "sha256": "26c4bec7e935eec78695940f2e8e3fa8f43051c3c082c353fb10bdee1e6a1853"
+      }
+    },
+    {
+      "id": "koyhq.dracula-theme",
+      "name": "Dracula",
+      "kind": "theme",
+      "version": "1.0.0",
+      "author": "Koy",
+      "license": "GPL-3.0-or-later",
+      "summary": {
+        "en": "Dark purple-gray palette with vivid neon accents.",
+        "tr": "Koyu mor-gri palet ve canlı neon vurgular."
+      },
+      "description": {
+        "en": "A vivid dark theme for the Koy window, menus, notch and dock built around the Dracula palette: purple-gray surfaces, bright white text and a purple accent, with neon pink, green, yellow and cyan. Changes colors only; sizes and layout are untouched. Palette colors are by Zeno Rocha (MIT).",
+        "tr": "Dracula paletiyle hazırlanmış canlı bir koyu tema; Koy penceresini, menüleri, çentiği ve dock'u boyar: mor-gri yüzeyler, parlak beyaz yazı ve mor vurgu, neon pembe, yeşil, sarı ve camgöbeği ile. Yalnız renkleri değiştirir; boyutlara ve yerleşime dokunmaz. Palet renkleri Zeno Rocha'ya aittir (MIT)."
+      },
+      "homepage": "https://github.com/koyhq/koy",
+      "updated": "2026-11-14",
+      "downloads": 0,
+      "package": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.dracula-theme-1.0.0.koyext",
+        "sha256": "097ad046fb70a2899d3c6f28cc14ac9f6a39daf833011c8513cc11366da42f5f",
+        "size": 17156
+      },
+      "preview": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.dracula-theme.png",
+        "sha256": "b19d72aedaa272d55006a9fa2593005bc347a9de9157efd16ad1a9773fcbe317"
+      }
+    },
+    {
+      "id": "koyhq.ege-theme",
+      "name": "Ege",
+      "kind": "theme",
+      "version": "1.0.0",
+      "author": "Koy",
+      "license": "GPL-3.0-or-later",
+      "summary": {
+        "en": "Deep Aegean blue surfaces with a turquoise accent.",
+        "tr": "Derin Ege mavisi yüzeyler ve turkuaz vurgu."
+      },
+      "description": {
+        "en": "A calm dark theme for the Koy window, menus, notch and dock inspired by the Aegean sea: deep navy surfaces, crisp off-white text and a turquoise accent, with sea-glass tones on the notch cards. Changes colors only; sizes and layout are untouched. Original palette by Koy.",
+        "tr": "Ege denizinden esinlenen sakin bir koyu tema; Koy penceresini, menüleri, çentiği ve dock'u boyar: derin lacivert yüzeyler, net kırık beyaz yazı ve turkuaz vurgu, çentik kartlarında deniz camı tonları. Yalnız renkleri değiştirir; boyutlara ve yerleşime dokunmaz. Özgün palet, Koy."
+      },
+      "homepage": "https://github.com/koyhq/koy",
+      "updated": "2026-11-14",
+      "downloads": 0,
+      "package": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.ege-theme-1.0.0.koyext",
+        "sha256": "1f160740f700993f7bfd1c20dfbbf12525870276d4332bc31d5fb643f6e28a2d",
+        "size": 17013
+      },
+      "preview": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.ege-theme.png",
+        "sha256": "917dff0e9a63c79cd24285f7bfdd4369701e69ac85671e5ac6842e5f5b62e8ab"
+      }
+    },
+    {
+      "id": "koyhq.gruvbox-theme",
+      "name": "Gruvbox",
+      "kind": "theme",
+      "version": "1.0.0",
+      "author": "Koy",
+      "license": "GPL-3.0-or-later",
+      "summary": {
+        "en": "Retro, warm and earthy palette with an orange accent.",
+        "tr": "Retro, sıcak ve topraksı palet ve turuncu vurgu."
+      },
+      "description": {
+        "en": "A retro dark theme for the Koy window, menus, notch and dock built around the Gruvbox palette: warm charcoal surfaces, parchment text and a bright orange accent, with the classic yellow, green and aqua tones. Changes colors only; sizes and layout are untouched. Palette colors are by Pavel Pertsev (MIT).",
+        "tr": "Gruvbox paletiyle hazırlanmış retro bir koyu tema; Koy penceresini, menüleri, çentiği ve dock'u boyar: sıcak kömür grisi yüzeyler, parşömen rengi yazı ve parlak turuncu vurgu, klasik sarı, yeşil ve su yeşili tonlarla. Yalnız renkleri değiştirir; boyutlara ve yerleşime dokunmaz. Palet renkleri Pavel Pertsev'e aittir (MIT)."
+      },
+      "homepage": "https://github.com/koyhq/koy",
+      "updated": "2026-11-14",
+      "downloads": 0,
+      "package": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.gruvbox-theme-1.0.0.koyext",
+        "sha256": "07aa5d75d20fd3a7df844108491261a083793f0e1cf53d8ab23afd29e54e00a2",
+        "size": 16032
+      },
+      "preview": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.gruvbox-theme.png",
+        "sha256": "7e85a0676050131a6dfc4db02b12eb774d575449f4de67742fd9b60531ebbffe"
+      }
+    },
+    {
       "id": "koyhq.high-contrast-theme",
       "name": "High Contrast",
       "kind": "theme",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "author": "Koy",
       "license": "GPL-3.0-or-later",
       "summary": {
@@ -47,16 +159,72 @@
         "tr": "Koy penceresi, menüler, çentik ve dock için en yüksek karşıtlıklı tema; az gören kullanıcılar ya da aydınlık ortamlar için: siyah arka planlar, beyaz yazı ve kenarlıklar, her yüzeyde görünür kalan sarı bir vurgu. Yalnız renkleri değiştirir."
       },
       "homepage": "https://github.com/koyhq/koy",
-      "updated": "2026-11-12",
+      "updated": "2026-11-14",
       "downloads": 0,
       "package": {
-        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.high-contrast-theme-1.1.0.koyext",
-        "sha256": "234d2f3768a71ec60fb869d33b1184dae8472af2e6a0fc2c9c97c62a42e67b80",
-        "size": 2996
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.high-contrast-theme-1.1.1.koyext",
+        "sha256": "9af34599859bc40d467a957ab578329016ffbf5c0761eb34e97076f51fbc7d0b",
+        "size": 15763
       },
       "preview": {
         "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.high-contrast-theme.png",
-        "sha256": "9ac70c976536ab825c9ec90bed959140d15288f68fe9b1013418eaa6ccd73187"
+        "sha256": "9a660a2167eadb05dc5ac5e17b9198579dce0029be8ff2676129d13001203fba"
+      }
+    },
+    {
+      "id": "koyhq.kapadokya-theme",
+      "name": "Kapadokya",
+      "kind": "theme",
+      "version": "1.0.0",
+      "author": "Koy",
+      "license": "GPL-3.0-or-later",
+      "summary": {
+        "en": "Warm earth tones with a terracotta accent.",
+        "tr": "Sıcak toprak tonları ve kiremit rengi vurgu."
+      },
+      "description": {
+        "en": "A warm dark theme for the Koy window, menus, notch and dock inspired by Cappadocia's valleys: volcanic brown surfaces, sandstone text and a terracotta accent, with sage, honey and dusty rose on the notch cards. Changes colors only; sizes and layout are untouched. Original palette by Koy.",
+        "tr": "Kapadokya vadilerinden esinlenen sıcak bir koyu tema; Koy penceresini, menüleri, çentiği ve dock'u boyar: volkanik kahve yüzeyler, kumtaşı yazı ve kiremit rengi vurgu, çentik kartlarında adaçayı, bal ve gül kurusu. Yalnız renkleri değiştirir; boyutlara ve yerleşime dokunmaz. Özgün palet, Koy."
+      },
+      "homepage": "https://github.com/koyhq/koy",
+      "updated": "2026-11-14",
+      "downloads": 0,
+      "package": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.kapadokya-theme-1.0.0.koyext",
+        "sha256": "15c53825c07e0e561ca29b6bedf19c3b90369338238f2812dc7d3ccbbab9f79f",
+        "size": 16683
+      },
+      "preview": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.kapadokya-theme.png",
+        "sha256": "780a5efa83c4965b18f16d433fc14de2f8b002c22f3981082a3571ede7e8515a"
+      }
+    },
+    {
+      "id": "koyhq.lale-theme",
+      "name": "Lale",
+      "kind": "theme",
+      "version": "1.0.0",
+      "author": "Koy",
+      "license": "GPL-3.0-or-later",
+      "summary": {
+        "en": "Deep plum surfaces with a tulip pink accent.",
+        "tr": "Koyu mürdüm yüzeyler ve lale pembesi vurgu."
+      },
+      "description": {
+        "en": "A soft dark theme for the Koy window, menus, notch and dock built around the tulip: deep plum surfaces, blush-white text and a tulip pink accent, with pastel greens and lilacs on the notch cards. Changes colors only; sizes and layout are untouched. Original palette by Koy.",
+        "tr": "Laleden esinlenen yumuşak bir koyu tema; Koy penceresini, menüleri, çentiği ve dock'u boyar: koyu mürdüm yüzeyler, pembemsi beyaz yazı ve lale pembesi vurgu, çentik kartlarında pastel yeşil ve leylak. Yalnız renkleri değiştirir; boyutlara ve yerleşime dokunmaz. Özgün palet, Koy."
+      },
+      "homepage": "https://github.com/koyhq/koy",
+      "updated": "2026-11-14",
+      "downloads": 0,
+      "package": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.lale-theme-1.0.0.koyext",
+        "sha256": "0757190890f57c24fd8695cc5910d5a255b23340a41b5c37b1ef71bc9638e95c",
+        "size": 17026
+      },
+      "preview": {
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.lale-theme.png",
+        "sha256": "39f37a5bbec16de378ad5fbd8417c66c94d88f92061b58043351a784253243dc"
       }
     },
     {
@@ -119,7 +287,7 @@
       "id": "koyhq.nord-theme",
       "name": "Nord",
       "kind": "theme",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "author": "Koy",
       "license": "GPL-3.0-or-later",
       "summary": {
@@ -131,23 +299,23 @@
         "tr": "Koy penceresi, menüler, çentik ve dock için Nord paletiyle hazırlanmış sakin bir koyu tema: derin mavi-gri yüzeyler, yumuşak kırık beyaz yazı ve buz gibi camgöbeği vurgu. Yalnız renkleri değiştirir; boyutlara ve yerleşime dokunmaz. Palet renkleri Sven Greb'e aittir (MIT)."
       },
       "homepage": "https://github.com/koyhq/koy",
-      "updated": "2026-11-12",
+      "updated": "2026-11-14",
       "downloads": 0,
       "package": {
-        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.nord-theme-1.1.0.koyext",
-        "sha256": "be2e6b32a873a6271d9d46005eb9a0fef36a5059666c6903b82f752f933bf089",
-        "size": 3261
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.nord-theme-1.1.1.koyext",
+        "sha256": "b5bf216dbac91e8e0888d5455bd2e55c77103e1a1de767976a75b9ce0a1a30cd",
+        "size": 16597
       },
       "preview": {
         "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.nord-theme.png",
-        "sha256": "e887c15b072a93584d24e471231ee056a32ee28eedbae038431788885ec2bf31"
+        "sha256": "4d930ad732a93b93b809313e7a36247904280cfd8650594dfddc78d021d0708e"
       }
     },
     {
       "id": "koyhq.solarized-theme",
       "name": "Solarized Dark",
       "kind": "theme",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "author": "Koy",
       "license": "GPL-3.0-or-later",
       "summary": {
@@ -159,16 +327,16 @@
         "tr": "Koy penceresi, menüler, çentik ve dock için Solarized Dark renkleri: koyu petrol yeşili yüzeyler, sıcak krem yazı ve mavi vurgu; klasik yeşil, sarı ve kırmızı durum renkleriyle birlikte. Yalnız renkleri değiştirir. Palet Ethan Schoonover'a aittir (MIT)."
       },
       "homepage": "https://github.com/koyhq/koy",
-      "updated": "2026-11-12",
+      "updated": "2026-11-14",
       "downloads": 0,
       "package": {
-        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.solarized-theme-1.1.0.koyext",
-        "sha256": "3e04423df48bea74996b8fe469dfb22e26f50c28143e946fda3b0099ee45f2b8",
-        "size": 3266
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.solarized-theme-1.1.1.koyext",
+        "sha256": "a70ed34db3a1c2ebf2fa942483016745cc8f28b9badf9947253c5cb7a0088ec7",
+        "size": 15919
       },
       "preview": {
         "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.solarized-theme.png",
-        "sha256": "d7e7783ff3dfa5c7d2e6dbf0320af882f881bb5a01eab666a55a8464572986bf"
+        "sha256": "c3a811922a76488a7017c0f043ae7b8ae5a7a1090f8f6e754ecbd07837ea69e5"
       }
     }
   ]

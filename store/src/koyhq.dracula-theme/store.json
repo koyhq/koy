@@ -1,0 +1,13 @@
+{
+  "summary": {
+    "en": "Dark purple-gray palette with vivid neon accents.",
+    "tr": "Koyu mor-gri palet ve canlı neon vurgular."
+  },
+  "description": {
+    "en": "A vivid dark theme for the Koy window, menus, notch and dock built around the Dracula palette: purple-gray surfaces, bright white text and a purple accent, with neon pink, green, yellow and cyan. Changes colors only; sizes and layout are untouched. Palette colors are by Zeno Rocha (MIT).",
+    "tr": "Dracula paletiyle hazırlanmış canlı bir koyu tema; Koy penceresini, menüleri, çentiği ve dock'u boyar: mor-gri yüzeyler, parlak beyaz yazı ve mor vurgu, neon pembe, yeşil, sarı ve camgöbeği ile. Yalnız renkleri değiştirir; boyutlara ve yerleşime dokunmaz. Palet renkleri Zeno Rocha'ya aittir (MIT)."
+  },
+  "homepage": "https://github.com/koyhq/koy",
+  "updated": "2026-11-14",
+  "downloads": 0
+}

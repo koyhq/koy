@@ -78,5 +78,19 @@ Kaldırma/şikâyet: sorunlu bir eklenti için issue açılır; bakımcı öğey
 ```powershell
 python scripts/build-store.py            # paketleri, önizlemeleri ve index.json'u üretir
 python scripts/build-store.py --check    # yazmadan doğrular (CI), fark ya da hata varsa çıkış kodu 1
-python scripts/make-store-samples.py     # yalnız örnek paketlerin görsellerini yeniden çizer (Pillow gerekir)
+python scripts/make-theme.py             # store/palettes/*.json'dan temaları üretir, bütün tema önizlemelerini çizer (Pillow gerekir)
+python scripts/make-theme.py <id>        # yalnız bu paletin theme.json'u ve preview.png'si
+python scripts/make-theme.py --preview <id>   # elle yazılmış temanın yalnız önizlemesi
+python scripts/make-store-samples.py     # tema dışı örnek paketlerin görsellerini yeniden çizer (Pillow gerekir)
 ```
+
+### Paletten tema üretmek
+
+Bir temanın ~120 renk anahtarını elle seçmek gerekmez. `store/palettes/<id>.json` içine 20 temel renk yazın
+(yüzeyler, yazı, vurgu, durum ve çentik sekme renkleri; biçim `scripts/make-theme.py` başında), sonra
+`python scripts/make-theme.py <id>` çalıştırın. Betik Koy penceresi, menü, çentik ve dock anahtarlarının hepsini
+türetir, okunurluğu (WCAG karşıtlığı: ana metin en az 4.5) denetler ve mağaza kartı önizlemesini (çentik, pencere,
+menü, dock) çizer. `manifest.json` ve `store.json`'u siz yazarsınız; palet dosyası pakete girmez. Türetilen bir
+değeri ya da yazı tipi / köşe gibi anahtarları paletteki `tokens` nesnesiyle ezebilirsiniz.
+
+Gerçek uygulamada denemek için: `dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix t --scene centik --user-theme store/src/<id>/theme.json`.

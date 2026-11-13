@@ -1,0 +1,13 @@
+{
+  "summary": {
+    "en": "Soothing pastel palette with a mauve accent.",
+    "tr": "Göz yormayan pastel palet ve leylak vurgu."
+  },
+  "description": {
+    "en": "A soothing dark theme for the Koy window, menus, notch and dock built around the Catppuccin Mocha flavor: deep indigo-gray surfaces, lavender-white text and a mauve accent, with pastel pink, peach, green and sky tones. Changes colors only; sizes and layout are untouched. Palette colors are by the Catppuccin project (MIT).",
+    "tr": "Catppuccin Mocha paletiyle hazırlanmış göz yormayan bir koyu tema; Koy penceresini, menüleri, çentiği ve dock'u boyar: derin çivit-gri yüzeyler, lavanta beyazı yazı ve leylak vurgu, pastel pembe, şeftali, yeşil ve gök mavisi tonlarla. Yalnız renkleri değiştirir; boyutlara ve yerleşime dokunmaz. Palet renkleri Catppuccin projesine aittir (MIT)."
+  },
+  "homepage": "https://github.com/koyhq/koy",
+  "updated": "2026-11-14",
+  "downloads": 0
+}
