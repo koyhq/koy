@@ -3369,6 +3369,57 @@
   <data name="LiveBgPresetDusk" xml:space="preserve">
     <value>Alacakaranlık</value>
   </data>
+  <data name="LiveBgPresetPlasma" xml:space="preserve">
+    <value>Plazma</value>
+  </data>
+  <data name="LiveBgPresetLava" xml:space="preserve">
+    <value>Lav lambası</value>
+  </data>
+  <data name="LiveBgPresetNebula" xml:space="preserve">
+    <value>Bulutsu</value>
+  </data>
+  <data name="LiveBgPresetSilk" xml:space="preserve">
+    <value>İpek</value>
+  </data>
+  <data name="LiveBgPresetNorthern" xml:space="preserve">
+    <value>Kuzey ışıkları</value>
+  </data>
+  <data name="LiveBgPresetWaves" xml:space="preserve">
+    <value>Dalgalar</value>
+  </data>
+  <data name="LiveBgPresetContour" xml:space="preserve">
+    <value>Kontur</value>
+  </data>
+  <data name="LiveBgPresetHorizon" xml:space="preserve">
+    <value>Ufuk</value>
+  </data>
+  <data name="LiveBgPresetUnderwater" xml:space="preserve">
+    <value>Su altı</value>
+  </data>
+  <data name="LiveBgPresetPearl" xml:space="preserve">
+    <value>Sedef</value>
+  </data>
+  <data name="LiveBgPresetNightSky" xml:space="preserve">
+    <value>Gece gökyüzü</value>
+  </data>
+  <data name="LiveBgPresetFireflies" xml:space="preserve">
+    <value>Ateş böcekleri</value>
+  </data>
+  <data name="LiveBgPresetSnow" xml:space="preserve">
+    <value>Kar</value>
+  </data>
+  <data name="LiveBgPresetRain" xml:space="preserve">
+    <value>Yağmur</value>
+  </data>
+  <data name="LiveBgPresetBokeh" xml:space="preserve">
+    <value>Bokeh</value>
+  </data>
+  <data name="LiveBgPresetWarp" xml:space="preserve">
+    <value>Işık hızı</value>
+  </data>
+  <data name="LiveBgPresetRipples" xml:space="preserve">
+    <value>Halkalar</value>
+  </data>
   <data name="LiveBgFileTitle" xml:space="preserve">
     <value>Arka plan dosyası</value>
   </data>

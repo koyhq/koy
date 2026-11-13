@@ -3369,6 +3369,57 @@
   <data name="LiveBgPresetDusk" xml:space="preserve">
     <value>Dusk</value>
   </data>
+  <data name="LiveBgPresetPlasma" xml:space="preserve">
+    <value>Plasma</value>
+  </data>
+  <data name="LiveBgPresetLava" xml:space="preserve">
+    <value>Lava lamp</value>
+  </data>
+  <data name="LiveBgPresetNebula" xml:space="preserve">
+    <value>Nebula</value>
+  </data>
+  <data name="LiveBgPresetSilk" xml:space="preserve">
+    <value>Silk</value>
+  </data>
+  <data name="LiveBgPresetNorthern" xml:space="preserve">
+    <value>Northern lights</value>
+  </data>
+  <data name="LiveBgPresetWaves" xml:space="preserve">
+    <value>Waves</value>
+  </data>
+  <data name="LiveBgPresetContour" xml:space="preserve">
+    <value>Contour lines</value>
+  </data>
+  <data name="LiveBgPresetHorizon" xml:space="preserve">
+    <value>Horizon</value>
+  </data>
+  <data name="LiveBgPresetUnderwater" xml:space="preserve">
+    <value>Underwater</value>
+  </data>
+  <data name="LiveBgPresetPearl" xml:space="preserve">
+    <value>Pearl</value>
+  </data>
+  <data name="LiveBgPresetNightSky" xml:space="preserve">
+    <value>Night sky</value>
+  </data>
+  <data name="LiveBgPresetFireflies" xml:space="preserve">
+    <value>Fireflies</value>
+  </data>
+  <data name="LiveBgPresetSnow" xml:space="preserve">
+    <value>Snow</value>
+  </data>
+  <data name="LiveBgPresetRain" xml:space="preserve">
+    <value>Rain</value>
+  </data>
+  <data name="LiveBgPresetBokeh" xml:space="preserve">
+    <value>Bokeh</value>
+  </data>
+  <data name="LiveBgPresetWarp" xml:space="preserve">
+    <value>Warp</value>
+  </data>
+  <data name="LiveBgPresetRipples" xml:space="preserve">
+    <value>Ripples</value>
+  </data>
   <data name="LiveBgFileTitle" xml:space="preserve">
     <value>Background file</value>
   </data>

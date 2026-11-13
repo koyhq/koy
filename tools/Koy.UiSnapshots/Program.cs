@@ -13,7 +13,7 @@ namespace Koy.UiSnapshots;
 /// <summary>
 /// Koy'un pencerelerini ekrana çıkarmadan PNG'ye çevirir. Hiçbir Win32 kancası, AppBar ya da görev çubuğu
 /// servisi başlatılmaz; pencereler gösterilmez, yalnız ölçülüp çizilir.
-/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall|centik|dock|dockbar|jumplist|startmenu|eklentiler]
+/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall|centik|dock|dockbar|jumplist|startmenu|eklentiler|efektler]
 /// <c>--scene jumplist</c>: dock sağ tık menüsünün bölümlü atlama listesi hâli (sentetik veri).
 /// <c>--scene startmenu</c>: Başlat düğmesinin sağ tık menüsü (Win+X karşılığı), alt menü açık hâliyle.
 /// <c>--scene eklentiler</c>: Eklentiler sayfası (depodaki store/ klasöründen sahte ağla; kurulum, uygulama ve hata durumları).
@@ -86,6 +86,10 @@ public static class Program
                 RenderUninstall(outDir, prefix, theme);
             else if (scene == "centik")
                 RenderCentik(outDir, prefix, theme);
+            else if (scene is "efektler" or "effects")
+                RenderEffects(outDir, prefix, theme);
+            else if (scene == "efekt-cpu")
+                MeasureEffects();
             else if (scene == "arama")
                 SearchSnapshots.Render(outDir, prefix, theme, RenderElement);
             else if (scene == "sitedock")
@@ -260,7 +264,7 @@ public static class Program
         bool locationBlocked = false, bool audioConnected = true, Func<Koy.Core.SystemStats.ISystemStatsService>? statsFactory = null,
         bool brightnessSupported = true, bool wideCover = false, Koy.Core.Notch.NotchStyleMode notchStyle = Koy.Core.Notch.NotchStyleMode.Pinned,
         Koy.Core.Notch.IdleDisplayMode idleMode = Koy.Core.Notch.IdleDisplayMode.ClockAndBattery, FakePower? power = null, string? language = null,
-        bool clockShowDate = false)
+        bool clockShowDate = false, string? liveBackground = null)
     {
         var settings = new AppSettings
         {
@@ -273,7 +277,9 @@ public static class Program
                 Style = notchStyle,
                 IdleDisplay = idleMode,
                 ClockShowDate = clockShowDate,
-                ControlCenterLayout = tileOrder is null ? new AppSettings().Notch.ControlCenterLayout : new Koy.Core.Settings.ValueList<string>(tileOrder)
+                ControlCenterLayout = tileOrder is null ? new AppSettings().Notch.ControlCenterLayout : new Koy.Core.Settings.ValueList<string>(tileOrder),
+                LiveBackgroundTarget = liveBackground is null ? Koy.Core.Notch.LiveBackgroundTarget.None : Koy.Core.Notch.LiveBackgroundTarget.Notch,
+                LiveBackgroundPreset = liveBackground ?? Koy.Core.Notch.LiveBackgroundPresets.DefaultId
             },
             Appearance = new AppearanceSettings
             {
@@ -403,6 +409,86 @@ public static class Program
 
         Settle();
         RenderElement((FrameworkElement)set.Window.Content, Koy.Core.Notch.NotchLayout.CanvasWidth, Koy.Core.Notch.NotchLayout.CanvasHeight, path);
+    }
+
+    /// <summary>
+    /// Her önayar açık çentikte 8 sn oynarken sürecin CPU kullanımı (tek çekirdeğin yüzdesi). Uygulamadaki gibi yazılımla
+    /// çizim zorlanır. Kaba ölçümdür: pencere ekran dışında, gerçek ekran bileşimi dahil değil.
+    /// </summary>
+    private static void MeasureEffects()
+    {
+        System.Windows.Media.RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
+        var ids = new List<string?> { null };
+        ids.AddRange(Koy.Core.Notch.LiveBackgroundPresets.All.Select(p => p.Id));
+        ids.Add(null);
+        // İlk tur ısınma (JIT); ölçüm ikinci turdan.
+        ids.Insert(0, Koy.Core.Notch.LiveBackgroundPresets.DefaultId);
+        foreach (var id in ids)
+        {
+            // Prizdeki pil: pille çalışırken pil tasarrufu hareketi durdurur, ölçüm hareketsiz kareyi ölçerdi.
+            // Müziksiz: ses çubukları ve ilerleme saati ölçüme karışmasın.
+            var set = MakeNotch(music: false, liveBackground: id, power: new FakePower(charging: true));
+            set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+            var content = (FrameworkElement)set.Window.Content;
+            set.Window.Content = null;
+            var shape = (Koy.App.Features.Notch.NotchShape)set.Window.FindName("Notch");
+            shape.Width = Koy.Core.Notch.NotchLayout.ExpandedWidth;
+            shape.Height = Koy.Core.Notch.NotchLayout.ExpandedHeight;
+            var host = new Window
+            {
+                Content = content, DataContext = set.Vm, WindowStyle = WindowStyle.None, ResizeMode = ResizeMode.NoResize,
+                ShowInTaskbar = false, ShowActivated = false, Left = -30000, Top = -30000,
+                Width = Koy.Core.Notch.NotchLayout.CanvasWidth, Height = Koy.Core.Notch.NotchLayout.CanvasHeight,
+            };
+            host.Show();
+            Settle();
+
+            var proc = System.Diagnostics.Process.GetCurrentProcess();
+            proc.Refresh();
+            var cpu0 = proc.TotalProcessorTime;
+            var wall = System.Diagnostics.Stopwatch.StartNew();
+            var frame = new System.Windows.Threading.DispatcherFrame();
+            var stop = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(8) };
+            stop.Tick += (_, _) => { stop.Stop(); frame.Continue = false; };
+            stop.Start();
+            System.Windows.Threading.Dispatcher.PushFrame(frame);
+            proc.Refresh();
+            var percent = (proc.TotalProcessorTime - cpu0).TotalMilliseconds / wall.Elapsed.TotalMilliseconds * 100;
+            Console.WriteLine($"{id ?? "(kapalı)",-12} {percent,6:F1} %");
+
+            host.Close();
+            set.Vm.Dispose();
+        }
+    }
+
+    /// <summary>Canlı arka plan önayarları: her biri açık çentiğin Ana sayfasında, müzik çalarken (hareketsiz kare).</summary>
+    private static void RenderEffects(string outDir, string prefix, string theme)
+    {
+        foreach (var preset in Koy.Core.Notch.LiveBackgroundPresets.All)
+        {
+            var set = MakeNotch(music: true, liveBackground: preset.Id);
+            set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+            // Arka plan yalnız görünür öğede çizilir (AGENTS #5). Çentik penceresi ekranın üstüne yerleşip en üstte durduğu
+            // için gösterilmez; içeriği ekran dışındaki sade bir pencereye taşınır.
+            var content = (FrameworkElement)set.Window.Content;
+            set.Window.Content = null;
+            var host = new Window
+            {
+                Content = content, DataContext = set.Vm, WindowStyle = WindowStyle.None, ResizeMode = ResizeMode.NoResize,
+                ShowInTaskbar = false, ShowActivated = false, Left = -30000, Top = -30000,
+                Width = Koy.Core.Notch.NotchLayout.CanvasWidth, Height = Koy.Core.Notch.NotchLayout.CanvasHeight,
+            };
+            var shape = (Koy.App.Features.Notch.NotchShape)set.Window.FindName("Notch");
+            shape.Width = Koy.Core.Notch.NotchLayout.ExpandedWidth;
+            shape.Height = Koy.Core.Notch.NotchLayout.ExpandedHeight;
+            shape.CornerRadius = Koy.Core.Notch.NotchStyle.CornerRadius(set.Vm.Settings.Notch.Style, Koy.Core.Notch.NotchSurface.Expanded, shape.Height, 34);
+            host.Show();
+            Settle();
+            RenderElement(content, Koy.Core.Notch.NotchLayout.CanvasWidth, Koy.Core.Notch.NotchLayout.CanvasHeight,
+                Path.Combine(outDir, $"{prefix}-{theme}-efekt-{preset.Id}.png"));
+            host.Close();
+            set.Vm.Dispose();
+        }
     }
 
     private static void RenderNotchScenes(Func<string, string> name)
