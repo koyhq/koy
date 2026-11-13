@@ -23,9 +23,9 @@
 
 <br />
 
-<img alt="Koy promo: the notch springs open, Calendar and Control Center, the Shelf, the dock" src="docs/screenshots/koy-tanitim.gif" width="720">
+<img alt="Koy promo: the notch springs open, Calendar and Control Center, the Shelf, the dock" src="docs/screenshots/koy-promo.gif" width="720">
 
-<sub>22-second promo (Turkish captions): the notch springs open from the top edge, Calendar and Control Center, dropping a file on the Shelf, and the dock.</sub>
+<sub>22-second promo: the notch springs open from the top edge, Calendar and Control Center, dropping a file on the Shelf, and the dock.</sub>
 
 </div>
 
