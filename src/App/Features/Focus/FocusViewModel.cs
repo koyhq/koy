@@ -299,6 +299,10 @@ public sealed partial class FocusViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void Reset() => _timers.Reset(Selected);
 
+    /// <summary>Ana'daki Odak satırı: çalışan zamanlayıcı varsa onu duraklatır, yoksa seçili sekmeninkini başlatır / sürdürür.</summary>
+    [RelayCommand]
+    private void ToggleRunning() => _timers.Toggle(_timers.Running?.Kind ?? Selected);
+
     [RelayCommand]
     private void Skip() => _timers.Pomodoro.Skip();
 

@@ -162,6 +162,15 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     /// <summary>Açık çentiğin üstündeki sekmeler; ayarlarda açık paneller, ayardaki sırayla.</summary>
     public ObservableCollection<NotchTabViewModel> Tabs { get; } = [];
 
+    /// <summary>Üst satırın sağındaki sekmeler: Ana dışındaki açık paneller (Ana ve Müzik ortadaki anahtarda).</summary>
+    public ObservableCollection<NotchTabViewModel> SideTabs { get; } = [];
+
+    /// <summary>Ortadaki anahtarda Müzik seçili (Ana sekmesi ve müzik yüzü).</summary>
+    public bool IsMusicPageSelected => CurrentPanel == NotchPanel.Home && Home.IsMusicPage;
+
+    /// <summary>Ortadaki anahtarda Ana seçili.</summary>
+    public bool IsHomePageSelected => CurrentPanel == NotchPanel.Home && Home.IsHomePage;
+
     /// <summary>Sekme çubuğu görünür mü (biçim "gizli" değilse; issue #78). Gizliyken paneller tekerlek ve kısayolla değişir.</summary>
     public bool ShowTabBar => Settings.Notch.TabBarStyle != NotchTabBarStyle.Hidden;
 
@@ -333,6 +342,9 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         LiveBackground = new LiveBackgroundState(settings.Notch);
         Home = new HomeViewModel(music, status, focus, systemStats, quickLaunch, shellActions, () => _controller.GoToPanel(NotchPanel.Focus),
             controlCenter.BluetoothDevices, settings.Notch.HomeCards) { LiveBackground = LiveBackground };
+        Home.AttachCalendar(calendar.Events, OpenCalendarDay);
+        Home.OpenSystemPage = () => _controller.GoToPanel(NotchPanel.System);
+        Home.PropertyChanged += OnHomePropertyChanged;
         quickLaunch.HoldOpen = HoldOpenForPicker;
         _visibility = visibility ?? new VisibilityController(settings.Notch.Visibility);
         _dispatcher = dispatcher ?? (System.Windows.Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher);
@@ -571,6 +583,10 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     private void ApplyState(NotchState newState)
     {
+        // Her açılışta Ana'nın yüzü yeniden seçilir: parça varsa Müzik, yoksa Ana (kullanıcının açıkken seçimi kapanınca unutulur).
+        if (newState == NotchState.Expanded && State != NotchState.Expanded)
+            Home.Page = NotchHomePages.OnOpen(Music.HasTrack, Home.Cards.Contains(HomeCard.Music));
+
         State = newState;
         // Kart çentik açılınca kalkar (açık çentik kartın yerine geçer).
         if (newState == NotchState.Expanded && Osd.Type == OsdType.Card)
@@ -587,6 +603,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
         CurrentPanel = newPanel;
         OnPropertyChanged(nameof(CurrentPanelContent));
+        NotifyPageSwitch();
         UpdateTargetSize();
         UpdateActivePanels();
     }
@@ -601,8 +618,45 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private void RebuildTabs()
     {
         Tabs.Clear();
+        SideTabs.Clear();
         foreach (var panel in _controller.EnabledPanels)
-            Tabs.Add(NotchTabs.Create(panel, panel == _controller.CurrentPanel));
+        {
+            var tab = NotchTabs.Create(panel, panel == _controller.CurrentPanel);
+            Tabs.Add(tab);
+            if (panel != NotchPanel.Home)
+                SideTabs.Add(tab);
+        }
+    }
+
+    private void OnHomePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(HomeViewModel.Page))
+        {
+            NotifyPageSwitch();
+            UpdateActivePanels();
+        }
+    }
+
+    private void NotifyPageSwitch()
+    {
+        OnPropertyChanged(nameof(IsMusicPageSelected));
+        OnPropertyChanged(nameof(IsHomePageSelected));
+    }
+
+    /// <summary>Ortadaki anahtar: Ana sekmesine geçer ve istenen yüzü gösterir.</summary>
+    [RelayCommand]
+    private void ShowHomePage(NotchHomePage page)
+    {
+        Home.Page = page;
+        _controller.GoToPanel(NotchPanel.Home);
+    }
+
+    // Ana'daki etkinliğe tıklanınca Takvim o günde açılır.
+    private void OpenCalendarDay(DateOnly day)
+    {
+        _calendar.SelectDayCommand.Execute(day);
+        _calendar.SetViewCommand.Execute(Koy.Core.Calendar.CalendarViewMode.Month);
+        _controller.GoToPanel(NotchPanel.Calendar);
     }
 
     private void UpdateActivePanels()
@@ -613,7 +667,8 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         // Ses çubukları "kapak ve dalga" ayarına bağlı; pil tasarrufu hareketi kısarken hiç yakalanmaz.
         _music.SetSpectrumAllowed(Settings.Music.ShowWaveform && !ReduceMotion);
         _music.Lyrics.SetAllowed(Settings.Music.LyricsEnabled);
-        _music.SetActive(isExpanded && CurrentPanel == NotchPanel.Home);
+        var onHome = CurrentPanel == NotchPanel.Home;
+        _music.SetActive(isExpanded && onHome && Home.IsMusicPage);
         // Saat, hava ve pil her sekmede üstteki durum satırında görünür.
         _status.SetActive(isExpanded);
         _controlCenter.SetActive(isExpanded && CurrentPanel == NotchPanel.ControlCenter);
@@ -623,10 +678,12 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         // Her servis yalnız sayfası görünürken çalışır (boşta %0 CPU): sistem verisi Ana ve Sistem'de (kartlar orada),
         // pano, görevler, takvim ve hızlı başlat kendi sayfalarında.
         var shown = isExpanded && IsNotchVisible;
-        SystemStats.SetActive(shown && CurrentPanel is NotchPanel.Home or NotchPanel.System);
-        Home.QuickLaunch.SetActive(shown && CurrentPanel == NotchPanel.Home);
-        // Kulaklık kartı yalnız Ana görünürken Bluetooth izleyicisini ister (Kontrol kendi "control" sahibiyle ister).
-        _controlCenter.BluetoothDevices.SetViewing("home", shown && CurrentPanel == NotchPanel.Home);
+        var homeFace = shown && onHome && Home.IsHomePage;
+        SystemStats.SetActive(homeFace || (shown && CurrentPanel == NotchPanel.System));
+        Home.QuickLaunch.SetActive(homeFace);
+        Home.SetActive(homeFace);
+        // Kulaklık kartı yalnız Ana yüzü görünürken Bluetooth izleyicisini ister (Kontrol kendi "control" sahibiyle ister).
+        _controlCenter.BluetoothDevices.SetViewing("home", homeFace);
         _focus.Tasks?.SetActive(shown && CurrentPanel == NotchPanel.Focus);
         _calendar.SetActive(shown && CurrentPanel == NotchPanel.Calendar);
         _clipboard?.SetActive(shown && CurrentPanel == NotchPanel.Clipboard);
@@ -819,6 +876,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         StopClockTimer();
         _controller.StateChanged -= OnStateChanged;
         _controller.PanelChanged -= OnPanelChanged;
+        Home.PropertyChanged -= OnHomePropertyChanged;
         _controller.EnabledPanelsChanged -= OnEnabledPanelsChanged;
         _controller.PanelTransitionTriggered -= OnPanelTransitionTriggered;
         _visibility.Changed -= OnVisibilityChanged;

@@ -86,20 +86,16 @@ public partial class HomePanel : UserControl
         }
     }
 
-    // Müzik kartına tıklanınca büyür / eski boyutuna döner. Düğme ve ilerleme çubuğu kendi işini yapar.
-    // Olay işlenmiş sayılır: yoksa çentik penceresi tıklamayı "boşluğa tıklandı" sayıp çentiği kapatırdı.
+    // Müzik kartının boş yerine tıklama işlenmiş sayılır: yoksa çentik penceresi tıklamayı "boşluğa tıklandı" sayıp
+    // çentiği kapatırdı. Düğme ve ilerleme çubuğu kendi işini yapar.
     private void MusicCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (DataContext is not HomeViewModel vm || !vm.ShowMusic)
-            return;
-
         for (var node = e.OriginalSource as DependencyObject; node is not null && !ReferenceEquals(node, sender); node = ParentOf(node))
         {
             if (node is ButtonBase or RangeBase)
                 return;
         }
 
-        vm.ToggleMusicExpandedCommand.Execute(null);
         e.Handled = true;
     }
 

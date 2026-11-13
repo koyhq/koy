@@ -180,8 +180,22 @@ public static class ThemeManager
             // Müzik kartı palet yokken (Düz nötr) diğer kartlarla aynı cam tonunda; ikincil metin ve çubuklar zaten
             // nötr (Tokens). Albüm rengi ve kapak resmi MusicViewModel fırçalarından gelir.
             o["KoyNotchMusicCard"] = new SolidColorBrush(Color.FromArgb(0x0F, 0xFF, 0xFF, 0xFF));
+            // Sayfa kartları da (Çentik D'de hepsi nötr) aynı cam katmanı olur; düğme ve çipler vurgulu katman.
+            foreach (var key in NotchPageCards)
+                o[key] = new SolidColorBrush(Color.FromArgb(0x0F, 0xFF, 0xFF, 0xFF));
+            foreach (var key in NotchPageChips)
+                o[key] = new SolidColorBrush(Color.FromArgb(0x17, 0xFF, 0xFF, 0xFF));
         }
     }
+
+    private static readonly string[] NotchPageCards =
+    [
+        "KoyNotchWeatherCard", "KoyNotchFocusCard", "KoyNotchShelfCard", "KoyNotchControlCard", "KoyNotchCalendarCard",
+        "KoyNotchClipCard", "KoyNotchSystemCard", "KoyNotchNetCard",
+    ];
+
+    private static readonly string[] NotchPageChips =
+        ["KoyNotchFocusButton", "KoyNotchShelfChip", "KoyNotchControlTile", "KoyNotchCalendarChip", "KoyNotchClipChip"];
 
     // Tokens.xaml'deki yazı ölçüleri (taban 13 DIP'te); taban boyu değişince oranla ölçeklenir.
     private static readonly (string Key, double AtDefault)[] FontTokens =
@@ -219,6 +233,7 @@ public static class ThemeManager
         {
             o["KoyFont"] = new FontFamily(ui);
             o["KoyNotchFont"] = new FontFamily(ui);
+            o["KoyNotchDisplayFont"] = new FontFamily(ui);
         }
 
         var clock = FontScalePolicy.ResolveClockFontFamily(a.ClockFontFamily, ui, installed);

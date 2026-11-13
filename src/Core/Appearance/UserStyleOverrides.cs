@@ -169,6 +169,7 @@ public static class AllowedTokens
         list.Add(new UserStyleToken("KoyFont", UserStyleKind.FontFamily));
         list.Add(new UserStyleToken("KoyFontMono", UserStyleKind.FontFamily));
         list.Add(new UserStyleToken("KoyNotchFont", UserStyleKind.FontFamily));
+        list.Add(new UserStyleToken("KoyNotchDisplayFont", UserStyleKind.FontFamily));
         list.Add(new UserStyleToken("KoyClockFont", UserStyleKind.FontFamily));
 
         // Yazı boyutları (DIP): okunur kalsın diye dar aralık.
