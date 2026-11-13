@@ -1,6 +1,6 @@
 # Proje haritası
 
-"Şunu değiştirmek istersem nereye bakarım?" sorusunun cevabı. Kurallar `AGENTS.md`'de, tasarım `docs/DESIGN.md`'de, sıradaki işler `docs/ROADMAP.md`'de.
+"Şunu değiştirmek istersem nereye bakarım?" sorusunun cevabı. Kurallar `AGENTS.md`'de, tasarım `docs/DESIGN.md`'de, sıradaki işler GitHub issue'larında (`docs/ROADMAP.md` tarihçe).
 
 Dosyalar her başlıkta **Core → Platform → App** sırasıyla yazılıdır. Bağımlılık yönü de budur: Core başka katmanı bilmez.
 
@@ -9,7 +9,7 @@ Dosyalar her başlıkta **Core → Platform → App** sırasıyla yazılıdır. 
 - Kullanıcıya görünen yeni metin iki resx dosyasında da var.
 - Arayüz değiştiyse `tools/Koy.UiSnapshots` ile görsel kanıt alındı.
 - Aşama bittiyse bellek ölçüldü, `docs/MEMORY.md` güncellendi (AGENTS #1).
-- `docs/ROADMAP.md` içindeki kutu işaretlendi.
+- İlgili issue PR'da `Closes #N` ile bağlandı.
 
 ## Çentiğe yeni sekme eklemek
 | Katman | Dosya | Ne yapılır |

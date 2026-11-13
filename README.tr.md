@@ -114,7 +114,7 @@ Dürüst durum: aşağıdakiler henüz yok ya da doğrulanmadı.
 - **Dock klasörleri:** 0.2.0 ile geldi, elle sınaması sürüyor.
 - **Windows'un UWP sabitlemeleri** (Spotify, WhatsApp gibi) dock'ta henüz gösterilmiyor.
 - **Çoklu ekran:** karışık DPI'lı donanımda ve ikincil görev çubuğu AppBar'ında elle denenmedi.
-- **Henüz yok:** Windows bildirimlerini çentikte gösterme, kod imzası (SmartScreen uyarısı). Sıra için [`docs/ROADMAP.md`](docs/ROADMAP.md).
+- **Henüz yok:** Kod imzası (SmartScreen uyarısı). Açık işler [GitHub issue'larında](https://github.com/koyhq/koy/issues).
 - **Doğrulanmadı:** hareket (animasyon) akıcılığı, yarı saydam malzemenin gerçek cihazda görünümü, sistem teması değişince canlı güncelleme, uygulama içi kaldırma akışının gerçek bir kurulumda uçtan uca denenmesi.
 
 ---

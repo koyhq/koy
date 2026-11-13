@@ -114,7 +114,7 @@ To be honest about the current state, the following do not exist yet or have not
 - **Dock folders:** Shipped in 0.2.0; manual testing is ongoing.
 - **UWP pins from Windows** (such as Spotify and WhatsApp) are not shown on the dock yet.
 - **Multi-monitor:** Not manually tested on mixed-DPI hardware or with the secondary taskbar AppBar.
-- **Not available yet:** Showing Windows notifications in the notch, code signing (SmartScreen warning). For the order of work, see [`docs/ROADMAP.md`](docs/ROADMAP.md).
+- **Not available yet:** Code signing (SmartScreen warning). Open work is tracked in [GitHub issues](https://github.com/koyhq/koy/issues).
 - **Not verified:** Animation smoothness, how the translucent material looks on real devices, live update when the system theme changes, an end-to-end run of the in-app uninstall flow on a real installation.
 
 ---
