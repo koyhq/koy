@@ -23,9 +23,9 @@
 
 <br />
 
-<img alt="Çentik: Ana panel" src="docs/screenshots/centik-ana.png" width="720">
+<img alt="Koy tanıtımı: çentik yayla açılır, Takvim ve Kontrol Merkezi, Raf, dock" src="docs/screenshots/koy-tanitim.gif" width="720">
 
-<sub>Çentik açıkken Ana panel: çalan müzik, kulaklık pili, sistem ve ağ, hızlı başlat.</sub>
+<sub>22 saniyelik tanıtım: çentik üst kenardan yayla açılır, Takvim ve Kontrol Merkezi, Raf'a dosya bırakma ve dock.</sub>
 
 </div>
 
@@ -37,7 +37,7 @@
 | :---: | :---: |
 | <img alt="Kapalı çentik, müzik çalarken" src="docs/screenshots/centik-kapali.png" width="360"><br><sub>Kapalı çentik: müzik çalarken kapak ve dalga</sub> | <img alt="Dock" src="docs/screenshots/dock.png" width="420"><br><sub>Dock: Windows görev çubuğunun yerine</sub> |
 | <img alt="Kontrol Merkezi" src="docs/screenshots/centik-kontrol.png" width="420"><br><sub>Kontrol Merkezi: Wi-Fi, Bluetooth, ses, parlaklık</sub> | <img alt="Takvim" src="docs/screenshots/centik-takvim.png" width="420"><br><sub>Takvim: ay, hafta ve gün görünümü, etkinlikler</sub> |
-| <img alt="Wi-Fi listesi" src="docs/screenshots/centik-wifi.png" width="420"><br><sub>Wi-Fi listesi: Windows'taki gibi ağ seçimi</sub> | |
+| <img alt="Wi-Fi listesi" src="docs/screenshots/centik-wifi.png" width="420"><br><sub>Wi-Fi listesi: Windows'taki gibi ağ seçimi</sub> | <img alt="Çentik: Ana panel" src="docs/screenshots/centik-ana.png" width="420"><br><sub>Ana panel: çalan müzik, kulaklık pili, sistem ve ağ, hızlı başlat</sub> |
 
 <sub>Çentik görüntüleri örnek verilerle çizildi (`tools/Koy.UiSnapshots`); dock görüntüsü gerçek ekrandan.</sub>
 
