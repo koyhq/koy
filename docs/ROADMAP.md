@@ -191,7 +191,7 @@ Kod incelemesinden çıkan işler paketlere bölündü.
 - [x] #11: `main`'e entegre edildi ve PR birleştirildi (aşağıda "Dock sistem tepsisi"); kalan kapsam (taşma simgeleri, balon bildirimleri) "Sonraya kalanlar"da.
 - [x] #9: `main`'de farklı bir yapıyla (Ekranlar sayfası, D2) çözüldü ve kapatıldı.
 
-**Hâlâ açık olan eksikler** (issue'lara taşındı: Peek'te tarih ve ağ #148, iki sütunlu ana görünüm #149, UWP #147, çoklu monitör doğrulaması #156, bellek #157; ses görselleştirici #78 ile geldi): iki sütunlu ana görünüm ve kapalı/Peek çentikte tarih ve ağ simgesi (tasarım bekliyor; veri tarafı hazır: `HomeViewModel`, `NotchLayout.ShowPeekDetails`); UWP uygulama sabitlemeleri (AUMID); ses görselleştirici; gerçek çoklu monitör ve karışık DPI doğrulaması; bellek ölçümü.
+**Hâlâ açık olan eksikler** (issue'lara taşındı: Peek'te tarih ve ağ #148, iki sütunlu ana görünüm zaten vardı (#149 kapatıldı), UWP #147, çoklu monitör doğrulaması #156, bellek #157; ses görselleştirici #78 ile geldi): iki sütunlu ana görünüm ve kapalı/Peek çentikte tarih ve ağ simgesi (tasarım bekliyor; veri tarafı hazır: `HomeViewModel`, `NotchLayout.ShowPeekDetails`); UWP uygulama sabitlemeleri (AUMID); ses görselleştirici; gerçek çoklu monitör ve karışık DPI doğrulaması; bellek ölçümü.
 
 ---
 
