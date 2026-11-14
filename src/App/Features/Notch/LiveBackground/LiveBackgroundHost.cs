@@ -22,6 +22,16 @@ public sealed class LiveBackgroundHost : Border
     // Yazılımla çizimde (AGENTS #3) her animasyon karesi bölgeyi yeniden çizer; yavaş geçişler için 15 fps yeter.
     private const int DesiredFrameRate = 15;
 
+    // Yerel video ilk kareyi çözene dek alttaki kart kapağı görünmesin diye çentik renginde dondurulmuş yedek zemin.
+    private static readonly Brush VideoFallbackBrush = CreateFallbackBrush();
+
+    private static SolidColorBrush CreateFallbackBrush()
+    {
+        var brush = new SolidColorBrush(Color.FromRgb(0x0A, 0x0A, 0x0B));
+        brush.Freeze();
+        return brush;
+    }
+
     public static readonly DependencyProperty SelectionProperty = DependencyProperty.Register(
         nameof(Selection), typeof(LiveBackgroundSelection), typeof(LiveBackgroundHost),
         new PropertyMetadata(null, (d, _) => ((LiveBackgroundHost)d).Apply()));
@@ -114,7 +124,7 @@ public sealed class LiveBackgroundHost : Border
             case LiveBackgroundContentKind.Ambient when selection.Preset is { VideoFile: { } videoFile } preset:
                 var builtinVideoPath = Path.Combine(AppContext.BaseDirectory, "assets", "backgrounds", videoFile);
                 if (File.Exists(builtinVideoPath))
-                    ShowVideo(builtinVideoPath, animate);
+                    ShowVideo(builtinVideoPath, animate, LiveBackgroundPreviewRenderer.Get(preset.Id));
                 else
                     ShowAmbient(preset, animate);
                 break;
@@ -125,7 +135,7 @@ public sealed class LiveBackgroundHost : Border
                 _ = ShowImageAsync(imagePath, selection.Kind, animate);
                 break;
             case LiveBackgroundContentKind.Video when selection.FilePath is { } videoPath:
-                ShowVideo(videoPath, animate);
+                ShowVideo(videoPath, animate, poster: null);
                 break;
         }
     }
@@ -190,10 +200,23 @@ public sealed class LiveBackgroundHost : Border
         brush.BeginAnimation(ImageBrush.ImageSourceProperty, animation);
     }
 
-    // ---- Video: sessiz MediaElement; hareketsizse ilk kareyi gösterip bekler ----
+    // ---- Video: sessiz MediaElement; ilk kare çözülene dek dondurulmuş poster alt katmanda kalır ----
 
-    private void ShowVideo(string path, bool animate)
+    private void ShowVideo(string path, bool animate, BitmapSource? poster)
     {
+        // MediaElement ilk kareyi boyayana kadar 0,3–1 sn saydam kalır; yerleşik döngülerde 0. karenin PNG posteri,
+        // yerel videoda ise koyu zemin hemen gösterilir ki çentik / müzik kartı arkadan parlamasın.
+        if (poster is not null)
+        {
+            var brush = new ImageBrush(poster) { Stretch = Stretch.UniformToFill };
+            RenderOptions.SetBitmapScalingMode(brush, BitmapScalingMode.HighQuality);
+            _art.Background = brush;
+        }
+        else
+        {
+            _art.Background = VideoFallbackBrush;
+        }
+
         var media = new MediaElement
         {
             LoadedBehavior = MediaState.Manual,
