@@ -114,7 +114,7 @@ Dürüst durum: aşağıdakiler henüz yok ya da doğrulanmadı.
 - **Dock klasörleri:** 0.2.0 ile geldi, elle sınaması sürüyor.
 - **Windows'un UWP sabitlemeleri** (Spotify, WhatsApp gibi) dock'ta henüz gösterilmiyor.
 - **Çoklu ekran:** karışık DPI'lı donanımda ve ikincil görev çubuğu AppBar'ında elle denenmedi.
-- **Henüz yok:** Kod imzası (SmartScreen uyarısı). Açık işler [GitHub issue'larında](https://github.com/koyhq/koy/issues).
+- **İmzalama:** Sürüm imzalama altyapısı iş akışına ve `scripts/pack.ps1` betiğine eklendi; depo gizli anahtarlarında sertifika veya SignPath tanımlanana kadar genel sürümler imzasız üretilir. Açık işler [GitHub issue'larında](https://github.com/koyhq/koy/issues).
 - **Doğrulanmadı:** hareket (animasyon) akıcılığı, yarı saydam malzemenin gerçek cihazda görünümü, sistem teması değişince canlı güncelleme, uygulama içi kaldırma akışının gerçek bir kurulumda uçtan uca denenmesi.
 
 ---
@@ -132,13 +132,13 @@ Dürüst durum: aşağıdakiler henüz yok ya da doğrulanmadı.
 
 ### İmza, SmartScreen ve güncellemeler
 
-Koy'un kurulum dosyası ve güncellemeleri henüz **kod imzalı değil**. Bu yüzden:
+Sürüm iş akışı ve `scripts/pack.ps1` isteğe bağlı Authenticode kod imzalamayı (`SIGNING_CERT_BASE64` / `SIGNING_CERT_PASSWORD` depo gizli anahtarları veya SignPath / Trusted Signing) destekler. Depoda bir imzalama sertifikası tanımlanana (ve yeni sertifika SmartScreen itibarı kazanana) kadar genel sürümler ilk çalıştırmada SmartScreen uyarısı gösterebilir:
 
 - **SmartScreen uyarısı:** İlk çalıştırmada Windows "Windows bilgisayarınızı korudu" diyebilir. Dosyayı yalnız [GitHub Releases](https://github.com/koyhq/koy/releases) sayfasından indirdiyseniz **"Ek bilgi" → "Yine de çalıştır"** ile devam edebilirsiniz. Başka bir siteden, aynadan ya da paylaşılan bir bağlantıdan gelen Koy dosyasını çalıştırmayın.
 - **`SHA256SUMS.txt` neyi kanıtlar:** İndirmenin bozulmadan, eksiksiz geldiğini. Dosyayla aynı sürüm sayfasında durduğu için dosyayı kimin yayınladığını kanıtlamaz; o güvence GitHub deposunun kendisinden gelir.
 - **Otomatik güncellemeler:** Kurulu Koy yalnız bu deponun GitHub Releases sayfasındaki sürümleri HTTPS ile indirir. Velopack her paketi sürüm listesindeki SHA özetiyle karşılaştırır; uymayan paket kurulmaz. Güncelleme Koy kapanınca uygulanır. İstemezseniz Ayarlar → Genel'den otomatik denetimi kapatabilirsiniz.
 - **Yayın hattı:** Sürümler yalnız GitHub Actions'ta, testler geçtikten sonra üretilir. Kullanılan eylemler commit özetine sabitlidir; `main` dalına zorla push ve dal silme, yayınlanmış `v*` etiketlerinin taşınması ve silinmesi depo kurallarıyla engellidir.
-- **Plan:** Açık kaynak projeler için ücretsiz kod imzalama (SignPath Foundation) değerlendirilecek. İmza gelince SmartScreen uyarısı zamanla kalkar ve güncellemeler imzayla da doğrulanır.
+- **İmza yapılandırması:** Bakımcılar GitHub Actions gizli anahtarlarına `SIGNING_CERT_BASE64` ve `SIGNING_CERT_PASSWORD` ekleyerek (veya SignPath Foundation / Azure Trusted Signing bağlayarak) `Koy.exe`, `Koy.Watchdog.exe` ve `Koy-win-Setup.exe` çıktılarının otomatik imzalanmasını etkinleştirebilir. Ayrıntılar [`CONTRIBUTING.md`](CONTRIBUTING.md#7-how-releases-work) içindedir.
 
 ### Kaynak Koddan Derleme
 
