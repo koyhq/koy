@@ -114,7 +114,7 @@ public sealed class MonitorService : IMonitorService
                         IsPrimary: isPrimary,
                         DpiScaleX: dpiScaleX,
                         DpiScaleY: dpiScaleY,
-                        Handle: hMonitor.Value,
+                        Handle: (nint)hMonitor.Value,
                         DeviceName: deviceName));
                 }
 

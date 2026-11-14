@@ -74,9 +74,9 @@ public sealed class TrayHostService : ITrayService
     private static DateTime LastBroadcastUtc => new(Interlocked.Read(ref s_lastBroadcastTicks), DateTimeKind.Utc);
 
     /// <summary>Az önce gelen "TaskbarCreated" bizim kendi yayınımızın yankısı mı (Gezgin'in yeniden başlaması değil).</summary>
-    public static bool IsOwnTaskbarCreatedBroadcast() =>
+    public static unsafe bool IsOwnTaskbarCreatedBroadcast() =>
         TaskbarCreatedPolicy.IsOwnBroadcast(
-            LastBroadcastUtc, DateTime.UtcNow, (nint)Interlocked.Read(ref s_broadcastExplorerTray), ShellTrayLocator.FindExplorerTray().Value);
+            LastBroadcastUtc, DateTime.UtcNow, (nint)Interlocked.Read(ref s_broadcastExplorerTray), (nint)ShellTrayLocator.FindExplorerTray().Value);
     private bool _disposed;
 
     public event EventHandler? IconsChanged;
@@ -100,7 +100,7 @@ public sealed class TrayHostService : ITrayService
     private HWND Hwnd
     {
         get => new(Volatile.Read(ref _hwndValue));
-        set => Volatile.Write(ref _hwndValue, value.Value);
+        set { unsafe { Volatile.Write(ref _hwndValue, (nint)value.Value); } }
     }
 
     /// <summary>Tepsi penceresi gerçekten kuruldu ve çalışıyor (başlatma başarısızsa ya da kapandıysa false).</summary>
@@ -192,7 +192,7 @@ public sealed class TrayHostService : ITrayService
             if (icon is null || icon.IconHandle == 0)
                 return null;
 
-            copy = PInvoke.CopyIcon(new HICON(icon.IconHandle)).Value;
+            unsafe { copy = (nint)PInvoke.CopyIcon(new HICON(icon.IconHandle)).Value; }
         }
 
         if (copy == 0)
@@ -264,7 +264,7 @@ public sealed class TrayHostService : ITrayService
         try
         {
             // Ham sürüm: kolay sürümün SafeHandle'ı serbest bırakılırken ana modüle FreeLibrary çağırmasın.
-            instance = new HINSTANCE(PInvoke.GetModuleHandle(default(PCWSTR)).Value);
+            unsafe { instance = new HINSTANCE(PInvoke.GetModuleHandle(default(PCWSTR)).Value); }
             if (!CreateWindows(instance))
                 return;
         }
@@ -461,7 +461,7 @@ public sealed class TrayHostService : ITrayService
         if ((data.Fields & TrayIconFields.Icon) != 0 && data.IconHandle != 0)
         {
             // Uygulama simgesini sonradan yok edebilir; kendi kopyamızı tutarız.
-            data = data with { IconHandle = PInvoke.CopyIcon(new HICON(data.IconHandle)).Value };
+            data = data with { IconHandle = (nint)PInvoke.CopyIcon(new HICON(data.IconHandle)).Value };
         }
 
         bool success;
@@ -538,7 +538,7 @@ public sealed class TrayHostService : ITrayService
         if (_taskbarCreatedMessage == 0)
             return;
 
-        Interlocked.Exchange(ref s_broadcastExplorerTray, ShellTrayLocator.FindExplorerTray().Value);
+        unsafe { Interlocked.Exchange(ref s_broadcastExplorerTray, (nint)ShellTrayLocator.FindExplorerTray().Value); }
         Interlocked.Exchange(ref s_lastBroadcastTicks, DateTime.UtcNow.Ticks);
         PInvoke.SendNotifyMessage(new HWND(0xFFFF), _taskbarCreatedMessage, default, default); // HWND_BROADCAST
     }

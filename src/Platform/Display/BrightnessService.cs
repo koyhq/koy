@@ -229,7 +229,7 @@ public sealed class BrightnessService : IBrightnessService
 
                 try
                 {
-                    using var safeHandle = new Microsoft.Win32.SafeHandles.SafeFileHandle(monitors[0].hPhysicalMonitor.Value, ownsHandle: false);
+                    using var safeHandle = new Microsoft.Win32.SafeHandles.SafeFileHandle((nint)monitors[0].hPhysicalMonitor.Value, ownsHandle: false);
                     return action(safeHandle);
                 }
                 finally

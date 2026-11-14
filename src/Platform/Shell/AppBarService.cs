@@ -196,15 +196,16 @@ public sealed class AppBarService : IAppBarService
 
     private unsafe void UpdatePositionInternal(HWND hwnd, double heightDip, double dpiScale, bool force, DockEdge edge = DockEdge.Bottom)
     {
-        if (_registeredEdges.TryGetValue(hwnd.Value, out var prevEdge) && prevEdge != edge)
+        var handle = (nint)hwnd.Value;
+        if (_registeredEdges.TryGetValue(handle, out var prevEdge) && prevEdge != edge)
         {
             // Win32 AppBar: Kenar değiştiğinde eski kenarın çalışma alanını geri vermek için ABM_REMOVE
             // ve yeni kenarda ABM_NEW zorunludur; aksi halde eski kenar payı Windows'ta asılı kalır.
-            Reregister(hwnd.Value, heightDip, dpiScale, edge);
+            Reregister(handle, heightDip, dpiScale, edge);
             return;
         }
 
-        _registeredEdges[hwnd.Value] = edge;
+        _registeredEdges[handle] = edge;
 
         if (heightDip <= 0)
             heightDip = 46;
@@ -251,7 +252,7 @@ public sealed class AppBarService : IAppBarService
         var requested = new WindowRect(data.rc.left, data.rc.top, data.rc.right, data.rc.bottom);
 
         // Alt kenar bizimken sonuç Gezgin'den bağımsızdır: aynı alan için tekrar SETPOS gerekmez (kurallar: AppBarPlacementCache).
-        if (!_placements.ShouldSend(hwnd.Value, requested, OwnsBottomEdge, force))
+        if (!_placements.ShouldSend(handle, requested, OwnsBottomEdge, force))
             return;
 
         PInvoke.SHAppBarMessage(ABM_QUERYPOS, ref data);
@@ -259,7 +260,7 @@ public sealed class AppBarService : IAppBarService
         var final = AppBarMath.FinalRect(edge, new WindowRect(screenLeft, screenTop, screenRight, screenBottom), heightPx, queried, OwnsBottomEdge);
         data.rc = new RECT { left = final.Left, top = final.Top, right = final.Right, bottom = final.Bottom };
         PInvoke.SHAppBarMessage(ABM_SETPOS, ref data);
-        _placements.Record(hwnd.Value, requested);
+        _placements.Record(handle, requested);
     }
 
     public void Dispose()
