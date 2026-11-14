@@ -5,6 +5,20 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.12](https://github.com/koyhq/koy/compare/v0.2.11...v0.2.12) (2026-11-14)
+Öne çıkanlar:
+- **Sadeleşen Koy arayüzü:** `Genel`, `Çentik`, `Dock` ve `Görünüm` sayfaları üst alt sekmelerle düzenlendi; en sık kullanılan ayarlar üste alındı, gereksiz açıklamalar temizlendi.
+- **HD MP4 canlı arka planlar ve cam kartlar:** Piksel görünümlü kodlu efektlerin yerini 17 adet 620×352 30 fps MP4 video döngüsü ve gerçek kare önizlemeleri aldı; çentik içi kutular arka planı gösteren yarı saydam koyu cam stiline geçti ve yeni kurulumlarda varsayılan pencere malzemesi **Cam** oldu.
+- **Eklentiler ve tepsi iyileştirmeleri:** Uygulanan yerleşik arka plan ve mağaza eklentilerine silmeden devre dışı bırakan **Kapat** düğmesi eklendi; sağ alt tepsi simgesi tek tıkla menüyü anında açıyor, çift tıkla yalnızca Koy penceresini getiriyor ve çentik açılışında en son kalınan Ana/Müzik yüzü korunuyor.
+
+### Eklenenler
+
+* **ui:** ayar arayüzü sadeleştirildi ve çentik canlı arka planları HD MP4 döngülere yükseltildi ([#175](https://github.com/koyhq/koy/issues/175)) ([1ac9a81](https://github.com/koyhq/koy/commit/1ac9a81416000efc2a8d507136cf0ea89004fa29))
+
+### Düzeltmeler
+
+* **calendar:** Google Takvim bağlama/kesme durumu çentikte anında yansıyor ve yerleşik istemci alanları gizleniyor ([246d94e](https://github.com/koyhq/koy/commit/246d94e382b868859c929d1cef0e5e61f73d3d90))
+
 ## [0.2.11](https://github.com/koyhq/koy/compare/v0.2.10...v0.2.11) (2026-11-14)
 Öne çıkanlar:
 - **Google Takvim izni daraldı:** Koy artık takvimlerin tamamı yerine yalnız etkinlikleri okuma izni istiyor. Daha önce bağladıysan bir şey yapman gerekmiyor.
