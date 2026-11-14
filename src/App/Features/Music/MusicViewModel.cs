@@ -80,11 +80,14 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
 
     public event Action? TrackChanged;
 
-    // Müzik kartındaki ses çubukları: yakalama servisi yalnız kart görünür ve müzik çalarken alınır.
+    // Müzik kartındaki ve kapalı çentikteki ses çubukları: yakalama servisi yalnız biri görünür ve müzik çalarken alınır.
+    // ~33 ms yakalamada 2 ms zamanlayıcı sapmasıyla 10 fps'e düşmesin diye 60 ms eşik: her 2 karede bir ≈15 fps.
+    private const int CollapsedSpectrumIntervalMs = 60;
     private readonly Func<SpectrumCaptureService>? _spectrumAcquire;
     private readonly Action? _spectrumRelease;
     private SpectrumCaptureService? _spectrum;
     private bool _spectrumAllowed;
+    private bool _isCollapsedViewing;
 
     /// <summary>Çubukların düzeyleri (arayüz iş parçacığında güncellenir).</summary>
     public SpectrumFeed Spectrum { get; }
@@ -93,8 +96,9 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private bool _showSpectrum;
 
-    // Albüm rengi: stil Düz değilse ve kapak renkliyse parça değişince bir kez, arka planda hesaplanır.
+    // Albüm rengi: stil Düz değilse ya da kapalı çentik albüm rengi istiyorsa kapak renkliyse bir kez hesaplanır.
     private MusicCardStyle _cardStyle = MusicCardStyle.Tinted;
+    private readonly bool _extractCoverPalette;
     private CoverFingerprint? _coverKey;
     private int _paletteGeneration;
 
@@ -108,6 +112,10 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     private Brush? _cardBrush;
+
+    /// <summary>Kapalı çentik "Albüm rengi" kipi için tam opak albüm rengi fırçası (müzik kartı Düz kalsa bile üretilir).</summary>
+    [ObservableProperty]
+    private Brush? _collapsedAlbumBrush;
 
     [ObservableProperty]
     private Brush? _subTextBrush;
@@ -145,7 +153,8 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
 
     private void UpdateCoverPalette(byte[]? bytes)
     {
-        if (_cardStyle == MusicCardStyle.Neutral || bytes is null || bytes.Length == 0)
+        var needPalette = _cardStyle != MusicCardStyle.Neutral || _extractCoverPalette;
+        if (!needPalette || bytes is null || bytes.Length == 0)
         {
             _paletteGeneration++;
             _coverKey = null;
@@ -184,7 +193,7 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
             return;
 
         _cardAlpha = alpha;
-        if (_palette is not null)
+        if (_palette is not null && _cardStyle != MusicCardStyle.Neutral)
             CardBrush = CardFill(_palette, _cardAlpha);
     }
 
@@ -193,9 +202,24 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
         _palette = palette;
         if (palette is null)
         {
+            CollapsedAlbumBrush = null;
             HasTint = false;
             HasBackdrop = false;
             CardBrush = SubTextBrush = SpectrumBrush = TintOverlayBrush = BackdropBrush = null;
+            return;
+        }
+
+        // Kapalı çentik için her zaman tam opak fırça; müzik kartı Düz ise kart fırçaları temiz kalır.
+        CollapsedAlbumBrush = CardFill(palette, 255);
+        SpectrumBrush = VisualizerColorSource == NotchVisualizerColorSource.Artwork
+            ? Solid(palette.Spectrum, 0xBF)
+            : null;
+
+        if (_cardStyle == MusicCardStyle.Neutral)
+        {
+            HasTint = false;
+            HasBackdrop = false;
+            CardBrush = SubTextBrush = TintOverlayBrush = BackdropBrush = null;
             return;
         }
 
@@ -205,9 +229,6 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
 
         CardBrush = CardFill(palette, _cardAlpha);
         SubTextBrush = Solid(palette.SubText, 255);
-        SpectrumBrush = VisualizerColorSource == NotchVisualizerColorSource.Artwork
-            ? Solid(palette.Spectrum, 0xBF)
-            : null;
         if (small is not null)
         {
             TintOverlayBrush = Solid(palette.Card, 0x4D); // alfa 0,30
@@ -270,10 +291,12 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
         ILyricsProvider? lyricsProvider = null, MusicCardStyle cardStyle = MusicCardStyle.Tinted,
         NotchVisualizerStyle visualizerStyle = NotchVisualizerStyle.Bars,
         NotchVisualizerColorSource visualizerColorSource = NotchVisualizerColorSource.Accent,
-        int visualizerBarCount = 5)
+        int visualizerBarCount = 5,
+        bool extractCoverPalette = false)
     {
         _mediaService = mediaService;
         _cardStyle = cardStyle;
+        _extractCoverPalette = extractCoverPalette;
         _visualizerStyle = visualizerStyle;
         _visualizerColorSource = visualizerColorSource;
         _visualizerBarCount = NotchVisualizer.ClampBarCount(visualizerBarCount);
@@ -310,25 +333,38 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
         UpdateProgressTimer();
     }
 
-    // Sözler çubukların yerini alır: görünmeyen çubuk için ses yakalanmaz (AGENTS #5).
+    /// <summary>Kapalı çentikte çalan müzik çubukları görünüyor mu (yalnız çentik görünür ve Collapsed iken).</summary>
+    public void SetCollapsedSpectrumActive(bool active)
+    {
+        if (_isCollapsedViewing == active)
+            return;
+
+        _isCollapsedViewing = active;
+        UpdateSpectrum();
+    }
+
+    // Sözler çubukların yerini alır: açık kartta görünmeyen çubuk için ses yakalanmaz (AGENTS #5).
     private void OnLyricsPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(LyricsViewModel.IsShown))
-            SetSpectrumAllowed(_spectrumAllowed);
+            UpdateSpectrum();
     }
 
     /// <summary>Ses çubukları izinli mi (Çentik ayarındaki "kapak ve dalga" açık ve pil tasarrufu hareketi kısmıyor).</summary>
     public void SetSpectrumAllowed(bool allowed)
     {
         _spectrumAllowed = allowed;
-        ShowSpectrum = allowed && _spectrumAcquire is not null && !Lyrics.IsShown;
+        ShowSpectrum = allowed && _spectrumAcquire is not null;
         UpdateSpectrum();
     }
 
-    // Yakalama yalnız kart görünür (çentik açık, Ana sekmesi) ve müzik çalarken sürer; aksi halde %0 CPU.
+    // Yakalama yalnız açık müzik kartı ya da görünür kapalı çentik varken ve müzik çalarken sürer; aksi halde %0 CPU.
     private void UpdateSpectrum()
     {
-        var want = !_disposed && _isActive && HasTrack && IsPlaying && ShowSpectrum;
+        var wantExpanded = _isActive && !Lyrics.IsShown;
+        var wantCollapsed = _isCollapsedViewing;
+        var want = !_disposed && HasTrack && IsPlaying && ShowSpectrum && (wantExpanded || wantCollapsed);
+        Spectrum.SetMinIntervalMs(wantExpanded ? 0 : CollapsedSpectrumIntervalMs);
         if (want && _spectrum is null)
         {
             try

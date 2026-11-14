@@ -367,11 +367,13 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLiveBackgroundEnabled))]
+    [NotifyPropertyChangedFor(nameof(IsAmbientPresetEnabled))]
     private LiveBackgroundTarget _liveBackgroundTarget = LiveBackgroundTarget.None;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLiveBackgroundFileSource))]
     [NotifyPropertyChangedFor(nameof(IsLiveBackgroundAmbientSource))]
+    [NotifyPropertyChangedFor(nameof(ShowAmbientPresetPicker))]
     [NotifyPropertyChangedFor(nameof(LiveBackgroundFileMessage))]
     private LiveBackgroundSourceKind _liveBackgroundSource = LiveBackgroundSourceKind.BuiltInAmbient;
 
@@ -386,9 +388,16 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private int _liveBackgroundScrimPercent = LiveBackgroundLimits.DefaultScrimPercent;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsAmbientPresetEnabled))]
+    [NotifyPropertyChangedFor(nameof(ShowAmbientPresetPicker))]
+    private NotchCollapsedBackground _notchCollapsedBackground = NotchCollapsedBackground.Default;
+
     public bool IsLiveBackgroundEnabled => LiveBackgroundTarget != LiveBackgroundTarget.None;
     public bool IsLiveBackgroundFileSource => LiveBackgroundSource == LiveBackgroundSourceKind.LocalFile;
     public bool IsLiveBackgroundAmbientSource => LiveBackgroundSource == LiveBackgroundSourceKind.BuiltInAmbient;
+    public bool IsAmbientPresetEnabled => IsLiveBackgroundEnabled || NotchCollapsedBackground == NotchCollapsedBackground.Ambient;
+    public bool ShowAmbientPresetPicker => IsLiveBackgroundAmbientSource || NotchCollapsedBackground == NotchCollapsedBackground.Ambient;
 
     /// <summary>Önayar seçici: kimlik + yerelleştirilmiş ad (dil değişince yeniden hesaplanır).</summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "XAML binding")]
@@ -1249,6 +1258,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             LiveBackgroundPreset = LiveBackgroundPresets.Find(s.Notch.LiveBackgroundPreset).Id;
             LiveBackgroundFilePath = s.Notch.LiveBackgroundFilePath ?? "";
             LiveBackgroundScrimPercent = LiveBackgroundLimits.ClampScrimPercent(s.Notch.LiveBackgroundScrimPercent);
+            NotchCollapsedBackground = s.Notch.CollapsedBackground;
             IdleDisplayMode = s.Notch.IdleDisplay;
             NotchStyle = s.Notch.Style;
             NotchOpenBehavior = s.Notch.OpenBehavior;
@@ -1566,7 +1576,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             or nameof(NotchOpenBehavior) or nameof(WheelAction) or nameof(BatterySaverReduceMotion)
             or nameof(NotchOpenDelayMs) or nameof(NotchCloseDelayMs) or nameof(NotchTabBarStyle) or nameof(NotchTabOrderVersion)
             or nameof(HomeCardOrderVersion) or nameof(VisualizerStyle) or nameof(VisualizerColorSource) or nameof(VisualizerBarCount)
-            or nameof(LiveBackgroundTarget) or nameof(LiveBackgroundSource) or nameof(LiveBackgroundPreset) or nameof(LiveBackgroundFilePath) or nameof(LiveBackgroundScrimPercent)
+            or nameof(LiveBackgroundTarget) or nameof(LiveBackgroundSource) or nameof(LiveBackgroundPreset) or nameof(LiveBackgroundFilePath) or nameof(LiveBackgroundScrimPercent) or nameof(NotchCollapsedBackground)
             or nameof(WeatherRefreshInterval) or nameof(PomodoroWorkMinutes) or nameof(PomodoroShortBreakMinutes) or nameof(PomodoroLongBreakMinutes)
             or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
             or nameof(PanelControlCenter) or nameof(PanelClipboard) or nameof(PanelSystem) or nameof(ClipboardHistoryEnabled)
@@ -1706,6 +1716,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 LiveBackgroundPreset = LiveBackgroundPreset,
                 LiveBackgroundFilePath = LiveBackgroundFilePath,
                 LiveBackgroundScrimPercent = LiveBackgroundScrimPercent,
+                CollapsedBackground = NotchCollapsedBackground,
                 FollowsMaterial = NotchFollowsMaterial,
                 WheelAction = WheelAction,
                 ClockHourFormat = ClockHourFormat,

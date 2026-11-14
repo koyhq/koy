@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Koy.App.Features.Notch"
         xmlns:osd="clr-namespace:Koy.App.Features.Notch.OSD"
         xmlns:home="clr-namespace:Koy.App.Features.Home"
+        xmlns:music="clr-namespace:Koy.App.Features.Music"
         xmlns:livebg="clr-namespace:Koy.App.Features.Notch.LiveBackground"
         xmlns:focus="clr-namespace:Koy.App.Features.Focus"
         xmlns:cc="clr-namespace:Koy.App.Features.ControlCenter"
@@ -406,22 +407,14 @@
                        Visibility="{Binding IsMicrophoneActive, Converter={StaticResource BoolToVis}}" />
             </StackPanel>
 
-            <!-- Sağ: dinamik dalga simgesi (yükseklik 14px, çubuk genişliği 3px, boşluk 2px) -->
-            <ItemsControl Grid.Column="2" VerticalAlignment="Center" Height="14"
-                          ItemsSource="{Binding WaveformBars}" Focusable="False"
-                          Visibility="{Binding ShowMusicWaveform, Converter={StaticResource BoolToVis}}">
-              <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                  <StackPanel Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-              </ItemsControl.ItemsPanel>
-              <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                  <Border Width="3" Height="{Binding}" Background="{Binding DataContext.WaveformBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                          CornerRadius="1" Margin="1,0" VerticalAlignment="Bottom" />
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <!-- Sağ: canlı ses spektrumu çubukları (kapalı modda ~15 fps kısıtlı, MusicViewModel yönetir) -->
+            <music:SpectrumBars Grid.Column="2" VerticalAlignment="Center" Height="14"
+                                BarWidth="3" Gap="2" IsHitTestVisible="False"
+                                BarCount="{Binding Music.VisualizerBarCount}"
+                                Feed="{Binding Music.Spectrum}"
+                                VisualizerStyle="{Binding Music.VisualizerStyle}"
+                                Fill="{Binding WaveformBrush}"
+                                Visibility="{Binding ShowMusicWaveform, Converter={StaticResource BoolToVis}}" />
           </Grid>
         </Grid>
 

@@ -8,7 +8,7 @@ public class SettingsPageResetTests
     {
         General = new GeneralSettings { Language = "en", FirstRunCompleted = true, LastSeenVersion = "0.2.7", AutoCheckUpdates = false },
         Appearance = new AppearanceSettings { AnimationSpeed = Koy.Core.Appearance.AnimationSpeed.Fast },
-        Notch = new NotchSettings { ShowVolumeOsd = false },
+        Notch = new NotchSettings { ShowVolumeOsd = false, CollapsedBackground = Koy.Core.Notch.NotchCollapsedBackground.AlbumColor },
         Music = new MusicSettings { ShowWaveform = false },
         Dock = new DockSettings { Enabled = false, ShowTray = false },
     };

@@ -46,6 +46,7 @@ public static class SettingsKeyMap
             "IdleDisplayMode=IdleDisplay", "WheelAction", "NotchHideInFullscreen=HideInFullscreen",
             "NotchFollowsMaterial=FollowsMaterial", "ShowVolumeOsd", "ShowBrightnessOsd", "ShowPrivacyIndicator",
             "NotchShowNotifications=ShowNotifications", "NotchNotificationsHideBody=NotificationsHideBody",
+            "NotchCollapsedBackground=CollapsedBackground",
             "EnabledPanels", "ControlCenterLayout");
         Add("Music", "MusicShowWaveform=ShowWaveform", "MusicCardStyle=CardStyle", "MusicLyricsEnabled=LyricsEnabled");
         Add("Displays", "Monitors", "NewScreenDefault");

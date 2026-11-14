@@ -67,8 +67,8 @@
             </Grid>
         </Border>
 
-        <Border Style="{StaticResource SettingRowStyle}" IsEnabled="{Binding IsLiveBackgroundEnabled}"
-                Visibility="{Binding IsLiveBackgroundAmbientSource, Converter={StaticResource BoolToVis}}">
+        <Border Style="{StaticResource SettingRowStyle}" IsEnabled="{Binding IsAmbientPresetEnabled}"
+                Visibility="{Binding ShowAmbientPresetPicker, Converter={StaticResource BoolToVis}}">
             <StackPanel>
                 <TextBlock Text="{Binding [LiveBgPresetTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 <ListBox Margin="0,10,0,0"
@@ -201,6 +201,33 @@
 
         <Button Content="{Binding [ExtGetMore], Source={x:Static res:Loc.Instance}}" Command="{Binding OpenStoreCommand}" CommandParameter="Background"
                 Style="{StaticResource LinkButtonStyle}" Margin="2,4,0,0" />
+
+        <!-- Kapalı çentik arka planı -->
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [NotchCollapsedBackgroundTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [NotchCollapsedBackgroundDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [NotchCollapsedBackgroundDefault], Source={x:Static res:Loc.Instance}}" GroupName="NotchCollapsedBackground"
+                                     IsChecked="{Binding NotchCollapsedBackground, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Default}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [NotchCollapsedBackgroundAlbumColor], Source={x:Static res:Loc.Instance}}" GroupName="NotchCollapsedBackground"
+                                     IsChecked="{Binding NotchCollapsedBackground, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=AlbumColor}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [NotchCollapsedBackgroundAmbient], Source={x:Static res:Loc.Instance}}" GroupName="NotchCollapsedBackground"
+                                     IsChecked="{Binding NotchCollapsedBackground, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Ambient}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
 
         <!-- Ses Görselleştiricisi & Müzik Kartı -->
         <Border Style="{StaticResource SettingRowStyle}">
