@@ -1,0 +1,452 @@
+<UserControl x:Class="Koy.App.Features.Settings.Pages.SubPages.CentikVisualsSubPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Koy.App.Features.Settings"
+             xmlns:res="clr-namespace:Koy.App.Resources"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:KoyWindowViewModel}">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+
+    <StackPanel>
+        <!-- GÖRSELLER (canlı arka plan, issue #67). Varsayılan: Kapalı. Yalnız açık çentikte oynar; hareketi azalt ve pil tasarrufunda ilk kare. -->
+        <TextBlock Text="{Binding [LiveBgHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [LiveBgTargetTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [LiveBgTargetDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [LiveBgTargetNone], Source={x:Static res:Loc.Instance}}" GroupName="LiveBackgroundTarget"
+                                     IsChecked="{Binding LiveBackgroundTarget, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=None}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [LiveBgTargetNotch], Source={x:Static res:Loc.Instance}}" GroupName="LiveBackgroundTarget"
+                                     IsChecked="{Binding LiveBackgroundTarget, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Notch}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [LiveBgTargetMusicCard], Source={x:Static res:Loc.Instance}}" GroupName="LiveBackgroundTarget"
+                                     IsChecked="{Binding LiveBackgroundTarget, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=MusicCard}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [LiveBgTargetBoth], Source={x:Static res:Loc.Instance}}" GroupName="LiveBackgroundTarget"
+                                     IsChecked="{Binding LiveBackgroundTarget, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Both}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}" IsEnabled="{Binding IsLiveBackgroundEnabled}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [LiveBgSourceTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [LiveBgSourceDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [LiveBgSourceAmbient], Source={x:Static res:Loc.Instance}}" GroupName="LiveBackgroundSource"
+                                     IsChecked="{Binding LiveBackgroundSource, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=BuiltInAmbient}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [LiveBgSourceFile], Source={x:Static res:Loc.Instance}}" GroupName="LiveBackgroundSource"
+                                     IsChecked="{Binding LiveBackgroundSource, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=LocalFile}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}" IsEnabled="{Binding IsLiveBackgroundEnabled}"
+                Visibility="{Binding IsLiveBackgroundAmbientSource, Converter={StaticResource BoolToVis}}">
+            <StackPanel>
+                <TextBlock Text="{Binding [LiveBgPresetTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                <TextBlock Text="{Binding [LiveBgPresetDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                <ListBox Margin="0,10,0,0"
+                         AutomationProperties.Name="{Binding [LiveBgPresetTitle], Source={x:Static res:Loc.Instance}}"
+                         ItemsSource="{Binding LiveBackgroundPresetOptions}"
+                         SelectedValuePath="Id"
+                         SelectedValue="{Binding LiveBackgroundPreset}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="3" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Cursor" Value="Hand" />
+                            <Setter Property="Margin" Value="0,0,8,8" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="FocusVisualStyle" Value="{StaticResource KoyFocusVisual}" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="CardBorder"
+                                                Background="{DynamicResource KoyBgSegment}"
+                                                BorderBrush="{DynamicResource KoyBorderHairline}"
+                                                BorderThickness="1"
+                                                CornerRadius="{DynamicResource KoyRadiusControl}"
+                                                Padding="4">
+                                            <ContentPresenter />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="CardBorder" Property="BorderBrush" Value="{DynamicResource KoyBorderStrong}" />
+                                                <Setter TargetName="CardBorder" Property="Background" Value="{DynamicResource KoyBgHover}" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="CardBorder" Property="BorderBrush" Value="{DynamicResource KoyAccent}" />
+                                                <Setter TargetName="CardBorder" Property="BorderThickness" Value="2" />
+                                                <Setter TargetName="CardBorder" Property="Padding" Value="3" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <Grid Height="56">
+                                    <Border x:Name="PreviewMask" Background="Black" CornerRadius="6" />
+                                    <Image Source="{Binding Preview}" Height="56" Stretch="UniformToFill">
+                                        <Image.OpacityMask>
+                                            <VisualBrush Visual="{Binding ElementName=PreviewMask}" />
+                                        </Image.OpacityMask>
+                                    </Image>
+                                </Grid>
+                                <TextBlock Text="{Binding Name}"
+                                           Margin="4,6,4,2"
+                                           FontSize="{DynamicResource KoyFontCaption}"
+                                           Foreground="{DynamicResource KoyTextPrimary}"
+                                           TextTrimming="CharacterEllipsis"
+                                           HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}" IsEnabled="{Binding IsLiveBackgroundEnabled}"
+                Visibility="{Binding IsLiveBackgroundFileSource, Converter={StaticResource BoolToVis}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [LiveBgFileTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding LiveBackgroundFileName}" Style="{StaticResource SettingDescStyle}"
+                               TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding LiveBackgroundFileMessage}"
+                               Foreground="{DynamicResource KoyDangerText}" TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource SettingDescStyle}">
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+                <Button Grid.Column="1" Content="{Binding [LiveBgFileChoose], Source={x:Static res:Loc.Instance}}"
+                        Command="{Binding PickLiveBackgroundFileCommand}" Style="{StaticResource SettingButtonStyle}" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}" IsEnabled="{Binding IsLiveBackgroundEnabled}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [LiveBgScrimTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [LiveBgScrimDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [LiveBgScrimTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="100" Height="32"
+                          ItemsSource="{Binding LiveBackgroundScrimOptions}" SelectedItem="{Binding LiveBackgroundScrimPercent}"
+                          Style="{StaticResource SettingComboBoxStyle}" />
+            </Grid>
+        </Border>
+
+        <Button Content="{Binding [ExtGetMore], Source={x:Static res:Loc.Instance}}" Command="{Binding OpenStoreCommand}" CommandParameter="Background"
+                Style="{StaticResource LinkButtonStyle}" Margin="2,4,0,0" />
+
+        <!-- Ses Görselleştiricisi & Müzik Kartı -->
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [MusicWaveformTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [MusicWaveformTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding MusicShowWaveform}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [MusicCardStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [MusicCardStyleDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [MusicCardStyleNeutral], Source={x:Static res:Loc.Instance}}" GroupName="MusicCardStyle"
+                                     IsChecked="{Binding MusicCardStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Neutral}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [MusicCardStyleTinted], Source={x:Static res:Loc.Instance}}" GroupName="MusicCardStyle"
+                                     IsChecked="{Binding MusicCardStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Tinted}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [MusicCardStyleArtwork], Source={x:Static res:Loc.Instance}}" GroupName="MusicCardStyle"
+                                     IsChecked="{Binding MusicCardStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Artwork}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [LyricsSettingTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [LyricsSettingDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [LyricsSettingTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding MusicLyricsEnabled}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [VisualizerStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [VisualizerStyleDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [VisualizerStyleBars], Source={x:Static res:Loc.Instance}}" GroupName="VisualizerStyle"
+                                     IsChecked="{Binding VisualizerStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Bars}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [VisualizerStyleWave], Source={x:Static res:Loc.Instance}}" GroupName="VisualizerStyle"
+                                     IsChecked="{Binding VisualizerStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Wave}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [VisualizerStyleDots], Source={x:Static res:Loc.Instance}}" GroupName="VisualizerStyle"
+                                     IsChecked="{Binding VisualizerStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Dots}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [VisualizerColorSourceTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [VisualizerColorSourceDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [VisualizerColorSourceAccent], Source={x:Static res:Loc.Instance}}" GroupName="VisualizerColorSource"
+                                     IsChecked="{Binding VisualizerColorSource, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Accent}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [VisualizerColorSourceArtwork], Source={x:Static res:Loc.Instance}}" GroupName="VisualizerColorSource"
+                                     IsChecked="{Binding VisualizerColorSource, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Artwork}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [VisualizerBarCountTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [VisualizerBarCountDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Slider Width="140" Minimum="3" Maximum="16" TickFrequency="1" IsSnapToTickEnabled="True"
+                            Value="{Binding VisualizerBarCount}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding VisualizerBarCount, StringFormat='{}{0}'}"
+                               Foreground="{DynamicResource KoyTextSecondary}"
+                               FontSize="{DynamicResource KoyFontCaption}"
+                               Width="32" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- SAAT (issue #77) -->
+        <TextBlock Text="{Binding [ClockHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [ClockHourFormatTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ClockHourFormatDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [ClockFormatAuto], Source={x:Static res:Loc.Instance}}" GroupName="ClockHourFormat"
+                                     IsChecked="{Binding ClockHourFormat, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Auto}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [ClockFormat12], Source={x:Static res:Loc.Instance}}" GroupName="ClockHourFormat"
+                                     IsChecked="{Binding ClockHourFormat, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Hour12}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [ClockFormat24], Source={x:Static res:Loc.Instance}}" GroupName="ClockHourFormat"
+                                     IsChecked="{Binding ClockHourFormat, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Hour24}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [ClockShowSecondsTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ClockShowSecondsDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [ClockShowSecondsTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding ClockShowSeconds}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [ClockShowDateTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ClockShowDateDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [ClockShowDateTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding ClockShowDate}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [ClockSecondTimeZoneTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ClockSecondTimeZoneDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <ComboBox Grid.Column="1" AutomationProperties.Name="{Binding [ClockSecondTimeZoneTitle], Source={x:Static res:Loc.Instance}}" HorizontalAlignment="Right" Width="260" Height="32"
+                          ItemsSource="{Binding SecondTimeZoneOptions}" DisplayMemberPath="Name" SelectedValuePath="Id"
+                          SelectedValue="{Binding ClockSecondTimeZoneId, Mode=TwoWay}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [ClockFirstDayTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ClockFirstDayDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [ClockFormatAuto], Source={x:Static res:Loc.Instance}}" GroupName="ClockFirstDay"
+                                     IsChecked="{Binding ClockFirstDayOfWeek, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=System}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [ClockFirstDayMonday], Source={x:Static res:Loc.Instance}}" GroupName="ClockFirstDay"
+                                     IsChecked="{Binding ClockFirstDayOfWeek, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Monday}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [ClockFirstDaySunday], Source={x:Static res:Loc.Instance}}" GroupName="ClockFirstDay"
+                                     IsChecked="{Binding ClockFirstDayOfWeek, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Sunday}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [ClockFirstDaySaturday], Source={x:Static res:Loc.Instance}}" GroupName="ClockFirstDay"
+                                     IsChecked="{Binding ClockFirstDayOfWeek, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Saturday}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [ClockShowWeekNumberTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ClockShowWeekNumberDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [ClockShowWeekNumberTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding ClockShowWeekNumber}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <StackPanel>
+                <TextBlock Text="{Binding [ClockCustomDateTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                <TextBlock Text="{Binding [ClockCustomDateDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                <TextBox Margin="0,8,0,0" Style="{StaticResource SettingTextBoxStyle}" Text="{Binding ClockCustomDateFormat}"
+                         AutomationProperties.Name="{Binding [ClockCustomDateTitle], Source={x:Static res:Loc.Instance}}" />
+                <TextBlock Text="{Binding [ClockCustomDateInvalid], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}"
+                           Foreground="{DynamicResource KoyDangerText}" Margin="0,4,0,0"
+                           Visibility="{Binding ClockCustomDateFormatInvalid, Converter={StaticResource BoolToVis}}" />
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>
