@@ -3999,5 +3999,50 @@
   <data name="WizCalendarPrivacyDesc" xml:space="preserve">
     <value>Connecting Google or Outlook in Settings is optional and strictly read-only. Tokens are encrypted on your device via Windows DPAPI and cached locally for offline viewing.</value>
   </data>
+  <data name="SubTabGeneralSystem" xml:space="preserve">
+    <value>System &amp; units</value>
+  </data>
+  <data name="SubTabGeneralProfiles" xml:space="preserve">
+    <value>Profiles</value>
+  </data>
+  <data name="SubTabGeneralRules" xml:space="preserve">
+    <value>App rules</value>
+  </data>
+  <data name="SubTabNotchBehavior" xml:space="preserve">
+    <value>Behavior &amp; indicators</value>
+  </data>
+  <data name="SubTabNotchVisuals" xml:space="preserve">
+    <value>Visuals &amp; effects</value>
+  </data>
+  <data name="SubTabNotchPanels" xml:space="preserve">
+    <value>Panels &amp; services</value>
+  </data>
+  <data name="SubTabNotchSearch" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="SubTabDockBehavior" xml:space="preserve">
+    <value>Layout &amp; behavior</value>
+  </data>
+  <data name="SubTabDockAppearance" xml:space="preserve">
+    <value>Icons &amp; badges</value>
+  </data>
+  <data name="SubTabDockSections" xml:space="preserve">
+    <value>Sections &amp; tray</value>
+  </data>
+  <data name="SubTabAppearanceTheme" xml:space="preserve">
+    <value>Theme &amp; surface</value>
+  </data>
+  <data name="SubTabAppearanceScaleMotion" xml:space="preserve">
+    <value>Scale, icons &amp; motion</value>
+  </data>
+  <data name="LiveBgBuiltinHeader" xml:space="preserve">
+    <value>Built-in notch animations</value>
+  </data>
+  <data name="LiveBgKindEffect" xml:space="preserve">
+    <value>Code effect</value>
+  </data>
+  <data name="LiveBgKindAmbient" xml:space="preserve">
+    <value>Ambient</value>
+  </data>
 </root>
 

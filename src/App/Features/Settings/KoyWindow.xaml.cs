@@ -124,6 +124,17 @@ public partial class KoyWindow : Window, IDisposable
             ViewModel.ShowChangedOnly = false;
 
         ViewModel.SelectPage(result.Row.PageIndex);
+        // Satır bir alt sekme (SubTab0, SubTab1...) içindeyse ilgili alt sekmeyi de aç.
+        for (DependencyObject? current = result.Row.Element; current is not null; current = LogicalTreeHelper.GetParent(current))
+        {
+            if (current is FrameworkElement fe &&
+                fe.Name.StartsWith("SubTab", StringComparison.Ordinal) &&
+                int.TryParse(fe.Name.AsSpan(6), out var subTabIndex))
+            {
+                ViewModel.SelectSubTab(result.Row.PageIndex, subTabIndex);
+                break;
+            }
+        }
         ContentScrollViewer?.ScrollToTop();
         // Sayfa görünür olup ölçüldükten sonra satıra kaydırılır ve ~1,5 sn vurgulanır.
         Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () => Highlight(result.Row.Element));
@@ -289,19 +300,23 @@ public partial class KoyWindow : Window, IDisposable
 
     private void ApplyPageCustomFilterState(bool only, HashSet<string> changed)
     {
-        // Sayfa 0 (Genel): Değişen ayar yoksa profil/kural boş durum metinlerini ve alt blokları gizle
+        // Sayfa 0 (Genel): Yalnız değişenler açıkken Profiller (SubTab1) ve Kurallar (SubTab2) içindeki
+        // boş durum metinleri, listeler ve özel kenarlıkların sızmasını önle.
         if (PagesHost.Children.Count > 0 && PagesHost.Children[0] is FrameworkElement page0)
         {
-            var hasChangedGeneral = HasChangedSettingsOnPage(0, changed);
-            var rootPanel = LogicalTreeHelper.GetChildren(page0).OfType<System.Windows.Controls.Panel>().FirstOrDefault();
-            if (rootPanel is not null)
+            var headerStyle = Application.Current?.TryFindResource("SectionHeaderStyle") as Style;
+            var rowStyle = Application.Current?.TryFindResource("SettingRowStyle") as Style;
+            foreach (var subTab in WalkTree(page0).OfType<FrameworkElement>().Where(e => e.Name is "SubTab1" or "SubTab2"))
             {
-                for (var i = 2; i < rootPanel.Children.Count; i++)
+                var subPanel = WalkTree(subTab).OfType<System.Windows.Controls.Panel>().FirstOrDefault();
+                if (subPanel is null)
+                    continue;
+
+                foreach (var child in subPanel.Children.OfType<FrameworkElement>())
                 {
-                    var child = rootPanel.Children[i] as FrameworkElement;
-                    if (child is not null && child.Style != Application.Current?.TryFindResource("SectionHeaderStyle") && child.Style != Application.Current?.TryFindResource("SettingRowStyle"))
+                    if (child.Style != headerStyle && child.Style != rowStyle)
                     {
-                        if (only && !hasChangedGeneral)
+                        if (only)
                             child.Visibility = Visibility.Collapsed;
                         else
                             child.ClearValue(VisibilityProperty);

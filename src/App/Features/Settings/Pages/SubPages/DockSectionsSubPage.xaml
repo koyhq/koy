@@ -1,0 +1,178 @@
+<UserControl x:Class="Koy.App.Features.Settings.Pages.SubPages.DockSectionsSubPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Koy.App.Features.Settings"
+             xmlns:res="clr-namespace:Koy.App.Resources"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:KoyWindowViewModel}">
+
+    <StackPanel>
+        <!-- BÖLÜMLER -->
+        <TextBlock Text="{Binding [SectionsHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [StartButtonTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [StartButtonTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockShowStartButton}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <!-- Başlat simgesi: düğme gizliyken seçenek sunulmaz. Özel görsel satırı yalnız "Özel" seçiliyken. -->
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Border.Visibility>
+                <Binding Path="DockShowStartButton" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="True" />
+            </Border.Visibility>
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [DockStartIconTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    </StackPanel>
+                    <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Content="{Binding [DockStartIconKoy], Source={x:Static res:Loc.Instance}}" GroupName="DockStartIcon"
+                                         IsChecked="{Binding DockStartIcon, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Koy}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [DockStartIconWindows], Source={x:Static res:Loc.Instance}}" GroupName="DockStartIcon"
+                                         IsChecked="{Binding DockStartIcon, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Windows}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [DockStartIconCustom], Source={x:Static res:Loc.Instance}}" GroupName="DockStartIcon"
+                                         IsChecked="{Binding DockStartIcon, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Custom}"
+                                         Command="{Binding PickStartIconCommand}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                <Grid Margin="0,10,0,0">
+                    <Grid.Visibility>
+                        <Binding Path="DockStartIcon" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="Custom" />
+                    </Grid.Visibility>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding StartIconFileName}" Style="{StaticResource SettingDescStyle}"
+                               VerticalAlignment="Center" Margin="0,0,16,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                    <Button Grid.Column="1" Content="{Binding [DockStartIconChoose], Source={x:Static res:Loc.Instance}}"
+                            Command="{Binding PickStartIconCommand}" Style="{StaticResource SettingButtonStyle}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [FoldersSectionTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [FoldersSectionTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockShowFolders}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockShowRecentsTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DockShowRecentsDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [DockShowRecentsTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockShowRecents}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockShowTrayTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DockShowTrayDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" IsChecked="{Binding DockShowTray}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockSmallTrayTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DockSmallTrayDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [DockSmallTrayTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockSmallTray}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <!-- Tepsi simgeleri (issue #77): yeni simge varsayılanı ve uygulama başına göster/gizle. Yalnız gösterim katmanı. -->
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockNewTrayIconTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DockNewTrayIconDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [TrayIconShow], Source={x:Static res:Loc.Instance}}" GroupName="NewTrayIcon"
+                                     IsChecked="{Binding DockNewTrayIconVisibility, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Overflow}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [TrayIconHide], Source={x:Static res:Loc.Instance}}" GroupName="NewTrayIcon"
+                                     IsChecked="{Binding DockNewTrayIconVisibility, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Hidden}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <TextBlock Text="{Binding [TrayAppsHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+        <TextBlock Text="{Binding [TrayAppsEmpty], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="2,0,0,8"
+                   Visibility="{Binding HasTrayAppRows, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=False}" />
+        <ItemsControl ItemsSource="{Binding TrayAppRows}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource SettingRowStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding ExeName}" Style="{StaticResource SettingTitleStyle}" VerticalAlignment="Center" />
+                            <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding ExeName}" IsChecked="{Binding IsShown}"
+                                      HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource ToggleSwitchStyle}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

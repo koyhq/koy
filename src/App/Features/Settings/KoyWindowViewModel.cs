@@ -51,6 +51,19 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private int _selectedPageIndex; // 0: Genel, 1: Çentik, 2: Dock, 3: Ekranlar, 4: Görünüm, 5: Kısayollar, 6: Dikte, 7: Performans, 8: Hakkında
 
+    // Alt sekme dizinleri (yalnız arayüz durumu, ayar dosyasına yazılmaz).
+    [ObservableProperty]
+    private int _generalSubTabIndex;
+
+    [ObservableProperty]
+    private int _notchSubTabIndex;
+
+    [ObservableProperty]
+    private int _dockSubTabIndex;
+
+    [ObservableProperty]
+    private int _appearanceSubTabIndex;
+
     // --- GENEL ---
     [ObservableProperty]
     private bool _runAtStartup;
@@ -377,9 +390,23 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     public bool IsLiveBackgroundFileSource => LiveBackgroundSource == LiveBackgroundSourceKind.LocalFile;
     public bool IsLiveBackgroundAmbientSource => LiveBackgroundSource == LiveBackgroundSourceKind.BuiltInAmbient;
 
-    /// <summary>Önayar seçici: kimlik + yerelleştirilmiş ad.</summary>
-    public IReadOnlyList<LiveBackgroundPresetOption> LiveBackgroundPresetOptions { get; } =
+    /// <summary>Önayar seçici: kimlik + yerelleştirilmiş ad (dil değişince yeniden hesaplanır).</summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "XAML binding")]
+    public IReadOnlyList<LiveBackgroundPresetOption> LiveBackgroundPresetOptions =>
         LiveBackgroundPresets.All.Select(p => new LiveBackgroundPresetOption(p.Id, Strings.Get(p.NameKey))).ToList();
+
+    /// <summary>Eklenti mağazasından veya karttan canlı arka plan önayarını uygular; hedef kapalıysa Çentik olarak açar.</summary>
+    [RelayCommand]
+    private void SelectLiveBackgroundPreset(string? presetId)
+    {
+        if (string.IsNullOrWhiteSpace(presetId))
+            return;
+
+        LiveBackgroundSource = LiveBackgroundSourceKind.BuiltInAmbient;
+        LiveBackgroundPreset = presetId;
+        if (LiveBackgroundTarget == LiveBackgroundTarget.None)
+            LiveBackgroundTarget = LiveBackgroundTarget.Notch;
+    }
 
     /// <summary>Perde yüzdesi seçenekleri.</summary>
     public int[] LiveBackgroundScrimOptions { get; } = [40, 50, 60, 65, 70, 80, 90];
@@ -1451,11 +1478,33 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         RebuildAdvancedRows();
     }
 
+    /// <summary>Ayar aramasından gidilen satırın ait olduğu alt sekmeyi etkinleştirir.</summary>
+    public void SelectSubTab(int pageIndex, int subTabIndex)
+    {
+        switch (pageIndex)
+        {
+            case 0:
+                GeneralSubTabIndex = subTabIndex;
+                break;
+            case 1:
+                NotchSubTabIndex = subTabIndex;
+                break;
+            case 2:
+                DockSubTabIndex = subTabIndex;
+                break;
+            case 4:
+                AppearanceSubTabIndex = subTabIndex;
+                break;
+        }
+    }
+
     protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
         if (_isLoading) return;
-        if (e.PropertyName is nameof(SelectedPageIndex) or nameof(MotionTogglesActive) or nameof(MotionTogglesInactive) or nameof(ClockCustomDateFormatInvalid)
+        if (e.PropertyName is nameof(SelectedPageIndex) or nameof(GeneralSubTabIndex) or nameof(NotchSubTabIndex)
+            or nameof(DockSubTabIndex) or nameof(AppearanceSubTabIndex)
+            or nameof(MotionTogglesActive) or nameof(MotionTogglesInactive) or nameof(ClockCustomDateFormatInvalid)
             or nameof(IsApplyRevertPending) or nameof(ApplyRevertSecondsLeft) or nameof(AdvancedRows) or nameof(AdvancedGroups) or nameof(SettingsFileInvalid) or nameof(AdvancedFilter)
             or nameof(HasTrayAppRows)
             or nameof(SettingsSearchQuery) or nameof(IsSettingsSearching) or nameof(SettingsSearchResults)
@@ -1548,6 +1597,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             OnPropertyChanged(nameof(UninstallRowDescription));
             OnPropertyChanged(nameof(DownloadProgressText));
             OnPropertyChanged(nameof(StartIconFileName));
+            OnPropertyChanged(nameof(LiveBackgroundPresetOptions));
             Profiles.RefreshLanguage();
             Extensions.RefreshLanguage();
             Rules.Refresh();

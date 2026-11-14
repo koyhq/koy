@@ -4,518 +4,67 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:Koy.App.Features.Settings"
+             xmlns:sub="clr-namespace:Koy.App.Features.Settings.Pages.SubPages"
              xmlns:res="clr-namespace:Koy.App.Resources"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:KoyWindowViewModel}">
-
-    <UserControl.Resources>
-        <Style x:Key="AccentSwatch" TargetType="RadioButton" BasedOn="{StaticResource ColorRadioStyle}">
-            <Setter Property="GroupName" Value="Accent" />
-        </Style>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
-    </UserControl.Resources>
 
     <StackPanel Margin="0,0,16,24">
         <TextBlock Text="{Binding [NavAppearance], Source={x:Static res:Loc.Instance}}" Style="{StaticResource PageTitleStyle}" />
         <TextBlock Text="{Binding [AppearanceSubtitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource PageSubtitleStyle}" />
 
-        <!-- TEMA -->
-        <TextBlock Text="{Binding [ThemeHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [ThemeTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [ThemeDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                </StackPanel>
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton GroupName="Theme" Style="{StaticResource SegRadioStyle}"
-                                     IsChecked="{Binding Theme, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=System}">
-                            <StackPanel Orientation="Horizontal">
-                                <res:KoyIcon Data="{StaticResource IconLaptop}" Size="14" Margin="0,0,6,0" />
-                                <TextBlock Text="{Binding [ThemeSystem], Source={x:Static res:Loc.Instance}}" />
-                            </StackPanel>
-                        </RadioButton>
-                        <RadioButton GroupName="Theme" Style="{StaticResource SegRadioStyle}"
-                                     IsChecked="{Binding Theme, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Dark}">
-                            <StackPanel Orientation="Horizontal">
-                                <res:KoyIcon Data="{StaticResource IconMoon}" Size="14" Margin="0,0,6,0" />
-                                <TextBlock Text="{Binding [ThemeDark], Source={x:Static res:Loc.Instance}}" />
-                            </StackPanel>
-                        </RadioButton>
-                        <RadioButton GroupName="Theme" Style="{StaticResource SegRadioStyle}"
-                                     IsChecked="{Binding Theme, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Light}">
-                            <StackPanel Orientation="Horizontal">
-                                <res:KoyIcon Data="{StaticResource IconSun}" Size="14" Margin="0,0,6,0" />
-                                <TextBlock Text="{Binding [ThemeLight], Source={x:Static res:Loc.Instance}}" />
-                            </StackPanel>
-                        </RadioButton>
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [AccentColorTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [AccentColorDesc2], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
-                            IsEnabled="{Binding UseWindowsAccent, Converter={x:Static local:InverseBooleanConverter.Instance}}">
-                    <StackPanel.Style>
-                        <Style TargetType="StackPanel">
-                            <Style.Triggers>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter Property="Opacity" Value="0.4" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </StackPanel.Style>
-                    <RadioButton Style="{StaticResource AccentSwatch}" Background="#3B82F6" ToolTip="{Binding [AccentBlue], Source={x:Static res:Loc.Instance}}"
-                                 AutomationProperties.Name="{Binding [AccentBlue], Source={x:Static res:Loc.Instance}}"
-                                 IsChecked="{Binding AccentColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=#3B82F6}" />
-                    <RadioButton Style="{StaticResource AccentSwatch}" Background="#8B5CF6" ToolTip="{Binding [AccentPurple], Source={x:Static res:Loc.Instance}}"
-                                 AutomationProperties.Name="{Binding [AccentPurple], Source={x:Static res:Loc.Instance}}"
-                                 IsChecked="{Binding AccentColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=#8B5CF6}" />
-                    <RadioButton Style="{StaticResource AccentSwatch}" Background="#EC4899" ToolTip="{Binding [AccentPink], Source={x:Static res:Loc.Instance}}"
-                                 AutomationProperties.Name="{Binding [AccentPink], Source={x:Static res:Loc.Instance}}"
-                                 IsChecked="{Binding AccentColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=#EC4899}" />
-                    <RadioButton Style="{StaticResource AccentSwatch}" Background="#F97316" ToolTip="{Binding [AccentOrange], Source={x:Static res:Loc.Instance}}"
-                                 AutomationProperties.Name="{Binding [AccentOrange], Source={x:Static res:Loc.Instance}}"
-                                 IsChecked="{Binding AccentColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=#F97316}" />
-                    <RadioButton Style="{StaticResource AccentSwatch}" Background="#22C55E" ToolTip="{Binding [AccentGreen], Source={x:Static res:Loc.Instance}}"
-                                 AutomationProperties.Name="{Binding [AccentGreen], Source={x:Static res:Loc.Instance}}"
-                                 IsChecked="{Binding AccentColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=#22C55E}" />
-                    <RadioButton Style="{StaticResource AccentSwatch}" Background="#14B8A6" ToolTip="{Binding [AccentTeal], Source={x:Static res:Loc.Instance}}"
-                                 AutomationProperties.Name="{Binding [AccentTeal], Source={x:Static res:Loc.Instance}}"
-                                 IsChecked="{Binding AccentColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=#14B8A6}" />
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [UseWindowsAccentTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [UseWindowsAccentDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                </StackPanel>
-                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [UseWindowsAccentTitle], Source={x:Static res:Loc.Instance}}"
-                          IsChecked="{Binding UseWindowsAccent}" Style="{StaticResource ToggleSwitchStyle}" />
-            </Grid>
-        </Border>
-
-        <!-- YÜZEY -->
-        <TextBlock Text="{Binding [SurfaceHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [MaterialTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [MaterialDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                </StackPanel>
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton GroupName="Material" Style="{StaticResource SegRadioStyle}"
-                                     Content="{Binding [MaterialSolid], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding Material, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Solid}" />
-                        <RadioButton GroupName="Material" Style="{StaticResource SegRadioStyle}"
-                                     Content="{Binding [MaterialFrosted], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding Material, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Frosted}" />
-                        <RadioButton GroupName="Material" Style="{StaticResource SegRadioStyle}"
-                                     Content="{Binding [MaterialGlass], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding Material, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Glass}" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [NotchFollowsMaterialTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [NotchFollowsMaterialDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                </StackPanel>
-                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [NotchFollowsMaterialTitle], Source={x:Static res:Loc.Instance}}"
-                          IsChecked="{Binding NotchFollowsMaterial}" Style="{StaticResource ToggleSwitchStyle}" />
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [ReadabilityGuardTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [ReadabilityGuardDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                </StackPanel>
-                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [ReadabilityGuardTitle], Source={x:Static res:Loc.Instance}}"
-                          IsChecked="{Binding MaterialReadabilityGuard}" Style="{StaticResource ToggleSwitchStyle}" />
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [CornerRadiusTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [CornerRadiusDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                </StackPanel>
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton GroupName="Corner" Style="{StaticResource SegRadioStyle}"
-                                     Content="{Binding [CornerSharp], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding CornerRadius, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=6}" />
-                        <RadioButton GroupName="Corner" Style="{StaticResource SegRadioStyle}"
-                                     Content="{Binding [CornerStandard], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding CornerRadius, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=12}" />
-                        <RadioButton GroupName="Corner" Style="{StaticResource SegRadioStyle}"
-                                     Content="{Binding [CornerRound], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding CornerRadius, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=17}" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
-
-        <!-- YAZI VE KOY ÖLÇEĞİ (issue #71). Ölçek yalnız Koy penceresi ve sağ alt menüde; çentik tuvali sabit (AGENTS #13). -->
-        <TextBlock Text="{Binding [FontSectionTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding [FontFamilyLabel], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                <ComboBox Grid.Column="1" Width="200" Height="32" HorizontalAlignment="Right" Style="{StaticResource SettingComboBoxStyle}"
-                          AutomationProperties.Name="{Binding [FontFamilyLabel], Source={x:Static res:Loc.Instance}}"
-                          ItemsSource="{Binding FontOptions}" SelectedValuePath="Value" SelectedValue="{Binding UiFontFamily}"
-                          VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
-                    <ComboBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <VirtualizingStackPanel />
-                        </ItemsPanelTemplate>
-                    </ComboBox.ItemsPanel>
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Label}" FontFamily="{Binding Preview}" TextTrimming="CharacterEllipsis" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding [ClockFontLabel], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                <ComboBox Grid.Column="1" Width="200" Height="32" HorizontalAlignment="Right" Style="{StaticResource SettingComboBoxStyle}"
-                          AutomationProperties.Name="{Binding [ClockFontLabel], Source={x:Static res:Loc.Instance}}"
-                          ItemsSource="{Binding FontOptions}" SelectedValuePath="Value" SelectedValue="{Binding ClockFontFamily}"
-                          VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
-                    <ComboBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <VirtualizingStackPanel />
-                        </ItemsPanelTemplate>
-                    </ComboBox.ItemsPanel>
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Label}" FontFamily="{Binding Preview}" TextTrimming="CharacterEllipsis" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding [FontSizeLabel], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                <ComboBox Grid.Column="1" Width="100" Height="32" HorizontalAlignment="Right" Style="{StaticResource SettingComboBoxStyle}"
-                          AutomationProperties.Name="{Binding [FontSizeLabel], Source={x:Static res:Loc.Instance}}"
-                          ItemsSource="{Binding BaseFontSizeOptions}" SelectedItem="{Binding BaseFontSize}" />
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding [FontWeightLabel], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton GroupName="FontWeight" Style="{StaticResource SegRadioStyle}"
-                                     Content="{Binding [FontWeightNormal], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding UiFontWeight, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=400}" />
-                        <RadioButton GroupName="FontWeight" Style="{StaticResource SegRadioStyle}"
-                                     Content="{Binding [FontWeightMedium], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding UiFontWeight, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=500}" />
-                        <RadioButton GroupName="FontWeight" Style="{StaticResource SegRadioStyle}"
-                                     Content="{Binding [FontWeightBold], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding UiFontWeight, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=600}" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [UiScaleLabel], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [UiScaleDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                </StackPanel>
-                <ComboBox Grid.Column="1" Width="100" Height="32" HorizontalAlignment="Right" Style="{StaticResource SettingComboBoxStyle}"
-                          AutomationProperties.Name="{Binding [UiScaleLabel], Source={x:Static res:Loc.Instance}}"
-                          ItemsSource="{Binding UiScaleOptions}" SelectedItem="{Binding UiScalePercent}" ItemStringFormat="{}{0} %" />
-            </Grid>
-        </Border>
-
-        <!-- SİMGE PAKETİ -->
-        <Border Style="{StaticResource SettingRowStyle}">
-            <StackPanel>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                        <TextBlock Text="{Binding [IconPackTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                        <TextBlock Text="{Binding [IconPackDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                    </StackPanel>
-                    <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <RadioButton GroupName="IconPack" Style="{StaticResource SegRadioStyle}"
-                                         Content="{Binding [IconPackBuiltin], Source={x:Static res:Loc.Instance}}"
-                                         IsChecked="{Binding IconPack, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Builtin}" />
-                            <RadioButton GroupName="IconPack" Style="{StaticResource SegRadioStyle}"
-                                         Content="{Binding [IconPackFolder], Source={x:Static res:Loc.Instance}}"
-                                         IsChecked="{Binding IconPack, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Folder}"
-                                         Command="{Binding PickIconPackFolderCommand}" />
-                        </StackPanel>
-                    </Border>
-                </Grid>
-                <Grid Margin="0,10,0,0">
-                    <Grid.Visibility>
-                        <Binding Path="IconPack" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="Folder" />
-                    </Grid.Visibility>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{Binding IconPackFolderName}" Style="{StaticResource SettingDescStyle}"
-                               VerticalAlignment="Center" Margin="0,0,16,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
-                    <Button Grid.Column="1" Content="{Binding [IconPackFolderChoose], Source={x:Static res:Loc.Instance}}"
-                            Command="{Binding PickIconPackFolderCommand}" Style="{StaticResource SettingButtonStyle}" />
-                </Grid>
-                <Button Content="{Binding [ExtGetMore], Source={x:Static res:Loc.Instance}}" Command="{Binding OpenStoreCommand}" CommandParameter="IconPack"
-                Style="{StaticResource LinkButtonStyle}" Margin="0,10,0,0" />
+        <!-- Alt sekme çubuğu; "Yalnız değişenler" açıkken tüm alt sekmeler bir arada görünür. -->
+        <Border Name="SubTabBar" HorizontalAlignment="Left" Margin="0,4,0,12">
+            <Border.Style>
+                <Style TargetType="Border" BasedOn="{StaticResource SegmentContainerStyle}">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ShowChangedOnly}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <StackPanel Orientation="Horizontal">
+                <RadioButton Content="{Binding [SubTabAppearanceTheme], Source={x:Static res:Loc.Instance}}" GroupName="GorunumSubTabs"
+                             IsChecked="{Binding AppearanceSubTabIndex, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=0}"
+                             Style="{StaticResource SegRadioStyle}" />
+                <RadioButton Content="{Binding [SubTabAppearanceScaleMotion], Source={x:Static res:Loc.Instance}}" GroupName="GorunumSubTabs"
+                             IsChecked="{Binding AppearanceSubTabIndex, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=1}"
+                             Style="{StaticResource SegRadioStyle}" />
             </StackPanel>
         </Border>
 
-        <!-- HAREKET -->
-        <TextBlock Text="{Binding [MotionHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+        <sub:GorunumThemeSubPage x:Name="SubTab0">
+            <sub:GorunumThemeSubPage.Style>
+                <Style TargetType="sub:GorunumThemeSubPage">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding AppearanceSubTabIndex}" Value="0">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ShowChangedOnly}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </sub:GorunumThemeSubPage.Style>
+        </sub:GorunumThemeSubPage>
 
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [AnimationTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [AnimationDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                </StackPanel>
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton GroupName="Anim" Style="{StaticResource SegRadioStyle}"
-                                     Content="{Binding [AnimGentle], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding AnimationSpeed, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Calm}" />
-                        <RadioButton GroupName="Anim" Style="{StaticResource SegRadioStyle}"
-                                     Content="{Binding [AnimNormal], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding AnimationSpeed, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Normal}" />
-                        <RadioButton GroupName="Anim" Style="{StaticResource SegRadioStyle}"
-                                     Content="{Binding [AnimFast], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding AnimationSpeed, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Fast}" />
-                        <RadioButton GroupName="Anim" Style="{StaticResource SegRadioStyle}"
-                                     Content="{Binding [AnimOff], Source={x:Static res:Loc.Instance}}"
-                                     IsChecked="{Binding AnimationSpeed, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Off}" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [ReduceMotionTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [ReduceMotionDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                </StackPanel>
-                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [ReduceMotionTitle], Source={x:Static res:Loc.Instance}}"
-                          IsChecked="{Binding RespectReduceMotion}" Style="{StaticResource ToggleSwitchStyle}" />
-            </Grid>
-        </Border>
-
-        <!-- ANİMASYONLAR TEK TEK (issue #79): genel çarpan 0 iken etkisiz, devre dışı görünür -->
-        <TextBlock Text="{Binding [MotionTogglesTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
-        <TextBlock Text="{Binding [MotionTogglesDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,0,0,8" />
-        <TextBlock Text="{Binding [MotionTogglesDisabledHint], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}"
-                   Foreground="{DynamicResource KoyAccentText}" Margin="0,0,0,8"
-                   Visibility="{Binding MotionTogglesInactive, Converter={StaticResource BoolToVis}}" />
-
-        <StackPanel IsEnabled="{Binding MotionTogglesActive}">
-            <Border Style="{StaticResource SettingRowStyle}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding [MotionNotchOpenClose], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [MotionNotchOpenClose], Source={x:Static res:Loc.Instance}}"
-                              IsChecked="{Binding MotionNotchOpenClose}" Style="{StaticResource ToggleSwitchStyle}" />
-                </Grid>
-            </Border>
-            <Border Style="{StaticResource SettingRowStyle}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding [MotionTabTransitions], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [MotionTabTransitions], Source={x:Static res:Loc.Instance}}"
-                              IsChecked="{Binding MotionTabTransitions}" Style="{StaticResource ToggleSwitchStyle}" />
-                </Grid>
-            </Border>
-            <Border Style="{StaticResource SettingRowStyle}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding [MotionOsd], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [MotionOsd], Source={x:Static res:Loc.Instance}}"
-                              IsChecked="{Binding MotionOsd}" Style="{StaticResource ToggleSwitchStyle}" />
-                </Grid>
-            </Border>
-            <Border Style="{StaticResource SettingRowStyle}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding [MotionDockMagnify], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [MotionDockMagnify], Source={x:Static res:Loc.Instance}}"
-                              IsChecked="{Binding MotionDockMagnify}" Style="{StaticResource ToggleSwitchStyle}" />
-                </Grid>
-            </Border>
-            <Border Style="{StaticResource SettingRowStyle}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding [MotionFolderPanel], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [MotionFolderPanel], Source={x:Static res:Loc.Instance}}"
-                              IsChecked="{Binding MotionFolderPanel}" Style="{StaticResource ToggleSwitchStyle}" />
-                </Grid>
-            </Border>
-        </StackPanel>
-        <!-- KULLANICI STİLİ (user-theme.json) -->
-        <TextBlock Text="{Binding [UserStyleHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [UserStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [UserStyleDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                </StackPanel>
-                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [UserStyleTitle], Source={x:Static res:Loc.Instance}}"
-                          IsChecked="{Binding UserStyleOverridesEnabled}" Style="{StaticResource ToggleSwitchStyle}" />
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding UserStyleStatusText}" Style="{StaticResource SettingDescStyle}" Margin="0" />
-                    <ItemsControl ItemsSource="{Binding UserStyleDiagnostics}" Focusable="False" Margin="0,6,0,0">
-                        <ItemsControl.Style>
-                            <Style TargetType="ItemsControl">
-                                <Style.Triggers>
-                                    <Trigger Property="HasItems" Value="False">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ItemsControl.Style>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,1,0,1"
-                                           FontSize="{DynamicResource KoyFontCaption}"
-                                           Foreground="{DynamicResource KoyDangerText}" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                    <Button Content="{Binding [ExtGetMore], Source={x:Static res:Loc.Instance}}" Command="{Binding OpenStoreCommand}" CommandParameter="Theme"
-                Style="{StaticResource LinkButtonStyle}" Margin="0,8,0,0" />
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="{Binding [UserStyleOpenFolder], Source={x:Static res:Loc.Instance}}"
-                            Command="{Binding OpenUserStyleFolderCommand}" Style="{StaticResource SettingButtonStyle}" Margin="0,0,8,0" />
-                    <Button Content="{Binding [UserStyleReload], Source={x:Static res:Loc.Instance}}"
-                            Command="{Binding ReloadUserStyleCommand}" Style="{StaticResource SettingButtonStyle}"
-                            IsEnabled="{Binding UserStyleOverridesEnabled}" />
-                </StackPanel>
-            </Grid>
-        </Border>
+        <sub:GorunumScaleMotionSubPage x:Name="SubTab1">
+            <sub:GorunumScaleMotionSubPage.Style>
+                <Style TargetType="sub:GorunumScaleMotionSubPage">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding AppearanceSubTabIndex}" Value="1">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ShowChangedOnly}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </sub:GorunumScaleMotionSubPage.Style>
+        </sub:GorunumScaleMotionSubPage>
     </StackPanel>
 </UserControl>

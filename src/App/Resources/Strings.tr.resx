@@ -3999,5 +3999,50 @@
   <data name="WizCalendarPrivacyDesc" xml:space="preserve">
     <value>Ayarlar'dan Google veya Outlook bağlamak isteğe bağlıdır ve yalnızca salt okunur erişim ister. Belirteçleriniz cihazınızda Windows DPAPI ile şifrelenir ve çevrimdışı kullanım için yerel önbellekte tutulur.</value>
   </data>
+  <data name="SubTabGeneralSystem" xml:space="preserve">
+    <value>Sistem ve birimler</value>
+  </data>
+  <data name="SubTabGeneralProfiles" xml:space="preserve">
+    <value>Profiller</value>
+  </data>
+  <data name="SubTabGeneralRules" xml:space="preserve">
+    <value>Uygulama kuralları</value>
+  </data>
+  <data name="SubTabNotchBehavior" xml:space="preserve">
+    <value>Davranış ve göstergeler</value>
+  </data>
+  <data name="SubTabNotchVisuals" xml:space="preserve">
+    <value>Görünüm ve efektler</value>
+  </data>
+  <data name="SubTabNotchPanels" xml:space="preserve">
+    <value>Paneller ve servisler</value>
+  </data>
+  <data name="SubTabNotchSearch" xml:space="preserve">
+    <value>Arama</value>
+  </data>
+  <data name="SubTabDockBehavior" xml:space="preserve">
+    <value>Düzen ve davranış</value>
+  </data>
+  <data name="SubTabDockAppearance" xml:space="preserve">
+    <value>Simgeler ve rozetler</value>
+  </data>
+  <data name="SubTabDockSections" xml:space="preserve">
+    <value>Bölümler ve tepsi</value>
+  </data>
+  <data name="SubTabAppearanceTheme" xml:space="preserve">
+    <value>Tema ve yüzey</value>
+  </data>
+  <data name="SubTabAppearanceScaleMotion" xml:space="preserve">
+    <value>Ölçek, simge ve hareket</value>
+  </data>
+  <data name="LiveBgBuiltinHeader" xml:space="preserve">
+    <value>Yerleşik çentik animasyonları</value>
+  </data>
+  <data name="LiveBgKindEffect" xml:space="preserve">
+    <value>Kodlu efekt</value>
+  </data>
+  <data name="LiveBgKindAmbient" xml:space="preserve">
+    <value>Ambiyans</value>
+  </data>
 </root>
 
