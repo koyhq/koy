@@ -73,3 +73,11 @@ public enum NotchStyleMode
     Pinned,
     Floating
 }
+
+/// <summary>Kapalı çentiğin arka plan stili. Değerler ayar dosyasına yazılır; yeni üye yalnız sona eklenir.</summary>
+public enum NotchCollapsedBackground
+{
+    Default = 0,
+    AlbumColor = 1,
+    Ambient = 2
+}

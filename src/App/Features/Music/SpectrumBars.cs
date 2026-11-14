@@ -15,6 +15,8 @@ public sealed class SpectrumFeed
     private readonly object _gate = new();
     private readonly float[] _pending;
     private bool _queued;
+    private long _minIntervalMs;
+    private long _lastDispatchTick;
 
     public SpectrumFeed(int bandCount, Dispatcher dispatcher)
     {
@@ -29,14 +31,34 @@ public sealed class SpectrumFeed
     /// <summary>Yeni düzeyler arayüze geçti (arayüz iş parçacığında).</summary>
     public event Action? Updated;
 
+    /// <summary>
+    /// En küçük arayüz yenileme aralığını (ms) ayarlar. Kapalı çentikte 15 fps için (~60 ms)
+    /// gereksiz yazılımsal yeniden çizimi keser; açık kartta 0 (yakalama hızında, ~30 fps) olur.
+    /// </summary>
+    public void SetMinIntervalMs(int intervalMs) =>
+        Volatile.Write(ref _minIntervalMs, Math.Max(0, intervalMs));
+
     /// <summary>Herhangi bir iş parçacığından çağrılır.</summary>
-    public void Push(float[] levels)
+    public void Push(float[] levels) => Push(levels, force: false);
+
+    private void Push(float[] levels, bool force)
     {
         lock (_gate)
         {
             Array.Copy(levels, _pending, Math.Min(levels.Length, _pending.Length));
             if (_queued)
                 return;
+
+            var minInterval = Volatile.Read(ref _minIntervalMs);
+            // Sessizlik karesi hiçbir zaman düşürülmez ki yakalama durduğunda çubuklar havada donmasın.
+            if (!force && minInterval > 0 && !IsSilent(levels))
+            {
+                var now = Environment.TickCount64;
+                if (now - _lastDispatchTick < minInterval)
+                    return;
+            }
+
+            _lastDispatchTick = Environment.TickCount64;
             _queued = true;
         }
 
@@ -44,7 +66,17 @@ public sealed class SpectrumFeed
     }
 
     /// <summary>Çubukları sıfırlar (yakalama durdu).</summary>
-    public void Clear() => Push(new float[_pending.Length]);
+    public void Clear() => Push(new float[_pending.Length], force: true);
+
+    private static bool IsSilent(float[] levels)
+    {
+        for (var i = 0; i < levels.Length; i++)
+        {
+            if (levels[i] > 0.01f)
+                return false;
+        }
+        return true;
+    }
 
     private void Apply()
     {
@@ -185,7 +217,7 @@ public sealed class SpectrumBars : FrameworkElement
 
         for (var i = 0; i < count; i++, x += barWidth + gap)
         {
-            var level = rawLevels[i];
+            var level = SampleLevel(rawLevels, i, count);
             switch (style)
             {
                 case NotchVisualizerStyle.Wave:
@@ -207,5 +239,22 @@ public sealed class SpectrumBars : FrameworkElement
                     break;
             }
         }
+    }
+
+    private static float SampleLevel(float[] rawLevels, int barIndex, int barCount)
+    {
+        if (barCount >= rawLevels.Length)
+            return rawLevels[barIndex];
+
+        // Küçük çubuk sayısında (ör. kapalı çentikte 5 çubuk) yalnız en düşük bas bantları yerine tüm tayfı örnekler.
+        var start = barIndex * rawLevels.Length / barCount;
+        var end = Math.Max(start + 1, (barIndex + 1) * rawLevels.Length / barCount);
+        var peak = 0f;
+        for (var j = start; j < end && j < rawLevels.Length; j++)
+        {
+            if (rawLevels[j] > peak)
+                peak = rawLevels[j];
+        }
+        return peak;
     }
 }

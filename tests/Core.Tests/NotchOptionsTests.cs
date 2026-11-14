@@ -127,6 +127,7 @@ public class NotchOptionsTests
         Assert.Equal(NotchOpenPolicy.DefaultCloseDelayMs, notch.CloseDelayMs);
         Assert.Empty(notch.PanelOrder);
         Assert.Equal(HomeCardLayout.Default, notch.HomeCards);
+        Assert.Equal(NotchCollapsedBackground.Default, notch.CollapsedBackground);
         Assert.Equal(NotchVisualizerStyle.Bars, music.VisualizerStyle);
         Assert.Equal(NotchVisualizerColorSource.Accent, music.VisualizerColorSource);
         Assert.Equal(5, music.VisualizerBarCount);
@@ -146,6 +147,7 @@ public class NotchOptionsTests
                     OpenDelayMs = 250,
                     CloseDelayMs = 600,
                     TabBarStyle = NotchTabBarStyle.Hidden,
+                    CollapsedBackground = NotchCollapsedBackground.Ambient,
                     PanelOrder = ["system", "home"],
                     HomeCards = [HomeCard.Weather, HomeCard.Timers],
                 },

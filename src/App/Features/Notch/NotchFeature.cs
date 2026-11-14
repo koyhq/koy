@@ -245,11 +245,12 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             HideInFullscreen = settings.Notch.HideInFullscreen
         };
 
-        // Müzik kartı çubukları: ses yakalama yalnız kart görünür ve müzik çalarken (MusicViewModel.UpdateSpectrum).
+        // Müzik kartı çubukları: ses yakalama kart veya kapalı çentik görünürken ve müzik çalarken açılır (MusicViewModel.UpdateSpectrum).
         var musicVm = new MusicViewModel(_mediaService!, spectrumAcquire: () => services.AcquireSpectrumService(), spectrumRelease: services.ReleaseSpectrumService,
             lyricsProvider: _lyricsProvider, cardStyle: settings.Music.CardStyle,
             visualizerStyle: settings.Music.VisualizerStyle, visualizerColorSource: settings.Music.VisualizerColorSource,
-            visualizerBarCount: settings.Music.VisualizerBarCount);
+            visualizerBarCount: settings.Music.VisualizerBarCount,
+            extractCoverPalette: settings.Notch.CollapsedBackground == Koy.Core.Notch.NotchCollapsedBackground.AlbumColor);
         musicVm.Lyrics.EnabledToggled += SaveLyricsEnabled;
         // Parlaklık, çentiğin o anki ekranına bağlanır; ekran düzeni değişince state.Monitor güncellenir.
         NotchWindowState? stateRef = null;

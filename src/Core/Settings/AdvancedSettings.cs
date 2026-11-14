@@ -221,6 +221,7 @@ public static class AdvancedSettings
         ["LiveBackgroundPreset"] = ("Canlı Arka Plan Önayarı", "Live Background Preset"),
         ["LiveBackgroundFilePath"] = ("Canlı Arka Plan Dosyası", "Live Background File"),
         ["LiveBackgroundScrimPercent"] = ("Canlı Arka Plan Perdesi (%)", "Live Background Scrim (%)"),
+        ["CollapsedBackground"] = ("Kapalı Çentik Arka Planı", "Collapsed Notch Background"),
 
         // Music
         ["VisualizerStyle"] = ("Görselleştirici Stili", "Visualizer Style"),
