@@ -11,7 +11,7 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <Company>Koy</Company>
     <Product>Koy</Product>
-    <Version>0.2.11</Version> <!-- x-release-please-version -->
+    <Version>0.2.12</Version> <!-- x-release-please-version -->
     <PlatformTarget>x64</PlatformTarget>
     <Authors>Burhan Şahin</Authors>
     <Copyright>Copyright (c) 2026 Burhan Şahin</Copyright>
