@@ -7,6 +7,14 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.11](https://github.com/koyhq/koy/compare/v0.2.10...v0.2.11) (2026-11-14)
+
+
+### Added
+
+* **calendar:** request calendar.events.readonly instead of calendar.readonly ([2365527](https://github.com/koyhq/koy/commit/23655279d87c611c25d1c112378c21ac6b296be5))
+* **calendar:** request calendar.events.readonly instead of calendar.readonly ([4e42317](https://github.com/koyhq/koy/commit/4e423179681fe8ffdc095849a6261924004cafab))
+
 ## [0.2.10](https://github.com/koyhq/koy/compare/v0.2.9...v0.2.10) (2026-11-14)
 
 
