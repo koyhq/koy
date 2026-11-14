@@ -1,4 +1,5 @@
 using Koy.Core.Notch;
+using Koy.Core.Tray;
 
 namespace Koy.Core.Notifications;
 
@@ -14,6 +15,16 @@ public static class NotificationPresentation
     public const int MaxTitleLength = 60;
     public const int MaxBodyLength = 90;
     public const int MaxAppNameLength = 30;
+
+    /// <summary>Tepsi balon bildirimini çentik bildirim kuyruğuna uygun öğeye çevirir.</summary>
+    public static NotificationItem FromTrayBalloon(TrayBalloonNotification balloon, uint id) =>
+        new(
+            Id: id,
+            AppName: balloon.AppName,
+            Title: balloon.Title,
+            Body: balloon.Body,
+            Time: balloon.Time,
+            Icon: balloon.Icon);
 
     public static NotchCard ToCard(NotificationItem item, DateTimeOffset now, bool hideBody, RelativeTimeLabels labels)
     {

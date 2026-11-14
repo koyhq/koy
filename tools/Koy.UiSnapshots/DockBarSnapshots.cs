@@ -22,6 +22,7 @@ internal static class DockBarSnapshots
     private sealed class FakeTray : ITrayService
     {
         public event EventHandler? IconsChanged { add { } remove { } }
+        public event EventHandler<TrayBalloonNotification>? BalloonReceived { add { } remove { } }
         public IReadOnlyList<TrayIcon> GetVisibleIcons() => [];
         public byte[]? GetIconImage(TrayIconKey key) => null;
         public void SendMouse(TrayIconKey key, TrayMouseAction action, int cursorX, int cursorY) { }

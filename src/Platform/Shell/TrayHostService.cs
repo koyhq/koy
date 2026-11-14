@@ -57,6 +57,7 @@ public sealed class TrayHostService : ITrayService
 
     private readonly object _gate = new();
     private readonly TrayIconStore _store = new();
+    private readonly TrayBalloonFilter _balloonFilter = new();
     private readonly uint _ownProcessId = (uint)Environment.ProcessId;
     private readonly WNDPROC _trayProc;
     private readonly WNDPROC _notifyProc;
@@ -80,6 +81,8 @@ public sealed class TrayHostService : ITrayService
     private bool _disposed;
 
     public event EventHandler? IconsChanged;
+
+    public event EventHandler<TrayBalloonNotification>? BalloonReceived;
 
     /// <summary>
     /// Pencere biz istemeden kapandı (iş parçacığı çıktı, dışarıdan WM_CLOSE/WM_DESTROY, mesaj döngüsü hatası).
@@ -305,7 +308,10 @@ public sealed class TrayHostService : ITrayService
         var unexpected = Volatile.Read(ref _closeRequested) == 0;
         Hwnd = HWND.Null;
         lock (_gate)
+        {
             DestroyIcons(_store.Clear());
+            _balloonFilter.Clear();
+        }
 
         UnregisterClass(ShellTrayLocator.TrayClassName, instance);
         UnregisterClass(NotifyClassName, instance);
@@ -465,15 +471,58 @@ public sealed class TrayHostService : ITrayService
         }
 
         bool success;
+        TrayBalloonNotification? pendingBalloon = null;
+        nint balloonIconCopy = 0;
+        nint balloonOwnerHwnd = 0;
+        string balloonTooltip = "";
+
         lock (_gate)
         {
             var result = _store.Apply(data);
             DestroyIcons(result.ReleasedIcons);
             success = result.Success;
+
+            if (success && _balloonFilter.TryAccept(data, out var title, out var body, out var timestamp))
+            {
+                var key = TrayIconKey.From(data);
+                var icon = Find(key);
+                balloonOwnerHwnd = icon?.OwnerHwnd ?? data.OwnerHwnd;
+                balloonTooltip = !string.IsNullOrWhiteSpace(icon?.Tooltip)
+                    ? icon.Tooltip.Trim()
+                    : data.Tooltip.Trim();
+
+                var sourceHIcon = (data.InfoFlags & TrayBalloonFlags.IconMask) == TrayBalloonFlags.User && data.BalloonIconHandle != 0
+                    ? data.BalloonIconHandle
+                    : icon?.IconHandle ?? 0;
+
+                if (sourceHIcon != 0)
+                    balloonIconCopy = (nint)PInvoke.CopyIcon(new HICON(sourceHIcon)).Value;
+
+                pendingBalloon = new TrayBalloonNotification(key, "", title, body, data.InfoFlags, timestamp);
+            }
         }
 
         if (success)
             IconsChanged?.Invoke(this, EventArgs.Empty);
+
+        if (pendingBalloon is not null)
+        {
+            byte[]? iconBytes = null;
+            if (balloonIconCopy != 0)
+            {
+                try
+                {
+                    iconBytes = IconHelper.HIconToPng(balloonIconCopy);
+                }
+                finally
+                {
+                    PInvoke.DestroyIcon(new HICON(balloonIconCopy));
+                }
+            }
+
+            var appName = balloonTooltip.Length > 0 ? balloonTooltip : GetAppName(balloonOwnerHwnd);
+            BalloonReceived?.Invoke(this, pendingBalloon with { AppName = appName, Icon = iconBytes });
+        }
 
         return success;
     }

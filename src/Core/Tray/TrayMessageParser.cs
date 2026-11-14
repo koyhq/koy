@@ -27,8 +27,14 @@ public static class TrayMessageParser
     private const int TipChars = 128;
     private const int OffState = 288;
     private const int OffStateMask = 292;
+    private const int OffInfo = 296;
+    private const int InfoChars = 256;
     private const int OffVersion = 808;
+    private const int OffInfoTitle = 812;
+    private const int InfoTitleChars = 64;
+    private const int OffInfoFlags = 940;
     private const int OffGuid = 944;
+    private const int OffBalloonIcon = 960;
 
     /// <summary>İpucu alanının sonuna kadar olan en küçük geçerli blok.</summary>
     public const int MinimumLength = OffTip + TipChars * 2;
@@ -58,18 +64,25 @@ public static class TrayMessageParser
         if (message > (uint)TrayMessage.SetVersion)
             return false;
 
+        var fields = (TrayIconFields)BinaryPrimitives.ReadUInt32LittleEndian(data[OffFlags..]);
+        var hasInfo = (fields & TrayIconFields.Info) != 0;
+
         result = new TrayNotifyData(
             Message: (TrayMessage)message,
             OwnerHwnd: ToHandle(BinaryPrimitives.ReadUInt32LittleEndian(data[OffHwnd..])),
             Id: BinaryPrimitives.ReadUInt32LittleEndian(data[OffId..]),
-            Fields: (TrayIconFields)BinaryPrimitives.ReadUInt32LittleEndian(data[OffFlags..]),
+            Fields: fields,
             CallbackMessage: BinaryPrimitives.ReadUInt32LittleEndian(data[OffCallback..]),
             IconHandle: ToHandle(BinaryPrimitives.ReadUInt32LittleEndian(data[OffIcon..])),
             Tooltip: ReadString(data.Slice(OffTip, TipChars * 2)),
             State: ReadUInt32OrZero(data, OffState),
             StateMask: ReadUInt32OrZero(data, OffStateMask),
             Version: ReadUInt32OrZero(data, OffVersion),
-            Guid: data.Length >= OffGuid + 16 ? new Guid(data.Slice(OffGuid, 16)) : Guid.Empty);
+            Guid: data.Length >= OffGuid + 16 ? new Guid(data.Slice(OffGuid, 16)) : Guid.Empty,
+            Info: hasInfo ? ReadStringOrEmpty(data, OffInfo, InfoChars * 2) : "",
+            InfoTitle: hasInfo ? ReadStringOrEmpty(data, OffInfoTitle, InfoTitleChars * 2) : "",
+            InfoFlags: hasInfo ? (TrayBalloonFlags)ReadUInt32OrZero(data, OffInfoFlags) : TrayBalloonFlags.None,
+            BalloonIconHandle: hasInfo ? ToHandle(ReadUInt32OrZero(data, OffBalloonIcon)) : 0);
         return true;
     }
 
@@ -78,6 +91,9 @@ public static class TrayMessageParser
 
     private static uint ReadUInt32OrZero(ReadOnlySpan<byte> data, int offset) =>
         data.Length >= offset + 4 ? BinaryPrimitives.ReadUInt32LittleEndian(data[offset..]) : 0;
+
+    private static string ReadStringOrEmpty(ReadOnlySpan<byte> data, int offset, int byteCount) =>
+        data.Length >= offset + byteCount ? ReadString(data.Slice(offset, byteCount)) : "";
 
     private static string ReadString(ReadOnlySpan<byte> utf16)
     {

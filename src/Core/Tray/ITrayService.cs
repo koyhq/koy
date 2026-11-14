@@ -9,6 +9,9 @@ public interface ITrayService : IDisposable
     /// <summary>Simge listesi değişti. Arka plan iş parçacığından gelebilir.</summary>
     event EventHandler? IconsChanged;
 
+    /// <summary>Bir tepsi simgesi balon bildirimi gönderdi. Arka plan iş parçacığından gelebilir.</summary>
+    event EventHandler<TrayBalloonNotification>? BalloonReceived;
+
     /// <summary>Gösterilecek simgeler (Koy'un kendi simgeleri hariç), ekleniş sırasıyla.</summary>
     IReadOnlyList<TrayIcon> GetVisibleIcons();
 
