@@ -7,6 +7,41 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.10](https://github.com/koyhq/koy/compare/v0.2.9...v0.2.10) (2026-11-14)
+
+
+### Added
+
+* **calendar:** add Google and Outlook calendar sync via OAuth (Closes [#152](https://github.com/koyhq/koy/issues/152)) ([557fc43](https://github.com/koyhq/koy/commit/557fc43bd9ea44abed48b63c4576bdadde03236f))
+* **calendar:** Google and Outlook calendar via OAuth ([b1eef52](https://github.com/koyhq/koy/commit/b1eef52f9b26df2937a6347d50d9f85115ce9dee))
+* **calendar:** show Outlook as coming soon when the build has no Outlook client ([30fda40](https://github.com/koyhq/koy/commit/30fda40e3e07a92f19370fa9d5bfcfda5c6dc1b1))
+* **dock:** parse and display tray balloon notifications (Closes [#151](https://github.com/koyhq/koy/issues/151)) ([f21e58e](https://github.com/koyhq/koy/commit/f21e58e097626c51a4635e0affd7e1fcad4d6fa2))
+* **dock:** pin Store (UWP) apps from the taskbar pins ([5912b57](https://github.com/koyhq/koy/commit/5912b57c40c5e02220ebdca1d0a5f0b3e5419e3f))
+* **dock:** pin Store apps from taskbar pins (Closes [#147](https://github.com/koyhq/koy/issues/147)) ([08078ad](https://github.com/koyhq/koy/commit/08078adec6a84e5cd21c2b507c99750656bf4783))
+* **dock:** tray balloon notifications ([0e14e63](https://github.com/koyhq/koy/commit/0e14e63d486dc96c4df167df5f1ed5491657fd47))
+* **notch:** D layout with a separate music page and a single top bar ([f5b64c3](https://github.com/koyhq/koy/commit/f5b64c39946f919ff2623b153f2787a798bfc0aa))
+* **notch:** D layout with separate music page and a single top bar ([e55edfd](https://github.com/koyhq/koy/commit/e55edfd8d019ca03f422f421238fde293978e6c9))
+* **notch:** show the date in the collapsed notch ([8684009](https://github.com/koyhq/koy/commit/8684009c5cd9798db5159c704f5ff8c512d13366))
+* **notch:** show the date in the collapsed notch (Closes [#148](https://github.com/koyhq/koy/issues/148)) ([3380113](https://github.com/koyhq/koy/commit/3380113ca49f68ce300e4a0b87573465765bc674))
+* **platform:** add Windows 10 (19041+) support ([a170ea8](https://github.com/koyhq/koy/commit/a170ea89cf2cbafa0b0a8a7da5a15fea991c3128))
+* **platform:** add Windows 10 (19041+) support (Closes [#137](https://github.com/koyhq/koy/issues/137)) ([21888c4](https://github.com/koyhq/koy/commit/21888c458d702fe553514bf1e45bf42ab8b0f1e5))
+* **search:** add new search sources and drag-out support (Closes [#154](https://github.com/koyhq/koy/issues/154)) ([a1e26a8](https://github.com/koyhq/koy/commit/a1e26a8ccf517764dbc4a22a12380a2df4aa931a))
+* **search:** more search sources ([fed751a](https://github.com/koyhq/koy/commit/fed751a06da30664b225592500a1a44252788311))
+* **store:** add six theme packs and a palette-based theme generator ([d8382c3](https://github.com/koyhq/koy/commit/d8382c326804d645b6698b1ae026e16e4df19f57))
+* **store:** add six theme packs and a palette-based theme generator ([a22f845](https://github.com/koyhq/koy/commit/a22f845e8b731d2655d90570e7f442d1cde08069))
+
+
+### Fixed
+
+* **calendar:** send the Google client secret and embed release OAuth clients ([12cc20e](https://github.com/koyhq/koy/commit/12cc20e51c4e055a667be3c49adc4fdfd46e5ec1))
+* **calendar:** use the localhost redirect Microsoft matches for Outlook ([500e1f1](https://github.com/koyhq/koy/commit/500e1f17e9af6106d00df0477c950ab9354625da))
+
+
+### Performance
+
+* record memory measurements after feature waves ([c158190](https://github.com/koyhq/koy/commit/c158190d6d5c9852a0dc866f02e025e8d3a3dad0))
+* record memory measurements after feature waves (Refs [#157](https://github.com/koyhq/koy/issues/157)) ([e08bc2f](https://github.com/koyhq/koy/commit/e08bc2f5e318b48b78520b67e5e366418b0312b9))
+
 ## [0.2.9](https://github.com/koyhq/koy/compare/v0.2.8...v0.2.9) (2026-11-12)
 
 
