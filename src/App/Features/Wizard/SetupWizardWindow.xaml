@@ -318,7 +318,7 @@
                                FontSize="15" Foreground="{DynamicResource KoyTextSecondary}" TextWrapping="Wrap" Margin="0,0,0,28" LineHeight="22" />
 
                     <!-- Başlangıç Seçeneği -->
-                    <Border Background="{DynamicResource KoyBgRow}" CornerRadius="{DynamicResource KoyRadiusRow}" Padding="20">
+                    <Border Background="{DynamicResource KoyBgRow}" CornerRadius="{DynamicResource KoyRadiusRow}" Padding="20" Margin="0,0,0,12">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -334,6 +334,15 @@
                                       Style="{StaticResource ModernCheckBoxStyle}"
                                       VerticalAlignment="Center" />
                         </Grid>
+                    </Border>
+
+                    <!-- Takvim Gizlilik Notu -->
+                    <Border Background="{DynamicResource KoyBgRow}" CornerRadius="{DynamicResource KoyRadiusRow}" Padding="16,14">
+                        <StackPanel>
+                            <TextBlock Text="{Binding [WizCalendarPrivacyTitle], Source={x:Static res:Loc.Instance}}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource KoyTextPrimary}" />
+                            <TextBlock Text="{Binding [WizCalendarPrivacyDesc], Source={x:Static res:Loc.Instance}}"
+                                       FontSize="12.5" Foreground="{DynamicResource KoyTextSecondary}" TextWrapping="Wrap" Margin="0,4,0,0" LineHeight="18" />
+                        </StackPanel>
                     </Border>
                 </StackPanel>
             </Grid>

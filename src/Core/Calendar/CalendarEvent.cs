@@ -8,15 +8,30 @@ public enum CalendarViewMode
     Day
 }
 
+/// <summary>Etkinliğin kaynağı: yerel defter ya da salt okunur bağlı hesaplar.</summary>
+public enum CalendarEventSource
+{
+    Local = 0,
+    Google = 1,
+    Outlook = 2
+}
+
 /// <summary>
-/// Yerel takvim etkinliği (Google / Outlook yok). <paramref name="Start"/> yerel saattir (saat dilimi taşımaz);
-/// <paramref name="DurationMinutes"/> 0 ise tek bir an (hatırlatma gibi).
+/// Takvim etkinliği. <paramref name="Start"/> yerel saattir (saat dilimi taşımaz);
+/// <paramref name="DurationMinutes"/> 0 ise tek bir an (hatırlatma gibi). Harici kaynaklı etkinlikler salt okunurdur.
 /// </summary>
-public sealed record CalendarEvent(string Id, string Title, DateTime Start, int DurationMinutes)
+public sealed record CalendarEvent(
+    string Id,
+    string Title,
+    DateTime Start,
+    int DurationMinutes,
+    CalendarEventSource Source = CalendarEventSource.Local)
 {
     public DateTime End => Start.AddMinutes(DurationMinutes);
 
     public DateOnly Date => DateOnly.FromDateTime(Start);
+
+    public bool IsReadOnly => Source != CalendarEventSource.Local;
 }
 
 /// <summary>Bir günün etkinlikleri (hafta görünümünün satırı).</summary>

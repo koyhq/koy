@@ -23,4 +23,12 @@
     <ProjectReference Include="..\Core\Koy.Core.csproj" />
     <ProjectReference Include="..\Platform\Koy.Platform.csproj" />
   </ItemGroup>
+
+  <!-- Takvim OAuth istemcileri: sürümde CI gizli anahtarlarından (release.yml) gelir, depoda değer yoktur.
+       Boş kalırsa kullanıcı Ayarlar'da kendi istemcisini girebilir. Okuyan: Features/Calendar/BuiltInCalendarClients. -->
+  <ItemGroup>
+    <AssemblyMetadata Include="KoyOAuthGoogleClientId" Value="$(KOY_BUILD_GOOGLE_CLIENT_ID)" />
+    <AssemblyMetadata Include="KoyOAuthGoogleClientSecret" Value="$(KOY_BUILD_GOOGLE_CLIENT_SECRET)" />
+    <AssemblyMetadata Include="KoyOAuthOutlookClientId" Value="$(KOY_BUILD_OUTLOOK_CLIENT_ID)" />
+  </ItemGroup>
 </Project>

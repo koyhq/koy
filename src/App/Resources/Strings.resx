@@ -3864,5 +3864,89 @@
   <data name="NotchPageHome" xml:space="preserve">
     <value>Home</value>
   </data>
+  <data name="CalAccountsHeader" xml:space="preserve">
+    <value>Calendar accounts</value>
+  </data>
+  <data name="CalPrivacyTitle" xml:space="preserve">
+    <value>Read-only and local storage</value>
+  </data>
+  <data name="CalPrivacyDesc" xml:space="preserve">
+    <value>Koy requests read-only calendar access via OAuth 2.0 PKCE. Tokens are encrypted with Windows DPAPI on this device and events are cached locally for offline use.</value>
+  </data>
+  <data name="CalGoogleTitle" xml:space="preserve">
+    <value>Google Calendar</value>
+  </data>
+  <data name="CalGoogleClientId" xml:space="preserve">
+    <value>Google OAuth Client ID</value>
+  </data>
+  <data name="CalOutlookTitle" xml:space="preserve">
+    <value>Outlook Calendar</value>
+  </data>
+  <data name="CalOutlookClientId" xml:space="preserve">
+    <value>Outlook OAuth Client ID</value>
+  </data>
+  <data name="CalClientIdHint" xml:space="preserve">
+    <value>Optional: your own OAuth Client ID (Koy's client is used when empty)</value>
+  </data>
+  <data name="CalGoogleClientSecret" xml:space="preserve">
+    <value>Google OAuth Client Secret</value>
+  </data>
+  <data name="CalClientSecretHint" xml:space="preserve">
+    <value>Client secret Google issued for your own Client ID</value>
+  </data>
+  <data name="CalComingSoon" xml:space="preserve">
+    <value>Coming soon</value>
+  </data>
+  <data name="CalConnectButton" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="CalDisconnectButton" xml:space="preserve">
+    <value>Disconnect</value>
+  </data>
+  <data name="CalSyncNowButton" xml:space="preserve">
+    <value>Sync now</value>
+  </data>
+  <data name="CalStatusConnected" xml:space="preserve">
+    <value>Connected (read-only)</value>
+  </data>
+  <data name="CalStatusConnectedAs" xml:space="preserve">
+    <value>Connected as {0}</value>
+  </data>
+  <data name="CalStatusDisconnected" xml:space="preserve">
+    <value>Not connected</value>
+  </data>
+  <data name="CalSyncing" xml:space="preserve">
+    <value>Syncing calendars…</value>
+  </data>
+  <data name="CalSyncDone" xml:space="preserve">
+    <value>Calendars synced.</value>
+  </data>
+  <data name="CalSyncOfflineCache" xml:space="preserve">
+    <value>Offline or unavailable; showing last cached events.</value>
+  </data>
+  <data name="CalSyncFailed" xml:space="preserve">
+    <value>Calendar sync failed.</value>
+  </data>
+  <data name="CalClientIdRequired" xml:space="preserve">
+    <value>This build has no built-in calendar client. Enter your own OAuth Client ID.</value>
+  </data>
+  <data name="CalAuthorizing" xml:space="preserve">
+    <value>Waiting for browser sign-in…</value>
+  </data>
+  <data name="CalConnectFailed" xml:space="preserve">
+    <value>Sign-in failed: {0}</value>
+  </data>
+  <data name="CalConnectedDone" xml:space="preserve">
+    <value>Calendar account connected.</value>
+  </data>
+  <data name="CalDisconnectedDone" xml:space="preserve">
+    <value>Calendar account disconnected.</value>
+  </data>
+  <data name="WizCalendarPrivacyTitle" xml:space="preserve">
+    <value>Optional calendar sync privacy</value>
+  </data>
+  <data name="WizCalendarPrivacyDesc" xml:space="preserve">
+    <value>Connecting Google or Outlook in Settings is optional and strictly read-only. Tokens are encrypted on your device via Windows DPAPI and cached locally for offline viewing.</value>
+  </data>
 </root>
 

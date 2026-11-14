@@ -19,7 +19,17 @@ public sealed record CalendarCell(DateOnly Date, bool IsCurrentMonth, bool IsTod
 public sealed record WeekDayRow(DateOnly Date, string Label, bool IsToday, bool IsSelected, string Summary, bool HasEvents);
 
 /// <summary>Seçili günün bir etkinlik satırı.</summary>
-public sealed record EventRow(string Id, string TimeText, string Title);
+public sealed record EventRow(string Id, string TimeText, string Title, CalendarEventSource Source = CalendarEventSource.Local)
+{
+    public bool CanDelete => Source == CalendarEventSource.Local;
+    public bool HasSourceBadge => Source != CalendarEventSource.Local;
+    public string SourceBadge => Source switch
+    {
+        CalendarEventSource.Google => "G",
+        CalendarEventSource.Outlook => "O",
+        _ => ""
+    };
+}
 
 /// <summary>
 /// Takvim sayfası (H): ay / hafta / gün görünümü ve yerel etkinlikler. Mantık Core/Calendar'da (MonthGrid,
@@ -29,6 +39,7 @@ public sealed record EventRow(string Id, string TimeText, string Title);
 public sealed partial class CalendarViewModel : ObservableObject, IDisposable
 {
     private readonly SharedEvents _events;
+    private readonly CalendarSettingsStore _calendarSettingsStore;
     private readonly Dispatcher _dispatcher;
     private readonly CultureInfo _culture;
     private readonly Func<DateOnly> _today;
@@ -36,12 +47,14 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
     private readonly DayOfWeek _firstDay;
     private readonly bool _showWeekNumber;
     private bool _active;
+    private bool _syncedThisSession;
     private bool _disposed;
 
-    public CalendarViewModel(AppSettings settings, SharedEvents? events = null, Dispatcher? dispatcher = null, Func<DateOnly>? today = null)
+    public CalendarViewModel(AppSettings settings, SharedEvents? events = null, Dispatcher? dispatcher = null, Func<DateOnly>? today = null, CalendarSettingsStore? calendarSettingsStore = null)
     {
         _dispatcher = dispatcher ?? Dispatcher.CurrentDispatcher;
         _events = events ?? new SharedEvents();
+        _calendarSettingsStore = calendarSettingsStore ?? new CalendarSettingsStore();
         _today = today ?? (() => DateOnly.FromDateTime(DateTime.Today));
         _culture = new CultureInfo(settings.General.Language == "en" ? "en-US" : "tr-TR");
         // Saat ve hafta ayarları (issue #77); ayar değişince çentik yeniden kurulur, burada bir kez okunur.
@@ -123,6 +136,13 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
             // Uygulama gece boyunca açık kalmış olabilir.
             Anchor = _today();
             Refresh();
+            if (!_syncedThisSession)
+            {
+                _syncedThisSession = true;
+                var calSettings = _calendarSettingsStore.Load();
+                if (calSettings.GoogleEnabled || calSettings.OutlookEnabled)
+                    _ = _events.SyncExternalAsync(calSettings);
+            }
         }
         else
         {
@@ -180,7 +200,7 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
 
         DayEvents.Clear();
         foreach (var e in EventAgenda.ForDay(all, Anchor))
-            DayEvents.Add(new EventRow(e.Id, e.Start.ToString(_timePattern, _culture), e.Title));
+            DayEvents.Add(new EventRow(e.Id, e.Start.ToString(_timePattern, _culture), e.Title, e.Source));
         HasDayEvents = DayEvents.Count > 0;
     }
 
