@@ -19,3 +19,7 @@ arastirma/
 
 # UiSnapshots aracinin yerel ciktisi
 ui-snapshots/
+
+# Yerel tasarım taslakları ve pazarlama çıktıları
+docs/design/taslak/
+marketing/
