@@ -256,6 +256,9 @@ public sealed class SharedServices : IDisposable
         toDispose?.Dispose();
     }
 
+    /// <summary>Tepsi barındırıcısı aktifken gelen balon bildirimleri. Arka plan iş parçacığından gelebilir.</summary>
+    public event Action<TrayBalloonNotification>? TrayBalloonReceived;
+
     /// <summary>
     /// Koy'un Shell_TrayWnd penceresi (sistem tepsisi barındırıcısı). Monitör başına ayrı pencere kurulmaz: bütün
     /// dock'lar aynı örneği paylaşır. Pencere kurulamazsa null döner (sayılmaz, bırakmaya gerek yok).
@@ -267,6 +270,7 @@ public sealed class SharedServices : IDisposable
         // Pencere beklenmedik kapandıysa (RequestClose sonrası) yenisi kurulur.
         if (_trayHost is { IsRunning: false })
         {
+            _trayHost.BalloonReceived -= OnTrayHostBalloonReceived;
             _trayHost.Dispose();
             _trayHost = null;
         }
@@ -281,6 +285,7 @@ public sealed class SharedServices : IDisposable
                 return null;
             }
 
+            host.BalloonReceived += OnTrayHostBalloonReceived;
             _trayHost = host;
         }
 
@@ -298,9 +303,16 @@ public sealed class SharedServices : IDisposable
             // her kurulum başarısız oluyordu (dock kapatılıp açılınca tepsi düğmesi kayboluyordu).
             var host = _trayHost;
             _trayHost = null;
-            host?.Dispose();
+            if (host is not null)
+            {
+                host.BalloonReceived -= OnTrayHostBalloonReceived;
+                host.Dispose();
+            }
         }
     }
+
+    private void OnTrayHostBalloonReceived(object? sender, TrayBalloonNotification balloon) =>
+        TrayBalloonReceived?.Invoke(balloon);
 
     /// <summary>
     /// Pano geçmişi. Çağıran önce <c>AppSettings.ClipboardHistoryEnabled</c>'a bakmalı: kapalıysa bu metot
@@ -483,8 +495,12 @@ public sealed class SharedServices : IDisposable
         _spectrumService?.Dispose();
         _spectrumService = null;
         _spectrumUsers = 0;
-        _trayHost?.Dispose();
-        _trayHost = null;
+        if (_trayHost is not null)
+        {
+            _trayHost.BalloonReceived -= OnTrayHostBalloonReceived;
+            _trayHost.Dispose();
+            _trayHost = null;
+        }
         _trayHostLease.Reset();
         _clipboard?.Dispose();
         _clipboard = null;

@@ -23,9 +23,25 @@ public enum TrayIconFields : uint
     Guid = 0x20
 }
 
+/// <summary>Balon bildiriminin simge ve davranış bayrakları (NIIF_*).</summary>
+[Flags]
+public enum TrayBalloonFlags : uint
+{
+    None = 0,
+    Info = 0x01,
+    Warning = 0x02,
+    Error = 0x03,
+    User = 0x04,
+    IconMask = 0x0F,
+    NoSound = 0x10,
+    LargeIcon = 0x20,
+    RespectQuietTime = 0x80
+}
+
 /// <summary>
 /// Bir uygulamanın tepsiye gönderdiği tek mesaj. Pencere ve simge tanıtıcıları <c>nint</c>;
-/// Win32 tipi taşımaz (AGENTS.md #11).
+/// Win32 tipi taşımaz (AGENTS.md #11). <see cref="Version"/> alanı <see cref="TrayIconFields.Info"/>
+/// taşındığında Win32 <c>uTimeout</c> birleşimini tutar.
 /// </summary>
 public sealed record TrayNotifyData(
     TrayMessage Message,
@@ -38,7 +54,21 @@ public sealed record TrayNotifyData(
     uint State,
     uint StateMask,
     uint Version,
-    Guid Guid);
+    Guid Guid,
+    string Info = "",
+    string InfoTitle = "",
+    TrayBalloonFlags InfoFlags = TrayBalloonFlags.None,
+    nint BalloonIconHandle = 0);
+
+/// <summary>Tepsi simgesinden gelen geçerli bir balon bildirimi.</summary>
+public sealed record TrayBalloonNotification(
+    TrayIconKey Key,
+    string AppName,
+    string Title,
+    string Body,
+    TrayBalloonFlags Flags,
+    DateTimeOffset Time,
+    byte[]? Icon = null);
 
 /// <summary>
 /// Tepsi simgesinin kimliği. GUID verilmişse simge yalnız GUID ile, verilmemişse pencere + kimlik numarasıyla tanınır.

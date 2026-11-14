@@ -1045,12 +1045,14 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     private OsdIndicatorViewModel? _notificationOsd;
     private NotchCard? _notificationCard;
     private NotchViewModel? _notificationWaitViewModel;
+    private int _balloonSequence;
 
     private void StartNotifications()
     {
         if (!settings.Notch.ShowNotifications || _windowStates.Count == 0 || _notificationListener is not null)
             return;
 
+        services.TrayBalloonReceived += OnTrayBalloonReceived;
         var listener = services.AcquireNotificationListener();
         _notificationListener = listener;
         _ = EnableNotificationsAsync(listener);
@@ -1087,6 +1089,22 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             if (_stopped || _notificationListener is null)
                 return;
 
+            var doNotDisturb = _focusAssistService?.IsDoNotDisturb ?? false;
+            if (_notificationQueue.Enqueue(item, doNotDisturb))
+                PumpNotifications();
+        });
+    }
+
+    private void OnTrayBalloonReceived(Koy.Core.Tray.TrayBalloonNotification balloon)
+    {
+        // Tepsi mesajı arka plan iş parçacığından gelir; kuyruğa ve çentiğe yalnız UI iş parçacığından dokunulur.
+        Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            if (_stopped || !settings.Notch.ShowNotifications || _windowStates.Count == 0)
+                return;
+
+            var id = 0x8000_0000u | (uint)Interlocked.Increment(ref _balloonSequence);
+            var item = NotificationPresentation.FromTrayBalloon(balloon, id);
             var doNotDisturb = _focusAssistService?.IsDoNotDisturb ?? false;
             if (_notificationQueue.Enqueue(item, doNotDisturb))
                 PumpNotifications();
@@ -1205,6 +1223,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
 
     private void StopNotifications()
     {
+        services.TrayBalloonReceived -= OnTrayBalloonReceived;
         StopWaitingForNotchCollapse();
         UnhookNotificationOsd();
         _notificationQueue.Clear();
