@@ -3834,6 +3834,9 @@
   <data name="CalClientSecretHint" xml:space="preserve">
     <value>Kendi Client ID'n için Google'ın verdiği istemci sırrı</value>
   </data>
+  <data name="CalComingSoon" xml:space="preserve">
+    <value>Yakında</value>
+  </data>
   <data name="CalConnectButton" xml:space="preserve">
     <value>Bağla</value>
   </data>

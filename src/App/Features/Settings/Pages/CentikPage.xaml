@@ -956,11 +956,13 @@
                     <TextBlock Text="{Binding [CalOutlookTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding CalendarAccounts.OutlookStatusText}" Style="{StaticResource SettingDescStyle}" />
                     <TextBox Style="{StaticResource SettingTextBoxStyle}" Margin="0,8,0,0"
+                             Visibility="{Binding CalendarAccounts.IsOutlookAvailable, Converter={StaticResource BoolToVis}}"
                              Text="{Binding CalendarAccounts.OutlookClientId, UpdateSourceTrigger=PropertyChanged}"
                              Tag="{Binding [CalClientIdHint], Source={x:Static res:Loc.Instance}}"
                              AutomationProperties.Name="{Binding [CalOutlookClientId], Source={x:Static res:Loc.Instance}}" />
                 </StackPanel>
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <StackPanel Grid.Column="1" VerticalAlignment="Center"
+                            Visibility="{Binding CalendarAccounts.IsOutlookAvailable, Converter={StaticResource BoolToVis}}">
                     <Button Command="{Binding CalendarAccounts.ConnectOutlookCommand}"
                             Content="{Binding [CalConnectButton], Source={x:Static res:Loc.Instance}}">
                         <Button.Style>

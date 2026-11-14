@@ -3834,6 +3834,9 @@
   <data name="CalClientSecretHint" xml:space="preserve">
     <value>Client secret Google issued for your own Client ID</value>
   </data>
+  <data name="CalComingSoon" xml:space="preserve">
+    <value>Coming soon</value>
+  </data>
   <data name="CalConnectButton" xml:space="preserve">
     <value>Connect</value>
   </data>

@@ -35,6 +35,13 @@ public sealed partial class CalendarAccountsViewModel : ObservableObject
     [ObservableProperty]
     private bool _isOutlookConnected;
 
+    /// <summary>
+    /// Outlook bağlanabilir mi: sürümde (ya da ortam değişkeninde / ayarlarda) istemci var veya zaten bağlı.
+    /// Yoksa satır "Yakında" der; kimlik alanı ve Bağlan düğmesi gizlenir.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isOutlookAvailable;
+
     [ObservableProperty]
     private bool _isGoogleBusy;
 
@@ -75,6 +82,7 @@ public sealed partial class CalendarAccountsViewModel : ObservableObject
             OutlookClientId = settings.OutlookClientId;
             IsGoogleConnected = settings.GoogleEnabled && _sync.HasToken(CalendarProvider.Google);
             IsOutlookConnected = settings.OutlookEnabled && _sync.HasToken(CalendarProvider.Outlook);
+            IsOutlookAvailable = IsOutlookConnected || BuiltInCalendarClients.Resolve(CalendarProvider.Outlook, settings).IsConfigured;
             UpdateStatusTexts(settings);
         }
         finally
@@ -261,7 +269,9 @@ public sealed partial class CalendarAccountsViewModel : ObservableObject
                 : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("CalStatusConnectedAs"), s.GoogleAccountLabel))
             : Strings.Get("CalStatusDisconnected");
 
-        OutlookStatusText = IsOutlookConnected
+        OutlookStatusText = !IsOutlookAvailable
+            ? Strings.Get("CalComingSoon")
+            : IsOutlookConnected
             ? (string.IsNullOrWhiteSpace(s.OutlookAccountLabel)
                 ? Strings.Get("CalStatusConnected")
                 : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("CalStatusConnectedAs"), s.OutlookAccountLabel))
