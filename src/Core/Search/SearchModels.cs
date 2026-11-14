@@ -33,8 +33,24 @@ public enum SearchGlyph
     Clipboard,
     Clock,
     Help,
-    History
+    History,
+    Symbol,
+    SpellCheck,
+    Dictionary,
+    Store
 }
+
+/// <summary>Panelden dışarı sürüklenebilen veri türü.</summary>
+public enum SearchDragKind
+{
+    None,
+    File,
+    Url,
+    Text
+}
+
+/// <summary>Sürükle-bırak yükü.</summary>
+public sealed record SearchDragData(SearchDragKind Kind, string Value);
 
 /// <summary>Satırın ek eylemi (ör. "Kopyala", "Bulunduğu klasörü aç").</summary>
 public sealed record SearchAction(string Id, string Label, Action Execute)
@@ -75,6 +91,9 @@ public sealed record SearchResult(string Id, string Category, string Title, Acti
 
     /// <summary>Simge yalnız görünen satırlar için, arka planda çözülür.</summary>
     public Func<byte[]?>? LoadIcon { get; init; }
+
+    /// <summary>Doluysa satır panelden dışarı sürüklenebilir (dosya, adres ya da metin).</summary>
+    public SearchDragData? Drag { get; init; }
 }
 
 /// <summary>Yardımda gösterilen kullanım örneği.</summary>

@@ -130,7 +130,10 @@
             <StackPanel>
               <TextBlock Text="{Binding Header}" FontSize="10.5" FontWeight="SemiBold" Margin="8,6,0,3" Foreground="{DynamicResource KoyNotchMuted}"
                          Visibility="{Binding HasHeader, Converter={StaticResource BoolToVis}}" />
-              <Border x:Name="Row" CornerRadius="12" Padding="8,4" MinHeight="38" Background="Transparent" Cursor="Hand" MouseLeftButtonUp="Row_MouseLeftButtonUp">
+              <Border x:Name="Row" CornerRadius="12" Padding="8,4" MinHeight="38" Background="Transparent" Cursor="Hand"
+                      PreviewMouseLeftButtonDown="Row_PreviewMouseLeftButtonDown"
+                      MouseMove="Row_MouseMove"
+                      MouseLeftButtonUp="Row_MouseLeftButtonUp">
                 <Grid>
                   <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="28" />

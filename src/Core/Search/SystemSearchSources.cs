@@ -161,7 +161,8 @@ public sealed class LocationSearchSource(ISearchShell shell, Func<string, string
             {
                 Glyph = SearchGlyph.Globe,
                 CategoryRelevance = SearchRelevance.Low,
-                Relevance = 1
+                Relevance = 1,
+                Drag = new SearchDragData(SearchDragKind.Url, target)
             }
         ];
     }
@@ -171,7 +172,8 @@ public sealed class LocationSearchSource(ISearchShell shell, Func<string, string
         {
             Glyph = glyph,
             CategoryRelevance = SearchRelevance.Highest,
-            Relevance = 1
+            Relevance = 1,
+            Drag = new SearchDragData(SearchDragKind.File, path)
         };
 
     private static bool IsProgram(string path) =>
@@ -259,7 +261,8 @@ public sealed class PlacesSearchSource(Func<IReadOnlyList<SearchPlace>> places, 
                 Subtitle = place.Group,
                 Glyph = SearchGlyph.Folder,
                 CategoryRelevance = category,
-                Relevance = relevance
+                Relevance = relevance,
+                Drag = new SearchDragData(SearchDragKind.File, path)
             };
         }
     }
@@ -299,7 +302,8 @@ public sealed class RecentDocumentsSearchSource(Func<IReadOnlyList<string>> path
                 Placement = SearchCategoryPlacement.Bottom,
                 CategoryRelevance = exact ? SearchRelevance.Highest : index == 0 ? SearchRelevance.High : SearchRelevance.Low,
                 Relevance = index == 0 ? relevance + 0.1 : relevance,
-                Actions = [new SearchAction("folder", t("SearchActOpenFolder"), () => shell.OpenContainingFolder(captured))]
+                Actions = [new SearchAction("folder", t("SearchActOpenFolder"), () => shell.OpenContainingFolder(captured))],
+                Drag = new SearchDragData(SearchDragKind.File, captured)
             };
 
             relevance -= 0.05;
@@ -405,7 +409,8 @@ public sealed class FileSearchSource(IFileSearchService service, ISearchShell sh
             CategoryRelevance = exact ? SearchRelevance.Highest : folded.Contains(query.Folded, StringComparison.Ordinal) ? SearchRelevance.High : SearchRelevance.Low,
             Relevance = 0.75,
             Actions = [new SearchAction("folder", t("SearchActOpenFolder"), () => shell.OpenContainingFolder(path))],
-            LoadIcon = noIcon
+            LoadIcon = noIcon,
+            Drag = new SearchDragData(SearchDragKind.File, path)
         };
     }
 

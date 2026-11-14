@@ -1158,6 +1158,66 @@
   <data name="SearchSourcesHeader" xml:space="preserve">
     <value>Search sources</value>
   </data>
+  <data name="SearchCatSpecialChars" xml:space="preserve">
+    <value>Special characters</value>
+  </data>
+  <data name="SearchCatSpellCheck" xml:space="preserve">
+    <value>Spell check</value>
+  </data>
+  <data name="SearchCatDictionary" xml:space="preserve">
+    <value>Dictionary</value>
+  </data>
+  <data name="SearchCatJumpList" xml:space="preserve">
+    <value>App actions</value>
+  </data>
+  <data name="SearchCatStore" xml:space="preserve">
+    <value>Microsoft Store</value>
+  </data>
+  <data name="SearchKwSpecialChars" xml:space="preserve">
+    <value>char;sym;symbol;sembol;özel</value>
+  </data>
+  <data name="SearchKwSpellCheck" xml:space="preserve">
+    <value>spell;yazim;yazım</value>
+  </data>
+  <data name="SearchKwDictionary" xml:space="preserve">
+    <value>dict;def;define;sozluk;sözlük;tdk</value>
+  </data>
+  <data name="SearchKwStore" xml:space="preserve">
+    <value>store;msstore;magaza;mağaza</value>
+  </data>
+  <data name="SearchSpellCorrect" xml:space="preserve">
+    <value>Spelling is correct</value>
+  </data>
+  <data name="SearchSpellNoSuggestions" xml:space="preserve">
+    <value>No spelling suggestions found</value>
+  </data>
+  <data name="SearchSpellSuggestionFor" xml:space="preserve">
+    <value>Suggestion for "{0}"</value>
+  </data>
+  <data name="SearchDictWebFor" xml:space="preserve">
+    <value>Look up "{0}" online</value>
+  </data>
+  <data name="SearchActOpenWeb" xml:space="preserve">
+    <value>Open on web</value>
+  </data>
+  <data name="SearchStoreFor" xml:space="preserve">
+    <value>Search Microsoft Store for "{0}"</value>
+  </data>
+  <data name="SearchSyntaxSpecialChars" xml:space="preserve">
+    <value>Special characters and symbols</value>
+  </data>
+  <data name="SearchSyntaxSpellCheck" xml:space="preserve">
+    <value>Check spelling and copy suggestion</value>
+  </data>
+  <data name="SearchSyntaxDictionary" xml:space="preserve">
+    <value>Look up word definition</value>
+  </data>
+  <data name="SearchSyntaxJumpList" xml:space="preserve">
+    <value>App jump list tasks and recent items</value>
+  </data>
+  <data name="SearchSyntaxStore" xml:space="preserve">
+    <value>Search Microsoft Store</value>
+  </data>
   <data name="ShortcutPlayPause" xml:space="preserve">
     <value>Music: play / pause</value>
   </data>

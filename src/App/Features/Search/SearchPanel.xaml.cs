@@ -13,6 +13,8 @@ public partial class SearchPanel : UserControl
     private SearchViewModel? _viewModel;
     private bool _allowCompletion;
     private bool _completing;
+    private Point _dragStart;
+    private SearchRowViewModel? _dragRow;
 
     public SearchPanel()
     {
@@ -136,13 +138,80 @@ public partial class SearchPanel : UserControl
             vm.FocusLastAction();
     }
 
+    private void Row_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.OriginalSource is DependencyObject source && IsInsideButton(source))
+        {
+            _dragRow = null;
+            return;
+        }
+
+        if (sender is FrameworkElement { DataContext: SearchRowViewModel row })
+        {
+            _dragStart = e.GetPosition(null);
+            _dragRow = row;
+        }
+    }
+
+    private void Row_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton != MouseButtonState.Pressed || _dragRow is not { } row || row.Result.Drag is not { Kind: not SearchDragKind.None } drag)
+            return;
+
+        var current = e.GetPosition(null);
+        if (Math.Abs(current.X - _dragStart.X) < SystemParameters.MinimumHorizontalDragDistance
+            && Math.Abs(current.Y - _dragStart.Y) < SystemParameters.MinimumVerticalDragDistance)
+        {
+            return;
+        }
+
+        _dragRow = null;
+        if (sender is not DependencyObject source)
+            return;
+
+        var data = BuildDragData(drag);
+        var effects = drag.Kind == SearchDragKind.File
+            ? DragDropEffects.Copy | DragDropEffects.Move
+            : DragDropEffects.Copy | DragDropEffects.Link;
+        DragDrop.DoDragDrop(source, data, effects);
+    }
+
     private void Row_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
+        _dragRow = null;
         if (_viewModel is not null && sender is FrameworkElement { DataContext: SearchRowViewModel row })
         {
             _viewModel.ActivateRow(row);
             e.Handled = true;
         }
+    }
+
+    private static DataObject BuildDragData(SearchDragData drag)
+    {
+        var data = new DataObject();
+        switch (drag.Kind)
+        {
+            case SearchDragKind.File:
+                data.SetData(DataFormats.FileDrop, new[] { drag.Value });
+                break;
+            case SearchDragKind.Url:
+            case SearchDragKind.Text:
+                data.SetData(DataFormats.UnicodeText, drag.Value);
+                break;
+        }
+
+        return data;
+    }
+
+    private static bool IsInsideButton(DependencyObject start)
+    {
+        for (var current = start; current is not null; current = System.Windows.Media.VisualTreeHelper.GetParent(current))
+        {
+            if (current is Button)
+                return true;
+        }
+
+        return false;
     }
 
     private void RowAction_Click(object sender, RoutedEventArgs e)
