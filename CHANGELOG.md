@@ -7,6 +7,19 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.12](https://github.com/koyhq/koy/compare/v0.2.11...v0.2.12) (2026-11-14)
+
+
+### Added
+
+* **ui:** simplify settings UI and upgrade notch live backgrounds to HD MP4 loops ([#175](https://github.com/koyhq/koy/issues/175)) ([1ac9a81](https://github.com/koyhq/koy/commit/1ac9a81416000efc2a8d507136cf0ea89004fa29))
+
+
+### Fixed
+
+* **calendar:** reflect connect and disconnect in the notch and hide built-in client fields ([246d94e](https://github.com/koyhq/koy/commit/246d94e382b868859c929d1cef0e5e61f73d3d90))
+* **calendar:** reflect connect and disconnect in the notch and hide built-in client fields ([0d50754](https://github.com/koyhq/koy/commit/0d507543e514ffb4d0eecf7f00d90380dceefb84))
+
 ## [0.2.11](https://github.com/koyhq/koy/compare/v0.2.10...v0.2.11) (2026-11-14)
 
 
