@@ -58,6 +58,9 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
         UpdateTitles();
     }
 
+    /// <summary>Yerel etkinlik defteri (Ana'nın "sıradaki" listesi de bunu okur).</summary>
+    public SharedEvents Events => _events;
+
     public IReadOnlyList<string> WeekdayHeaders { get; }
 
     [ObservableProperty]

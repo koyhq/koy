@@ -298,106 +298,55 @@
       </Button>
     </Grid>
 
-    <!-- Ses ve parlaklık -->
-    <Border Grid.Row="1" Margin="0,8,0,0" CornerRadius="18" Background="{DynamicResource KoyNotchControlCard}" Padding="14,12">
+    <!-- Ses ve parlaklık (D tasarımı): pil göstergesi gibi dolan kalın çubuklar. Simgeye tıklamak sesi kapatır / açar.
+         Parlaklık yolu yoksa çubuk soluk ve kapalı, altında nedeni yazılı. -->
+    <Border Grid.Row="1" Margin="0,10,0,0" CornerRadius="18" Background="{DynamicResource KoyNotchControlCard}" Padding="14">
       <StackPanel VerticalAlignment="Center">
-        <!-- Ses: etikete tıklamak sessize alır / açar -->
-        <Grid Height="30">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="92" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="40" />
-          </Grid.ColumnDefinitions>
-          <Button Command="{Binding ToggleMuteCommand}" Background="Transparent" BorderThickness="0" Cursor="Hand" HorizontalAlignment="Left"
-                  FocusVisualStyle="{x:Null}" ToolTip="{Binding [ControlVolume], Source={x:Static res:Loc.Instance}}" AutomationProperties.Name="{Binding [ControlVolume], Source={x:Static res:Loc.Instance}}">
-            <Button.Template>
-              <ControlTemplate TargetType="Button">
-                <StackPanel Orientation="Horizontal" Background="Transparent">
-                  <Grid Width="14" Height="14" Margin="0,0,8,0">
-                    <Path Stretch="Uniform" Fill="{DynamicResource KoyNotchControlSoft}"
-                          Data="M 3,6 L 6,6 L 11,2 L 11,16 L 6,12 L 3,12 Z M 13,5 A 5,5 0 0 1 13,13 M 15,3 A 8,8 0 0 1 15,15">
-                      <Path.Style>
-                        <Style TargetType="Path">
-                          <Setter Property="Visibility" Value="Visible" />
-                          <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsMuted}" Value="True">
-                              <Setter Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                          </Style.Triggers>
-                        </Style>
-                      </Path.Style>
-                    </Path>
-                    <Path Stretch="Uniform" Fill="#EF4444" Stroke="#EF4444" StrokeThickness="1.2"
-                          Data="M 3,6 L 6,6 L 11,2 L 11,16 L 6,12 L 3,12 Z M 14,7 L 18,11 M 18,7 L 14,11">
-                      <Path.Style>
-                        <Style TargetType="Path">
-                          <Setter Property="Visibility" Value="Collapsed" />
-                          <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsMuted}" Value="True">
-                              <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                          </Style.Triggers>
-                        </Style>
-                      </Path.Style>
-                    </Path>
-                  </Grid>
-                  <TextBlock Text="{Binding [ControlVolume], Source={x:Static res:Loc.Instance}}" Foreground="{DynamicResource KoyNotchControlSoft}" VerticalAlignment="Center" />
-                </StackPanel>
-              </ControlTemplate>
-            </Button.Template>
-          </Button>
-          <Slider x:Name="VolumeSlider" Grid.Column="1" Style="{StaticResource ModernSliderStyle}"
-                  Foreground="{DynamicResource KoyNotchText}"
-                  Minimum="0" Maximum="100"
-                  Value="{Binding VolumePercent, Mode=OneWay}"
-                  ValueChanged="VolumeSlider_ValueChanged"
-                  Margin="6,0" />
-          <TextBlock Grid.Column="2" Text="{Binding VolumePercent, Converter={x:Static res:PercentTextConverter.Instance}}"
-                     FontSize="11" Foreground="{DynamicResource KoyNotchMuted}" VerticalAlignment="Center" HorizontalAlignment="Right" />
-        </Grid>
-
-        <!-- Parlaklık: kaynak belirlendikten sonra görünür; yol yoksa kaydırıcı devre dışı ve nedeni yazılı -->
-        <StackPanel Margin="0,10,0,0" Visibility="{Binding IsBrightnessResolved, Converter={StaticResource BoolToVis}}">
-        <Grid Height="30" IsEnabled="{Binding IsBrightnessSupported}">
-          <Grid.Style>
-            <Style TargetType="Grid">
+        <local:ThickSlider x:Name="VolumeSlider" Height="54" Value="{Binding VolumePercent, Mode=OneWay}"
+                           Label="{Binding [ControlVolume], Source={x:Static res:Loc.Instance}}"
+                           UserValueChanged="VolumeSlider_UserValueChanged" IconClicked="VolumeSlider_IconClicked"
+                           AutomationProperties.Name="{Binding [ControlVolume], Source={x:Static res:Loc.Instance}}">
+          <local:ThickSlider.Style>
+            <Style TargetType="local:ThickSlider">
+              <Setter Property="Icon" Value="{DynamicResource IconVolume}" />
               <Style.Triggers>
-                <Trigger Property="IsEnabled" Value="False">
-                  <Setter Property="Opacity" Value="0.4" />
-                </Trigger>
-              </Style.Triggers>
-            </Style>
-          </Grid.Style>
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="92" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="40" />
-          </Grid.ColumnDefinitions>
-          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-            <res:KoyIcon Data="{DynamicResource IconSun}" Size="14" Foreground="{DynamicResource KoyNotchBrightness}" Margin="0,0,8,0" />
-            <TextBlock Text="{Binding [ControlBrightness], Source={x:Static res:Loc.Instance}}" Foreground="{DynamicResource KoyNotchControlSoft}" VerticalAlignment="Center" />
-          </StackPanel>
-          <Slider x:Name="BrightnessSlider" Grid.Column="1" Style="{StaticResource ModernSliderStyle}"
-                  Foreground="{DynamicResource KoyNotchBrightness}"
-                  Minimum="0" Maximum="100"
-                  Value="{Binding Brightness, Mode=OneWay}"
-                  ValueChanged="BrightnessSlider_ValueChanged"
-                  Margin="6,0" />
-          <TextBlock Grid.Column="2" Text="{Binding Brightness, Converter={x:Static res:PercentTextConverter.Instance}}"
-                     FontSize="11" Foreground="{DynamicResource KoyNotchMuted}" VerticalAlignment="Center" HorizontalAlignment="Right" />
-        </Grid>
-        <TextBlock Text="{Binding [BrightnessUnavailable], Source={x:Static res:Loc.Instance}}" FontSize="11" Foreground="{DynamicResource KoyNotchMuted}" Margin="0,2,0,0" TextWrapping="Wrap">
-          <TextBlock.Style>
-            <Style TargetType="TextBlock">
-              <Setter Property="Visibility" Value="Collapsed" />
-              <Style.Triggers>
-                <DataTrigger Binding="{Binding IsBrightnessSupported}" Value="False">
-                  <Setter Property="Visibility" Value="Visible" />
+                <DataTrigger Binding="{Binding IsMuted}" Value="True">
+                  <Setter Property="Icon" Value="{DynamicResource IconVolumeMuted}" />
+                  <Setter Property="IconBrush" Value="#F87171" />
                 </DataTrigger>
               </Style.Triggers>
             </Style>
-          </TextBlock.Style>
-        </TextBlock>
+          </local:ThickSlider.Style>
+        </local:ThickSlider>
+
+        <StackPanel Margin="0,10,0,0" Visibility="{Binding IsBrightnessResolved, Converter={StaticResource BoolToVis}}">
+          <local:ThickSlider x:Name="BrightnessSlider" Height="54" Value="{Binding Brightness, Mode=OneWay}" Icon="{DynamicResource IconSun}"
+                             Label="{Binding [ControlBrightness], Source={x:Static res:Loc.Instance}}"
+                             IsEnabled="{Binding IsBrightnessSupported}"
+                             UserValueChanged="BrightnessSlider_UserValueChanged"
+                             AutomationProperties.Name="{Binding [ControlBrightness], Source={x:Static res:Loc.Instance}}">
+            <local:ThickSlider.Style>
+              <Style TargetType="local:ThickSlider">
+                <Style.Triggers>
+                  <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.4" />
+                  </Trigger>
+                </Style.Triggers>
+              </Style>
+            </local:ThickSlider.Style>
+          </local:ThickSlider>
+          <TextBlock Text="{Binding [BrightnessUnavailable], Source={x:Static res:Loc.Instance}}" FontSize="11" Foreground="{DynamicResource KoyNotchMuted}" Margin="2,6,0,0" TextWrapping="Wrap">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock">
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsBrightnessSupported}" Value="False">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
         </StackPanel>
       </StackPanel>
     </Border>

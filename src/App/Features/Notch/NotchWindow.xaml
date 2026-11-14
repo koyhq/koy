@@ -52,6 +52,30 @@
         </Setter.Value>
       </Setter>
     </Style>
+    <!-- Üst ortadaki Müzik / Ana anahtarının düğmesi: Tag seçili mi (bool) -->
+    <Style x:Key="NotchSwitchButtonStyle" TargetType="Button">
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+      <Setter Property="Foreground" Value="{DynamicResource KoyNotchDim}" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="Bg" CornerRadius="12" Background="Transparent">
+              <ContentPresenter />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="{DynamicResource KoyNotchText}" />
+              </Trigger>
+              <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource KoyNotchPressed}" />
+                <Setter Property="Foreground" Value="{DynamicResource KoyNotchText}" />
+              </DataTrigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
   </Window.Resources>
 
   <Grid HorizontalAlignment="Center" VerticalAlignment="Top">
@@ -497,8 +521,9 @@
           </Canvas>
         </Grid>
 
-        <!-- 3. Açık çentik (H tasarımı): üstte durum satırı, ortada sabit yükseklikli sayfa, altta ikonlu sekmeler.
-             Kenar payı 24 = kulak yarıçapı (12) + tasarımın iç boşluğu (12). Yükseklik: 10 + 26 + 12 + 236 + 12 + 44 + 12 = 352. -->
+        <!-- 3. Açık çentik (D tasarımı, docs/design/taslak/centik-d.html): tek üst satır ve altında sayfa; alt sekme çubuğu yok.
+             Üst satır: solda saat, hava ve pil; tam ortada Müzik / Ana anahtarı; sağda öbür sekmeler, ince çizgi, bildirim ve iğne.
+             Kenar payı 24 = kulak yarıçapı (12) + iç boşluk (12). Yükseklik: 10 + 30 + 8 + 292 + 12 = 352. -->
         <Grid x:Name="ExpandedView" Margin="24,10,24,12">
           <Grid.Style>
             <Style TargetType="Grid">
@@ -511,7 +536,7 @@
                   </MultiDataTrigger.Conditions>
                   <Setter Property="Visibility" Value="Visible" />
                 </MultiDataTrigger>
-                <!-- Arama açıkken durum satırı, sayfa ve sekmeler yerine arama paneli görünür -->
+                <!-- Arama açıkken üst satır ve sayfa yerine arama paneli görünür -->
                 <DataTrigger Binding="{Binding IsSearchOpen}" Value="True">
                   <Setter Property="Visibility" Value="Collapsed" />
                 </DataTrigger>
@@ -520,28 +545,18 @@
           </Grid.Style>
 
           <Grid.RowDefinitions>
-            <RowDefinition Height="26" />
-            <RowDefinition Height="260" />
-            <RowDefinition Height="44" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="*" />
           </Grid.RowDefinitions>
 
-          <!-- Durum satırı: saat · gün tarih, hava sıcaklığı, pil, Bildirim Merkezi, açık tut -->
-          <Grid Grid.Row="0" Margin="4,0,0,0">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" />
-              <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+          <Grid Grid.Row="0">
+            <!-- Sol: saat, gizlilik noktaları, hava (yer adı ipucunda), pil -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,0,0,0">
+              <TextBlock Text="{Binding Status.CurrentTime}" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource KoyNotchText}"
+                         VerticalAlignment="Center" ToolTip="{Binding Status.DayDate}" />
 
-            <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="12" TextTrimming="CharacterEllipsis">
-              <Run Text="{Binding Status.CurrentTime, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource KoyNotchText}" />
-              <Run Text="{Binding Status.DayDate, Mode=OneWay, StringFormat=' · {0}'}" Foreground="{DynamicResource KoyNotchMuted}" /><Run Text="{Binding Status.SecondClockSuffix, Mode=OneWay}" Foreground="{DynamicResource KoyNotchMuted}" />
-            </TextBlock>
-
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-              <!-- Gizlilik göstergesi (açık çentik durum satırı) -->
-              <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0"
-                          ToolTip="{Binding PrivacyToolTip}"
-                          ToolTipService.InitialShowDelay="150"
+              <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0"
+                          ToolTip="{Binding PrivacyToolTip}" ToolTipService.InitialShowDelay="150"
                           Visibility="{Binding HasPrivacyActivity, Converter={StaticResource BoolToVis}}">
                 <Ellipse Width="6" Height="6" Fill="#22C55E" Margin="2,0"
                          Visibility="{Binding IsCameraActive, Converter={StaticResource BoolToVis}}" />
@@ -549,35 +564,111 @@
                          Visibility="{Binding IsMicrophoneActive, Converter={StaticResource BoolToVis}}" />
               </StackPanel>
 
-              <!-- Hava: konum seçilmişse sıcaklık ve küçük yer adı (tıklayınca yenilenir); seçilmemişse konum seçtirir -->
-              <Button Style="{StaticResource NotchPlainButtonStyle}" Margin="0,0,12,0" VerticalAlignment="Center"
+              <!-- Hava: tıklayınca yenilenir; yer adı ve rüzgâr ipucunda (sol taraf kalabalıklaşmasın) -->
+              <Button Style="{StaticResource NotchPlainButtonStyle}" Margin="10,0,0,0" VerticalAlignment="Center"
                       Command="{Binding Status.RefreshWeatherCommand}"
-                      ToolTip="{Binding Status.WindToolTip}"
                       Visibility="{Binding Home.ShowWeather, Converter={StaticResource BoolToVis}}">
+                <Button.ToolTip>
+                  <TextBlock>
+                    <Run Text="{Binding Status.PlaceName, Mode=OneWay}" />
+                    <Run Text="{Binding Status.WindToolTip, Mode=OneWay}" />
+                  </TextBlock>
+                </Button.ToolTip>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                   <Viewbox Width="15" Height="15" Margin="0,0,5,0" VerticalAlignment="Center">
                     <status:WeatherGlyph DataContext="{Binding Status}" />
                   </Viewbox>
-                  <TextBlock Text="{Binding Status.TemperatureShort}" FontSize="12" Foreground="{DynamicResource KoyNotchText}" VerticalAlignment="Center" />
-                  <TextBlock Text="{Binding Status.PlaceName}" FontSize="10" Foreground="{DynamicResource KoyNotchMuted}" Margin="6,2,0,0"
-                             MaxWidth="96" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                  <TextBlock Text="{Binding Status.TemperatureShort}" FontSize="12.5" Foreground="{DynamicResource KoyNotchText}" VerticalAlignment="Center" />
                 </StackPanel>
               </Button>
-              <Button Style="{StaticResource NotchPlainButtonStyle}" Margin="0,0,12,0" VerticalAlignment="Center"
+              <Button Style="{StaticResource NotchPlainButtonStyle}" Margin="10,0,0,0" VerticalAlignment="Center"
                       Command="{Binding Home.ChooseWeatherLocationCommand}"
                       Visibility="{Binding Home.ShowNoLocation, Converter={StaticResource BoolToVis}}">
                 <TextBlock Text="{Binding [WeatherPickLocation], Source={x:Static res:Loc.Instance}}" FontSize="12" Foreground="{DynamicResource KoyNotchMuted}" />
               </Button>
 
-              <!-- Pil: yalnız pil varsa -->
-              <TextBlock Text="{Binding BatteryPercent, Converter={x:Static res:PercentTextConverter.Instance}}" FontSize="12" FontWeight="SemiBold"
-                         Foreground="{DynamicResource KoyNotchOk}" VerticalAlignment="Center" Margin="0,0,8,0"
-                         Visibility="{Binding HasBattery, Converter={StaticResource BoolToVis}}" />
+              <!-- Pil: yalnız pil varsa; küçük gövde ve yüzde -->
+              <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0"
+                          Visibility="{Binding HasBattery, Converter={StaticResource BoolToVis}}">
+                <Border Width="20" Height="10" BorderThickness="1.5" BorderBrush="{DynamicResource KoyNotchMuted}" CornerRadius="3" Padding="1" VerticalAlignment="Center">
+                  <Border HorizontalAlignment="Left" Width="{Binding BatteryFillWidth}" MaxWidth="14" Background="#4ADE80" CornerRadius="1" />
+                </Border>
+                <TextBlock Text="{Binding BatteryPercent, Converter={x:Static res:PercentTextConverter.Instance}}" FontSize="12"
+                           Foreground="{DynamicResource KoyNotchMuted}" Margin="5,0,0,0" VerticalAlignment="Center" />
+              </StackPanel>
+            </StackPanel>
+
+            <!-- Orta: Müzik / Ana anahtarı, çentiğin tam ortasında. Parça varken notada yeşil nokta. -->
+            <Border HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="14" Padding="2" Background="{DynamicResource KoyNotchChip}">
+              <StackPanel Orientation="Horizontal">
+                <Button Style="{StaticResource NotchSwitchButtonStyle}" Tag="{Binding IsMusicPageSelected}"
+                        Command="{Binding ShowHomePageCommand}" CommandParameter="{x:Static core:NotchHomePage.Music}"
+                        ToolTip="{Binding [NotchPageMusic], Source={x:Static res:Loc.Instance}}"
+                        AutomationProperties.Name="{Binding [NotchPageMusic], Source={x:Static res:Loc.Instance}}">
+                  <Grid Width="40" Height="24">
+                    <res:KoyIcon Data="{DynamicResource IconMusic}" Size="15" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                    <Ellipse Width="5" Height="5" Fill="#4ADE80" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,9,0"
+                             Visibility="{Binding Music.HasTrack, Converter={StaticResource BoolToVis}}" />
+                  </Grid>
+                </Button>
+                <Button Style="{StaticResource NotchSwitchButtonStyle}" Margin="2,0,0,0" Tag="{Binding IsHomePageSelected}"
+                        Command="{Binding ShowHomePageCommand}" CommandParameter="{x:Static core:NotchHomePage.Home}"
+                        ToolTip="{Binding [NotchPageHome], Source={x:Static res:Loc.Instance}}"
+                        AutomationProperties.Name="{Binding [NotchPageHome], Source={x:Static res:Loc.Instance}}">
+                  <Grid Width="40" Height="24">
+                    <res:KoyIcon Data="{DynamicResource IconTabHome}" Size="15" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                  </Grid>
+                </Button>
+              </StackPanel>
+            </Border>
+
+            <!-- Sağ: öbür sekmeler (simge; adı ipucunda, seçiliyken kendi renginde), ince çizgi, bildirim ve açık tut -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+              <ItemsControl ItemsSource="{Binding SideTabs}" Focusable="False" VerticalAlignment="Center"
+                            Visibility="{Binding ShowTabBar, Converter={StaticResource BoolToVis}}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="{x:Type local:NotchTabViewModel}">
+                    <Button Margin="1,0" Width="27" Height="27" Cursor="Hand" FocusVisualStyle="{x:Null}"
+                            Command="{Binding DataContext.SelectTabCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                            CommandParameter="{Binding Panel}"
+                            ToolTip="{Binding Label}" ToolTipService.InitialShowDelay="250"
+                            AutomationProperties.Name="{Binding Label}">
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Border x:Name="Pill" CornerRadius="8" Background="Transparent">
+                            <res:KoyIcon x:Name="Glyph" Data="{Binding Icon}" Size="15" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                         Foreground="{DynamicResource KoyNotchDim}" />
+                          </Border>
+                          <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                              <Setter TargetName="Pill" Property="Background" Value="{DynamicResource KoyNotchHover}" />
+                              <Setter TargetName="Glyph" Property="Foreground" Value="{DynamicResource KoyNotchText}" />
+                            </Trigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                              <Setter TargetName="Pill" Property="Background" Value="{DynamicResource KoyNotchActive}" />
+                              <Setter TargetName="Glyph" Property="Foreground" Value="{Binding Accent}" />
+                            </DataTrigger>
+                          </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                      </Button.Template>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <Border Width="1" Height="16" Margin="6,0" Background="{DynamicResource KoyNotchDivider}" VerticalAlignment="Center" />
 
               <Button Style="{StaticResource NotchStatusButtonStyle}" Command="{Binding Home.OpenNotificationCenterCommand}"
                       ToolTip="{Binding [NotchNotifications], Source={x:Static res:Loc.Instance}}"
                       AutomationProperties.Name="{Binding [NotchNotifications], Source={x:Static res:Loc.Instance}}">
-                <res:KoyIcon Data="{DynamicResource IconBell}" Size="15" Foreground="{DynamicResource KoyNotchTextSecondary}" />
+                <res:KoyIcon Data="{DynamicResource IconBell}" Size="15" Foreground="{DynamicResource KoyNotchDim}" />
               </Button>
               <Button Style="{StaticResource NotchStatusButtonStyle}" Command="{Binding TogglePinnedCommand}"
                       ToolTip="{Binding [NotchPin], Source={x:Static res:Loc.Instance}}"
@@ -585,10 +676,10 @@
                 <res:KoyIcon Data="{DynamicResource IconPin}" Size="15">
                   <res:KoyIcon.Style>
                     <Style TargetType="res:KoyIcon">
-                      <Setter Property="Foreground" Value="{DynamicResource KoyNotchTextSecondary}" />
+                      <Setter Property="Foreground" Value="{DynamicResource KoyNotchDim}" />
                       <Style.Triggers>
                         <DataTrigger Binding="{Binding IsPinned}" Value="True">
-                          <Setter Property="Foreground" Value="{DynamicResource KoyNotchAccentFocus}" />
+                          <Setter Property="Foreground" Value="{DynamicResource KoyNotchAccentControl}" />
                         </DataTrigger>
                       </Style.Triggers>
                     </Style>
@@ -598,8 +689,8 @@
             </StackPanel>
           </Grid>
 
-          <!-- Sayfa: sekme değişiminde yatay kayma ve solma yalnız burada (durum satırı ve sekmeler yerinde kalır) -->
-          <ContentControl x:Name="BodyHost" Grid.Row="1" Margin="0,12,0,12" Foreground="{DynamicResource KoyNotchText}" Content="{Binding CurrentPanelContent}" ClipToBounds="False">
+          <!-- Sayfa: sekme değişiminde yatay kayma ve solma yalnız burada (üst satır yerinde kalır) -->
+          <ContentControl x:Name="BodyHost" Grid.Row="1" Margin="0,8,0,0" Foreground="{DynamicResource KoyNotchText}" Content="{Binding CurrentPanelContent}" ClipToBounds="False">
             <ContentControl.RenderTransform>
               <TranslateTransform x:Name="PanelTranslate" X="0" />
             </ContentControl.RenderTransform>
@@ -627,52 +718,6 @@
               </DataTemplate>
             </ContentControl.Resources>
           </ContentControl>
-
-          <!-- Sekme çubuğu: sekmeler listeden üretilir (NotchTabs); seçili sekme kendi sayfa rengini alır -->
-          <ItemsControl Grid.Row="2" ItemsSource="{Binding Tabs}" Focusable="False"
-                        Visibility="{Binding ShowTabBar, Converter={StaticResource BoolToVis}}">
-            <ItemsControl.ItemsPanel>
-              <ItemsPanelTemplate>
-                <UniformGrid Rows="1" />
-              </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate DataType="{x:Type local:NotchTabViewModel}">
-                <Button Margin="1,0" Height="42" Cursor="Hand"
-                        FocusVisualStyle="{x:Null}"
-                        Command="{Binding DataContext.SelectTabCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                        CommandParameter="{Binding Panel}"
-                        AutomationProperties.Name="{Binding Label}">
-                  <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                      <Border x:Name="Pill" CornerRadius="14" Background="Transparent">
-                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                          <res:KoyIcon x:Name="Glyph" Data="{Binding Icon}" Size="16" HorizontalAlignment="Center"
-                                       Foreground="{DynamicResource KoyNotchDim}" />
-                          <TextBlock x:Name="Label" Text="{Binding Label}" FontSize="10.5" FontWeight="SemiBold" Margin="0,3,0,0"
-                                     HorizontalAlignment="Center" Foreground="{DynamicResource KoyNotchMuted}" />
-                        </StackPanel>
-                      </Border>
-                      <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                          <Setter TargetName="Pill" Property="Background" Value="{DynamicResource KoyNotchHover}" />
-                        </Trigger>
-                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                          <Setter TargetName="Pill" Property="Background" Value="{DynamicResource KoyNotchChip}" />
-                          <Setter TargetName="Label" Property="Foreground" Value="{DynamicResource KoyNotchText}" />
-                          <Setter TargetName="Glyph" Property="Foreground" Value="{Binding Accent}" />
-                        </DataTrigger>
-                        <!-- Sekme çubuğu biçimi "yalnız simge" (issue #78): ad gizlenir, simge dikey ortada kalır -->
-                        <DataTrigger Binding="{Binding DataContext.ShowTabLabels, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="False">
-                          <Setter TargetName="Label" Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                      </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                  </Button.Template>
-                </Button>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
         </Grid>
 
         <!-- 4. Arama: açık çentiğin bütün gövdesini kullanır -->

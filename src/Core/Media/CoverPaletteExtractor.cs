@@ -2,8 +2,13 @@ using Koy.Core.Appearance;
 
 namespace Koy.Core.Media;
 
-/// <summary>Albüm kapağından türetilen müzik kartı renkleri. Spectrum App tarafında alfa 0.75 ile kullanılır.</summary>
-public sealed record CoverPalette(Rgb Card, Rgb SubText, Rgb Spectrum);
+/// <summary>
+/// Albüm kapağından türetilen müzik kartı renkleri. Spectrum App tarafında alfa 0.75 ile kullanılır.
+/// <paramref name="Blend"/> doluysa kapak çok renklidir (ör. kick.com yayınında kapak yerine gelen Chrome logosu):
+/// kart tek bir tona boyanmaz, bu renklerin köşelerden yayılan yumuşak karışımı çizilir; <paramref name="Card"/> o
+/// zaman karışımın altındaki nötr zemindir.
+/// </summary>
+public sealed record CoverPalette(Rgb Card, Rgb SubText, Rgb Spectrum, IReadOnlyList<Rgb>? Blend = null);
 
 /// <summary>
 /// Küçük bir kapak resminden (BGRA, örn. 32 px) vurgu paleti çıkarır. Tek geçiş, yığın üstü kovalar;
@@ -59,6 +64,10 @@ public static class CoverPaletteExtractor
         if (total == 0 || candidates < total * MinCandidateRatio)
             return null;
 
+        var blend = BlendColors(weight, hueSum, satSum);
+        if (blend is not null)
+            return new CoverPalette(BlendBase, BlendSubText, BlendSubText, blend);
+
         var best = 0;
         for (var i = 1; i < HueBuckets; i++)
         {
@@ -82,5 +91,55 @@ public static class CoverPaletteExtractor
 
         var sub = ColorMath.FromHsl(hue, SubTextSaturation, SubTextLightness);
         return new CoverPalette(card, sub, sub);
+    }
+
+    // Çok renkli kapak: en az üç ayrı ton (aralarında en az 30°), her biri renkli piksellerin %15'inden fazlası.
+    // Tek bir baskın ton seçmek burada yanıltıcı (Chrome logosunda sarı kazanıp hardal kart veriyordu).
+    private const double BlendMinShare = 0.15;
+    private const int BlendMinSeparation = 2; // kova = 15°, 2 kova = 30° (Chrome kırmızısı ile sarısı ~40° ayrık)
+    private const int BlendMinColors = 3;
+    private const int BlendMaxColors = 4;
+    private static readonly Rgb BlendBase = new(0x14, 0x14, 0x16);
+    private static readonly Rgb BlendSubText = new(0xC8, 0xC8, 0xCE);
+
+    private static List<Rgb>? BlendColors(ReadOnlySpan<double> weight, ReadOnlySpan<double> hueSum, ReadOnlySpan<double> satSum)
+    {
+        double total = 0;
+        foreach (var w in weight)
+            total += w;
+        if (total <= 0)
+            return null;
+
+        var order = new List<int>();
+        for (var i = 0; i < weight.Length; i++)
+            order.Add(i);
+        var weights = weight.ToArray();
+        order.Sort((a, b) => weights[b].CompareTo(weights[a]));
+
+        var picked = new List<int>();
+        foreach (var i in order)
+        {
+            if (weight[i] / total < BlendMinShare)
+                break;
+
+            var far = picked.TrueForAll(j =>
+            {
+                var d = Math.Abs(i - j);
+                return Math.Min(d, HueBuckets - d) >= BlendMinSeparation;
+            });
+            if (far)
+                picked.Add(i);
+            if (picked.Count == BlendMaxColors)
+                break;
+        }
+
+        if (picked.Count < BlendMinColors)
+            return null;
+
+        // Karışımda renkler canlı kalsın ama yazıyı boğmasın: orta açıklık, yüksek doygunluk (App alfa ~0,35 ile çizer).
+        var colors = new List<Rgb>(picked.Count);
+        foreach (var i in picked)
+            colors.Add(ColorMath.FromHsl(hueSum[i] / weight[i], Math.Clamp(satSum[i] / weight[i], 0.55, 0.85), 0.5));
+        return colors;
     }
 }

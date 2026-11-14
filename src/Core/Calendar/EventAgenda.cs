@@ -38,6 +38,28 @@ public static class EventAgenda
             .FirstOrDefault();
     }
 
+    /// <summary>
+    /// Ana sayfanın "sıradaki" listesi: şu an süren ya da önümüzdeki <paramref name="days"/> gün içinde başlayacak
+    /// etkinlikler, başlangıca göre, en çok <paramref name="count"/> tane. Bitmiş etkinlikler sayılmaz; süresiz (an)
+    /// etkinlik başlangıcı geçince düşer.
+    /// </summary>
+    public static IReadOnlyList<CalendarEvent> Upcoming(IEnumerable<CalendarEvent> events, DateTime now, int count, int days = 14)
+    {
+        if (count <= 0)
+            return [];
+
+        var horizon = now.Date.AddDays(Math.Max(1, days));
+        return events
+            .Where(e => (e.DurationMinutes == 0 ? e.Start >= now : e.End > now) && e.Start < horizon)
+            .OrderBy(e => e.Start)
+            .ThenBy(e => e.Title, StringComparer.CurrentCultureIgnoreCase)
+            .Take(count)
+            .ToList();
+    }
+
+    /// <summary>Etkinliğe kalan süre (başlamışsa sıfır); "10 sa 13 dk sonra" metni App'te kurulur.</summary>
+    public static TimeSpan Until(CalendarEvent e, DateTime now) => e.Start > now ? e.Start - now : TimeSpan.Zero;
+
     /// <summary>Başlığı kırpar ve uzunluğu sınırlar; boşsa null (etkinlik eklenemez).</summary>
     public static string? NormalizeTitle(string? title)
     {

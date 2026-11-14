@@ -5,6 +5,7 @@
         `defs` dizisi ve durum satırı) alındı; 24x24 tuvalde çizgi simgesidir (KoyIcon). Icons.xaml üreteçle yazıldığı
         için elle eklenenler ayrı dosyada tutulur.
     -->
+    <Geometry x:Key="IconMusic">M9 18V5l12-2v13M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 19a3 3 0 1 0 0-6 3 3 0 0 0 0 6z</Geometry>
     <Geometry x:Key="IconTabHome">M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z</Geometry>
     <Geometry x:Key="IconTabFocus">M12 8v5l3 2M9 2h6M12 22a9 9 0 1 0 0-18 9 9 0 0 0 0 18z</Geometry>
     <Geometry x:Key="IconTabCalendar">M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z</Geometry>

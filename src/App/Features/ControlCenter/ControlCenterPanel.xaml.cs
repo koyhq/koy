@@ -223,19 +223,10 @@ public partial class ControlCenterPanel : UserControl
             StopAnimation();
     }
 
-    private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-        if (VolumeSlider.IsMouseCaptureWithin || VolumeSlider.IsFocused)
-        {
-            ViewModel?.OnVolumeSliderChanged(e.NewValue);
-        }
-    }
+    // Kalın çubuklar yalnız kullanıcı değiştirince olay verir; bağlamadan gelen değer servise geri yazılmaz.
+    private void VolumeSlider_UserValueChanged(object? sender, double value) => ViewModel?.OnVolumeSliderChanged(value);
 
-    private void BrightnessSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-        if (BrightnessSlider.IsMouseCaptureWithin || BrightnessSlider.IsFocused)
-        {
-            ViewModel?.OnBrightnessSliderChanged(e.NewValue);
-        }
-    }
+    private void VolumeSlider_IconClicked(object? sender, EventArgs e) => ViewModel?.ToggleMuteCommand.Execute(null);
+
+    private void BrightnessSlider_UserValueChanged(object? sender, double value) => ViewModel?.OnBrightnessSliderChanged(value);
 }

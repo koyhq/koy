@@ -3768,5 +3768,41 @@
   <data name="ExtInstallErrorIoError" xml:space="preserve">
     <value>A file could not be written. Check disk space and folder permissions.</value>
   </data>
+  <data name="HomeToday" xml:space="preserve">
+    <value>Today</value>
+  </data>
+  <data name="HomeTomorrow" xml:space="preserve">
+    <value>Tomorrow</value>
+  </data>
+  <data name="HomeEventNow" xml:space="preserve">
+    <value>now</value>
+  </data>
+  <data name="HomeEventInMinutes" xml:space="preserve">
+    <value>in {0} min</value>
+  </data>
+  <data name="HomeEventInHours" xml:space="preserve">
+    <value>in {0} h {1} min</value>
+  </data>
+  <data name="HomeEventInDays" xml:space="preserve">
+    <value>in {0} days</value>
+  </data>
+  <data name="HomeNextUp" xml:space="preserve">
+    <value>UP NEXT</value>
+  </data>
+  <data name="HomeNoEvents" xml:space="preserve">
+    <value>No upcoming events.</value>
+  </data>
+  <data name="HomeFocusStart" xml:space="preserve">
+    <value>Start focus</value>
+  </data>
+  <data name="MusicLive" xml:space="preserve">
+    <value>LIVE</value>
+  </data>
+  <data name="NotchPageMusic" xml:space="preserve">
+    <value>Music</value>
+  </data>
+  <data name="NotchPageHome" xml:space="preserve">
+    <value>Home</value>
+  </data>
 </root>
 

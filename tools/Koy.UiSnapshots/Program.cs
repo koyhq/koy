@@ -472,7 +472,7 @@ public static class Program
         System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Background);
         ShotNotch(set, name("ana-muzik"), expanded: true);
         // Müzik kartına tıklanınca: büyük kart Ana gövdesini kaplar.
-        set.Vm.Home.ToggleMusicExpandedCommand.Execute(null);
+        set.Vm.ShowHomePageCommand.Execute(Koy.Core.Notch.NotchHomePage.Home);
         ShotNotch(set, name("ana-muzik-buyuk"), expanded: true);
         set.Vm.Dispose();
 
@@ -484,7 +484,7 @@ public static class Program
             set.Vm.Music.SetCardStyle(style);
             Flush();
             ShotNotch(set, name("ana-muzik-" + style.ToString().ToLowerInvariant()), expanded: true);
-            set.Vm.Home.ToggleMusicExpandedCommand.Execute(null);
+            set.Vm.ShowHomePageCommand.Execute(Koy.Core.Notch.NotchHomePage.Home);
             ShotNotch(set, name("ana-muzik-" + style.ToString().ToLowerInvariant() + "-buyuk"), expanded: true);
             set.Vm.Dispose();
         }
@@ -493,7 +493,7 @@ public static class Program
         set = MakeNotch(music: true, wideCover: true);
         set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
         ShotNotch(set, name("ana-muzik-video"), expanded: true);
-        set.Vm.Home.ToggleMusicExpandedCommand.Execute(null);
+        set.Vm.ShowHomePageCommand.Execute(Koy.Core.Notch.NotchHomePage.Home);
         ShotNotch(set, name("ana-muzik-video-buyuk"), expanded: true);
         set.Vm.Dispose();
 

@@ -127,4 +127,35 @@ public class CoverPaletteExtractorTests
         Assert.NotNull(p);
         Assert.InRange(Hue(p!.Card), 115, 125);
     }
+
+    [Fact]
+    public void Many_coloured_logo_gives_a_blend_instead_of_one_tint()
+    {
+        // Chrome logosu gibi: dört çeyrek kırmızı, sarı, yeşil, mavi.
+        var data = Image(32, 32, (x, y) => (x < 16, y < 16) switch
+        {
+            (true, true) => ((byte)234, (byte)67, (byte)53),
+            (false, true) => ((byte)251, (byte)188, (byte)5),
+            (true, false) => ((byte)52, (byte)168, (byte)83),
+            _ => ((byte)66, (byte)133, (byte)244),
+        });
+
+        var palette = CoverPaletteExtractor.Extract(data, 32, 32, 32 * 4);
+
+        Assert.NotNull(palette);
+        Assert.NotNull(palette!.Blend);
+        Assert.Equal(4, palette.Blend!.Count);
+        Assert.True(ColorMath.Contrast(new Rgb(0xF4, 0xF4, 0xF5), palette.Card) >= 7);
+    }
+
+    [Fact]
+    public void Two_colour_cover_keeps_a_single_tint()
+    {
+        var data = Image(32, 32, (x, _) => x < 16 ? ((byte)124, (byte)58, (byte)237) : ((byte)219, (byte)39, (byte)119));
+
+        var palette = CoverPaletteExtractor.Extract(data, 32, 32, 32 * 4);
+
+        Assert.NotNull(palette);
+        Assert.Null(palette!.Blend);
+    }
 }

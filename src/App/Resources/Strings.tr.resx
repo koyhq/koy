@@ -3768,5 +3768,41 @@
   <data name="ExtInstallErrorIoError" xml:space="preserve">
     <value>Bir dosya yazılamadı. Disk alanını ve klasör izinlerini denetle.</value>
   </data>
+  <data name="HomeToday" xml:space="preserve">
+    <value>Bugün</value>
+  </data>
+  <data name="HomeTomorrow" xml:space="preserve">
+    <value>Yarın</value>
+  </data>
+  <data name="HomeEventNow" xml:space="preserve">
+    <value>şimdi</value>
+  </data>
+  <data name="HomeEventInMinutes" xml:space="preserve">
+    <value>{0} dk sonra</value>
+  </data>
+  <data name="HomeEventInHours" xml:space="preserve">
+    <value>{0} sa {1} dk sonra</value>
+  </data>
+  <data name="HomeEventInDays" xml:space="preserve">
+    <value>{0} gün sonra</value>
+  </data>
+  <data name="HomeNextUp" xml:space="preserve">
+    <value>SIRADAKİ</value>
+  </data>
+  <data name="HomeNoEvents" xml:space="preserve">
+    <value>Yaklaşan etkinlik yok.</value>
+  </data>
+  <data name="HomeFocusStart" xml:space="preserve">
+    <value>Odak başlat</value>
+  </data>
+  <data name="MusicLive" xml:space="preserve">
+    <value>CANLI</value>
+  </data>
+  <data name="NotchPageMusic" xml:space="preserve">
+    <value>Müzik</value>
+  </data>
+  <data name="NotchPageHome" xml:space="preserve">
+    <value>Ana</value>
+  </data>
 </root>
 

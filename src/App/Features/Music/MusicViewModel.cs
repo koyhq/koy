@@ -1,4 +1,5 @@
 using System.IO;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -24,6 +25,7 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     private bool _disposed;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLive))]
     private bool _hasTrack;
 
     [ObservableProperty]
@@ -52,7 +54,14 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     private TimeSpan _position = TimeSpan.Zero;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLive))]
     private TimeSpan _duration = TimeSpan.Zero;
+
+    /// <summary>
+    /// Süresi olmayan oynatım (kick.com, Twitch, radyo yayını): ilerleme çubuğu ve "0:00 / 0:00" yerine CANLI rozeti
+    /// gösterilir, ileri / geri soluk kalır.
+    /// </summary>
+    public bool IsLive => HasTrack && Duration <= TimeSpan.Zero;
 
     [ObservableProperty]
     private double _progress;
@@ -176,7 +185,7 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
 
         _cardAlpha = alpha;
         if (_palette is not null)
-            CardBrush = Solid(_palette.Card, _cardAlpha);
+            CardBrush = CardFill(_palette, _cardAlpha);
     }
 
     private void ApplyPalette(CoverPalette? palette, BitmapSource? small)
@@ -190,7 +199,11 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
             return;
         }
 
-        CardBrush = Solid(palette.Card, _cardAlpha);
+        // Çok renkli kapak çoğunlukla uygulama simgesidir (kapaksız yayın): büyütülmüş simge zemini yerine renk karışımı.
+        if (palette.Blend is not null)
+            small = null;
+
+        CardBrush = CardFill(palette, _cardAlpha);
         SubTextBrush = Solid(palette.SubText, 255);
         SpectrumBrush = VisualizerColorSource == NotchVisualizerColorSource.Artwork
             ? Solid(palette.Spectrum, 0xBF)
@@ -209,6 +222,37 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
 
         HasBackdrop = small is not null;
         HasTint = true;
+    }
+
+    // Çok renkli kapakta (Chrome logosu gibi) kart tek tona boyanmaz: nötr zemin üstünde her renk bir köşeden yumuşakça
+    // yayılır (D tasarımı, "renk karışımı"). Fırça bir kez kurulur ve dondurulur; animasyon yok.
+    private static readonly Point[] BlendSpots = [new(0.12, 0.18), new(0.88, 0.12), new(0.18, 0.92), new(0.86, 0.88)];
+
+    private static Brush CardFill(CoverPalette palette, byte alpha)
+    {
+        if (palette.Blend is not { Count: > 0 } colors)
+            return Solid(palette.Card, alpha);
+
+        var area = new RectangleGeometry(new Rect(0, 0, 1, 1));
+        var group = new DrawingGroup();
+        group.Children.Add(new GeometryDrawing(Solid(palette.Card, alpha), null, area));
+        for (var i = 0; i < colors.Count && i < BlendSpots.Length; i++)
+        {
+            var c = colors[i];
+            var glow = new RadialGradientBrush(Color.FromArgb((byte)(0x59 * alpha / 255), c.R, c.G, c.B), Color.FromArgb(0, c.R, c.G, c.B))
+            {
+                Center = BlendSpots[i],
+                GradientOrigin = BlendSpots[i],
+                RadiusX = 0.7,
+                RadiusY = 0.8,
+            };
+            glow.Freeze();
+            group.Children.Add(new GeometryDrawing(glow, null, area));
+        }
+
+        var brush = new DrawingBrush(group) { Stretch = Stretch.Fill };
+        brush.Freeze();
+        return brush;
     }
 
     private static SolidColorBrush Solid(Koy.Core.Appearance.Rgb c, byte alpha)
