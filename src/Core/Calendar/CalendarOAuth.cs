@@ -35,7 +35,7 @@ public sealed record OAuthCallbackResult(bool Success, string? Code = null, stri
 /// </summary>
 public static class CalendarOAuthConfig
 {
-    public const string GoogleScope = "https://www.googleapis.com/auth/calendar.readonly";
+    public const string GoogleScope = "https://www.googleapis.com/auth/calendar.events.readonly";
     public const string OutlookScope = "Calendars.Read offline_access";
 
     public const string GoogleClientIdEnvVar = "KOY_GOOGLE_CLIENT_ID";
