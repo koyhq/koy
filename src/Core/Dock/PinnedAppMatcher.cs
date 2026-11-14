@@ -31,11 +31,14 @@ public static class PinnedAppMatcher
                 return true;
         }
 
-        // 3. Başlık / kısayol adı (son çare)
-        var shortcutName = Path.GetFileNameWithoutExtension(pin.ShortcutPath);
-        if (!string.IsNullOrEmpty(shortcutName) && !string.IsNullOrEmpty(win.Title) &&
-            win.Title.Contains(shortcutName, StringComparison.OrdinalIgnoreCase))
-            return true;
+        // 3. Başlık / kısayol adı (son çare; shell:AppsFolder\<AUMID> yolundaki noktalar paket adını kesmesin diye atlanır)
+        if (!TaskbandPackagedPins.IsAppsFolderPath(pin.ShortcutPath))
+        {
+            var shortcutName = Path.GetFileNameWithoutExtension(pin.ShortcutPath);
+            if (!string.IsNullOrEmpty(shortcutName) && !string.IsNullOrEmpty(win.Title) &&
+                win.Title.Contains(shortcutName, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
 
         return !string.IsNullOrEmpty(pin.Title) && !string.IsNullOrEmpty(win.Title) &&
                win.Title.Contains(pin.Title, StringComparison.OrdinalIgnoreCase);
