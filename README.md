@@ -114,7 +114,7 @@ To be honest about the current state, the following do not exist yet or have not
 - **Dock folders:** Shipped in 0.2.0; manual testing is ongoing.
 - **UWP pins from Windows** (such as Spotify and WhatsApp) are not shown on the dock yet.
 - **Multi-monitor:** Not manually tested on mixed-DPI hardware or with the secondary taskbar AppBar.
-- **Not available yet:** Code signing (SmartScreen warning). Open work is tracked in [GitHub issues](https://github.com/koyhq/koy/issues).
+- **Signing:** Release signing support is wired into the pipeline and `scripts/pack.ps1`; public releases remain unsigned until a certificate or SignPath setup is configured in repository secrets. Open work is tracked in [GitHub issues](https://github.com/koyhq/koy/issues).
 - **Not verified:** Animation smoothness, how the translucent material looks on real devices, live update when the system theme changes, an end-to-end run of the in-app uninstall flow on a real installation.
 
 ---
@@ -132,13 +132,13 @@ To be honest about the current state, the following do not exist yet or have not
 
 ### Signing, SmartScreen and Updates
 
-Koy's installer and updates are **not code-signed yet**. Therefore:
+The release workflow and `scripts/pack.ps1` support optional Authenticode code signing (`SIGNING_CERT_BASE64` / `SIGNING_CERT_PASSWORD` repository secrets, or SignPath / Trusted Signing). Until a signing certificate is configured in the repository secrets (and builds SmartScreen reputation), public releases may still trigger a SmartScreen prompt:
 
 - **SmartScreen warning:** On first run Windows may say "Windows protected your PC". If you downloaded the file only from the [GitHub Releases](https://github.com/koyhq/koy/releases) page, you can continue with **"More info" → "Run anyway"**. Do not run a Koy file that came from another site, a mirror or a shared link.
 - **What `SHA256SUMS.txt` proves:** That the download arrived intact and complete. Because it sits on the same release page as the file, it does not prove who published the file; that assurance comes from the GitHub repository itself.
 - **Automatic updates:** Installed Koy only downloads releases from this repository's GitHub Releases page over HTTPS. Velopack compares each package with the SHA hash in the release feed; a package that does not match is not installed. Updates are applied when Koy closes. If you prefer, you can turn off automatic checks in Settings → General.
 - **Release pipeline:** Releases are built only on GitHub Actions, after tests pass. Actions in use are pinned to commit hashes; force-pushing to `main`, deleting the branch, and moving or deleting published `v*` tags are blocked by repository rules.
-- **Plan:** Free code signing for open source projects (SignPath Foundation) will be evaluated. Once signing arrives, the SmartScreen warning will fade over time and updates will be verified by signature as well.
+- **Signing configuration:** Maintainers can enable automatic signing of `Koy.exe`, `Koy.Watchdog.exe`, and `Koy-win-Setup.exe` by setting `SIGNING_CERT_BASE64` and `SIGNING_CERT_PASSWORD` in GitHub Actions secrets (or by plugging in SignPath Foundation / Azure Trusted Signing). Details are in [`CONTRIBUTING.md`](CONTRIBUTING.md#7-how-releases-work).
 
 ### Building from Source
 
