@@ -159,8 +159,7 @@ internal static unsafe class BluetoothAudioKs
                 return false;
 
             var controlIid = IidKsControl;
-            void* controlPtr = null;
-            part.Activate((uint)CLSCTX.CLSCTX_ALL, &controlIid, &controlPtr);
+            part.Activate((uint)CLSCTX.CLSCTX_ALL, &controlIid, out var controlPtr);
             if (controlPtr is null)
                 return false;
 

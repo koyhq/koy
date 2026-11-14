@@ -51,12 +51,20 @@ public sealed class InstalledAppsService : IInstalledAppsService
         object? enumeratorObject = null;
         try
         {
-            PInvoke.SHCreateItemFromParsingName(AppsFolder, null, typeof(IShellItem).GUID, out folderObject).ThrowOnFailure();
-            var folder = (IShellItem)folderObject;
+            var shellItemIid = typeof(IShellItem).GUID;
+            fixed (char* pAppsFolder = AppsFolder)
+                PInvoke.SHCreateItemFromParsingName(new PCWSTR(pAppsFolder), null, &shellItemIid, out folderObject).ThrowOnFailure();
+            if (folderObject is not IShellItem folder)
+                return apps;
 
             var handler = PInvoke.BHID_EnumItems;
             var enumeratorId = typeof(IEnumShellItems).GUID;
-            folder.BindToHandler(null, &handler, &enumeratorId, out enumeratorObject);
+            folder.BindToHandler(null, &handler, &enumeratorId, out var enumeratorPtr);
+            if (enumeratorPtr is null)
+                return apps;
+
+            enumeratorObject = Marshal.GetObjectForIUnknown((nint)enumeratorPtr);
+            Marshal.Release((nint)enumeratorPtr);
             var enumerator = (IEnumShellItems)enumeratorObject;
 
             var item = new IShellItem[1];

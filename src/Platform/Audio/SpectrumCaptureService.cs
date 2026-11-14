@@ -176,9 +176,13 @@ public sealed class SpectrumCaptureService : IDisposable
         }
 
         var captureIid = typeof(IAudioCaptureClient).GUID;
-        client.GetService(&captureIid, out var captureObj);
-        capture = captureObj as IAudioCaptureClient;
-        return capture is not null;
+        client.GetService(&captureIid, out var capturePtr);
+        if (capturePtr is null)
+            return false;
+
+        capture = (IAudioCaptureClient)Marshal.GetObjectForIUnknown((nint)capturePtr);
+        Marshal.Release((nint)capturePtr);
+        return true;
     }
 
     private static unsafe bool TryReadFormat(WAVEFORMATEX* mix, out SampleFormat format)

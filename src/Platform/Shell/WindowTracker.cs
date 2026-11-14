@@ -178,31 +178,31 @@ public sealed class WindowTracker : IWindowTracker
         }
         _shellHookWindows.Clear();
 
-        if (_foregroundHook.Value != 0)
+        if (!_foregroundHook.IsNull)
         {
             PInvoke.UnhookWinEvent(_foregroundHook);
             _foregroundHook = default;
         }
 
-        if (_locationHook.Value != 0)
+        if (!_locationHook.IsNull)
         {
             PInvoke.UnhookWinEvent(_locationHook);
             _locationHook = default;
         }
 
-        if (_lifecycleHook.Value != 0)
+        if (!_lifecycleHook.IsNull)
         {
             PInvoke.UnhookWinEvent(_lifecycleHook);
             _lifecycleHook = default;
         }
 
-        if (_uncloakHook.Value != 0)
+        if (!_uncloakHook.IsNull)
         {
             PInvoke.UnhookWinEvent(_uncloakHook);
             _uncloakHook = default;
         }
 
-        if (_nameHook.Value != 0)
+        if (!_nameHook.IsNull)
         {
             PInvoke.UnhookWinEvent(_nameHook);
             _nameHook = default;
@@ -236,7 +236,8 @@ public sealed class WindowTracker : IWindowTracker
             if (hwnd.IsNull)
                 return true;
 
-            seenHandles.Add(hwnd.Value);
+            var handle = (nint)hwnd.Value;
+            seenHandles.Add(handle);
 
             // Görev çubuğu kuralı Core'da (TaskbarWindowRule): APPWINDOW her zaman girer; aksi halde sahipsiz ve
             // araç/etkinleşmeyen pencere olmamalı. Gizlenmiş (cloaked) pencereler ekranda yok.
@@ -282,7 +283,7 @@ public sealed class WindowTracker : IWindowTracker
 
             var iconData = !string.IsNullOrEmpty(procPath) ? IconHelper.GetIconBytes(procPath) : null;
             var bounds = new WindowRect(wr.left, wr.top, wr.right, wr.bottom);
-            windows.Add(new OpenWindowInfo(hwnd.Value, title, procPath, (int)pid, bounds, iconData, aumid, GetClassNameString(hwnd)));
+            windows.Add(new OpenWindowInfo(handle, title, procPath, (int)pid, bounds, iconData, aumid, GetClassNameString(hwnd)));
 
             return true;
         }, 0);
@@ -377,10 +378,13 @@ public sealed class WindowTracker : IWindowTracker
         if (pid == (uint)Environment.ProcessId)
             return;
 
+        nint handle;
+        unsafe { handle = (nint)hwnd.Value; }
+
         if (@event == PInvoke.EVENT_OBJECT_DESTROY && idObject == 0 && idChild == 0)
         {
             lock (_aumidGate)
-                _aumidCache.Remove(hwnd.Value);
+                _aumidCache.Remove(handle);
         }
 
         // Yaşam döngüsü olayları (pencere açılma / kapanma)
@@ -410,7 +414,7 @@ public sealed class WindowTracker : IWindowTracker
             // Dock'ta zaten olan pencerenin başlığı (tarayıcı sekmesi, akan sohbet, çalan şarkı) saniyede birkaç kez
             // değişebilir; her seferinde tam yenileme (kısayol çözme, pencere taraması) boşta CPU yakıyordu. Yalnız
             // listede olmayan pencere (başlığı sonradan konup görünür olan) yenileme ister.
-            if (idObject == 0 && idChild == 0 && !IsKnownWindow(hwnd.Value) && IsTopLevelTaskbarWindow(hwnd))
+            if (idObject == 0 && idChild == 0 && !IsKnownWindow(handle) && IsTopLevelTaskbarWindow(hwnd))
                 _nameChangeDebouncer?.Request();
             return;
         }
@@ -422,7 +426,7 @@ public sealed class WindowTracker : IWindowTracker
                 return;
 
             // Yalnızca mevcut ön plan penceresi hareket ettiyse güncelle (arka plan pencerelerinin gürültüsünü filtrele)
-            if (CurrentForeground is not null && hwnd.Value != CurrentForeground.Handle)
+            if (CurrentForeground is not null && handle != CurrentForeground.Handle)
                 return;
         }
 
@@ -448,7 +452,10 @@ public sealed class WindowTracker : IWindowTracker
             bounds = new WindowRect(wr.left, wr.top, wr.right, wr.bottom);
         }
 
-        var info = new WindowInfo(hwnd.Value, bounds);
+        nint handle;
+        unsafe { handle = (nint)hwnd.Value; }
+
+        var info = new WindowInfo(handle, bounds);
         if (Equals(CurrentForeground, info))
             return;
 
@@ -468,11 +475,8 @@ public sealed class WindowTracker : IWindowTracker
 
         Span<char> buffer = stackalloc char[1024];
         var size = (uint)buffer.Length;
-        fixed (char* pBuffer = buffer)
-        {
-            if (!PInvoke.QueryFullProcessImageName(process, PROCESS_NAME_FORMAT.PROCESS_NAME_WIN32, pBuffer, ref size))
-                return null;
-        }
+        if (!PInvoke.QueryFullProcessImageName(process, PROCESS_NAME_FORMAT.PROCESS_NAME_WIN32, buffer, ref size))
+            return null;
 
         return buffer[..(int)size].ToString();
     }
@@ -541,9 +545,12 @@ public sealed class WindowTracker : IWindowTracker
 
     private string? GetAppUserModelId(HWND hwnd, uint pid)
     {
+        nint handle;
+        unsafe { handle = (nint)hwnd.Value; }
+
         lock (_aumidGate)
         {
-            if (_aumidCache.TryGetValue(hwnd.Value, out var cached) &&
+            if (_aumidCache.TryGetValue(handle, out var cached) &&
                 (cached.Value is not null || DateTime.UtcNow - cached.ReadUtc < EmptyAumidRetry))
                 return cached.Value;
         }
@@ -551,7 +558,7 @@ public sealed class WindowTracker : IWindowTracker
         // Paketli uygulamalar (Spotify, Claude…) pencereye değil pakete AUMID verir: süreçten oku.
         var value = AppUserModelIdReader.ForWindow(hwnd) ?? AppUserModelIdReader.ForProcess(pid);
         lock (_aumidGate)
-            _aumidCache[hwnd.Value] = (value, DateTime.UtcNow);
+            _aumidCache[handle] = (value, DateTime.UtcNow);
         return value;
     }
 

@@ -81,9 +81,16 @@ public static class IconHelper
     {
         try
         {
-            PInvoke.SHCreateItemFromParsingName(path, null, typeof(IShellItemImageFactory).GUID, out var obj).ThrowOnFailure();
+            var iid = typeof(IShellItemImageFactory).GUID;
+            object obj;
+            fixed (char* pPath = path)
+                PInvoke.SHCreateItemFromParsingName(new PCWSTR(pPath), null, &iid, out obj).ThrowOnFailure();
             if (obj is not IShellItemImageFactory factory)
+            {
+                if (obj is not null && Marshal.IsComObject(obj))
+                    Marshal.ReleaseComObject(obj);
                 return null;
+            }
 
             try
             {
@@ -257,9 +264,9 @@ public static class IconHelper
 
     private sealed class IconSafeHandle : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
     {
-        public IconSafeHandle(HICON hIcon) : base(ownsHandle: false)
+        public unsafe IconSafeHandle(HICON hIcon) : base(ownsHandle: false)
         {
-            SetHandle(hIcon.Value);
+            SetHandle((nint)hIcon.Value);
         }
 
         protected override bool ReleaseHandle() => true;
@@ -267,9 +274,9 @@ public static class IconHelper
 
     private sealed class BitmapSafeHandle : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
     {
-        public BitmapSafeHandle(HBITMAP hBmp) : base(ownsHandle: false)
+        public unsafe BitmapSafeHandle(HBITMAP hBmp) : base(ownsHandle: false)
         {
-            SetHandle(hBmp.Value);
+            SetHandle((nint)hBmp.Value);
         }
 
         protected override bool ReleaseHandle() => true;

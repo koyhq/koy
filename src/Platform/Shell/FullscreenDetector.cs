@@ -40,7 +40,8 @@ public sealed class FullscreenDetector : IFullscreenDetector
         // EnumWindows üstten alta (z sırası) gezer; hedef monitördeki ilk gerçek pencere karar verir.
         PInvoke.EnumWindows((hwnd, _) =>
         {
-            if (!PInvoke.IsWindowVisible(hwnd) || PInvoke.IsIconic(hwnd) || IgnoredHandles.Contains(hwnd.Value) || hwnd.Value == NotchHandle)
+            var handle = (nint)hwnd.Value;
+            if (!PInvoke.IsWindowVisible(hwnd) || PInvoke.IsIconic(hwnd) || IgnoredHandles.Contains(handle) || handle == NotchHandle)
                 return true;
 
             uint pid = 0;
@@ -74,7 +75,7 @@ public sealed class FullscreenDetector : IFullscreenDetector
                 return true;
 
             var mon = PInvoke.MonitorFromWindow(hwnd, MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST);
-            if (mon.Value != monitorHandle)
+            if ((nint)mon.Value != monitorHandle)
                 return true;
 
             var mi = new MONITORINFO { cbSize = (uint)sizeof(MONITORINFO) };
@@ -101,8 +102,12 @@ public sealed class FullscreenDetector : IFullscreenDetector
         if (fg.IsNull || fg == PInvoke.GetDesktopWindow() || fg == PInvoke.GetShellWindow())
             return false;
 
-        if ((NotchHandle != 0 && fg.Value == NotchHandle) || IgnoredHandles.Contains(fg.Value))
-            return false;
+        unsafe
+        {
+            var fgHandle = (nint)fg.Value;
+            if ((NotchHandle != 0 && fgHandle == NotchHandle) || IgnoredHandles.Contains(fgHandle))
+                return false;
+        }
 
         // Masaüstü pencerelerini (Progman, WorkerW) veya görev çubuklarını (birincil / ikincil) yoksay
         unsafe
@@ -130,13 +135,16 @@ public sealed class FullscreenDetector : IFullscreenDetector
             return false;
 
         var fgMon = PInvoke.MonitorFromWindow(fg, MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST);
-        if (fgMon.Value == 0)
+        if (fgMon.IsNull)
             return false;
 
         // Belirli bir monitör sorgulanıyorsa ve ön plan penceresi başka bir monitördeyse
         // bu ekran için tam ekran sayılmaz (AGENTS.md / M6.2: Yan ekrandaki tam ekran burayı gizlemez).
-        if (targetMonitorHandle != 0 && fgMon.Value != targetMonitorHandle)
-            return false;
+        unsafe
+        {
+            if (targetMonitorHandle != 0 && (nint)fgMon.Value != targetMonitorHandle)
+                return false;
+        }
 
         // Üç işaret birleşir (FullscreenRule): Windows'un tam ekran bildirimi (özel kip D3D, sunum modu kesin; QUNS_BUSY
         // tek başına güvenilmez, Sessiz saatlerde de dönebilir, bu yüzden geometriyle birlikte okunur), başlık
@@ -165,7 +173,7 @@ public sealed class FullscreenDetector : IFullscreenDetector
         }
     }
 
-    internal static bool IsScreenClippingHost(HWND hwnd) => IsScreenClippingHost((nint)hwnd.Value);
+    internal static unsafe bool IsScreenClippingHost(HWND hwnd) => IsScreenClippingHost((nint)hwnd.Value);
 
     public static unsafe bool IsScreenClippingHost(nint handle)
     {
