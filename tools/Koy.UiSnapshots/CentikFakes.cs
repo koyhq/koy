@@ -66,7 +66,8 @@ internal sealed class FakePower(int percent = 86, bool charging = false, bool ha
 
 internal sealed class FakeWeather : IWeatherService
 {
-    public WeatherInfo? CurrentWeather { get; } = new(14, 2, "Parçalı bulutlu", "PartlyCloudy", DateTimeOffset.Now);
+    public WeatherInfo? CurrentWeather { get; } = new(14, 2,
+        System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "Partly cloudy" : "Parçalı bulutlu", "PartlyCloudy", DateTimeOffset.Now);
     public event EventHandler<WeatherInfo?>? WeatherChanged { add { } remove { } }
     public Task<WeatherInfo?> GetCurrentWeatherAsync(double latitude, double longitude, CancellationToken cancellationToken = default) =>
         Task.FromResult(CurrentWeather);

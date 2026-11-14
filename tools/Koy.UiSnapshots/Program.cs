@@ -20,6 +20,7 @@ namespace Koy.UiSnapshots;
 /// <c>--scene uninstall</c>: yalnız Hakkında sayfası ve kaldırma onay görünümü (kaldırıcı hiçbir zaman çalıştırılmaz).
 /// <c>--scene sitedock</c>: tanıtım sitesi için, görev çubuğuna sabitlenmiş gerçek uygulamalarla kapsül dock.
 /// <c>--user-theme &lt;yol&gt;</c>: o user-theme.json dosyasını (ör. store/ tema paketinin theme.json'ı) uygulayarak çizer; %AppData% dosyasına dokunulmaz.
+/// <c>--lang en|tr</c>: arayüz dili (çentik sahneleri; verilmezse makinenin dili). İngilizce README ve site görüntüleri için.
 /// <c>--transparent</c>: gri zemin çizilmez (siteye doğrudan konacak görüntüler). <c>--scale 2</c>: çözünürlük çarpanı (varsayılan 1,5).
 /// </summary>
 public static class Program
@@ -41,6 +42,9 @@ public static class Program
     /// <summary>Çizimin arkasındaki zemin; saydam yüzeyler bunu gösterir.</summary>
     private static Color Backdrop = Color.FromRgb(0x7A, 0x80, 0x8C);
 
+    /// <summary>--lang ile verilen arayüz dili ("en" / "tr"); null ise ayarın varsayılanı.</summary>
+    private static string? Language;
+
     [STAThread]
     public static int Main(string[] args)
     {
@@ -49,6 +53,15 @@ public static class Program
         var themeArg = (Arg(args, "--theme") ?? "dark").ToLowerInvariant();
         var scene = (Arg(args, "--scene") ?? "all").ToLowerInvariant();
         Transparent = args.Contains("--transparent");
+        if (Arg(args, "--lang") is "en" or "tr")
+        {
+            Language = Arg(args, "--lang");
+            var culture = new System.Globalization.CultureInfo(Language == "en" ? "en-US" : "tr-TR");
+            System.Globalization.CultureInfo.CurrentUICulture = culture;
+            System.Globalization.CultureInfo.CurrentCulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+        }
         if (Arg(args, "--user-theme") is { Length: > 0 } userTheme)
         {
             UserThemePath = Path.GetFullPath(userTheme);
@@ -293,8 +306,8 @@ public static class Program
                 Longitude = 28.97
             }
         };
-        if (language is not null)
-            settings.General.Language = language;
+        if ((language ?? Language) is { } lang)
+            settings.General.Language = lang;
 
         var controller = new Koy.Core.Notch.NotchController();
         controller.SetEnabledPanels(Koy.Core.Notch.NotchPanels.Order);
@@ -360,7 +373,10 @@ public static class Program
 
     private static Koy.App.Features.Calendar.CalendarViewModel MakeCalendar(AppSettings settings)
     {
-        var events = new Koy.App.Features.Calendar.SharedEvents(new Koy.Core.Calendar.EventStore(TempFile("events.json")));
+        // Önbellek de geçici dosyada: yoksa kullanıcının gerçek Google/Outlook etkinlikleri görüntüye karışır.
+        var events = new Koy.App.Features.Calendar.SharedEvents(
+            new Koy.Core.Calendar.EventStore(TempFile("events.json")),
+            new Koy.Core.Calendar.CalendarCacheStore(TempFile("calendar-cache.json")));
         var today = DateOnly.FromDateTime(DateTime.Today);
         events.Book.Add("Takım toplantısı", today, new TimeOnly(14, 0));
         events.Book.Add("Diş randevusu", today, new TimeOnly(17, 30));
@@ -566,6 +582,10 @@ public static class Program
         // Müzik kartına tıklanınca: büyük kart Ana gövdesini kaplar.
         set.Vm.ShowHomePageCommand.Execute(Koy.Core.Notch.NotchHomePage.Home);
         ShotNotch(set, name("ana-muzik-buyuk"), expanded: true);
+        // Müzik sayfası (D düzeni): üst çubuktaki nota düğmesi.
+        set.Vm.ShowHomePageCommand.Execute(Koy.Core.Notch.NotchHomePage.Music);
+        Flush();
+        ShotNotch(set, name("muzik"), expanded: true);
         set.Vm.Dispose();
 
         // Müzik kartı stilleri (#66): Albüm kapağı (küçük ve büyük kart) ve Düz.
