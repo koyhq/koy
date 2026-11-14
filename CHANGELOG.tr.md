@@ -5,6 +5,14 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.11](https://github.com/koyhq/koy/compare/v0.2.10...v0.2.11) (2026-11-14)
+Öne çıkanlar:
+- **Google Takvim izni daraldı:** Koy artık takvimlerin tamamı yerine yalnız etkinlikleri okuma izni istiyor. Daha önce bağladıysan bir şey yapman gerekmiyor.
+
+### Değişenler
+
+* **calendar:** calendar.readonly yerine daha dar calendar.events.readonly izni isteniyor ([4e42317](https://github.com/koyhq/koy/commit/4e423179681fe8ffdc095849a6261924004cafab))
+
 ## [0.2.10](https://github.com/koyhq/koy/compare/v0.2.9...v0.2.10) (2026-11-14)
 Öne çıkanlar:
 - **Google Takvim:** Ayarlar › Çentik › Takvim hesapları'ndan Google hesabını bağla, etkinliklerin çentikteki takvimde görünsün. Erişim salt okunur, belirteçler bu cihazda şifreli saklanır. Outlook yakında.
