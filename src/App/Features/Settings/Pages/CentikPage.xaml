@@ -898,6 +898,96 @@
             </Grid>
         </Border>
 
+        <!-- TAKVİM HESAPLARI -->
+        <TextBlock Text="{Binding [CalAccountsHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <StackPanel>
+                <TextBlock Text="{Binding [CalPrivacyTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                <TextBlock Text="{Binding [CalPrivacyDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" TextWrapping="Wrap" Margin="0,2,0,0" />
+            </StackPanel>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [CalGoogleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding CalendarAccounts.GoogleStatusText}" Style="{StaticResource SettingDescStyle}" />
+                    <TextBox Style="{StaticResource SettingTextBoxStyle}" Margin="0,8,0,0"
+                             Text="{Binding CalendarAccounts.GoogleClientId, UpdateSourceTrigger=PropertyChanged}"
+                             Tag="{Binding [CalClientIdHint], Source={x:Static res:Loc.Instance}}"
+                             AutomationProperties.Name="{Binding [CalGoogleClientId], Source={x:Static res:Loc.Instance}}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <Button Command="{Binding CalendarAccounts.ConnectGoogleCommand}"
+                            Content="{Binding [CalConnectButton], Source={x:Static res:Loc.Instance}}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SettingButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CalendarAccounts.IsGoogleConnected}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Style="{StaticResource SettingButtonStyle}" Command="{Binding CalendarAccounts.DisconnectGoogleCommand}"
+                            Content="{Binding [CalDisconnectButton], Source={x:Static res:Loc.Instance}}"
+                            Visibility="{Binding CalendarAccounts.IsGoogleConnected, Converter={StaticResource BoolToVis}}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [CalOutlookTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding CalendarAccounts.OutlookStatusText}" Style="{StaticResource SettingDescStyle}" />
+                    <TextBox Style="{StaticResource SettingTextBoxStyle}" Margin="0,8,0,0"
+                             Text="{Binding CalendarAccounts.OutlookClientId, UpdateSourceTrigger=PropertyChanged}"
+                             Tag="{Binding [CalClientIdHint], Source={x:Static res:Loc.Instance}}"
+                             AutomationProperties.Name="{Binding [CalOutlookClientId], Source={x:Static res:Loc.Instance}}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <Button Command="{Binding CalendarAccounts.ConnectOutlookCommand}"
+                            Content="{Binding [CalConnectButton], Source={x:Static res:Loc.Instance}}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SettingButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CalendarAccounts.IsOutlookConnected}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Style="{StaticResource SettingButtonStyle}" Command="{Binding CalendarAccounts.DisconnectOutlookCommand}"
+                            Content="{Binding [CalDisconnectButton], Source={x:Static res:Loc.Instance}}"
+                            Visibility="{Binding CalendarAccounts.IsOutlookConnected, Converter={StaticResource BoolToVis}}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding CalendarAccounts.StatusMessage}" Style="{StaticResource SettingDescStyle}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                <Button Grid.Column="1" Style="{StaticResource SettingButtonStyle}" Command="{Binding CalendarAccounts.SyncNowCommand}"
+                        Content="{Binding [CalSyncNowButton], Source={x:Static res:Loc.Instance}}" />
+            </Grid>
+        </Border>
+
         <!-- POMODORO -->
         <TextBlock Text="{Binding [PomodoroHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 

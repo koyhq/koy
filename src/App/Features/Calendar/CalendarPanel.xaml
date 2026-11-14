@@ -338,7 +338,13 @@
                   </Grid.ColumnDefinitions>
                   <TextBlock Text="{Binding TimeText}" Foreground="{DynamicResource KoyNotchAccentCalendar}" FontWeight="SemiBold" VerticalAlignment="Center" />
                   <TextBlock Grid.Column="1" Text="{Binding Title}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                  <Border Grid.Column="2" CornerRadius="6" Padding="5,1" Margin="4,0,0,0" VerticalAlignment="Center"
+                          Background="{DynamicResource KoyNotchCalendarChip}"
+                          Visibility="{Binding HasSourceBadge, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="{Binding SourceBadge}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource KoyNotchCalendarSoft}" />
+                  </Border>
                   <Button Grid.Column="2" Style="{StaticResource CalIconButton}" Width="24" Height="24"
+                          Visibility="{Binding CanDelete, Converter={StaticResource BoolToVis}}"
                           Command="{Binding DataContext.DeleteEventCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                           CommandParameter="{Binding Id}"
                           ToolTip="{Binding [CalDeleteEvent], Source={x:Static res:Loc.Instance}}"

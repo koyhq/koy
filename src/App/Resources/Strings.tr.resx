@@ -3804,5 +3804,80 @@
   <data name="NotchPageHome" xml:space="preserve">
     <value>Ana</value>
   </data>
+  <data name="CalAccountsHeader" xml:space="preserve">
+    <value>Takvim hesapları</value>
+  </data>
+  <data name="CalPrivacyTitle" xml:space="preserve">
+    <value>Salt okunur ve yerel depolama</value>
+  </data>
+  <data name="CalPrivacyDesc" xml:space="preserve">
+    <value>Koy, OAuth 2.0 PKCE ile yalnız salt okunur takvim erişimi ister. Belirteçler bu cihazda Windows DPAPI ile şifrelenir; etkinlikler çevrimdışı kullanım için yerel önbellekte saklanır.</value>
+  </data>
+  <data name="CalGoogleTitle" xml:space="preserve">
+    <value>Google Takvim</value>
+  </data>
+  <data name="CalGoogleClientId" xml:space="preserve">
+    <value>Google OAuth İstemci Kimliği</value>
+  </data>
+  <data name="CalOutlookTitle" xml:space="preserve">
+    <value>Outlook Takvim</value>
+  </data>
+  <data name="CalOutlookClientId" xml:space="preserve">
+    <value>Outlook OAuth İstemci Kimliği</value>
+  </data>
+  <data name="CalClientIdHint" xml:space="preserve">
+    <value>OAuth Client ID (veya ortam değişkeninden okunur)</value>
+  </data>
+  <data name="CalConnectButton" xml:space="preserve">
+    <value>Bağla</value>
+  </data>
+  <data name="CalDisconnectButton" xml:space="preserve">
+    <value>Bağlantıyı kes</value>
+  </data>
+  <data name="CalSyncNowButton" xml:space="preserve">
+    <value>Şimdi eşitle</value>
+  </data>
+  <data name="CalStatusConnected" xml:space="preserve">
+    <value>Bağlı (salt okunur)</value>
+  </data>
+  <data name="CalStatusConnectedAs" xml:space="preserve">
+    <value>{0} olarak bağlı</value>
+  </data>
+  <data name="CalStatusDisconnected" xml:space="preserve">
+    <value>Bağlı değil</value>
+  </data>
+  <data name="CalSyncing" xml:space="preserve">
+    <value>Takvimler eşitleniyor…</value>
+  </data>
+  <data name="CalSyncDone" xml:space="preserve">
+    <value>Takvimler eşitlendi.</value>
+  </data>
+  <data name="CalSyncOfflineCache" xml:space="preserve">
+    <value>Çevrimdışı veya erişilemiyor; son önbellekteki etkinlikler gösteriliyor.</value>
+  </data>
+  <data name="CalSyncFailed" xml:space="preserve">
+    <value>Takvim eşitlemesi başarısız oldu.</value>
+  </data>
+  <data name="CalClientIdRequired" xml:space="preserve">
+    <value>Önce bir OAuth Client ID girin.</value>
+  </data>
+  <data name="CalAuthorizing" xml:space="preserve">
+    <value>Tarayıcıda oturum açılması bekleniyor…</value>
+  </data>
+  <data name="CalConnectFailed" xml:space="preserve">
+    <value>Oturum açılamadı: {0}</value>
+  </data>
+  <data name="CalConnectedDone" xml:space="preserve">
+    <value>Takvim hesabı bağlandı.</value>
+  </data>
+  <data name="CalDisconnectedDone" xml:space="preserve">
+    <value>Takvim hesabı bağlantısı kesildi.</value>
+  </data>
+  <data name="WizCalendarPrivacyTitle" xml:space="preserve">
+    <value>İsteğe bağlı takvim eşitleme gizliliği</value>
+  </data>
+  <data name="WizCalendarPrivacyDesc" xml:space="preserve">
+    <value>Ayarlar'dan Google veya Outlook bağlamak isteğe bağlıdır ve yalnızca salt okunur erişim ister. Belirteçleriniz cihazınızda Windows DPAPI ile şifrelenir ve çevrimdışı kullanım için yerel önbellekte tutulur.</value>
+  </data>
 </root>
 

@@ -45,6 +45,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     /// <summary>Çentik sayfası › Hava durumu: konum anahtarı ve şehir arama.</summary>
     public WeatherLocationViewModel Weather { get; }
 
+    /// <summary>Çentik sayfası › Takvim hesapları: Google ve Outlook OAuth bağlantısı.</summary>
+    public CalendarAccountsViewModel CalendarAccounts { get; }
+
     [ObservableProperty]
     private int _selectedPageIndex; // 0: Genel, 1: Çentik, 2: Dock, 3: Ekranlar, 4: Görünüm, 5: Kısayollar, 6: Dikte, 7: Performans, 8: Hakkında
 
@@ -1087,6 +1090,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         Profiles.ListChanged += Rules.Refresh;
         Displays = new DisplaysViewModel(_store);
         Weather = new WeatherLocationViewModel(_store);
+        CalendarAccounts = new CalendarAccountsViewModel();
         UpdateStatus.Changed += OnUpdateStatusChanged;
         OnUpdateStatusChanged();
         ThemeManager.UserStyleApplied += RefreshUserStyle;
@@ -1278,6 +1282,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             Shortcuts.Load(s);
             HotCorners.Load(s);
             Weather.Load(s);
+            CalendarAccounts.Load();
 
             var panels = NotchPanels.ParseEnabled(s.Notch.EnabledPanels ?? ["home", "focus", "calendar", "shelf", "clipboard", "system", "controlcenter"]);
             PanelFocus = panels.Contains(NotchPanel.Focus);
