@@ -30,7 +30,8 @@ public sealed class UnitConverterSource(ISearchShell shell, Func<string, string>
                 Glyph = SearchGlyph.Calculator,
                 CategoryRelevance = SearchRelevance.Highest,
                 Relevance = 1,
-                RestoresFocus = true
+                RestoresFocus = true,
+                Drag = new SearchDragData(SearchDragKind.Text, number)
             }
         ];
     }

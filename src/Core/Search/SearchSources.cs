@@ -190,7 +190,8 @@ public sealed class CalculatorSearchSource(ISearchShell shell, Func<string, stri
                 Relevance = 1,
                 ReplacesQuery = copy,
                 Actions = [new SearchAction("copy", t("SearchActCopy"), () => shell.CopyText(copy))],
-                RestoresFocus = true
+                RestoresFocus = true,
+                Drag = new SearchDragData(SearchDragKind.Text, copy)
             }
         ];
     }

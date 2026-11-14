@@ -138,7 +138,8 @@ public sealed class ColorConverterSource(ISearchShell shell, Func<string, string
             Glyph = SearchGlyph.Clipboard,
             CategoryRelevance = SearchRelevance.Highest,
             Relevance = 1 - index * 0.1,
-            RestoresFocus = true
+            RestoresFocus = true,
+            Drag = new SearchDragData(SearchDragKind.Text, row.Text)
         }).ToList();
     }
 }

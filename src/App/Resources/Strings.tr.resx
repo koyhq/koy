@@ -1158,6 +1158,66 @@
   <data name="SearchSourcesHeader" xml:space="preserve">
     <value>Arama kaynakları</value>
   </data>
+  <data name="SearchCatSpecialChars" xml:space="preserve">
+    <value>Özel karakterler</value>
+  </data>
+  <data name="SearchCatSpellCheck" xml:space="preserve">
+    <value>Yazım denetimi</value>
+  </data>
+  <data name="SearchCatDictionary" xml:space="preserve">
+    <value>Sözlük</value>
+  </data>
+  <data name="SearchCatJumpList" xml:space="preserve">
+    <value>Uygulama eylemleri</value>
+  </data>
+  <data name="SearchCatStore" xml:space="preserve">
+    <value>Microsoft Store</value>
+  </data>
+  <data name="SearchKwSpecialChars" xml:space="preserve">
+    <value>sembol;özel;char;sym</value>
+  </data>
+  <data name="SearchKwSpellCheck" xml:space="preserve">
+    <value>yazım;yazim;spell</value>
+  </data>
+  <data name="SearchKwDictionary" xml:space="preserve">
+    <value>sözlük;sozluk;tdk;dict;def</value>
+  </data>
+  <data name="SearchKwStore" xml:space="preserve">
+    <value>mağaza;magaza;store;msstore</value>
+  </data>
+  <data name="SearchSpellCorrect" xml:space="preserve">
+    <value>Yazım doğru</value>
+  </data>
+  <data name="SearchSpellNoSuggestions" xml:space="preserve">
+    <value>Yazım önerisi bulunamadı</value>
+  </data>
+  <data name="SearchSpellSuggestionFor" xml:space="preserve">
+    <value>"{0}" için öneri</value>
+  </data>
+  <data name="SearchDictWebFor" xml:space="preserve">
+    <value>"{0}" sözlükte ara</value>
+  </data>
+  <data name="SearchActOpenWeb" xml:space="preserve">
+    <value>Web'de aç</value>
+  </data>
+  <data name="SearchStoreFor" xml:space="preserve">
+    <value>Microsoft Store'da "{0}" ara</value>
+  </data>
+  <data name="SearchSyntaxSpecialChars" xml:space="preserve">
+    <value>Özel karakterler ve semboller</value>
+  </data>
+  <data name="SearchSyntaxSpellCheck" xml:space="preserve">
+    <value>Yazım denetimi ve öneri kopyalama</value>
+  </data>
+  <data name="SearchSyntaxDictionary" xml:space="preserve">
+    <value>Kelime anlamını ara</value>
+  </data>
+  <data name="SearchSyntaxJumpList" xml:space="preserve">
+    <value>Uygulama atlama listesi görev ve son öğeleri</value>
+  </data>
+  <data name="SearchSyntaxStore" xml:space="preserve">
+    <value>Microsoft Store'da ara</value>
+  </data>
   <data name="ShortcutPlayPause" xml:space="preserve">
     <value>Müzik: oynat / duraklat</value>
   </data>

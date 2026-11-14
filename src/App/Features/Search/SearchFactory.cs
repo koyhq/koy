@@ -10,6 +10,7 @@ using Koy.Core.Dock;
 using Koy.Core.Search;
 using Koy.Core.Settings;
 using Koy.Core.Shell;
+using Koy.Platform.JumpList;
 using Koy.Platform.Search;
 using Koy.Platform.Shell;
 
@@ -28,10 +29,14 @@ public static class SearchFactory
     public static IReadOnlyList<(string Id, string Name)> SourceCatalog { get; } =
     [
         ("apps", "SearchCatApps"),
+        ("jumplist", "SearchCatJumpList"),
         ("windows", "SearchCatWindows"),
         ("calculator", "SearchCatCalculator"),
         ("units", "SearchCatUnits"),
         ("color", "SearchCatColor"),
+        ("chars", "SearchCatSpecialChars"),
+        ("spell", "SearchCatSpellCheck"),
+        ("dictionary", "SearchCatDictionary"),
         ("session", "SearchCatSession"),
         ("shell", "SearchCatShell"),
         ("locations", "SearchCatLocations"),
@@ -39,6 +44,7 @@ public static class SearchFactory
         ("recent", "SearchCatRecent"),
         ("files", "SearchCatFiles"),
         ("web", "SearchCatWeb"),
+        ("store", "SearchCatStore"),
         ("bookmarks", "SearchCatBookmarks"),
         ("kill", "SearchCatProcesses"),
         ("clipboard", "SearchCatClipboard"),
@@ -74,6 +80,14 @@ public static class SearchFactory
         }
 
         Add(apps);
+        Add(new JumpListSearchSource(
+            new InstalledAppsService(),
+            new JumpListService(),
+            T,
+            app => IconHelper.GetIconBytes(InstalledAppsService.ShellPath(app)))
+        {
+            Syntaxes = [new SearchSyntax(T("SearchExampleApp"), T("SearchSyntaxJumpList"))]
+        });
         Add(new WindowSearchSource(windows.GetOpenWindows, windows.ActivateWindow, T)
         {
             Syntaxes = [new SearchSyntax(T("SearchExampleWindow"), T("SearchSyntaxWindows"))]
@@ -104,6 +118,18 @@ public static class SearchFactory
                 new SearchSyntax("rgb(255, 136, 0)", T("SearchSyntaxColor")),
                 new SearchSyntax("hsl(32, 100%, 50%)", T("SearchSyntaxColor"))
             ]
+        });
+        Add(new SpecialCharactersSource(shell, T)
+        {
+            Syntaxes = [new SearchSyntax(Keywords("SearchKwSpecialChars")[0] + " arrow", T("SearchSyntaxSpecialChars"))]
+        });
+        Add(new SpellCheckSource(new WindowsSpellCheckerService(), shell, T)
+        {
+            Syntaxes = [new SearchSyntax(Keywords("SearchKwSpellCheck")[0] + " recieve", T("SearchSyntaxSpellCheck"))]
+        });
+        Add(new DictionarySource(new HttpDictionaryService(), shell, T)
+        {
+            Syntaxes = [new SearchSyntax(Keywords("SearchKwDictionary")[0] + " serendipity", T("SearchSyntaxDictionary"))]
         });
         Add(new SessionSearchSource(new SystemCommandService(), SessionEntries(), T)
         {
@@ -138,6 +164,10 @@ public static class SearchFactory
                 .ToList()
         };
         Add(web);
+        Add(new MicrosoftStoreSearchSource(shell, T)
+        {
+            Syntaxes = [new SearchSyntax(Keywords("SearchKwStore")[0] + " terminal", T("SearchSyntaxStore"))]
+        });
 
         Add(new BookmarksSearchSource(SearchBookmarks.Load, shell, T)
         {
@@ -221,7 +251,11 @@ public sealed class SearchGlyphConverter : IValueConverter
         [SearchGlyph.Clipboard] = Parse("M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-6a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1zM16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h2"),
         [SearchGlyph.Clock] = Parse("M22 12a10 10 0 1 1 -20 0a10 10 0 0 1 20 0zM12 6v6l4 2"),
         [SearchGlyph.Help] = Parse("M22 12a10 10 0 1 1 -20 0a10 10 0 0 1 20 0zM9.09 9a3 3 0 0 1 5.83 1c0 2 -3 3 -3 3M12 17h.01"),
-        [SearchGlyph.History] = Parse("M3 12a9 9 0 1 0 9 -9a9.75 9.75 0 0 0 -6.74 2.74l-2.26 2.26M3 3v5h5M12 7v5l4 2")
+        [SearchGlyph.History] = Parse("M3 12a9 9 0 1 0 9 -9a9.75 9.75 0 0 0 -6.74 2.74l-2.26 2.26M3 3v5h5M12 7v5l4 2"),
+        [SearchGlyph.Symbol] = Parse("M12 2l2.4 7.4h7.6l-6 4.6l2.3 7l-6.3 -4.6l-6.3 4.6l2.3 -7l-6 -4.6h7.6z"),
+        [SearchGlyph.SpellCheck] = Parse("M6 16l6 -12l6 12M8 12h8M16 20l2 2l4 -4"),
+        [SearchGlyph.Dictionary] = Parse("M4 19.5v-15a2.5 2.5 0 0 1 2.5 -2.5h13.5v19h-13.5a2.5 2.5 0 0 1 0 -5h13.5"),
+        [SearchGlyph.Store] = Parse("M6 7h12l1 13h-14zM9 7v-1a3 3 0 0 1 6 0v1")
     };
 
     private static Geometry Parse(string data)

@@ -122,7 +122,8 @@ public sealed class BookmarksSearchSource(Func<IReadOnlyList<BrowserBookmark>> l
                 Subtitle = url,
                 Glyph = SearchGlyph.Bookmark,
                 CategoryRelevance = title == query.Folded ? SearchRelevance.High : SearchRelevance.Moderate,
-                Relevance = score
+                Relevance = score,
+                Drag = new SearchDragData(SearchDragKind.Url, url)
             };
         }
     }

@@ -186,6 +186,7 @@ public static class SearchBookmarks
                 bookmarks.AddRange(ReadFile(Path.Combine(profile, "Bookmarks")));
         }
 
+        bookmarks.AddRange(FirefoxBookmarks.Load());
         return bookmarks.DistinctBy(b => b.Url, StringComparer.OrdinalIgnoreCase).ToList();
     }
 
