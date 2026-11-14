@@ -1,0 +1,9 @@
+{
+  "colors": {
+    "bg": "#282828", "shell": "#1D2021", "surface": "#32302F", "raised": "#3C3836", "active": "#504945", "border": "#3C3836",
+    "text": "#EBDBB2", "text2": "#D5C4A1", "muted": "#A89984", "disabled": "#665C54",
+    "accent": "#FE8019", "ok": "#B8BB26", "warn": "#FABD2F", "danger": "#FB4934",
+    "red": "#FB4934", "yellow": "#FABD2F", "purple": "#D3869B", "green": "#B8BB26", "blue": "#83A598", "cyan": "#8EC07C"
+  },
+  "tint": 0.06
+}

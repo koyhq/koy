@@ -1,0 +1,9 @@
+{
+  "colors": {
+    "bg": "#0F1E2E", "shell": "#0A1622", "surface": "#16293D", "raised": "#1D344B", "active": "#284562", "border": "#1E3549",
+    "text": "#EAF2F8", "text2": "#B9CBDA", "muted": "#869DB2", "disabled": "#4C647B",
+    "accent": "#2EC4C6", "ok": "#5BD6A0", "warn": "#F2C66D", "danger": "#F07A7A",
+    "red": "#F28B82", "yellow": "#F2C66D", "purple": "#A7A9F5", "green": "#5BD6A0", "blue": "#5AA9E6", "cyan": "#2EC4C6"
+  },
+  "tint": 0.07
+}

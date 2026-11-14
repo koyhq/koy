@@ -1,0 +1,13 @@
+{
+  "summary": {
+    "en": "Retro, warm and earthy palette with an orange accent.",
+    "tr": "Retro, sıcak ve topraksı palet ve turuncu vurgu."
+  },
+  "description": {
+    "en": "A retro dark theme for the Koy window, menus, notch and dock built around the Gruvbox palette: warm charcoal surfaces, parchment text and a bright orange accent, with the classic yellow, green and aqua tones. Changes colors only; sizes and layout are untouched. Palette colors are by Pavel Pertsev (MIT).",
+    "tr": "Gruvbox paletiyle hazırlanmış retro bir koyu tema; Koy penceresini, menüleri, çentiği ve dock'u boyar: sıcak kömür grisi yüzeyler, parşömen rengi yazı ve parlak turuncu vurgu, klasik sarı, yeşil ve su yeşili tonlarla. Yalnız renkleri değiştirir; boyutlara ve yerleşime dokunmaz. Palet renkleri Pavel Pertsev'e aittir (MIT)."
+  },
+  "homepage": "https://github.com/koyhq/koy",
+  "updated": "2026-11-14",
+  "downloads": 0
+}

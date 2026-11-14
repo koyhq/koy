@@ -1,0 +1,10 @@
+{
+  "id": "koyhq.lale-theme",
+  "name": "Lale",
+  "version": "1.0.0",
+  "author": "Koy",
+  "kind": "theme",
+  "license": "GPL-3.0-or-later",
+  "capabilities": [],
+  "entryKind": "data"
+}

@@ -223,5 +223,6 @@ Tasarım ve dosya biçimleri: `docs/EXTENSION-STORE.md`. Yalnız veri paketi (te
 | App | `Pages/GorunumPage.xaml`, `CentikPage.xaml`, `GenelPage.xaml` | "Mağazadan daha fazla al…" bağlantıları (`OpenStoreCommand`, parametre: `IconPack`, `Theme`, `Background`, `Profile`) |
 | Araç | `tools/Koy.UiSnapshots/ExtensionSnapshots.cs` | `--scene eklentiler`: depodaki `store/` klasöründen sahte ağla sayfanın görüntüleri |
 | Depo | `store/`, `scripts/build-store.py` | İndeks, paketler, önizlemeler, kaynaklar |
+| Depo | `store/palettes/`, `scripts/make-theme.py` | Yeni tema: 20 temel renkten bütün anahtarları türetir, karşıtlığı denetler, kart önizlemesini çizer (`store/README.md`) |
 
 Unutma: Kurulum uygulama demek değildir. Kaldırmadan önce `RevertOnUninstall` uygulanır. Yeni hata enum değeri eklenirse `Strings*.resx` içine `ExtInstallError<Ad>`, `ExtIndexError<Ad>`, `ExtApplyError<Ad>` anahtarı da eklenir. Sayfa dizini en sona eklendi (Gelişmiş 9, Eklentiler 10); `SettingsPageIndex.PageNameKeys` buna bağlı.
