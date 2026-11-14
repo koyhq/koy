@@ -11,7 +11,7 @@
 
 **English** · [Türkçe](README.tr.md)
 
-**A lightweight, zero-browser, spring-animated Notch and smart desktop Dock for Windows 11.**
+**A lightweight, zero-browser, spring-animated Notch and smart desktop Dock for Windows 10 and 11.**
 
 [![CI](https://github.com/koyhq/koy/actions/workflows/ci.yml/badge.svg)](https://github.com/koyhq/koy/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/koyhq/koy?color=3B82F6&label=Release)](https://github.com/koyhq/koy/releases/latest)
@@ -142,7 +142,7 @@ Koy's installer and updates are **not code-signed yet**. Therefore:
 
 ### Building from Source
 
-**Requirements:** Windows 11 (22H2 / build 22621+) and the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+**Requirements:** Windows 10 (2004 / build 19041+) or Windows 11, and the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 
 ```powershell
 # 1. Clone the repository
@@ -173,7 +173,7 @@ flowchart LR
         VM["ViewModels (CommunityToolkit.Mvvm)"]
     end
 
-    subgraph Platform["src/Platform (Windows 11)"]
+    subgraph Platform["src/Platform (Windows)"]
         Win32["CsWin32 P/Invoke (AppBar, DWM, Tray, Hooks)"]
         WinRT["WinRT & COM (GSMTC Media, CoreAudio, Radios, Power)"]
     end
@@ -195,7 +195,7 @@ flowchart LR
 koy/
 ├── src/
 │   ├── Core/          # Pure C# (net10.0). No WPF, Win32 or WinRT. Spring physics, state machines, settings.
-│   ├── Platform/      # Windows 11 API implementations (CsWin32 NativeMethods.txt & WinRT). No WPF.
+│   ├── Platform/      # Windows API implementations (CsWin32 NativeMethods.txt & WinRT). No WPF.
 │   └── App/           # WPF UI, thin ViewModels, 8-page KoyWindow, vector icons and .resx language files.
 ├── tests/
 │   └── Core.Tests/    # xUnit unit tests (Spring, NotchController, DockPositionResolver, Pomodoro, shortcuts, display layout, uninstall, etc.).

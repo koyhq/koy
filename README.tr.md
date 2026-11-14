@@ -11,7 +11,7 @@
 
 [English](README.md) · **Türkçe**
 
-**Windows 11 için hafif, yay fiziği animasyonlu Çentik (Notch) ve akıllı masaüstü Dock'u.**
+**Windows 10 ve 11 için hafif, yay fiziği animasyonlu Çentik (Notch) ve akıllı masaüstü Dock'u.**
 
 [![CI](https://github.com/koyhq/koy/actions/workflows/ci.yml/badge.svg)](https://github.com/koyhq/koy/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/koyhq/koy?color=3B82F6&label=Release)](https://github.com/koyhq/koy/releases/latest)
@@ -142,7 +142,7 @@ Koy'un kurulum dosyası ve güncellemeleri henüz **kod imzalı değil**. Bu yü
 
 ### Kaynak Koddan Derleme
 
-**Gereksinimler:** Windows 11 (22H2 / Derleme 22621+) ve [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+**Gereksinimler:** Windows 10 (2004 / Derleme 19041+) veya Windows 11 ile [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 
 ```powershell
 # 1. Depoyu klonlayın
@@ -173,7 +173,7 @@ flowchart LR
         VM["ViewModels (CommunityToolkit.Mvvm)"]
     end
 
-    subgraph Platform["src/Platform (Windows 11)"]
+    subgraph Platform["src/Platform (Windows)"]
         Win32["CsWin32 P/Invoke (AppBar, DWM, Tray, Hooks)"]
         WinRT["WinRT & COM (GSMTC Media, CoreAudio, Radios, Power)"]
     end
@@ -195,7 +195,7 @@ flowchart LR
 koy/
 ├── src/
 │   ├── Core/          # Saf C# (net10.0). WPF, Win32 ve WinRT YOK. Yay fiziği, durum makineleri, ayarlar.
-│   ├── Platform/      # Windows 11 API uygulamaları (CsWin32 NativeMethods.txt & WinRT). WPF YOK.
+│   ├── Platform/      # Windows API uygulamaları (CsWin32 NativeMethods.txt & WinRT). WPF YOK.
 │   └── App/           # WPF arayüzü, ince ViewModel'ler, 8 sayfalı KoyWindow, vektör ikonlar ve .resx dil dosyaları.
 ├── tests/
 │   └── Core.Tests/    # xUnit birim testleri (Spring, NotchController, DockPositionResolver, Pomodoro, kısayollar, ekran yerleşimi, kaldırma vb.).

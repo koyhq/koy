@@ -4,7 +4,7 @@ Bu dosya bu depoda çalışan bütün ajanlar (Antigravity/Gemini, Claude, Codex
 İletişim Türkçe. Kararları proje sahibi verir.
 
 ## Proje
-Windows 11 için hafif bir **notch** (ekranın üst ortasında, yay animasyonlu koy/ada) ve görev çubuğunun yerine geçen bir **dock**.
+Windows 10 ve 11 için hafif bir **notch** (ekranın üst ortasında, yay animasyonlu koy/ada) ve görev çubuğunun yerine geçen bir **dock**.
 İlham: [kua8/Nectar](https://github.com/kua8/Nectar) (Tauri/WebView2, bellek ağır). **Nectar'dan kod, görsel ya da metin kopyalanmaz**; Nectar GPLv3 olsa da biz kendi kodumuzu yazarız.
 
 - Hedefler, mimari, kararlar: `docs/PLAN.md`
@@ -14,7 +14,7 @@ Windows 11 için hafif bir **notch** (ekranın üst ortasında, yay animasyonlu 
 - Arayüz tasarımı (dock, çentik, Koy penceresi, her sayfanın ayarları): `docs/DESIGN.md`. Arayüz işinden önce oku. Ekranların görseli: `docs/design/index.html` (tarayıcıda aç).
 
 ## Yığın
-C# + WPF, .NET 10 (`global.json`), yalnız Windows 11. MVVM: CommunityToolkit.Mvvm. Win32: Microsoft.Windows.CsWin32. Test: xUnit. Lisans GPLv3.
+C# + WPF, .NET 10 (`global.json`), Windows 10 2004 (19041) ve üstü, Windows 11. Win10'da DWM akriliği ve köşe yuvarlaması yok: `BackdropService.IsSupported` (22000+) kapalıyken pencere malzemesi Katı olur; Windows 11'e özel API'ler sürüm denetimiyle çağrılır (`OperatingSystem.IsWindowsVersionAtLeast`). MVVM: CommunityToolkit.Mvvm. Win32: Microsoft.Windows.CsWin32. Test: xUnit. Lisans GPLv3.
 
 ## Komutlar
 ```powershell
@@ -49,7 +49,7 @@ src/Core/       Saf C# (net10.0). WPF ve Windows API YOK.
                 Search/     arama paneli: kaynaklar (ISearchSource), puanlama, sıralama, geçmiş, panel durumu (SearchPanelController), hesap
                 Lyrics/     eşzamanlı sözler: LRC ayrıştırıcı, kaynak zinciri (yerel, önbellek, LRCLIB), oturum durumu (LyricsSession)
                 StartMenu/  dock Başlat düğmesinin sağ tık (Win+X) menüsü: grup ve sıra modeli (StartMenuModel), eylemler (StartMenuActions), IStartMenuHost
-src/Platform/   Core'daki sözleşmelerin Windows 11 uygulamaları (WinRT / CsWin32). Aynı klasör adları:
+src/Platform/   Core'daki sözleşmelerin Windows uygulamaları (WinRT / CsWin32). Aynı klasör adları:
                 Shell/TrayHostService.cs : Core.Tray.ITrayService. Koy'un gizli Shell_TrayWnd penceresi (kendi iş
                 parçacığında); her kaydı Windows'a da iletir. SharedServices.AcquireTrayHost ile sayaçlı paylaşılır;
                 yalnız görev çubuğu gizliyken kurulur (DockFeature.ApplyTrayPolicy). Görev çubuğunu gizleyen kod
