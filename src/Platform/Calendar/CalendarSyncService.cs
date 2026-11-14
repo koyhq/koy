@@ -34,7 +34,11 @@ public sealed class CalendarSyncService : ICalendarSyncService
         var codeChallenge = OAuthPkce.ComputeCodeChallenge(codeVerifier);
         var state = OAuthPkce.CreateState();
         var port = LoopbackOAuthListener.AllocateFreePort();
-        var redirectUri = $"http://127.0.0.1:{port}/callback/";
+        // Google masaüstü istemcisi her loopback adresini kabul eder. Microsoft kayıtlı "http://localhost" adresinde
+        // yalnız portu yok sayar; yol ve ana makine aynı olmalı, bu yüzden Outlook kök yolla localhost kullanır.
+        var redirectUri = provider == CalendarProvider.Outlook
+            ? $"http://localhost:{port}/"
+            : $"http://127.0.0.1:{port}/callback/";
 
         var callback = await LoopbackOAuthListener.AuthorizeAsync(
             provider,
