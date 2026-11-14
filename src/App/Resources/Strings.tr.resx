@@ -1447,7 +1447,7 @@
     <value>Saatin yanında tarih göster</value>
   </data>
   <data name="ClockShowDateDesc" xml:space="preserve">
-    <value>Çentik göz attığında saatin ardına kısa tarihi ekler. Varsayılan kapalı.</value>
+    <value>Kapalı ve göz atan çentikte saatin ardına kısa tarihi ekler. Varsayılan kapalı.</value>
   </data>
   <data name="ClockSecondTimeZoneTitle" xml:space="preserve">
     <value>İkinci saat dilimi</value>

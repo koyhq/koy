@@ -1447,7 +1447,7 @@
     <value>Show date next to the time</value>
   </data>
   <data name="ClockShowDateDesc" xml:space="preserve">
-    <value>Adds the short date after the clock when the notch peeks. Off by default.</value>
+    <value>Adds the short date after the clock in the collapsed and peeking notch. Off by default.</value>
   </data>
   <data name="ClockSecondTimeZoneTitle" xml:space="preserve">
     <value>Second time zone</value>

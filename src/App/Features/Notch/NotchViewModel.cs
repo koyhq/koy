@@ -93,7 +93,9 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     public bool ShowIdleRing => HasBattery && IsIdleRing && !_focus.HasRunning;
 
     /// <summary>Halka modunda Peek'te saatin yanındaki kısa tarih ("· 18 Kas").</summary>
-    public bool ShowIdlePeekDate => IsIdleRing && State == NotchState.Peek;
+    public bool ShowIdlePeekDate => IsIdleRing
+        && NotchLayout.ShowPeekDetails(State, Music.HasTrack)
+        && IdleDisplay.ShowPeekDetails(Settings.Notch.IdleDisplay);
 
     /// <summary>Halkanın dolu kısmı; yalnız pil yüzdesi değişince yeniden kurulur (dondurulmuş, zamanlayıcı yok).</summary>
     [ObservableProperty]
@@ -183,7 +185,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     /// <summary>Boşta Wi-Fi / Bluetooth simgeleri gösterilsin mi (Kontrol paneli açık ve boşta görünüm "saat, pil ve bağlantılar").</summary>
     public bool ShowIdleRadio => ShowRadioStatus && !_focus.HasRunning
         && (IdleDisplay.ShowRadioWhenCollapsed(Settings.Notch.IdleDisplay)
-            || (IdleDisplay.ShowRadio(Settings.Notch.IdleDisplay) && State == NotchState.Peek));
+            || (IdleDisplay.ShowRadio(Settings.Notch.IdleDisplay) && NotchLayout.ShowPeekDetails(State, Music.HasTrack)));
 
     /// <summary>"Çentiği açık tut" açık: fare çıkınca kapanmaz.</summary>
     public bool IsPinned => _controller.IsPinned;
@@ -256,16 +258,30 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private string _title = "Koy";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ClockExtras))]
     [NotifyPropertyChangedFor(nameof(ClockDisplay))]
     private string _clockTime = "";
 
-    /// <summary>Klasik göz atma satırının sonuna eklenen tarih ve ikinci saat (" · 12 Kas · UTC+9 21:00"); ikisi de kapalıysa boş.</summary>
+    /// <summary>Klasik kapalı çentikte saatin yanına eklenen kısa tarih (" · 17 Kas"); kapalıysa boş.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ClockExtras))]
+    [NotifyPropertyChangedFor(nameof(ClockDisplay))]
+    private string _clockDateSuffix = "";
+
+    /// <summary>Klasik göz atma satırının sonuna eklenen ikinci saat (" · UTC+9 21:00"); kapalıysa boş.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ClockExtras))]
     [NotifyPropertyChangedFor(nameof(ClockDisplay))]
     private string _clockPeekExtras = "";
 
-    /// <summary>Klasik soldaki saat metni: Peek'te tarih ve ikinci saat eklenir, kapalıyken yalnız saat (genişlik korunur).</summary>
-    public string ClockDisplay => State == NotchState.Peek ? ClockTime + ClockPeekExtras : ClockTime;
+    /// <summary>Klasik soldaki saatin ardındaki ek metin: kapalıyken kısa tarih, Peek'te varsa ikinci saat de eklenir.</summary>
+    public string ClockExtras =>
+        (NotchLayout.ShowPeekDetails(State, Music.HasTrack) && IdleDisplay.ShowPeekDetails(Settings.Notch.IdleDisplay))
+            ? ClockDateSuffix + ClockPeekExtras
+            : ClockDateSuffix;
+
+    /// <summary>Klasik soldaki saat metni: saat + varsa kapalı tarih ve Peek ayrıntıları.</summary>
+    public string ClockDisplay => ClockTime + ClockExtras;
 
     [ObservableProperty]
     private int _batteryPercent = 100;
@@ -286,14 +302,12 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     private void NotifyLayoutChanged()
     {
+        OnPropertyChanged(nameof(ClockExtras));
         OnPropertyChanged(nameof(ClockDisplay));
         OnPropertyChanged(nameof(ShowCollapsedLayout));
         OnPropertyChanged(nameof(ShowPeekLayout));
-        if (IsIdleRing)
-        {
-            OnPropertyChanged(nameof(ShowIdlePeekDate));
-            OnPropertyChanged(nameof(ShowIdleRadio));
-        }
+        OnPropertyChanged(nameof(ShowIdlePeekDate));
+        OnPropertyChanged(nameof(ShowIdleRadio));
     }
 
     partial void OnHasBatteryChanged(bool value)
@@ -501,8 +515,11 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         // İkinci saat ve tarih aynı saat tikinde güncellenir; ek zamanlayıcı yok.
         var secondClock = SecondClock.Read(clock.ClockSecondTimeZoneId, DateTimeOffset.Now,
             ClockFormatPolicy.ResolveTimePattern(clock.ClockHourFormat, false, CultureInfo.CurrentCulture), CultureInfo.CurrentCulture)?.Text;
-        var shortDate = clock.ClockShowDate ? IdleDisplayFormat.ShortDate(now, CultureInfo.CurrentCulture, clock.ClockCustomDateFormat) : null;
-        ClockPeekExtras = ClockFormatPolicy.ComposePeekLine("", shortDate, secondClock);
+        var shortDate = IdleDisplay.ShowCollapsedDate(clock.IdleDisplay, clock.ClockShowDate)
+            ? IdleDisplayFormat.ShortDate(now, CultureInfo.CurrentCulture, clock.ClockCustomDateFormat)
+            : null;
+        ClockDateSuffix = ClockFormatPolicy.ComposePeekLine("", shortDate, null);
+        ClockPeekExtras = ClockFormatPolicy.ComposePeekLine("", null, secondClock);
         if (IsIdleRing)
         {
             var culture = IdleCulture;
