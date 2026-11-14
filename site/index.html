@@ -35,7 +35,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=Inter:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=20261112-4">
+  <link rel="stylesheet" href="style.css?v=20261114">
   <script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
@@ -64,9 +64,9 @@
     <section class="hero">
       <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
       <div class="stage stage--hero" data-notch="hero">
-        <img class="stage__closed" src="img/centik-kapali.webp?v=20261112" width="415" height="51" alt="">
-        <img class="stage__open" id="hero-open" src="img/centik-ana.webp?v=20261112" width="926" height="528" fetchpriority="high"
-             alt="The open Koy notch: now playing, headphone battery, CPU and memory, network speed and quick launch" data-i18n-attr="alt:hero.openAlt">
+        <img data-i18n-attr="src:img.kapali" class="stage__closed" src="img/centik-kapali.webp?v=20261114" width="420" height="51" alt="">
+        <img class="stage__open" id="hero-open" src="img/centik-ana.webp?v=20261114" width="930" height="528" fetchpriority="high"
+             alt="The open Koy notch: date and weather, upcoming events, focus timer, headphone battery, system status and quick launch" data-i18n-attr="alt:hero.openAlt,src:img.ana">
         <button class="stage__zone" type="button" data-notch-zone aria-expanded="false" aria-controls="hero-open" aria-label="Open or close the notch" data-i18n-attr="aria-label:hero.zone"></button>
       </div>
       <p class="hero__hint" aria-hidden="true">
@@ -115,16 +115,20 @@
           <div class="showcase__side">
             <div class="tablist" role="tablist" aria-label="Notch pages" data-i18n-attr="aria-label:notch.tablist">
               <button class="tab" role="tab" id="tab-ana" aria-controls="panel-ana" aria-selected="true" data-key="ana" data-i18n="tab.home">Home</button>
+              <button class="tab" role="tab" id="tab-muzik" aria-controls="panel-muzik" aria-selected="false" tabindex="-1" data-key="muzik" data-i18n="tab.music">Music</button>
               <button class="tab" role="tab" id="tab-takvim" aria-controls="panel-takvim" aria-selected="false" tabindex="-1" data-key="takvim" data-i18n="tab.calendar">Calendar</button>
               <button class="tab" role="tab" id="tab-kontrol" aria-controls="panel-kontrol" aria-selected="false" tabindex="-1" data-key="kontrol" data-i18n="tab.control">Control Center</button>
               <button class="tab" role="tab" id="tab-wifi" aria-controls="panel-wifi" aria-selected="false" tabindex="-1" data-key="wifi" data-i18n="tab.wifi">Wi-Fi</button>
+              <button class="tab" role="tab" id="tab-arkaplan" aria-controls="panel-arkaplan" aria-selected="false" tabindex="-1" data-key="arkaplan" data-i18n="tab.backgrounds">Live backgrounds</button>
               <button class="tab" role="tab" id="tab-kapali" aria-controls="panel-kapali" aria-selected="false" tabindex="-1" data-key="kapali" data-i18n="tab.closed">When closed</button>
             </div>
             <div class="panels">
-              <p class="panel" role="tabpanel" id="panel-ana" aria-labelledby="tab-ana" data-key="ana" data-i18n="panel.home">Now playing, headphone battery, CPU and memory, network speed and quick launch at a glance. Music comes from Spotify, your browser or Windows Media Player.</p>
+              <p class="panel" role="tabpanel" id="panel-ana" aria-labelledby="tab-ana" data-key="ana" data-i18n="panel.home">Date and weather, your next events, a focus timer, headphone battery, CPU and memory, network speed and quick launch at a glance.</p>
+              <p class="panel" role="tabpanel" id="panel-muzik" aria-labelledby="tab-muzik" data-key="muzik" data-i18n="panel.music" hidden>Cover art, progress and controls on a page of their own, one tap from the top bar. Music comes from Spotify, your browser or Windows Media Player.</p>
               <p class="panel" role="tabpanel" id="panel-takvim" aria-labelledby="tab-takvim" data-key="takvim" data-i18n="panel.calendar" hidden>Month, week and day views, a timer, stopwatch and Pomodoro. Events stay on your computer. When time is up, the notch shakes to let you know.</p>
               <p class="panel" role="tabpanel" id="panel-kontrol" aria-labelledby="tab-kontrol" data-key="kontrol" data-i18n="panel.control" hidden>Wi-Fi, Bluetooth, Do Not Disturb, volume and brightness. Drag the tiles into any order you like.</p>
               <p class="panel" role="tabpanel" id="panel-wifi" aria-labelledby="tab-wifi" data-key="wifi" data-i18n="panel.wifi" hidden>Pick a network from the notch, just like in Windows. Connect to Bluetooth devices here too.</p>
+              <p class="panel" role="tabpanel" id="panel-arkaplan" aria-labelledby="tab-arkaplan" data-key="arkaplan" data-i18n="panel.backgrounds" hidden>17 moving backgrounds behind the open notch: horizon, nebula, northern lights, rain, snow and more. They play only while the notch is open, or pick your own image or video.</p>
               <p class="panel" role="tabpanel" id="panel-kapali" aria-labelledby="tab-kapali" data-key="kapali" data-i18n="panel.closed" hidden>When closed, the notch stays small: cover art and a waveform if music is playing, otherwise the clock and battery. A brief indicator appears when volume or brightness changes.</p>
               <p class="panels__note" data-i18n="panel.note">There are also Focus, Shelf (drag and drop files and text), Clipboard and System pages.</p>
             </div>
@@ -133,11 +137,13 @@
           <div class="scene">
             <div class="aurora aurora--still" aria-hidden="true"><span></span><span></span><span></span></div>
             <div class="stage stage--shots">
-              <img class="shot is-active" data-key="ana" src="img/centik-ana.webp?v=20261112" width="926" height="528" loading="lazy" alt="Notch Home page: music, headphones, system and quick launch" data-i18n-attr="alt:shot.home">
-              <img class="shot" data-key="takvim" src="img/centik-takvim.webp?v=20261112" width="926" height="528" loading="lazy" alt="Notch Calendar page: month view, timer and events" data-i18n-attr="alt:shot.calendar">
-              <img class="shot" data-key="kontrol" src="img/centik-kontrol.webp?v=20261112" width="926" height="528" loading="lazy" alt="Control Center: Wi-Fi, Bluetooth, volume and brightness" data-i18n-attr="alt:shot.control">
-              <img class="shot" data-key="wifi" src="img/centik-wifi.webp?v=20261112" width="926" height="528" loading="lazy" alt="Wi-Fi network list in the notch" data-i18n-attr="alt:shot.wifi">
-              <img class="shot shot--closed" data-key="kapali" src="img/centik-kapali.webp?v=20261112" width="415" height="51" loading="lazy" alt="Closed notch: cover art and waveform while music plays" data-i18n-attr="alt:shot.closed">
+              <img class="shot is-active" data-key="ana" src="img/centik-ana.webp?v=20261114" width="930" height="528" loading="lazy" alt="Notch Home page: weather, events, focus, headphones, system and quick launch" data-i18n-attr="alt:shot.home,src:img.ana">
+              <img class="shot" data-key="muzik" src="img/centik-muzik.webp?v=20261114" width="930" height="528" loading="lazy" alt="Notch Music page: cover art, progress and playback controls" data-i18n-attr="alt:shot.music,src:img.muzik">
+              <img class="shot" data-key="takvim" src="img/centik-takvim.webp?v=20261114" width="930" height="528" loading="lazy" alt="Notch Calendar page: month view, timer and events" data-i18n-attr="alt:shot.calendar,src:img.takvim">
+              <img class="shot" data-key="kontrol" src="img/centik-kontrol.webp?v=20261114" width="930" height="528" loading="lazy" alt="Control Center: Wi-Fi, Bluetooth, volume and brightness" data-i18n-attr="alt:shot.control,src:img.kontrol">
+              <img class="shot" data-key="wifi" src="img/centik-wifi.webp?v=20261114" width="930" height="528" loading="lazy" alt="Wi-Fi network list in the notch" data-i18n-attr="alt:shot.wifi,src:img.wifi">
+              <img class="shot" data-key="arkaplan" src="img/centik-arkaplan.webp?v=20261114" width="720" height="409" loading="lazy" alt="The open notch cycling through its live backgrounds" data-i18n-attr="alt:shot.backgrounds,src:img.arkaplan">
+              <img class="shot shot--closed" data-key="kapali" src="img/centik-kapali.webp?v=20261114" width="420" height="51" loading="lazy" alt="Closed notch: cover art and waveform while music plays" data-i18n-attr="src:img.kapali,alt:shot.closed">
             </div>
           </div>
         </div>
@@ -161,8 +167,8 @@
           <div class="scene scene--tall">
             <div class="aurora aurora--still" aria-hidden="true"><span></span><span></span><span></span></div>
             <div class="stage stage--demo" data-notch="demo">
-              <img class="stage__closed" src="img/centik-kapali.webp?v=20261112" width="415" height="51" loading="lazy" alt="">
-              <img class="stage__open" id="demo-open" src="img/centik-ana.webp?v=20261112" width="926" height="528" loading="lazy" alt="The opened notch: music, headphone battery, system and quick launch" data-i18n-attr="alt:demo.openAlt">
+              <img data-i18n-attr="src:img.kapali" class="stage__closed" src="img/centik-kapali.webp?v=20261114" width="420" height="51" loading="lazy" alt="">
+              <img class="stage__open" id="demo-open" src="img/centik-ana.webp?v=20261114" width="930" height="528" loading="lazy" alt="The opened notch: weather, events, headphone battery, system and quick launch" data-i18n-attr="alt:demo.openAlt,src:img.ana">
               <button class="stage__zone" type="button" data-notch-zone aria-expanded="false" aria-controls="demo-open" aria-label="Open or close the notch" data-i18n-attr="aria-label:hero.zone"></button>
             </div>
             <img class="dock-img scene__dock" src="img/dock.webp?v=20261112-3" width="1057" height="161" loading="lazy" alt="The Koy dock at the bottom of the screen: pinned apps and open windows" data-i18n-attr="alt:demo.dockAlt">
@@ -312,7 +318,7 @@
     </div>
   </footer>
 
-  <script src="js/i18n.js?v=20261112-2"></script>
-  <script type="module" src="js/main.js?v=20261112-2"></script>
+  <script src="js/i18n.js?v=20261114"></script>
+  <script type="module" src="js/main.js?v=20261114"></script>
 </body>
 </html>

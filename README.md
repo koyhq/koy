@@ -35,9 +35,14 @@
 
 | | |
 | :---: | :---: |
-| <img alt="Closed notch while music is playing" src="docs/screenshots/centik-kapali.png" width="360"><br><sub>Closed notch: cover art and waveform while music plays</sub> | <img alt="Dock" src="docs/screenshots/dock.png" width="420"><br><sub>Dock: replaces the Windows taskbar</sub> |
-| <img alt="Control Center" src="docs/screenshots/centik-kontrol.png" width="420"><br><sub>Control Center: Wi-Fi, Bluetooth, volume, brightness</sub> | <img alt="Calendar" src="docs/screenshots/centik-takvim.png" width="420"><br><sub>Calendar: month, week and day views, events</sub> |
-| <img alt="Wi-Fi list" src="docs/screenshots/centik-wifi.png" width="420"><br><sub>Wi-Fi list: network selection like in Windows</sub> | <img alt="Notch: Home panel" src="docs/screenshots/centik-ana.png" width="420"><br><sub>Home panel: now playing, headphone battery, system and network, quick launch</sub> |
+| <img alt="Closed notch while music is playing" src="docs/screenshots/centik-kapali-en.png" width="360"><br><sub>Closed notch: cover art and waveform while music plays</sub> | <img alt="Dock" src="docs/screenshots/dock.png" width="420"><br><sub>Dock: replaces the Windows taskbar</sub> |
+| <img alt="Notch: Home page" src="docs/screenshots/centik-ana-en.png" width="420"><br><sub>Home: date and weather, upcoming events, focus timer, headphone battery, system and network, quick launch</sub> | <img alt="Notch: Music page" src="docs/screenshots/centik-muzik-en.png" width="420"><br><sub>Music: cover art, progress and controls on a page of its own</sub> |
+| <img alt="Control Center" src="docs/screenshots/centik-kontrol-en.png" width="420"><br><sub>Control Center: Wi-Fi, Bluetooth, volume, brightness</sub> | <img alt="Calendar" src="docs/screenshots/centik-takvim-en.png" width="420"><br><sub>Calendar: month, week and day views, events</sub> |
+| <img alt="Wi-Fi list" src="docs/screenshots/centik-wifi-en.png" width="420"><br><sub>Wi-Fi list: network selection like in Windows</sub> | |
+
+**Live backgrounds:** 17 moving backgrounds play behind the open notch (or pick your own image, GIF or video).
+
+<p align="center"><img alt="The open notch cycling through its 17 live backgrounds" src="docs/screenshots/koy-backgrounds.gif" width="640"></p>
 
 <sub>Notch images were rendered with sample data (`tools/Koy.UiSnapshots`); the dock image is from a real screen. The app UI is available in English and Turkish.</sub>
 

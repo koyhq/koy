@@ -7,7 +7,7 @@
 import { loadMotion, OPEN, CLOSE } from './spring.js?v=20261112-2';
 
 const CLOSE_DELAY = 400;
-const CLOSED = { scaleX: 0.448, scaleY: 0.097 }; // kapalı çentiğin açık görüntüye oranı (415/926, 51/528)
+const CLOSED = { scaleX: 0.452, scaleY: 0.097 }; // kapalı çentiğin açık görüntüye oranı (420/930, 51/528)
 
 export function initNotch(root) {
   const zone = root.querySelector('[data-notch-zone]');

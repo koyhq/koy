@@ -18,10 +18,10 @@ internal sealed class FakeWifi(bool locationBlocked = false) : IWifiService
 
         return Task.FromResult(new WifiScanResult(WifiAccess.Allowed, true, false,
         [
-            new WifiNetwork("Ev Ağı", 88, true, true, true),
-            new WifiNetwork("Komşu_5G", 72, true, false, false),
-            new WifiNetwork("Kafe Misafir", 51, false, false, false),
-            new WifiNetwork("Ofis", 33, true, false, true),
+            new WifiNetwork(Sample.T("Ev Ağı", "Home"), 88, true, true, true),
+            new WifiNetwork(Sample.T("Komşu_5G", "Neighbor_5G"), 72, true, false, false),
+            new WifiNetwork(Sample.T("Kafe Misafir", "Cafe Guest"), 51, false, false, false),
+            new WifiNetwork(Sample.T("Ofis", "Office"), 33, true, false, true),
             new WifiNetwork("", 20, true, false, false)
         ]));
     }
@@ -39,11 +39,11 @@ internal sealed class FakeBluetooth(bool anyAudioConnected = true) : IBluetoothS
 
     public IReadOnlyList<BluetoothDeviceInfo> Devices { get; } =
     [
-        new("a", "Kulaklık Pro", BluetoothDeviceKind.Headphones, anyAudioConnected, anyAudioConnected ? 86 : null, "c1"),
-        new("b", "Sessiz Fare", BluetoothDeviceKind.Mouse, true, 40, "c2"),
-        new("c", "Salon Hoparlörü", BluetoothDeviceKind.Speaker, false, null, "c3"),
-        new("d", "Mekanik Klavye", BluetoothDeviceKind.Keyboard, false, null, "c4"),
-        new("e", "Telefonum", BluetoothDeviceKind.Phone, false, null, "c5"),
+        new("a", Sample.T("Kulaklık Pro", "Headphones Pro"), BluetoothDeviceKind.Headphones, anyAudioConnected, anyAudioConnected ? 86 : null, "c1"),
+        new("b", Sample.T("Sessiz Fare", "Silent Mouse"), BluetoothDeviceKind.Mouse, true, 40, "c2"),
+        new("c", Sample.T("Salon Hoparlörü", "Living Room Speaker"), BluetoothDeviceKind.Speaker, false, null, "c3"),
+        new("d", Sample.T("Mekanik Klavye", "Mechanical Keyboard"), BluetoothDeviceKind.Keyboard, false, null, "c4"),
+        new("e", Sample.T("Telefonum", "My Phone"), BluetoothDeviceKind.Phone, false, null, "c5"),
         new("f", "Bilinmeyen Cihaz", BluetoothDeviceKind.Other, false, null, "c6")
     ];
 

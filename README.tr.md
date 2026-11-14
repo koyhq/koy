@@ -36,8 +36,13 @@
 | | |
 | :---: | :---: |
 | <img alt="Kapalı çentik, müzik çalarken" src="docs/screenshots/centik-kapali.png" width="360"><br><sub>Kapalı çentik: müzik çalarken kapak ve dalga</sub> | <img alt="Dock" src="docs/screenshots/dock.png" width="420"><br><sub>Dock: Windows görev çubuğunun yerine</sub> |
+| <img alt="Çentik: Ana sayfa" src="docs/screenshots/centik-ana.png" width="420"><br><sub>Ana: tarih ve hava, sıradaki etkinlikler, odak sayacı, kulaklık pili, sistem ve ağ, hızlı başlat</sub> | <img alt="Çentik: Müzik sayfası" src="docs/screenshots/centik-muzik.png" width="420"><br><sub>Müzik: kapak, ilerleme ve kontroller kendi sayfasında</sub> |
 | <img alt="Kontrol Merkezi" src="docs/screenshots/centik-kontrol.png" width="420"><br><sub>Kontrol Merkezi: Wi-Fi, Bluetooth, ses, parlaklık</sub> | <img alt="Takvim" src="docs/screenshots/centik-takvim.png" width="420"><br><sub>Takvim: ay, hafta ve gün görünümü, etkinlikler</sub> |
-| <img alt="Wi-Fi listesi" src="docs/screenshots/centik-wifi.png" width="420"><br><sub>Wi-Fi listesi: Windows'taki gibi ağ seçimi</sub> | <img alt="Çentik: Ana panel" src="docs/screenshots/centik-ana.png" width="420"><br><sub>Ana panel: çalan müzik, kulaklık pili, sistem ve ağ, hızlı başlat</sub> |
+| <img alt="Wi-Fi listesi" src="docs/screenshots/centik-wifi.png" width="420"><br><sub>Wi-Fi listesi: Windows'taki gibi ağ seçimi</sub> | |
+
+**Canlı arka planlar:** Açık çentiğin arkasında 17 hareketli arka plan oynar (istersen kendi resmini, GIF'ini ya da videonu seç).
+
+<p align="center"><img alt="Açık çentik, 17 canlı arka plan arasında geçiyor" src="docs/screenshots/koy-arkaplanlar.gif" width="640"></p>
 
 <sub>Çentik görüntüleri örnek verilerle çizildi (`tools/Koy.UiSnapshots`); dock görüntüsü gerçek ekrandan.</sub>
 

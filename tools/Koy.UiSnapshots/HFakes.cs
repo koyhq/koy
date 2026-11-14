@@ -16,7 +16,7 @@ internal sealed class FakeSystemStats : ISystemStatsService
         Current = new SystemSnapshot(
             CpuPercent: instantOnly ? 0 : 23, TopProcessName: instantOnly ? null : "Chrome", TopProcessCpuPercent: instantOnly ? 0 : 11,
             RamUsedBytes: (long)(9.2 * 1024 * 1024 * 1024), RamTotalBytes: 16L * 1024 * 1024 * 1024, RamPercent: 58,
-            NetDownBytesPerSec: instantOnly ? 0 : (long)(2.5 * 1024 * 1024), NetUpBytesPerSec: instantOnly ? 0 : 360 * 1024, NetworkName: "Ev Ağı",
+            NetDownBytesPerSec: instantOnly ? 0 : (long)(2.5 * 1024 * 1024), NetUpBytesPerSec: instantOnly ? 0 : 360 * 1024, NetworkName: Sample.T("Ev Ağı", "Home"),
             KoyMemoryBytes: 64L * 1024 * 1024, RatesReady: !instantOnly);
     }
 
@@ -49,13 +49,13 @@ internal sealed class FakeClipboard : IClipboardHistoryService
 
         _items =
         [
-            Make("https://ornek.com/sayfa/baslik", true, TimeSpan.FromHours(3)),
+            Make(Sample.T("https://ornek.com/sayfa/baslik", "https://example.com/page/title"), true, TimeSpan.FromHours(3)),
             Make("#3B82F6", false, TimeSpan.FromMinutes(2)),
-            Make("Toplantı notları:\nBütçe onaylandı, tasarım teslimi cuma.\nSonraki görüşme salı.", false, TimeSpan.FromSeconds(10)),
-            Make("var sonuc = liste.Where(x => x.Aktif).ToList();", false, TimeSpan.FromMinutes(40)),
+            Make(Sample.T("Toplantı notları:\nBütçe onaylandı, tasarım teslimi cuma.\nSonraki görüşme salı.", "Meeting notes:\nBudget approved, design due Friday.\nNext call Tuesday."), false, TimeSpan.FromSeconds(10)),
+            Make(Sample.T("var sonuc = liste.Where(x => x.Aktif).ToList();", "var result = items.Where(x => x.Active).ToList();"), false, TimeSpan.FromMinutes(40)),
             Make("rgb(250, 204, 21)", false, TimeSpan.FromHours(1)),
-            Make("https://docs.ornek.com/rehber", false, TimeSpan.FromHours(5)),
-            Make("Yarın 10:00 müşteri görüşmesi", false, TimeSpan.FromDays(1))
+            Make(Sample.T("https://docs.ornek.com/rehber", "https://docs.example.com/guide"), false, TimeSpan.FromHours(5)),
+            Make(Sample.T("Yarın 10:00 müşteri görüşmesi", "Client call tomorrow at 10:00"), false, TimeSpan.FromDays(1))
         ];
     }
 

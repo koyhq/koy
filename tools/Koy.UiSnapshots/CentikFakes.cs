@@ -36,17 +36,29 @@ internal sealed class FakeMedia(MediaInfo? current) : IMediaService
 // Örnek metin bu proje için yazıldı; ağa ve dosyaya gidilmez. Satırlar FakeMedia'nın 84. saniyesi çevresinde.
 internal sealed class FakeLyrics : Koy.Core.Lyrics.ILyricsProvider
 {
-    private static readonly string[] Sample =
-    [
-        "Yol uzar, farlar söner",
-        "Şehir arkamda kalır",
-        "",
-        "Gece boyu radyoda aynı şarkı çalar, kimse söndürmez",
-        "Camda ince bir yağmur",
-        "Sabah daha çok uzak",
-        "Dönüş yok bu yoldan",
-        "Yine de gülümserim"
-    ];
+    private static string[] Sample => Koy.UiSnapshots.Sample.English
+        ?
+        [
+            "The road goes on, the headlights fade",
+            "The city falls behind",
+            "",
+            "All night the radio plays the same song, nobody turns it off",
+            "A thin rain on the glass",
+            "Morning is still far away",
+            "There's no turning back",
+            "And still I smile"
+        ]
+        :
+        [
+            "Yol uzar, farlar söner",
+            "Şehir arkamda kalır",
+            "",
+            "Gece boyu radyoda aynı şarkı çalar, kimse söndürmez",
+            "Camda ince bir yağmur",
+            "Sabah daha çok uzak",
+            "Dönüş yok bu yoldan",
+            "Yine de gülümserim"
+        ];
 
     public Task<Koy.Core.Lyrics.LyricsLoadResult> LoadAsync(Koy.Core.Lyrics.LyricsQuery query, CancellationToken cancellationToken) =>
         Task.FromResult(new Koy.Core.Lyrics.LyricsLoadResult(
@@ -66,7 +78,8 @@ internal sealed class FakePower(int percent = 86, bool charging = false, bool ha
 
 internal sealed class FakeWeather : IWeatherService
 {
-    public WeatherInfo? CurrentWeather { get; } = new(14, 2, "Parçalı bulutlu", "PartlyCloudy", DateTimeOffset.Now);
+    public WeatherInfo? CurrentWeather { get; } = new(14, 2,
+        Sample.T("Parçalı bulutlu", "Partly cloudy"), "PartlyCloudy", DateTimeOffset.Now);
     public event EventHandler<WeatherInfo?>? WeatherChanged { add { } remove { } }
     public Task<WeatherInfo?> GetCurrentWeatherAsync(double latitude, double longitude, CancellationToken cancellationToken = default) =>
         Task.FromResult(CurrentWeather);

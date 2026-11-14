@@ -18,8 +18,10 @@ namespace Koy.UiSnapshots;
 /// <c>--scene startmenu</c>: Başlat düğmesinin sağ tık menüsü (Win+X karşılığı), alt menü açık hâliyle.
 /// <c>--scene eklentiler</c>: Eklentiler sayfası (depodaki store/ klasöründen sahte ağla; kurulum, uygulama ve hata durumları).
 /// <c>--scene uninstall</c>: yalnız Hakkında sayfası ve kaldırma onay görünümü (kaldırıcı hiçbir zaman çalıştırılmaz).
+/// <c>--scene efekt-video</c>: video arka planlı çentiğin 4 sn'lik döngüsü kare kare (&lt;out&gt;/&lt;önayar&gt;/f000.png). <c>--preset a,b</c> süzer, <c>--fps</c> (vars. 15).
 /// <c>--scene sitedock</c>: tanıtım sitesi için, görev çubuğuna sabitlenmiş gerçek uygulamalarla kapsül dock.
 /// <c>--user-theme &lt;yol&gt;</c>: o user-theme.json dosyasını (ör. store/ tema paketinin theme.json'ı) uygulayarak çizer; %AppData% dosyasına dokunulmaz.
+/// <c>--lang en|tr</c>: arayüz dili (çentik sahneleri; verilmezse makinenin dili). İngilizce README ve site görüntüleri için.
 /// <c>--transparent</c>: gri zemin çizilmez (siteye doğrudan konacak görüntüler). <c>--scale 2</c>: çözünürlük çarpanı (varsayılan 1,5).
 /// </summary>
 public static class Program
@@ -41,6 +43,9 @@ public static class Program
     /// <summary>Çizimin arkasındaki zemin; saydam yüzeyler bunu gösterir.</summary>
     private static Color Backdrop = Color.FromRgb(0x7A, 0x80, 0x8C);
 
+    /// <summary>--lang ile verilen arayüz dili ("en" / "tr"); null ise ayarın varsayılanı.</summary>
+    private static string? Language;
+
     [STAThread]
     public static int Main(string[] args)
     {
@@ -49,6 +54,15 @@ public static class Program
         var themeArg = (Arg(args, "--theme") ?? "dark").ToLowerInvariant();
         var scene = (Arg(args, "--scene") ?? "all").ToLowerInvariant();
         Transparent = args.Contains("--transparent");
+        if (Arg(args, "--lang") is "en" or "tr")
+        {
+            Language = Arg(args, "--lang");
+            var culture = new System.Globalization.CultureInfo(Language == "en" ? "en-US" : "tr-TR");
+            System.Globalization.CultureInfo.CurrentUICulture = culture;
+            System.Globalization.CultureInfo.CurrentCulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+        }
         if (Arg(args, "--user-theme") is { Length: > 0 } userTheme)
         {
             UserThemePath = Path.GetFullPath(userTheme);
@@ -88,6 +102,8 @@ public static class Program
                 RenderCentik(outDir, prefix, theme);
             else if (scene is "efektler" or "effects")
                 RenderEffects(outDir, prefix, theme);
+            else if (scene == "efekt-video")
+                RenderEffectVideos(outDir, Arg(args, "--preset"), int.TryParse(Arg(args, "--fps"), out var fps) && fps is >= 1 and <= 30 ? fps : 15);
             else if (scene == "efekt-cpu")
                 MeasureEffects();
             else if (scene == "arama")
@@ -288,18 +304,18 @@ public static class Program
             Weather = new WeatherSettings
             {
                 LocationSource = Koy.Core.Weather.WeatherLocationSource.City,
-                City = "İstanbul, Türkiye",
+                City = Sample.T("İstanbul, Türkiye", "Istanbul, Turkey"),
                 Latitude = 41.01,
                 Longitude = 28.97
             }
         };
-        if (language is not null)
-            settings.General.Language = language;
+        if ((language ?? Language) is { } lang)
+            settings.General.Language = lang;
 
         var controller = new Koy.Core.Notch.NotchController();
         controller.SetEnabledPanels(Koy.Core.Notch.NotchPanels.Order);
         var timers = new Koy.Core.Timers.FocusTimers(Koy.Core.Timers.PomodoroConfig.Default);
-        var info = music ? new Koy.Core.Media.MediaInfo("Gece Yolculuğu", "Mor ve Ötesi", "Spotify.exe", true, wideCover ? FakeCover(150, 83) : FakeCover(300, 300)) : null;
+        var info = music ? new Koy.Core.Media.MediaInfo(Sample.T("Gece Yolculuğu", "Night Drive"), Sample.T("Mor ve Ötesi", "The Coves"), "Spotify.exe", true, wideCover ? FakeCover(150, 83) : FakeCover(300, 300)) : null;
 
         var vm = new Koy.App.Features.Notch.NotchViewModel(
             settings,
@@ -350,23 +366,26 @@ public static class Program
     private static Koy.App.Features.Focus.TasksViewModel MakeTasks()
     {
         var service = new Koy.Core.Tasks.TaskService(TempFile("tasks.json"));
-        var done = service.Add("Sunumu gönder");
-        service.Add("Raporu gözden geçir");
-        service.Add("Toplantı notlarını yaz", new TimeOnly(16, 0));
-        service.Add("Spor", new TimeOnly(18, 30));
+        var done = service.Add(Sample.T("Sunumu gönder", "Send the slides"));
+        service.Add(Sample.T("Raporu gözden geçir", "Review the report"));
+        service.Add(Sample.T("Toplantı notlarını yaz", "Write meeting notes"), new TimeOnly(16, 0));
+        service.Add(Sample.T("Spor", "Workout"), new TimeOnly(18, 30));
         service.SetDone(done!.Id, true);
         return new Koy.App.Features.Focus.TasksViewModel(service);
     }
 
     private static Koy.App.Features.Calendar.CalendarViewModel MakeCalendar(AppSettings settings)
     {
-        var events = new Koy.App.Features.Calendar.SharedEvents(new Koy.Core.Calendar.EventStore(TempFile("events.json")));
+        // Önbellek de geçici dosyada: yoksa kullanıcının gerçek Google/Outlook etkinlikleri görüntüye karışır.
+        var events = new Koy.App.Features.Calendar.SharedEvents(
+            new Koy.Core.Calendar.EventStore(TempFile("events.json")),
+            new Koy.Core.Calendar.CalendarCacheStore(TempFile("calendar-cache.json")));
         var today = DateOnly.FromDateTime(DateTime.Today);
-        events.Book.Add("Takım toplantısı", today, new TimeOnly(14, 0));
-        events.Book.Add("Diş randevusu", today, new TimeOnly(17, 30));
-        events.Book.Add("Sunum", today.AddDays(2), new TimeOnly(10, 0));
-        events.Book.Add("Doğum günü", today.AddDays(5), new TimeOnly(19, 0));
-        events.Book.Add("Fatura son gün", today.AddDays(-3), new TimeOnly(12, 0));
+        events.Book.Add(Sample.T("Takım toplantısı", "Team meeting"), today, new TimeOnly(14, 0));
+        events.Book.Add(Sample.T("Diş randevusu", "Dentist"), today, new TimeOnly(17, 30));
+        events.Book.Add(Sample.T("Sunum", "Presentation"), today.AddDays(2), new TimeOnly(10, 0));
+        events.Book.Add(Sample.T("Doğum günü", "Birthday"), today.AddDays(5), new TimeOnly(19, 0));
+        events.Book.Add(Sample.T("Fatura son gün", "Bill due"), today.AddDays(-3), new TimeOnly(12, 0));
         return new Koy.App.Features.Calendar.CalendarViewModel(settings, events);
     }
 
@@ -491,14 +510,89 @@ public static class Program
         }
     }
 
+    /// <summary>
+    /// Video önayarlarının 4 sn'lik döngüsünü açık çentikte (Ana) kare kare çizer: &lt;out&gt;/&lt;önayar&gt;/f000.png…
+    /// Video durdurulup her kare için konumu elle ayarlanır (ScrubbingEnabled), böylece kareler eşit aralıklı olur.
+    /// README ve site için GIF / video üretmekte kullanılır.
+    /// </summary>
+    private static void RenderEffectVideos(string outDir, string? only, int fps)
+    {
+        // Bütün önayarlar birkaç dakika sürer; saat ilk değerde sabit tutulur ki GIF'te atlamasın.
+        string? clock = null;
+        foreach (var preset in Koy.Core.Notch.LiveBackgroundPresets.All)
+        {
+            if (preset.VideoFile is null || (only is not null && !only.Split(',').Contains(preset.Id)))
+                continue;
+            var set = MakeNotch(music: true, liveBackground: preset.Id);
+            set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+            set.Vm.ShowHomePageCommand.Execute(Koy.Core.Notch.NotchHomePage.Home);
+            var content = (FrameworkElement)set.Window.Content;
+            set.Window.Content = null;
+            var host = new Window
+            {
+                Content = content, DataContext = set.Vm, WindowStyle = WindowStyle.None, ResizeMode = ResizeMode.NoResize,
+                ShowInTaskbar = false, ShowActivated = false, Left = -30000, Top = -30000,
+                Width = Koy.Core.Notch.NotchLayout.CanvasWidth, Height = Koy.Core.Notch.NotchLayout.CanvasHeight,
+            };
+            var shape = (Koy.App.Features.Notch.NotchShape)set.Window.FindName("Notch");
+            shape.Width = Koy.Core.Notch.NotchLayout.ExpandedWidth;
+            shape.Height = Koy.Core.Notch.NotchLayout.ExpandedHeight;
+            shape.CornerRadius = Koy.Core.Notch.NotchStyle.CornerRadius(set.Vm.Settings.Notch.Style, Koy.Core.Notch.NotchSurface.Expanded, shape.Height, 34);
+            host.Show();
+            Settle();
+
+            var media = FindDescendant<System.Windows.Controls.MediaElement>(content);
+            if (media is null)
+            {
+                Console.WriteLine($"{preset.Id}: video yok, atlandı");
+            }
+            else
+            {
+                var dir = Path.Combine(outDir, preset.Id);
+                Directory.CreateDirectory(dir);
+                media.Pause();
+                var frames = 4 * fps;
+                for (var i = 0; i < frames; i++)
+                {
+                    media.Position = TimeSpan.FromSeconds((double)i / fps);
+                    // Konum değişince yeni kare kod çözücüden eşzamansız gelir; kısa bekleyip kuyruğu boşalt.
+                    for (var k = 0; k < 3; k++)
+                    {
+                        Thread.Sleep(40);
+                        Flush();
+                    }
+                    clock ??= set.Vm.Status.CurrentTime;
+                    set.Vm.Status.CurrentTime = clock;
+                    RenderElement(content, Koy.Core.Notch.NotchLayout.CanvasWidth, Koy.Core.Notch.NotchLayout.CanvasHeight,
+                        Path.Combine(dir, $"f{i:000}.png"));
+                }
+            }
+            host.Close();
+            set.Vm.Dispose();
+        }
+    }
+
+    private static T? FindDescendant<T>(DependencyObject root) where T : DependencyObject
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            var child = VisualTreeHelper.GetChild(root, i);
+            if (child is T found)
+                return found;
+            if (FindDescendant<T>(child) is { } deeper)
+                return deeper;
+        }
+        return null;
+    }
+
     private static void RenderNotchScenes(Func<string, string> name)
     {
         var shelfItems = new[]
         {
-            new Koy.Core.Shelf.ShelfItem("1", "sunum.pdf", @"C:\Belgeler\sunum.pdf", Koy.Core.Shelf.ShelfItemKind.File, DateTimeOffset.Now),
-            new Koy.Core.Shelf.ShelfItem("2", "ekran.png", @"C:\Belgeler\ekran.png", Koy.Core.Shelf.ShelfItemKind.File, DateTimeOffset.Now),
-            new Koy.Core.Shelf.ShelfItem("3", "notlar", @"C:\Belgeler\notlar", Koy.Core.Shelf.ShelfItemKind.Directory, DateTimeOffset.Now),
-            new Koy.Core.Shelf.ShelfItem("4", "Kopyalanan metin", "Kopyalanan metin", Koy.Core.Shelf.ShelfItemKind.Text, DateTimeOffset.Now)
+            new Koy.Core.Shelf.ShelfItem("1", Sample.T("sunum.pdf", "slides.pdf"), Sample.T(@"C:\Belgeler\sunum.pdf", @"C:\Documents\slides.pdf"), Koy.Core.Shelf.ShelfItemKind.File, DateTimeOffset.Now),
+            new Koy.Core.Shelf.ShelfItem("2", Sample.T("ekran.png", "screen.png"), Sample.T(@"C:\Belgeler\ekran.png", @"C:\Documents\screen.png"), Koy.Core.Shelf.ShelfItemKind.File, DateTimeOffset.Now),
+            new Koy.Core.Shelf.ShelfItem("3", Sample.T("notlar", "notes"), Sample.T(@"C:\Belgeler\notlar", @"C:\Documents\notes"), Koy.Core.Shelf.ShelfItemKind.Directory, DateTimeOffset.Now),
+            new Koy.Core.Shelf.ShelfItem("4", Sample.T("Kopyalanan metin", "Copied text"), Sample.T("Kopyalanan metin", "Copied text"), Koy.Core.Shelf.ShelfItemKind.Text, DateTimeOffset.Now)
         };
 
         // Kapalı çentik: boşta, tarihli, müzik çalarken, zamanlayıcı çalışırken.
@@ -566,6 +660,10 @@ public static class Program
         // Müzik kartına tıklanınca: büyük kart Ana gövdesini kaplar.
         set.Vm.ShowHomePageCommand.Execute(Koy.Core.Notch.NotchHomePage.Home);
         ShotNotch(set, name("ana-muzik-buyuk"), expanded: true);
+        // Müzik sayfası (D düzeni): üst çubuktaki nota düğmesi.
+        set.Vm.ShowHomePageCommand.Execute(Koy.Core.Notch.NotchHomePage.Music);
+        Flush();
+        ShotNotch(set, name("muzik"), expanded: true);
         set.Vm.Dispose();
 
         // Müzik kartı stilleri (#66): Albüm kapağı (küçük ve büyük kart) ve Düz.
@@ -715,7 +813,7 @@ public static class Program
 
         // Güvenli ve kayıtsız ağa tıklanınca satırın içinde şifre kutusu; bağlanıyor ve hata satırları.
         var rows = set.Vm.ControlCenter.Wifi.Rows;
-        var secured = rows.First(r => r.Ssid == "Komşu_5G");
+        var secured = rows.First(r => r.Ssid == Sample.T("Komşu_5G", "Neighbor_5G"));
         set.Vm.ControlCenter.Wifi.ActivateCommand.Execute(secured);
         Flush();
         Settle();
@@ -724,8 +822,8 @@ public static class Program
             box.Password = "12345678";
         ShotNotch(set, name("wifi-sifre"), expanded: true);
         secured.IsPasswordOpen = false;
-        rows.First(r => r.Ssid == "Komşu_5G").IsBusy = true;
-        rows.First(r => r.Ssid == "Kafe Misafir").ErrorText = Koy.App.Resources.Strings.Get("WifiErrTimeout");
+        rows.First(r => r.Ssid == Sample.T("Komşu_5G", "Neighbor_5G")).IsBusy = true;
+        rows.First(r => r.Ssid == Sample.T("Kafe Misafir", "Cafe Guest")).ErrorText = Koy.App.Resources.Strings.Get("WifiErrTimeout");
         ShotNotch(set, name("wifi-baglaniyor-hata"), expanded: true);
         set.Vm.Dispose();
 
