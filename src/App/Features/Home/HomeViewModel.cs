@@ -149,6 +149,8 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
         if (active)
         {
             _events.Changed += OnEventsChanged;
+            // Ayarlardan bağlanan ya da kesilen takvim hesabı "Bugün" kartına da yansısın.
+            _events.ReloadExternalFromCache();
             RefreshUpcoming();
         }
         else
