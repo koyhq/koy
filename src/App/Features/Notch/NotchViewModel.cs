@@ -400,14 +400,17 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         }
     }
 
+    private bool IsCardShown => Osd.IsActive && Osd.Type == OsdType.Card;
+
     private void OnOsdActivated(object? sender, EventArgs e)
     {
         // Akıllı/Fareyle modunda çentik gizli olabilir; gösterge süresince (3 sn) görünür kalsın.
         _visibility.OnMediaActivity();
         // Kart (güncelleme, bildirim) gösterildiği sürece çentik gizlenmez; başka OSD kartın yerini alırsa bırakılır.
         _visibility.SetHold(Osd.Type == OsdType.Card);
-        // OSD/kart görünürken imleç kartın ya da × düğmesinin üstüne gelince çentik kendiliğinden açılmasın.
-        _controller.SetHoverOpenSuppressed(Osd.IsActive);
+        // Kart görünürken imleç kartın ya da × düğmesinin üstüne gelince çentik kendiliğinden açılmasın. Ses/parlaklık
+        // gibi düğmesiz göstergelerde bastırılmaz: tekerlekle ses değiştirirken üzerine gelince açılma bozulmasın.
+        _controller.SetHoverOpenSuppressed(IsCardShown);
         UpdateTargetSize();
         UpdateActivePanels();
     }
@@ -415,7 +418,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private void OnOsdStateChanged(object? sender, EventArgs e)
     {
         _visibility.SetHold(false);
-        _controller.SetHoverOpenSuppressed(Osd.IsActive);
+        _controller.SetHoverOpenSuppressed(IsCardShown);
         UpdateTargetSize();
         UpdateActivePanels();
     }
