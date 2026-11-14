@@ -408,12 +408,15 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         _visibility.OnMediaActivity();
         // Kart (güncelleme, bildirim) gösterildiği sürece çentik gizlenmez; başka OSD kartın yerini alırsa bırakılır.
         _visibility.SetHold(Osd.Type == OsdType.Card);
+        // OSD/kart görünürken imleç kartın ya da × düğmesinin üstüne gelince çentik kendiliğinden açılmasın.
+        _controller.SetHoverOpenSuppressed(Osd.IsActive);
         UpdateTargetSize();
     }
 
     private void OnOsdStateChanged(object? sender, EventArgs e)
     {
         _visibility.SetHold(false);
+        _controller.SetHoverOpenSuppressed(Osd.IsActive);
         UpdateTargetSize();
     }
 

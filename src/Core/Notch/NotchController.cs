@@ -46,6 +46,33 @@ public sealed class NotchController : IDisposable
     private int _openDelayMs;
     private int _closeDelayMs = NotchOpenPolicy.DefaultCloseDelayMs;
     private ITimer? _hoverOpenTimer;
+    private bool _hoverOpenSuppressed;
+    private bool _suppressedUntilMouseLeave;
+
+    /// <summary>Üzerine gelince açılmanın (Expanded veya Peek) şu an bastırılıp bastırılmadığını gösterir.</summary>
+    public bool IsHoverOpenSuppressed => _hoverOpenSuppressed || _suppressedUntilMouseLeave;
+
+    /// <summary>
+    /// OSD/kart görünürken fareyle üzerine gelerek çentiğin açılmasını (Expanded ve Peek) bastırır.
+    /// İmleç çentik üzerindeyken bastırma kalkarsa, imleç çıkana (<see cref="OnMouseLeave"/>) kadar bastırma sürer.
+    /// </summary>
+    public void SetHoverOpenSuppressed(bool suppressed)
+    {
+        if (_hoverOpenSuppressed == suppressed)
+            return;
+
+        _hoverOpenSuppressed = suppressed;
+        if (suppressed)
+        {
+            _suppressedUntilMouseLeave = false;
+            _hoverOpenTimer?.Dispose();
+            _hoverOpenTimer = null;
+        }
+        else
+        {
+            _suppressedUntilMouseLeave = IsMouseOver;
+        }
+    }
 
     // Sekme sırası (kullanıcının sırası; boşsa varsayılan). Geçici eklenen panel (sürükle-bırakta Raf) bu sıraya göre yerleşir.
     private List<NotchPanel> _panelOrder = [.. NotchPanels.Order];
@@ -142,6 +169,13 @@ public sealed class NotchController : IDisposable
         IsMouseOver = true;
         _mouseLeaveTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
 
+        if (IsHoverOpenSuppressed)
+        {
+            _hoverOpenTimer?.Dispose();
+            _hoverOpenTimer = null;
+            return;
+        }
+
         if (OpenOnHover && State != NotchState.Expanded && OpenDelayMs == 0)
         {
             _autoPeekTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
@@ -166,7 +200,7 @@ public sealed class NotchController : IDisposable
     {
         _hoverOpenTimer?.Dispose();
         _hoverOpenTimer = null;
-        if (IsMouseOver && OpenOnHover && State != NotchState.Expanded && !_disposed)
+        if (IsMouseOver && OpenOnHover && !IsHoverOpenSuppressed && State != NotchState.Expanded && !_disposed)
         {
             _autoPeekTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
             SetState(NotchState.Expanded);
@@ -176,6 +210,7 @@ public sealed class NotchController : IDisposable
     public void OnMouseLeave()
     {
         IsMouseOver = false;
+        _suppressedUntilMouseLeave = false;
         _hoverOpenTimer?.Dispose();
         _hoverOpenTimer = null;
 
