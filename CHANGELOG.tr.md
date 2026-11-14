@@ -28,6 +28,7 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 ### Düzeltmeler
 
 * **calendar:** Google istemci sırrı gönderiliyor, sürüm OAuth istemcileri derlemeye gömülüyor ([12cc20e](https://github.com/koyhq/koy/commit/12cc20e51c4e055a667be3c49adc4fdfd46e5ec1))
+* **uninstall:** ayarlar silinirken takvim belirteçleri ve önbelleği de siliniyor ([5fcdf97](https://github.com/koyhq/koy/commit/5fcdf97c6855788405da4ac757df27bc839441ca))
 
 ### Performans
 

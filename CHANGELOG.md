@@ -25,6 +25,7 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 ### Fixed
 
 * **calendar:** send the Google client secret and embed release OAuth clients ([12cc20e](https://github.com/koyhq/koy/commit/12cc20e51c4e055a667be3c49adc4fdfd46e5ec1))
+* **uninstall:** delete calendar tokens and cache when settings are removed ([5fcdf97](https://github.com/koyhq/koy/commit/5fcdf97c6855788405da4ac757df27bc839441ca))
 
 
 ### Performance
