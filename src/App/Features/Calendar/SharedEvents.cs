@@ -80,16 +80,16 @@ public sealed class SharedEvents
 
             if (settings.GoogleEnabled && _syncService.HasToken(CalendarProvider.Google))
             {
-                var clientId = CalendarOAuthConfig.ResolveClientId(CalendarProvider.Google, settings.GoogleClientId);
-                var result = await _syncService.SyncAsync(CalendarProvider.Google, clientId, from, to, ct);
+                var client = BuiltInCalendarClients.Resolve(CalendarProvider.Google, settings);
+                var result = await _syncService.SyncAsync(CalendarProvider.Google, client, from, to, ct);
                 if (result.Events.Count > 0 || result.Success)
                     Book.ReplaceExternal(CalendarEventSource.Google, result.Events);
             }
 
             if (settings.OutlookEnabled && _syncService.HasToken(CalendarProvider.Outlook))
             {
-                var clientId = CalendarOAuthConfig.ResolveClientId(CalendarProvider.Outlook, settings.OutlookClientId);
-                var result = await _syncService.SyncAsync(CalendarProvider.Outlook, clientId, from, to, ct);
+                var client = BuiltInCalendarClients.Resolve(CalendarProvider.Outlook, settings);
+                var result = await _syncService.SyncAsync(CalendarProvider.Outlook, client, from, to, ct);
                 if (result.Events.Count > 0 || result.Success)
                     Book.ReplaceExternal(CalendarEventSource.Outlook, result.Events);
             }

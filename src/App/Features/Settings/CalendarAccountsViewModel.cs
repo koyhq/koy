@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Koy.App.Features.Calendar;
 using Koy.App.Resources;
 using Koy.Core.Calendar;
 using Koy.Core.Diagnostics;
@@ -9,7 +10,8 @@ namespace Koy.App.Features.Settings;
 
 /// <summary>
 /// Ayarlar › Çentik › Takvim hesapları: Google ve Outlook salt okunur OAuth 2.0 PKCE bağlantısı.
-/// İstemci sırrı tutulmaz; belirteçler DPAPI ile şifreli saklanır, etkinlikler yerel önbellekte tutulur.
+/// Sürümün yerleşik istemcisi kullanılır; kimlik alanları yalnız kendi istemcisini kullanmak isteyen için.
+/// Belirteçler DPAPI ile şifreli saklanır, etkinlikler yerel önbellekte tutulur.
 /// </summary>
 public sealed partial class CalendarAccountsViewModel : ObservableObject
 {
@@ -20,6 +22,9 @@ public sealed partial class CalendarAccountsViewModel : ObservableObject
 
     [ObservableProperty]
     private string _googleClientId = "";
+
+    [ObservableProperty]
+    private string _googleClientSecret = "";
 
     [ObservableProperty]
     private string _outlookClientId = "";
@@ -66,6 +71,7 @@ public sealed partial class CalendarAccountsViewModel : ObservableObject
         {
             var settings = _store.Load();
             GoogleClientId = settings.GoogleClientId;
+            GoogleClientSecret = settings.GoogleClientSecret;
             OutlookClientId = settings.OutlookClientId;
             IsGoogleConnected = settings.GoogleEnabled && _sync.HasToken(CalendarProvider.Google);
             IsOutlookConnected = settings.OutlookEnabled && _sync.HasToken(CalendarProvider.Outlook);
@@ -84,6 +90,15 @@ public sealed partial class CalendarAccountsViewModel : ObservableObject
 
         var current = _store.Load();
         _store.Save(current with { GoogleClientId = value?.Trim() ?? "" });
+    }
+
+    partial void OnGoogleClientSecretChanged(string value)
+    {
+        if (_loading)
+            return;
+
+        var current = _store.Load();
+        _store.Save(current with { GoogleClientSecret = value?.Trim() ?? "" });
     }
 
     partial void OnOutlookClientIdChanged(string value)
@@ -122,8 +137,8 @@ public sealed partial class CalendarAccountsViewModel : ObservableObject
         {
             if (current.GoogleEnabled && _sync.HasToken(CalendarProvider.Google))
             {
-                var clientId = CalendarOAuthConfig.ResolveClientId(CalendarProvider.Google, current.GoogleClientId);
-                var res = await _sync.SyncAsync(CalendarProvider.Google, clientId, from, to);
+                var client = BuiltInCalendarClients.Resolve(CalendarProvider.Google, current);
+                var res = await _sync.SyncAsync(CalendarProvider.Google, client, from, to);
                 if (!res.Success)
                 {
                     anyError = true;
@@ -133,8 +148,8 @@ public sealed partial class CalendarAccountsViewModel : ObservableObject
 
             if (current.OutlookEnabled && _sync.HasToken(CalendarProvider.Outlook))
             {
-                var clientId = CalendarOAuthConfig.ResolveClientId(CalendarProvider.Outlook, current.OutlookClientId);
-                var res = await _sync.SyncAsync(CalendarProvider.Outlook, clientId, from, to);
+                var client = BuiltInCalendarClients.Resolve(CalendarProvider.Outlook, current);
+                var res = await _sync.SyncAsync(CalendarProvider.Outlook, client, from, to);
                 if (!res.Success)
                 {
                     anyError = true;
@@ -160,9 +175,8 @@ public sealed partial class CalendarAccountsViewModel : ObservableObject
     private async Task ConnectAsync(CalendarProvider provider)
     {
         var current = _store.Load();
-        var configured = provider == CalendarProvider.Google ? current.GoogleClientId : current.OutlookClientId;
-        var clientId = CalendarOAuthConfig.ResolveClientId(provider, configured);
-        if (string.IsNullOrWhiteSpace(clientId))
+        var client = BuiltInCalendarClients.Resolve(provider, current);
+        if (!client.IsConfigured)
         {
             StatusMessage = Strings.Get("CalClientIdRequired");
             return;
@@ -172,7 +186,7 @@ public sealed partial class CalendarAccountsViewModel : ObservableObject
         StatusMessage = Strings.Get("CalAuthorizing");
         try
         {
-            var result = await _sync.ConnectAsync(provider, clientId);
+            var result = await _sync.ConnectAsync(provider, client);
             if (!result.Success)
             {
                 StatusMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("CalConnectFailed"), result.Error ?? "");
@@ -190,7 +204,7 @@ public sealed partial class CalendarAccountsViewModel : ObservableObject
                 IsOutlookConnected = true;
 
             var now = DateTimeOffset.UtcNow;
-            await _sync.SyncAsync(provider, clientId, now.AddDays(-14), now.AddDays(60));
+            await _sync.SyncAsync(provider, client, now.AddDays(-14), now.AddDays(60));
             UpdateStatusTexts(updated);
             StatusMessage = Strings.Get("CalConnectedDone");
         }

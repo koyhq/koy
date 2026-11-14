@@ -3826,7 +3826,13 @@
     <value>Outlook OAuth İstemci Kimliği</value>
   </data>
   <data name="CalClientIdHint" xml:space="preserve">
-    <value>OAuth Client ID (veya ortam değişkeninden okunur)</value>
+    <value>İsteğe bağlı: kendi OAuth Client ID'n (boşsa Koy'un istemcisi kullanılır)</value>
+  </data>
+  <data name="CalGoogleClientSecret" xml:space="preserve">
+    <value>Google OAuth İstemci Sırrı</value>
+  </data>
+  <data name="CalClientSecretHint" xml:space="preserve">
+    <value>Kendi Client ID'n için Google'ın verdiği istemci sırrı</value>
   </data>
   <data name="CalConnectButton" xml:space="preserve">
     <value>Bağla</value>
@@ -3859,7 +3865,7 @@
     <value>Takvim eşitlemesi başarısız oldu.</value>
   </data>
   <data name="CalClientIdRequired" xml:space="preserve">
-    <value>Önce bir OAuth Client ID girin.</value>
+    <value>Bu sürümde yerleşik takvim istemcisi yok. Kendi OAuth Client ID'ni gir.</value>
   </data>
   <data name="CalAuthorizing" xml:space="preserve">
     <value>Tarayıcıda oturum açılması bekleniyor…</value>

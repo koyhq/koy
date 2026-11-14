@@ -63,7 +63,13 @@ jobs:
           dotnet build Koy.slnx --no-restore -c Release -warnaserror
           dotnet test Koy.slnx --no-build -c Release
 
+      # Takvim OAuth istemcileri sürüme gömülür (Koy.App.csproj AssemblyMetadata). Gizli anahtar yoksa boş kalır ve
+      # kullanıcı Ayarlar'da kendi istemcisini girer. Google masaüstü istemcisinin sırrı Google'ca gizli sayılmaz.
       - name: Publish App (win-x64)
+        env:
+          KOY_BUILD_GOOGLE_CLIENT_ID: ${{ secrets.KOY_GOOGLE_CLIENT_ID }}
+          KOY_BUILD_GOOGLE_CLIENT_SECRET: ${{ secrets.KOY_GOOGLE_CLIENT_SECRET }}
+          KOY_BUILD_OUTLOOK_CLIENT_ID: ${{ secrets.KOY_OUTLOOK_CLIENT_ID }}
         run: dotnet publish src/App/Koy.App.csproj -c Release -r win-x64 --self-contained false -o publish/win-x64
 
       # Gözcü süreç (Native AOT): görev çubuğunu Koy öldürülünce geri getirir. Yalnız exe Koy'un klasörüne kopyalanır.

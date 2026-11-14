@@ -31,7 +31,7 @@ public sealed record OAuthCallbackResult(bool Success, string? Code = null, stri
 
 /// <summary>
 /// Sağlayıcı başına OAuth 2.0 PKCE uç noktaları ve salt okunur kapsamlar.
-/// İstemci gizli anahtarı (client secret) depoda tutulmaz; public client PKCE akışı kullanılır.
+/// PKCE akışı kullanılır. Depoda istemci kimliği ya da sırrı yoktur; sürümde CI gizli anahtarlarından gömülür.
 /// </summary>
 public static class CalendarOAuthConfig
 {
@@ -39,6 +39,7 @@ public static class CalendarOAuthConfig
     public const string OutlookScope = "Calendars.Read offline_access";
 
     public const string GoogleClientIdEnvVar = "KOY_GOOGLE_CLIENT_ID";
+    public const string GoogleClientSecretEnvVar = "KOY_GOOGLE_CLIENT_SECRET";
     public const string OutlookClientIdEnvVar = "KOY_OUTLOOK_CLIENT_ID";
 
     public static CalendarEventSource ToEventSource(CalendarProvider provider) => provider switch
@@ -70,24 +71,64 @@ public static class CalendarOAuthConfig
     };
 
     /// <summary>
-    /// Ayarlardaki istemci kimliği boşsa ortam değişkeninden okur. Gizli anahtar tutulmaz.
+    /// Kullanılacak OAuth istemcisini seçer. Sıra: ayarlar → ortam değişkeni → sürüme gömülü yerleşik istemci.
+    /// Gizli anahtar yalnız kendi kimliğiyle birlikte kullanılır: ayarlarda kimlik varsa ayarlardaki sır, ortam
+    /// değişkeninde kimlik varsa ortamdaki sır, yoksa yerleşik sır. Hiçbiri yoksa boş istemci döner.
     /// </summary>
-    public static string ResolveClientId(CalendarProvider provider, string? configuredClientId, Func<string, string?>? getEnv = null)
+    public static OAuthClient ResolveClient(
+        CalendarProvider provider,
+        CalendarSettings settings,
+        OAuthBuiltInClients? builtIn = null,
+        Func<string, string?>? getEnv = null)
     {
-        if (!string.IsNullOrWhiteSpace(configuredClientId))
-            return configuredClientId.Trim();
+        ArgumentNullException.ThrowIfNull(settings);
+        getEnv ??= Environment.GetEnvironmentVariable;
 
-        var envName = provider switch
+        var (configuredId, configuredSecret) = provider switch
         {
-            CalendarProvider.Google => GoogleClientIdEnvVar,
-            CalendarProvider.Outlook => OutlookClientIdEnvVar,
+            CalendarProvider.Google => (settings.GoogleClientId, settings.GoogleClientSecret),
+            CalendarProvider.Outlook => (settings.OutlookClientId, ""),
             _ => throw new ArgumentOutOfRangeException(nameof(provider))
         };
+        if (!string.IsNullOrWhiteSpace(configuredId))
+            return new OAuthClient(configuredId.Trim(), Trim(configuredSecret));
 
-        var fromEnv = (getEnv ?? Environment.GetEnvironmentVariable)(envName);
-        return string.IsNullOrWhiteSpace(fromEnv) ? "" : fromEnv.Trim();
+        var (idVar, secretVar) = provider switch
+        {
+            CalendarProvider.Google => (GoogleClientIdEnvVar, GoogleClientSecretEnvVar),
+            _ => (OutlookClientIdEnvVar, null)
+        };
+        var envId = getEnv(idVar);
+        if (!string.IsNullOrWhiteSpace(envId))
+            return new OAuthClient(envId.Trim(), secretVar is null ? "" : Trim(getEnv(secretVar)));
+
+        return provider == CalendarProvider.Google
+            ? new OAuthClient(Trim(builtIn?.GoogleClientId), Trim(builtIn?.GoogleClientSecret))
+            : new OAuthClient(Trim(builtIn?.OutlookClientId));
+    }
+
+    private static string Trim(string? value) => string.IsNullOrWhiteSpace(value) ? "" : value.Trim();
+}
+
+/// <summary>
+/// Token isteğinde kullanılan OAuth istemcisi. Google masaüstü istemcileri PKCE ile bile token uç noktasında
+/// <c>client_secret</c> ister (Google bu sırrı gizli saymaz); Outlook genel istemcisinde sır boştur.
+/// </summary>
+public sealed record OAuthClient(string ClientId, string ClientSecret = "")
+{
+    public bool IsConfigured => !string.IsNullOrWhiteSpace(ClientId);
+
+    /// <summary>Token isteği formuna istemci alanlarını ekler; sır boşsa <c>client_secret</c> gönderilmez.</summary>
+    public void AddTo(IDictionary<string, string> form)
+    {
+        form["client_id"] = ClientId;
+        if (!string.IsNullOrWhiteSpace(ClientSecret))
+            form["client_secret"] = ClientSecret;
     }
 }
+
+/// <summary>Sürüm derlenirken CI gizli anahtarlarından gömülen yerleşik istemciler (yerel derlemede boş).</summary>
+public sealed record OAuthBuiltInClients(string GoogleClientId = "", string GoogleClientSecret = "", string OutlookClientId = "");
 
 /// <summary>RFC 7636 PKCE (S256) üretimi, yetkilendirme URL'si oluşturma ve loopback callback doğrulama.</summary>
 public static class OAuthPkce

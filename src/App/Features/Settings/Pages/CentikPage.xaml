@@ -921,6 +921,10 @@
                              Text="{Binding CalendarAccounts.GoogleClientId, UpdateSourceTrigger=PropertyChanged}"
                              Tag="{Binding [CalClientIdHint], Source={x:Static res:Loc.Instance}}"
                              AutomationProperties.Name="{Binding [CalGoogleClientId], Source={x:Static res:Loc.Instance}}" />
+                    <TextBox Style="{StaticResource SettingTextBoxStyle}" Margin="0,6,0,0"
+                             Text="{Binding CalendarAccounts.GoogleClientSecret, UpdateSourceTrigger=PropertyChanged}"
+                             Tag="{Binding [CalClientSecretHint], Source={x:Static res:Loc.Instance}}"
+                             AutomationProperties.Name="{Binding [CalGoogleClientSecret], Source={x:Static res:Loc.Instance}}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <Button Command="{Binding CalendarAccounts.ConnectGoogleCommand}"

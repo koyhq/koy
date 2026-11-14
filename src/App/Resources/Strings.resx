@@ -3826,7 +3826,13 @@
     <value>Outlook OAuth Client ID</value>
   </data>
   <data name="CalClientIdHint" xml:space="preserve">
-    <value>OAuth Client ID (or set via environment variable)</value>
+    <value>Optional: your own OAuth Client ID (Koy's client is used when empty)</value>
+  </data>
+  <data name="CalGoogleClientSecret" xml:space="preserve">
+    <value>Google OAuth Client Secret</value>
+  </data>
+  <data name="CalClientSecretHint" xml:space="preserve">
+    <value>Client secret Google issued for your own Client ID</value>
   </data>
   <data name="CalConnectButton" xml:space="preserve">
     <value>Connect</value>
@@ -3859,7 +3865,7 @@
     <value>Calendar sync failed.</value>
   </data>
   <data name="CalClientIdRequired" xml:space="preserve">
-    <value>Enter an OAuth Client ID first.</value>
+    <value>This build has no built-in calendar client. Enter your own OAuth Client ID.</value>
   </data>
   <data name="CalAuthorizing" xml:space="preserve">
     <value>Waiting for browser sign-in…</value>

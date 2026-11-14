@@ -7,7 +7,8 @@ namespace Koy.Platform.Calendar;
 
 /// <summary>
 /// Google Calendar API v3 ve Microsoft Graph Outlook Calendar için OAuth 2.0 PKCE + salt okunur eşitleme servisi.
-/// İstemci sırrı içermez; belirteçler DPAPI ile şifreli saklanır, etkinlikler yerel önbellekte tutulur.
+/// Google için istemci sırrı token isteğine eklenir (<see cref="OAuthClient"/>); belirteçler DPAPI ile şifreli
+/// saklanır, etkinlikler yerel önbellekte tutulur.
 /// </summary>
 public sealed class CalendarSyncService : ICalendarSyncService
 {
@@ -24,9 +25,9 @@ public sealed class CalendarSyncService : ICalendarSyncService
 
     public bool HasToken(CalendarProvider provider) => _tokenStore.Exists(provider);
 
-    public async Task<OAuthConnectResult> ConnectAsync(CalendarProvider provider, string clientId, CancellationToken ct = default)
+    public async Task<OAuthConnectResult> ConnectAsync(CalendarProvider provider, OAuthClient client, CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(clientId))
+        if (!client.IsConfigured)
             return new OAuthConnectResult(false, Error: "missing_client_id");
 
         var codeVerifier = OAuthPkce.CreateCodeVerifier();
@@ -37,7 +38,7 @@ public sealed class CalendarSyncService : ICalendarSyncService
 
         var callback = await LoopbackOAuthListener.AuthorizeAsync(
             provider,
-            clientId.Trim(),
+            client.ClientId,
             codeChallenge,
             state,
             redirectUri,
@@ -49,7 +50,7 @@ public sealed class CalendarSyncService : ICalendarSyncService
 
         try
         {
-            var tokenSet = await ExchangeCodeAsync(provider, clientId.Trim(), callback.Code, redirectUri, codeVerifier, ct)
+            var tokenSet = await ExchangeCodeAsync(provider, client, callback.Code, redirectUri, codeVerifier, ct)
                 .ConfigureAwait(false);
             if (tokenSet is null)
                 return new OAuthConnectResult(false, Error: "token_exchange_failed");
@@ -72,7 +73,7 @@ public sealed class CalendarSyncService : ICalendarSyncService
 
     public async Task<CalendarSyncResult> SyncAsync(
         CalendarProvider provider,
-        string clientId,
+        OAuthClient client,
         DateTimeOffset fromUtc,
         DateTimeOffset toUtc,
         CancellationToken ct = default)
@@ -87,10 +88,10 @@ public sealed class CalendarSyncService : ICalendarSyncService
             var now = DateTimeOffset.UtcNow;
             if (tokens.IsExpired(now))
             {
-                if (string.IsNullOrWhiteSpace(tokens.RefreshToken) || string.IsNullOrWhiteSpace(clientId))
+                if (string.IsNullOrWhiteSpace(tokens.RefreshToken) || !client.IsConfigured)
                     return LoadCachedForProvider(source, "token_expired");
 
-                var refreshed = await RefreshTokenAsync(provider, clientId.Trim(), tokens, ct).ConfigureAwait(false);
+                var refreshed = await RefreshTokenAsync(provider, client, tokens, ct).ConfigureAwait(false);
                 if (refreshed is null)
                     return LoadCachedForProvider(source, "refresh_failed");
 
@@ -128,7 +129,7 @@ public sealed class CalendarSyncService : ICalendarSyncService
 
     private static async Task<OAuthTokenSet?> ExchangeCodeAsync(
         CalendarProvider provider,
-        string clientId,
+        OAuthClient client,
         string code,
         string redirectUri,
         string codeVerifier,
@@ -136,12 +137,12 @@ public sealed class CalendarSyncService : ICalendarSyncService
     {
         var form = new Dictionary<string, string>
         {
-            ["client_id"] = clientId,
             ["code"] = code,
             ["redirect_uri"] = redirectUri,
             ["grant_type"] = "authorization_code",
             ["code_verifier"] = codeVerifier
         };
+        client.AddTo(form);
 
         using var req = new HttpRequestMessage(HttpMethod.Post, CalendarOAuthConfig.GetTokenEndpoint(provider))
         {
@@ -157,17 +158,17 @@ public sealed class CalendarSyncService : ICalendarSyncService
 
     private static async Task<OAuthTokenSet?> RefreshTokenAsync(
         CalendarProvider provider,
-        string clientId,
+        OAuthClient client,
         OAuthTokenSet current,
         CancellationToken ct)
     {
         var form = new Dictionary<string, string>
         {
-            ["client_id"] = clientId,
             ["refresh_token"] = current.RefreshToken,
             ["grant_type"] = "refresh_token",
             ["scope"] = CalendarOAuthConfig.GetReadOnlyScope(provider)
         };
+        client.AddTo(form);
 
         using var req = new HttpRequestMessage(HttpMethod.Post, CalendarOAuthConfig.GetTokenEndpoint(provider))
         {

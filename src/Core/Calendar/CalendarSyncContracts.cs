@@ -19,11 +19,15 @@ public sealed record CalendarCacheSnapshot(
     DateTimeOffset? LastSyncUtc,
     List<CalendarEvent> Events);
 
-/// <summary>Harici takvim (Google / Outlook) OAuth ayarları. İstemci sırrı ve token burada tutulmaz.</summary>
+/// <summary>
+/// Harici takvim (Google / Outlook) OAuth ayarları. Token burada tutulmaz. Kimlik ve sır alanları yalnız kendi
+/// istemcisini kullanmak isteyen için; boşsa sürümün yerleşik istemcisi kullanılır.
+/// </summary>
 public sealed record CalendarSettings
 {
     public bool GoogleEnabled { get; set; }
     public string GoogleClientId { get; set; } = "";
+    public string GoogleClientSecret { get; set; } = "";
     public string GoogleAccountLabel { get; set; } = "";
     public bool OutlookEnabled { get; set; }
     public string OutlookClientId { get; set; } = "";
@@ -60,6 +64,7 @@ public sealed class CalendarSettingsStore(string? path = null)
                 return new CalendarSettings();
 
             settings.GoogleClientId ??= "";
+            settings.GoogleClientSecret ??= "";
             settings.GoogleAccountLabel ??= "";
             settings.OutlookClientId ??= "";
             settings.OutlookAccountLabel ??= "";
@@ -219,11 +224,11 @@ public sealed record CalendarSyncResult(
 public interface ICalendarSyncService
 {
     bool HasToken(CalendarProvider provider);
-    Task<OAuthConnectResult> ConnectAsync(CalendarProvider provider, string clientId, CancellationToken ct = default);
+    Task<OAuthConnectResult> ConnectAsync(CalendarProvider provider, OAuthClient client, CancellationToken ct = default);
     Task DisconnectAsync(CalendarProvider provider, CancellationToken ct = default);
     Task<CalendarSyncResult> SyncAsync(
         CalendarProvider provider,
-        string clientId,
+        OAuthClient client,
         DateTimeOffset fromUtc,
         DateTimeOffset toUtc,
         CancellationToken ct = default);

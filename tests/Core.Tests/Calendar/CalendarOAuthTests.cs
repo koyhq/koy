@@ -73,13 +73,61 @@ public sealed class CalendarOAuthTests
     }
 
     [Fact]
-    public void ResolveClientId_FallsBackToEnvironmentVariable()
+    public void ResolveClient_PrefersSettingsThenEnvironmentThenBuiltIn()
     {
-        Assert.Equal("cfg-id", CalendarOAuthConfig.ResolveClientId(CalendarProvider.Google, " cfg-id ", _ => "env-id"));
-        Assert.Equal("env-id", CalendarOAuthConfig.ResolveClientId(CalendarProvider.Google, "", name =>
-            name == CalendarOAuthConfig.GoogleClientIdEnvVar ? "env-id" : null));
-        Assert.Equal("env-out", CalendarOAuthConfig.ResolveClientId(CalendarProvider.Outlook, null, name =>
-            name == CalendarOAuthConfig.OutlookClientIdEnvVar ? "env-out" : null));
+        var builtIn = new OAuthBuiltInClients("built-g", "built-secret", "built-o");
+        Func<string, string?> env = name => name switch
+        {
+            CalendarOAuthConfig.GoogleClientIdEnvVar => "env-g",
+            CalendarOAuthConfig.GoogleClientSecretEnvVar => "env-secret",
+            CalendarOAuthConfig.OutlookClientIdEnvVar => "env-o",
+            _ => null
+        };
+
+        var fromSettings = CalendarOAuthConfig.ResolveClient(CalendarProvider.Google,
+            new CalendarSettings { GoogleClientId = " cfg-g ", GoogleClientSecret = " cfg-secret " }, builtIn, env);
+        Assert.Equal(new OAuthClient("cfg-g", "cfg-secret"), fromSettings);
+
+        var fromEnv = CalendarOAuthConfig.ResolveClient(CalendarProvider.Google, new CalendarSettings(), builtIn, env);
+        Assert.Equal(new OAuthClient("env-g", "env-secret"), fromEnv);
+
+        var fromBuiltIn = CalendarOAuthConfig.ResolveClient(CalendarProvider.Google, new CalendarSettings(), builtIn, _ => null);
+        Assert.Equal(new OAuthClient("built-g", "built-secret"), fromBuiltIn);
+
+        Assert.Equal(new OAuthClient("env-o"), CalendarOAuthConfig.ResolveClient(CalendarProvider.Outlook, new CalendarSettings(), builtIn, env));
+        Assert.Equal(new OAuthClient("built-o"), CalendarOAuthConfig.ResolveClient(CalendarProvider.Outlook, new CalendarSettings(), builtIn, _ => null));
+    }
+
+    [Fact]
+    public void ResolveClient_NeverPairsBuiltInSecretWithUserClientId()
+    {
+        var builtIn = new OAuthBuiltInClients("built-g", "built-secret");
+        var client = CalendarOAuthConfig.ResolveClient(CalendarProvider.Google,
+            new CalendarSettings { GoogleClientId = "my-id" }, builtIn, _ => null);
+
+        Assert.Equal("my-id", client.ClientId);
+        Assert.Equal("", client.ClientSecret);
+    }
+
+    [Fact]
+    public void ResolveClient_IsNotConfiguredWithoutAnySource()
+    {
+        var client = CalendarOAuthConfig.ResolveClient(CalendarProvider.Google, new CalendarSettings(), null, _ => null);
+        Assert.False(client.IsConfigured);
+    }
+
+    [Fact]
+    public void OAuthClient_AddsSecretOnlyWhenPresent()
+    {
+        var withSecret = new Dictionary<string, string>();
+        new OAuthClient("id", "secret").AddTo(withSecret);
+        Assert.Equal("id", withSecret["client_id"]);
+        Assert.Equal("secret", withSecret["client_secret"]);
+
+        var publicClient = new Dictionary<string, string>();
+        new OAuthClient("id").AddTo(publicClient);
+        Assert.Equal("id", publicClient["client_id"]);
+        Assert.False(publicClient.ContainsKey("client_secret"));
     }
 
     [Fact]
