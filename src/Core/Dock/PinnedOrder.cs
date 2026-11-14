@@ -276,7 +276,9 @@ public static class PinnedOrder
     private static void MatchRun(ReadOnlySpan<char> run, int runStart, int alignment,
         IReadOnlyList<string> ids, Dictionary<string, int> positions)
     {
-        if (!run.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
+        var isLnk = run.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase);
+        var isPackaged = !isLnk && TaskbandPackagedPins.IsPackagedAumid(run);
+        if (!isLnk && !isPackaged)
             return;
 
         string? best = null;
