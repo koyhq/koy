@@ -209,6 +209,53 @@
         <TextBlock Text="{Binding [ExtEmpty], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="2,8,0,8"
                    Visibility="{Binding Extensions.ShowEmpty, Converter={StaticResource BoolToVis}}" />
 
+        <!-- Yerleşik canlı arka planlar -->
+        <StackPanel Visibility="{Binding Extensions.ShowBuiltinBackgrounds, Converter={StaticResource BoolToVis}}" Margin="0,0,0,12">
+            <TextBlock Text="{Binding [LiveBgBuiltinHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+            <ItemsControl ItemsSource="{Binding Extensions.FilteredBuiltinBackgrounds}" Focusable="False" Margin="0,0,-8,0">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="3" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type ext:BuiltinBackgroundCardViewModel}">
+                        <Border Style="{StaticResource ExtCardStyle}" Margin="0,0,8,8" AutomationProperties.Name="{Binding Name}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Border Grid.Row="0" Height="96" CornerRadius="{DynamicResource KoyRadiusSmall}"
+                                        Background="{DynamicResource KoyBgControl}" ClipToBounds="True" Margin="0,0,0,10">
+                                    <Image Source="{Binding Preview}" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality" />
+                                </Border>
+
+                                <StackPanel Grid.Row="1" Margin="0,0,0,10">
+                                    <TextBlock Text="{Binding Name}" FontSize="{DynamicResource KoyFontRowTitle}" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource KoyTextPrimary}" TextTrimming="CharacterEllipsis" />
+                                    <Border Style="{StaticResource ExtChipStyle}" HorizontalAlignment="Left" Margin="0,6,0,0">
+                                        <TextBlock Text="{Binding KindLabel}" Style="{StaticResource ExtChipTextStyle}" />
+                                    </Border>
+                                </StackPanel>
+
+                                <Grid Grid.Row="2">
+                                    <Button Content="{Binding [ExtDisable], Source={x:Static res:Loc.Instance}}" Command="{Binding DisableCommand}"
+                                            Style="{StaticResource SettingButtonStyle}" HorizontalAlignment="Stretch"
+                                            Visibility="{Binding IsApplied, Converter={StaticResource BoolToVis}}" />
+                                    <Button Content="{Binding [ExtApply], Source={x:Static res:Loc.Instance}}" Command="{Binding ApplyCommand}"
+                                            Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Stretch"
+                                            Visibility="{Binding ShowApply, Converter={StaticResource BoolToVis}}" />
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
         <!-- Kartlar -->
         <ItemsControl ItemsSource="{Binding Extensions.Cards}" Focusable="False">
             <ItemsControl.ItemTemplate>
@@ -275,6 +322,9 @@
                                     <Button Content="{Binding ApplyLabel}" Command="{Binding ApplyCommand}"
                                             Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,0,6"
                                             Visibility="{Binding ShowApply, Converter={StaticResource BoolToVis}}" />
+                                    <Button Content="{Binding [ExtDisable], Source={x:Static res:Loc.Instance}}" Command="{Binding DisableCommand}"
+                                            Style="{StaticResource SettingButtonStyle}" Margin="0,0,0,6"
+                                            Visibility="{Binding IsApplied, Converter={StaticResource BoolToVis}}" />
                                     <Button Content="{Binding [ExtUninstall], Source={x:Static res:Loc.Instance}}" Command="{Binding RequestUninstallCommand}"
                                             Style="{StaticResource SettingButtonStyle}" Margin="0,0,0,6"
                                             Visibility="{Binding ShowUninstallButton, Converter={StaticResource BoolToVis}}" />

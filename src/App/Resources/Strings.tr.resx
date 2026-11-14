@@ -3369,6 +3369,57 @@
   <data name="LiveBgPresetDusk" xml:space="preserve">
     <value>Alacakaranlık</value>
   </data>
+  <data name="LiveBgPresetPlasma" xml:space="preserve">
+    <value>Plazma</value>
+  </data>
+  <data name="LiveBgPresetLava" xml:space="preserve">
+    <value>Lav lambası</value>
+  </data>
+  <data name="LiveBgPresetNebula" xml:space="preserve">
+    <value>Bulutsu</value>
+  </data>
+  <data name="LiveBgPresetSilk" xml:space="preserve">
+    <value>İpek</value>
+  </data>
+  <data name="LiveBgPresetNorthern" xml:space="preserve">
+    <value>Kuzey ışıkları</value>
+  </data>
+  <data name="LiveBgPresetWaves" xml:space="preserve">
+    <value>Dalgalar</value>
+  </data>
+  <data name="LiveBgPresetContour" xml:space="preserve">
+    <value>Kontur</value>
+  </data>
+  <data name="LiveBgPresetHorizon" xml:space="preserve">
+    <value>Ufuk</value>
+  </data>
+  <data name="LiveBgPresetUnderwater" xml:space="preserve">
+    <value>Su altı</value>
+  </data>
+  <data name="LiveBgPresetPearl" xml:space="preserve">
+    <value>Sedef</value>
+  </data>
+  <data name="LiveBgPresetNightSky" xml:space="preserve">
+    <value>Gece gökyüzü</value>
+  </data>
+  <data name="LiveBgPresetFireflies" xml:space="preserve">
+    <value>Ateş böcekleri</value>
+  </data>
+  <data name="LiveBgPresetSnow" xml:space="preserve">
+    <value>Kar</value>
+  </data>
+  <data name="LiveBgPresetRain" xml:space="preserve">
+    <value>Yağmur</value>
+  </data>
+  <data name="LiveBgPresetBokeh" xml:space="preserve">
+    <value>Bokeh</value>
+  </data>
+  <data name="LiveBgPresetWarp" xml:space="preserve">
+    <value>Işık hızı</value>
+  </data>
+  <data name="LiveBgPresetRipples" xml:space="preserve">
+    <value>Halkalar</value>
+  </data>
   <data name="LiveBgFileTitle" xml:space="preserve">
     <value>Arka plan dosyası</value>
   </data>
@@ -3603,6 +3654,9 @@
   <data name="ExtApplied" xml:space="preserve">
     <value>Uygulandı</value>
   </data>
+  <data name="ExtDisable" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
   <data name="ExtUninstall" xml:space="preserve">
     <value>Kaldır</value>
   </data>
@@ -3707,6 +3761,9 @@
   </data>
   <data name="ExtAppliedOk" xml:space="preserve">
     <value>{0} uygulandı.</value>
+  </data>
+  <data name="ExtDisabledOk" xml:space="preserve">
+    <value>{0} kapatıldı.</value>
   </data>
   <data name="ExtUninstalledOk" xml:space="preserve">
     <value>{0} kaldırıldı.</value>
@@ -3947,6 +4004,66 @@
   </data>
   <data name="WizCalendarPrivacyDesc" xml:space="preserve">
     <value>Ayarlar'dan Google veya Outlook bağlamak isteğe bağlıdır ve yalnızca salt okunur erişim ister. Belirteçleriniz cihazınızda Windows DPAPI ile şifrelenir ve çevrimdışı kullanım için yerel önbellekte tutulur.</value>
+  </data>
+  <data name="SubTabGeneralSystem" xml:space="preserve">
+    <value>Sistem ve birimler</value>
+  </data>
+  <data name="SubTabGeneralProfiles" xml:space="preserve">
+    <value>Profiller</value>
+  </data>
+  <data name="SubTabGeneralRules" xml:space="preserve">
+    <value>Uygulama kuralları</value>
+  </data>
+  <data name="SubTabNotchBehavior" xml:space="preserve">
+    <value>Davranış ve göstergeler</value>
+  </data>
+  <data name="SubTabNotchVisuals" xml:space="preserve">
+    <value>Görünüm ve efektler</value>
+  </data>
+  <data name="SubTabNotchPanels" xml:space="preserve">
+    <value>Paneller ve servisler</value>
+  </data>
+  <data name="SubTabNotchSearch" xml:space="preserve">
+    <value>Arama</value>
+  </data>
+  <data name="SubTabDockBehavior" xml:space="preserve">
+    <value>Düzen ve davranış</value>
+  </data>
+  <data name="SubTabDockAppearance" xml:space="preserve">
+    <value>Simgeler ve rozetler</value>
+  </data>
+  <data name="SubTabDockSections" xml:space="preserve">
+    <value>Bölümler ve tepsi</value>
+  </data>
+  <data name="SubTabAppearanceTheme" xml:space="preserve">
+    <value>Tema ve yüzey</value>
+  </data>
+  <data name="SubTabAppearanceScaleMotion" xml:space="preserve">
+    <value>Ölçek, simge ve hareket</value>
+  </data>
+  <data name="LiveBgBuiltinHeader" xml:space="preserve">
+    <value>Yerleşik çentik animasyonları</value>
+  </data>
+  <data name="LiveBgKindVideo" xml:space="preserve">
+    <value>Video döngü</value>
+  </data>
+  <data name="LiveBgPresetNebulaFlow" xml:space="preserve">
+    <value>Bulutsu akışı</value>
+  </data>
+  <data name="LiveBgPresetLiquidGold" xml:space="preserve">
+    <value>Akışkan altın</value>
+  </data>
+  <data name="LiveBgPresetDeepOcean" xml:space="preserve">
+    <value>Derin okyanus</value>
+  </data>
+  <data name="LiveBgPresetVelvetAurora" xml:space="preserve">
+    <value>Kadife aurora</value>
+  </data>
+  <data name="LiveBgKindEffect" xml:space="preserve">
+    <value>Kodlu efekt</value>
+  </data>
+  <data name="LiveBgKindAmbient" xml:space="preserve">
+    <value>Ambiyans</value>
   </data>
 </root>
 

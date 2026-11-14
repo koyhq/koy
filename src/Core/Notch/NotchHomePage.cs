@@ -8,11 +8,11 @@ public enum NotchHomePage
 }
 
 /// <summary>
-/// Ana sekmesinde hangi yüzün gösterileceği. Çentik her açılışta yeniden karar verir: parça varsa ve müzik kartı
-/// ayarlarda açıksa Müzik, yoksa Ana. Kullanıcı açıkken üstteki anahtarla değiştirir; seçim kapanınca unutulur.
+/// Ana sekmesinde hangi yüzün gösterileceği. Kullanıcının seçtiği yüz (Ana veya Müzik) çentik kapansa da korunur;
+/// ancak parça yoksa ya da müzik kartı ayarlarda kapalıysa Ana yüzüne düşer.
 /// </summary>
 public static class NotchHomePages
 {
-    public static NotchHomePage OnOpen(bool hasTrack, bool musicEnabled) =>
-        hasTrack && musicEnabled ? NotchHomePage.Music : NotchHomePage.Home;
+    public static NotchHomePage OnOpen(NotchHomePage current, bool hasTrack, bool musicEnabled) =>
+        hasTrack && musicEnabled ? current : NotchHomePage.Home;
 }

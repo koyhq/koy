@@ -72,6 +72,9 @@ public partial class SagAltMenuWindow : Window
         }
     }
 
+    /// <summary>Örnek oluşturulmuşsa menüyü gizler; yoksa gereksiz yere pencere kurmaz.</summary>
+    public static void HideIfOpen() => _instance?.Hide();
+
     public void ShowMenu()
     {
         ViewModel.Refresh();

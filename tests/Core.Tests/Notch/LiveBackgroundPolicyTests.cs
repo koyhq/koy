@@ -298,7 +298,8 @@ public class LiveBackgroundPolicyTests
         Assert.Equal(LiveBackgroundPresets.All.Count, LiveBackgroundPresets.All.Select(p => p.Id).Distinct().Count());
         Assert.Contains(LiveBackgroundPresets.All, p => p.Id == LiveBackgroundPresets.DefaultId);
 
-        foreach (var preset in LiveBackgroundPresets.All)
+        // Video döngülerin paleti yalnız önizleme içindir; koyuluk ve döngü kuralı renk geçişlerinde.
+        foreach (var preset in LiveBackgroundPresets.All.Where(p => p.VideoFile is null))
         {
             Assert.False(string.IsNullOrWhiteSpace(preset.NameKey));
             Assert.InRange(preset.CycleSeconds, 8, 60);

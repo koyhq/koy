@@ -1,7 +1,9 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using Koy.Core.Notch;
 
 namespace Koy.App.Features.Notch.LiveBackground;
@@ -12,7 +14,8 @@ namespace Koy.App.Features.Notch.LiveBackground;
 /// Kararı vermez: <see cref="Mode"/> Core'dan gelir (<see cref="LiveBackgroundPlaybackPolicy.Decide"/>).
 /// <see cref="LiveBackgroundPlaybackMode.Off"/> iken (çentik kapalı / gizli, yüzey hedef dışı), öğe ağaçtan çıkınca ya da
 /// görünmez olunca bütün animasyon saatleri durdurulur, kareler ve medya bırakılır: boşta CPU ve bellek sıfır (AGENTS #5, #6).
-/// Zamanlayıcı ya da CompositionTarget.Rendering kullanılmaz; yalnız WPF animasyon saatleri.
+/// Renk geçişi, GIF ve video WPF animasyon saatleriyle döner. Kodlu efektler (<see cref="BackgroundEffect"/>) küçük bir
+/// tampona çizilir ve efektin kare hızında bir zamanlayıcıyla yenilenir; zamanlayıcı yalnız oynarken kuruludur.
 /// </summary>
 public sealed class LiveBackgroundHost : Border
 {
@@ -29,7 +32,7 @@ public sealed class LiveBackgroundHost : Border
 
     public static readonly DependencyProperty ScrimOpacityProperty = DependencyProperty.Register(
         nameof(ScrimOpacity), typeof(double), typeof(LiveBackgroundHost),
-        new PropertyMetadata(0.65, (d, e) => ((LiveBackgroundHost)d)._scrim.Opacity = (double)e.NewValue));
+        new PropertyMetadata(0.45, (d, e) => ((LiveBackgroundHost)d)._scrim.Opacity = (double)e.NewValue));
 
     public LiveBackgroundSelection? Selection
     {
@@ -52,8 +55,8 @@ public sealed class LiveBackgroundHost : Border
     private readonly Border _art = new();
     private readonly Grid _mediaHost = new();
     // Perde yalnız bir arka plan gösterilirken çizilir: yoksa çentik zeminini (tema paketinin KoyNotchSurface rengi dahil)
-    // %65 siyahla koyultur ve saydam malzemede zemini neredeyse opak siyaha çevirirdi.
-    private readonly Border _scrim = new() { Background = Brushes.Black, Opacity = 0.65, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
+    // siyahla koyultur ve saydam malzemede zemini neredeyse opak siyaha çevirirdi.
+    private readonly Border _scrim = new() { Background = Brushes.Black, Opacity = 0.45, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
 
     private CancellationTokenSource? _loading;
     private MediaElement? _media;
@@ -108,6 +111,13 @@ public sealed class LiveBackgroundHost : Border
 
         switch (selection.Kind)
         {
+            case LiveBackgroundContentKind.Ambient when selection.Preset is { VideoFile: { } videoFile } preset:
+                var builtinVideoPath = Path.Combine(AppContext.BaseDirectory, "assets", "backgrounds", videoFile);
+                if (File.Exists(builtinVideoPath))
+                    ShowVideo(builtinVideoPath, animate);
+                else
+                    ShowAmbient(preset, animate);
+                break;
             case LiveBackgroundContentKind.Ambient when selection.Preset is { } preset:
                 ShowAmbient(preset, animate);
                 break;
@@ -161,6 +171,7 @@ public sealed class LiveBackgroundHost : Border
             return;
 
         var brush = new ImageBrush(loaded.Frames[0]) { Stretch = Stretch.UniformToFill };
+        RenderOptions.SetBitmapScalingMode(brush, BitmapScalingMode.HighQuality);
         _art.Background = brush;
 
         if (!animate || loaded.Frames.Count < 2)

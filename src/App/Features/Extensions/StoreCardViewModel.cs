@@ -222,6 +222,9 @@ public sealed partial class StoreCardViewModel : ObservableObject
     private void Apply() => _owner.Apply(this);
 
     [RelayCommand]
+    private void Disable() => _owner.Disable(this);
+
+    [RelayCommand]
     private void RequestUninstall() => IsUninstallConfirming = true;
 
     [RelayCommand]

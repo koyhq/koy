@@ -87,7 +87,8 @@
         kendi vurgu rengi ve kart tonları vardır. Pano ve Sistem sayfaları eklenince kendi kartları da buraya gelir.
     -->
     <SolidColorBrush x:Key="KoyNotchSurface" Color="#0A0A0B" />
-    <SolidColorBrush x:Key="KoyNotchCard" Color="#18181B" />
+    <SolidColorBrush x:Key="KoyNotchCard" Color="#8818181B" />
+    <SolidColorBrush x:Key="KoyNotchCardBorder" Color="#1CFFFFFF" />
     <SolidColorBrush x:Key="KoyNotchChip" Color="#1F1F23" />
     <SolidColorBrush x:Key="KoyNotchMuted" Color="#A1A1AA" />
     <SolidColorBrush x:Key="KoyNotchDim" Color="#71717A" />
@@ -102,28 +103,28 @@
     <!-- Ana: müzik kartı ve hava kartı. Müzik kartı palet yokken (Düz stil, gri ya da kapaksız parça) nötrdür: demodaki
          "Düz nötr" (CamMuzikKarti.dc.html; proje sahibi kararı 2026-11-11, eskiden yeşildi). Kart KoyNotchCard tonunda,
          ikincil metin beyaz %62, çubuklar beyaz %60, kapaksız yer tutucu nötr gri. Cam'da kart tonunu ThemeManager ezer. -->
-    <SolidColorBrush x:Key="KoyNotchMusicCard" Color="#18181B" />
+    <SolidColorBrush x:Key="KoyNotchMusicCard" Color="#8818181B" />
     <SolidColorBrush x:Key="KoyNotchMusicCover" Color="#27272A" />
     <SolidColorBrush x:Key="KoyNotchMusicSub" Color="#9EF4F4F5" />
     <SolidColorBrush x:Key="KoyNotchMusicSpectrum" Color="#99F4F4F5" />
-    <SolidColorBrush x:Key="KoyNotchWeatherCard" Color="#18181B" />
+    <SolidColorBrush x:Key="KoyNotchWeatherCard" Color="#8818181B" />
     <SolidColorBrush x:Key="KoyNotchWeatherSoft" Color="#BFDBFE" />
     <SolidColorBrush x:Key="KoyNotchWeatherIconBg" Color="#223B82F6" />
-    <!-- Çentik D (2026-11-14, docs/design/taslak/centik-d.html): bütün sayfa kartları tek nötr ton (#18181B), düğme ve
+    <!-- Çentik D (2026-11-14, docs/design/taslak/centik-d.html): bütün sayfa kartları tek nötr ton (#8818181B), düğme ve
          çipler #232327; sayfa rengi yalnız vurgu (simge, halka, seçili gün, onay kutusu). -->
     <!-- Odak -->
-    <SolidColorBrush x:Key="KoyNotchFocusCard" Color="#18181B" />
+    <SolidColorBrush x:Key="KoyNotchFocusCard" Color="#8818181B" />
     <SolidColorBrush x:Key="KoyNotchFocusTrack" Color="#3A1F25" />
     <SolidColorBrush x:Key="KoyNotchFocusButton" Color="#232327" />
     <SolidColorBrush x:Key="KoyNotchFocusSoft" Color="#FDA4AF" />
     <!-- Raf -->
-    <SolidColorBrush x:Key="KoyNotchShelfCard" Color="#18181B" />
+    <SolidColorBrush x:Key="KoyNotchShelfCard" Color="#8818181B" />
     <SolidColorBrush x:Key="KoyNotchShelfChip" Color="#232327" />
     <SolidColorBrush x:Key="KoyNotchShelfChipText" Color="#FDE68A" />
     <SolidColorBrush x:Key="KoyNotchShelfSoft" Color="#FCD34D" />
     <SolidColorBrush x:Key="KoyNotchShelfDash" Color="#6B5A24" />
     <!-- Kontrol -->
-    <SolidColorBrush x:Key="KoyNotchControlCard" Color="#18181B" />
+    <SolidColorBrush x:Key="KoyNotchControlCard" Color="#8818181B" />
     <SolidColorBrush x:Key="KoyNotchControlTrack" Color="#1E2A44" />
     <SolidColorBrush x:Key="KoyNotchControlSoft" Color="#BFDBFE" />
     <SolidColorBrush x:Key="KoyNotchControlTile" Color="#232327" />
@@ -135,19 +136,19 @@
     <SolidColorBrush x:Key="KoyNotchRowError" Color="#F87171" />
     <!-- Takvim -->
     <SolidColorBrush x:Key="KoyNotchAccentCalendar" Color="#38BDF8" />
-    <SolidColorBrush x:Key="KoyNotchCalendarCard" Color="#18181B" />
+    <SolidColorBrush x:Key="KoyNotchCalendarCard" Color="#8818181B" />
     <SolidColorBrush x:Key="KoyNotchCalendarChip" Color="#232327" />
     <SolidColorBrush x:Key="KoyNotchCalendarSoft" Color="#BAE6FD" />
     <!-- Pano -->
-    <SolidColorBrush x:Key="KoyNotchClipCard" Color="#18181B" />
+    <SolidColorBrush x:Key="KoyNotchClipCard" Color="#8818181B" />
     <SolidColorBrush x:Key="KoyNotchClipChip" Color="#232327" />
     <SolidColorBrush x:Key="KoyNotchClipChipText" Color="#DDD6FE" />
     <SolidColorBrush x:Key="KoyNotchClipSoft" Color="#C4B5FD" />
     <!-- Sistem ve Ana'daki sistem kartları -->
-    <SolidColorBrush x:Key="KoyNotchSystemCard" Color="#18181B" />
+    <SolidColorBrush x:Key="KoyNotchSystemCard" Color="#8818181B" />
     <SolidColorBrush x:Key="KoyNotchSystemTrack" Color="#1E3A2F" />
     <SolidColorBrush x:Key="KoyNotchSystemSoft" Color="#A7F3D0" />
-    <SolidColorBrush x:Key="KoyNotchNetCard" Color="#18181B" />
+    <SolidColorBrush x:Key="KoyNotchNetCard" Color="#8818181B" />
     <SolidColorBrush x:Key="KoyNotchNetSoft" Color="#C4B5FD" />
     <!-- Hızlı başlat boş yuva çerçevesi -->
     <SolidColorBrush x:Key="KoyNotchDash" Color="#3F3F46" />

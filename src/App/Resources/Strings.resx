@@ -3369,6 +3369,57 @@
   <data name="LiveBgPresetDusk" xml:space="preserve">
     <value>Dusk</value>
   </data>
+  <data name="LiveBgPresetPlasma" xml:space="preserve">
+    <value>Plasma</value>
+  </data>
+  <data name="LiveBgPresetLava" xml:space="preserve">
+    <value>Lava lamp</value>
+  </data>
+  <data name="LiveBgPresetNebula" xml:space="preserve">
+    <value>Nebula</value>
+  </data>
+  <data name="LiveBgPresetSilk" xml:space="preserve">
+    <value>Silk</value>
+  </data>
+  <data name="LiveBgPresetNorthern" xml:space="preserve">
+    <value>Northern lights</value>
+  </data>
+  <data name="LiveBgPresetWaves" xml:space="preserve">
+    <value>Waves</value>
+  </data>
+  <data name="LiveBgPresetContour" xml:space="preserve">
+    <value>Contour lines</value>
+  </data>
+  <data name="LiveBgPresetHorizon" xml:space="preserve">
+    <value>Horizon</value>
+  </data>
+  <data name="LiveBgPresetUnderwater" xml:space="preserve">
+    <value>Underwater</value>
+  </data>
+  <data name="LiveBgPresetPearl" xml:space="preserve">
+    <value>Pearl</value>
+  </data>
+  <data name="LiveBgPresetNightSky" xml:space="preserve">
+    <value>Night sky</value>
+  </data>
+  <data name="LiveBgPresetFireflies" xml:space="preserve">
+    <value>Fireflies</value>
+  </data>
+  <data name="LiveBgPresetSnow" xml:space="preserve">
+    <value>Snow</value>
+  </data>
+  <data name="LiveBgPresetRain" xml:space="preserve">
+    <value>Rain</value>
+  </data>
+  <data name="LiveBgPresetBokeh" xml:space="preserve">
+    <value>Bokeh</value>
+  </data>
+  <data name="LiveBgPresetWarp" xml:space="preserve">
+    <value>Warp</value>
+  </data>
+  <data name="LiveBgPresetRipples" xml:space="preserve">
+    <value>Ripples</value>
+  </data>
   <data name="LiveBgFileTitle" xml:space="preserve">
     <value>Background file</value>
   </data>
@@ -3603,6 +3654,9 @@
   <data name="ExtApplied" xml:space="preserve">
     <value>Applied</value>
   </data>
+  <data name="ExtDisable" xml:space="preserve">
+    <value>Disable</value>
+  </data>
   <data name="ExtUninstall" xml:space="preserve">
     <value>Remove</value>
   </data>
@@ -3707,6 +3761,9 @@
   </data>
   <data name="ExtAppliedOk" xml:space="preserve">
     <value>{0} applied.</value>
+  </data>
+  <data name="ExtDisabledOk" xml:space="preserve">
+    <value>{0} disabled.</value>
   </data>
   <data name="ExtUninstalledOk" xml:space="preserve">
     <value>{0} removed.</value>
@@ -3947,6 +4004,66 @@
   </data>
   <data name="WizCalendarPrivacyDesc" xml:space="preserve">
     <value>Connecting Google or Outlook in Settings is optional and strictly read-only. Tokens are encrypted on your device via Windows DPAPI and cached locally for offline viewing.</value>
+  </data>
+  <data name="SubTabGeneralSystem" xml:space="preserve">
+    <value>System &amp; units</value>
+  </data>
+  <data name="SubTabGeneralProfiles" xml:space="preserve">
+    <value>Profiles</value>
+  </data>
+  <data name="SubTabGeneralRules" xml:space="preserve">
+    <value>App rules</value>
+  </data>
+  <data name="SubTabNotchBehavior" xml:space="preserve">
+    <value>Behavior &amp; indicators</value>
+  </data>
+  <data name="SubTabNotchVisuals" xml:space="preserve">
+    <value>Visuals &amp; effects</value>
+  </data>
+  <data name="SubTabNotchPanels" xml:space="preserve">
+    <value>Panels &amp; services</value>
+  </data>
+  <data name="SubTabNotchSearch" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="SubTabDockBehavior" xml:space="preserve">
+    <value>Layout &amp; behavior</value>
+  </data>
+  <data name="SubTabDockAppearance" xml:space="preserve">
+    <value>Icons &amp; badges</value>
+  </data>
+  <data name="SubTabDockSections" xml:space="preserve">
+    <value>Sections &amp; tray</value>
+  </data>
+  <data name="SubTabAppearanceTheme" xml:space="preserve">
+    <value>Theme &amp; surface</value>
+  </data>
+  <data name="SubTabAppearanceScaleMotion" xml:space="preserve">
+    <value>Scale, icons &amp; motion</value>
+  </data>
+  <data name="LiveBgBuiltinHeader" xml:space="preserve">
+    <value>Built-in notch animations</value>
+  </data>
+  <data name="LiveBgKindVideo" xml:space="preserve">
+    <value>Video loop</value>
+  </data>
+  <data name="LiveBgPresetNebulaFlow" xml:space="preserve">
+    <value>Nebula flow</value>
+  </data>
+  <data name="LiveBgPresetLiquidGold" xml:space="preserve">
+    <value>Liquid gold</value>
+  </data>
+  <data name="LiveBgPresetDeepOcean" xml:space="preserve">
+    <value>Deep ocean</value>
+  </data>
+  <data name="LiveBgPresetVelvetAurora" xml:space="preserve">
+    <value>Velvet aurora</value>
+  </data>
+  <data name="LiveBgKindEffect" xml:space="preserve">
+    <value>Code effect</value>
+  </data>
+  <data name="LiveBgKindAmbient" xml:space="preserve">
+    <value>Ambient</value>
   </data>
 </root>
 
