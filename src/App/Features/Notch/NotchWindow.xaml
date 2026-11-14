@@ -272,15 +272,15 @@
               </StackPanel>
             </Button>
 
-            <!-- Sol: Saat (HH:mm, 13px, font-weight 600, foreground #F4F4F5) -->
+            <!-- Sol: Saat (HH:mm, 13px, font-weight 600, #F4F4F5) ve varsa kısa tarih (soluk) -->
             <TextBlock Grid.Column="0"
                        Visibility="{Binding ShowIdleClassicClock, Converter={StaticResource BoolToVis}}"
-                       Text="{Binding ClockDisplay}"
                        FontFamily="{DynamicResource KoyClockFont}"
-                       Foreground="{DynamicResource KoyNotchText}"
                        FontSize="13"
-                       FontWeight="SemiBold"
-                       VerticalAlignment="Center" />
+                       VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis">
+              <Run Text="{Binding ClockTime, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource KoyNotchText}" /><Run Text="{Binding ClockExtras, Mode=OneWay}" Foreground="{DynamicResource KoyNotchTextMuted}" />
+            </TextBlock>
 
             <!-- Sağ: zamanlayıcı çalışırken kalan süre (pil, Wi-Fi ve Bluetooth yerine). Saniyede bir yalnız sayaç çalışırken değişir, animasyon yok. -->
             <TextBlock Text="{Binding IdleTimerText}"

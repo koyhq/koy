@@ -36,8 +36,8 @@ public static class NotchLayout
         state == NotchState.Collapsed || (state == NotchState.Peek && !hasTrack);
 
     /// <summary>
-    /// Üzerine gelince (Peek) boşta yerleşimine tarih ve bağlantı simgeleri (ağ, Bluetooth) eklensin mi.
-    /// Kapalı çentik kalabalıklaşmasın diye bu ayrıntılar yalnız Peek'te görünür; kapalıyken yalnız saat ve pil kalır.
+    /// Üzerine gelince (Peek) boşta yerleşimine yalnız Peek'e özel ayrıntılar (ikinci saat, halka modunda tarih ve
+    /// bağlantı simgeleri) eklensin mi. Parça çalıyorken Peek müzik kartını gösterdiği için false döner.
     /// </summary>
     public static bool ShowPeekDetails(NotchState state, bool hasTrack) =>
         state == NotchState.Peek && !hasTrack;
