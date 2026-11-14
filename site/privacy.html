@@ -51,7 +51,7 @@
         <p>Koy is a free, open source desktop app for Windows (a notch and a dock). It runs on your computer. Koy has no user accounts, no analytics and no advertising, and its developer does not run a server that receives your data. The source code is public at <a href="https://github.com/koyhq/koy">github.com/koyhq/koy</a>.</p>
 
         <h2>Google Calendar</h2>
-        <p>If you choose to connect a Google account in Settings › Notch › Calendar accounts, Koy asks Google for one permission: <code>https://www.googleapis.com/auth/calendar.readonly</code>, read-only access to your calendars.</p>
+        <p>If you choose to connect a Google account in Settings › Notch › Calendar accounts, Koy asks Google for one permission: <code>https://www.googleapis.com/auth/calendar.events.readonly</code>, read-only access to your calendar events.</p>
         <ul>
           <li><strong>What Koy reads:</strong> events on your primary calendar from two weeks ago to two months ahead (title, start and end time and whether the event lasts all day). Koy uses them only to show your events in the notch calendar.</li>
           <li><strong>Where it is kept:</strong> only on your computer. The access and refresh tokens are encrypted with Windows DPAPI for your Windows user, and the events are cached in <code>%AppData%\Koy</code> so the calendar works offline.</li>
@@ -80,7 +80,7 @@
         <p>Koy, Windows için ücretsiz ve açık kaynak bir masaüstü uygulamasıdır (çentik ve dock). Bilgisayarında çalışır. Koy'da kullanıcı hesabı, analiz ya da reklam yoktur; geliştiricinin verilerini alan bir sunucusu yoktur. Kaynak kodu <a href="https://github.com/koyhq/koy">github.com/koyhq/koy</a> adresinde açıktır.</p>
 
         <h2>Google Takvim</h2>
-        <p>Ayarlar › Çentik › Takvim hesapları'ndan bir Google hesabı bağlarsan Koy Google'dan tek bir izin ister: <code>https://www.googleapis.com/auth/calendar.readonly</code>, takvimlerine salt okunur erişim.</p>
+        <p>Ayarlar › Çentik › Takvim hesapları'ndan bir Google hesabı bağlarsan Koy Google'dan tek bir izin ister: <code>https://www.googleapis.com/auth/calendar.events.readonly</code>, takvim etkinliklerine salt okunur erişim.</p>
         <ul>
           <li><strong>Koy neyi okur:</strong> birincil takvimindeki iki hafta öncesinden iki ay sonrasına kadarki etkinlikler (başlık, başlangıç ve bitiş saati, tüm gün olup olmadığı). Bunları yalnız çentikteki takvimde göstermek için kullanır.</li>
           <li><strong>Nerede saklanır:</strong> yalnız bilgisayarında. Erişim ve yenileme belirteçleri Windows kullanıcın için Windows DPAPI ile şifrelenir; etkinlikler takvim çevrimdışı da çalışsın diye <code>%AppData%\Koy</code> klasöründe önbelleğe alınır.</li>
