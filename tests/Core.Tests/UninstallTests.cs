@@ -1,9 +1,39 @@
+using Koy.Core.Calendar;
 using Koy.Core.Uninstall;
 
 namespace Koy.Core.Tests;
 
 public class UninstallTests
 {
+    [Fact]
+    public void SettingFiles_KaldirmadaTakvimBelirtecVeOnbellegiSilinir()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "koy-uninstall-cal-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            var tokens = new CalendarTokenStore(new PassthroughProtector(), dir);
+            foreach (var provider in Enum.GetValues<CalendarProvider>())
+                tokens.Save(provider, new OAuthTokenSet("a", "r", DateTimeOffset.UtcNow));
+
+            var written = Directory.GetFiles(dir).Select(Path.GetFileName).ToList();
+            written.Add(Path.GetFileName(CalendarSettingsStore.DefaultPath));
+            written.Add(Path.GetFileName(CalendarCacheStore.DefaultPath));
+
+            Assert.All(written, f => Assert.Contains(f, UninstallPlan.SettingFiles));
+        }
+        finally
+        {
+            try { Directory.Delete(dir, true); } catch { }
+        }
+    }
+
+    private sealed class PassthroughProtector : ITokenProtector
+    {
+        public byte[] Protect(byte[] plainBytes) => plainBytes;
+        public byte[] Unprotect(byte[] protectedBytes) => protectedBytes;
+    }
+
     [Fact]
     public void Evaluate_KuruluVeKaldiriciVarsa_Available()
     {

@@ -109,6 +109,7 @@
       'footer.bug': 'Report a bug',
       'footer.discussions': 'Discussions',
       'footer.security': 'Security',
+      'footer.privacy': 'Privacy',
     },
 
     tr: {
@@ -214,6 +215,7 @@
       'footer.bug': 'Hata bildir',
       'footer.discussions': 'Tartışmalar',
       'footer.security': 'Güvenlik',
+      'footer.privacy': 'Gizlilik',
     },
   };
 

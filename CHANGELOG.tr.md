@@ -5,6 +5,35 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.10](https://github.com/koyhq/koy/compare/v0.2.9...v0.2.10) (2026-11-14)
+Öne çıkanlar:
+- **Google Takvim:** Ayarlar › Çentik › Takvim hesapları'ndan Google hesabını bağla, etkinliklerin çentikteki takvimde görünsün. Erişim salt okunur, belirteçler bu cihazda şifreli saklanır. Outlook yakında.
+- **Windows 10 desteği:** Koy artık Windows 10 (2004 / derleme 19041 ve üstü) üzerinde de çalışıyor. Windows 10'da pencereler akrilik yerine düz (Katı) yüzeyle açılır.
+- **Yeni çentik düzeni:** Müzik ayrı bir sayfada, sekmeler tek üst çubukta. Kapalı çentikte saatin yanında kısa tarih gösterilebiliyor.
+- **Dock:** Görev çubuğuna sabitlenmiş Mağaza uygulamaları dock'ta da görünüyor; tepsi uygulamalarının balon bildirimleri çentikte kart olarak çıkıyor.
+- **Arama:** Atlama listeleri, özel karakterler, yazım denetimi, sözlük, Microsoft Store araması ve Firefox yer imleri eklendi; sonuçlar sürüklenip bırakılabiliyor.
+- **Mağaza:** Altı yeni tema (Ege, Kapadokya, Lale, Gruvbox, Catppuccin Mocha, Dracula).
+
+### Eklenenler
+
+* **calendar:** OAuth ile salt okunur Google Takvim eşitlemesi; Outlook "Yakında" olarak görünüyor ([557fc43](https://github.com/koyhq/koy/commit/557fc43bd9ea44abed48b63c4576bdadde03236f))
+* **dock:** tepsi balon bildirimleri çentikte bildirim kartı olarak gösteriliyor ([f21e58e](https://github.com/koyhq/koy/commit/f21e58e097626c51a4635e0affd7e1fcad4d6fa2))
+* **dock:** görev çubuğuna sabitlenmiş Mağaza (UWP) uygulamaları dock'a geliyor ([08078ad](https://github.com/koyhq/koy/commit/08078adec6a84e5cd21c2b507c99750656bf4783))
+* **notch:** ayrı müzik sayfası ve tek üst çubuklu D düzeni ([e55edfd](https://github.com/koyhq/koy/commit/e55edfd8d019ca03f422f421238fde293978e6c9))
+* **notch:** kapalı çentikte tarih ([3380113](https://github.com/koyhq/koy/commit/3380113ca49f68ce300e4a0b87573465765bc674))
+* **platform:** Windows 10 (sürüm 2004 / derleme 19041 ve üstü) desteği ([21888c4](https://github.com/koyhq/koy/commit/21888c458d702fe553514bf1e45bf42ab8b0f1e5))
+* **search:** atlama listesi, özel karakter, yazım denetimi, sözlük ve Microsoft Store kaynakları, Firefox yer imleri ve sürükle-bırak ([a1e26a8](https://github.com/koyhq/koy/commit/a1e26a8ccf517764dbc4a22a12380a2df4aa931a))
+* **store:** altı tema paketi ve palet tabanlı tema üretici ([a22f845](https://github.com/koyhq/koy/commit/a22f845e8b731d2655d90570e7f442d1cde08069))
+
+### Düzeltmeler
+
+* **calendar:** Google istemci sırrı gönderiliyor, sürüm OAuth istemcileri derlemeye gömülüyor ([12cc20e](https://github.com/koyhq/koy/commit/12cc20e51c4e055a667be3c49adc4fdfd46e5ec1))
+* **uninstall:** ayarlar silinirken takvim belirteçleri ve önbelleği de siliniyor ([5fcdf97](https://github.com/koyhq/koy/commit/5fcdf97c6855788405da4ac757df27bc839441ca))
+
+### Performans
+
+* özellik dalgalarından sonra bellek ölçümleri kaydedildi ([e08bc2f](https://github.com/koyhq/koy/commit/e08bc2f5e318b48b78520b67e5e366418b0312b9))
+
 ## [0.2.9](https://github.com/koyhq/koy/compare/v0.2.8...v0.2.9) (2026-11-12)
 Öne çıkanlar:
 - **Dock sağ tık menüsü:** Menü artık dock'un arkasında kalmıyor, dock'un dışında açılıyor; menü açıkken başka bir yere tıklayınca kapanıyor.

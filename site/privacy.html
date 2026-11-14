@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Koy: privacy policy</title>
+  <meta name="description" content="What data Koy uses, where it goes and how to remove it, including the Google Calendar connection.">
+  <meta name="theme-color" content="#070f26">
+  <link rel="canonical" href="https://koyhq.github.io/koy/privacy.html">
+  <link rel="icon" href="img/favicon.ico" sizes="48x48">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="style.css?v=20261112-4">
+  <style>
+    .policy { padding: clamp(40px, 6vw, 80px) 0 96px; color: var(--ink); }
+    .policy__top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 40px; }
+    .policy__lang { display: flex; gap: 4px; }
+    .policy__lang button { font: inherit; font-size: 14px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink-2); cursor: pointer; }
+    .policy__lang button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+    .policy article { max-width: 720px; }
+    .policy h1 { font-family: var(--font-display); font-weight: 500; font-size: clamp(32px, 5vw, 48px); line-height: 1.1; margin: 0 0 8px; }
+    .policy h2 { font-family: var(--font-display); font-weight: 500; font-size: 22px; margin: 40px 0 12px; }
+    .policy p, .policy li { font-size: 16px; line-height: 1.65; color: var(--ink-2); }
+    .policy ul { padding-left: 20px; }
+    .policy a { color: var(--accent); }
+    .policy .updated { color: var(--ink-3); font-size: 14px; margin: 0 0 32px; }
+    .policy [lang]:not(.on) { display: none; }
+    .brand img { filter: none; }
+    @media (prefers-color-scheme: light) { .brand img { filter: invert(1); } }
+  </style>
+</head>
+<body>
+  <main class="policy">
+    <div class="wrap">
+      <div class="policy__top">
+        <a class="brand" href="./" aria-label="Koy">
+          <img src="img/koy-horizontal-white.svg" alt="Koy" width="96" height="36">
+        </a>
+        <div class="policy__lang" role="group" aria-label="Language">
+          <button type="button" data-lang="en" aria-pressed="true">EN</button>
+          <button type="button" data-lang="tr" aria-pressed="false">TR</button>
+        </div>
+      </div>
+
+      <article lang="en" class="on">
+        <h1>Privacy policy</h1>
+        <p class="updated">Last updated: 14 November 2026</p>
+
+        <p>Koy is a free, open source desktop app for Windows (a notch and a dock). It runs on your computer. Koy has no user accounts, no analytics and no advertising, and its developer does not run a server that receives your data. The source code is public at <a href="https://github.com/koyhq/koy">github.com/koyhq/koy</a>.</p>
+
+        <h2>Google Calendar</h2>
+        <p>If you choose to connect a Google account in Settings › Notch › Calendar accounts, Koy asks Google for one permission: <code>https://www.googleapis.com/auth/calendar.readonly</code>, read-only access to your calendars.</p>
+        <ul>
+          <li><strong>What Koy reads:</strong> events on your primary calendar from two weeks ago to two months ahead (title, start and end time and whether the event lasts all day). Koy uses them only to show your events in the notch calendar.</li>
+          <li><strong>Where it is kept:</strong> only on your computer. The access and refresh tokens are encrypted with Windows DPAPI for your Windows user, and the events are cached in <code>%AppData%\Koy</code> so the calendar works offline.</li>
+          <li><strong>Who receives it:</strong> nobody. Data travels only between your computer and Google. Koy never creates, changes or deletes events, and it does not sell, share or transfer your Google data to anyone.</li>
+          <li><strong>Removing it:</strong> press Disconnect in Koy to delete the tokens and cached events from your computer. You can also revoke Koy's access at any time at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>. Uninstalling Koy without keeping settings removes the <code>%AppData%\Koy</code> folder.</li>
+        </ul>
+        <p>Koy's use and transfer of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements. Google data is not used for advertising and is not read by humans.</p>
+
+        <h2>Other online features</h2>
+        <p>Some features contact a service directly from your computer, only when you use them:</p>
+        <ul>
+          <li><strong>Weather:</strong> the place you choose (or your approximate location, if you allow it) is sent to Open-Meteo to get the forecast.</li>
+          <li><strong>Dictionary search:</strong> when you type a dictionary keyword in search, the word is sent to dictionaryapi.dev (English) or sozluk.gov.tr (Turkish).</li>
+          <li><strong>Updates and the extension store:</strong> Koy downloads update information, themes and extensions from GitHub.</li>
+        </ul>
+        <p>Each of these services has its own privacy policy. Everything else, such as settings, clipboard history and crash logs, stays on your computer.</p>
+
+        <h2>Changes and contact</h2>
+        <p>If this policy changes, the new version is published on this page with a new date. Questions: open an issue at <a href="https://github.com/koyhq/koy/issues">github.com/koyhq/koy/issues</a>.</p>
+      </article>
+
+      <article lang="tr">
+        <h1>Gizlilik politikası</h1>
+        <p class="updated">Son güncelleme: 14 Kasım 2026</p>
+
+        <p>Koy, Windows için ücretsiz ve açık kaynak bir masaüstü uygulamasıdır (çentik ve dock). Bilgisayarında çalışır. Koy'da kullanıcı hesabı, analiz ya da reklam yoktur; geliştiricinin verilerini alan bir sunucusu yoktur. Kaynak kodu <a href="https://github.com/koyhq/koy">github.com/koyhq/koy</a> adresinde açıktır.</p>
+
+        <h2>Google Takvim</h2>
+        <p>Ayarlar › Çentik › Takvim hesapları'ndan bir Google hesabı bağlarsan Koy Google'dan tek bir izin ister: <code>https://www.googleapis.com/auth/calendar.readonly</code>, takvimlerine salt okunur erişim.</p>
+        <ul>
+          <li><strong>Koy neyi okur:</strong> birincil takvimindeki iki hafta öncesinden iki ay sonrasına kadarki etkinlikler (başlık, başlangıç ve bitiş saati, tüm gün olup olmadığı). Bunları yalnız çentikteki takvimde göstermek için kullanır.</li>
+          <li><strong>Nerede saklanır:</strong> yalnız bilgisayarında. Erişim ve yenileme belirteçleri Windows kullanıcın için Windows DPAPI ile şifrelenir; etkinlikler takvim çevrimdışı da çalışsın diye <code>%AppData%\Koy</code> klasöründe önbelleğe alınır.</li>
+          <li><strong>Kime gider:</strong> kimseye. Veri yalnız bilgisayarınla Google arasında gidip gelir. Koy etkinlik oluşturmaz, değiştirmez, silmez; Google verilerini kimseye satmaz, paylaşmaz, aktarmaz.</li>
+          <li><strong>Silmek için:</strong> Koy'da Bağlantıyı kes düğmesine bas; belirteçler ve önbellekteki etkinlikler bilgisayarından silinir. Koy'un erişimini istediğin zaman <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a> adresinden de kaldırabilirsin. Koy'u ayarları tutmadan kaldırmak <code>%AppData%\Koy</code> klasörünü siler.</li>
+        </ul>
+        <p>Koy'un Google API'lerinden aldığı bilgileri kullanması ve aktarması, Sınırlı Kullanım (Limited Use) şartları dahil <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Hizmetleri Kullanıcı Verileri Politikası</a>'na uyar. Google verileri reklam için kullanılmaz ve insanlar tarafından okunmaz.</p>
+
+        <h2>Diğer çevrimiçi özellikler</h2>
+        <p>Bazı özellikler, yalnız onları kullandığında, bilgisayarından doğrudan bir hizmete bağlanır:</p>
+        <ul>
+          <li><strong>Hava durumu:</strong> seçtiğin yer (izin verirsen yaklaşık konumun) tahmini almak için Open-Meteo'ya gönderilir.</li>
+          <li><strong>Sözlük araması:</strong> aramada sözlük anahtar kelimesini yazınca kelime dictionaryapi.dev'e (İngilizce) ya da sozluk.gov.tr'ye (Türkçe) gönderilir.</li>
+          <li><strong>Güncellemeler ve eklenti mağazası:</strong> Koy güncelleme bilgisini, temaları ve eklentileri GitHub'dan indirir.</li>
+        </ul>
+        <p>Bu hizmetlerin her birinin kendi gizlilik politikası vardır. Ayarlar, pano geçmişi ve çökme kayıtları gibi geri kalan her şey bilgisayarında kalır.</p>
+
+        <h2>Değişiklikler ve iletişim</h2>
+        <p>Bu politika değişirse yeni hali bu sayfada yeni tarihle yayımlanır. Soruların için <a href="https://github.com/koyhq/koy/issues">github.com/koyhq/koy/issues</a> adresinde bir konu aç.</p>
+      </article>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      var KEY = 'koy-lang';
+      function pick() {
+        var q = new URLSearchParams(location.search).get('lang');
+        if (q === 'tr' || q === 'en') return q;
+        try { var s = localStorage.getItem(KEY); if (s === 'tr' || s === 'en') return s; } catch (e) {}
+        return (navigator.language || '').toLowerCase().indexOf('tr') === 0 ? 'tr' : 'en';
+      }
+      function apply(code) {
+        document.documentElement.lang = code;
+        document.title = code === 'tr' ? 'Koy: gizlilik politikası' : 'Koy: privacy policy';
+        document.querySelectorAll('article[lang]').forEach(function (a) { a.classList.toggle('on', a.lang === code); });
+        document.querySelectorAll('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === code)); });
+      }
+      document.querySelectorAll('[data-lang]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          try { localStorage.setItem(KEY, b.dataset.lang); } catch (e) {}
+          apply(b.dataset.lang);
+        });
+      });
+      apply(pick());
+    })();
+  </script>
+</body>
+</html>

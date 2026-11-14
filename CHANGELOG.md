@@ -7,6 +7,31 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.10](https://github.com/koyhq/koy/compare/v0.2.9...v0.2.10) (2026-11-14)
+
+
+### Added
+
+* **calendar:** read-only Google Calendar sync via OAuth; Outlook shows as coming soon ([557fc43](https://github.com/koyhq/koy/commit/557fc43bd9ea44abed48b63c4576bdadde03236f))
+* **dock:** show tray balloon notifications as notch notification cards ([f21e58e](https://github.com/koyhq/koy/commit/f21e58e097626c51a4635e0affd7e1fcad4d6fa2))
+* **dock:** pin Store (UWP) apps from the taskbar pins ([08078ad](https://github.com/koyhq/koy/commit/08078adec6a84e5cd21c2b507c99750656bf4783))
+* **notch:** D layout with a separate music page and a single top bar ([e55edfd](https://github.com/koyhq/koy/commit/e55edfd8d019ca03f422f421238fde293978e6c9))
+* **notch:** show the date in the collapsed notch ([3380113](https://github.com/koyhq/koy/commit/3380113ca49f68ce300e4a0b87573465765bc674))
+* **platform:** support Windows 10 (version 2004 / build 19041 or later) ([21888c4](https://github.com/koyhq/koy/commit/21888c458d702fe553514bf1e45bf42ab8b0f1e5))
+* **search:** jump list, special characters, spell check, dictionary and Microsoft Store sources, Firefox bookmarks and drag-out ([a1e26a8](https://github.com/koyhq/koy/commit/a1e26a8ccf517764dbc4a22a12380a2df4aa931a))
+* **store:** add six theme packs and a palette-based theme generator ([a22f845](https://github.com/koyhq/koy/commit/a22f845e8b731d2655d90570e7f442d1cde08069))
+
+
+### Fixed
+
+* **calendar:** send the Google client secret and embed release OAuth clients ([12cc20e](https://github.com/koyhq/koy/commit/12cc20e51c4e055a667be3c49adc4fdfd46e5ec1))
+* **uninstall:** delete calendar tokens and cache when settings are removed ([5fcdf97](https://github.com/koyhq/koy/commit/5fcdf97c6855788405da4ac757df27bc839441ca))
+
+
+### Performance
+
+* record memory measurements after feature waves ([e08bc2f](https://github.com/koyhq/koy/commit/e08bc2f5e318b48b78520b67e5e366418b0312b9))
+
 ## [0.2.9](https://github.com/koyhq/koy/compare/v0.2.8...v0.2.9) (2026-11-12)
 
 
