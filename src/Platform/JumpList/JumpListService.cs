@@ -264,7 +264,12 @@ public sealed class JumpListService : IJumpListService
                 adl.SetAppID(id);
 
             var iid = ObjectArrayIid;
-            adl.GetList(type, (uint)max, &iid, out array);
+            adl.GetList(type, (uint)max, &iid, out var arrayPtr);
+            if (arrayPtr is null)
+                return entries;
+
+            array = Marshal.GetObjectForIUnknown((nint)arrayPtr);
+            Marshal.Release((nint)arrayPtr);
             if (array is not IObjectArray objects)
                 return entries;
 
@@ -298,7 +303,12 @@ public sealed class JumpListService : IJumpListService
             var shellItem = ShellItemIid;
             try
             {
-                objects.GetAt(index, &shellItem, out element);
+                objects.GetAt(index, &shellItem, out var elementPtr);
+                if (elementPtr is not null)
+                {
+                    element = Marshal.GetObjectForIUnknown((nint)elementPtr);
+                    Marshal.Release((nint)elementPtr);
+                }
                 if (element is IShellItem item)
                     return ShellLinkEntryReader.FromShellItem(item);
             }
@@ -309,7 +319,12 @@ public sealed class JumpListService : IJumpListService
             }
 
             var shellLink = ShellLinkIid;
-            objects.GetAt(index, &shellLink, out element);
+            objects.GetAt(index, &shellLink, out var linkPtr);
+            if (linkPtr is not null)
+            {
+                element = Marshal.GetObjectForIUnknown((nint)linkPtr);
+                Marshal.Release((nint)linkPtr);
+            }
             // Kısayol olarak gelen son kullanılan, olduğu gibi çalışır.
             return element is IShellLinkW && ShellLinkEntryReader.FromLink(element) is { IsSeparator: false } link ? link : null;
         }

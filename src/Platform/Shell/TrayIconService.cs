@@ -41,11 +41,15 @@ public sealed class TrayIconService : IDisposable
             var exePath = Environment.ProcessPath;
             if (!string.IsNullOrEmpty(exePath))
             {
-                PInvoke.ExtractIconEx(exePath, 0, out var largeHandle, out _safeIconHandle, 1);
-                largeHandle?.Dispose();
-                if (_safeIconHandle is not null && !_safeIconHandle.IsInvalid)
+                HICON smallIcon = default;
+                uint extracted;
+                fixed (char* pExe = exePath)
+                    extracted = PInvoke.ExtractIconEx(new PCWSTR(pExe), 0, null, &smallIcon, 1);
+
+                if (extracted > 0 && !smallIcon.IsNull)
                 {
-                    hIcon = new HICON(_safeIconHandle.DangerousGetHandle());
+                    _safeIconHandle = new DestroyIconSafeHandle((nint)smallIcon.Value, ownsHandle: true);
+                    hIcon = smallIcon;
                 }
             }
         }

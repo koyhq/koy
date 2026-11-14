@@ -8,9 +8,6 @@ updates:
       - "dependencies"
     commit-message:
       prefix: "chore(deps)"
-    ignore:
-      # CsWin32 0.3.3xx üretilen türleri değiştirdi (Platform'da 70 derleme hatası); geçiş ayrı iş (ROADMAP).
-      - dependency-name: "Microsoft.Windows.CsWin32"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

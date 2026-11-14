@@ -29,7 +29,7 @@ public static class PopupMenuProbe
 
             (result ??= []).Add(new WindowRect(rect.left, rect.top, rect.right, rect.bottom));
             if (bringToFront)
-                WindowStyles.ReassertTopmost(hwnd.Value);
+                unsafe { WindowStyles.ReassertTopmost((nint)hwnd.Value); }
         }
 
         return result ?? [];

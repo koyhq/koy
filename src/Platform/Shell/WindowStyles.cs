@@ -109,7 +109,7 @@ public static class WindowStyles
     /// <summary>
     /// Geçerli ön plan penceresinin tanıtıcısını (HWND) döndürür.
     /// </summary>
-    public static nint GetForeground() => PInvoke.GetForegroundWindow().Value;
+    public static unsafe nint GetForeground() => (nint)PInvoke.GetForegroundWindow().Value;
 
     /// <summary>
     /// Pencerenin ekranı kaplayıp kaplamadığını (WS_MAXIMIZE) denetler.
@@ -157,9 +157,9 @@ public static class WindowStyles
     /// <summary>
     /// Verilen pencerenin bulunduğu monitörün tanıtıcısını (HMONITOR) döndürür.
     /// </summary>
-    public static nint GetWindowMonitor(nint hwnd)
+    public static unsafe nint GetWindowMonitor(nint hwnd)
     {
         if (hwnd == 0) return 0;
-        return PInvoke.MonitorFromWindow(new HWND(hwnd), MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST).Value;
+        return (nint)PInvoke.MonitorFromWindow(new HWND(hwnd), MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST).Value;
     }
 }

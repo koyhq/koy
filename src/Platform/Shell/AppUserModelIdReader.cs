@@ -16,11 +16,12 @@ internal static class AppUserModelIdReader
         pid = 5
     };
 
-    public static string? ForWindow(HWND hwnd)
+    public static unsafe string? ForWindow(HWND hwnd)
     {
         try
         {
-            PInvoke.SHGetPropertyStoreForWindow(hwnd, typeof(IPropertyStore).GUID, out var obj).ThrowOnFailure();
+            var iid = typeof(IPropertyStore).GUID;
+            PInvoke.SHGetPropertyStoreForWindow(hwnd, &iid, out var obj).ThrowOnFailure();
             if (obj is not IPropertyStore store)
             {
                 if (obj is not null && Marshal.IsComObject(obj))
@@ -60,11 +61,8 @@ internal static class AppUserModelIdReader
 
             Span<char> buffer = stackalloc char[130]; // APPLICATION_USER_MODEL_ID_MAX_LENGTH = 130
             var length = (uint)buffer.Length;
-            fixed (char* p = buffer)
-            {
-                if (PInvoke.GetApplicationUserModelId(process, ref length, p) != WIN32_ERROR.ERROR_SUCCESS || length < 2)
-                    return null;
-            }
+            if (PInvoke.GetApplicationUserModelId(process, ref length, buffer) != WIN32_ERROR.ERROR_SUCCESS || length < 2)
+                return null;
 
             return buffer[..(int)(length - 1)].ToString(); // sondaki NUL hariç
         }
