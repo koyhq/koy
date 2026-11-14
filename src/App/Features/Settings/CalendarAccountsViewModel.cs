@@ -26,6 +26,13 @@ public sealed partial class CalendarAccountsViewModel : ObservableObject
     [ObservableProperty]
     private string _googleClientSecret = "";
 
+    /// <summary>
+    /// Kendi Google istemcisi alanları: sürümde yerleşik istemci yoksa ya da kullanıcı zaten kendi kimliğini girmişse
+    /// görünür. Yerleşik istemciyle gelen sürümde boş kutular kafa karıştırmasın diye gizlenir.
+    /// </summary>
+    [ObservableProperty]
+    private bool _showGoogleClientFields;
+
     [ObservableProperty]
     private string _outlookClientId = "";
 
@@ -79,6 +86,8 @@ public sealed partial class CalendarAccountsViewModel : ObservableObject
             var settings = _store.Load();
             GoogleClientId = settings.GoogleClientId;
             GoogleClientSecret = settings.GoogleClientSecret;
+            ShowGoogleClientFields = string.IsNullOrWhiteSpace(BuiltInCalendarClients.Current.GoogleClientId)
+                || !string.IsNullOrWhiteSpace(settings.GoogleClientId);
             OutlookClientId = settings.OutlookClientId;
             IsGoogleConnected = settings.GoogleEnabled && _sync.HasToken(CalendarProvider.Google);
             IsOutlookConnected = settings.OutlookEnabled && _sync.HasToken(CalendarProvider.Outlook);

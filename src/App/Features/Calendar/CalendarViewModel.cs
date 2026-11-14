@@ -133,6 +133,9 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
         if (active)
         {
             _events.Changed += OnEventsChanged;
+            // Ayarlardan bağlanan ya da bağlantısı kesilen hesap önbelleği değiştirir; çentik açık kalmış olsa da
+            // sayfa her görününce Google / Outlook etkinlikleri önbellekten yeniden okunur (küçük JSON, eşitleme yok).
+            _events.ReloadExternalFromCache();
             // Uygulama gece boyunca açık kalmış olabilir.
             Anchor = _today();
             Refresh();
