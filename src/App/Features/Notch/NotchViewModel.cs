@@ -821,7 +821,8 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     private Brush ResolveCollapsedSurface() => Settings.Notch.CollapsedBackground switch
     {
-        NotchCollapsedBackground.AlbumColor when _music.HasTrack && _music.CollapsedAlbumBrush is not null
+        // Albüm rengi yalnız çalarken: duraklatılınca çentik varsayılan zemine döner.
+        NotchCollapsedBackground.AlbumColor when _music.HasTrack && _music.IsPlaying && _music.CollapsedAlbumBrush is not null
             => _music.CollapsedAlbumBrush,
         NotchCollapsedBackground.Ambient when _ambientCollapsedSurface is not null
             => _ambientCollapsedSurface,
