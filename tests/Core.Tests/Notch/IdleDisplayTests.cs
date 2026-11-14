@@ -55,6 +55,17 @@ public class IdleDisplayTests
     }
 
     [Theory]
+    [InlineData(IdleDisplayMode.ClockAndBattery, false, false)]
+    [InlineData(IdleDisplayMode.ClockAndBattery, true, true)]
+    [InlineData(IdleDisplayMode.ClockOnly, true, false)]
+    [InlineData(IdleDisplayMode.Nothing, true, false)]
+    [InlineData(IdleDisplayMode.RingClockDay, true, false)] // halka modunda tarih yalnız Peek'te
+    public void ShowCollapsedDate_respects_mode_and_setting(IdleDisplayMode mode, bool clockShowDate, bool expected)
+    {
+        Assert.Equal(expected, IdleDisplay.ShowCollapsedDate(mode, clockShowDate));
+    }
+
+    [Theory]
     [InlineData(IdleDisplayMode.ClockAndBattery, false)]
     [InlineData(IdleDisplayMode.ClockOnly, false)]
     [InlineData(IdleDisplayMode.Nothing, false)]

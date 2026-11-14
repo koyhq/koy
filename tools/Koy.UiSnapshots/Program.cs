@@ -259,7 +259,8 @@ public static class Program
     private static NotchSet MakeNotch(bool music, IReadOnlyList<Koy.Core.Shelf.ShelfItem>? shelf = null, List<string>? tileOrder = null,
         bool locationBlocked = false, bool audioConnected = true, Func<Koy.Core.SystemStats.ISystemStatsService>? statsFactory = null,
         bool brightnessSupported = true, bool wideCover = false, Koy.Core.Notch.NotchStyleMode notchStyle = Koy.Core.Notch.NotchStyleMode.Pinned,
-        Koy.Core.Notch.IdleDisplayMode idleMode = Koy.Core.Notch.IdleDisplayMode.ClockAndBattery, FakePower? power = null, string? language = null)
+        Koy.Core.Notch.IdleDisplayMode idleMode = Koy.Core.Notch.IdleDisplayMode.ClockAndBattery, FakePower? power = null, string? language = null,
+        bool clockShowDate = false)
     {
         var settings = new AppSettings
         {
@@ -271,6 +272,7 @@ public static class Program
             {
                 Style = notchStyle,
                 IdleDisplay = idleMode,
+                ClockShowDate = clockShowDate,
                 ControlCenterLayout = tileOrder is null ? new AppSettings().Notch.ControlCenterLayout : new Koy.Core.Settings.ValueList<string>(tileOrder)
             },
             Appearance = new AppearanceSettings
@@ -413,12 +415,16 @@ public static class Program
             new Koy.Core.Shelf.ShelfItem("4", "Kopyalanan metin", "Kopyalanan metin", Koy.Core.Shelf.ShelfItemKind.Text, DateTimeOffset.Now)
         };
 
-        // Kapalı çentik: boşta, müzik çalarken, zamanlayıcı çalışırken.
+        // Kapalı çentik: boşta, tarihli, müzik çalarken, zamanlayıcı çalışırken.
         var set = MakeNotch(music: false);
         ShotNotch(set, name("kapali"), expanded: false);
         set.Timers.Toggle(Koy.Core.Timers.FocusKind.Focus);
         Flush();
         ShotNotch(set, name("kapali-zamanlayici"), expanded: false);
+        set.Vm.Dispose();
+
+        set = MakeNotch(music: false, clockShowDate: true);
+        ShotNotch(set, name("kapali-tarih"), expanded: false);
         set.Vm.Dispose();
 
         set = MakeNotch(music: true);

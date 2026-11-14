@@ -28,7 +28,15 @@ public static class IdleDisplay
     public static bool ShowRadioWhenCollapsed(IdleDisplayMode mode) => ShowRadio(mode) && !IsRing(mode);
 
     /// <summary>
-    /// Üzerine gelince görünen tarih ve ağ simgesi de "ek bilgi"dir: "saat, pil ve bağlantılar" ve halka modunda çıkar.
+    /// Kapalı klasik çentikte saatin yanında kısa tarih gösterilsin mi ("Saat, pil ve bağlantılar" modunda ve ayar açıksa).
+    /// "Yalnız saat", "Hiçbiri" ve zaten gün adı gösteren halka modunda kapalı çentikte ayrıca tarih eklenmez.
+    /// </summary>
+    public static bool ShowCollapsedDate(IdleDisplayMode mode, bool clockShowDate) =>
+        clockShowDate && mode == IdleDisplayMode.ClockAndBattery;
+
+    /// <summary>
+    /// Üzerine gelince görünen ek bilgiler (ikinci saat, halka modunda tarih ve ağ simgeleri):
+    /// "saat, pil ve bağlantılar" ve halka modunda çıkar; "Yalnız saat" ve "Hiçbiri"nde kapalıdır.
     /// </summary>
     public static bool ShowPeekDetails(IdleDisplayMode mode) => mode is not (IdleDisplayMode.ClockOnly or IdleDisplayMode.Nothing);
 }
