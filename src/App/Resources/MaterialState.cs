@@ -23,9 +23,11 @@ public static class MaterialState
 
     public static event Action? Changed;
 
-    /// <summary>Koy penceresi, sağ alt menü ve sihirbaz için etkin seviye.</summary>
+    /// <summary>Koy penceresi, sağ alt menü ve sihirbaz için etkin seviye. Windows 10'da DWM akrilik olmadığı için Katı.</summary>
     public static MaterialLevel ForWindow(AppSettings settings, ResolvedTheme theme) =>
-        Resolve(settings, theme == ResolvedTheme.Light ? ReadabilityGuard.WindowLight : ReadabilityGuard.WindowDark);
+        MaterialSetting.ResolveWindowMaterial(
+            Resolve(settings, theme == ResolvedTheme.Light ? ReadabilityGuard.WindowLight : ReadabilityGuard.WindowDark),
+            Koy.Platform.Shell.BackdropService.IsSupported);
 
     /// <summary>Açık çentik ve kartlar için etkin seviye. "Açık çentik malzemeyi izlesin" kapalıysa hep Katı.</summary>
     public static MaterialLevel ForNotch(AppSettings settings) =>

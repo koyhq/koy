@@ -43,4 +43,10 @@ public static class MaterialSetting
 
     /// <summary>Bulanıklıksız yüzey opaklığının 0–255 alfa karşılığı.</summary>
     public static byte LayeredAlpha(MaterialLevel value) => (byte)Math.Round(255 * LayeredOpacity(value));
+
+    /// <summary>
+    /// Sistem arka planı (DWM akrilik/mika) desteklenmiyorsa (Windows 10) pencere yüzeyi opak <see cref="MaterialLevel.Solid"/> olur.
+    /// </summary>
+    public static MaterialLevel ResolveWindowMaterial(MaterialLevel requested, bool supportsBackdrop) =>
+        supportsBackdrop ? requested : MaterialLevel.Solid;
 }

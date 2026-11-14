@@ -7,8 +7,8 @@
 
   const dict = {
     en: {
-      'meta.title': 'Koy: notch and dock for Windows 11',
-      'meta.description': 'Koy is a spring-animated notch and a dock that replaces the taskbar on Windows 11. One process, no browser engine, easy on the CPU at idle. Free and open source.',
+      'meta.title': 'Koy: notch and dock for Windows 10 / 11',
+      'meta.description': 'Koy is a spring-animated notch and a dock that replaces the taskbar on Windows 10 / 11. One process, no browser engine, easy on the CPU at idle. Free and open source.',
       'meta.ogDescription': 'A spring-animated notch and a dock that replaces the taskbar. No browser engine, free and open source.',
       'meta.ogImageAlt': 'Koy: a Turkish tagline on a blue background',
       'meta.locale': 'en_US',
@@ -32,7 +32,7 @@
       'hero.sub': 'A spring-animated notch and a dock that replaces the taskbar. One process, no browser engine, easy on the CPU at idle.',
       'cta.download': 'Download Koy',
       'cta.source': 'Source code',
-      'hero.facts': 'Windows 11 · Free and open source (GPLv3)',
+      'hero.facts': 'Windows 10 / 11 · Free and open source (GPLv3)',
 
       'notch.title': 'Put the top of your screen to work.',
       'notch.lead': 'Move the mouse to the top edge and the notch springs open. Music, calendar, Wi-Fi and system status, all in one place.',
@@ -87,7 +87,7 @@
       'details.uninstall.text': 'Uninstall from inside Koy in one step. Keep your settings if you like; your taskbar goes back to normal.',
 
       'install.title': 'Setup takes a minute.',
-      'install.lead': 'Requires Windows 11 (22H2 or later). Koy is free, and every release is built on GitHub Actions after the tests pass.',
+      'install.lead': 'Requires Windows 10 (2004 / 19041 or later) or Windows 11. Koy is free, and every release is built on GitHub Actions after the tests pass.',
       'install.s1.title': 'Download',
       'install.s1.text': "Setup installs in one click and updates itself. Prefer no install? There's a portable zip.",
       'install.s1.zip': 'Portable zip',
@@ -101,7 +101,7 @@
       'copy.selected': 'Selected, press Ctrl+C',
 
       'footer.title': 'Try it in a minute.',
-      'footer.lead': "Free, open source, for Windows 11. Don't like it? Uninstall in one step.",
+      'footer.lead': "Free, open source, for Windows 10 / 11. Don't like it? Uninstall in one step.",
       'footer.note': 'An open source project released under GPLv3.',
       'footer.links': 'Links',
       'footer.releases': 'Releases',
@@ -112,8 +112,8 @@
     },
 
     tr: {
-      'meta.title': 'Koy: Windows 11 için çentik ve dock',
-      'meta.description': 'Koy, Windows 11 için yay fiziğiyle açılan bir çentik ve görev çubuğunun yerine geçen bir dock. Tek süreç, tarayıcı motoru yok, boşta işlemciyi yormaz. Ücretsiz ve açık kaynak.',
+      'meta.title': 'Koy: Windows 10 / 11 için çentik ve dock',
+      'meta.description': 'Koy, Windows 10 / 11 için yay fiziğiyle açılan bir çentik ve görev çubuğunun yerine geçen bir dock. Tek süreç, tarayıcı motoru yok, boşta işlemciyi yormaz. Ücretsiz ve açık kaynak.',
       'meta.ogDescription': 'Yay fiziğiyle açılan çentik, görev çubuğunun yerine geçen dock. Tarayıcı motoru yok, ücretsiz ve açık kaynak.',
       'meta.ogImageAlt': "Koy: mavi zeminde 'Masaüstünü hafifçe değiştir.' yazısı",
       'meta.locale': 'tr_TR',
@@ -137,7 +137,7 @@
       'hero.sub': 'Yay fiziğiyle açılan bir çentik ve görev çubuğunun yerine geçen bir dock. Tek süreç, tarayıcı motoru yok, boşta işlemciyi yormaz.',
       'cta.download': "Koy'u indir",
       'cta.source': 'Kaynak kodu',
-      'hero.facts': 'Windows 11 · Ücretsiz ve açık kaynak (GPLv3)',
+      'hero.facts': 'Windows 10 / 11 · Ücretsiz ve açık kaynak (GPLv3)',
 
       'notch.title': 'Ekranın üstü boşa durmasın.',
       'notch.lead': 'Fareyi üst kenara götür, çentik yayla açılsın. Müzik, takvim, Wi-Fi ve sistem durumu hep aynı yerde.',
@@ -192,7 +192,7 @@
       'details.uninstall.text': "Koy'dan tek adımda kaldırılır. İstersen ayarların korunur, görev çubuğun yerine döner.",
 
       'install.title': 'Kurulum bir dakika.',
-      'install.lead': "Windows 11 (22H2 ve üstü) gerekir. Koy ücretsizdir ve her sürüm GitHub Actions'ta, testler geçtikten sonra üretilir.",
+      'install.lead': "Windows 10 (2004 / 19041 ve üstü) veya Windows 11 gerekir. Koy ücretsizdir ve her sürüm GitHub Actions'ta, testler geçtikten sonra üretilir.",
       'install.s1.title': 'İndir',
       'install.s1.text': 'Setup tek tıkla kurar ve kendini günceller. Kurulum istemezsen taşınabilir zip var.',
       'install.s1.zip': 'Taşınabilir zip',
@@ -206,7 +206,7 @@
       'copy.selected': 'Seçildi, Ctrl+C',
 
       'footer.title': 'Denemesi bir dakika.',
-      'footer.lead': 'Ücretsiz, açık kaynak, Windows 11 için. Beğenmezsen tek adımda kaldırırsın.',
+      'footer.lead': 'Ücretsiz, açık kaynak, Windows 10 / 11 için. Beğenmezsen tek adımda kaldırırsın.',
       'footer.note': 'GPLv3 ile yayımlanan açık kaynak bir proje.',
       'footer.links': 'Bağlantılar',
       'footer.releases': 'Sürümler',

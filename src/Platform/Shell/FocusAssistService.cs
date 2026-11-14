@@ -61,6 +61,9 @@ public sealed class FocusAssistService : IFocusAssistService
 
     private static bool ReadFocusSession()
     {
+        if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22621))
+            return false;
+
         try
         {
             return Windows.UI.Shell.FocusSessionManager.IsSupported && Windows.UI.Shell.FocusSessionManager.GetDefault().IsFocusActive;
@@ -79,7 +82,7 @@ public sealed class FocusAssistService : IFocusAssistService
         add
         {
             _stateChanged += value;
-            if (_focusManager is not null)
+            if (_focusManager is not null || !OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22621))
                 return;
 
             try
