@@ -3654,6 +3654,9 @@
   <data name="ExtApplied" xml:space="preserve">
     <value>Uygulandı</value>
   </data>
+  <data name="ExtDisable" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
   <data name="ExtUninstall" xml:space="preserve">
     <value>Kaldır</value>
   </data>
@@ -3758,6 +3761,9 @@
   </data>
   <data name="ExtAppliedOk" xml:space="preserve">
     <value>{0} uygulandı.</value>
+  </data>
+  <data name="ExtDisabledOk" xml:space="preserve">
+    <value>{0} kapatıldı.</value>
   </data>
   <data name="ExtUninstalledOk" xml:space="preserve">
     <value>{0} kaldırıldı.</value>
@@ -4037,6 +4043,21 @@
   </data>
   <data name="LiveBgBuiltinHeader" xml:space="preserve">
     <value>Yerleşik çentik animasyonları</value>
+  </data>
+  <data name="LiveBgKindVideo" xml:space="preserve">
+    <value>Video döngü</value>
+  </data>
+  <data name="LiveBgPresetNebulaFlow" xml:space="preserve">
+    <value>Bulutsu akışı</value>
+  </data>
+  <data name="LiveBgPresetLiquidGold" xml:space="preserve">
+    <value>Akışkan altın</value>
+  </data>
+  <data name="LiveBgPresetDeepOcean" xml:space="preserve">
+    <value>Derin okyanus</value>
+  </data>
+  <data name="LiveBgPresetVelvetAurora" xml:space="preserve">
+    <value>Kadife aurora</value>
   </data>
   <data name="LiveBgKindEffect" xml:space="preserve">
     <value>Kodlu efekt</value>

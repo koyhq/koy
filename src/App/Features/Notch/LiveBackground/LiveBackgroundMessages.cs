@@ -22,7 +22,7 @@ public static class LiveBackgroundMessages
 /// <summary>Önayar seçici satırı.</summary>
 public sealed record LiveBackgroundPresetOption(string Id, string Name)
 {
-    public bool IsEffect => LiveBackgroundPresets.Find(Id).Effect is not null;
+    public bool IsVideo => LiveBackgroundPresets.Find(Id).VideoFile is not null;
 
     public System.Windows.Media.Imaging.BitmapSource Preview => LiveBackgroundPreviewRenderer.Get(Id);
 }

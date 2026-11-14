@@ -71,7 +71,7 @@ public sealed record AppearanceSettings
     public AnimationSpeed AnimationSpeed { get; set; } = AnimationSpeed.Normal;
     public bool RespectReduceMotion { get; set; } = true;
     public bool BatterySaverReduceMotion { get; set; } = true;
-    public MaterialLevel Material { get; set; } = MaterialLevel.Solid;
+    public MaterialLevel Material { get; set; } = MaterialLevel.Glass;
 
     /// <summary>Animasyon başına açma/kapama. Kapalı bir animasyonun son durumu yaysız, anında uygulanır. App tarafında Motion.ScaleFor ile okunur (bkz. MotionPolicy.ScaleFor); BadgeBounce henüz bağlı değil (dock rozetinde animasyon yok).</summary>
     public MotionSettings Motion { get; set; } = new();

@@ -37,6 +37,20 @@
             </Grid>
         </Border>
 
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [HoverMagnifyTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [HoverMagnifyTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockHoverMagnify}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
         <!-- Simge aralığı: 0..16 px -->
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
@@ -55,20 +69,6 @@
                                FontSize="{DynamicResource KoyFontCaption}"
                                Width="44" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
                 </StackPanel>
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [HoverMagnifyTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [HoverMagnifyTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockHoverMagnify}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                          Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
 

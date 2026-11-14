@@ -26,7 +26,7 @@ public sealed partial class BuiltinBackgroundCardViewModel : ObservableObject
 
     public string Id => _preset.Id;
 
-    public bool IsEffect => _preset.Effect is not null;
+    public bool IsVideo => _preset.VideoFile is not null;
 
     public BitmapSource Preview => LiveBackgroundPreviewRenderer.Get(_preset.Id);
 
@@ -46,9 +46,12 @@ public sealed partial class BuiltinBackgroundCardViewModel : ObservableObject
     [RelayCommand]
     private void Apply() => _owner.ApplyBuiltinBackground(Id);
 
+    [RelayCommand]
+    private void Disable() => _owner.DisableBuiltinBackground(Id);
+
     internal void RefreshLanguage()
     {
         Name = Strings.Get(_preset.NameKey);
-        KindLabel = Strings.Get(IsEffect ? "LiveBgKindEffect" : "LiveBgKindAmbient");
+        KindLabel = Strings.Get(IsVideo ? "LiveBgKindVideo" : "LiveBgKindAmbient");
     }
 }

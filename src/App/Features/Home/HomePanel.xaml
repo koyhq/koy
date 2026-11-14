@@ -170,7 +170,8 @@
 
   <Grid>
     <!-- ============================== MÜZİK YÜZÜ ============================== -->
-    <Border CornerRadius="20" Padding="18" MouseLeftButtonDown="MusicCard_MouseLeftButtonDown" RenderOptions.BitmapScalingMode="Linear"
+    <Border CornerRadius="20" Padding="18" BorderBrush="{DynamicResource KoyNotchCardBorder}" BorderThickness="1"
+            MouseLeftButtonDown="MusicCard_MouseLeftButtonDown" RenderOptions.BitmapScalingMode="Linear"
             Visibility="{Binding IsMusicPage, Converter={StaticResource BoolToVis}}">
       <Border.Style>
         <Style TargetType="Border">
@@ -367,7 +368,7 @@
       </Grid.ColumnDefinitions>
 
       <!-- SOL: Bugün. Gün, hava (konum yoksa "Konum seç"), ince çizgi, sıradaki etkinlik ve sonraki ikisi. -->
-      <Border Grid.Column="0" CornerRadius="18" Background="{DynamicResource KoyNotchCard}" Padding="16,14,16,10">
+      <Border Grid.Column="0" CornerRadius="18" Background="{DynamicResource KoyNotchCard}" BorderBrush="{DynamicResource KoyNotchCardBorder}" BorderThickness="1" Padding="16,14,16,10">
         <DockPanel LastChildFill="False">
           <TextBlock DockPanel.Dock="Top" Text="{Binding Status.Greeting}" FontSize="12" Foreground="{DynamicResource KoyNotchMuted}" />
           <TextBlock DockPanel.Dock="Top" Text="{Binding Status.DayDate}" FontFamily="{DynamicResource KoyNotchDisplayFont}" FontSize="21" FontWeight="SemiBold"
@@ -452,7 +453,7 @@
           <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Height="58" Margin="0,0,0,10" CornerRadius="18" Background="{DynamicResource KoyNotchCard}" Padding="12,0,10,0"
+        <Border Grid.Row="0" Height="58" Margin="0,0,0,10" CornerRadius="18" Background="{DynamicResource KoyNotchCard}" BorderBrush="{DynamicResource KoyNotchCardBorder}" BorderThickness="1" Padding="12,0,10,0"
                 Visibility="{Binding ShowFocusRow, Converter={StaticResource BoolToVis}}">
           <Grid>
             <!-- Çalışıyor: halka, tür ve kalan süre, duraklat ve (Pomodoro'da) sonraki aşama -->
@@ -511,7 +512,7 @@
           </Grid.RowDefinitions>
 
           <!-- Kulaklık kartı: bağlı ses cihazının adı ve (varsa) pili. -->
-          <Border x:Name="HeadphoneCardBorder" Grid.Row="0" Height="40" Margin="0,0,0,10" CornerRadius="16" Background="{DynamicResource KoyNotchCard}" Padding="12,0"
+          <Border x:Name="HeadphoneCardBorder" Grid.Row="0" Height="40" Margin="0,0,0,10" CornerRadius="16" Background="{DynamicResource KoyNotchCard}" BorderBrush="{DynamicResource KoyNotchCardBorder}" BorderThickness="1" Padding="12,0"
                   Visibility="{Binding ShowHeadphoneCard, Converter={StaticResource BoolToVis}}">
             <Grid DataContext="{Binding Bluetooth.PrimaryAudio}">
               <Grid.ColumnDefinitions>
@@ -540,7 +541,7 @@
           <!-- Sistem: işlemci, bellek ve ağ tek kartta; tıklayınca Sistem sayfası -->
           <Button x:Name="SystemCardGrid" Grid.Row="1" Margin="0,0,0,10" Style="{StaticResource CardButtonStyle}" Command="{Binding OpenSystemCommand}"
                   Visibility="{Binding ShowSystemCard, Converter={StaticResource BoolToVis}}">
-            <Border CornerRadius="18" Background="{DynamicResource KoyNotchCard}" Padding="16,0">
+            <Border CornerRadius="18" Background="{DynamicResource KoyNotchCard}" BorderBrush="{DynamicResource KoyNotchCardBorder}" BorderThickness="1" Padding="16,0">
               <StackPanel VerticalAlignment="Center">
                 <Grid>
                   <TextBlock Text="{Binding [HomeCpu], Source={x:Static res:Loc.Instance}}" FontSize="12.5" />
@@ -572,7 +573,7 @@
           </Button>
 
           <!-- Hızlı başlat: başlık ve simgeler tek satırda -->
-          <Border x:Name="QuickLaunchCardBorder" Grid.Row="2" Height="54" CornerRadius="18" Background="{DynamicResource KoyNotchCard}" Padding="14,0,10,0"
+          <Border x:Name="QuickLaunchCardBorder" Grid.Row="2" Height="54" CornerRadius="18" Background="{DynamicResource KoyNotchCard}" BorderBrush="{DynamicResource KoyNotchCardBorder}" BorderThickness="1" Padding="14,0,10,0"
                   Visibility="{Binding ShowQuickLaunchCard, Converter={StaticResource BoolToVis}}">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
               <TextBlock Text="{Binding [QuickLaunchTitle], Source={x:Static res:Loc.Instance}}" FontSize="12" Foreground="{DynamicResource KoyNotchMuted}"

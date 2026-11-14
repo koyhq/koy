@@ -20,6 +20,11 @@
     <PackageReference Include="Velopack" Version="1.2.161" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\..\assets\backgrounds\*.mp4" Link="assets\backgrounds\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\assets\backgrounds\*.png" Link="assets\backgrounds\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Core\Koy.Core.csproj" />
     <ProjectReference Include="..\Platform\Koy.Platform.csproj" />
   </ItemGroup>

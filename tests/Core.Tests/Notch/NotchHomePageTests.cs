@@ -6,12 +6,13 @@ namespace Koy.Core.Tests.Notch;
 public class NotchHomePageTests
 {
     [Theory]
-    [InlineData(true, true, NotchHomePage.Music)]
-    [InlineData(false, true, NotchHomePage.Home)]
-    [InlineData(true, false, NotchHomePage.Home)]
-    [InlineData(false, false, NotchHomePage.Home)]
-    public void OnOpen_shows_music_only_with_a_track_and_the_music_card_enabled(bool hasTrack, bool musicEnabled, NotchHomePage expected) =>
-        Assert.Equal(expected, NotchHomePages.OnOpen(hasTrack, musicEnabled));
+    [InlineData(NotchHomePage.Music, true, true, NotchHomePage.Music)]
+    [InlineData(NotchHomePage.Home, true, true, NotchHomePage.Home)]
+    [InlineData(NotchHomePage.Music, false, true, NotchHomePage.Home)]
+    [InlineData(NotchHomePage.Music, true, false, NotchHomePage.Home)]
+    [InlineData(NotchHomePage.Home, false, false, NotchHomePage.Home)]
+    public void OnOpen_preserves_selected_page_when_music_is_available(NotchHomePage current, bool hasTrack, bool musicEnabled, NotchHomePage expected) =>
+        Assert.Equal(expected, NotchHomePages.OnOpen(current, hasTrack, musicEnabled));
 }
 
 public class EventAgendaUpcomingTests

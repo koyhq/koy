@@ -9,28 +9,6 @@
              d:DataContext="{d:DesignInstance local:KoyWindowViewModel}">
 
     <StackPanel>
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [DockStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="{Binding [StyleCapsule], Source={x:Static res:Loc.Instance}}" GroupName="DockStyle"
-                                     IsChecked="{Binding DockStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=FloatingCapsule}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [StyleFullWidth], Source={x:Static res:Loc.Instance}}" GroupName="DockStyle"
-                                     IsChecked="{Binding DockStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=FullWidth}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
-
         <!-- Ekran kenarı: Alt, Üst, Sol, Sağ -->
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
@@ -54,6 +32,28 @@
                                      Style="{StaticResource SegRadioStyle}" />
                         <RadioButton Content="{Binding [DockEdgeRight], Source={x:Static res:Loc.Instance}}" GroupName="DockEdge"
                                      IsChecked="{Binding DockEdge, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Right}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [StyleCapsule], Source={x:Static res:Loc.Instance}}" GroupName="DockStyle"
+                                     IsChecked="{Binding DockStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=FloatingCapsule}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [StyleFullWidth], Source={x:Static res:Loc.Instance}}" GroupName="DockStyle"
+                                     IsChecked="{Binding DockStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=FullWidth}"
                                      Style="{StaticResource SegRadioStyle}" />
                     </StackPanel>
                 </Border>
@@ -284,7 +284,6 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [RevealTriggerTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [RevealTriggerDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
                 <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
@@ -353,7 +352,6 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [DockLeftClickTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [DockLeftClickDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
                 <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
@@ -406,7 +404,6 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [DockGroupingModeTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [DockGroupingModeDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
                 <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
@@ -433,7 +430,6 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [DockLabelModeTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [DockLabelModeDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 </StackPanel>
                 <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">

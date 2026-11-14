@@ -15,7 +15,6 @@
         <Border Style="{StaticResource SettingRowStyle}">
             <StackPanel>
                 <TextBlock Text="{Binding [RulesAddTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                <TextBlock Text="{Binding [RulesAddDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 <TextBox Margin="0,8,0,0" Style="{StaticResource SettingTextBoxStyle}" MaxLength="120"
                          Text="{Binding Rules.ProcessText, UpdateSourceTrigger=PropertyChanged}"
                          AutomationProperties.Name="{Binding [RulesProcessHint], Source={x:Static res:Loc.Instance}}">

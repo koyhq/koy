@@ -15,7 +15,6 @@
         <Border Style="{StaticResource SettingRowStyle}">
             <StackPanel>
                 <TextBlock Text="{Binding [ProfilesSaveTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                <TextBlock Text="{Binding [ProfilesSaveDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                 <TextBox Margin="0,8,0,0" Style="{StaticResource SettingTextBoxStyle}" MaxLength="60"
                          Text="{Binding Profiles.NewName, UpdateSourceTrigger=PropertyChanged}"
                          AutomationProperties.Name="{Binding [ProfilesNameHint], Source={x:Static res:Loc.Instance}}">

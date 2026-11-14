@@ -56,9 +56,8 @@ public enum LiveBackgroundPlaybackMode
 /// <param name="NameKey">Strings.resx anahtarı.</param>
 /// <param name="Colors">Geçişte dönen renkler (en az 2).</param>
 /// <param name="CycleSeconds">Bir tam geçiş döngüsünün süresi (yalnız renk geçişinde).</param>
-/// <param name="Effect">Doluysa renk geçişi yerine bu kodlu efekt çizilir (<see cref="Effects.BackgroundEffects"/>);
-/// <paramref name="Colors"/> efektin paletidir.</param>
-public sealed record LiveBackgroundPreset(string Id, string NameKey, IReadOnlyList<string> Colors, int CycleSeconds, string? Effect = null);
+/// <param name="VideoFile">Doluysa renk geçişi yerine <c>assets/backgrounds/</c> altındaki bu MP4 döngüsü oynatılır.</param>
+public sealed record LiveBackgroundPreset(string Id, string NameKey, IReadOnlyList<string> Colors, int CycleSeconds, string? VideoFile = null);
 
 /// <summary>Yerleşik ambiyans önayarlarının küçük kataloğu.</summary>
 public static class LiveBackgroundPresets
@@ -71,24 +70,24 @@ public static class LiveBackgroundPresets
         new("ember", "LiveBgPresetEmber", ["#3A1410", "#5C2A12", "#2B1033"], 20),
         new("ocean", "LiveBgPresetOcean", ["#0B2545", "#13496B", "#0E6B73"], 16),
         new("dusk", "LiveBgPresetDusk", ["#1F1B4B", "#4A1F4F", "#6B2A3A"], 22),
-        // Kodla çizilen efektler (Effects/BackgroundEffects): kimlik efektin kimliğiyle aynı.
-        new("plasma", "LiveBgPresetPlasma", ["#3B1F5C", "#0E6B73", "#1E2A5E", "#6B2A3A"], 0, "plasma"),
-        new("lava", "LiveBgPresetLava", ["#1A0B1E", "#C2410C", "#F59E0B"], 0, "lava"),
-        new("nebula", "LiveBgPresetNebula", ["#0B0B1E", "#6D28D9", "#DB2777"], 0, "nebula"),
-        new("silk", "LiveBgPresetSilk", ["#1E1B4B", "#0F766E", "#7C3AED", "#BE185D"], 0, "silk"),
-        new("northern", "LiveBgPresetNorthern", ["#071426", "#22C55E", "#8B5CF6"], 0, "northern"),
-        new("waves", "LiveBgPresetWaves", ["#0B1020", "#1E3A8A", "#0E7490", "#2563EB"], 0, "waves"),
-        new("contour", "LiveBgPresetContour", ["#0B1220", "#38BDF8", "#A78BFA"], 0, "contour"),
-        new("horizon", "LiveBgPresetHorizon", ["#1A0B2E", "#7C2D82", "#F59E0B", "#EC4899", "#D946EF"], 0, "horizon"),
-        new("underwater", "LiveBgPresetUnderwater", ["#03192B", "#0B4A6B", "#7DD3FC"], 0, "underwater"),
-        new("pearl", "LiveBgPresetPearl", ["#4C1D95", "#0E7490", "#BE185D", "#A16207"], 0, "pearl"),
-        new("nightsky", "LiveBgPresetNightSky", ["#05060E", "#1E1B4B", "#F8FAFC"], 0, "nightsky"),
-        new("fireflies", "LiveBgPresetFireflies", ["#05070A", "#0F2A1E", "#FACC15"], 0, "fireflies"),
-        new("snow", "LiveBgPresetSnow", ["#0F172A", "#1E293B", "#E2E8F0"], 0, "snow"),
-        new("rain", "LiveBgPresetRain", ["#0B1320", "#1E293B", "#94A3B8"], 0, "rain"),
-        new("bokeh", "LiveBgPresetBokeh", ["#0B0B12", "#1A1033", "#F472B6", "#60A5FA", "#FBBF24"], 0, "bokeh"),
-        new("warp", "LiveBgPresetWarp", ["#04050C", "#1E3A8A", "#E0F2FE"], 0, "warp"),
-        new("ripples", "LiveBgPresetRipples", ["#04121C", "#0EA5E9", "#A5F3FC"], 0, "ripples"),
+        // 620x352 30fps HD MP4 video döngüleri (assets/backgrounds/).
+        new("plasma", "LiveBgPresetPlasma", ["#3B1F5C", "#0E6B73", "#1E2A5E", "#6B2A3A"], 0, "plasma.mp4"),
+        new("lava", "LiveBgPresetLava", ["#1A0B1E", "#C2410C", "#F59E0B"], 0, "lava.mp4"),
+        new("nebula", "LiveBgPresetNebula", ["#0B0B1E", "#6D28D9", "#DB2777"], 0, "nebula.mp4"),
+        new("silk", "LiveBgPresetSilk", ["#1E1B4B", "#0F766E", "#7C3AED", "#BE185D"], 0, "silk.mp4"),
+        new("northern", "LiveBgPresetNorthern", ["#071426", "#22C55E", "#8B5CF6"], 0, "northern.mp4"),
+        new("waves", "LiveBgPresetWaves", ["#0B1020", "#1E3A8A", "#0E7490", "#2563EB"], 0, "waves.mp4"),
+        new("contour", "LiveBgPresetContour", ["#0B1220", "#38BDF8", "#A78BFA"], 0, "contour.mp4"),
+        new("horizon", "LiveBgPresetHorizon", ["#1A0B2E", "#7C2D82", "#F59E0B", "#EC4899", "#D946EF"], 0, "horizon.mp4"),
+        new("underwater", "LiveBgPresetUnderwater", ["#03192B", "#0B4A6B", "#7DD3FC"], 0, "underwater.mp4"),
+        new("pearl", "LiveBgPresetPearl", ["#4C1D95", "#0E7490", "#BE185D", "#A16207"], 0, "pearl.mp4"),
+        new("nightsky", "LiveBgPresetNightSky", ["#05060E", "#1E1B4B", "#F8FAFC"], 0, "nightsky.mp4"),
+        new("fireflies", "LiveBgPresetFireflies", ["#05070A", "#0F2A1E", "#FACC15"], 0, "fireflies.mp4"),
+        new("snow", "LiveBgPresetSnow", ["#0F172A", "#1E293B", "#E2E8F0"], 0, "snow.mp4"),
+        new("rain", "LiveBgPresetRain", ["#0B1320", "#1E293B", "#94A3B8"], 0, "rain.mp4"),
+        new("bokeh", "LiveBgPresetBokeh", ["#0B0B12", "#1A1033", "#F472B6", "#60A5FA", "#FBBF24"], 0, "bokeh.mp4"),
+        new("warp", "LiveBgPresetWarp", ["#04050C", "#1E3A8A", "#E0F2FE"], 0, "warp.mp4"),
+        new("ripples", "LiveBgPresetRipples", ["#04121C", "#0EA5E9", "#A5F3FC"], 0, "ripples.mp4"),
     ];
 
     /// <summary>Kimliğe göre önayar; bilinmeyen ya da boş kimlikte varsayılan döner (ayar dosyası elle bozulmuş olabilir).</summary>

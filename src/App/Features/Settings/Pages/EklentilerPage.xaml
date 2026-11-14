@@ -242,15 +242,9 @@
                                 </StackPanel>
 
                                 <Grid Grid.Row="2">
-                                    <Border Style="{StaticResource ExtChipStyle}" Background="{DynamicResource KoyAccentSubtle}"
-                                            HorizontalAlignment="Left" Margin="0" Padding="8,4"
-                                            Visibility="{Binding IsApplied, Converter={StaticResource BoolToVis}}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <res:KoyIcon Data="{StaticResource IconCheck}" Size="11" StrokeWidth="3" Foreground="{DynamicResource KoyAccentText}" VerticalAlignment="Center" />
-                                            <TextBlock Text="{Binding [ExtApplied], Source={x:Static res:Loc.Instance}}" Style="{StaticResource ExtChipTextStyle}"
-                                                       Foreground="{DynamicResource KoyAccentText}" Margin="4,0,0,0" />
-                                        </StackPanel>
-                                    </Border>
+                                    <Button Content="{Binding [ExtDisable], Source={x:Static res:Loc.Instance}}" Command="{Binding DisableCommand}"
+                                            Style="{StaticResource SettingButtonStyle}" HorizontalAlignment="Stretch"
+                                            Visibility="{Binding IsApplied, Converter={StaticResource BoolToVis}}" />
                                     <Button Content="{Binding [ExtApply], Source={x:Static res:Loc.Instance}}" Command="{Binding ApplyCommand}"
                                             Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Stretch"
                                             Visibility="{Binding ShowApply, Converter={StaticResource BoolToVis}}" />
@@ -328,6 +322,9 @@
                                     <Button Content="{Binding ApplyLabel}" Command="{Binding ApplyCommand}"
                                             Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,0,6"
                                             Visibility="{Binding ShowApply, Converter={StaticResource BoolToVis}}" />
+                                    <Button Content="{Binding [ExtDisable], Source={x:Static res:Loc.Instance}}" Command="{Binding DisableCommand}"
+                                            Style="{StaticResource SettingButtonStyle}" Margin="0,0,0,6"
+                                            Visibility="{Binding IsApplied, Converter={StaticResource BoolToVis}}" />
                                     <Button Content="{Binding [ExtUninstall], Source={x:Static res:Loc.Instance}}" Command="{Binding RequestUninstallCommand}"
                                             Style="{StaticResource SettingButtonStyle}" Margin="0,0,0,6"
                                             Visibility="{Binding ShowUninstallButton, Converter={StaticResource BoolToVis}}" />

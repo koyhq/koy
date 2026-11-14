@@ -14,7 +14,7 @@
         MinWidth="880"
         MinHeight="600"
         WindowStartupLocation="CenterScreen"
-        WindowStyle="SingleBorderWindow"
+        WindowStyle="None"
         AllowsTransparency="False"
         Background="Transparent"
         ResizeMode="CanMinimize"

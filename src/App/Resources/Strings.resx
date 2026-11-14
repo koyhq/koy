@@ -3654,6 +3654,9 @@
   <data name="ExtApplied" xml:space="preserve">
     <value>Applied</value>
   </data>
+  <data name="ExtDisable" xml:space="preserve">
+    <value>Disable</value>
+  </data>
   <data name="ExtUninstall" xml:space="preserve">
     <value>Remove</value>
   </data>
@@ -3758,6 +3761,9 @@
   </data>
   <data name="ExtAppliedOk" xml:space="preserve">
     <value>{0} applied.</value>
+  </data>
+  <data name="ExtDisabledOk" xml:space="preserve">
+    <value>{0} disabled.</value>
   </data>
   <data name="ExtUninstalledOk" xml:space="preserve">
     <value>{0} removed.</value>
@@ -4037,6 +4043,21 @@
   </data>
   <data name="LiveBgBuiltinHeader" xml:space="preserve">
     <value>Built-in notch animations</value>
+  </data>
+  <data name="LiveBgKindVideo" xml:space="preserve">
+    <value>Video loop</value>
+  </data>
+  <data name="LiveBgPresetNebulaFlow" xml:space="preserve">
+    <value>Nebula flow</value>
+  </data>
+  <data name="LiveBgPresetLiquidGold" xml:space="preserve">
+    <value>Liquid gold</value>
+  </data>
+  <data name="LiveBgPresetDeepOcean" xml:space="preserve">
+    <value>Deep ocean</value>
+  </data>
+  <data name="LiveBgPresetVelvetAurora" xml:space="preserve">
+    <value>Velvet aurora</value>
   </data>
   <data name="LiveBgKindEffect" xml:space="preserve">
     <value>Code effect</value>

@@ -1,12 +1,10 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Diagnostics;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 using Koy.Core.Notch;
-using Koy.Core.Notch.Effects;
 
 namespace Koy.App.Features.Notch.LiveBackground;
 
@@ -34,7 +32,7 @@ public sealed class LiveBackgroundHost : Border
 
     public static readonly DependencyProperty ScrimOpacityProperty = DependencyProperty.Register(
         nameof(ScrimOpacity), typeof(double), typeof(LiveBackgroundHost),
-        new PropertyMetadata(0.65, (d, e) => ((LiveBackgroundHost)d)._scrim.Opacity = (double)e.NewValue));
+        new PropertyMetadata(0.45, (d, e) => ((LiveBackgroundHost)d)._scrim.Opacity = (double)e.NewValue));
 
     public LiveBackgroundSelection? Selection
     {
@@ -57,11 +55,10 @@ public sealed class LiveBackgroundHost : Border
     private readonly Border _art = new();
     private readonly Grid _mediaHost = new();
     // Perde yalnız bir arka plan gösterilirken çizilir: yoksa çentik zeminini (tema paketinin KoyNotchSurface rengi dahil)
-    // %65 siyahla koyultur ve saydam malzemede zemini neredeyse opak siyaha çevirirdi.
-    private readonly Border _scrim = new() { Background = Brushes.Black, Opacity = 0.65, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
+    // siyahla koyultur ve saydam malzemede zemini neredeyse opak siyaha çevirirdi.
+    private readonly Border _scrim = new() { Background = Brushes.Black, Opacity = 0.45, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
 
     private CancellationTokenSource? _loading;
-    private DispatcherTimer? _effectTimer;
     private MediaElement? _media;
     private (LiveBackgroundSelection Selection, LiveBackgroundPlaybackMode Mode)? _applied;
 
@@ -114,9 +111,12 @@ public sealed class LiveBackgroundHost : Border
 
         switch (selection.Kind)
         {
-            case LiveBackgroundContentKind.Ambient when selection.Preset is { Effect: { } effectId } preset
-                                                        && BackgroundEffects.Find(effectId) is { } effect:
-                ShowEffect(effect, preset, animate);
+            case LiveBackgroundContentKind.Ambient when selection.Preset is { VideoFile: { } videoFile } preset:
+                var builtinVideoPath = Path.Combine(AppContext.BaseDirectory, "assets", "backgrounds", videoFile);
+                if (File.Exists(builtinVideoPath))
+                    ShowVideo(builtinVideoPath, animate);
+                else
+                    ShowAmbient(preset, animate);
                 break;
             case LiveBackgroundContentKind.Ambient when selection.Preset is { } preset:
                 ShowAmbient(preset, animate);
@@ -155,51 +155,6 @@ public sealed class LiveBackgroundHost : Border
         }
     }
 
-    // ---- Kodlu efekt: küçük tampon, yumuşak büyütme; hareketsizse tek kare ----
-
-    private void ShowEffect(BackgroundEffect effect, LiveBackgroundPreset preset, bool animate)
-    {
-        // Ölçü henüz yoksa (ilk açılış) açık çentiğin ölçüsü: tuval sabit (AGENTS #13).
-        var width = ActualWidth > 0 ? ActualWidth : NotchLayout.ExpandedWidth;
-        var height = ActualHeight > 0 ? ActualHeight : NotchLayout.ExpandedHeight;
-        var w = Math.Max(8, (int)Math.Ceiling(width / effect.Downscale));
-        var h = Math.Max(8, (int)Math.Ceiling(height / effect.Downscale));
-
-        var palette = preset.Colors.Select(EffectColor.Parse).ToArray();
-        var pixels = new uint[w * h];
-        var bitmap = new WriteableBitmap(w, h, 96, 96, PixelFormats.Bgr32, null);
-        var brush = new ImageBrush(bitmap) { Stretch = Stretch.Fill };
-        RenderOptions.SetBitmapScalingMode(brush, BitmapScalingMode.Linear);
-        _art.Background = brush;
-
-        // Hareketsizde de canlı görünen bir an seçilir (t = 0'da bazı efektler boş başlar).
-        const float stillTime = 12f;
-        var clock = Stopwatch.StartNew();
-
-        void Draw(float time)
-        {
-            effect.Render(new EffectFrame(pixels, w, h, time, palette));
-            bitmap.WritePixels(new Int32Rect(0, 0, w, h), pixels, w * 4, 0);
-        }
-
-        Draw(stillTime);
-        if (!animate)
-            return;
-
-        var timer = new DispatcherTimer(DispatcherPriority.Render, Dispatcher)
-        {
-            Interval = TimeSpan.FromSeconds(1.0 / effect.FramesPerSecond),
-        };
-        timer.Tick += (_, _) =>
-        {
-            if (!ReferenceEquals(_effectTimer, timer))
-                return;
-            Draw(stillTime + (float)clock.Elapsed.TotalSeconds);
-        };
-        _effectTimer = timer;
-        timer.Start();
-    }
-
     private static Color Parse(string hex) => (Color)ColorConverter.ConvertFromString(hex);
 
     // ---- GIF / görsel: kareler arka planda çözülür, ImageBrush kaynağı anahtar karelerle değiştirilir ----
@@ -216,6 +171,7 @@ public sealed class LiveBackgroundHost : Border
             return;
 
         var brush = new ImageBrush(loaded.Frames[0]) { Stretch = Stretch.UniformToFill };
+        RenderOptions.SetBitmapScalingMode(brush, BitmapScalingMode.HighQuality);
         _art.Background = brush;
 
         if (!animate || loaded.Frames.Count < 2)
@@ -291,12 +247,6 @@ public sealed class LiveBackgroundHost : Border
             _loading = null;
             cts.Cancel();
             cts.Dispose();
-        }
-
-        if (_effectTimer is { } timer)
-        {
-            _effectTimer = null;
-            timer.Stop();
         }
 
         switch (_art.Background)

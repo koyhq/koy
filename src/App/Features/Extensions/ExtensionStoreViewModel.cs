@@ -771,6 +771,33 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject, IDisposa
         StatusIsError = false;
     }
 
+    internal void DisableBuiltinBackground(string presetId)
+    {
+        var preset = LiveBackgroundPresets.Find(presetId);
+        var current = _profiles.CurrentSettings();
+        if (current.Notch.LiveBackgroundTarget == LiveBackgroundTarget.None)
+            return;
+
+        var updated = current with
+        {
+            Notch = current.Notch with
+            {
+                LiveBackgroundTarget = LiveBackgroundTarget.None,
+            },
+        };
+
+        if (!_profiles.CommitSettings(updated))
+        {
+            StatusText = Strings.Get("ExtApplySaveFailed");
+            StatusIsError = true;
+            return;
+        }
+
+        ReloadRegistry();
+        StatusText = string.Format(CultureInfo.CurrentCulture, Strings.Get("ExtDisabledOk"), Strings.Get(preset.NameKey));
+        StatusIsError = false;
+    }
+
     internal void Apply(StoreCardViewModel card)
     {
         card.Say("", false);
@@ -789,6 +816,55 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject, IDisposa
         }
 
         Report(card, string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("ExtAppliedOk"), name), false);
+    }
+
+    internal void Disable(StoreCardViewModel card)
+    {
+        card.Say("", false);
+        var id = card.Id;
+        var entry = _client.Registry.Load().Find(id);
+        var folder = ExtensionPaths.FolderFor(id, _client.ExtensionsFolder);
+        if (entry is null || folder is null)
+        {
+            ReloadRegistry();
+            return;
+        }
+
+        var before = _profiles.CurrentSettings();
+        var plan = ExtensionApplyPlanner.RevertOnUninstall(before, entry, folder, _runner.ReadBackup());
+        if (!plan.IsSuccess)
+        {
+            Report(card, Strings.Get("ExtApplyError" + plan.Error), true);
+            return;
+        }
+
+        var snapshot = TakeSnapshotFor(plan);
+        var files = _runner.Run(plan.FileActions);
+        if (!files.IsSuccess)
+        {
+            RestoreSnapshot(snapshot);
+            Report(card, Strings.Get(files.ErrorKey!), true);
+            return;
+        }
+
+        if (!_profiles.CommitSettings(plan.Settings!))
+        {
+            RestoreSnapshot(snapshot);
+            Report(card, Strings.Get("ExtApplySaveFailed"), true);
+            return;
+        }
+
+        if (entry.Kind != ExtensionKind.Profile && !_client.Registry.Update(r => r.WithoutApplied(id)))
+        {
+            _profiles.CommitSettings(before);
+            RestoreSnapshot(snapshot);
+            ReloadRegistry();
+            Report(card, Strings.Get("ExtRegistrySaveFailed"), true);
+            return;
+        }
+
+        ReloadRegistry();
+        Report(card, string.Format(CultureInfo.CurrentCulture, Strings.Get("ExtDisabledOk"), entry.Name), false);
     }
 
     private sealed record ApplyOutcome(string? ErrorKey, InstalledEntry? Entry, ExtensionFileActionResult? Files);

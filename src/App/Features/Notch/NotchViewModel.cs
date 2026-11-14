@@ -600,9 +600,9 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     private void ApplyState(NotchState newState)
     {
-        // Her açılışta Ana'nın yüzü yeniden seçilir: parça varsa Müzik, yoksa Ana (kullanıcının açıkken seçimi kapanınca unutulur).
+        // Kullanıcının seçtiği Ana/Müzik yüzü korunur; parça yoksa ya da müzik kartı kapalıysa Ana yüzüne düşer.
         if (newState == NotchState.Expanded && State != NotchState.Expanded)
-            Home.Page = NotchHomePages.OnOpen(Music.HasTrack, Home.Cards.Contains(HomeCard.Music));
+            Home.Page = NotchHomePages.OnOpen(Home.Page, Music.HasTrack, Home.Cards.Contains(HomeCard.Music));
 
         State = newState;
         // Kart çentik açılınca kalkar (açık çentik kartın yerine geçer).
