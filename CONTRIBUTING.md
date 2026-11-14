@@ -11,7 +11,7 @@ Koy is a clean three-layer architecture running in a single process:
 ```text
 src/
   Core/         Pure C# (net10.0): absolutely no WPF, Win32 or WinRT
-  Platform/     Windows 11 API implementations (CsWin32 & WinRT): no WPF
+  Platform/     Windows API implementations (CsWin32 & WinRT): no WPF
   App/          WPF UI, thin ViewModels (CommunityToolkit.Mvvm) and XAML views
 tests/
   Core.Tests/   xUnit unit tests (covers the Core layer only)
@@ -69,7 +69,7 @@ When the Dock is enabled, Koy hides the Windows taskbar (`Shell_TrayWnd` and `Sh
 ## 5. Development Environment and Commands
 
 ### Requirements
-- Windows 11 (22H2 / build 22621 or later)
+- Windows 10 (2004 / build 19041 or later) or Windows 11
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 
 ### Build, Test and Package

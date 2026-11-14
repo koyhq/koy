@@ -31,7 +31,10 @@ public sealed class ShellActionService : IShellActionService
 
     public void OpenQuickSettings() => SendWinCombo(VIRTUAL_KEY.VK_A);
 
-    public void OpenNotificationCenter() => SendWinCombo(VIRTUAL_KEY.VK_N);
+    public void OpenNotificationCenter() =>
+        SendWinCombo(OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000)
+            ? VIRTUAL_KEY.VK_N
+            : VIRTUAL_KEY.VK_A);
 
     internal static unsafe void SendWinCombo(VIRTUAL_KEY key)
     {

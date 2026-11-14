@@ -1,6 +1,6 @@
 # Koy — Hedefler, Mimari, Teknoloji
 
-Windows 11 için hafif bir notch (koy/ada) ve görev çubuğunun yerine geçen bir dock.
+Windows 10 ve 11 için hafif bir notch (koy/ada) ve görev çubuğunun yerine geçen bir dock.
 Nectar'dan ilham alıyor ama kodu, tasarımı ve görselleri bize ait olacak; Nectar'dan kod kopyalanmayacak.
 
 ## Verilen kararlar (2026-11-03)
@@ -9,7 +9,7 @@ Nectar'dan ilham alıyor ama kodu, tasarımı ve görselleri bize ait olacak; Ne
 | --- | --- |
 | Kapsam | Notch + Dock. Önce notch, dock sonra. |
 | Bellek hedefi | Boşta 100–150 MB (çok ekranla 200 MB'a kadar kabul) → C# + WPF. İlk hedef 60 MB idi; 2026-11-06 kararıyla gevşetildi (bkz. `docs/MEMORY.md`) |
-| Windows | Yalnız Windows 11 |
+| Windows | Windows 10 2004 (19041) ve üstü, Windows 11 |
 | Yayın | Açık kaynak, GitHub, Türkçe + İngilizce |
 | Lisans | GPLv3 |
 | Hava durumu | Open-Meteo (anahtarsız, ücretsiz) |

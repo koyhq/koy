@@ -1786,7 +1786,7 @@
     <value>Welcome to Koy</value>
   </data>
   <data name="WizWelcomeBody" xml:space="preserve">
-    <value>A smart notch and a minimal floating dock for Windows 11. Let's set your preferences before you start.</value>
+    <value>A smart notch and a minimal floating dock for Windows 10 / 11. Let's set your preferences before you start.</value>
   </data>
   <data name="WizLangTitle" xml:space="preserve">
     <value>Interface language</value>

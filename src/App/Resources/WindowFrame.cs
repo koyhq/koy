@@ -29,8 +29,13 @@ public static class WindowFrame
     private static void Initialize(Window window)
     {
         // Katmansız pencerede WPF yüzeyi siyahla temizler; DWM arka planı görünsün diye saydam temizlenir.
-        if (PresentationSource.FromVisual(window) is HwndSource source && source.CompositionTarget is not null)
+        // Windows 10'da sistem arka planı olmadığı için saydam temizleme siyah/bozuk arka plana yol açar; atlanır.
+        if (BackdropService.IsSupported &&
+            PresentationSource.FromVisual(window) is HwndSource source &&
+            source.CompositionTarget is not null)
+        {
             source.CompositionTarget.BackgroundColor = Colors.Transparent;
+        }
 
         void Refresh() => Apply(window);
         Refresh();
@@ -50,7 +55,9 @@ public static class WindowFrame
             return;
 
         var settings = ThemeManager.LastSettings ?? new AppSettings();
-        var level = MaterialState.ForWindow(settings, ThemeManager.Current);
+        var level = MaterialSetting.ResolveWindowMaterial(
+            MaterialState.ForWindow(settings, ThemeManager.Current),
+            BackdropService.IsSupported);
         var sharp = CornerSetting.Resolve(settings.Appearance.CornerRadius) == CornerStyle.Sharp;
         BackdropService.ApplyWindowFrame(
             hwnd,
