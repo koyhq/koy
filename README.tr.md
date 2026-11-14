@@ -40,6 +40,10 @@
 | <img alt="Kontrol Merkezi" src="docs/screenshots/centik-kontrol.png" width="420"><br><sub>Kontrol Merkezi: Wi-Fi, Bluetooth, ses, parlaklık</sub> | <img alt="Takvim" src="docs/screenshots/centik-takvim.png" width="420"><br><sub>Takvim: ay, hafta ve gün görünümü, etkinlikler</sub> |
 | <img alt="Wi-Fi listesi" src="docs/screenshots/centik-wifi.png" width="420"><br><sub>Wi-Fi listesi: Windows'taki gibi ağ seçimi</sub> | |
 
+**Canlı arka planlar:** Açık çentiğin arkasında 17 hareketli arka plan oynar (istersen kendi resmini, GIF'ini ya da videonu seç).
+
+<p align="center"><img alt="Açık çentik, 17 canlı arka plan arasında geçiyor" src="docs/screenshots/koy-arkaplanlar.gif" width="640"></p>
+
 <sub>Çentik görüntüleri örnek verilerle çizildi (`tools/Koy.UiSnapshots`); dock görüntüsü gerçek ekrandan.</sub>
 
 ---
