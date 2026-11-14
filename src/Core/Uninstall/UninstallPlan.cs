@@ -30,7 +30,15 @@ public static class UninstallPlan
     public const string UpdaterArguments = "--uninstall";
 
     /// <summary>Kullanıcı tercihleri ve içeriği: yalnız "ayarlarımı sakla" kapalıysa silinir.</summary>
-    public static readonly IReadOnlyList<string> SettingFiles = ["settings.json", "settings.json.tmp", "shelf.json", "events.json", "events.json.tmp"];
+    public static readonly IReadOnlyList<string> SettingFiles =
+    [
+        "settings.json", "settings.json.tmp", "shelf.json", "events.json", "events.json.tmp",
+        // Harici takvim: hesap ayarları, DPAPI ile şifreli belirteçler ve çevrimdışı etkinlik önbelleği.
+        "calendar-settings.json", "calendar-settings.json.tmp",
+        "calendar-token-google.dat", "calendar-token-google.dat.tmp",
+        "calendar-token-outlook.dat", "calendar-token-outlook.dat.tmp",
+        "calendar-cache.json", "calendar-cache.json.tmp"
+    ];
 
     /// <summary>Çalışma durumu: yeniden kurulumda işe yaramaz, her kaldırmada silinir.</summary>
     public static readonly IReadOnlyList<string> StateFiles = ["taskbar-state.json"];
