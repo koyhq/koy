@@ -1,5 +1,4 @@
 using System.Windows.Interop;
-using System.Windows.Threading;
 using Koy.App.Features.Settings;
 using Koy.Core.Diagnostics;
 using Koy.Platform.Shell;
@@ -8,8 +7,8 @@ namespace Koy.App.Features.Menu;
 
 /// <summary>
 /// Sistem tepsisi (system tray) simgesini ve gelen tıklama olaylarını yönetir.
-/// Sol tek tık veya sağ tık: Sağ Alt Menüyü açar.
-/// Çift tık: Doğrudan Koy ana penceresini (Ayarlar / Dashboard) açar.
+/// Sol tek tık veya sağ tık: Sağ Alt Menüyü gecikmesiz (0 ms) açar/kapatır.
+/// Çift tık: Açık menüyü gizler ve doğrudan Koy ana penceresini (Ayarlar / Dashboard) açar.
 /// </summary>
 public sealed class TrayIconManager : IDisposable
 {
@@ -20,7 +19,7 @@ public sealed class TrayIconManager : IDisposable
 
     private HwndSource? _hwndSource;
     private TrayIconService? _trayService;
-    private DispatcherTimer? _singleClickTimer;
+    private bool _ignoreNextLeftUp;
     private bool _isRunning;
     private readonly uint _taskbarCreatedMessage = TrayIconService.TaskbarCreatedMessage;
 
@@ -59,16 +58,6 @@ public sealed class TrayIconManager : IDisposable
 
         _hwndSource = new HwndSource(parameters);
         _hwndSource.AddHook(WndProc);
-
-        _singleClickTimer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromMilliseconds(220)
-        };
-        _singleClickTimer.Tick += (_, _) =>
-        {
-            _singleClickTimer.Stop();
-            CrashLog.Guard("Tepsi tek tık", SagAltMenuWindow.Toggle);
-        };
 
         _trayService = new TrayIconService(_hwndSource.Handle, WmTrayCallback);
         if (_iconVisible)
@@ -112,23 +101,28 @@ public sealed class TrayIconManager : IDisposable
 
             if (mouseMsg == WmLButtonDblClk)
             {
-                // Çift tık: Tek tık zamanlayıcısını durdur, menüyü kapat ve Koy ana penceresini aç
-                _singleClickTimer?.Stop();
-                SagAltMenuWindow.Instance.Hide();
+                // Win32 çift tıkta DBLCLK ardından bir LBUTTONUP daha gönderir; menüyü yeniden açmasın diye yutulur.
+                _ignoreNextLeftUp = true;
+                SagAltMenuWindow.HideIfOpen();
                 KoyWindow.ShowInstance();
                 handled = true;
             }
             else if (mouseMsg == WmLButtonUp)
             {
-                // Sol tek tık: Çift tık ihtimaline karşı 220 ms bekle
-                _singleClickTimer?.Stop();
-                _singleClickTimer?.Start();
+                if (_ignoreNextLeftUp)
+                {
+                    _ignoreNextLeftUp = false;
+                    handled = true;
+                    return 0;
+                }
+
+                // Sol tek tık: gecikmesiz doğrudan açılır menüyü aç/kapat.
+                SagAltMenuWindow.Toggle();
                 handled = true;
             }
             else if (mouseMsg == WmRButtonUp)
             {
-                // Sağ tık: Beklemeden doğrudan açılır menüyü aç
-                _singleClickTimer?.Stop();
+                _ignoreNextLeftUp = false;
                 SagAltMenuWindow.Toggle();
                 handled = true;
             }
@@ -141,8 +135,7 @@ public sealed class TrayIconManager : IDisposable
         if (!_isRunning) return;
         _isRunning = false;
 
-        _singleClickTimer?.Stop();
-        _singleClickTimer = null;
+        _ignoreNextLeftUp = false;
 
         _trayService?.Remove();
         _trayService?.Dispose();

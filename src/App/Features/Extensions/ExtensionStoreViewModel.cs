@@ -7,11 +7,13 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Koy.App.Features.Notch.LiveBackground;
 using Koy.App.Features.Settings;
 using Koy.App.Resources;
 using Koy.Core.Appearance;
 using Koy.Core.Diagnostics;
 using Koy.Core.Extensions.Store;
+using Koy.Core.Notch;
 using Koy.Core.Settings;
 using Koy.Core.SystemStats;
 using Koy.Platform.Extensions;
@@ -83,6 +85,8 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject, IDisposa
         _runner = new ExtensionFileActionRunner(userStyleFolder ?? UserStyleFile.DefaultFolder, profiles);
         foreach (var key in new[] { "Newest", "Alphabetical", "MostDownloads" })
             SortOptions.Add(new StoreSortOption(key));
+        foreach (var preset in LiveBackgroundPresets.All)
+            BuiltinBackgrounds.Add(new BuiltinBackgroundCardViewModel(this, preset, isApplied: false));
     }
 
     /// <summary>Gerçek mağaza adresi, gerçek ayar klasörleri ve ortak HTTP istemcisi.</summary>
@@ -93,6 +97,10 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject, IDisposa
     public event Action? ProfilesChanged;
 
     public ObservableCollection<StoreCardViewModel> Cards { get; } = [];
+
+    public ObservableCollection<BuiltinBackgroundCardViewModel> BuiltinBackgrounds { get; } = [];
+
+    public ObservableCollection<BuiltinBackgroundCardViewModel> FilteredBuiltinBackgrounds { get; } = [];
 
     public ObservableCollection<StoreSortOption> SortOptions { get; } = [];
 
@@ -183,8 +191,11 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject, IDisposa
 
     public bool ShowLoading => IsLoading && Cards.Count == 0;
 
+    public bool ShowBuiltinBackgrounds =>
+        FilteredBuiltinBackgrounds.Count > 0 && CategoryKey is "All" or "Background" && FilterKey != "Updates";
+
     // Katalog alınamadıysa hata kutusu zaten söylüyor; ayrıca "eşleşen yok" yazılmaz.
-    public bool ShowEmpty => !IsLoading && Cards.Count == 0 && !HasIndexError;
+    public bool ShowEmpty => !IsLoading && Cards.Count == 0 && !ShowBuiltinBackgrounds && !HasIndexError;
 
     public bool HasMore => _state.Visible().Count > Cards.Count;
 
@@ -205,6 +216,7 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject, IDisposa
     private void NotifyListStates()
     {
         OnPropertyChanged(nameof(ShowLoading));
+        OnPropertyChanged(nameof(ShowBuiltinBackgrounds));
         OnPropertyChanged(nameof(ShowEmpty));
         OnPropertyChanged(nameof(HasMore));
     }
@@ -342,7 +354,39 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject, IDisposa
         CountText = _state.Index is null && all.Count == 0 ? "" : BuildCountText(all.Count);
         var remaining = all.Count - Cards.Count;
         ShowMoreText = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("ExtShowMore"), Math.Min(remaining, PageSize));
+        RebuildBuiltinBackgrounds();
         NotifyListStates();
+    }
+
+    private void RebuildBuiltinBackgrounds()
+    {
+        var activeId = _settings.Notch.LiveBackgroundTarget != LiveBackgroundTarget.None
+            && _settings.Notch.LiveBackgroundSource == LiveBackgroundSourceKind.BuiltInAmbient
+            ? LiveBackgroundPresets.Find(_settings.Notch.LiveBackgroundPreset).Id
+            : null;
+
+        var showCategory = CategoryKey is "All" or "Background";
+        var showFilter = FilterKey != "Updates";
+        var onlyApplied = FilterKey == "Installed";
+        var query = SearchText.Trim();
+
+        FilteredBuiltinBackgrounds.Clear();
+        foreach (var card in BuiltinBackgrounds)
+        {
+            card.IsApplied = activeId is not null && string.Equals(activeId, card.Id, StringComparison.OrdinalIgnoreCase);
+
+            if (!showCategory || !showFilter)
+                continue;
+            if (onlyApplied && !card.IsApplied)
+                continue;
+            if (query.Length > 0
+                && !card.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase)
+                && !card.Id.Contains(query, StringComparison.OrdinalIgnoreCase)
+                && !card.KindLabel.Contains(query, StringComparison.CurrentCultureIgnoreCase))
+                continue;
+
+            FilteredBuiltinBackgrounds.Add(card);
+        }
     }
 
     private string BuildCountText(int visible)
@@ -385,6 +429,8 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject, IDisposa
     {
         foreach (var option in SortOptions)
             option.RefreshLabel();
+        foreach (var card in BuiltinBackgrounds)
+            card.RefreshLanguage();
         Rebuild();
     }
 
@@ -694,6 +740,36 @@ public sealed partial class ExtensionStoreViewModel : ObservableObject, IDisposa
     }
 
     // --- Uygula ---
+
+    internal void ApplyBuiltinBackground(string presetId)
+    {
+        var preset = LiveBackgroundPresets.Find(presetId);
+        var current = _profiles.CurrentSettings();
+        // Hedef kapalıysa çentik: yoksa arka planı seçmek hiçbir şey göstermezdi.
+        var target = current.Notch.LiveBackgroundTarget == LiveBackgroundTarget.None
+            ? LiveBackgroundTarget.Notch
+            : current.Notch.LiveBackgroundTarget;
+        var updated = current with
+        {
+            Notch = current.Notch with
+            {
+                LiveBackgroundSource = LiveBackgroundSourceKind.BuiltInAmbient,
+                LiveBackgroundPreset = preset.Id,
+                LiveBackgroundTarget = target,
+            },
+        };
+
+        if (!_profiles.CommitSettings(updated))
+        {
+            StatusText = Strings.Get("ExtApplySaveFailed");
+            StatusIsError = true;
+            return;
+        }
+
+        ReloadRegistry();
+        StatusText = string.Format(CultureInfo.CurrentCulture, Strings.Get("ExtAppliedOk"), Strings.Get(preset.NameKey));
+        StatusIsError = false;
+    }
 
     internal void Apply(StoreCardViewModel card)
     {
