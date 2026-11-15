@@ -71,6 +71,68 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [NotchEdgeLineTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [NotchEdgeLineDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [NotchEdgeLineTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding NotchEdgeLine}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}" IsEnabled="{Binding NotchEdgeLine}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [NotchEdgeLineColorTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{Binding [NotchEdgeLineColorNotch], Source={x:Static res:Loc.Instance}}" GroupName="NotchEdgeLineColor"
+                                     IsChecked="{Binding NotchEdgeLineColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=NotchSurface}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                        <RadioButton Content="{Binding [NotchEdgeLineColorAccent], Source={x:Static res:Loc.Instance}}" GroupName="NotchEdgeLineColor"
+                                     IsChecked="{Binding NotchEdgeLineColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Accent}"
+                                     Style="{StaticResource SegRadioStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}" IsEnabled="{Binding NotchEdgeLine}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [NotchEdgeLineThicknessTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [NotchEdgeLineThicknessDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBox x:Name="EdgeLineThicknessBox" Width="64" Style="{StaticResource SettingTextBoxStyle}"
+                             TextAlignment="Right" MaxLength="2" InputMethod.IsInputMethodEnabled="False"
+                             AutomationProperties.Name="{Binding [NotchEdgeLineThicknessTitle], Source={x:Static res:Loc.Instance}}"
+                             Text="{Binding NotchEdgeLineThickness, UpdateSourceTrigger=LostFocus}"
+                             PreviewTextInput="EdgeLineThicknessBox_PreviewTextInput"
+                             KeyDown="EdgeLineThicknessBox_KeyDown"
+                             LostFocus="EdgeLineThicknessBox_LostFocus"/>
+                    <TextBlock Text="px" Foreground="{DynamicResource KoyTextSecondary}"
+                               FontSize="{DynamicResource KoyFontCaption}"
+                               VerticalAlignment="Center" Margin="8,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [HideInFullscreenTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
                 <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [HideInFullscreenTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding NotchHideInFullscreen}" HorizontalAlignment="Right" VerticalAlignment="Center"

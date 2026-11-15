@@ -354,6 +354,27 @@
   <data name="VisPeek" xml:space="preserve">
     <value>Peek</value>
   </data>
+  <data name="NotchEdgeLineTitle" xml:space="preserve">
+    <value>Line along the top edge</value>
+  </data>
+  <data name="NotchEdgeLineDesc" xml:space="preserve">
+    <value>A thin line on both sides of the notch; the notch opens out of it.</value>
+  </data>
+  <data name="NotchEdgeLineColorTitle" xml:space="preserve">
+    <value>Line color</value>
+  </data>
+  <data name="NotchEdgeLineColorNotch" xml:space="preserve">
+    <value>Notch color</value>
+  </data>
+  <data name="NotchEdgeLineColorAccent" xml:space="preserve">
+    <value>Accent color</value>
+  </data>
+  <data name="NotchEdgeLineThicknessDesc" xml:space="preserve">
+    <value>Type a value from 1 to 20 and press Enter.</value>
+  </data>
+  <data name="NotchEdgeLineThicknessTitle" xml:space="preserve">
+    <value>Line thickness</value>
+  </data>
   <data name="HideInFullscreenTitle" xml:space="preserve">
     <value>Hide in fullscreen apps</value>
   </data>

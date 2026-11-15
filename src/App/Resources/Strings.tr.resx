@@ -354,6 +354,27 @@
   <data name="VisPeek" xml:space="preserve">
     <value>Gözetleme</value>
   </data>
+  <data name="NotchEdgeLineTitle" xml:space="preserve">
+    <value>Üst kenarda çizgi</value>
+  </data>
+  <data name="NotchEdgeLineDesc" xml:space="preserve">
+    <value>Çentiğin iki yanında ince bir çizgi; çentik bu çizginin içinden açılır.</value>
+  </data>
+  <data name="NotchEdgeLineColorTitle" xml:space="preserve">
+    <value>Çizgi rengi</value>
+  </data>
+  <data name="NotchEdgeLineColorNotch" xml:space="preserve">
+    <value>Çentik rengi</value>
+  </data>
+  <data name="NotchEdgeLineColorAccent" xml:space="preserve">
+    <value>Vurgu rengi</value>
+  </data>
+  <data name="NotchEdgeLineThicknessDesc" xml:space="preserve">
+    <value>1 ile 20 arasında bir değer yaz, Enter’a bas.</value>
+  </data>
+  <data name="NotchEdgeLineThicknessTitle" xml:space="preserve">
+    <value>Çizgi kalınlığı</value>
+  </data>
   <data name="HideInFullscreenTitle" xml:space="preserve">
     <value>Tam ekranda gizle</value>
   </data>

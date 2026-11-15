@@ -58,9 +58,12 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         public required VisibilityController VisibilityController { get; init; }
         public required NotchController Controller { get; init; }
         public nint Hwnd { get; set; }
+        /// <summary>Üst kenardaki çizgi; ayar kapalıysa null.</summary>
+        public NotchLineWindow? Line { get; init; }
 
         public void Dispose()
         {
+            Line?.Close();
             Window.Close();
             ViewModel.Dispose();
             Controller.Dispose();
@@ -301,7 +304,8 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             Window = window,
             ViewModel = viewModel,
             VisibilityController = visibilityController,
-            Controller = controller
+            Controller = controller,
+            Line = settings.Notch.EdgeLine ? new NotchLineWindow(monitor, settings.Notch.EdgeLineColor, settings.Notch.EdgeLineThickness) : null
         };
 
         stateRef = state;
@@ -331,6 +335,12 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
 
         AttachOsd(viewModel);
 
+        // Çizgi çentikten önce gösterilir: sonra açılan çentik en üste geçer ve çizginin ortasını örter.
+        if (state.Line is { } line)
+        {
+            line.SourceInitialized += (_, _) => _fullscreenDetector?.IgnoredHandles.Add(line.Handle);
+            line.Show();
+        }
         window.Show();
         UpdateNotchBounds(window, visibilityController, monitor, NotchStyle.TopOffsetDip(settings.Notch.Style));
     }
@@ -396,6 +406,10 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
                 {
                     _fullscreenDetector?.IgnoredHandles.Remove(state.Hwnd);
                 }
+                if (state.Line is { Handle: not 0 } removedLine)
+                {
+                    _fullscreenDetector?.IgnoredHandles.Remove(removedLine.Handle);
+                }
                 _windows.Remove(key);
                 state.Dispose();
             }
@@ -408,6 +422,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             {
                 existingState.Monitor = monitor;
                 existingState.Window.SetTargetMonitor(monitor);
+                existingState.Line?.Place(monitor);
                 // Ekran eklendi/çıkarıldı: parlaklık kaynağı (dahili/harici) yeniden belirlenir.
                 existingState.ViewModel.ControlCenter.RefreshBrightness();
                 UpdateNotchBounds(existingState.Window, existingState.VisibilityController, monitor, NotchStyle.TopOffsetDip(settings.Notch.Style));
@@ -456,6 +471,8 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             {
                 if (!FullscreenDetector.IsScreenClippingHost(info.Handle))
                 {
+                    // Önce çizgi, sonra çentik: çentik çizginin üstünde kalır.
+                    state.Line?.ReassertTopmost();
                     WindowStyles.ReassertTopmost(state.Hwnd);
                 }
             }
@@ -466,6 +483,11 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
 
     private void OnVisibilityChanged(object? sender, VisibilityResult result)
     {
+        foreach (var state in _windowStates.Values)
+        {
+            if (ReferenceEquals(state.VisibilityController, sender))
+                state.Line?.SetLineVisible(NotchEdgeLine.IsVisible(state.VisibilityController.IsFullscreen, settings.Notch.HideInFullscreen));
+        }
         UpdateEdgeTimer();
     }
 

@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Koy.Core.Notch;
 using Koy.Core.Shortcuts;
 using Koy.Core.Timers;
 
@@ -217,6 +218,7 @@ public static class SettingsProfileCodec
                 ProfileSection.Notch =>
                     !Enum.IsDefined(s.Notch.Visibility) || !Enum.IsDefined(s.Notch.Style) || !Enum.IsDefined(s.Notch.OpenBehavior)
                     || !Enum.IsDefined(s.Notch.IdleDisplay) || !Enum.IsDefined(s.Notch.WheelAction)
+                    || !Enum.IsDefined(s.Notch.EdgeLineColor) || s.Notch.EdgeLineThickness != NotchEdgeLine.ClampThickness(s.Notch.EdgeLineThickness)
                     || !IsSaneList(s.Notch.EnabledPanels) || !IsSaneList(s.Notch.ControlCenterLayout)
                     || !Enum.IsDefined(s.Notch.TabBarStyle) || !IsSaneList(s.Notch.PanelOrder)
                     || s.Notch.HomeCards is null || s.Notch.HomeCards.Count > MaxListItems || !s.Notch.HomeCards.All(Enum.IsDefined)

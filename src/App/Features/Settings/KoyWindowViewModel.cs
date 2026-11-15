@@ -340,6 +340,15 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _notchHideInFullscreen = true;
 
     [ObservableProperty]
+    private bool _notchEdgeLine = true;
+
+    [ObservableProperty]
+    private NotchEdgeLineColor _notchEdgeLineColor = NotchEdgeLineColor.NotchSurface;
+
+    [ObservableProperty]
+    private int _notchEdgeLineThickness = Koy.Core.Notch.NotchEdgeLine.DefaultThickness;
+
+    [ObservableProperty]
     private IdleDisplayMode _idleDisplayMode;
 
     [ObservableProperty]
@@ -1233,6 +1242,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             DockProximity = DockProximityMapping.Effective(DockStyle, DockProximity);
 
             NotchHideInFullscreen = s.Notch.HideInFullscreen;
+            NotchEdgeLine = s.Notch.EdgeLine;
+            NotchEdgeLineColor = s.Notch.EdgeLineColor;
+            NotchEdgeLineThickness = Koy.Core.Notch.NotchEdgeLine.ClampThickness(s.Notch.EdgeLineThickness);
             ShowVolumeOsd = s.Notch.ShowVolumeOsd;
             ShowBrightnessOsd = s.Notch.ShowBrightnessOsd;
             ShowPrivacyIndicator = s.Notch.ShowPrivacyIndicator;
@@ -1560,7 +1572,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
              or nameof(AnimationSpeed) or nameof(RespectReduceMotion));
 
     private static bool AffectsNotch(string? name) =>
-        name is nameof(NotchVisibility) or nameof(NotchHideInFullscreen) or nameof(MusicShowWaveform) or nameof(MusicCardStyle) or nameof(MusicLyricsEnabled)
+        name is nameof(NotchVisibility) or nameof(NotchHideInFullscreen) or nameof(NotchEdgeLine) or nameof(NotchEdgeLineColor) or nameof(NotchEdgeLineThickness) or nameof(MusicShowWaveform) or nameof(MusicCardStyle) or nameof(MusicLyricsEnabled)
             or nameof(ShowVolumeOsd) or nameof(ShowBrightnessOsd) or nameof(ShowPrivacyIndicator) or nameof(NotchShowNotifications) or nameof(NotchNotificationsHideBody) or nameof(IdleDisplayMode) or nameof(NotchStyle)
             or nameof(Material) or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
             or nameof(NotchOpenBehavior) or nameof(WheelAction) or nameof(BatterySaverReduceMotion)
@@ -1688,6 +1700,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 Enabled = NotchEnabled,
                 Visibility = NotchVisibility,
                 HideInFullscreen = NotchHideInFullscreen,
+                EdgeLine = NotchEdgeLine,
+                EdgeLineColor = NotchEdgeLineColor,
+                EdgeLineThickness = Koy.Core.Notch.NotchEdgeLine.ClampThickness(NotchEdgeLineThickness),
                 ShowVolumeOsd = ShowVolumeOsd,
                 ShowBrightnessOsd = ShowBrightnessOsd,
                 ShowPrivacyIndicator = ShowPrivacyIndicator,
@@ -1878,6 +1893,14 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     /// <summary>Son sıfırlamadan sonra kısa bilgi satırı; sayfa değişince kapanır.</summary>
     [ObservableProperty]
     private bool _pageResetDone;
+
+    // Kutuya elle yazılan kalınlık aralık dışındaysa en yakın sınıra çekilir; kutu düzeltilmiş değeri gösterir.
+    partial void OnNotchEdgeLineThicknessChanged(int value)
+    {
+        var clamped = Koy.Core.Notch.NotchEdgeLine.ClampThickness(value);
+        if (clamped != value)
+            NotchEdgeLineThickness = clamped;
+    }
 
     partial void OnSelectedPageIndexChanged(int value)
     {
