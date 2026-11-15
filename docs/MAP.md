@@ -199,6 +199,7 @@ Sürümler release-please ile otomatiktir, elle etiket atılmaz. Ayrıntı: `CON
 | Core | `src/Core/Display/WindowPlacementMath.cs` | `TopCenter` ofset aşırı yüklemesi (tuval sabit, yalnız pencere Top'u kayar) |
 | App | `src/App/Features/Notch/NotchShape.cs`, `NotchWindow.xaml(.cs)`, `NotchViewModel.cs` | Kulaksız şekil, ofsetli yerleşim, biçime göre köşe yarıçapı |
 | App | `src/App/Features/Notch/NotchFeature.cs` | `NotchBounds` ve fare kenar bölgesi (`CheckEdgePeek`) ofseti sayar |
+| Core, App | `src/Core/Notch/NotchEdgeLine.cs`, `src/App/Features/Notch/NotchLineWindow.cs` | Üst kenar çizgisi: kalınlık, renk kaynağı, görünürlük kararı Core'da; pencere App'te, `NotchFeature` çentik penceresiyle birlikte kurar ve z-sırasını korur |
 
 ## Malzeme (Katı / Buzlu / Cam) ve okunabilirlik koruması
 | Katman | Dosya | Ne yapılır |

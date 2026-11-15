@@ -43,7 +43,7 @@ public static class SettingsKeyMap
             "DockIconSize=IconSize", "DockIndicatorStyle=IndicatorStyle", "MiddleClickAction");
         Add("DockItems", "DockPinnedOrder=PinnedOrder", "DockFolders=Folders");
         Add("Notch", "NotchEnabled=Enabled", "NotchVisibility=Visibility", "NotchStyle=Style", "NotchOpenBehavior=OpenBehavior",
-            "IdleDisplayMode=IdleDisplay", "WheelAction", "NotchHideInFullscreen=HideInFullscreen",
+            "IdleDisplayMode=IdleDisplay", "WheelAction", "NotchHideInFullscreen=HideInFullscreen", "NotchEdgeLine=EdgeLine", "NotchEdgeLineColor=EdgeLineColor", "NotchEdgeLineThickness=EdgeLineThickness",
             "NotchFollowsMaterial=FollowsMaterial", "ShowVolumeOsd", "ShowBrightnessOsd", "ShowPrivacyIndicator",
             "NotchShowNotifications=ShowNotifications", "NotchNotificationsHideBody=NotificationsHideBody",
             "EnabledPanels", "ControlCenterLayout");

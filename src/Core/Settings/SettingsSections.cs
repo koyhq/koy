@@ -305,6 +305,15 @@ public sealed record NotchSettings
     /// <summary>Tam ekran uygulama ya da oyun varken çentik gizlensin.</summary>
     public bool HideInFullscreen { get; set; } = true;
 
+    /// <summary>Çentiğin iki yanında ekranın üst kenarı boyunca ince çizgi; çentik bu çizginin içinden açılır.</summary>
+    public bool EdgeLine { get; set; } = true;
+
+    /// <summary>Üst kenar çizgisinin rengi: çentik zemini (varsayılan, siyah) ya da vurgu rengi.</summary>
+    public NotchEdgeLineColor EdgeLineColor { get; set; } = NotchEdgeLineColor.NotchSurface;
+
+    /// <summary>Üst kenar çizgisinin kalınlığı (DIP, 1–20; bkz. <c>NotchEdgeLine.ClampThickness</c>).</summary>
+    public int EdgeLineThickness { get; set; } = NotchEdgeLine.DefaultThickness;
+
     /// <summary>Açık çentik ve kartlar malzemeyi izlesin; kapalıysa açık çentik hep opak kalır.</summary>
     public bool FollowsMaterial { get; set; } = true;
 
