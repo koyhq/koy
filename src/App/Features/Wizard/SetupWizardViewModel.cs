@@ -32,7 +32,7 @@ public sealed partial class SetupWizardViewModel : ObservableObject
     private string _selectedLanguage = AppLanguage.SystemDefault;
 
     [ObservableProperty]
-    private bool _runAtStartup = true;
+    private bool _runAtStartup = StartupService.IsInstalledBuild;
 
     /// <summary>Hava durumu için konum kullanılsın mı. Varsayılan hayır: izin yalnız kullanıcı isteyince sorulur.</summary>
     [ObservableProperty]
@@ -138,7 +138,9 @@ public sealed partial class SetupWizardViewModel : ObservableObject
 
         _store.Save(updated);
 
-        StartupService.SetEnabled(RunAtStartup);
+        // Geliştirme/taşınabilir çalıştırmada kullanıcı açıkça seçmediyse makinenin kurulu başlangıç kaydını ezme.
+        if (RunAtStartup || StartupService.IsInstalledBuild || StartupService.IsEnabled)
+            StartupService.SetEnabled(RunAtStartup);
 
         Completed?.Invoke();
     }

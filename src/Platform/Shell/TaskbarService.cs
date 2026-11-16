@@ -27,6 +27,12 @@ public static partial class TaskbarService
         "Koy",
         "taskbar-state.json");
 
+    /// <summary>Windows Gezgini görev çubuğu penceresi hazır mı (oturum açılışında henüz oluşmamış olabilir).</summary>
+    public static bool IsExplorerTaskbarReady => ShellTrayLocator.FindExplorerTray() != HWND.Null;
+
+    /// <summary>Önceki oturumdan kalan geri yüklenecek görev çubuğu durumu var mı.</summary>
+    public static bool HasPendingRestore => TaskbarStatePolicy.ShouldWriteState(ReadSavedState());
+
     /// <summary>
     /// Görev çubuğunu gizler. Birden çok kez çağrılabilir (idempotent): zaten gizliyken kayıtlı "önceki durum"
     /// korunur, böylece bizim koyduğumuz AUTOHIDE kullanıcının gerçek durumu sanılıp üzerine yazılmaz.
@@ -36,25 +42,27 @@ public static partial class TaskbarService
     {
         var saved = ReadSavedState();
         var primary = ShellTrayLocator.FindExplorerTray();
-        var prevState = saved is { Hidden: true } s ? s.PreviousState : TaskbarStatePolicy.AlwaysOnTop;
-
-        if (primary != HWND.Null)
+        if (primary == HWND.Null)
         {
-            var data = new APPBARDATA
-            {
-                cbSize = (uint)sizeof(APPBARDATA),
-                hWnd = primary
-            };
-            var current = (int)PInvoke.SHAppBarMessage(ABM_GETSTATE, ref data);
-            prevState = TaskbarStatePolicy.ChoosePreviousState(saved, current);
+            // Gezgin henüz görev çubuğunu kurmadıysa (oturum açılışı): önceki durumu tahmin edip dosyaya yazma;
+            // Shell_TrayWnd oluşunca ReapplyTaskbarHiding gerçek durumu okuyup gizler.
+            return;
+        }
 
-            // Zaten otomatik gizlemedeyse yeniden SETSTATE gönderilmez: Gezgin her SETSTATE'te çalışma alanını yeniden
-            // hesaplar ve dock'un AppBar payını bir an düşürür (büyütülmüş pencereler sıçrar).
-            if ((current & ABS_AUTOHIDE) == 0)
-            {
-                data.lParam = new LPARAM((nint)ABS_AUTOHIDE);
-                PInvoke.SHAppBarMessage(ABM_SETSTATE, ref data);
-            }
+        var data = new APPBARDATA
+        {
+            cbSize = (uint)sizeof(APPBARDATA),
+            hWnd = primary
+        };
+        var current = (int)PInvoke.SHAppBarMessage(ABM_GETSTATE, ref data);
+        var prevState = TaskbarStatePolicy.ChoosePreviousState(saved, current);
+
+        // Zaten otomatik gizlemedeyse yeniden SETSTATE gönderilmez: Gezgin her SETSTATE'te çalışma alanını yeniden
+        // hesaplar ve dock'un AppBar payını bir an düşürür (büyütülmüş pencereler sıçrar).
+        if ((current & ABS_AUTOHIDE) == 0)
+        {
+            data.lParam = new LPARAM((nint)ABS_AUTOHIDE);
+            PInvoke.SHAppBarMessage(ABM_SETSTATE, ref data);
         }
 
         SaveState(new TaskbarSavedState(true, prevState));

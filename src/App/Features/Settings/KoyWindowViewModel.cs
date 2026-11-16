@@ -68,6 +68,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private bool _runAtStartup;
 
+    private bool _lastSavedRunAtStartup;
+
     [ObservableProperty]
     private bool _hideWindowsTaskbar = true;
 
@@ -334,7 +336,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _notchEnabled = true;
 
     [ObservableProperty]
-    private VisibilityMode _notchVisibility = VisibilityMode.Smart;
+    private VisibilityMode _notchVisibility = VisibilityMode.Fixed;
 
     [ObservableProperty]
     private bool _notchHideInFullscreen = true;
@@ -1178,6 +1180,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             _lastKnown = s;
 
             RunAtStartup = StartupService.IsEnabled;
+            _lastSavedRunAtStartup = RunAtStartup;
             HideWindowsTaskbar = s.Dock.HideWindowsTaskbar;
             Language = s.General.Language;
             AutoCheckUpdates = s.General.AutoCheckUpdates;
@@ -1613,7 +1616,27 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         if (AppUninstaller.InProgress)
             return;
 
-        StartupService.SetEnabled(RunAtStartup);
+        // Yalnız başlangıç anahtarı gerçekten değiştiyse kayıt defterine yaz; ilgisiz ayar kayıtlarında dokunma.
+        if (RunAtStartup != _lastSavedRunAtStartup)
+        {
+            if (StartupService.SetEnabled(RunAtStartup))
+            {
+                _lastSavedRunAtStartup = RunAtStartup;
+            }
+            else
+            {
+                _isLoading = true;
+                try
+                {
+                    RunAtStartup = StartupService.IsEnabled;
+                    _lastSavedRunAtStartup = RunAtStartup;
+                }
+                finally
+                {
+                    _isLoading = false;
+                }
+            }
+        }
 
         // Ana her zaman açık; sekme sırası sabit (NotchPanels.Order), ayar yalnız hangilerinin açık olduğunu tutar.
         var enabledPanels = new List<string> { NotchPanels.ToKey(NotchPanel.Home) };
