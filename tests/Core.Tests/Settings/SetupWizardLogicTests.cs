@@ -1,5 +1,6 @@
 using Koy.Core.Appearance;
 using Koy.Core.Settings;
+using Koy.Core.Visibility;
 
 namespace Koy.Core.Tests.Settings;
 
@@ -19,6 +20,8 @@ public sealed class SetupWizardLogicTests : IDisposable
         Assert.Equal(AnimationSpeed.Normal, settings.Appearance.AnimationSpeed);
         Assert.True(settings.Appearance.RespectReduceMotion);
         Assert.True(settings.Dock.HideWindowsTaskbar);
+        Assert.Equal(VisibilityMode.Fixed, settings.Notch.Visibility);
+        Assert.True(settings.Notch.HideInFullscreen);
         Assert.True(settings.General.AutoCheckUpdates);
         Assert.Equal(UpdateChannel.Stable, settings.General.UpdateChannel);
     }
@@ -43,6 +46,8 @@ public sealed class SetupWizardLogicTests : IDisposable
         var loaded = store.Load();
         Assert.True(loaded.General.FirstRunCompleted);
         Assert.Equal(expectedNotch, loaded.Notch.Enabled);
+        Assert.Equal(VisibilityMode.Fixed, loaded.Notch.Visibility);
+        Assert.True(loaded.Notch.HideInFullscreen);
         Assert.Equal(expectedDock, loaded.Dock.Enabled);
         Assert.Equal(dockEnabled, loaded.Dock.HideWindowsTaskbar);
     }
