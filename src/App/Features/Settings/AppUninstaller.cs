@@ -57,6 +57,7 @@ internal static class AppUninstaller
         _deleteSettings = !keepSettings;
 
         App.SafeRestoreTaskbar();
+        StartupService.SetEnabled(false);
         var clean = UninstallCleaner.Run(RoamingDir, LocalDir, keepSettings);
         if (clean.Failed.Count > 0)
             CrashLog.Write("Kaldırma: silinemeyen dosyalar", string.Join(Environment.NewLine, clean.Failed));
@@ -99,8 +100,15 @@ internal static class AppUninstaller
     {
         App.SafeRestoreTaskbar();
 
-        try { StartupService.SetEnabled(false); }
-        catch (Exception ex) { CrashLog.Write("Kaldırma kancası: başlatma kaydı silinemedi", ex); }
+        try
+        {
+            if (!StartupService.SetEnabled(false))
+                CrashLog.Write("Kaldırma kancası: başlatma kaydı silinemedi", "StartupService.SetEnabled(false) başarısız oldu.");
+        }
+        catch (Exception ex)
+        {
+            CrashLog.Write("Kaldırma kancası: başlatma kaydı silinemedi", ex);
+        }
 
         try { UninstallCleaner.Run(RoamingDir, LocalDir, UninstallPlan.KeepSettingsOnExternalUninstall); }
         catch (Exception ex) { CrashLog.Write("Kaldırma kancası: dosyalar silinemedi", ex); }

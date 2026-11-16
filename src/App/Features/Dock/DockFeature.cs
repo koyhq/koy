@@ -220,12 +220,14 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     /// </summary>
     public void ReapplyTaskbarHiding()
     {
-        if (_windowStates.Count == 0)
+        if (_windowStates.Count == 0 || _stopping)
             return;
+
+        ApplyTrayPolicy();
 
         if (settings.Dock.HideWindowsTaskbar)
         {
-            TaskbarService.Hide();
+            ApplyTaskbarPolicy();
             // Yeni Gezgin kendi tepsisini oluşturdu: Koy'unki yeniden öne alınır, uygulamalar simgelerini yeniden kaydeder.
             _trayService?.EnsureFirst();
         }
@@ -382,6 +384,9 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
         if (_windowStates.Count > 0)
         {
+            if (!TaskbarService.IsExplorerTaskbarReady)
+                return;
+
             TaskbarService.Hide();
             _taskbarHidden = true;
             _trayService?.EnsureFirst();
