@@ -7,6 +7,19 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.13](https://github.com/koyhq/koy/compare/v0.2.12...v0.2.13) (2026-11-16)
+
+
+### Added
+
+* **notch:** add top edge line the notch opens out of ([#178](https://github.com/koyhq/koy/issues/178)) ([432e383](https://github.com/koyhq/koy/commit/432e383eb0fef85ff57c4cf429f80091742309a1))
+
+
+### Fixed
+
+* **notch:** seamless video loops, instant poster, collapsed notch background and live bars, card hover ([#177](https://github.com/koyhq/koy/issues/177)) ([8f4f415](https://github.com/koyhq/koy/commit/8f4f415bea3830738898b595fa87fec6b085bc83))
+* **startup:** bundle self-contained runtime, harden autostart and align notch defaults ([#180](https://github.com/koyhq/koy/issues/180)) ([03b9899](https://github.com/koyhq/koy/commit/03b9899f0134cfe7d720117c6fd29f8beb0a55f3))
+
 ## [0.2.12](https://github.com/koyhq/koy/compare/v0.2.11...v0.2.12) (2026-11-14)
 
 
