@@ -5,6 +5,21 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.13](https://github.com/koyhq/koy/compare/v0.2.12...v0.2.13) (2026-11-16)
+Öne çıkanlar:
+- **Üst kenar çizgisi:** Çentiğin iki yanından ekranın üst kenarı boyunca uzanan ince çizgi eklendi; çentik açılıp kapanırken bu çizgiden çıkar ve içine çekilir (kalınlık ve renk ayarlanabilir, tam ekranda gizlenir).
+- **Akıcı video döngüleri ve kapalı çentik:** 17 yerleşik MP4 arka plan kesintisiz döngüye alındı, açılışta anlık ilk kare gösteriliyor, bildirim kartı üzerine gelince çentik açılmıyor ve kapalı çentik müzik çalarken canlı ses çubukları gösterebiliyor.
+- **Sıfır .NET bağımlılığı ve sağlam başlangıç:** Kurulum ve taşınabilir paketler artık `.NET 10` çalışma zamanını içinde taşıyor (temiz PC'de tarayıcıya atmaz); "Masaüstüyle birlikte başlat" Velopack kök yolunu kullanıyor ve Explorer hazır olana kadar güvenli bekliyor.
+
+### Eklenenler
+
+* **notch:** çentiğin içinden açıldığı üst kenar çizgisi eklendi ([#178](https://github.com/koyhq/koy/issues/178)) ([432e383](https://github.com/koyhq/koy/commit/432e383eb0fef85ff57c4cf429f80091742309a1))
+
+### Düzeltmeler
+
+* **notch:** kesintisiz video döngüleri, anlık ilk kare, kapalı çentik arka planı ile canlı çubuklar ve bildirim kartı üzerine gelme davranışı ([#177](https://github.com/koyhq/koy/issues/177)) ([8f4f415](https://github.com/koyhq/koy/commit/8f4f415bea3830738898b595fa87fec6b085bc83))
+* **startup:** tam bağımsız çalışma zamanı paketleme, otomatik başlatma yolu ve Explorer hazırlık düzeltmeleri ([#180](https://github.com/koyhq/koy/issues/180)) ([03b9899](https://github.com/koyhq/koy/commit/03b9899f0134cfe7d720117c6fd29f8beb0a55f3))
+
 ## [0.2.12](https://github.com/koyhq/koy/compare/v0.2.11...v0.2.12) (2026-11-14)
 Öne çıkanlar:
 - **Sadeleşen Koy arayüzü:** `Genel`, `Çentik`, `Dock` ve `Görünüm` sayfaları üst alt sekmelerle düzenlendi; en sık kullanılan ayarlar üste alındı, gereksiz açıklamalar temizlendi.
