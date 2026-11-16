@@ -74,7 +74,7 @@ if (Test-Path $publishDir) { Remove-Item $publishDir -Recurse -Force }
 if (Test-Path $distDir) { Remove-Item $distDir -Recurse -Force }
 New-Item -ItemType Directory -Path $distDir -Force | Out-Null
 
-dotnet publish src/App/Koy.App.csproj -c Release -r win-x64 --self-contained false -o $publishDir
+dotnet publish src/App/Koy.App.csproj -c Release -r win-x64 --self-contained true -o $publishDir
 Assert-LastExit 'dotnet publish'
 
 # Gozcu surec (Native AOT, C++ derleme araclari gerekir): Koy ile ayni klasore yalniz exe kopyalanir.

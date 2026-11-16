@@ -15,12 +15,14 @@ using Koy.App.Resources;
 using Koy.Core.Diagnostics;
 using Koy.Core.Input;
 using Koy.Core.Settings;
+using Koy.Core.Shell;
 using Koy.Core.Shortcuts;
 using Koy.Core.Tray;
 using Koy.Core.Updates;
 using Koy.Platform.Media;
 using Koy.Platform.Shell;
 using Velopack;
+using Velopack.Locators;
 
 namespace Koy.App;
 
@@ -29,6 +31,8 @@ public static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        StartupService.Configure(ResolveStartupExePath, IsVelopackInstalled);
+
         // Velopack kurulum ve güncelleme kancaları: kaldırma ve güncelleme sürecin ölmesiyle biter,
         // OnExit çalışmayabilir; görev çubuğu bu kancalarda mutlaka geri getirilir. Kaldırma kancası ayrıca
         // başlatma kaydını ve durum dosyalarını siler (30 sn sınırı, onay yok; ayarlara dokunmaz). (hata verse bile süreç düşmesin).
@@ -43,11 +47,52 @@ public static class Program
         if (instance is null)
             return;
 
+        // Windows Run anahtarı çalışma dizinini System32 bırakır; göreli yollar ve dosya iletişim kutuları bozulmasın.
+        try
+        {
+            if (Directory.Exists(AppContext.BaseDirectory))
+                Environment.CurrentDirectory = AppContext.BaseDirectory;
+        }
+        catch
+        {
+        }
+
         var app = new App();
         app.InitializeComponent();
         instance.ListenForActivation(() =>
             app.Dispatcher.BeginInvoke(() => KoyWindow.ShowInstance()));
         app.Run();
+    }
+
+    internal static bool IsVelopackInstalled()
+    {
+        try
+        {
+            var locator = VelopackLocator.Current;
+            return locator.CurrentlyInstalledVersion is not null && !locator.IsPortable;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    internal static string? ResolveStartupExePath()
+    {
+        try
+        {
+            var locator = VelopackLocator.Current;
+            return StartupPathPolicy.ResolveTargetPath(
+                isInstalled: locator.CurrentlyInstalledVersion is not null,
+                isPortable: locator.IsPortable,
+                rootAppDir: locator.RootAppDir,
+                processPath: Environment.ProcessPath,
+                fileExists: File.Exists);
+        }
+        catch
+        {
+            return Environment.ProcessPath;
+        }
     }
 }
 
@@ -61,7 +106,11 @@ public partial class App : Application, IDisposable
     private readonly SharedServices _services = new();
 
     private static readonly TimeSpan PauseDuration = TimeSpan.FromHours(1);
+    private static readonly TimeSpan ExplorerWaitInterval = TimeSpan.FromMilliseconds(500);
+    private const int MaxExplorerWaitAttempts = 30;
     private DispatcherTimer? _pauseTimer;
+    private DispatcherTimer? _explorerWaitTimer;
+    private int _explorerWaitAttempts;
 
     /// <summary>Genel kısayollar; Kısayollar sayfası kayıt sonuçlarını buradan okur.</summary>
     public ShortcutController? Shortcuts => _shortcuts;
@@ -81,6 +130,7 @@ public partial class App : Application, IDisposable
         // Görev çubuğu güvenliği: önceki oturum çöktüyse görev çubuğunu geri getir.
         SafeRestoreTaskbar();
         InstallGlobalErrorHandlers();
+        StartupService.ReconcileInstalled();
 
         var store = new SettingsStore(SettingsStore.DefaultPath);
         var settings = store.Load();
@@ -125,6 +175,10 @@ public partial class App : Application, IDisposable
 
         foreach (var feature in _features)
             feature.Start();
+
+        // Oturum açılışında Explorer görev çubuğu henüz kurulmamışsa hazır olana kadar sınırlı süre beklenir.
+        if (!TaskbarService.IsExplorerTaskbarReady)
+            StartExplorerWaitTimer();
 
         // Bağlam kuralları: etkin kural yoksa hiçbir şeye abone olmaz.
         Koy.App.Features.Rules.ContextRuleService.Instance.Start(_services);
@@ -268,15 +322,60 @@ public partial class App : Application, IDisposable
         }
     }
 
+    private void StartExplorerWaitTimer()
+    {
+        _explorerWaitAttempts = 0;
+        _explorerWaitTimer ??= new DispatcherTimer(DispatcherPriority.Background) { Interval = ExplorerWaitInterval };
+        _explorerWaitTimer.Tick -= OnExplorerWaitTick;
+        _explorerWaitTimer.Tick += OnExplorerWaitTick;
+        _explorerWaitTimer.Stop();
+        _explorerWaitTimer.Start();
+    }
+
+    private void StopExplorerWaitTimer()
+    {
+        if (_explorerWaitTimer is null)
+            return;
+
+        _explorerWaitTimer.Stop();
+        _explorerWaitTimer.Tick -= OnExplorerWaitTick;
+        _explorerWaitTimer = null;
+    }
+
+    private void OnExplorerWaitTick(object? sender, EventArgs e)
+    {
+        if (TaskbarService.IsExplorerTaskbarReady)
+        {
+            StopExplorerWaitTimer();
+            OnExplorerRestarted();
+            return;
+        }
+
+        if (++_explorerWaitAttempts >= MaxExplorerWaitAttempts)
+            StopExplorerWaitTimer();
+    }
+
     /// <summary>
-    /// Görev çubuğunu geri getirir; hata verse bile çağıranın (çökme işleyicisi) akışını bozmaz.
+    /// Explorer (yeniden) başladığında dock gizlemesini ve AppBar'ı yeniden uygular; dock kapalıyken önceki oturumdan
+    /// kalma görev çubuğu durumu varsa yalnız onu geri yükler (AGENTS.md #12).
     /// </summary>
     private void OnExplorerRestarted()
     {
+        StopExplorerWaitTimer();
         CrashLog.Guard("Explorer yeniden başladı", () =>
         {
-            foreach (var dock in _features.OfType<DockFeature>())
-                dock.ReapplyTaskbarHiding();
+            var docks = _features.OfType<DockFeature>().ToList();
+            if (docks.Count > 0)
+            {
+                foreach (var dock in docks)
+                    dock.ReapplyTaskbarHiding();
+            }
+            else if (TaskbarService.HasPendingRestore)
+            {
+                SafeRestoreTaskbar();
+            }
+
+            RefreshNotificationAreaIcon();
         });
     }
 
@@ -515,6 +614,10 @@ public partial class App : Application, IDisposable
         if (_disposed)
             return;
         _disposed = true;
+
+        StopExplorerWaitTimer();
+        _pauseTimer?.Stop();
+        _pauseTimer = null;
 
         _shortcuts?.Dispose();
         _shortcuts = null;
