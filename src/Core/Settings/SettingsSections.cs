@@ -376,6 +376,9 @@ public sealed record NotchSettings
 
     /// <summary>Okunabilirlik için koyu perdenin yüzdesi (30–90, bkz. <see cref="LiveBackgroundLimits.ClampScrimPercent"/>).</summary>
     public int LiveBackgroundScrimPercent { get; set; } = LiveBackgroundLimits.DefaultScrimPercent;
+
+    /// <summary>Kapalı çentiğin arka planı: Varsayılan (#0A0A0B), Albüm rengi (çalarken kapaktan), Ambiyans (seçili önayardan statik renk).</summary>
+    public NotchCollapsedBackground CollapsedBackground { get; set; } = NotchCollapsedBackground.Default;
 }
 
 /// <summary>Müzik kartı.</summary>

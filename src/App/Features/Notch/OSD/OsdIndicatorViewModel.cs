@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using Koy.Core.SystemStats;
 using System.Windows;
@@ -25,6 +26,10 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
     private readonly DispatcherTimer _autoDismissTimer;
     private IAudioService? _attachedAudio;
     private IBrightnessService? _attachedBrightness;
+    private long _autoDismissStartedAt;
+    private TimeSpan _autoDismissDuration;
+    private TimeSpan? _pausedRemaining;
+    private bool _isAutoDismissPaused;
     private bool _disposed;
 
     /// <summary>
@@ -274,14 +279,48 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
 
     private void ResetTimer(TimeSpan? interval = null)
     {
+        var duration = interval ?? TimeSpan.FromMilliseconds(1500);
+        _isAutoDismissPaused = false;
+        _pausedRemaining = null;
+        _autoDismissDuration = duration;
+        _autoDismissStartedAt = Stopwatch.GetTimestamp();
         _autoDismissTimer.Stop();
-        _autoDismissTimer.Interval = interval ?? TimeSpan.FromMilliseconds(1500);
+        _autoDismissTimer.Interval = duration;
+        _autoDismissTimer.Start();
+    }
+
+    /// <summary>İmleç kart üzerindeyken otomatik kapanma sayacını kalan süreyi koruyarak duraklatır.</summary>
+    public void PauseAutoDismiss()
+    {
+        if (_disposed || !IsActive || _isAutoDismissPaused || !_autoDismissTimer.IsEnabled)
+            return;
+
+        _autoDismissTimer.Stop();
+        var remaining = _autoDismissDuration - Stopwatch.GetElapsedTime(_autoDismissStartedAt);
+        _pausedRemaining = remaining > TimeSpan.Zero ? remaining : TimeSpan.FromMilliseconds(1);
+        _isAutoDismissPaused = true;
+    }
+
+    /// <summary>İmleç karttan ayrılınca otomatik kapanma sayacını kaldığı süreden devam ettirir.</summary>
+    public void ResumeAutoDismiss()
+    {
+        if (_disposed || !IsActive || !_isAutoDismissPaused)
+            return;
+
+        var remaining = _pausedRemaining ?? _autoDismissTimer.Interval;
+        _isAutoDismissPaused = false;
+        _pausedRemaining = null;
+        _autoDismissDuration = remaining;
+        _autoDismissStartedAt = Stopwatch.GetTimestamp();
+        _autoDismissTimer.Interval = remaining;
         _autoDismissTimer.Start();
     }
 
     private void OnAutoDismissTick(object? sender, EventArgs e)
     {
         _autoDismissTimer.Stop();
+        _isAutoDismissPaused = false;
+        _pausedRemaining = null;
         Dismiss();
     }
 
@@ -321,6 +360,8 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
             else
             {
                 _autoDismissTimer.Stop();
+                _isAutoDismissPaused = false;
+                _pausedRemaining = null;
             }
 
             Activated?.Invoke(this, EventArgs.Empty);
@@ -417,6 +458,9 @@ public sealed partial class OsdIndicatorViewModel : ObservableObject, IDisposabl
 
     public void Dismiss()
     {
+        _autoDismissTimer.Stop();
+        _isAutoDismissPaused = false;
+        _pausedRemaining = null;
         if (!IsActive)
             return;
 

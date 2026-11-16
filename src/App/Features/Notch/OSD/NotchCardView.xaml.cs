@@ -13,6 +13,13 @@ public partial class NotchCardView : UserControl
     // Kartın üstüne basmak çentiği açmasın (çentiğin tıklama işleyicisine ulaşmaz).
     private void Card_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => e.Handled = true;
 
+    // İmleç kart üzerindeyken otomatik kapanmayı duraklatır; ayrılınca kalan süreden devam eder.
+    private void Card_MouseEnter(object sender, MouseEventArgs e) =>
+        (DataContext as OsdIndicatorViewModel)?.PauseAutoDismiss();
+
+    private void Card_MouseLeave(object sender, MouseEventArgs e) =>
+        (DataContext as OsdIndicatorViewModel)?.ResumeAutoDismiss();
+
     private void Action_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         (DataContext as OsdIndicatorViewModel)?.RequestPrimaryAction();

@@ -397,4 +397,122 @@ public class NotchControllerTests
         Assert.Equal(0, raised);
         Assert.Equal(NotchPanel.ControlCenter, controller.CurrentPanel);
     }
+
+    [Fact]
+    public void HoverOpenSuppressed_BlocksImmediateHoverOpen_AndPeek()
+    {
+        var clock = new FakeClock();
+        using var hoverController = new NotchController(clock) { OpenOnHover = true, OpenDelayMs = 0 };
+        hoverController.SetHoverOpenSuppressed(true);
+
+        hoverController.OnMouseEnter();
+
+        Assert.True(hoverController.IsMouseOver);
+        Assert.True(hoverController.IsHoverOpenSuppressed);
+        Assert.Equal(NotchState.Collapsed, hoverController.State);
+        Assert.Equal(0, clock.ActiveTimers);
+
+        using var peekController = new NotchController(clock) { OpenOnHover = false };
+        peekController.SetHoverOpenSuppressed(true);
+
+        peekController.OnMouseEnter();
+
+        Assert.True(peekController.IsMouseOver);
+        Assert.Equal(NotchState.Collapsed, peekController.State);
+    }
+
+    [Fact]
+    public void HoverOpenSuppressed_BlocksDelayedHoverOpen_AndCancelsPendingTimer()
+    {
+        var clock = new FakeClock();
+        using var controller = new NotchController(clock) { OpenOnHover = true, OpenDelayMs = 300 };
+
+        // Bastırılmışken giriş yapıldığında gecikme zamanlayıcısı başlamamalı ve OnHoverOpenTimeout açmamalı
+        controller.SetHoverOpenSuppressed(true);
+        controller.OnMouseEnter();
+        Assert.Equal(NotchState.Collapsed, controller.State);
+        Assert.Equal(0, clock.ActiveTimers);
+
+        controller.OnHoverOpenTimeout();
+        Assert.Equal(NotchState.Collapsed, controller.State);
+
+        controller.OnMouseLeave();
+        controller.SetHoverOpenSuppressed(false);
+
+        // Zamanlayıcı çalışırken bastırma açılırsa bekleyen zamanlayıcı iptal edilir ve süre dolsa da açılmaz
+        controller.OnMouseEnter();
+        Assert.Equal(NotchState.Peek, controller.State);
+        Assert.Equal(1, clock.ActiveTimers);
+
+        controller.SetHoverOpenSuppressed(true);
+        Assert.Equal(0, clock.ActiveTimers);
+        clock.Advance(TimeSpan.FromMilliseconds(500));
+        controller.OnHoverOpenTimeout();
+        Assert.NotEqual(NotchState.Expanded, controller.State);
+    }
+
+    [Fact]
+    public void ClearingSuppression_WhileMouseInside_KeepsSuppressedUntilMouseLeaves()
+    {
+        var clock = new FakeClock();
+        using var controller = new NotchController(clock) { OpenOnHover = true, OpenDelayMs = 0 };
+        controller.SetHoverOpenSuppressed(true);
+
+        // Kullanıcı kartın × düğmesine tıklamak için çentiğe girdi
+        controller.OnMouseEnter();
+        Assert.Equal(NotchState.Collapsed, controller.State);
+
+        // × tıklandı, bastırma kalktı ama imleç hâlâ içeride — çentik hemen açılmamalı
+        controller.SetHoverOpenSuppressed(false);
+        Assert.True(controller.IsHoverOpenSuppressed);
+        Assert.Equal(NotchState.Collapsed, controller.State);
+
+        // İmleç çıkmadan gelen ek giriş veya zaman aşımı da açmamalı
+        controller.OnMouseEnter();
+        controller.OnHoverOpenTimeout();
+        Assert.Equal(NotchState.Collapsed, controller.State);
+
+        // İmleç çıkınca bastırma tamamen temizlenir ve sonraki girişte normal açılır
+        controller.OnMouseLeave();
+        Assert.False(controller.IsHoverOpenSuppressed);
+
+        controller.OnMouseEnter();
+        Assert.Equal(NotchState.Expanded, controller.State);
+    }
+
+    [Fact]
+    public void ClearingSuppression_WhenMouseOutside_AllowsNextHoverImmediately()
+    {
+        using var controller = new NotchController { OpenOnHover = true, OpenDelayMs = 0 };
+        controller.SetHoverOpenSuppressed(true);
+
+        // Kart imleç üzerine hiç gelmeden otomatik kapandı (ya da imleç zaten çıkmıştı)
+        controller.SetHoverOpenSuppressed(false);
+        Assert.False(controller.IsHoverOpenSuppressed);
+
+        controller.OnMouseEnter();
+        Assert.Equal(NotchState.Expanded, controller.State);
+    }
+
+    [Fact]
+    public void RedundantClearSuppression_WhileMouseInside_DoesNotBlockFutureHover()
+    {
+        using var controller = new NotchController { OpenOnHover = false };
+        controller.OnMouseEnter();
+        Assert.Equal(NotchState.Peek, controller.State);
+
+        // Hiç bastırılmamışken false çağrısı imleç içeride diye sahte bastırma başlatmamalı
+        controller.SetHoverOpenSuppressed(false);
+        Assert.False(controller.IsHoverOpenSuppressed);
+    }
+
+    [Fact]
+    public void HoverOpenSuppressed_StillAllowsExplicitClickToExpand()
+    {
+        using var controller = new NotchController { OpenOnHover = true };
+        controller.SetHoverOpenSuppressed(true);
+
+        controller.OnClick();
+        Assert.Equal(NotchState.Expanded, controller.State);
+    }
 }

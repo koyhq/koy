@@ -4086,5 +4086,20 @@
   <data name="LiveBgKindAmbient" xml:space="preserve">
     <value>Ambient</value>
   </data>
+  <data name="NotchCollapsedBackgroundTitle" xml:space="preserve">
+    <value>Collapsed notch background</value>
+  </data>
+  <data name="NotchCollapsedBackgroundDesc" xml:space="preserve">
+    <value>Background when the notch is closed. Album color uses the playing track's cover; Ambient uses a static color from your chosen preset.</value>
+  </data>
+  <data name="NotchCollapsedBackgroundDefault" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="NotchCollapsedBackgroundAlbumColor" xml:space="preserve">
+    <value>Album color</value>
+  </data>
+  <data name="NotchCollapsedBackgroundAmbient" xml:space="preserve">
+    <value>Ambient</value>
+  </data>
 </root>
 

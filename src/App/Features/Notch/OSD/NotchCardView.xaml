@@ -7,7 +7,10 @@
              xmlns:res="clr-namespace:Koy.App.Resources"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:OsdIndicatorViewModel}"
-             Width="380" Height="72">
+             Width="380" Height="72"
+             Background="Transparent"
+             MouseEnter="Card_MouseEnter"
+             MouseLeave="Card_MouseLeave">
 
   <!-- Çentik kartı (güncelleme, bildirim): sol daire içinde simge, orta iki satır, sağda hap düğme ve ×.
        Düğmeler Border + MouseLeftButtonUp: çentik odak almaz (WS_EX_NOACTIVATE) ve tıklama çentiği açmaz. -->

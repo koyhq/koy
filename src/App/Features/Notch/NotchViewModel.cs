@@ -153,9 +153,6 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     /// <summary>Müzik çalarken dalga simgesi gösterilsin mi.</summary>
     public bool ShowMusicWaveform => Settings.Music.ShowWaveform;
 
-    /// <summary>Kapalı çentikteki dalga simgesi çubuklarının yükseklikleri (Settings.Music.VisualizerBarCount kadar).</summary>
-    public IReadOnlyList<double> WaveformBars { get; }
-
     /// <summary>Dalga simgesinin rengi (VisualizerColorSource Artwork ise albüm rengi, aksi halde yeşil gösterge rengi).</summary>
     public Brush WaveformBrush => (Settings.Music.VisualizerColorSource == NotchVisualizerColorSource.Artwork && _music.SpectrumBrush is not null)
         ? _music.SpectrumBrush
@@ -352,8 +349,9 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         _shelf = shelf;
         _calendar = calendar;
         _clipboard = clipboard;
-        WaveformBars = GenerateWaveformBars(settings.Music.VisualizerBarCount);
         LiveBackground = new LiveBackgroundState(settings.Notch);
+        if (settings.Notch.CollapsedBackground == NotchCollapsedBackground.Ambient)
+            _ambientCollapsedSurface = BuildAmbientCollapsedSurface(settings.Notch.LiveBackgroundPreset);
         Home = new HomeViewModel(music, status, focus, systemStats, quickLaunch, shellActions, () => _controller.GoToPanel(NotchPanel.Focus),
             controlCenter.BluetoothDevices, settings.Notch.HomeCards) { LiveBackground = LiveBackground };
         Home.AttachCalendar(calendar.Events, OpenCalendarDay);
@@ -402,19 +400,27 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         }
     }
 
+    private bool IsCardShown => Osd.IsActive && Osd.Type == OsdType.Card;
+
     private void OnOsdActivated(object? sender, EventArgs e)
     {
         // Akıllı/Fareyle modunda çentik gizli olabilir; gösterge süresince (3 sn) görünür kalsın.
         _visibility.OnMediaActivity();
         // Kart (güncelleme, bildirim) gösterildiği sürece çentik gizlenmez; başka OSD kartın yerini alırsa bırakılır.
         _visibility.SetHold(Osd.Type == OsdType.Card);
+        // Kart görünürken imleç kartın ya da × düğmesinin üstüne gelince çentik kendiliğinden açılmasın. Ses/parlaklık
+        // gibi düğmesiz göstergelerde bastırılmaz: tekerlekle ses değiştirirken üzerine gelince açılma bozulmasın.
+        _controller.SetHoverOpenSuppressed(IsCardShown);
         UpdateTargetSize();
+        UpdateActivePanels();
     }
 
     private void OnOsdStateChanged(object? sender, EventArgs e)
     {
         _visibility.SetHold(false);
+        _controller.SetHoverOpenSuppressed(IsCardShown);
         UpdateTargetSize();
+        UpdateActivePanels();
     }
 
     private void OnStatusPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -424,9 +430,9 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
             UpdateBatteryState();
         }
 
-        // Fişe takılıp çıkarılınca canlı arka plan hareket ↔ ilk kare arasında geçer.
+        // Fişe takılıp çıkarılınca canlı arka plan hareket ↔ ilk kare arasında, ses spektrumu ise hareket kısıtlama kararına göre güncellenir.
         if (e.PropertyName == nameof(StatusViewModel.IsOnBattery))
-            UpdateLiveBackground();
+            UpdateActivePanels();
     }
 
     private void UpdateBatteryState()
@@ -567,6 +573,16 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
             NotifyLayoutChanged();
             if (State == NotchState.Collapsed)
                 UpdateTargetSize();
+            else if (State != NotchState.Expanded)
+                UpdateSurface();
+        }
+        else if (e.PropertyName == nameof(MusicViewModel.CollapsedAlbumBrush))
+        {
+            UpdateSurface();
+        }
+        else if (e.PropertyName == nameof(MusicViewModel.SpectrumBrush))
+        {
+            OnPropertyChanged(nameof(WaveformBrush));
         }
     }
 
@@ -681,11 +697,13 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         UpdateLiveBackground();
         // Arama açıkken sayfalar görünmez; servisleri de çalışmaz.
         var isExpanded = State == NotchState.Expanded && !IsSearchOpen;
+        var shown = isExpanded && IsNotchVisible;
         // Ses çubukları "kapak ve dalga" ayarına bağlı; pil tasarrufu hareketi kısarken hiç yakalanmaz.
         _music.SetSpectrumAllowed(Settings.Music.ShowWaveform && !ReduceMotion);
         _music.Lyrics.SetAllowed(Settings.Music.LyricsEnabled);
         var onHome = CurrentPanel == NotchPanel.Home;
-        _music.SetActive(isExpanded && onHome && Home.IsMusicPage);
+        _music.SetActive(shown && onHome && Home.IsMusicPage);
+        _music.SetCollapsedSpectrumActive(IsNotchVisible && State == NotchState.Collapsed && !Osd.IsActive);
         // Saat, hava ve pil her sekmede üstteki durum satırında görünür.
         _status.SetActive(isExpanded);
         _controlCenter.SetActive(isExpanded && CurrentPanel == NotchPanel.ControlCenter);
@@ -694,7 +712,6 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
         // Her servis yalnız sayfası görünürken çalışır (boşta %0 CPU): sistem verisi Ana ve Sistem'de (kartlar orada),
         // pano, görevler, takvim ve hızlı başlat kendi sayfalarında.
-        var shown = isExpanded && IsNotchVisible;
         var homeFace = shown && onHome && Home.IsHomePage;
         SystemStats.SetActive(homeFace || (shown && CurrentPanel == NotchPanel.System));
         Home.QuickLaunch.SetActive(homeFace);
@@ -763,6 +780,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     private Brush _opaqueSurface = DefaultSurface;
     private Brush _glassSurface = DefaultSurface;
+    private Brush? _ambientCollapsedSurface;
 
     /// <summary>Çentik şeklinin zemini.</summary>
     [ObservableProperty]
@@ -792,8 +810,45 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     private void UpdateSurface()
     {
-        var glassy = Osd.IsActive ? Osd.Type == OsdType.Card : State == NotchState.Expanded;
-        SurfaceBrush = glassy ? _glassSurface : _opaqueSurface;
+        if (Osd.IsActive)
+        {
+            SurfaceBrush = Osd.Type == OsdType.Card ? _glassSurface : _opaqueSurface;
+            return;
+        }
+
+        SurfaceBrush = State == NotchState.Expanded ? _glassSurface : ResolveCollapsedSurface();
+    }
+
+    private Brush ResolveCollapsedSurface() => Settings.Notch.CollapsedBackground switch
+    {
+        // Albüm rengi yalnız çalarken: duraklatılınca çentik varsayılan zemine döner.
+        NotchCollapsedBackground.AlbumColor when _music.HasTrack && _music.IsPlaying && _music.CollapsedAlbumBrush is not null
+            => _music.CollapsedAlbumBrush,
+        NotchCollapsedBackground.Ambient when _ambientCollapsedSurface is not null
+            => _ambientCollapsedSurface,
+        _ => _opaqueSurface,
+    };
+
+    private static Brush BuildAmbientCollapsedSurface(string? presetId)
+    {
+        // Kapalı çentikte video ve zamanlayıcı açılmaz (AGENTS #5/#6); yalnız seçilen önayarın statik ve okunabilir tonu kullanılır.
+        var stops = CollapsedBackgroundPolicy.ResolveAmbientStops(presetId);
+        if (stops.Count == 1)
+            return FrozenArgb(0xFF, stops[0].R, stops[0].G, stops[0].B);
+
+        var gradient = new LinearGradientBrush
+        {
+            StartPoint = new System.Windows.Point(0, 0),
+            EndPoint = new System.Windows.Point(1, 0),
+        };
+        var last = stops.Count - 1;
+        for (var i = 0; i < stops.Count; i++)
+        {
+            var c = stops[i];
+            gradient.GradientStops.Add(new GradientStop(Color.FromRgb(c.R, c.G, c.B), (double)i / last));
+        }
+        gradient.Freeze();
+        return gradient;
     }
 
     private void OnThemeApplied() => OnMaterialChanged();
@@ -917,17 +972,5 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         _clipboard?.Dispose();
         _search?.Dispose();
         Home.Dispose();
-    }
-
-    private static List<double> GenerateWaveformBars(int count)
-    {
-        var clamped = NotchVisualizer.ClampBarCount(count);
-        var pattern = new double[] { 6, 12, 14, 10, 5, 11, 14, 8, 6, 13, 9, 5, 12, 14, 7, 5 };
-        var list = new List<double>(clamped);
-        for (var i = 0; i < clamped; i++)
-        {
-            list.Add(pattern[i % pattern.Length]);
-        }
-        return list;
     }
 }

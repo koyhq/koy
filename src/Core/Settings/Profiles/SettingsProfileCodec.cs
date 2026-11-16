@@ -223,7 +223,8 @@ public static class SettingsProfileCodec
                     || !Enum.IsDefined(s.Notch.TabBarStyle) || !IsSaneList(s.Notch.PanelOrder)
                     || s.Notch.HomeCards is null || s.Notch.HomeCards.Count > MaxListItems || !s.Notch.HomeCards.All(Enum.IsDefined)
                     || !Enum.IsDefined(s.Notch.ClockHourFormat) || !Enum.IsDefined(s.Notch.ClockFirstDayOfWeek)
-                    || !Enum.IsDefined(s.Notch.LiveBackgroundTarget) || !Enum.IsDefined(s.Notch.LiveBackgroundSource),
+                    || !Enum.IsDefined(s.Notch.LiveBackgroundTarget) || !Enum.IsDefined(s.Notch.LiveBackgroundSource)
+                    || !Enum.IsDefined(s.Notch.CollapsedBackground),
                 ProfileSection.Music =>
                     !Enum.IsDefined(s.Music.CardStyle) || !Enum.IsDefined(s.Music.VisualizerStyle)
                     || !Enum.IsDefined(s.Music.VisualizerColorSource),

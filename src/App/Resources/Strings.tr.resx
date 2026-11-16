@@ -4086,5 +4086,20 @@
   <data name="LiveBgKindAmbient" xml:space="preserve">
     <value>Ambiyans</value>
   </data>
+  <data name="NotchCollapsedBackgroundTitle" xml:space="preserve">
+    <value>Kapalı çentik arka planı</value>
+  </data>
+  <data name="NotchCollapsedBackgroundDesc" xml:space="preserve">
+    <value>Çentik kapalıyken görünen zemin. Albüm rengi çalan parçanın kapağını, Ambiyans seçili önayarın statik rengini kullanır.</value>
+  </data>
+  <data name="NotchCollapsedBackgroundDefault" xml:space="preserve">
+    <value>Varsayılan</value>
+  </data>
+  <data name="NotchCollapsedBackgroundAlbumColor" xml:space="preserve">
+    <value>Albüm rengi</value>
+  </data>
+  <data name="NotchCollapsedBackgroundAmbient" xml:space="preserve">
+    <value>Ambiyans</value>
+  </data>
 </root>
 
