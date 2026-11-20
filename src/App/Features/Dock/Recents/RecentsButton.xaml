@@ -54,7 +54,7 @@
                AllowsTransparency="True"
                StaysOpen="False"
                PopupAnimation="None">
-            <Border Background="{DynamicResource KoyMenuBg}"
+            <res:ShadowBorder ShadowBlur="12" ShadowDepth="4" ShadowOpacity="0.45" Background="{DynamicResource KoyMenuBg}"
                     BorderBrush="{DynamicResource KoyMenuBorder}"
                     BorderThickness="1"
                     CornerRadius="14"
@@ -63,13 +63,6 @@
                     MinWidth="240"
                     MaxWidth="320"
                     SnapsToDevicePixels="True">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="24"
-                                      ShadowDepth="4"
-                                      Opacity="0.45"
-                                      Direction="270"
-                                      Color="{StaticResource KoyShadowColor}"/>
-                </Border.Effect>
 
                 <StackPanel>
                     <TextBlock Text="{Binding [RecentFiles], Source={x:Static res:Loc.Instance}}"
@@ -112,7 +105,7 @@
                                Margin="8,2,8,4"
                                Visibility="{Binding HasRecentFiles, Converter={x:Static dock:DockConverters.InverseBoolToVisibilityConverter}}"/>
                 </StackPanel>
-            </Border>
+            </res:ShadowBorder>
         </Popup>
     </Grid>
 </UserControl>

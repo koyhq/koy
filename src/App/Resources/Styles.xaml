@@ -550,15 +550,12 @@
                                AllowsTransparency="True" Focusable="False" PopupAnimation="Fade" VerticalOffset="4">
                             <Grid Name="DropDown" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}"
                                   MaxHeight="{TemplateBinding MaxDropDownHeight}" Margin="0,0,12,16">
-                                <Border Background="{DynamicResource KoyBgRow}" BorderBrush="{DynamicResource KoyBorderStrong}"
+                                <m:ShadowBorder ShadowBlur="7" ShadowDepth="3" ShadowOpacity="0.35" Background="{DynamicResource KoyBgRow}" BorderBrush="{DynamicResource KoyBorderStrong}"
                                         BorderThickness="1" CornerRadius="{DynamicResource KoyRadiusControl}" Padding="2">
-                                    <Border.Effect>
-                                        <DropShadowEffect Color="#000000" Opacity="0.35" BlurRadius="14" ShadowDepth="3" Direction="270" />
-                                    </Border.Effect>
                                     <ScrollViewer SnapsToDevicePixels="True">
                                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
                                     </ScrollViewer>
-                                </Border>
+                                </m:ShadowBorder>
                             </Grid>
                         </Popup>
                     </Grid>
@@ -805,18 +802,15 @@
                            VerticalOffset="-5"
                            PlacementTarget="{Binding ElementName=menuItemBorder}"
                            IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}">
-                        <Border Background="{DynamicResource KoyMenuBg}"
+                        <m:ShadowBorder ShadowBlur="10" ShadowDepth="4" ShadowOpacity="0.5" Margin="0,0,12,16" Background="{DynamicResource KoyMenuBg}"
                                 BorderBrush="{DynamicResource KoyMenuBorder}"
                                 BorderThickness="1"
                                 CornerRadius="10"
                                 Padding="4"
                                 MinWidth="160"
                                 SnapsToDevicePixels="True">
-                            <Border.Effect>
-                                <DropShadowEffect Color="#000000" Opacity="0.5" BlurRadius="20" ShadowDepth="4" Direction="270" />
-                            </Border.Effect>
                             <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" Grid.IsSharedSizeScope="True" />
-                        </Border>
+                        </m:ShadowBorder>
                     </Popup>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -845,17 +839,14 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ContextMenu}">
-                    <Border Background="{DynamicResource KoyMenuBg}"
+                    <m:ShadowBorder ShadowBlur="10" ShadowDepth="4" ShadowOpacity="0.5" Margin="0,0,12,16" Background="{DynamicResource KoyMenuBg}"
                             BorderBrush="{DynamicResource KoyMenuBorder}"
                             BorderThickness="1"
                             CornerRadius="10"
                             Padding="4"
                             MinWidth="160">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#000000" Opacity="0.5" BlurRadius="20" ShadowDepth="4" Direction="270" />
-                        </Border.Effect>
                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
-                    </Border>
+                    </m:ShadowBorder>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

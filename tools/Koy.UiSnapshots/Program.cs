@@ -682,6 +682,7 @@ public static class Program
         // Video kapağı (Chrome/YouTube Windows'a ~150×83 verir): kırpılmadan tamamı, arkada bulanık hâli.
         set = MakeNotch(music: true, wideCover: true);
         set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+        set.Vm.ShowHomePageCommand.Execute(Koy.Core.Notch.NotchHomePage.Music);
         ShotNotch(set, name("ana-muzik-video"), expanded: true);
         set.Vm.ShowHomePageCommand.Execute(Koy.Core.Notch.NotchHomePage.Home);
         ShotNotch(set, name("ana-muzik-video-buyuk"), expanded: true);

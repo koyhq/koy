@@ -8,7 +8,7 @@
              xmlns:folder="clr-namespace:Koy.App.Features.Dock.Folder">
 
     <!-- Seelen UI Yüzen Kapsül Tabanı: 60 px yükseklik (aşağı yapışınca 46 px), 18 px köşe yuvarlama (yapışınca 14,14,0,0) -->
-    <Border Background="{Binding CapsuleSurface}"
+    <res:ShadowBorder ShadowBlur="12" ShadowDepth="4" ShadowOpacity="0.35" Background="{Binding CapsuleSurface}"
             BorderBrush="{DynamicResource KoyDockCapsuleBorder}"
             BorderThickness="1"
             CornerRadius="{Binding CapsuleCornerRadius}"
@@ -17,13 +17,6 @@
             Padding="{Binding InnerPadding}"
             Margin="{Binding DockMargin}"
             SnapsToDevicePixels="True">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="24"
-                              ShadowDepth="4"
-                              Opacity="0.35"
-                              Direction="270"
-                              Color="#000000"/>
-        </Border.Effect>
 
         <StackPanel Orientation="{Binding StripOrientation}" VerticalAlignment="Center" HorizontalAlignment="Center">
             <!-- 1. Windows Başlat Düğmesi -->
@@ -93,5 +86,5 @@
             <!-- 7. Küçük tepsi: Koy menüsü düğmesinin sağında dar ok -->
             <tray:TrayButton IsCompact="True"/>
         </StackPanel>
-    </Border>
+    </res:ShadowBorder>
 </UserControl>

@@ -15,8 +15,8 @@ namespace Koy.App.Features.Notch.LiveBackground;
 /// Kararı vermez: <see cref="Mode"/> Core'dan gelir (<see cref="LiveBackgroundPlaybackPolicy.Decide"/>).
 /// <see cref="LiveBackgroundPlaybackMode.Off"/> iken (çentik kapalı / gizli, yüzey hedef dışı), öğe ağaçtan çıkınca ya da
 /// görünmez olunca bütün animasyon saatleri durdurulur, kareler ve medya bırakılır: boşta CPU ve bellek sıfır (AGENTS #5, #6).
-/// Renk geçişi, GIF ve video WPF animasyon saatleriyle döner. Kodlu efektler (<see cref="BackgroundEffect"/>) küçük bir
-/// tampona çizilir ve efektin kare hızında bir zamanlayıcıyla yenilenir; zamanlayıcı yalnız oynarken kuruludur.
+/// Renk geçişi, GIF ve video WPF animasyon saatleriyle döner. Video yalnız Animate'te açılır; durağan karede yerleşik
+/// döngülerin posteri gösterilir.
 /// </summary>
 public sealed class LiveBackgroundHost : Border
 {
@@ -79,6 +79,7 @@ public sealed class LiveBackgroundHost : Border
 
     private CancellationTokenSource? _loading;
     private MediaElement? _media;
+    private RenderTargetBitmap? _loopFrame;
     private DispatcherTimer? _revealTimer;
     private (LiveBackgroundSelection Selection, LiveBackgroundPlaybackMode Mode)? _applied;
 
@@ -133,8 +134,12 @@ public sealed class LiveBackgroundHost : Border
         {
             case LiveBackgroundContentKind.Ambient when selection.Preset is { VideoFile: { } videoFile } preset:
                 var builtinVideoPath = Path.Combine(AppContext.BaseDirectory, "assets", "backgrounds", videoFile);
-                if (File.Exists(builtinVideoPath))
-                    ShowVideo(builtinVideoPath, animate, LiveBackgroundPreviewRenderer.Get(preset.Id), BuiltinVideoSpeed);
+                var poster = LiveBackgroundPreviewRenderer.Get(preset.Id);
+                if (!animate)
+                    // Durağan karede poster zaten 0. kare: video çözücü (ve ekran kartı sürücüleri) hiç açılmaz.
+                    ShowStill(poster);
+                else if (File.Exists(builtinVideoPath))
+                    ShowVideo(builtinVideoPath, animate, poster, BuiltinVideoSpeed);
                 else
                     ShowAmbient(preset, animate);
                 break;
@@ -321,10 +326,23 @@ public sealed class LiveBackgroundHost : Border
         if (width <= 0 || height <= 0)
             return;
 
-        var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
-        bitmap.Render(media);
-        bitmap.Freeze();
-        var brush = new ImageBrush(bitmap) { Stretch = Stretch.Fill };
+        // Her döngüde (~7 sn) yeni bir tampon yerine aynı tampon yeniden çizilir: yerel bellek GC'yi beklemeden birikmez.
+        if (_loopFrame is null || _loopFrame.PixelWidth != width || _loopFrame.PixelHeight != height)
+        {
+            _loopFrame = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+            _art.Background = new ImageBrush(_loopFrame) { Stretch = Stretch.Fill };
+        }
+        else
+        {
+            _loopFrame.Clear();
+        }
+        _loopFrame.Render(media);
+    }
+
+    private void ShowStill(BitmapSource image)
+    {
+        var brush = new ImageBrush(image) { Stretch = Stretch.UniformToFill };
+        RenderOptions.SetBitmapScalingMode(brush, BitmapScalingMode.HighQuality);
         _art.Background = brush;
     }
 
@@ -355,6 +373,7 @@ public sealed class LiveBackgroundHost : Border
         }
 
         _art.Background = null;
+        _loopFrame = null;
 
         if (_media is { } media)
         {

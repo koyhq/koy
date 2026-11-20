@@ -81,9 +81,10 @@ public sealed partial class LiveBackgroundState : ObservableObject
         }
 
         var reduceMotion = !Motion.Enabled;
+        var isVideo = Selection.IsVideo;
         NotchMode = LiveBackgroundPlaybackPolicy.Decide(
-            isNotchExpanded, isWindowVisible, reduceMotion, isBatterySaver, _target, LiveBackgroundSurface.Notch);
+            isNotchExpanded, isWindowVisible, reduceMotion, isBatterySaver, _target, LiveBackgroundSurface.Notch, isVideo);
         MusicCardMode = LiveBackgroundPlaybackPolicy.Decide(
-            isNotchExpanded, isWindowVisible, reduceMotion, isBatterySaver, _target, LiveBackgroundSurface.MusicCard);
+            isNotchExpanded, isWindowVisible, reduceMotion, isBatterySaver, _target, LiveBackgroundSurface.MusicCard, isVideo);
     }
 }

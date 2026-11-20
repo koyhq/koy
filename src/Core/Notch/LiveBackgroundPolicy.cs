@@ -104,8 +104,11 @@ public static class LiveBackgroundLimits
     /// <summary>GIF için en çok tutulan kare sayısı.</summary>
     public const int MaxGifFrames = 120;
 
-    /// <summary>Çözülmüş karelerin toplam bellek sınırı (bayt). 620×352×4 ≈ 0,87 MB/kare: yaklaşık 55 kare.</summary>
-    public const long MaxDecodedBytes = 48L * 1024 * 1024;
+    /// <summary>
+    /// Çözülmüş karelerin toplam bellek sınırı (bayt). 620×352×4 ≈ 0,87 MB/kare: yaklaşık 32 kare, yani kısa (30 kareye
+    /// kadar) GIF'ler kare atlamadan sığar; daha uzunları kare atlanarak (stride) sığdırılır. 48 MB'tan indirildi (RAM raporu 2026-11-20).
+    /// </summary>
+    public const long MaxDecodedBytes = 28L * 1024 * 1024;
 
     /// <summary>
     /// Kaynağın çözülmemiş (tam çözünürlük, kare başına 4 bayt) toplam boyutu için üst sınır. GIF kareleri düşük sıkıştırmalı
@@ -227,14 +230,19 @@ public static class LiveBackgroundPlaybackPolicy
     /// </summary>
     public static LiveBackgroundPlaybackMode Decide(
         bool isNotchExpanded, bool isWindowVisible, bool reduceMotion, bool isBatterySaver,
-        LiveBackgroundTarget target, LiveBackgroundSurface surface)
+        LiveBackgroundTarget target, LiveBackgroundSurface surface, bool isVideo = false)
     {
         if (!AppliesTo(target, surface) || !isNotchExpanded || !isWindowVisible)
             return LiveBackgroundPlaybackMode.Off;
 
-        return ShouldAnimate(isNotchExpanded, isWindowVisible, reduceMotion, isBatterySaver, target)
-            ? LiveBackgroundPlaybackMode.Animate
-            : LiveBackgroundPlaybackMode.StaticFirstFrame;
+        if (!ShouldAnimate(isNotchExpanded, isWindowVisible, reduceMotion, isBatterySaver, target))
+            return LiveBackgroundPlaybackMode.StaticFirstFrame;
+
+        // İki yüzeyde aynı video iki ayrı çözücüyle oynardı (iki kat CPU ve bellek, ölçüm 2026-11-20): video yalnız
+        // çentik zemininde oynar, müzik kartı aynı içeriğin durağan karesini gösterir.
+        return isVideo && target == LiveBackgroundTarget.Both && surface == LiveBackgroundSurface.MusicCard
+            ? LiveBackgroundPlaybackMode.StaticFirstFrame
+            : LiveBackgroundPlaybackMode.Animate;
     }
 }
 
@@ -355,6 +363,9 @@ public sealed record LiveBackgroundSelection(
     LiveBackgroundContentKind Kind, LiveBackgroundPreset? Preset, string? FilePath, LiveBackgroundFileError Error)
 {
     public static LiveBackgroundSelection None { get; } = new(LiveBackgroundContentKind.None, null, null, LiveBackgroundFileError.None);
+
+    /// <summary>Video çözücüyle oynatılır mı (yerel video ya da yerleşik MP4 döngüsü).</summary>
+    public bool IsVideo => Kind == LiveBackgroundContentKind.Video || Preset?.VideoFile is not null;
 }
 
 /// <summary>Ayar değerlerinden içerik seçimini çözer (saf, dosya sistemine dokunmaz).</summary>

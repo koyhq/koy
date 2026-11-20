@@ -140,6 +140,13 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private Brush? _backdropBrush;
 
+    /// <summary>
+    /// Yatay (video) kapağın arkasındaki bulanık zemin: ~24 px kapağın büyütülmüşü, kart stilinden bağımsız. BlurEffect
+    /// yerine kullanılır; shader efekti yazılımla çizimde de Direct3D yığınını (~140 MB, geri verilmez) yüklüyordu.
+    /// </summary>
+    [ObservableProperty]
+    private Brush? _coverBlurBrush;
+
     /// <summary>Müzik kartı stili; çentik kurulurken ayardan verilir.</summary>
     public void SetCardStyle(MusicCardStyle style)
     {
@@ -197,6 +204,13 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
             CardBrush = CardFill(_palette, _cardAlpha);
     }
 
+    private static ImageBrush FrozenImageBrush(BitmapSource image)
+    {
+        var brush = new ImageBrush(image) { Stretch = Stretch.UniformToFill };
+        brush.Freeze();
+        return brush;
+    }
+
     private void ApplyPalette(CoverPalette? palette, BitmapSource? small)
     {
         _palette = palette;
@@ -232,9 +246,7 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
         if (small is not null)
         {
             TintOverlayBrush = Solid(palette.Card, 0x4D); // alfa 0,30
-            var image = new ImageBrush(small) { Stretch = Stretch.UniformToFill };
-            image.Freeze();
-            BackdropBrush = image;
+            BackdropBrush = FrozenImageBrush(small);
         }
         else
         {
@@ -519,6 +531,21 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
         return time.TotalHours >= 1
             ? $"{(int)time.TotalHours}:{time.Minutes:D2}:{time.Seconds:D2}"
             : $"{time.Minutes}:{time.Seconds:D2}";
+    }
+
+    // Yatay kapakta arkadaki bulanık zemin: kapağın ~24 px'e küçültülmüş hâli, ekranda yumuşak büyütülür (sahte blur).
+    partial void OnThumbnailChanged(ImageSource? value)
+    {
+        if (!IsWideCover || value is not BitmapSource cover)
+        {
+            CoverBlurBrush = null;
+            return;
+        }
+
+        var scale = 24.0 / cover.PixelWidth;
+        var small = new TransformedBitmap(cover, new ScaleTransform(scale, scale));
+        small.Freeze();
+        CoverBlurBrush = FrozenImageBrush(small);
     }
 
     private static BitmapImage? DecodeThumbnail(byte[]? bytes)

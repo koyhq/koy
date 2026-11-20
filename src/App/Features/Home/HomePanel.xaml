@@ -139,15 +139,10 @@
       <Grid>
         <Path Width="56" Height="56" Stretch="Uniform" Fill="#60FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"
               Data="M 12,3 L 6,5 L 6,11 A 2.5,2.5 0 1 1 3.5,8.5 L 5,8.5 L 5,4 L 12,2 Z" />
-        <Rectangle Margin="-24" Opacity="0.85" RenderOptions.BitmapScalingMode="LowQuality"
-                   Visibility="{Binding Music.IsWideCover, Converter={StaticResource BoolToVis}}">
-          <Rectangle.Fill>
-            <ImageBrush ImageSource="{Binding Music.Thumbnail}" Stretch="UniformToFill" />
-          </Rectangle.Fill>
-          <Rectangle.Effect>
-            <BlurEffect Radius="18" KernelType="Gaussian" />
-          </Rectangle.Effect>
-        </Rectangle>
+        <!-- Bulanıklık efekt (BlurEffect) değil: 32 px kapağın yumuşak büyütülmüşü (Direct3D yüklemez). -->
+        <Rectangle Margin="-24" Opacity="0.85" RenderOptions.BitmapScalingMode="HighQuality"
+                   Fill="{Binding Music.CoverBlurBrush}"
+                   Visibility="{Binding Music.IsWideCover, Converter={StaticResource BoolToVis}}" />
         <Rectangle RenderOptions.BitmapScalingMode="HighQuality">
           <Rectangle.Style>
             <Style TargetType="Rectangle">
@@ -324,13 +319,22 @@
                       AutomationProperties.Name="{Binding [MusicPrevious], Source={x:Static res:Loc.Instance}}">
                 <Path Width="18" Height="18" Stretch="Uniform" Fill="{DynamicResource KoyNotchText}" Data="M6 5h2v14H6zM20 5v14L9 12z" />
               </Button>
-              <Button Style="{StaticResource PlayerButtonStyle}" Width="52" Height="52" Margin="24,0" Background="{DynamicResource KoyNotchText}"
+              <!-- Gölge efekt (DropShadowEffect) değil, yumuşak geçişli bir elips: shader efekti yazılımla çizimde bile
+                   Direct3D yığınını (~140 MB, süreçten çıkmaz) yüklüyordu (ölçüm 2026-11-20). -->
+              <Grid Margin="24,0">
+              <!-- Negatif kenar boşluğu: elips düğmenin dışına taşar ama düzende yer kaplamaz (düğme sırası kaymaz). -->
+              <Ellipse Margin="-9,-6,-9,-12" IsHitTestVisible="False">
+                <Ellipse.Fill>
+                  <RadialGradientBrush>
+                    <GradientStop Color="#59000000" Offset="0.6" />
+                    <GradientStop Color="#00000000" Offset="1" />
+                  </RadialGradientBrush>
+                </Ellipse.Fill>
+              </Ellipse>
+              <Button Style="{StaticResource PlayerButtonStyle}" Width="52" Height="52" Background="{DynamicResource KoyNotchText}"
                       Command="{Binding Music.PlayPauseCommand}"
                       ToolTip="{Binding [MusicPlayPause], Source={x:Static res:Loc.Instance}}"
                       AutomationProperties.Name="{Binding [MusicPlayPause], Source={x:Static res:Loc.Instance}}">
-                <Button.Effect>
-                  <DropShadowEffect BlurRadius="14" ShadowDepth="3" Opacity="0.35" Color="Black" />
-                </Button.Effect>
                 <Grid>
                   <Path Width="20" Height="20" Stretch="Uniform" Fill="{DynamicResource KoyNotchSurface}" Data="M7 4l12 8-12 8z">
                     <Path.Style>
@@ -347,6 +351,7 @@
                         Visibility="{Binding Music.IsPlaying, Converter={StaticResource BoolToVis}}" />
                 </Grid>
               </Button>
+              </Grid>
               <Button Style="{StaticResource PlayerButtonStyle}" Width="40" Height="40" Command="{Binding Music.NextCommand}"
                       IsEnabled="{Binding Music.IsLive, Converter={x:Static local:NotConverter.Instance}}"
                       ToolTip="{Binding [MusicNext], Source={x:Static res:Loc.Instance}}"

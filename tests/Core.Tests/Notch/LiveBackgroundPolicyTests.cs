@@ -130,6 +130,39 @@ public class LiveBackgroundPolicyTests
     }
 
     [Fact]
+    public void Decide_both_target_plays_video_only_on_notch_surface()
+    {
+        Assert.Equal(LiveBackgroundPlaybackMode.Animate,
+            LiveBackgroundPlaybackPolicy.Decide(true, true, false, false, Both, LiveBackgroundSurface.Notch, isVideo: true));
+        Assert.Equal(LiveBackgroundPlaybackMode.StaticFirstFrame,
+            LiveBackgroundPlaybackPolicy.Decide(true, true, false, false, Both, LiveBackgroundSurface.MusicCard, isVideo: true));
+    }
+
+    [Fact]
+    public void Decide_both_target_still_animates_non_video_on_music_card()
+    {
+        Assert.Equal(LiveBackgroundPlaybackMode.Animate,
+            LiveBackgroundPlaybackPolicy.Decide(true, true, false, false, Both, LiveBackgroundSurface.MusicCard, isVideo: false));
+    }
+
+    [Fact]
+    public void Decide_music_card_only_target_still_animates_video()
+    {
+        Assert.Equal(LiveBackgroundPlaybackMode.Animate,
+            LiveBackgroundPlaybackPolicy.Decide(true, true, false, false, LiveBackgroundTarget.MusicCard, LiveBackgroundSurface.MusicCard, isVideo: true));
+    }
+
+    [Theory]
+    [InlineData("contour", true)]
+    [InlineData("ocean", false)]
+    public void Selection_is_video_for_builtin_mp4_presets(string presetId, bool expected)
+    {
+        var selection = LiveBackgroundResolver.Resolve(Both, LiveBackgroundSourceKind.BuiltInAmbient, presetId, null, 0);
+
+        Assert.Equal(expected, selection.IsVideo);
+    }
+
+    [Fact]
     public void Decide_never_animates_unless_should_animate_agrees()
     {
         foreach (var target in Enum.GetValues<LiveBackgroundTarget>())
