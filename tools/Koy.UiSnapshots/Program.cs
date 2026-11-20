@@ -106,6 +106,11 @@ public static class Program
                 RenderEffectVideos(outDir, Arg(args, "--preset"), int.TryParse(Arg(args, "--fps"), out var fps) && fps is >= 1 and <= 30 ? fps : 15);
             else if (scene == "efekt-cpu")
                 MeasureEffects();
+            else if (scene == "sozler-canli")
+            {
+                LyricsLiveCheck.Run(outDir, prefix + "-" + theme, RenderElement);
+                LyricsInNotchCheck(outDir, prefix + "-" + theme);
+            }
             else if (scene == "arama")
                 SearchSnapshots.Render(outDir, prefix, theme, RenderElement);
             else if (scene == "sitedock")
@@ -132,6 +137,43 @@ public static class Program
 
         Console.WriteLine($"Bitti: {outDir}");
         return 0;
+    }
+
+    // Sözler gerçek müzik sayfasının içinde (#182): çentik penceresi ekran dışında gösterilir, Müzik sayfası açık,
+    // konum gerçek zamanla ilerler. Etkin satır, kayma ve satır saydamlıkları yarım saniyede bir yazılır.
+    private static void LyricsInNotchCheck(string outDir, string prefix)
+    {
+        var set = MakeNotch(music: true, liveClock: true);
+        set.Window.Left = -4000;
+        set.Window.Top = -4000;
+        set.Window.Show();
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+        set.Vm.ShowHomePageCommand.Execute(Koy.Core.Notch.NotchHomePage.Music);
+        set.Vm.Music.Lyrics.SetAllowed(true);
+        var log = new List<string>();
+        var start = DateTime.Now;
+        while ((DateTime.Now - start).TotalSeconds < 8)
+        {
+            var frame = new System.Windows.Threading.DispatcherFrame();
+            var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+            timer.Tick += (_, _) => { timer.Stop(); frame.Continue = false; };
+            timer.Start();
+            System.Windows.Threading.Dispatcher.PushFrame(frame);
+
+            var view = FindDescendant<Koy.App.Features.Music.LyricsView>((DependencyObject)set.Window.Content);
+            var host = view?.FindName("LinesHost") as System.Windows.Controls.ItemsControl;
+            var ops = new List<string>();
+            for (var i = 0; host is not null && i < host.Items.Count; i++)
+                if (host.ItemContainerGenerator.ContainerFromIndex(i) is UIElement c)
+                    ops.Add(c.Opacity.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+            var lyrics = set.Vm.Music.Lyrics;
+            log.Add(FormattableString.Invariant($"{(DateTime.Now - start).TotalSeconds:0.0}s durum={lyrics.State} gosterilen={lyrics.IsShown} etkin={lyrics.ActiveLine?.Text ?? "-"} gorunur={view?.IsVisible} gorunumSaydam={view?.Opacity:0.00} boy={view?.ActualHeight:0} kayma={(host?.RenderTransform as System.Windows.Media.TranslateTransform)?.Y:0.0} satir=[{string.Join(" ", ops)}]"));
+        }
+        File.WriteAllLines(Path.Combine(outDir, prefix + "-sozler-centikte.txt"), log);
+        foreach (var line in log)
+            Console.WriteLine(line);
+        set.Window.Close();
+        set.Vm.Dispose();
     }
 
     private static void RenderDockFolders(string outDir, string prefix, string theme)
@@ -280,7 +322,7 @@ public static class Program
         bool locationBlocked = false, bool audioConnected = true, Func<Koy.Core.SystemStats.ISystemStatsService>? statsFactory = null,
         bool brightnessSupported = true, bool wideCover = false, Koy.Core.Notch.NotchStyleMode notchStyle = Koy.Core.Notch.NotchStyleMode.Pinned,
         Koy.Core.Notch.IdleDisplayMode idleMode = Koy.Core.Notch.IdleDisplayMode.ClockAndBattery, FakePower? power = null, string? language = null,
-        bool clockShowDate = false, string? liveBackground = null)
+        bool clockShowDate = false, string? liveBackground = null, bool liveClock = false)
     {
         var settings = new AppSettings
         {
@@ -321,7 +363,7 @@ public static class Program
             settings,
             controller,
             // Yakalama başlatılmayan servis: çubuklar aşağıda sahte düzeylerle doldurulur, gerçek ses okunmaz.
-            new Koy.App.Features.Music.MusicViewModel(new FakeMedia(info), spectrumAcquire: () => new Koy.Platform.Audio.SpectrumCaptureService(), lyricsProvider: new FakeLyrics()),
+            new Koy.App.Features.Music.MusicViewModel(new FakeMedia(info, liveClock), spectrumAcquire: () => new Koy.Platform.Audio.SpectrumCaptureService(), lyricsProvider: new FakeLyrics()),
             new Koy.App.Features.ControlCenter.ControlCenterViewModel(
                 () => new FakeAudio(), () => new FakeRadio(), null, () => new FakeBrightness(brightnessSupported), new FakeFocusAssist(), settings,
                 wifiFactory: () => new FakeWifi(locationBlocked),
@@ -688,6 +730,12 @@ public static class Program
                 ShotNotch(set, name("muzik-acilis-" + ms), expanded: true);
             }
             home.MusicEntrance.Finish();
+            // Sözler açık (#182): etkin satır ortada, öbürleri uzaklığa göre soluk.
+            set.Vm.Music.Lyrics.SetAllowed(true);
+            Settle();
+            FindDescendant<Koy.App.Features.Music.LyricsView>(home)?.SnapForSnapshot();
+            ShotNotch(set, name("muzik-sozler"), expanded: true);
+            set.Vm.Music.Lyrics.SetAllowed(false);
         }
         set.Vm.Dispose();
 

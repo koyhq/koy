@@ -255,6 +255,15 @@
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
               <StackPanel x:Name="TrackTitleBlock">
+                <StackPanel.Style>
+                  <Style TargetType="StackPanel">
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding Music.Lyrics.IsShown}" Value="True">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </StackPanel.Style>
                 <Border HorizontalAlignment="Left" CornerRadius="9" Background="#EF4444" Padding="7,2" Margin="0,0,0,6"
                         Visibility="{Binding Music.IsLive, Converter={StaticResource BoolToVis}}">
                   <StackPanel Orientation="Horizontal">
@@ -267,26 +276,9 @@
                 <TextBlock Text="{Binding Music.Artist}" FontSize="12.5" Style="{StaticResource MusicArtistText}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" />
                 <TextBlock Text="{Binding Music.SourceAppId}" FontSize="11" Style="{StaticResource MusicSubText}" Opacity="0.7" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
               </StackPanel>
-              <!-- Sözler: varsayılan kapalı (başlık LRCLIB'e gider); kullanıcı buradan açar. Açıkken tam, kapalıyken soluk. -->
-              <Button Grid.Column="1" Style="{StaticResource PlayerButtonStyle}" Width="30" Height="30" VerticalAlignment="Top" Margin="8,0,0,0"
-                      Command="{Binding Music.Lyrics.ToggleEnabledCommand}"
-                      Visibility="{Binding Music.Lyrics.CanToggle, Converter={StaticResource BoolToVis}}"
-                      ToolTip="{Binding [LyricsToggle], Source={x:Static res:Loc.Instance}}"
-                      AutomationProperties.Name="{Binding [LyricsSettingTitle], Source={x:Static res:Loc.Instance}}">
-                <Path Width="15" Height="15" Stretch="Uniform" Stroke="{DynamicResource KoyNotchText}" StrokeThickness="2"
-                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M4 6h16M4 11h16M4 16h9M4 21h6">
-                  <Path.Style>
-                    <Style TargetType="Path">
-                      <Setter Property="Opacity" Value="0.45" />
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding Music.Lyrics.IsEnabled}" Value="True">
-                          <Setter Property="Opacity" Value="1" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </Path.Style>
-                </Path>
-              </Button>
+              <!-- Sözler açıkken (#182): büyük başlık yerine tek satır "Şarkı · Sanatçı"; sözlere yer kalır. -->
+              <TextBlock Grid.ColumnSpan="2" Text="{Binding Music.CollapsedLabel}" FontSize="12" Style="{StaticResource MusicSubText}"
+                         TextTrimming="CharacterEllipsis" Visibility="{Binding Music.Lyrics.IsShown, Converter={StaticResource BoolToVis}}" />
             </Grid>
 
             <!-- Orta: sözler açıksa sözler, değilse ses çubukları (çalan sesten; yakalama yalnız bu yüz görünürken) -->
@@ -300,7 +292,7 @@
                 </MultiBinding>
               </music:SpectrumBars.Visibility>
             </music:SpectrumBars>
-            <music:LyricsView x:Name="MusicLyrics" Grid.Row="1" FontSize="13.5" Margin="0,10,0,8" DataContext="{Binding Music.Lyrics}"
+            <music:LyricsView x:Name="MusicLyrics" Grid.Row="1" FontSize="19" Margin="0,4,0,6" DataContext="{Binding Music.Lyrics}"
                               Visibility="{Binding IsShown, Converter={StaticResource BoolToVis}}" />
 
             <!-- İlerleme: tam genişlik ince çubuk, süreler altında. Canlı yayında yok. -->
@@ -324,7 +316,14 @@
             </StackPanel>
 
             <!-- Denetimler: büyük beyaz oynat / duraklat, iki yanında önceki / sonraki (canlıda soluk) -->
-            <StackPanel x:Name="ControlsRow" Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+            <!-- Denetimler (#182): [Plak, 5. adımda]  önceki  oynat  sonraki  [Sözler]. Yan sütunlar eşit: oynat ortada kalır. -->
+            <Grid x:Name="ControlsRow" Grid.Row="3">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="40" />
+              </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
               <Button Style="{StaticResource PlayerButtonStyle}" Width="40" Height="40" Command="{Binding Music.PreviousCommand}"
                       IsEnabled="{Binding Music.IsLive, Converter={x:Static local:NotConverter.Instance}}"
                       ToolTip="{Binding [MusicPrevious], Source={x:Static res:Loc.Instance}}"
@@ -371,6 +370,27 @@
                 <Path Width="18" Height="18" Stretch="Uniform" Fill="{DynamicResource KoyNotchText}" Data="M16 5h2v14h-2zM4 5v14l11-7z" />
               </Button>
             </StackPanel>
+            <!-- Sözler: varsayılan kapalı (başlık LRCLIB'e gider). Açıkken dolu zemin; söz bulunamazsa başlık ve dalga kalır. -->
+            <Button Grid.Column="2" Width="40" Height="40" VerticalAlignment="Center" Command="{Binding Music.Lyrics.ToggleEnabledCommand}"
+                    Visibility="{Binding Music.Lyrics.CanToggle, Converter={StaticResource BoolToVis}}"
+                    ToolTip="{Binding [LyricsToggle], Source={x:Static res:Loc.Instance}}"
+                    AutomationProperties.Name="{Binding [LyricsSettingTitle], Source={x:Static res:Loc.Instance}}">
+              <Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource PlayerButtonStyle}">
+                  <Setter Property="Background" Value="#0FFFFFFF" />
+                  <Setter Property="Opacity" Value="0.7" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding Music.Lyrics.IsEnabled}" Value="True">
+                      <Setter Property="Background" Value="#33FFFFFF" />
+                      <Setter Property="Opacity" Value="1" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Button.Style>
+              <Path Width="16" Height="16" Stretch="Uniform" Stroke="{DynamicResource KoyNotchText}" StrokeThickness="2"
+                    StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M4 6h16M4 12h12M4 18h8" />
+            </Button>
+            </Grid>
           </Grid>
         </Grid>
       </Grid>

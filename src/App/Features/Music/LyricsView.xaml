@@ -3,7 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Koy.App.Features.Music"
              Background="Transparent">
-  <!-- Canvas: liste kendi tam yüksekliğini alır. Grid içinde kalsaydı yerleşim kırpması kaydırılan satırları keserdi. -->
+  <!-- Canvas: liste kendi tam yüksekliğini alır. Grid içinde kalsaydı yerleşim kırpması kaydırılan satırları keserdi.
+       Üst ve alt kenar saydamlık maskesiyle silikleşir (#182); maske efekt değildir, Direct3D yüklemez. Maske kodda,
+       piksel cinsinden kurulur (LyricsView.UpdateEdgeMask): göreli maske listenin tamamına yayılıyordu. -->
   <Canvas x:Name="Viewport" ClipToBounds="True">
     <ItemsControl x:Name="LinesHost" ItemsSource="{Binding Lines}" Focusable="False"
                   Width="{Binding ActualWidth, ElementName=Viewport}">
@@ -12,30 +14,20 @@
       </ItemsControl.RenderTransform>
       <ItemsControl.ItemTemplate>
         <DataTemplate DataType="{x:Type local:LyricLineItem}">
+          <!-- Satırın saydamlığı ve ölçeği etkin satırın çizgisine uzaklığından gelir (LyricsView.ApplyEmphasis). -->
           <Button Cursor="Hand" Focusable="False" HorizontalContentAlignment="Stretch"
                   Command="{Binding DataContext.SeekToLineCommand, RelativeSource={RelativeSource AncestorType=local:LyricsView}}"
                   CommandParameter="{Binding}">
             <Button.Template>
               <ControlTemplate TargetType="Button">
-                <Border Background="Transparent" Padding="0,2">
+                <Border Background="Transparent" Padding="0,4">
                   <ContentPresenter />
                 </Border>
               </ControlTemplate>
             </Button.Template>
-            <!-- Yazı boyutu kullanıldığı karttan gelir: küçük kartta 13, büyük kartta 15. -->
             <TextBlock Text="{Binding Text}" FontSize="{Binding FontSize, RelativeSource={RelativeSource AncestorType=local:LyricsView}}"
-                       FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{DynamicResource KoyNotchText}">
-              <TextBlock.Style>
-                <Style TargetType="TextBlock">
-                  <Setter Property="Opacity" Value="0.42" />
-                  <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsActive}" Value="True">
-                      <Setter Property="Opacity" Value="1" />
-                    </DataTrigger>
-                  </Style.Triggers>
-                </Style>
-              </TextBlock.Style>
-            </TextBlock>
+                       FontFamily="{DynamicResource KoyNotchDisplayFont}" FontWeight="SemiBold" TextWrapping="Wrap"
+                       Foreground="{DynamicResource KoyNotchText}" />
           </Button>
         </DataTemplate>
       </ItemsControl.ItemTemplate>

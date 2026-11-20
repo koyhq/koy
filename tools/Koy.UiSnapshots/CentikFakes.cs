@@ -11,7 +11,8 @@ namespace Koy.UiSnapshots;
 
 // Çentik sahnesi için sahte servisler: gerçek medya, pil, hava, ses ya da radyo servisine dokunulmaz.
 
-internal sealed class FakeMedia(MediaInfo? current) : IMediaService
+// liveClock: konum gerçek zamanla ilerler (sözlerin canlı kayma denetimi için); varsayılan sabit 1:24.
+internal sealed class FakeMedia(MediaInfo? current, bool liveClock = false) : IMediaService
 {
     public event EventHandler<MediaInfo?>? Changed { add { } remove { } }
     public event EventHandler<PlaybackTimeline?>? TimelineChanged { add { } remove { } }
@@ -20,7 +21,7 @@ internal sealed class FakeMedia(MediaInfo? current) : IMediaService
     public MediaInfo? Current { get; } = current;
     public PlaybackTimeline? Timeline { get; } = current is null
         ? null
-        : new PlaybackTimeline(TimeSpan.FromSeconds(84), TimeSpan.Zero, TimeSpan.FromSeconds(221), DateTimeOffset.MinValue);
+        : new PlaybackTimeline(TimeSpan.FromSeconds(84), TimeSpan.Zero, TimeSpan.FromSeconds(221), liveClock ? DateTimeOffset.Now : DateTimeOffset.MinValue);
     public IReadOnlyList<MediaSessionInfo> Sessions { get; } = [];
 
     public Task StartAsync() => Task.CompletedTask;
