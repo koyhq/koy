@@ -82,6 +82,16 @@ Unutma: Bildirim yoklaması AGENTS #5'in tek yoklama istisnasıdır (paketsiz s�
 | App | `Settings/Pages/CentikPage.xaml`, `KoyWindowViewModel.cs` | "Görseller" bölümü: hedef, kaynak, önayar, dosya seçici, perde |
 
 Unutma: çentik kapalı / gizliyken hiçbir şey oynamaz ve kare tutulmaz (AGENTS #5, #6); hareketi azalt ve pil tasarrufunda yalnız ilk kare. Tuval 620×352 büyütülmez (AGENTS #13).
+## Müzik sayfası hareketleri (#182)
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Media/TrackTransition.cs` | Parça değişimi geçişi: tek ilerleme yayı, kapak/başlık kaydırma, ölçek ve saydamlık değerleri (testli) |
+| App | `src/App/Features/Music/TrackTransitionPresenter.cs` | Değerleri öğelere yazar; kare yalnız geçiş sürerken dinlenir, yüz gizlenince biter. Sekme geçişleri anahtarına uyar |
+| App | `src/App/Features/Home/HomePanel.xaml` | `OutgoingCover`, `IncomingCover`, `TrackTitleBlock` |
+| Araç | `tools/Koy.UiSnapshots` (`--scene centik`) | `muzik-gecis-*` ara kareleri |
+
+Unutma: shader efekti yok (`DropShadowEffect`, `BlurEffect` Direct3D yığınını yükler); yalnız dönüşüm, saydamlık, gradyan, kırpma.
+
 ## Aramaya yeni kaynak eklemek
 | Katman | Dosya | Ne yapılır |
 |---|---|---|

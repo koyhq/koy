@@ -136,7 +136,9 @@
 
     <!-- Kare kapak ya da (video) yatay kapak: yatayda resmin tamamı, arkada bulanık hâli. Kapak yoksa nota. -->
     <DataTemplate x:Key="CoverArt">
-      <Grid>
+      <!-- Kapak yokken görünen zemin kapakla birlikte durur (çerçevede değil): parça geçişinde kapak kayarken
+           arkasında gri şerit kalmasın. -->
+      <Grid Background="{DynamicResource KoyNotchMusicCover}">
         <Path Width="56" Height="56" Stretch="Uniform" Fill="#60FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"
               Data="M 12,3 L 6,5 L 6,11 A 2.5,2.5 0 1 1 3.5,8.5 L 5,8.5 L 5,4 L 12,2 Z" />
         <!-- Bulanıklık efekt (BlurEffect) değil: 32 px kapağın yumuşak büyütülmüşü (Direct3D yüklemez). -->
@@ -165,7 +167,7 @@
 
   <Grid>
     <!-- ============================== MÜZİK YÜZÜ ============================== -->
-    <Border CornerRadius="20" Padding="18" BorderBrush="{DynamicResource KoyNotchCardBorder}" BorderThickness="1"
+    <Border x:Name="MusicFace" CornerRadius="20" Padding="18" BorderBrush="{DynamicResource KoyNotchCardBorder}" BorderThickness="1"
             MouseLeftButtonDown="MusicCard_MouseLeftButtonDown" RenderOptions.BitmapScalingMode="Linear"
             Visibility="{Binding IsMusicPage, Converter={StaticResource BoolToVis}}">
       <Border.Style>
@@ -219,12 +221,22 @@
             <ColumnDefinition Width="*" />
           </Grid.ColumnDefinitions>
 
-          <Border Width="200" Height="200" CornerRadius="20" Background="{DynamicResource KoyNotchMusicCover}" ClipToBounds="True" VerticalAlignment="Center">
+          <Border Width="200" Height="200" CornerRadius="20" ClipToBounds="True" VerticalAlignment="Center">
             <Grid>
               <Grid.Clip>
                 <RectangleGeometry Rect="0,0,200,200" RadiusX="20" RadiusY="20" />
               </Grid.Clip>
-              <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource CoverArt}" />
+              <!-- Parça değişimi (issue #182): giden kapak ve gelen kapak; yalnız geçiş sürerken hareket eder
+                   (TrackTransitionPresenter). Giden kapak geçiş dışında boştur, eski resmi tutmaz. -->
+              <!-- Her kapağın kendi yuvarlak kırpması var: kırpma dönüşümle birlikte kayar, kenar düz kesilmez. -->
+              <Rectangle x:Name="OutgoingCover" Visibility="Collapsed" IsHitTestVisible="False" RadiusX="20" RadiusY="20"
+                         RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality" />
+              <ContentPresenter x:Name="IncomingCover" Content="{Binding}" ContentTemplate="{StaticResource CoverArt}"
+                                RenderTransformOrigin="0.5,0.5">
+                <ContentPresenter.Clip>
+                  <RectangleGeometry Rect="0,0,200,200" RadiusX="20" RadiusY="20" />
+                </ContentPresenter.Clip>
+              </ContentPresenter>
             </Grid>
           </Border>
 
@@ -242,7 +254,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
-              <StackPanel>
+              <StackPanel x:Name="TrackTitleBlock">
                 <Border HorizontalAlignment="Left" CornerRadius="9" Background="#EF4444" Padding="7,2" Margin="0,0,0,6"
                         Visibility="{Binding Music.IsLive, Converter={StaticResource BoolToVis}}">
                   <StackPanel Orientation="Horizontal">

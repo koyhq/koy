@@ -5,16 +5,29 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using Koy.App.Features.Music;
 using Koy.Core.Notch;
 
 namespace Koy.App.Features.Home;
 
 public partial class HomePanel : UserControl
 {
+    private readonly TrackTransitionPresenter _trackTransition;
+
+    /// <summary>Müzik yüzündeki parça değişimi geçişi (görsel kanıt aracı ara kareleri buradan çizer).</summary>
+    public TrackTransitionPresenter TrackTransition => _trackTransition;
+
     public HomePanel()
     {
         InitializeComponent();
-        Loaded += (_, _) => UpdateRightColumnOrder();
+        _trackTransition = new TrackTransitionPresenter(MusicFace, IncomingCover, OutgoingCover, TrackTitleBlock);
+        Loaded += (_, _) =>
+        {
+            UpdateRightColumnOrder();
+            _trackTransition.Attach((DataContext as HomeViewModel)?.Music);
+        };
+        // Sayfa şablondan yeniden kurulursa eski örnek müzik olaylarında asılı kalmasın.
+        Unloaded += (_, _) => _trackTransition.Attach(null);
         DataContextChanged += OnDataContextChanged;
     }
 
@@ -25,6 +38,9 @@ public partial class HomePanel : UserControl
 
         if (e.NewValue is HomeViewModel newVm)
             newVm.PropertyChanged += OnHomeViewModelPropertyChanged;
+
+        if (IsLoaded)
+            _trackTransition.Attach((e.NewValue as HomeViewModel)?.Music);
 
         UpdateRightColumnOrder();
     }

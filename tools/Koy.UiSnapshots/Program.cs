@@ -339,7 +339,7 @@ public static class Program
     }
 
     // Deneme kapağı: 300 px desenli PNG (gerçek kapaklar 300–640 px); keskinlik ve yuvarlak köşe kontrolü için ince çizgiler.
-    private static byte[] FakeCover(int width, int height)
+    private static byte[] FakeCover(int width, int height, bool warm = false)
     {
         var pixels = new byte[width * height * 4];
         for (var y = 0; y < height; y++)
@@ -347,9 +347,9 @@ public static class Program
             {
                 var i = (y * width + x) * 4;
                 var line = x % 20 == 0 || y % 20 == 0;
-                pixels[i] = (byte)(line ? 255 : 80 + x / 3);
-                pixels[i + 1] = (byte)(line ? 255 : 40 + y / 3);
-                pixels[i + 2] = (byte)(line ? 255 : 140);
+                pixels[i] = (byte)(line ? 255 : warm ? 40 : 80 + x / 3);
+                pixels[i + 1] = (byte)(line ? 255 : warm ? 90 + y / 3 : 40 + y / 3);
+                pixels[i + 2] = (byte)(line ? 255 : warm ? 160 + x / 4 : 140);
                 pixels[i + 3] = 255;
             }
         var bitmap = System.Windows.Media.Imaging.BitmapSource.Create(width, height, 96, 96, System.Windows.Media.PixelFormats.Bgra32, null, pixels, width * 4);
@@ -664,6 +664,23 @@ public static class Program
         set.Vm.ShowHomePageCommand.Execute(Koy.Core.Notch.NotchHomePage.Music);
         Flush();
         ShotNotch(set, name("muzik"), expanded: true);
+        // Parça değişimi geçişi (#182): eski kapak sola gider, yeni kapak sağdan büyüyerek, başlık aşağıdan gelir.
+        if (FindDescendant<Koy.App.Features.Home.HomePanel>((DependencyObject)set.Window.Content) is { } home)
+        {
+            var oldCover = new System.Windows.Media.Imaging.BitmapImage();
+            oldCover.BeginInit();
+            oldCover.StreamSource = new MemoryStream(FakeCover(300, 300, warm: true));
+            oldCover.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+            oldCover.EndInit();
+            oldCover.Freeze();
+            foreach (var p in new[] { 0.15, 0.35, 0.6, 0.85 })
+            {
+                home.TrackTransition.ShowFrame(oldCover, p);
+                Flush();
+                ShotNotch(set, name("muzik-gecis-" + (int)(p * 100)), expanded: true);
+            }
+            home.TrackTransition.ShowFrame(null, 1);
+        }
         set.Vm.Dispose();
 
         // Müzik kartı stilleri (#66): Albüm kapağı (küçük ve büyük kart) ve Düz.
