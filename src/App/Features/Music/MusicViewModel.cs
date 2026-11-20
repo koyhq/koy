@@ -128,6 +128,11 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private Brush? _spectrumBrush;
 
+    /// <summary>Müzik sayfasındaki ayna dalganın fırçası (#182): kapak renginden dikey geçiş, ortada parlak, uçlarda
+    /// soluk. Kapak paleti yoksa null; sayfa o zaman tema rengini kullanır.</summary>
+    [ObservableProperty]
+    private Brush? _mirrorWaveBrush;
+
     [ObservableProperty]
     private NotchVisualizerStyle _visualizerStyle = NotchVisualizerStyle.Bars;
 
@@ -224,12 +229,13 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
             CollapsedAlbumBrush = null;
             HasTint = false;
             HasBackdrop = false;
-            CardBrush = SubTextBrush = SpectrumBrush = TintOverlayBrush = BackdropBrush = null;
+            CardBrush = SubTextBrush = SpectrumBrush = TintOverlayBrush = BackdropBrush = MirrorWaveBrush = null;
             return;
         }
 
         // Kapalı çentik için her zaman tam opak fırça; müzik kartı Düz ise kart fırçaları temiz kalır.
         CollapsedAlbumBrush = CardFill(palette, 255);
+        MirrorWaveBrush = MirrorFill(palette.Spectrum);
         SpectrumBrush = VisualizerColorSource == NotchVisualizerColorSource.Artwork
             ? Solid(palette.Spectrum, 0xBF)
             : null;
@@ -289,6 +295,21 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
         }
 
         var brush = new DrawingBrush(group) { Stretch = Stretch.Fill };
+        brush.Freeze();
+        return brush;
+    }
+
+    // Ayna dalga: kapak renginin dikey geçişi; çubuk ortadan iki yöne büyüdüğü için orta parlak, uçlar soluk.
+    private static LinearGradientBrush MirrorFill(Koy.Core.Appearance.Rgb c)
+    {
+        var edge = Color.FromArgb(0x70, c.R, c.G, c.B);
+        var middle = Color.FromArgb(0xF2, c.R, c.G, c.B);
+        var brush = new LinearGradientBrush
+        {
+            StartPoint = new System.Windows.Point(0, 0),
+            EndPoint = new System.Windows.Point(0, 1),
+            GradientStops = { new GradientStop(edge, 0), new GradientStop(middle, 0.5), new GradientStop(edge, 1) },
+        };
         brush.Freeze();
         return brush;
     }

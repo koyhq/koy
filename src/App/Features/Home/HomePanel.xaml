@@ -40,16 +40,13 @@
         </DataTrigger>
       </Style.Triggers>
     </Style>
-    <Style x:Key="MusicSpectrumBars" TargetType="music:SpectrumBars">
-      <Setter Property="Fill" Value="{DynamicResource KoyNotchMusicSpectrum}" />
+    <!-- Müzik sayfasındaki ayna dalga (#182): her zaman kapak renginde; kapak paleti yoksa tema rengi. -->
+    <Style x:Key="MusicMirrorWave" TargetType="music:SpectrumBars">
+      <Setter Property="Fill" Value="{Binding Music.MirrorWaveBrush}" />
       <Style.Triggers>
-        <MultiDataTrigger>
-          <MultiDataTrigger.Conditions>
-            <Condition Binding="{Binding Music.HasTint}" Value="True" />
-            <Condition Binding="{Binding Music.VisualizerColorSource}" Value="Artwork" />
-          </MultiDataTrigger.Conditions>
-          <Setter Property="Fill" Value="{Binding Music.SpectrumBrush}" />
-        </MultiDataTrigger>
+        <DataTrigger Binding="{Binding Music.MirrorWaveBrush}" Value="{x:Null}">
+          <Setter Property="Fill" Value="{DynamicResource KoyNotchMusicSpectrum}" />
+        </DataTrigger>
       </Style.Triggers>
     </Style>
     <!-- Albüm kapağı stili: kapağın üstüne kart tonu, onun üstüne koyu perde (#0A0A0B 0,55 → 0,85). BlurEffect yok. -->
@@ -282,9 +279,9 @@
             </Grid>
 
             <!-- Orta: sözler açıksa sözler, değilse ses çubukları (çalan sesten; yakalama yalnız bu yüz görünürken) -->
-            <music:SpectrumBars x:Name="MusicWave" Grid.Row="1" Height="30" BarWidth="6" Gap="5" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                Feed="{Binding Music.Spectrum}" VisualizerStyle="{Binding Music.VisualizerStyle}"
-                                Style="{StaticResource MusicSpectrumBars}" IsHitTestVisible="False">
+            <music:SpectrumBars x:Name="MusicWave" Grid.Row="1" Height="56" Mirror="True" Gap="3" Margin="0,8"
+                                VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                                Feed="{Binding Music.Spectrum}" Style="{StaticResource MusicMirrorWave}" IsHitTestVisible="False">
               <music:SpectrumBars.Visibility>
                 <MultiBinding Converter="{x:Static local:AllTrueToVisibility.Instance}">
                   <Binding Path="Music.ShowSpectrum" />
