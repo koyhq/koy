@@ -87,8 +87,12 @@ Unutma: çentik kapalı / gizliyken hiçbir şey oynamaz ve kare tutulmaz (AGENT
 |---|---|---|
 | Core | `src/Core/Media/TrackTransition.cs` | Parça değişimi geçişi: tek ilerleme yayı, kapak/başlık kaydırma, ölçek ve saydamlık değerleri (testli) |
 | App | `src/App/Features/Music/TrackTransitionPresenter.cs` | Değerleri öğelere yazar; kare yalnız geçiş sürerken dinlenir, yüz gizlenince biter. Sekme geçişleri anahtarına uyar |
-| App | `src/App/Features/Home/HomePanel.xaml` | `OutgoingCover`, `IncomingCover`, `TrackTitleBlock` |
-| Araç | `tools/Koy.UiSnapshots` (`--scene centik`) | `muzik-gecis-*` ara kareleri |
+| Core | `src/Core/Animation/StaggeredEntrance.cs` | Kademeli giriş zamanlaması (sıra gecikmesi, ölçek, kayma) ve kapanış solması süresi (testli) |
+| App | `src/App/Features/Notch/StaggeredEntrancePresenter.cs` | Öğeleri sırayla içeri alır; müzik yüzü görünür olunca oynar (`HomePanel`). Açılış/kapanış anahtarına uyar |
+| App | `src/App/Features/Notch/ExpandedExitFade.cs` | Kapanışta açık içeriğin 120 ms solması: durum değişmeden önce (`PropertyChanging`) görünüm sabitlenir |
+| App | `src/App/Features/Music/ProgressRing.cs`, `NotchWindow.xaml` (`MusicStateView`) | Kapalı çentikte kapak çevresindeki ilerleme halkası; ilerleme zamanlayıcısı kapalı çentik görünürken de çalışır |
+| App | `src/App/Features/Home/HomePanel.xaml` | `OutgoingCover`, `IncomingCover`, `TrackTitleBlock`; kademeli giriş öğeleri `CoverFrame`, `TitleRow`, `MusicWave`/`MusicLyrics`, `ProgressRow`, `ControlsRow` |
+| Araç | `tools/Koy.UiSnapshots` (`--scene centik`) | `muzik-gecis-*`, `muzik-acilis-*` ara kareleri, `kapali-muzik` |
 
 Unutma: shader efekti yok (`DropShadowEffect`, `BlurEffect` Direct3D yığınını yükler); yalnız dönüşüm, saydamlık, gradyan, kırpma.
 

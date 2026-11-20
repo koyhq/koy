@@ -6,6 +6,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using Koy.App.Features.Music;
+using Koy.App.Features.Notch;
 using Koy.Core.Notch;
 
 namespace Koy.App.Features.Home;
@@ -14,13 +15,28 @@ public partial class HomePanel : UserControl
 {
     private readonly TrackTransitionPresenter _trackTransition;
 
+    private readonly StaggeredEntrancePresenter _musicEntrance;
+
     /// <summary>Müzik yüzündeki parça değişimi geçişi (görsel kanıt aracı ara kareleri buradan çizer).</summary>
     public TrackTransitionPresenter TrackTransition => _trackTransition;
+
+    /// <summary>Müzik yüzünün kademeli girişi (çentik açılınca ya da Müzik sayfasına geçilince).</summary>
+    public StaggeredEntrancePresenter MusicEntrance => _musicEntrance;
 
     public HomePanel()
     {
         InitializeComponent();
         _trackTransition = new TrackTransitionPresenter(MusicFace, IncomingCover, OutgoingCover, TrackTitleBlock);
+        // Tasarımdaki sıra (#182): kapak, başlık, dalga/sözler, ilerleme, denetimler.
+        _musicEntrance = new StaggeredEntrancePresenter(
+            (CoverFrame, 0), (TitleRow, 1), (MusicWave, 2), (MusicLyrics, 2), (ProgressRow, 3), (ControlsRow, 4));
+        MusicFace.IsVisibleChanged += (_, e) =>
+        {
+            if (e.NewValue is true)
+                _musicEntrance.Play();
+            else
+                _musicEntrance.Finish();
+        };
         Loaded += (_, _) =>
         {
             UpdateRightColumnOrder();

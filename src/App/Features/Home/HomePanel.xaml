@@ -221,7 +221,7 @@
             <ColumnDefinition Width="*" />
           </Grid.ColumnDefinitions>
 
-          <Border Width="200" Height="200" CornerRadius="20" ClipToBounds="True" VerticalAlignment="Center">
+          <Border x:Name="CoverFrame" Width="200" Height="200" CornerRadius="20" ClipToBounds="True" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
             <Grid>
               <Grid.Clip>
                 <RectangleGeometry Rect="0,0,200,200" RadiusX="20" RadiusY="20" />
@@ -249,7 +249,7 @@
             </Grid.RowDefinitions>
 
             <!-- Başlık satırı: canlıysa rozet, başlık (iki satıra kadar), sanatçı ve uygulama; sağ üstte sözler düğmesi -->
-            <Grid Grid.Row="0">
+            <Grid x:Name="TitleRow" Grid.Row="0">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -290,7 +290,7 @@
             </Grid>
 
             <!-- Orta: sözler açıksa sözler, değilse ses çubukları (çalan sesten; yakalama yalnız bu yüz görünürken) -->
-            <music:SpectrumBars Grid.Row="1" Height="30" BarWidth="6" Gap="5" VerticalAlignment="Center" HorizontalAlignment="Center"
+            <music:SpectrumBars x:Name="MusicWave" Grid.Row="1" Height="30" BarWidth="6" Gap="5" VerticalAlignment="Center" HorizontalAlignment="Center"
                                 Feed="{Binding Music.Spectrum}" VisualizerStyle="{Binding Music.VisualizerStyle}"
                                 Style="{StaticResource MusicSpectrumBars}" IsHitTestVisible="False">
               <music:SpectrumBars.Visibility>
@@ -300,11 +300,11 @@
                 </MultiBinding>
               </music:SpectrumBars.Visibility>
             </music:SpectrumBars>
-            <music:LyricsView Grid.Row="1" FontSize="13.5" Margin="0,10,0,8" DataContext="{Binding Music.Lyrics}"
+            <music:LyricsView x:Name="MusicLyrics" Grid.Row="1" FontSize="13.5" Margin="0,10,0,8" DataContext="{Binding Music.Lyrics}"
                               Visibility="{Binding IsShown, Converter={StaticResource BoolToVis}}" />
 
             <!-- İlerleme: tam genişlik ince çubuk, süreler altında. Canlı yayında yok. -->
-            <StackPanel Grid.Row="2" Margin="0,0,0,6">
+            <StackPanel x:Name="ProgressRow" Grid.Row="2" Margin="0,0,0,6">
               <StackPanel.Style>
                 <Style TargetType="StackPanel">
                   <Style.Triggers>
@@ -324,7 +324,7 @@
             </StackPanel>
 
             <!-- Denetimler: büyük beyaz oynat / duraklat, iki yanında önceki / sonraki (canlıda soluk) -->
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+            <StackPanel x:Name="ControlsRow" Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
               <Button Style="{StaticResource PlayerButtonStyle}" Width="40" Height="40" Command="{Binding Music.PreviousCommand}"
                       IsEnabled="{Binding Music.IsLive, Converter={x:Static local:NotConverter.Instance}}"
                       ToolTip="{Binding [MusicPrevious], Source={x:Static res:Loc.Instance}}"

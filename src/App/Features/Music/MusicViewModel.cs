@@ -29,10 +29,15 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     private bool _hasTrack;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CollapsedLabel))]
     private string _title = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CollapsedLabel))]
     private string _artist = string.Empty;
+
+    /// <summary>Kapalı çentikteki tek satır: "Şarkı · Sanatçı", sanatçı yoksa yalnız şarkı.</summary>
+    public string CollapsedLabel => string.IsNullOrWhiteSpace(Artist) ? Title : Title + " · " + Artist;
 
     [ObservableProperty]
     private string _sourceAppId = string.Empty;
@@ -352,7 +357,8 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
             return;
 
         _isCollapsedViewing = active;
-        UpdateSpectrum();
+        // Kapalı çentikteki ilerleme halkası da saniyede bir ilerler; görünmüyorsa zamanlayıcı durur (AGENTS #5).
+        UpdateProgressTimer();
     }
 
     // Sözler çubukların yerini alır: açık kartta görünmeyen çubuk için ses yakalanmaz (AGENTS #5).
@@ -402,7 +408,7 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     private void UpdateProgressTimer()
     {
         UpdateSpectrum();
-        if (_isActive && HasTrack && IsPlaying)
+        if ((_isActive || _isCollapsedViewing) && HasTrack && IsPlaying)
         {
             if (!_progressTimer.IsEnabled)
                 _progressTimer.Start();

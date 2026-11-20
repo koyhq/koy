@@ -156,6 +156,9 @@ public partial class NotchWindow : Window
     {
         if (e.OldValue is NotchViewModel oldVm)
         {
+            oldVm.PropertyChanging -= OnViewModelPropertyChanging;
+            oldVm.PropertyChanged -= OnViewModelPropertyChanged;
+            _exitFade.Cancel();
             oldVm.TargetSizeChanged -= AnimateTo;
             oldVm.TargetVisibilityChanged -= AnimateVisibility;
             oldVm.PanelTransitionTriggered -= AnimatePanelTransition;
@@ -166,6 +169,8 @@ public partial class NotchWindow : Window
 
         if (e.NewValue is NotchViewModel newVm)
         {
+            newVm.PropertyChanging += OnViewModelPropertyChanging;
+            newVm.PropertyChanged += OnViewModelPropertyChanged;
             newVm.TargetSizeChanged += AnimateTo;
             newVm.TargetVisibilityChanged += AnimateVisibility;
             newVm.PanelTransitionTriggered += AnimatePanelTransition;
@@ -187,6 +192,22 @@ public partial class NotchWindow : Window
                 AnimateVisibility(newVm.IsNotchVisible);
             }
         }
+    }
+
+    // Kapanışta açık içerik kısa süre solar (#182): durum değişmeden önce görünüm sabitlenir, sonra solma başlar.
+    private ExpandedExitFade? _exitFadeField;
+    private ExpandedExitFade _exitFade => _exitFadeField ??= new ExpandedExitFade(ExpandedView);
+
+    private void OnViewModelPropertyChanging(object? sender, System.ComponentModel.PropertyChangingEventArgs e)
+    {
+        if (e.PropertyName == nameof(NotchViewModel.State) && ViewModel?.State == NotchState.Expanded && !ViewModel.ReduceMotion)
+            _exitFade.Pin();
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(NotchViewModel.State))
+            _exitFade.OnStateChanged(ViewModel?.State == NotchState.Expanded);
     }
 
     // Çentik odak çalmaz (WS_EX_NOACTIVATE); bu yüzden yazı alanına tıklanınca pencere geçici olarak etkinleştirilir

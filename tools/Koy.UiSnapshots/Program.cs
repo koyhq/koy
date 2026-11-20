@@ -680,6 +680,14 @@ public static class Program
                 ShotNotch(set, name("muzik-gecis-" + (int)(p * 100)), expanded: true);
             }
             home.TrackTransition.ShowFrame(null, 1);
+            // Açılışta kademeli giriş (#182): kapak, başlık, dalga, ilerleme, denetimler 50 ms arayla.
+            foreach (var ms in new[] { 60, 140, 240 })
+            {
+                home.MusicEntrance.ShowFrame(ms / 1000.0);
+                Flush();
+                ShotNotch(set, name("muzik-acilis-" + ms), expanded: true);
+            }
+            home.MusicEntrance.Finish();
         }
         set.Vm.Dispose();
 
