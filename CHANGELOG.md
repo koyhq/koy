@@ -8,22 +8,24 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 ---
 
 ## [0.2.15](https://github.com/koyhq/koy/compare/v0.2.14...v0.2.15) (2026-11-21)
-
+Highlights:
+- **Much smaller updates:** every release now also ships a delta package, so updating from the previous version downloads only the changed files (a few MB) instead of the full ~79 MB package.
+- **Update checks that keep up:** Koy checks again after the computer wakes from sleep or is unlocked (at most every 6 hours), download errors show in the update dialog, and the About card has its own check and update button.
+- **Album color by default:** while music plays, the closed notch takes the cover's tone.
 
 ### Added
 
-* **notch:** use album color as the default collapsed background ([061383f](https://github.com/koyhq/koy/commit/061383feaf68ef149a4fa9037f266f7da8b061a3))
+* **notch:** use album color as the default collapsed background; the former "Default" option is now "Plain" ([061383f](https://github.com/koyhq/koy/commit/061383feaf68ef149a4fa9037f266f7da8b061a3))
 
 
 ### Fixed
 
-* **update:** delta updates, recheck after sleep and a clearer update dialog ([b227e14](https://github.com/koyhq/koy/commit/b227e149cd790ed7db9c79a120377654f063ebda))
-* **update:** recheck after sleep, surface errors and tidy the update dialog ([5191cbf](https://github.com/koyhq/koy/commit/5191cbfb710bd4b432d1be07c185993c04075ab2))
+* **update:** recheck after sleep and unlock, show download errors, check and update button on the About card, clearer update dialog ([#185](https://github.com/koyhq/koy/issues/185)) ([5191cbf](https://github.com/koyhq/koy/commit/5191cbfb710bd4b432d1be07c185993c04075ab2))
 
 
 ### Performance
 
-* **update:** ship delta update packages and drop unused language files ([ea0777c](https://github.com/koyhq/koy/commit/ea0777cb8ce2c0666bc18df08aa59dcbf40c6bfd))
+* **update:** ship delta update packages and drop unused language files ([#185](https://github.com/koyhq/koy/issues/185)) ([ea0777c](https://github.com/koyhq/koy/commit/ea0777cb8ce2c0666bc18df08aa59dcbf40c6bfd))
 
 ## [0.2.14](https://github.com/koyhq/koy/compare/v0.2.13...v0.2.14) (2026-11-21)
 Highlights:

@@ -5,6 +5,24 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.15](https://github.com/koyhq/koy/compare/v0.2.14...v0.2.15) (2026-11-21)
+Öne çıkanlar:
+- **Çok daha küçük güncellemeler:** Her sürüm artık bir delta paketi de içeriyor; önceki sürümden güncellerken ~79 MB'lık paketin tamamı yerine yalnız değişen dosyalar (birkaç MB) iniyor.
+- **Güncel kalan denetim:** Koy, bilgisayar uykudan dönünce ya da kilit açılınca yeniden denetliyor (en sık 6 saatte bir); indirme hatası güncelleme penceresinde görünüyor, Hakkında kartında denetle ve güncelle düğmesi var.
+- **Varsayılan albüm rengi:** Müzik çalarken kapalı çentik kapağın tonunu alıyor.
+
+### Eklenenler
+
+* **notch:** kapalı çentik arka planında albüm rengi varsayılan oldu; eski "Varsayılan" seçeneğinin adı "Düz" ([061383f](https://github.com/koyhq/koy/commit/061383feaf68ef149a4fa9037f266f7da8b061a3))
+
+### Düzeltmeler
+
+* **update:** uykudan dönüş ve kilit açılışında yeniden denetim, görünür indirme hatası, Hakkında kartında denetle/güncelle düğmesi, sadeleşen güncelleme penceresi ([#185](https://github.com/koyhq/koy/issues/185)) ([5191cbf](https://github.com/koyhq/koy/commit/5191cbfb710bd4b432d1be07c185993c04075ab2))
+
+### Performans
+
+* **update:** delta güncelleme paketleri ve kullanılmayan dil dosyalarının çıkarılması ([#185](https://github.com/koyhq/koy/issues/185)) ([ea0777c](https://github.com/koyhq/koy/commit/ea0777cb8ce2c0666bc18df08aa59dcbf40c6bfd))
+
 ## [0.2.14](https://github.com/koyhq/koy/compare/v0.2.13...v0.2.14) (2026-11-21)
 Öne çıkanlar:
 - **Hareketli müzik sayfası:** Parça değişince kapak kayarak değişiyor, çentik açılınca sayfa parça parça giriyor ve kapanırken soluyor; başlığın altında kapak renginde ayna dalga, kartın arkasında kapak renginden akan lekeler var. Yeni plak modu kapağı dönen bir plağa çeviriyor, duraklatınca kol kalkıyor.
