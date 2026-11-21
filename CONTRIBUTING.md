@@ -113,6 +113,8 @@ powershell -ExecutionPolicy Bypass -File scripts\pack.ps1 -Version 0.1.0 -SignPa
 
 Releases are prepared automatically with [release-please](https://github.com/googleapis/release-please); tags are never created by hand.
 
+The release workflow downloads the previous stable release's full package before `vpk pack`, so every release also ships a `Koy-<version>-delta.nupkg`. Users updating from the previous version download only the changed files (a few MB) instead of the full self-contained package (~75 MB). If no earlier release is found, the release ships without a delta.
+
 1. **Commit prefixes determine the release** (based on the commits merged into `main`):
    - `fix:` → patch release, listed under fixes in the changelog.
    - `perf:` → patch release, listed under performance.

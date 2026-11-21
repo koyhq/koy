@@ -14,6 +14,10 @@
     <ServerGarbageCollection>false</ServerGarbageCollection>
     <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
     <TieredPGO>true</TieredPGO>
+
+    <!-- Paket boyutu: self-contained yayında WPF ve paketlerin 12 ek dil klasörü (~7,5 MB, ~144 dosya) taşınmasın.
+         Koy'un arayüzü yalnız İngilizce ve Türkçe; başka dil eklenirse buraya da eklenir. -->
+    <SatelliteResourceLanguages>en;tr</SatelliteResourceLanguages>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
