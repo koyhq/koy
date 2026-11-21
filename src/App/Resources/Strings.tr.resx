@@ -1686,6 +1686,9 @@
   <data name="SettingsFileInvalid" xml:space="preserve">
     <value>settings.json değişti ama okunamadı. Koy son geçerli ayarları koruyor.</value>
   </data>
+  <data name="SettingsSaveFailed" xml:space="preserve">
+    <value>Koy ayarlarını kaydedemedi (dosya kilitli ya da salt okunur olabilir). Değişiklikler çıkana kadar geçerli kalır; kayıt yeniden çalışınca uyarı kalkar.</value>
+  </data>
   <data name="OpenOnDragOver" xml:space="preserve">
     <value>Sürükleyince</value>
   </data>

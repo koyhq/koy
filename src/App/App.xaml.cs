@@ -417,9 +417,19 @@ public partial class App : Application, IDisposable
             SafeCloseTrayHost();
         };
 
+        // Arayüz iş parçacığı hatasında Koy açık kalır (tek bozuk olay işleyicisi kullanıcının ayarlarını ve
+        // görev çubuğunu götürmesin). Ölümcül sınıf ve aynı hatanın hızla tekrarı (kısır döngü) kapanmaya bırakılır.
+        var uiPolicy = new UiExceptionPolicy();
         DispatcherUnhandledException += (_, args) =>
         {
             CrashLog.Write("Dispatcher Unhandled", args.Exception);
+            // Koy açık kalacaksa görev çubuğuna dokunulmaz: Restore gözcüyü durdurur ve çubuğu gösterir, dock ise
+            // çalışmaya devam ederdi (çift çubuk, gözcüsüz dock). Geri getirme yalnız süreç gerçekten kapanırken.
+            if (uiPolicy.ShouldHandle(args.Exception, DateTime.UtcNow))
+            {
+                args.Handled = true;
+                return;
+            }
             SafeRestoreTaskbar();
             SafeCloseTrayHost();
         };

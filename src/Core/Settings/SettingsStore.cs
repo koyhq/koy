@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Koy.Core.Diagnostics;
 
 namespace Koy.Core.Settings;
 
@@ -18,32 +19,66 @@ public sealed class SettingsStore(string path)
     /// </summary>
     public string BackupPath { get; } = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(path) ?? "", "settings.v3.json");
 
-    /// <summary>Dosya yoksa ya da JSON'u bozuksa varsayılan ayarları döner. Okuma sırasındaki G/Ç hataları (kilitli dosya vb.) yakalanmaz.</summary>
+    // Antivirüs/senkron aracı dosyayı bir an tutabilir: kısa, sınırlı yeniden deneme (UI iş parçacığını uzun bloklamaz).
+    private const int IoAttempts = 3;
+    private const int IoRetryDelayMs = 75;
+
+    // Yol başına son bilinen ayarlar (başarılı Load/Save). Kilitli dosyada varsayılana düşüp ayarları sıfırlamamak için.
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, AppSettings> LastKnown =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    private static string KeyOf(string path) => System.IO.Path.GetFullPath(path);
+
+    /// <summary>
+    /// Dosya yoksa ya da JSON'u bozuksa varsayılan ayarları döner. Kilitli/okunamayan dosyada (G/Ç, yetki) kısa süre
+    /// yeniden dener, olmazsa hatayı crash.log'a yazar ve son bilinen ayarlarla (yoksa varsayılanla) devam eder;
+    /// varsayılan diske yazılmaz, dosya bozulmaz.
+    /// </summary>
     public AppSettings Load()
     {
-        try
+        for (var attempt = 1; ; attempt++)
         {
-            if (!File.Exists(Path))
+            try
+            {
+                var loaded = LoadOnce();
+                LastKnown[KeyOf(Path)] = loaded;
+                return loaded;
+            }
+            catch (JsonException)
+            {
                 return new AppSettings();
-
-            JsonNode? node;
-            using (var stream = File.OpenRead(Path))
-                node = JsonNode.Parse(stream);
-
-            if (node is not JsonObject root)
-                return new AppSettings();
-
-            // Göç tipli okumadan önce JSON ağacında yapılır: şema ya da değer biçimi değişse de dosya okunabilir kalır.
-            var originalVersion = SettingsMigration.Migrate(root);
-            if (originalVersion < AppSettings.CurrentVersion)
-                BackupOriginalFile();
-
-            return ParseTolerant(root, out _).FillMissingSections();
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                if (attempt < IoAttempts)
+                {
+                    Thread.Sleep(IoRetryDelayMs);
+                    continue;
+                }
+                CrashLog.Write("SettingsStore.Load " + System.IO.Path.GetFileName(Path), ex);
+                return LastKnown.TryGetValue(KeyOf(Path), out var known) ? known : new AppSettings();
+            }
         }
-        catch (JsonException)
-        {
+    }
+
+    private AppSettings LoadOnce()
+    {
+        if (!File.Exists(Path))
             return new AppSettings();
-        }
+
+        JsonNode? node;
+        using (var stream = File.OpenRead(Path))
+            node = JsonNode.Parse(stream);
+
+        if (node is not JsonObject root)
+            return new AppSettings();
+
+        // Göç tipli okumadan önce JSON ağacında yapılır: şema ya da değer biçimi değişse de dosya okunabilir kalır.
+        var originalVersion = SettingsMigration.Migrate(root);
+        if (originalVersion < AppSettings.CurrentVersion)
+            BackupOriginalFile();
+
+        return ParseTolerant(root, out _).FillMissingSections();
     }
 
     // Tanınmayan bir değer (örn. "Style": "Bogus") yalnız kendi alanını varsayılana döndürür; geri kalan ayarlar korunur.
@@ -176,15 +211,83 @@ public sealed class SettingsStore(string path)
         }
     }
 
-    /// <summary>Önce geçici dosyaya yazar, sonra yerine taşır; yazma yarıda kesilirse eski dosya bozulmaz.</summary>
-    public void Save(AppSettings settings)
+    // Art arda hatalar tek bildirime iner (kaydırıcı sürüklemesi her değişimde yazar).
+    private static readonly SaveFailureStreak Streak = new();
+
+    /// <summary>Son kayıt başarısız mı.</summary>
+    public static bool IsSaveFailing => Streak.IsFailing;
+
+    /// <summary>Kayıt başarısız olmaya başladı (art arda ilk hata). Arayüz iş parçacığında olmayabilir.</summary>
+    public static event Action<Exception>? SaveFailed;
+
+    /// <summary>Başarısızlık serisi bitti (kayıt yine çalışıyor).</summary>
+    public static event Action? SaveRecovered;
+
+    /// <summary>
+    /// Kaydeder; G/Ç hatasında (kilit, salt okunur, disk dolu) fırlatmaz: hata crash.log'a yazılır ve
+    /// <see cref="SaveFailed"/> tetiklenir. Sonucu bilmek isteyen <see cref="TrySave"/> kullanır.
+    /// </summary>
+    public void Save(AppSettings settings) => TrySave(settings, out _);
+
+    /// <summary>
+    /// Önce geçici dosyaya yazar, sonra yerine taşır; yazma yarıda kesilirse eski dosya bozulmaz. G/Ç ve yetki hatasında
+    /// kısa yeniden dener; olmazsa false döner, .tmp kalıntısı silinir ve eski dosya olduğu gibi kalır.
+    /// </summary>
+    public bool TrySave(AppSettings settings, out Exception? error)
     {
-        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(Path)!);
+        error = null;
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                SaveOnce(settings);
+                LastKnown[KeyOf(Path)] = settings;
+                if (Streak.Report(success: true) == SaveFailureStreak.Change.Ended)
+                    SaveRecovered?.Invoke();
+                return true;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                DeleteTempQuietly();
+                if (attempt < IoAttempts)
+                {
+                    Thread.Sleep(IoRetryDelayMs);
+                    continue;
+                }
+
+                error = ex;
+                if (Streak.Report(success: false) == SaveFailureStreak.Change.Started)
+                {
+                    CrashLog.Write("SettingsStore.Save " + System.IO.Path.GetFileName(Path), ex);
+                    SaveFailed?.Invoke(ex);
+                }
+                return false;
+            }
+        }
+    }
+
+    private void SaveOnce(AppSettings settings)
+    {
+        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(Path))!);
         var temp = Path + ".tmp";
         using (var stream = File.Create(temp))
             JsonSerializer.Serialize(stream, settings, SettingsJsonContext.Default.AppSettings);
         File.Move(temp, Path, overwrite: true);
         RememberOwnWrite(Path);
+    }
+
+    private void DeleteTempQuietly()
+    {
+        try
+        {
+            File.Delete(Path + ".tmp");
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
     }
 
     // Koy'un kendi yazdığı dosyanın son yazma zamanı (yol başına; aynı dosyaya birden çok SettingsStore örneği yazar).

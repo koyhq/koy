@@ -110,6 +110,21 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     private bool _settingsFileInvalid;
 
+    /// <summary>settings.json yazılamadı (kilit, salt okunur, disk dolu); değişiklikler yalnız bellekte. Kayıt toparlanınca kalkar.</summary>
+    [ObservableProperty]
+    private bool _settingsSaveFailed;
+
+    // Kayıt hatası herhangi bir iş parçacığından gelebilir; özellik arayüz iş parçacığında değişsin.
+    private void OnStoreSaveFailed(Exception _) => SetSaveFailed(true);
+
+    private void OnStoreSaveRecovered() => SetSaveFailed(false);
+
+    private void SetSaveFailed(bool failed)
+    {
+        if (System.Windows.Application.Current is { } app)
+            app.Dispatcher.InvokeAsync(() => SettingsSaveFailed = failed);
+    }
+
     // Kendi arayüzü olan ayarlar Gelişmiş tablosuna girmez: VM özellikleri düz v3 adlarıyla SettingsKeyMap'te.
     private static readonly string[] DedicatedUiKeys =
         SettingsKeyMap.V3ToV4.Values.Select(v => $"{v.Section}.{v.Name}").ToArray();
@@ -1145,6 +1160,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         UpdateStatus.Changed += OnUpdateStatusChanged;
         OnUpdateStatusChanged();
         ThemeManager.UserStyleApplied += RefreshUserStyle;
+        SettingsSaveFailed = SettingsStore.IsSaveFailing;
+        SettingsStore.SaveFailed += OnStoreSaveFailed;
+        SettingsStore.SaveRecovered += OnStoreSaveRecovered;
         LoadFromSettings();
         NotchFeature.NotificationAccessChanged += OnNotificationAccessChanged;
         RefreshNotificationPermission();
@@ -1534,7 +1552,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         if (e.PropertyName is nameof(SelectedPageIndex) or nameof(GeneralSubTabIndex) or nameof(NotchSubTabIndex)
             or nameof(DockSubTabIndex) or nameof(AppearanceSubTabIndex)
             or nameof(MotionTogglesActive) or nameof(MotionTogglesInactive) or nameof(ClockCustomDateFormatInvalid)
-            or nameof(IsApplyRevertPending) or nameof(ApplyRevertSecondsLeft) or nameof(AdvancedRows) or nameof(AdvancedGroups) or nameof(SettingsFileInvalid) or nameof(AdvancedFilter)
+            or nameof(IsApplyRevertPending) or nameof(ApplyRevertSecondsLeft) or nameof(AdvancedRows) or nameof(AdvancedGroups) or nameof(SettingsFileInvalid) or nameof(SettingsSaveFailed) or nameof(AdvancedFilter)
             or nameof(HasTrayAppRows)
             or nameof(SettingsSearchQuery) or nameof(IsSettingsSearching) or nameof(SettingsSearchResults)
             or nameof(SettingsSearchNoResult) or nameof(ShowChangedOnly) or nameof(CanResetPage) or nameof(IsPageResetConfirming) or nameof(PageResetDone)

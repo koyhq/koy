@@ -1686,6 +1686,9 @@
   <data name="SettingsFileInvalid" xml:space="preserve">
     <value>settings.json was changed but could not be read. Koy keeps the last valid settings.</value>
   </data>
+  <data name="SettingsSaveFailed" xml:space="preserve">
+    <value>Koy could not save your settings (the file may be locked or read-only). Changes stay active until you quit; the warning goes away once saving works again.</value>
+  </data>
   <data name="OpenOnDragOver" xml:space="preserve">
     <value>On drag</value>
   </data>
