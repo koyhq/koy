@@ -109,11 +109,16 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
 
     /// <summary>Kart kapaktan boyanıyor (stil Düz değil ve kapak renkli). Değilse XAML Tokens fırçalarında kalır.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCardOpaque))]
     private bool _hasTint;
 
     /// <summary>Kartın zemini küçültülmüş kapak (Albüm kapağı stili, renkli kapak).</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCardOpaque))]
     private bool _hasBackdrop;
+
+    /// <summary>Kart zemini opak: altındaki çentik arka planı görünmez (canlı arka plan çözülmez, <see cref="MusicCardCoverage"/>).</summary>
+    public bool IsCardOpaque => MusicCardCoverage.IsOpaque(HasTint, HasBackdrop, _cardAlpha);
 
     [ObservableProperty]
     private Brush? _cardBrush;
@@ -214,6 +219,7 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
             return;
 
         _cardAlpha = alpha;
+        OnPropertyChanged(nameof(IsCardOpaque));
         if (_palette is not null && _cardStyle != MusicCardStyle.Neutral)
             CardBrush = CardFill(_palette, _cardAlpha);
     }
@@ -528,6 +534,7 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
             SourceAppId = string.Empty;
             IsPlaying = false;
             Thumbnail = null;
+            _coverTracker.Reset();
             UpdateCoverPalette(null);
             UpdateProgressTimer();
             OnPropertyChanged(nameof(ShowCollapsedMedia));
@@ -539,7 +546,14 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
         Artist = info.Artist;
         SourceAppId = MediaAppName.FromSourceAppId(info.SourceAppId);
         IsPlaying = info.IsPlaying;
-        Thumbnail = DecodeThumbnail(info.Thumbnail);
+        // Oynat/duraklat ve aynı albümün parçaları aynı kapağı getirir: yeniden çözülmez, fırça ve geçiş tetiklenmez.
+        if (_coverTracker.HasChanged(info.Thumbnail))
+        {
+            Thumbnail = DecodeThumbnail(info.Thumbnail);
+            if (Thumbnail is null)
+                _coverTracker.Reset();
+        }
+
         UpdateCoverPalette(info.Thumbnail);
 
         UpdateProgressTimer();
@@ -629,6 +643,8 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     }
 
     private const int MaxCoverPixels = 320;
+
+    private readonly CoverChangeTracker _coverTracker = new();
 
     // Yalnız başlık okunur (OnDemand + DelayCreation): piksel çözülmez.
     private static int ReadPixelWidth(byte[] bytes)

@@ -580,6 +580,10 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         {
             UpdateSurface();
         }
+        else if (e.PropertyName == nameof(MusicViewModel.IsCardOpaque))
+        {
+            UpdateLiveBackground();
+        }
         else if (e.PropertyName == nameof(MusicViewModel.SpectrumBrush))
         {
             OnPropertyChanged(nameof(WaveformBrush));
@@ -642,8 +646,11 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     }
 
     // Açık ve görünür çentikte oynar; kapanınca / gizlenince Off olur (Core kararı), görünüm kareleri bırakır.
+    // Müzik yüzü opak kartla çentik zeminini örtüyorsa zemin durağan kalır (video çözülmez).
     private void UpdateLiveBackground() =>
-        LiveBackground.Update(State == NotchState.Expanded, IsNotchVisible, ReduceMotion);
+        LiveBackground.Update(State == NotchState.Expanded, IsNotchVisible, ReduceMotion,
+            isBackdropCovered: State == NotchState.Expanded && !IsSearchOpen && CurrentPanel == NotchPanel.Home
+                && Home.IsMusicPage && _music.IsCardOpaque);
 
     private void OnEnabledPanelsChanged(object? sender, EventArgs e) => RunOnUi(RebuildTabs);
 
@@ -714,7 +721,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         // Her servis yalnız sayfası görünürken çalışır (boşta %0 CPU): sistem verisi Ana ve Sistem'de (kartlar orada),
         // pano, görevler, takvim ve hızlı başlat kendi sayfalarında.
         var homeFace = shown && onHome && Home.IsHomePage;
-        SystemStats.SetActive(homeFace || (shown && CurrentPanel == NotchPanel.System));
+        SystemStats.SetActive((homeFace && Home.ShowSystemCard) || (shown && CurrentPanel == NotchPanel.System));
         Home.QuickLaunch.SetActive(homeFace);
         Home.SetActive(homeFace);
         // Kulaklık kartı yalnız Ana yüzü görünürken Bluetooth izleyicisini ister (Kontrol kendi "control" sahibiyle ister).

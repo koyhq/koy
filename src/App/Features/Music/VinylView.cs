@@ -11,13 +11,13 @@ namespace Koy.App.Features.Music;
 /// Plak modu (issue #182, hareket <see cref="VinylMotion"/>): kapak, plağın ortasındaki etiket olur. Oluklu disk ve
 /// ışık yansıması sabittir (oluklar dairesel, dönmesi görünmez); yalnız etiket döner, böylece her karede çizilen alan
 /// küçük kalır. Çalarken döner, duraklatınca yayla yavaşlayıp durur, ton kolu kalkar. Kare yalnız görünürken ve
-/// hareket sürerken dinlenir, en çok 30 fps. Shader efekti yok.
+/// hareket sürerken dinlenir, 30 fps ve ortak müzik saatinde (akan kapak rengiyle aynı vuruş, <see cref="MusicFrameClock"/>). Shader efekti yok.
 /// </summary>
 public sealed class VinylView : Grid
 {
     private const double Size = 200;
     private const double LabelSize = 88;
-    private const double FrameSeconds = 1.0 / 30;
+    private const double Fps = 30;
 
     public static readonly DependencyProperty CoverProperty = DependencyProperty.Register(
         nameof(Cover), typeof(ImageSource), typeof(VinylView), new PropertyMetadata(null, OnCoverChanged));
@@ -45,9 +45,7 @@ public sealed class VinylView : Grid
     private readonly RotateTransform _armTurn = new(VinylMotion.ArmRestAngle, 7, 7);
     private readonly Ellipse _label;
 
-    private bool _rendering;
-    private TimeSpan _lastFrame;
-    private double _sinceDraw;
+    private object? _clock;
 
     public VinylView()
     {
@@ -119,40 +117,17 @@ public sealed class VinylView : Grid
             StopClock();
     }
 
-    private void StartClock()
-    {
-        if (_rendering)
-            return;
-
-        _rendering = true;
-        _lastFrame = TimeSpan.Zero;
-        _sinceDraw = 0;
-        CompositionTarget.Rendering += OnRendering;
-    }
+    private void StartClock() => _clock ??= MusicFrameClock.Subscribe(Fps, OnFrame);
 
     private void StopClock()
     {
-        if (!_rendering)
-            return;
-
-        CompositionTarget.Rendering -= OnRendering;
-        _rendering = false;
+        MusicFrameClock.Unsubscribe(_clock);
+        _clock = null;
     }
 
-    private void OnRendering(object? sender, EventArgs e)
+    private void OnFrame(double step)
     {
-        var now = ((RenderingEventArgs)e).RenderingTime;
-        var dt = _lastFrame == TimeSpan.Zero ? 0 : (now - _lastFrame).TotalSeconds;
-        _lastFrame = now;
-        if (dt < 0)
-            return;
-
-        _sinceDraw += dt;
-        if (_sinceDraw < FrameSeconds)
-            return;
-
-        _motion.Step(_sinceDraw);
-        _sinceDraw = 0;
+        _motion.Step(step);
         Apply();
         UpdateClock();
     }

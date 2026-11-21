@@ -32,6 +32,7 @@ public partial class LyricsView : UserControl
 
     // Satırların liste içindeki orta noktaları (kaymadan bağımsız); yerleşim değişince yenilenir.
     private readonly List<(FrameworkElement Container, ScaleTransform Scale, double Center)> _rows = [];
+    private readonly List<bool> _settled = []; // satır sabit bölgede ve değeri yazılmış mı (ApplyEmphasis)
 
     public LyricsView()
     {
@@ -154,6 +155,7 @@ public partial class LyricsView : UserControl
     private void MeasureRows()
     {
         _rows.Clear();
+        _settled.Clear();
         var generator = LinesHost.ItemContainerGenerator;
         for (var i = 0; i < LinesHost.Items.Count; i++)
         {
@@ -169,6 +171,7 @@ public partial class LyricsView : UserControl
 
             var center = container.TranslatePoint(new Point(), LinesHost).Y + container.ActualHeight / 2;
             _rows.Add((container, scale, center));
+            _settled.Add(false);
         }
     }
 
@@ -176,9 +179,16 @@ public partial class LyricsView : UserControl
     {
         var anchor = Viewport.ActualHeight * AnchorRatio - ScrollTransform.Y;
         var unit = LineUnit;
-        foreach (var (container, scale, center) in _rows)
+        for (var i = 0; i < _rows.Count; i++)
         {
+            var (container, scale, center) = _rows[i];
             var distance = (center - anchor) / unit;
+            // Etkin satırdan uzak satırlar sabit değerde durur: bir kez yazılır, sonra karede atlanır.
+            var settled = LyricsEmphasis.IsSettled(distance);
+            if (settled && _settled[i])
+                continue;
+
+            _settled[i] = settled;
             container.Opacity = LyricsEmphasis.OpacityAt(distance);
             scale.ScaleX = scale.ScaleY = LyricsEmphasis.ScaleAt(distance);
         }

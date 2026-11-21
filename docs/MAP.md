@@ -83,6 +83,8 @@ Unutma: Bildirim yoklaması AGENTS #5'in tek yoklama istisnasıdır (paketsiz s�
 | App | `NotchWindow.xaml`, `Home/HomePanel.xaml` | Host, çentik zemininin ve müzik kartı zemininin içeriğin altında |
 | App | `Settings/Pages/CentikPage.xaml`, `KoyWindowViewModel.cs` | "Görseller" bölümü: hedef, kaynak, önayar, dosya seçici, perde |
 
+Opak müzik kartı (Kapak resmi stili ya da Katı malzemede albüm rengi) çentik zeminini örttüğü için o anda zemin durağan kalır: `MusicCardCoverage` (Core) girdisi `LiveBackgroundPlaybackPolicy.Decide(isBackdropCovered)`'e gider, `NotchViewModel.UpdateLiveBackground` besler.
+
 Unutma: çentik kapalı / gizliyken hiçbir şey oynamaz ve kare tutulmaz (AGENTS #5, #6); hareketi azalt ve pil tasarrufunda yalnız ilk kare. Tuval 620×352 büyütülmez (AGENTS #13).
 ## Müzik sayfası hareketleri (#182)
 | Katman | Dosya | Ne yapılır |
@@ -93,7 +95,8 @@ Unutma: çentik kapalı / gizliyken hiçbir şey oynamaz ve kare tutulmaz (AGENT
 | App | `src/App/Features/Notch/StaggeredEntrancePresenter.cs` | Öğeleri sırayla içeri alır; müzik yüzü görünür olunca oynar (`HomePanel`). Açılış/kapanış anahtarına uyar |
 | App | `src/App/Features/Notch/ExpandedExitFade.cs` | Kapanışta açık içeriğin 120 ms solması: durum değişmeden önce (`PropertyChanging`) görünüm sabitlenir |
 | Core, App | `src/Core/Notch/MirrorWave.cs`, `src/App/Features/Music/SpectrumBars.cs` (`Mirror`) | Ayna dalga: ortadan simetrik bant örneklemesi (testli), bütün genişliği dolduran çizim; fırça `MusicViewModel.MirrorWaveBrush` (kapak paleti) |
-| Core, App | `src/Core/Media/CoverBlobs.cs`, `src/App/Features/Music/CoverBlobsView.cs` | Akan kapak rengi: leke renkleri paletten, yavaş döngü (testli); çizim 15 fps, yalnız görünür ve çalarken, renk değişiminde 0,6 sn geçiş. Kart kapaktan boyanıyorsa lekeler kartta canlı arka plana göre önceliklidir: `HomePanel` karttaki `LiveBackgroundHost`'u `Off` yapar |
+| Core, App | `src/Core/Media/CoverBlobs.cs`, `src/App/Features/Music/CoverBlobsView.cs` | Akan kapak rengi: leke renkleri paletten, yavaş döngü (testli); çizim 10 fps, yalnız görünür ve çalarken, renk değişiminde 0,6 sn geçiş. Kart kapaktan boyanıyorsa lekeler kartta canlı arka plana göre önceliklidir: `HomePanel` karttaki `LiveBackgroundHost`'u `Off` yapar |
+| Core, App | `src/Core/Media/FrameGrid.cs`, `src/App/Features/Music/MusicFrameClock.cs` | Müzik sayfasının ortak saati: tek `CompositionTarget.Rendering` aboneliği, 30 Hz ızgara; lekeler (10 fps) ve plak (30 fps) aynı vuruşta çizilir, abonesi kalmayınca abonelik kalkar. Yeni müzik animasyonu kendi saatini kurmaz, buraya abone olur. Canlı arka plan (WPF saati / video iş parçacığı) ve ses çubukları (yakalama olayı) ızgaraya bağlı değildir |
 | Core, App | `src/Core/Media/VinylMotion.cs`, `src/App/Features/Music/VinylView.cs` | Plak modu: dönüş hızı ve kol yayları (testli); yalnız etiket döner (30 fps). Ayar `MusicSettings.VinylMode`, düğme denetim sırasının solunda, kayıt `NotchFeature.SaveVinylMode` |
 | Core | `src/Core/Lyrics/LyricsEmphasis.cs` | Söz satırının etkin çizgiye uzaklığına göre saydamlık ve ölçeği (testli) |
 | App | `src/App/Features/Music/LyricsView.xaml(.cs)` | Etkin satırı ortaya yayla getirir, vurguyu konumdan hesaplar; kenar maskesi piksel cinsinden kurulur (göreli maske uzun listede bütün sözleri soldurur) |
