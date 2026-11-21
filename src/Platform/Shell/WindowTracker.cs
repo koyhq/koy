@@ -25,7 +25,12 @@ public sealed class WindowTracker : IWindowTracker
     private HWINEVENTHOOK _uncloakHook;
     private HWINEVENTHOOK _nameHook;
     private RefreshDebouncer? _nameChangeDebouncer;
-    private bool _started;
+    private SynchronizationContext? _uiContext;
+    private readonly List<WindowHookLease> _leases = [];
+    private WindowHookLease? _legacyLease;
+    // Kurulu kancalar (WinEventHooks). Kanca geri çağrısı arayüz iş parçacığında çalışır; söküldükten sonra
+    // kuyrukta kalan olayları atmak için okuma/yazma bellek engelli.
+    private int _installed;
     private bool _disposed;
 
     public event EventHandler<WindowInfo>? ForegroundWindowChanged;
@@ -38,7 +43,10 @@ public sealed class WindowTracker : IWindowTracker
     public WindowInfo? CurrentForeground { get; private set; }
 
     /// <summary>İzleyici çalışıyor mu (paylaşımlı kullanımda ikinci özellik mevcut durumu elle okumalı).</summary>
-    public bool IsStarted => _started;
+    public bool IsStarted => _leases.Count > 0;
+
+    /// <summary>Şu an kurulu WinEvent kancaları (tüketici istekleri birleşimi).</summary>
+    public WinEventHooks InstalledHooks => (WinEventHooks)Volatile.Read(ref _installed);
 
     public WindowTracker()
     {
@@ -46,71 +54,107 @@ public sealed class WindowTracker : IWindowTracker
         _hookProc = OnWinEvent;
     }
 
-    public void Start()
+    /// <summary>Eski sözleşme: her şeyi isteyen tek tüketici (<see cref="WindowHookNeeds.All"/>). Yeni kod <see cref="Start(WindowHookNeeds)"/> kullanır.</summary>
+    public void Start() => _legacyLease ??= Start(WindowHookNeeds.All);
+
+    /// <summary>
+    /// İstenen bilgiyi üretecek kancaları kurar; kancalar tüketiciler arasında paylaşılır (istekler birleşir).
+    /// Dönen kira bırakılınca (<c>Dispose</c>) başka kimsenin istemediği kancalar sökülür. Arayüz iş parçacığından çağrılır:
+    /// başlık değişimi bildirimi bu iş parçacığına taşınır (<c>WindowsChanged</c>'e abone kod arayüze dokunur).
+    /// </summary>
+    public WindowHookLease Start(WindowHookNeeds needs)
     {
-        if (_started)
+        _uiContext ??= SynchronizationContext.Current;
+        var lease = new WindowHookLease(this, needs);
+        _leases.Add(lease);
+        ApplyHooks();
+        return lease;
+    }
+
+    /// <summary>Kiranın isteğini değiştirir (ör. bağlam kurallarına tam ekran koşulu eklendi).</summary>
+    internal void UpdateLease(WindowHookLease lease, WindowHookNeeds needs)
+    {
+        if (!_leases.Contains(lease))
             return;
+        lease.Needs = needs;
+        ApplyHooks();
+    }
 
-        _started = true;
+    internal void ReleaseLease(WindowHookLease lease)
+    {
+        if (!_leases.Remove(lease))
+            return;
+        if (ReferenceEquals(lease, _legacyLease))
+            _legacyLease = null;
+        ApplyHooks();
+    }
 
-        // Ön plan pencere değişimi (EVENT_SYSTEM_FOREGROUND = 0x0003)
-        _foregroundHook = PInvoke.SetWinEventHook(
-            PInvoke.EVENT_SYSTEM_FOREGROUND,
-            PInvoke.EVENT_SYSTEM_FOREGROUND,
-            default(HMODULE),
-            _hookProc,
-            0,
-            0,
-            PInvoke.WINEVENT_OUTOFCONTEXT);
+    /// <summary>Tüketici isteklerinin birleşimine göre kancaları kurar ya da söker.</summary>
+    private void ApplyHooks()
+    {
+        var before = (WinEventHooks)Volatile.Read(ref _installed);
+        var desired = WindowHookPolicy.HooksFor(WindowHookPolicy.Combine(_leases.Select(l => l.Needs)));
 
+        // Önce kurulu küme güncellenir: sökülen kancanın kuyrukta kalan olayları atılır, yeni kancanın ilk olayı kaçmaz.
+        Volatile.Write(ref _installed, (int)desired);
+
+        SyncHook(desired, WinEventHooks.Foreground, ref _foregroundHook,
+            PInvoke.EVENT_SYSTEM_FOREGROUND, PInvoke.EVENT_SYSTEM_FOREGROUND);
         // Pencere konum/boyut değişimi (EVENT_OBJECT_LOCATIONCHANGE = 0x800B)
-        _locationHook = PInvoke.SetWinEventHook(
-            PInvoke.EVENT_OBJECT_LOCATIONCHANGE,
-            PInvoke.EVENT_OBJECT_LOCATIONCHANGE,
-            default(HMODULE),
-            _hookProc,
-            0,
-            0,
-            PInvoke.WINEVENT_OUTOFCONTEXT);
-
+        SyncHook(desired, WinEventHooks.Location, ref _locationHook,
+            PInvoke.EVENT_OBJECT_LOCATIONCHANGE, PInvoke.EVENT_OBJECT_LOCATIONCHANGE);
         // Pencere oluşturulma, yok edilme, gösterilme, gizlenme olayları (0x8000..0x8003)
-        _lifecycleHook = PInvoke.SetWinEventHook(
-            PInvoke.EVENT_OBJECT_CREATE,
-            PInvoke.EVENT_OBJECT_HIDE,
-            default(HMODULE),
-            _hookProc,
-            0,
-            0,
-            PInvoke.WINEVENT_OUTOFCONTEXT);
-
+        SyncHook(desired, WinEventHooks.Lifecycle, ref _lifecycleHook,
+            PInvoke.EVENT_OBJECT_CREATE, PInvoke.EVENT_OBJECT_HIDE);
         // Pencere gizlendi / gizlilikten çıktı (sanal masaüstü geçişi, Mağaza uygulaması): SHOW/HIDE olayı gelmez, bunlar gelir.
-        _uncloakHook = PInvoke.SetWinEventHook(
-            PInvoke.EVENT_OBJECT_CLOAKED,
-            PInvoke.EVENT_OBJECT_UNCLOAKED,
-            default(HMODULE),
-            _hookProc,
-            0,
-            0,
-            PInvoke.WINEVENT_OUTOFCONTEXT);
+        SyncHook(desired, WinEventHooks.Cloak, ref _uncloakHook,
+            PInvoke.EVENT_OBJECT_CLOAKED, PInvoke.EVENT_OBJECT_UNCLOAKED);
 
         // Başlık değişimi: sık gelebilir (tarayıcı sekmesi, terminal). Yalnız görev çubuğu penceresi olanlar sayılır ve
         // olaylar tek bir bildirimde birleşir (tek atımlık erteleme; boşta zamanlayıcı yok, yoklama yok).
         // Bildirim, Start'ın çağrıldığı iş parçacığına (arayüz) taşınır: WindowsChanged'e abone kod arayüze dokunur.
-        var context = SynchronizationContext.Current;
-        _nameChangeDebouncer = new RefreshDebouncer(
-            () => WindowsChanged?.Invoke(this, EventArgs.Empty),
-            NameChangeDelay,
-            post: action => { if (context is not null) context.Post(_ => action(), null); else action(); });
-        _nameHook = PInvoke.SetWinEventHook(
-            PInvoke.EVENT_OBJECT_NAMECHANGE,
-            PInvoke.EVENT_OBJECT_NAMECHANGE,
-            default(HMODULE),
-            _hookProc,
-            0,
-            0,
-            PInvoke.WINEVENT_OUTOFCONTEXT);
+        if (desired.HasFlag(WinEventHooks.Name) && _nameChangeDebouncer is null)
+        {
+            var context = _uiContext;
+            _nameChangeDebouncer = new RefreshDebouncer(
+                () => WindowsChanged?.Invoke(this, EventArgs.Empty),
+                NameChangeDelay,
+                post: action => { if (context is not null) context.Post(_ => action(), null); else action(); });
+        }
+        SyncHook(desired, WinEventHooks.Name, ref _nameHook,
+            PInvoke.EVENT_OBJECT_NAMECHANGE, PInvoke.EVENT_OBJECT_NAMECHANGE);
+        if (!desired.HasFlag(WinEventHooks.Name))
+        {
+            _nameChangeDebouncer?.Dispose();
+            _nameChangeDebouncer = null;
+        }
 
-        UpdateForegroundWindow();
+        // Ön plan ya da taşınma kancası yeni eklendiyse mevcut durumu bir kez oku (ilk Start'ta olduğu gibi); taşınma kancası
+        // sonradan eklenirse eski sınırlar bayat kalmış olabilir.
+        var added = desired & ~before;
+        if (added.HasFlag(WinEventHooks.Foreground) || added.HasFlag(WinEventHooks.Location))
+            UpdateForegroundWindow();
+    }
+
+    private void SyncHook(WinEventHooks desired, WinEventHooks flag, ref HWINEVENTHOOK hook, uint eventMin, uint eventMax)
+    {
+        var want = desired.HasFlag(flag);
+        if (want && hook.IsNull)
+        {
+            hook = PInvoke.SetWinEventHook(
+                eventMin,
+                eventMax,
+                default(HMODULE),
+                _hookProc,
+                0,
+                0,
+                PInvoke.WINEVENT_OUTOFCONTEXT);
+        }
+        else if (!want && !hook.IsNull)
+        {
+            PInvoke.UnhookWinEvent(hook);
+            hook = default;
+        }
     }
 
     private static readonly TimeSpan NameChangeDelay = TimeSpan.FromMilliseconds(500);
@@ -165,12 +209,11 @@ public sealed class WindowTracker : IWindowTracker
         }
     }
 
+    /// <summary>Bütün kiraları, kabuk kancası kayıtlarını ve WinEvent kancalarını söker (paylaşılan izleyici son kullanıcıyla kapanırken).</summary>
     public void Stop()
     {
-        if (!_started)
-            return;
-
-        _started = false;
+        _leases.Clear();
+        _legacyLease = null;
 
         foreach (var hwnd in _shellHookWindows)
         {
@@ -178,38 +221,7 @@ public sealed class WindowTracker : IWindowTracker
         }
         _shellHookWindows.Clear();
 
-        if (!_foregroundHook.IsNull)
-        {
-            PInvoke.UnhookWinEvent(_foregroundHook);
-            _foregroundHook = default;
-        }
-
-        if (!_locationHook.IsNull)
-        {
-            PInvoke.UnhookWinEvent(_locationHook);
-            _locationHook = default;
-        }
-
-        if (!_lifecycleHook.IsNull)
-        {
-            PInvoke.UnhookWinEvent(_lifecycleHook);
-            _lifecycleHook = default;
-        }
-
-        if (!_uncloakHook.IsNull)
-        {
-            PInvoke.UnhookWinEvent(_uncloakHook);
-            _uncloakHook = default;
-        }
-
-        if (!_nameHook.IsNull)
-        {
-            PInvoke.UnhookWinEvent(_nameHook);
-            _nameHook = default;
-        }
-
-        _nameChangeDebouncer?.Dispose();
-        _nameChangeDebouncer = null;
+        ApplyHooks();
     }
 
     public bool GetCursorPosition(out int x, out int y)
@@ -368,7 +380,20 @@ public sealed class WindowTracker : IWindowTracker
 
     private void HandleWinEvent(uint @event, HWND hwnd, int idObject, int idChild)
     {
-        if (hwnd.IsNull)
+        // Ucuz süzgeçler sistem çağrısından önce: kancası artık kurulu olmayan olay (söküldükten sonra kuyrukta kalan),
+        // pencere tutamacı olmayan (imleç, düzenleme imleci) ya da pencerenin kendisine ait olmayan (alt nesne) olay atılır.
+        var kind = WindowHookPolicy.Classify(@event);
+        if ((InstalledHooks & WindowHookPolicy.HookFor(kind)) == WinEventHooks.None)
+            return;
+        if (!WindowHookPolicy.IsWindowLevelEvent(!hwnd.IsNull, idObject, idChild))
+            return;
+
+        nint handle;
+        unsafe { handle = (nint)hwnd.Value; }
+
+        // Konum değişimi: yalnızca mevcut ön plan penceresi hareket ettiyse güncelle (arka plan pencerelerinin
+        // gürültüsünü süreç kimliği sorgusuna varmadan filtrele).
+        if (kind == WinEventKind.Location && CurrentForeground is not null && handle != CurrentForeground.Handle)
             return;
 
         // Koy'un kendi pencerelerinin (dock, açılır pencereler, önizleme kutucuğu, thumbnail host, menüler)
@@ -378,55 +403,34 @@ public sealed class WindowTracker : IWindowTracker
         if (pid == (uint)Environment.ProcessId)
             return;
 
-        nint handle;
-        unsafe { handle = (nint)hwnd.Value; }
-
-        if (@event == PInvoke.EVENT_OBJECT_DESTROY && idObject == 0 && idChild == 0)
+        if (@event == PInvoke.EVENT_OBJECT_DESTROY)
         {
             lock (_aumidGate)
                 _aumidCache.Remove(handle);
         }
 
-        // Yaşam döngüsü olayları (pencere açılma / kapanma)
-        if (@event is PInvoke.EVENT_OBJECT_CREATE or PInvoke.EVENT_OBJECT_DESTROY
-                   or PInvoke.EVENT_OBJECT_SHOW or PInvoke.EVENT_OBJECT_HIDE)
+        switch (kind)
         {
-            if (idObject == 0 && idChild == 0)
-            {
+            // Yaşam döngüsü olayları (pencere açılma / kapanma)
+            case WinEventKind.Lifecycle:
                 WindowsChanged?.Invoke(this, EventArgs.Empty);
-            }
-            return;
-        }
+                return;
 
-        // Gizlilikten çıkış: yalnız üst düzey pencere (idObject 0, idChild 0) ve görev çubuğu penceresi ise.
-        // Gizlenme (CLOAKED) pencereyi listeden düşürür; o an kural artık sağlanmadığından yalnız üst düzey olması aranır.
-        if (@event is PInvoke.EVENT_OBJECT_UNCLOAKED or PInvoke.EVENT_OBJECT_CLOAKED)
-        {
-            if (idObject == 0 && idChild == 0 && PInvoke.GetAncestor(hwnd, GET_ANCESTOR_FLAGS.GA_ROOT) == hwnd
-                && (@event == PInvoke.EVENT_OBJECT_CLOAKED || IsTopLevelTaskbarWindow(hwnd)))
-                WindowsChanged?.Invoke(this, EventArgs.Empty);
-            return;
-        }
+            // Gizlilikten çıkış: yalnız üst düzey pencere ve görev çubuğu penceresi ise.
+            // Gizlenme (CLOAKED) pencereyi listeden düşürür; o an kural artık sağlanmadığından yalnız üst düzey olması aranır.
+            case WinEventKind.Cloak:
+                if (PInvoke.GetAncestor(hwnd, GET_ANCESTOR_FLAGS.GA_ROOT) == hwnd
+                    && (@event == PInvoke.EVENT_OBJECT_CLOAKED || IsTopLevelTaskbarWindow(hwnd)))
+                    WindowsChanged?.Invoke(this, EventArgs.Empty);
+                return;
 
-        // Başlık değişimi: görev çubuğu penceresi değilse (alt pencere, araç penceresi, kabuk) hiç ilgilenilmez.
-        if (@event == PInvoke.EVENT_OBJECT_NAMECHANGE)
-        {
+            // Başlık değişimi: görev çubuğu penceresi değilse (alt pencere, araç penceresi, kabuk) hiç ilgilenilmez.
             // Dock'ta zaten olan pencerenin başlığı (tarayıcı sekmesi, akan sohbet, çalan şarkı) saniyede birkaç kez
             // değişebilir; her seferinde tam yenileme (kısayol çözme, pencere taraması) boşta CPU yakıyordu. Yalnız
             // listede olmayan pencere (başlığı sonradan konup görünür olan) yenileme ister.
-            if (idObject == 0 && idChild == 0 && !IsKnownWindow(handle) && IsTopLevelTaskbarWindow(hwnd))
-                _nameChangeDebouncer?.Request();
-            return;
-        }
-
-        // Konum değişiminde yalnızca ana pencere (idObject == 0) seviyesindeki hareketleri dikkate al
-        if (@event == PInvoke.EVENT_OBJECT_LOCATIONCHANGE)
-        {
-            if (idObject != 0)
-                return;
-
-            // Yalnızca mevcut ön plan penceresi hareket ettiyse güncelle (arka plan pencerelerinin gürültüsünü filtrele)
-            if (CurrentForeground is not null && handle != CurrentForeground.Handle)
+            case WinEventKind.Name:
+                if (!IsKnownWindow(handle) && IsTopLevelTaskbarWindow(hwnd))
+                    _nameChangeDebouncer?.Request();
                 return;
         }
 

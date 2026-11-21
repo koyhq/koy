@@ -108,6 +108,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     private FocusAssistService? _focusAssistService;
     private ShelfService? _shelfService;
     private WindowTracker? _windowTracker;
+    private WindowHookLease? _windowHookLease;
     private FullscreenDetector? _fullscreenDetector;
     private MonitorService? _monitorService;
     private DisplayEvents? _displayEvents;
@@ -182,8 +183,10 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         _windowTracker.ForegroundWindowChanged += OnForegroundWindowChanged;
 
         // İzleyici paylaşımlı: Dock onu önceden başlattıysa ilk ön plan olayı bir daha gelmez, mevcut durumu elle uygula.
+        // Çentik ön plan değişimini her zaman ister; ön plan sınırlarını yalnız kararı onlara bağlıysa (Akıllı / Gözetleme ya da tam ekranda gizlenme).
+        // Pencere listesi ve başlık kancaları dock'a aittir: dock kapalıyken kurulmaz.
         var trackerWasRunning = _windowTracker.IsStarted;
-        _windowTracker.Start();
+        _windowHookLease = _windowTracker.Start(WindowHookPolicy.ForNotch(settings.Notch.Visibility, settings.Notch.HideInFullscreen));
         if (trackerWasRunning && _windowTracker.CurrentForeground is { } currentForeground)
             OnForegroundWindowChanged(this, currentForeground);
 
@@ -1287,6 +1290,8 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         if (_windowTracker is not null)
         {
             _windowTracker.ForegroundWindowChanged -= OnForegroundWindowChanged;
+            _windowHookLease?.Dispose();
+            _windowHookLease = null;
             _windowTracker = null;
             services.ReleaseWindowTracker();
         }

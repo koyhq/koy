@@ -53,6 +53,8 @@ Unutma:
 | Core | `src/Core/Rules/` | Bağlam kuralları: `RuleEvaluator` (eşleşme), `ContextProfileSwitcher` (titreşim önleme, tekrar uygulamama, geri dönüş), `RuleListEditor`, `RuleStore` (`rules.json`, settings.json dışında), `RuleSources` |
 | App | `src/App/Features/Rules/ContextRuleService.cs` | Ön plan olayını (`WindowTracker`) dinler, kural profilini `ProfileService` ile uygular/geri alır; etkin kural yoksa hiçbir şeye abone olmaz |
 | App | `src/App/Features/Settings/RulesViewModel.cs` + `Pages/GenelPage.xaml` | Genel sayfasındaki Kurallar bölümü |
+| Core | `src/Core/Shell/WindowHookPolicy.cs` | Pencere izleyicisinin WinEvent kancaları: hangi tüketici (çentik, dock, bağlam kuralları) hangi bilgiyi ister (`WindowHookNeeds`), buna yetecek en az kanca kümesi (`HooksFor`), olay sınıflandırma ve ucuz ön süzgeç |
+| Platform | `src/Platform/Shell/WindowTracker.cs` + `WindowHookLease.cs` | Kancalar tüketici kiralarının birleşimine göre kurulur/sökülür (`Start(WindowHookNeeds)` kira döner, bırakılınca kancalar çekilir); dock yokken pencere listesi ve başlık kancaları kurulmaz |
 
 ## Çentik kartı ve Windows bildirimleri
 | Katman | Dosya | Ne yapılır |
