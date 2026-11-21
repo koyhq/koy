@@ -239,8 +239,14 @@ public static class Program
             vm.HasAvailableUpdate = true;
             vm.AvailableVersionText = string.Format(System.Globalization.CultureInfo.CurrentCulture, Koy.App.Resources.Strings.Get("UpdateAvailableBadge"), "0.2.0");
             RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-guncelleme-dugme.png"));
+            vm.SelectPage(Array.IndexOf(PageNames, "hakkinda"));
+            RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-hakkinda-guncelleme.png"));
+            vm.SelectPage(1);
 
-            vm.OpenUpdateOverlay();
+            // Gerçek UpdateInfo yok (OpenUpdateOverlay yeni sürüm bilinmeyince açılmaz): pencere metinleri elle kurulur.
+            vm.UpdateModalTitleText = Koy.App.Resources.Strings.Get("UpdateModalTitle");
+            vm.UpdateModalIntroText = string.Format(System.Globalization.CultureInfo.CurrentCulture, Koy.App.Resources.Strings.Get("UpdateModalIntro"), "0.2.0");
+            vm.IsUpdateOverlayOpen = true;
             vm.UpdateHighlights.Clear();
             vm.UpdateHighlights.Add("Windows 11 24H2 için yeni sistem tepsisi kancası");
             vm.UpdateHighlights.Add("Hızlı başlat için klavye gezintisi ve odak halkası");
@@ -249,6 +255,11 @@ public static class Program
             vm.IsDownloadingUpdate = true;
             vm.DownloadProgress = 64;
             RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-guncelleme-indiriliyor.png"));
+
+            vm.IsDownloadingUpdate = false;
+            vm.UpdateErrorText = Koy.App.Resources.Strings.Get("UpdateDownloadFailed");
+            RenderElement((FrameworkElement)win.Content, 880, 680, Path.Combine(outDir, $"{prefix}-{theme}-koy-guncelleme-hata.png"));
+            vm.UpdateErrorText = "";
             vm.CloseUpdateOverlay();
 
             vm.OpenWhatsNewOverlay();

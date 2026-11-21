@@ -2620,16 +2620,16 @@
     <value>Dismiss</value>
   </data>
   <data name="UpdateModalTitle" xml:space="preserve">
-    <value>New Version Available</value>
+    <value>New version available</value>
   </data>
   <data name="UpdateModalIntro" xml:space="preserve">
-    <value>Koy {0} is available. Would you like to download and update now?</value>
+    <value>Koy {0} is out. Download and install it now?</value>
   </data>
   <data name="UpdateModalHighlights" xml:space="preserve">
     <value>Highlights:</value>
   </data>
   <data name="UpdateNow" xml:space="preserve">
-    <value>Update Now</value>
+    <value>Update now</value>
   </data>
   <data name="UpdateLater" xml:space="preserve">
     <value>Later</value>
@@ -4103,6 +4103,15 @@
   </data>
   <data name="MusicVinyl" xml:space="preserve">
     <value>Vinyl view</value>
+  </data>
+  <data name="UpdateDownloadFailed" xml:space="preserve">
+    <value>The download didn't finish. Check your connection and try again.</value>
+  </data>
+  <data name="UpdateRestartNote" xml:space="preserve">
+    <value>When the download finishes, Koy closes and reopens on the new version.</value>
+  </data>
+  <data name="UpdateReleaseNotes" xml:space="preserve">
+    <value>Full release notes</value>
   </data>
 </root>
 

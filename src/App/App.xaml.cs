@@ -183,8 +183,8 @@ public partial class App : Application, IDisposable
         // Bağlam kuralları: etkin kural yoksa hiçbir şeye abone olmaz.
         Koy.App.Features.Rules.ContextRuleService.Instance.Start(_services);
 
-        // Güncellemeleri otomatik denetle ayarı: açılıştan sonra arka planda tek seferlik denetim.
-        _ = AutoUpdater.RunAsync(settings);
+        // Güncellemeleri otomatik denetle: açılıştan sonra, uykudan dönüşte ve kilit açılınca (son denetim eskimişse).
+        _ = AutoUpdater.StartAsync();
 
         // Genel kısayollar: çentik/dock açık olmasa da çalışır.
         _shortcuts = new ShortcutController();
@@ -601,6 +601,7 @@ public partial class App : Application, IDisposable
 
     protected override void OnExit(ExitEventArgs e)
     {
+        AutoUpdater.Stop();
         // Sıra önemli: özellikler servisleri hâlâ kullanırken servisler atılmamalı.
         Dispose();
 
