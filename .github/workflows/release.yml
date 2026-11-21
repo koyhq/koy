@@ -87,6 +87,37 @@ jobs:
           dotnet tool install -g vpk --version $vpkVersion
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      # Delta paketi: vpk pack, --outputDir'de önceki sürümün full paketi varsa yalnız farkı taşıyan
+      # Koy-<sürüm>-delta.nupkg da üretir; bir önceki sürümden güncelleyen kullanıcı ~79 MB yerine farkı indirir
+      # (self-contained runtime değişmediği sürece birkaç MB). Önceki sürüm adıyla seçilir (bu sürümden küçük en yüksek
+      # kararlı sürüm): release-please yolunda bu sürümün sayfası paketlemeden önce oluştuğu için "en son sürüm" boş olabilir.
+      # Bulunamazsa ya da indirilemezse delta atlanır, full paket her durumda üretilir.
+      - name: Download previous release (for delta)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+          $current = [version]($env:TAG_NAME.TrimStart('v') -replace '-.*$', '')
+          $prev = gh release list --repo $env:GITHUB_REPOSITORY --exclude-drafts --exclude-pre-releases --limit 50 --json tagName --jq '.[].tagName' |
+            ForEach-Object {
+              $v = $null
+              if ([version]::TryParse(($_.TrimStart('v') -replace '-.*$', ''), [ref]$v) -and $v -lt $current) {
+                [pscustomobject]@{ Tag = $_; Version = $v }
+              }
+            } | Sort-Object Version -Descending | Select-Object -First 1
+          if (-not $prev) {
+            Write-Host "No earlier stable release; skipping delta."
+            exit 0
+          }
+          gh release download $prev.Tag --repo $env:GITHUB_REPOSITORY --pattern 'Koy-*-full.nupkg' --dir dist
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "::warning::Could not download $($prev.Tag); this release ships without a delta package."
+            Get-ChildItem dist -File | Remove-Item -Force
+            exit 0
+          }
+          Write-Host "Delta base: $($prev.Tag)"
+
       # Opsiyonel kod imzalama: SIGNING_CERT_BASE64 tanimliysa PFX dosyasi cozulur; tanimli degilse imzasiz akis surer.
       # Alternatif olarak SignPath Foundation veya Azure Trusted Signing (--azureTrustedSignFile) da eklenebilir.
       - name: Prepare Code Signing Certificate
@@ -129,6 +160,7 @@ jobs:
           }
 
       - name: Build Velopack Installer & Portable Zip
+        id: pack
         shell: pwsh
         env:
           SIGNING_ENABLED: ${{ steps.signing.outputs.enabled }}
@@ -175,6 +207,24 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Remove-Item dist/release-notes.md -ErrorAction SilentlyContinue
 
+          # Delta tabanı olarak indirilen önceki full paket bu sürüme yüklenmez ve sağlama listesine girmez. vpk onu bu sürümün
+          # kayıtlarına da yazar; istemci son 10 GitHub sürümünün releases.win.json'unu birleştirdiği için her sürüm yalnız
+          # kendi full ve delta paketini listeler (Velopack belgesi: sürüm başına bir full, bir delta). Aksi halde kayıt, bu
+          # sürüme yüklenmemiş bir dosyayı gösterir.
+          Get-ChildItem dist -Filter 'Koy-*-full.nupkg' | Where-Object { $_.Name -ne "Koy-$ver-full.nupkg" } | Remove-Item -Force
+          $feed = Get-Content dist/releases.win.json -Raw -Encoding utf8 | ConvertFrom-Json
+          $feed.Assets = @($feed.Assets | Where-Object { $_.Version -eq $ver })
+          $feed | ConvertTo-Json -Depth 10 -Compress | Set-Content dist/releases.win.json -Encoding utf8
+          $nameRe = [regex]::Escape("Koy-$ver-")
+          (Get-Content dist/RELEASES -Encoding utf8) | Where-Object { $_ -match $nameRe } | Set-Content dist/RELEASES -Encoding utf8
+          $delta = Get-ChildItem dist -Filter "Koy-$ver-delta.nupkg" -ErrorAction SilentlyContinue
+          if ($delta) {
+            Write-Host ("Delta package: {0} ({1:N1} MB)" -f $delta.Name, ($delta.Length / 1MB))
+            "has_delta=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          } else {
+            "has_delta=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
+
           Compress-Archive -Path "publish/win-x64/*" -DestinationPath "dist/Koy-win-Portable.zip" -Force
 
       - name: Clean Up Signing Certificate
@@ -195,6 +245,18 @@ jobs:
             "$hash  $($_.Name)" | Out-File -FilePath dist/SHA256SUMS.txt -Append -Encoding utf8
           }
           Get-Content dist/SHA256SUMS.txt
+
+      # Delta, onu listeleyen releases.win.json'dan önce yüklenir: arada güncelleyen istemci eksik dosya görmesin.
+      - name: Upload Delta Package
+        if: steps.pack.outputs.has_delta == 'true'
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          generate_release_notes: ${{ !inputs.existing_release }}
+          fail_on_unmatched_files: true
+          files: dist/Koy-*-delta.nupkg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Surum yoksa olusturur (elle etiket), varsa yalniz dosya ekler ve notlara dokunmaz.
       # release-please yolunda notlar CHANGELOG'dan gelir; GitHub'in otomatik notlari eklenmez.

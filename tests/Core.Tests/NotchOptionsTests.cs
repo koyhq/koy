@@ -127,7 +127,8 @@ public class NotchOptionsTests
         Assert.Equal(NotchOpenPolicy.DefaultCloseDelayMs, notch.CloseDelayMs);
         Assert.Empty(notch.PanelOrder);
         Assert.Equal(HomeCardLayout.Default, notch.HomeCards);
-        Assert.Equal(NotchCollapsedBackground.Default, notch.CollapsedBackground);
+        // Albüm rengi varsayılan: müzik çalarken kapalı çentik kapağın tonunu alır, çalmıyorken düz zemindir.
+        Assert.Equal(NotchCollapsedBackground.AlbumColor, notch.CollapsedBackground);
         Assert.Equal(NotchVisualizerStyle.Bars, music.VisualizerStyle);
         Assert.Equal(NotchVisualizerColorSource.Accent, music.VisualizerColorSource);
         Assert.Equal(5, music.VisualizerBarCount);

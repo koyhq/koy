@@ -500,10 +500,30 @@
                             <TextBlock Text="{Binding DownloadProgressText}" Style="{StaticResource SettingTitleStyle}" Margin="0,0,0,8" />
                             <ProgressBar Value="{Binding DownloadProgress}" Minimum="0" Maximum="100" Height="6"
                                          Foreground="{DynamicResource KoyAccent}" Background="{DynamicResource KoyBgControl}" BorderThickness="0" />
+                            <!-- Kullanıcı ne olacağını bilsin: indirme bitince Koy kendiliğinden yeniden başlar. -->
+                            <TextBlock Text="{Binding [UpdateRestartNote], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}"
+                                       Margin="0,8,0,0" TextWrapping="Wrap" />
                         </StackPanel>
 
-                        <!-- Düğmeler -->
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                        <!-- İndirme hatası: pencere açık kalır, "Şimdi güncelle" yeniden dener. -->
+                        <TextBlock Text="{Binding UpdateErrorText}" Foreground="{DynamicResource KoyDangerText}" FontSize="{DynamicResource KoyFontBody}"
+                                   TextWrapping="Wrap" Margin="0,0,0,12">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding UpdateErrorText}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <!-- Düğmeler; solda bütün sürüm notlarına bağlantı -->
+                        <Grid Margin="0,8,0,0">
+                        <Button Content="{Binding [UpdateReleaseNotes], Source={x:Static res:Loc.Instance}}" Command="{Binding OpenReleaseNotesCommand}"
+                                Style="{StaticResource LinkButtonStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Content="{Binding [UpdateLater], Source={x:Static res:Loc.Instance}}"
                                     Command="{Binding CloseUpdateOverlayCommand}"
                                     IsEnabled="{Binding IsDownloadingUpdate, Converter={x:Static local:InverseBooleanConverter.Instance}}"
@@ -513,6 +533,7 @@
                                     IsEnabled="{Binding IsDownloadingUpdate, Converter={x:Static local:InverseBooleanConverter.Instance}}"
                                     Style="{StaticResource PrimaryButtonStyle}" />
                         </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </Border>
             </Grid>

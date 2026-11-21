@@ -402,7 +402,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsAmbientPresetEnabled))]
     [NotifyPropertyChangedFor(nameof(ShowAmbientPresetPicker))]
-    private NotchCollapsedBackground _notchCollapsedBackground = NotchCollapsedBackground.Default;
+    private NotchCollapsedBackground _notchCollapsedBackground = NotchCollapsedBackground.AlbumColor;
 
     public bool IsLiveBackgroundEnabled => LiveBackgroundTarget != LiveBackgroundTarget.None;
     public bool IsLiveBackgroundFileSource => LiveBackgroundSource == LiveBackgroundSourceKind.LocalFile;
@@ -1077,6 +1077,10 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DownloadProgressText))]
     private int _downloadProgress;
+
+    /// <summary>İndirme başarısız olunca güncelleme penceresinde görünen ileti; boşsa satır gizlenir.</summary>
+    [ObservableProperty]
+    private string _updateErrorText = "";
 
     public string DownloadProgressText => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("UpdateDownloading"), DownloadProgress);
 
@@ -2068,26 +2072,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         IsCheckingUpdates = true;
         try
         {
-            var mgr = new Velopack.UpdateManager(new Velopack.Sources.GithubSource("https://github.com/koyhq/koy", null, UpdateChannel == UpdateChannel.Preview));
-            if (!mgr.IsInstalled)
-            {
-                // Geliştirme çalıştırmasında denetim yapılamaz; başarı gibi gösterilmez.
-                UpdateStatus.Record(UpdateCheckResult.NotInstalled);
-                return;
-            }
-
-            var newVersion = await mgr.CheckForUpdatesAsync();
-            if (newVersion != null)
-            {
-                UpdateStatus.RecordAvailable(newVersion);
-                return;
-            }
-
-            UpdateStatus.Record(UpdateCheckResult.UpToDate);
-        }
-        catch
-        {
-            UpdateStatus.Record(UpdateCheckResult.Failed);
+            await UpdateClient.CheckAsync(UpdateChannel, "Güncelleme denetimi (elle)");
         }
         finally
         {
@@ -2100,7 +2085,10 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [RelayCommand]
     public void OpenUpdateOverlay()
     {
-        var version = UpdateStatus.AvailableVersion ?? AppVersion;
+        // Yeni sürüm bilinmiyorsa pencere açılmaz: kurulu sürümü "yayınlandı" diye göstermek yanlış olurdu.
+        if (UpdateStatus.AvailableVersion is not { } version)
+            return;
+
         UpdateModalTitleText = Strings.Get("UpdateModalTitle");
         UpdateModalIntroText = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Get("UpdateModalIntro"), version);
 
@@ -2119,7 +2107,10 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
         // İndirme sürerken (pencere kapatılıp menüden yeniden açıldıysa) durumu sıfırlama: ikinci indirme başlamasın.
         if (!IsDownloadingUpdate)
+        {
             DownloadProgress = 0;
+            UpdateErrorText = "";
+        }
         IsUpdateOverlayOpen = true;
     }
 
@@ -2139,10 +2130,11 @@ public sealed partial class KoyWindowViewModel : ObservableObject
 
         IsDownloadingUpdate = true;
         DownloadProgress = 0;
+        UpdateErrorText = "";
 
         try
         {
-            var mgr = new Velopack.UpdateManager(new Velopack.Sources.GithubSource("https://github.com/koyhq/koy", null, UpdateChannel == UpdateChannel.Preview));
+            var mgr = UpdateClient.CreateManager(UpdateChannel);
             var dispatcher = System.Windows.Application.Current.Dispatcher;
             await mgr.DownloadUpdatesAsync(update, progress =>
             {
@@ -2157,6 +2149,26 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         {
             Koy.Core.Diagnostics.CrashLog.Write("Güncelleme indirme", ex);
             IsDownloadingUpdate = false;
+            // Sessizce kaybolmasın: pencere açık kalır, kullanıcı yeniden deneyebilir.
+            UpdateErrorText = Strings.Get("UpdateDownloadFailed");
+        }
+    }
+
+    /// <summary>Güncelleme penceresindeki "Bütün notlar": yeni sürümün GitHub sayfası.</summary>
+    [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
+    private void OpenReleaseNotes()
+    {
+        if (UpdateStatus.AvailableVersion is not { } version)
+            return;
+
+        try
+        {
+            Process.Start(new ProcessStartInfo { FileName = UpdateClient.ReleasePageUrl(version), UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            Koy.Core.Diagnostics.CrashLog.Write("Sürüm notları bağlantısı", ex);
         }
     }
 

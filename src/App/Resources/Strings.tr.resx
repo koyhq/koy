@@ -2620,19 +2620,19 @@
     <value>Kapat</value>
   </data>
   <data name="UpdateModalTitle" xml:space="preserve">
-    <value>Yeni Sürüm Mevcut</value>
+    <value>Yeni sürüm var</value>
   </data>
   <data name="UpdateModalIntro" xml:space="preserve">
-    <value>Koy {0} yayınlandı. Şimdi indirip güncellemek istiyor musunuz?</value>
+    <value>Koy {0} çıktı. Şimdi indirip kurmak ister misin?</value>
   </data>
   <data name="UpdateModalHighlights" xml:space="preserve">
     <value>Öne çıkanlar:</value>
   </data>
   <data name="UpdateNow" xml:space="preserve">
-    <value>Şimdi Güncelle</value>
+    <value>Şimdi güncelle</value>
   </data>
   <data name="UpdateLater" xml:space="preserve">
-    <value>Daha Sonra</value>
+    <value>Daha sonra</value>
   </data>
   <data name="UpdateDownloading" xml:space="preserve">
     <value>Güncelleme indiriliyor… %{0}</value>
@@ -4090,10 +4090,10 @@
     <value>Kapalı çentik arka planı</value>
   </data>
   <data name="NotchCollapsedBackgroundDesc" xml:space="preserve">
-    <value>Çentik kapalıyken görünen zemin. Albüm rengi çalan parçanın kapağını, Ambiyans seçili önayarın statik rengini kullanır.</value>
+    <value>Çentik kapalıyken görünen zemin. Düz her zaman koyudur; Albüm rengi çalan parçanın kapağını, Ambiyans seçili önayarın statik rengini kullanır.</value>
   </data>
   <data name="NotchCollapsedBackgroundDefault" xml:space="preserve">
-    <value>Varsayılan</value>
+    <value>Düz</value>
   </data>
   <data name="NotchCollapsedBackgroundAlbumColor" xml:space="preserve">
     <value>Albüm rengi</value>
@@ -4103,6 +4103,15 @@
   </data>
   <data name="MusicVinyl" xml:space="preserve">
     <value>Plak görünümü</value>
+  </data>
+  <data name="UpdateDownloadFailed" xml:space="preserve">
+    <value>İndirme tamamlanamadı. Bağlantını kontrol edip yeniden dene.</value>
+  </data>
+  <data name="UpdateRestartNote" xml:space="preserve">
+    <value>İndirme bitince Koy kapanıp yeni sürümle yeniden açılır.</value>
+  </data>
+  <data name="UpdateReleaseNotes" xml:space="preserve">
+    <value>Bütün notlar</value>
   </data>
 </root>
 
