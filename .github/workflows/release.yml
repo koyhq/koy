@@ -52,6 +52,19 @@ jobs:
         with:
           ref: ${{ inputs.tag_name && format('refs/tags/{0}', inputs.tag_name) || github.ref }}
 
+      # Elle atilan etiket ya da workflow_dispatch ile verilen etiket, Directory.Build.props'taki surumle ayni olmali;
+      # aksi halde paket etiketten farkli bir surum numarasi tasir. release-please yolunda ikisi zaten esittir.
+      - name: Verify tag matches Directory.Build.props version
+        shell: pwsh
+        run: |
+          $tagVersion = $env:TAG_NAME.TrimStart('v')
+          $propsVersion = ([xml](Get-Content Directory.Build.props -Raw -Encoding utf8)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+          if (-not $propsVersion) { throw "Directory.Build.props icinde <Version> bulunamadi." }
+          if ($tagVersion -ne $propsVersion.Trim()) {
+            throw "Etiket surumu ($tagVersion) Directory.Build.props surumu ($($propsVersion.Trim())) ile ayni degil. Once surumu guncelleyin ya da dogru etiketi verin."
+          }
+          Write-Host "Tag $env:TAG_NAME matches Directory.Build.props version $propsVersion."
+
       - name: Setup .NET 10
         uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
