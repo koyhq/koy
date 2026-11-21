@@ -332,6 +332,10 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     /// <summary>Stile göre geçerli yakınlık modu (tam genişlikte Aşağı yapış/Çekil sadeleşir; bkz. DockProximityMapping).</summary>
     private DockProximityMode EffectiveProximity => DockProximityMapping.Effective(settings.Dock.Style, settings.Dock.Proximity);
 
+    /// <summary>Dock penceresi açık monitörlerin HMONITOR'ları: yalnız bu monitörlerdeki Windows görev çubukları gizlenir.</summary>
+    private HashSet<nint> DockMonitorHandles()
+        => _windowStates.Values.Select(s => s.Monitor.Handle).ToHashSet();
+
     private void EnsureTaskbarHidden()
     {
         if (_stopping)
@@ -340,7 +344,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         if (settings.Dock.HideWindowsTaskbar && _windowStates.Count > 0)
         {
             // Görev çubuğu yeniden göründüyse gizlendi: tepsi sahipliği (elle geri getirmede bırakılmıştı) geri alınır.
-            if (TaskbarService.EnsureHidden() && _trayReleasedByUser)
+            if (TaskbarService.EnsureHidden(DockMonitorHandles()) && _trayReleasedByUser)
             {
                 // Elle geri getirilen görev çubuğu yeniden gizlendi: tepsi ve alt kenar sahipliği geri alınır.
                 _trayReleasedByUser = false;
@@ -387,7 +391,10 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             if (!TaskbarService.IsExplorerTaskbarReady)
                 return;
 
-            TaskbarService.Hide();
+            // Durum yazılamadıysa (disk, kilit) hiçbir şey gizlenmez; sahiplik de alınmaz.
+            if (!TaskbarService.Hide(DockMonitorHandles()))
+                return;
+
             _taskbarHidden = true;
             _trayService?.EnsureFirst();
 

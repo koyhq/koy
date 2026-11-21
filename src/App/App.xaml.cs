@@ -130,6 +130,15 @@ public partial class App : Application, IDisposable
         // Görev çubuğu güvenliği: önceki oturum çöktüyse görev çubuğunu geri getir.
         SafeRestoreTaskbar();
         InstallGlobalErrorHandlers();
+
+        // Oturum kapanırken Gezgin, OnExit'ten önce gidebilir: görev çubuğu Gezgin hâlâ canlıyken geri getirilir
+        // (AUTOHIDE bir sonraki oturuma kalmasın). Dock'un yeniden gizlemesi kısa süre bastırılır.
+        SessionEnding += (_, _) =>
+        {
+            TaskbarService.BeginShutdown();
+            SafeRestoreTaskbar();
+            SafeCloseTrayHost();
+        };
         StartupService.ReconcileInstalled();
 
         var store = new SettingsStore(SettingsStore.DefaultPath);

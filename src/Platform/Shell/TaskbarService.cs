@@ -1,7 +1,9 @@
 using System.IO;
+using Koy.Core.Diagnostics;
 using Koy.Core.Shell;
 using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.Graphics.Gdi;
 using Windows.Win32.UI.Shell;
 using Windows.Win32.UI.WindowsAndMessaging;
 
@@ -10,8 +12,9 @@ namespace Koy.Platform.Shell;
 /// <summary>
 /// Windows görev çubuğunu gizler ve geri getirir.
 /// Güvenlik kuralı (AGENTS.md #7): Çökse bile görev çubuğu geri gelmeli.
-/// Görev çubuğu gizlendiğinde durum %AppData%\Koy\taskbar-state.json dosyasına yazılır,
-/// geri getirildiğinde ise bu dosya silinir. Açılışta bu dosya kontrol edilir.
+/// Görev çubuğu gizlenmeden ÖNCE durum %AppData%\Koy\taskbar-state.json dosyasına atomik yazılır (geçici dosya + taşıma),
+/// geri getirildiğinde dosya silinir. Açılışta bu dosya kontrol edilir. Gizlemenin her yolu (Hide, EnsureHidden) gözcünün
+/// çalıştığını ve RunOnce yedeğinin yazıldığını garanti eder (OnHidden).
 /// Bu dosya Koy.Watchdog projesine de bağlanarak derlenir (gözcü, Koy ölünce aynı Restore'u çalıştırır); bu yüzden
 /// yalnız Core ve Win32'ye bağımlı kalır. Koy'a özel kısım (gözcüyü başlatma/durdurma) TaskbarService.Watchdog.cs
 /// içindeki kısmi yöntemlerdedir.
@@ -27,169 +30,272 @@ public static partial class TaskbarService
         "Koy",
         "taskbar-state.json");
 
+    private static readonly object Gate = new();
+
+    // Koy'un SW_HIDE ile gizlediği çubuklar: dock'u olmayan monitörler ya da kapanan dock'lar için yalnız bunlar geri gösterilir.
+    private static readonly HashSet<nint> HiddenBars = [];
+    private static bool _hiddenByUs;
+    private static readonly TaskbarShutdownGuard ShutdownGuard = new();
+    private static long _lastStateErrorLogMs = long.MinValue / 2;
+
     /// <summary>Windows Gezgini görev çubuğu penceresi hazır mı (oturum açılışında henüz oluşmamış olabilir).</summary>
     public static bool IsExplorerTaskbarReady => ShellTrayLocator.FindExplorerTray() != HWND.Null;
 
-    /// <summary>Önceki oturumdan kalan geri yüklenecek görev çubuğu durumu var mı.</summary>
-    public static bool HasPendingRestore => TaskbarStatePolicy.ShouldWriteState(ReadSavedState());
+    /// <summary>Önceki oturumdan kalan geri yüklenecek görev çubuğu durumu var mı (gizli kayıt ya da bozuk dosya).</summary>
+    public static bool HasPendingRestore => TaskbarStatePolicy.HasPendingRestore(ReadStateFile());
 
     /// <summary>
-    /// Görev çubuğunu gizler. Birden çok kez çağrılabilir (idempotent): zaten gizliyken kayıtlı "önceki durum"
-    /// korunur, böylece bizim koyduğumuz AUTOHIDE kullanıcının gerçek durumu sanılıp üzerine yazılmaz.
-    /// Explorer yeniden başlayınca da aynı çağrı gizlemeyi yeniden uygular.
+    /// Oturum kapanıyor: görev çubuğu geri getirildikten sonra dock'un yeniden gizlemesi kısa süre bastırılır
+    /// (kapatma iptal edilirse süre dolunca dock yeniden gizler).
     /// </summary>
-    public static unsafe void Hide()
+    public static void BeginShutdown()
     {
-        var saved = ReadSavedState();
-        var primary = ShellTrayLocator.FindExplorerTray();
-        if (primary == HWND.Null)
+        lock (Gate)
+            ShutdownGuard.Begin(Environment.TickCount64);
+    }
+
+    /// <summary>
+    /// Dock'lu monitörlerdeki görev çubuklarını gizler (dock'suz monitörlerinki görünür kalır). Birden çok kez
+    /// çağrılabilir (idempotent): zaten gizliyken kayıtlı "önceki durum" korunur, böylece bizim koyduğumuz AUTOHIDE
+    /// kullanıcının gerçek durumu sanılıp üzerine yazılmaz. Sıra: durum dosyası → gözcü + RunOnce → ABM_SETSTATE → SW_HIDE;
+    /// durum yazılamazsa hiçbir şey gizlenmez. Explorer yeniden başlayınca da aynı çağrı gizlemeyi yeniden uygular.
+    /// </summary>
+    /// <param name="dockMonitors">Dock penceresi açık monitörlerin HMONITOR tutamaçları.</param>
+    /// <returns>Görev çubuğu(ları) gizlendi mi.</returns>
+    public static unsafe bool Hide(IReadOnlyCollection<nint> dockMonitors)
+    {
+        lock (Gate)
         {
-            // Gezgin henüz görev çubuğunu kurmadıysa (oturum açılışı): önceki durumu tahmin edip dosyaya yazma;
-            // Shell_TrayWnd oluşunca ReapplyTaskbarHiding gerçek durumu okuyup gizler.
-            return;
+            if (ShutdownGuard.IsSuppressed(Environment.TickCount64))
+                return false;
+
+            var primary = ShellTrayLocator.FindExplorerTray();
+            if (primary == HWND.Null)
+            {
+                // Gezgin henüz görev çubuğunu kurmadıysa (oturum açılışı): önceki durumu tahmin edip dosyaya yazma;
+                // Shell_TrayWnd oluşunca ReapplyTaskbarHiding gerçek durumu okuyup gizler.
+                return false;
+            }
+
+            var read = ReadStateFile();
+            var data = new APPBARDATA
+            {
+                cbSize = (uint)sizeof(APPBARDATA),
+                hWnd = primary
+            };
+            var current = (int)PInvoke.SHAppBarMessage(ABM_GETSTATE, ref data);
+            var prevState = TaskbarStatePolicy.ChoosePreviousState(read, current);
+
+            // 1. Durum önce yazılır: SETSTATE'ten sonra ölürsek Restore'un neyi geri getireceği bellidir.
+            var desired = new TaskbarSavedState(true, prevState);
+            if (read.State != desired && !SaveState(desired))
+                return false;
+
+            // 2. Gözcü ve RunOnce yedeği, çubuk gizlenmeden önce hazır.
+            OnHidden();
+
+            // 3. Zaten otomatik gizlemedeyse yeniden SETSTATE gönderilmez: Gezgin her SETSTATE'te çalışma alanını yeniden
+            // hesaplar ve dock'un AppBar payını bir an düşürür (büyütülmüş pencereler sıçrar).
+            if ((current & ABS_AUTOHIDE) == 0)
+            {
+                data.lParam = new LPARAM((nint)ABS_AUTOHIDE);
+                PInvoke.SHAppBarMessage(ABM_SETSTATE, ref data);
+            }
+
+            // 4. Yalnız dock'lu monitörlerdeki çubuklar SW_HIDE; daha önce gizlediğimiz ama artık hedef olmayan geri gösterilir.
+            ApplyBarVisibility(dockMonitors);
+            _hiddenByUs = true;
+            return true;
         }
-
-        var data = new APPBARDATA
-        {
-            cbSize = (uint)sizeof(APPBARDATA),
-            hWnd = primary
-        };
-        var current = (int)PInvoke.SHAppBarMessage(ABM_GETSTATE, ref data);
-        var prevState = TaskbarStatePolicy.ChoosePreviousState(saved, current);
-
-        // Zaten otomatik gizlemedeyse yeniden SETSTATE gönderilmez: Gezgin her SETSTATE'te çalışma alanını yeniden
-        // hesaplar ve dock'un AppBar payını bir an düşürür (büyütülmüş pencereler sıçrar).
-        if ((current & ABS_AUTOHIDE) == 0)
-        {
-            data.lParam = new LPARAM((nint)ABS_AUTOHIDE);
-            PInvoke.SHAppBarMessage(ABM_SETSTATE, ref data);
-        }
-
-        SaveState(new TaskbarSavedState(true, prevState));
-        SetVisible(false);
-        OnHidden();
     }
 
     /// <summary>
     /// Görev çubuğunu (birincil ve bütün ikincil monitörlerdekileri) geri getirir ve durumu önceki haline döndürür.
     /// Explorer çalışmıyorsa (birincil çubuk yok) durum dosyası silinmez; sonraki açılış yeniden dener.
+    /// Gözcü ve RunOnce yedeği en SON, iş bitince kaldırılır: Restore yarıda ölürse hâlâ korunuyoruz.
     /// </summary>
     /// <param name="alsoSkipProcessId">Gözcü için: ölen Koy sürecinin tepsi penceresini atla.</param>
     /// <param name="force">Kurtarma amaçlı: kayıtlı durum olmasa bile ABM_SETSTATE gönder.</param>
     public static unsafe void Restore(uint alsoSkipProcessId = 0, bool force = false)
     {
-        // Temiz geri yüklemede gözcü gereksiz: önce durdurulur ki aynı işi ikinci kez yapmasın.
-        OnRestoring();
-
-        SetVisible(true);
-
-        var saved = ReadSavedState();
-        if (!TaskbarStatePolicy.ShouldWriteState(saved, force))
+        lock (Gate)
         {
-            DeleteState();
-            return;
+            var read = ReadStateFile();
+
+            SetAllBarsVisible();
+            _hiddenByUs = false;
+
+            var primary = ShellTrayLocator.FindExplorerTray(alsoSkipProcessId);
+            if (primary == HWND.Null)
+            {
+                // Explorer yok: bekleyen kayıt varsa dosya ve yedekler kalır; yoksa temizlik.
+                if (!force && !TaskbarStatePolicy.HasPendingRestore(read))
+                    Finish();
+                return;
+            }
+
+            var data = new APPBARDATA
+            {
+                cbSize = (uint)sizeof(APPBARDATA),
+                hWnd = primary
+            };
+            var current = (int)PInvoke.SHAppBarMessage(ABM_GETSTATE, ref data);
+            var decision = TaskbarStatePolicy.DecideRestore(read, current, force);
+            if (decision.SendState)
+            {
+                data.lParam = new LPARAM((nint)decision.State);
+                PInvoke.SHAppBarMessage(ABM_SETSTATE, ref data);
+            }
+
+            Finish();
         }
-
-        var primary = ShellTrayLocator.FindExplorerTray(alsoSkipProcessId);
-        if (primary == HWND.Null)
-            return;
-
-        var data = new APPBARDATA
-        {
-            cbSize = (uint)sizeof(APPBARDATA),
-            hWnd = primary,
-            lParam = new LPARAM((nint)TaskbarStatePolicy.ResolveRestoreState(saved))
-        };
-        PInvoke.SHAppBarMessage(ABM_SETSTATE, ref data);
-
-        DeleteState();
     }
 
     /// <summary>
     /// Gezgin, otomatik gizleme durumu değişince ya da kendi kendine görev çubuğunu yeniden gösterir;
-    /// o zaman alt kenarda bizim dock'la birlikte ikinci bir çubuk çıkar. Birincil veya ikincil
-    /// monitörlerdeki görev çubuklarından herhangi biri görünür olduysa tekrar gizler.
+    /// o zaman alt kenarda bizim dock'la birlikte ikinci bir çubuk çıkar. Dock'lu monitörlerdeki çubuklardan biri
+    /// görünür olduysa Hide'ın tam yoluyla yeniden gizlenir (durum dosyası, gözcü ve RunOnce de yeniden doğrulanır).
+    /// Gizliyken gözcü ölmüşse yeniden başlatılır.
     /// </summary>
-    public static bool EnsureHidden()
+    public static bool EnsureHidden(IReadOnlyCollection<nint> dockMonitors)
     {
-        var primary = ShellTrayLocator.FindExplorerTray();
-        if (primary != HWND.Null && PInvoke.IsWindowVisible(primary))
+        bool anyVisible;
+        lock (Gate)
         {
-            SetVisible(false);
-            return true;
+            if (ShutdownGuard.IsSuppressed(Environment.TickCount64))
+                return false;
+
+            var targets = TaskbarBarSelector.SelectBarsToHide(EnumerateBars(), dockMonitors);
+            anyVisible = targets.Any(h => PInvoke.IsWindowVisible(new HWND(h)));
+            if (!anyVisible && _hiddenByUs)
+                OnHidden();
         }
 
-        var secondary = HWND.Null;
-        while ((secondary = PInvoke.FindWindowEx(HWND.Null, secondary, "Shell_SecondaryTrayWnd", null)) != HWND.Null)
-        {
-            if (PInvoke.IsWindowVisible(secondary))
-            {
-                SetVisible(false);
-                return true;
-            }
-        }
-
-        return false;
+        return anyVisible && Hide(dockMonitors);
     }
 
-    // Koy'da gözcüyü başlatır/durdurur; gözcü projesinde gövde yoktur (derleyici çağrıyı siler).
+    // Koy'da gözcüyü başlatır/RunOnce yazar ve durdurur/siler; gözcü projesinde gövde yoktur (derleyici çağrıyı siler).
     static partial void OnHidden();
 
     static partial void OnRestoring();
 
-    private static void SetVisible(bool visible)
+    // Geri yükleme bitti: durum dosyası silinir, gözcü durdurulur, RunOnce kaydı kaldırılır.
+    private static void Finish()
     {
-        var command = visible ? SHOW_WINDOW_CMD.SW_SHOW : SHOW_WINDOW_CMD.SW_HIDE;
+        DeleteState();
+        TaskbarRunOnce.Unregister();
+        OnRestoring();
+    }
+
+    private static void SetAllBarsVisible()
+    {
+        foreach (var bar in EnumerateBars())
+            PInvoke.ShowWindow(new HWND(bar.Handle), SHOW_WINDOW_CMD.SW_SHOW);
+
+        HiddenBars.Clear();
+    }
+
+    private static void ApplyBarVisibility(IReadOnlyCollection<nint> dockMonitors)
+    {
+        var bars = EnumerateBars();
+        var targets = TaskbarBarSelector.SelectBarsToHide(bars, dockMonitors);
+
+        foreach (var bar in bars)
+        {
+            var hwnd = new HWND(bar.Handle);
+            if (targets.Contains(bar.Handle))
+            {
+                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_HIDE);
+                HiddenBars.Add(bar.Handle);
+            }
+            else if (HiddenBars.Remove(bar.Handle))
+            {
+                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_SHOW);
+            }
+        }
+    }
+
+    /// <summary>Birincil ve ikincil görev çubuğu pencereleri, bulundukları monitörle birlikte.</summary>
+    private static unsafe List<TaskbarBar> EnumerateBars()
+    {
+        var bars = new List<TaskbarBar>();
 
         var primary = ShellTrayLocator.FindExplorerTray();
         if (primary != HWND.Null)
-            PInvoke.ShowWindow(primary, command);
+            bars.Add(new TaskbarBar((nint)primary.Value, MonitorOf(primary)));
 
-        // Diğer monitörlerdeki görev çubukları.
         var secondary = HWND.Null;
         while ((secondary = PInvoke.FindWindowEx(HWND.Null, secondary, "Shell_SecondaryTrayWnd", null)) != HWND.Null)
-            PInvoke.ShowWindow(secondary, command);
+            bars.Add(new TaskbarBar((nint)secondary.Value, MonitorOf(secondary)));
+
+        return bars;
     }
 
-    private static void SaveState(TaskbarSavedState state)
+    private static unsafe nint MonitorOf(HWND hwnd)
+        => (nint)PInvoke.MonitorFromWindow(hwnd, MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST).Value;
+
+    /// <summary>Durumu atomik yazar (geçici dosya + taşıma). Başarısızlık CrashLog'a gider, çağıran gizlemeyi bırakır.</summary>
+    private static bool SaveState(TaskbarSavedState state)
     {
+        var temp = StateFilePath + ".tmp";
         try
         {
             var dir = Path.GetDirectoryName(StateFilePath);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
 
-            File.WriteAllText(StateFilePath, TaskbarStatePolicy.Serialize(state, DateTime.UtcNow));
+            File.WriteAllText(temp, TaskbarStatePolicy.Serialize(state, DateTime.UtcNow));
+            File.Move(temp, StateFilePath, overwrite: true);
+            return true;
         }
-        catch
+        catch (Exception ex)
         {
-            // Durum dosyası yazılamasa bile ana iş akışı kesilmez
+            // Window olaylarında her denemede log basılmasın: dakikada bir.
+            var now = Environment.TickCount64;
+            if (now - _lastStateErrorLogMs >= 60_000)
+            {
+                _lastStateErrorLogMs = now;
+                CrashLog.Write("Görev çubuğu durum dosyası yazılamadı; görev çubuğu gizlenmedi", ex);
+            }
+
+            try
+            {
+                File.Delete(temp);
+            }
+            catch
+            {
+            }
+
+            return false;
         }
     }
 
-    private static TaskbarSavedState? ReadSavedState()
+    private static TaskbarStateRead ReadStateFile()
     {
         try
         {
-            if (File.Exists(StateFilePath))
-                return TaskbarStatePolicy.Parse(File.ReadAllText(StateFilePath));
+            return File.Exists(StateFilePath)
+                ? TaskbarStatePolicy.Read(File.ReadAllText(StateFilePath))
+                : TaskbarStateRead.Missing;
         }
-        catch
+        catch (Exception ex)
         {
+            // Okunamayan dosya (kilit, erişim) bozuk sayılır: güvenli tarafta geri yüklenir.
+            CrashLog.Write("Görev çubuğu durum dosyası okunamadı", ex);
+            return new TaskbarStateRead(TaskbarStateFileStatus.Corrupt, null);
         }
-        return null;
     }
 
     private static void DeleteState()
     {
         try
         {
-            if (File.Exists(StateFilePath))
-                File.Delete(StateFilePath);
+            File.Delete(StateFilePath);
+            File.Delete(StateFilePath + ".tmp");
         }
-        catch
+        catch (Exception ex)
         {
-            // Silme hatası yutulur
+            CrashLog.Write("Görev çubuğu durum dosyası silinemedi", ex);
         }
     }
 }

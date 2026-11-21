@@ -251,3 +251,11 @@ MFMediaType_Video
 MFVideoFormat_RGB32
 MF_SOURCE_READER_CONSTANTS
 MF_SOURCE_READER_FLAG
+
+CreateProcess
+STARTUPINFOEXW
+STARTUPINFOW
+PROCESS_INFORMATION
+InitializeProcThreadAttributeList
+UpdateProcThreadAttribute
+DeleteProcThreadAttributeList

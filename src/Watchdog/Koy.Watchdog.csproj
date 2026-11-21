@@ -35,5 +35,6 @@
     <!-- Görev çubuğu durumu mantığı tekrar yazılmaz: Platform'daki aynı dosyalar derlenir (CsWin32 türleri bu projede üretilir). -->
     <Compile Include="..\Platform\Shell\TaskbarService.cs" Link="Shared\TaskbarService.cs" />
     <Compile Include="..\Platform\Shell\ShellTrayLocator.cs" Link="Shared\ShellTrayLocator.cs" />
+    <Compile Include="..\Platform\Shell\TaskbarRunOnce.cs" Link="Shared\TaskbarRunOnce.cs" />
   </ItemGroup>
 </Project>

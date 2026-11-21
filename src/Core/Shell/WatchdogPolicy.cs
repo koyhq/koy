@@ -35,8 +35,23 @@ public static class WatchdogPolicy
 {
     public const string PidArgument = "--pid";
 
+    /// <summary>
+    /// `--restore-taskbar`: Koy'u beklemez; durum dosyası "gizli" diyorsa (ya da bozuksa) görev çubuğunu geri getirip çıkar.
+    /// HKCU RunOnce kaydı bunu oturum açılışında çalıştırır (<see cref="TaskbarRunOncePolicy"/>).
+    /// </summary>
+    public const string RestoreOnlyArgument = "--restore-taskbar";
+
+    /// <summary>Koy'un tek örnek muteksi (App/SingleInstance ile aynı ad). Koy çalışıyorsa yalnız-geri-getir kipi dokunmaz.</summary>
+    public const string KoySingleInstanceMutexName = @"Local\Koy.SingleInstance";
+
+    /// <summary>Yalnız-geri-getir kipinde Gezgin'in görev çubuğunu bekleme üst sınırı (oturum açılışında geç oluşur).</summary>
+    public const int RestoreOnlyExplorerWaitMs = 60_000;
+
     /// <summary>Aynı anda tek gözcü: ikinci örnek bu muteksi alamayınca hemen çıkar.</summary>
     public const string SingletonMutexName = @"Local\Koy.Watchdog.Singleton";
+
+    /// <summary>Yalnız-geri-getir kipinin ayrı muteksi: Koy'un watch kipindeki gözcüsünü engellemesin.</summary>
+    public const string RestoreOnlySingletonMutexName = @"Local\Koy.Watchdog.RestoreOnly.Singleton";
 
     /// <summary>Koy'un temiz çıkış işareti için adlandırılmış olay (Koy PID'ine özel).</summary>
     public static string StopEventName(int koyProcessId)
@@ -45,6 +60,16 @@ public static class WatchdogPolicy
     /// <summary>Gözcüye verilecek komut satırı argümanları.</summary>
     public static string BuildArguments(int koyProcessId)
         => PidArgument + " " + koyProcessId.ToString(CultureInfo.InvariantCulture);
+
+    /// <summary>Komut satırında `--restore-taskbar` var mı (büyük/küçük harf duyarsız).</summary>
+    public static bool IsRestoreOnly(IReadOnlyList<string> args)
+    {
+        foreach (var a in args)
+            if (string.Equals(a, RestoreOnlyArgument, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+        return false;
+    }
 
     /// <summary>`--pid N` argümanını çözer. Eksik, sayı olmayan ya da pozitif olmayan değerde false döner.</summary>
     public static bool TryParseProcessId(IReadOnlyList<string> args, out int processId)

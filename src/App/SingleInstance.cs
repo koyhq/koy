@@ -9,7 +9,8 @@ namespace Koy.App;
 /// </summary>
 internal sealed class SingleInstance : IDisposable
 {
-    private const string MutexName = @"Local\Koy.SingleInstance";
+    // Gözcünün "yalnız geri getir" kipi Koy'un çalışıp çalışmadığını bu adla anlar (WatchdogPolicy ile ortak).
+    private const string MutexName = Koy.Core.Shell.WatchdogPolicy.KoySingleInstanceMutexName;
     private const string ActivateEventName = @"Local\Koy.SingleInstance.Activate";
 
     private readonly Mutex _mutex;
