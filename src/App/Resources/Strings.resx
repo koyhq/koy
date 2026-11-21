@@ -4090,10 +4090,10 @@
     <value>Collapsed notch background</value>
   </data>
   <data name="NotchCollapsedBackgroundDesc" xml:space="preserve">
-    <value>Background when the notch is closed. Album color uses the playing track's cover; Ambient uses a static color from your chosen preset.</value>
+    <value>Background when the notch is closed. Plain is always dark; Album color uses the playing track's cover; Ambient uses a static color from your chosen preset.</value>
   </data>
   <data name="NotchCollapsedBackgroundDefault" xml:space="preserve">
-    <value>Default</value>
+    <value>Plain</value>
   </data>
   <data name="NotchCollapsedBackgroundAlbumColor" xml:space="preserve">
     <value>Album color</value>

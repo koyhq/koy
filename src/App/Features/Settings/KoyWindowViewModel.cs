@@ -402,7 +402,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsAmbientPresetEnabled))]
     [NotifyPropertyChangedFor(nameof(ShowAmbientPresetPicker))]
-    private NotchCollapsedBackground _notchCollapsedBackground = NotchCollapsedBackground.Default;
+    private NotchCollapsedBackground _notchCollapsedBackground = NotchCollapsedBackground.AlbumColor;
 
     public bool IsLiveBackgroundEnabled => LiveBackgroundTarget != LiveBackgroundTarget.None;
     public bool IsLiveBackgroundFileSource => LiveBackgroundSource == LiveBackgroundSourceKind.LocalFile;

@@ -4090,10 +4090,10 @@
     <value>Kapalı çentik arka planı</value>
   </data>
   <data name="NotchCollapsedBackgroundDesc" xml:space="preserve">
-    <value>Çentik kapalıyken görünen zemin. Albüm rengi çalan parçanın kapağını, Ambiyans seçili önayarın statik rengini kullanır.</value>
+    <value>Çentik kapalıyken görünen zemin. Düz her zaman koyudur; Albüm rengi çalan parçanın kapağını, Ambiyans seçili önayarın statik rengini kullanır.</value>
   </data>
   <data name="NotchCollapsedBackgroundDefault" xml:space="preserve">
-    <value>Varsayılan</value>
+    <value>Düz</value>
   </data>
   <data name="NotchCollapsedBackgroundAlbumColor" xml:space="preserve">
     <value>Albüm rengi</value>
