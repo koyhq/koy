@@ -7,6 +7,24 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.15](https://github.com/koyhq/koy/compare/v0.2.14...v0.2.15) (2026-11-21)
+
+
+### Added
+
+* **notch:** use album color as the default collapsed background ([061383f](https://github.com/koyhq/koy/commit/061383feaf68ef149a4fa9037f266f7da8b061a3))
+
+
+### Fixed
+
+* **update:** delta updates, recheck after sleep and a clearer update dialog ([b227e14](https://github.com/koyhq/koy/commit/b227e149cd790ed7db9c79a120377654f063ebda))
+* **update:** recheck after sleep, surface errors and tidy the update dialog ([5191cbf](https://github.com/koyhq/koy/commit/5191cbfb710bd4b432d1be07c185993c04075ab2))
+
+
+### Performance
+
+* **update:** ship delta update packages and drop unused language files ([ea0777c](https://github.com/koyhq/koy/commit/ea0777cb8ce2c0666bc18df08aa59dcbf40c6bfd))
+
 ## [0.2.14](https://github.com/koyhq/koy/compare/v0.2.13...v0.2.14) (2026-11-21)
 Highlights:
 - **A music page that moves:** the cover slides on a track change, the page enters piece by piece when the notch opens and fades out when it closes, a mirror wave in the cover color plays under the title, flowing cover colors drift behind the card, and a new vinyl mode spins the cover as a record (the tone arm lifts on pause).
