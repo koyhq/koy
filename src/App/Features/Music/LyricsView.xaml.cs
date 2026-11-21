@@ -6,27 +6,44 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Koy.App.Resources;
 using Koy.Core.Animation;
+using Koy.Core.Lyrics;
 
 namespace Koy.App.Features.Music;
 
-/// <summary>Söz listesi: etkin satırı yayla görünümün üst kısmına getirir. Yalnız satır değişirken kare çizilir (AGENTS #6).</summary>
+/// <summary>
+/// Söz listesi (issue #182): etkin satır görünümün ortasına yayla gelir; öbür satırlar o çizgiye uzaklıklarına göre
+/// solar ve küçülür (<see cref="LyricsEmphasis"/>). Vurgu konumdan hesaplandığı için kayma sürerken satırlar da
+/// yumuşakça parlayıp söner. Yalnız kayarken kare çizilir (AGENTS #6).
+/// </summary>
 public partial class LyricsView : UserControl
 {
-    // Etkin satırın görünümdeki yeri: altta gelecek satırlara daha çok yer kalır.
-    private const double AnchorRatio = 0.35;
+    // Etkin satırın görünümdeki yeri: kenar maskesinin (üst %22, alt %28) tam ortası.
+    private const double AnchorRatio = 0.47;
 
-    private readonly Spring _scroll = new(0) { Stiffness = 130, Damping = 20, RestThreshold = 0.5 };
+    // Uzaklığın "bir satır" birimi: tek satırlık sözün yüksekliği yazı boyutuyla ölçeklenir.
+    private double LineUnit => Math.Max(16, FontSize * 1.33 + 8);
+
+    private readonly Spring _scroll = new(0) { Stiffness = 150, Damping = 19, RestThreshold = 0.5 };
     private LyricsViewModel? _viewModel;
     private bool _animating;
     private bool _scrollQueued;
     private bool _snapNext = true;
     private TimeSpan _lastFrame;
 
+    // Satırların liste içindeki orta noktaları (kaymadan bağımsız); yerleşim değişince yenilenir.
+    private readonly List<(FrameworkElement Container, ScaleTransform Scale, double Center)> _rows = [];
+
     public LyricsView()
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
         IsVisibleChanged += OnIsVisibleChanged;
+        LinesHost.SizeChanged += (_, _) => QueueScroll();
+        Viewport.SizeChanged += (_, _) =>
+        {
+            UpdateEdgeMask();
+            QueueScroll();
+        };
         Unloaded += (_, _) => StopAnimation();
     }
 
@@ -89,13 +106,8 @@ public partial class LyricsView : UserControl
         if (_viewModel is null || !IsVisible)
             return;
 
-        var target = 0.0;
-        if (_viewModel.ActiveLine is { } line && LinesHost.ItemContainerGenerator.ContainerFromItem(line) is FrameworkElement container)
-        {
-            var center = container.TranslatePoint(new Point(), LinesHost).Y + container.ActualHeight / 2;
-            var lowest = Math.Min(0, Viewport.ActualHeight - LinesHost.ActualHeight);
-            target = Math.Clamp(Viewport.ActualHeight * AnchorRatio - center, lowest, 0);
-        }
+        MeasureRows();
+        var target = TargetOffset(_viewModel);
 
         if (_snapNext || !Motion.Enabled)
         {
@@ -103,11 +115,101 @@ public partial class LyricsView : UserControl
             StopAnimation();
             _scroll.SnapTo(target);
             ScrollTransform.Y = target;
+            ApplyEmphasis();
             return;
         }
 
         _scroll.Target = target;
         WakeAnimation();
+    }
+
+    /// <summary>
+    /// Etkin satıra animasyonsuz hizalar, görünürlüğe bakmaz. Yalnız görsel kanıt aracı (tools/Koy.UiSnapshots) kullanır:
+    /// orada pencere ekrana çıkmadığı için görünüm kendini görünmez sayar.
+    /// </summary>
+    public void SnapForSnapshot()
+    {
+        if (_viewModel is null)
+            return;
+
+        UpdateLayout();
+        MeasureRows();
+        var target = TargetOffset(_viewModel);
+        _scroll.SnapTo(target);
+        ScrollTransform.Y = target;
+        ApplyEmphasis();
+    }
+
+    // Etkin satır çizgiye gelir; henüz satır yoksa (giriş) ilk satır çizgide bekler: alan boş görünmesin.
+    private double TargetOffset(LyricsViewModel viewModel)
+    {
+        var anchor = Viewport.ActualHeight * AnchorRatio;
+        if (viewModel.ActiveLine is { } line && LinesHost.ItemContainerGenerator.ContainerFromItem(line) is FrameworkElement active
+            && _rows.FindIndex(r => ReferenceEquals(r.Container, active)) is var index and >= 0)
+            return anchor - _rows[index].Center;
+
+        return _rows.Count > 0 ? anchor - _rows[0].Center : 0;
+    }
+
+    private void MeasureRows()
+    {
+        _rows.Clear();
+        var generator = LinesHost.ItemContainerGenerator;
+        for (var i = 0; i < LinesHost.Items.Count; i++)
+        {
+            if (generator.ContainerFromIndex(i) is not FrameworkElement container || container.ActualHeight <= 0)
+                continue;
+
+            if (container.RenderTransform is not ScaleTransform scale || scale.IsFrozen)
+            {
+                scale = new ScaleTransform();
+                container.RenderTransform = scale;
+                container.RenderTransformOrigin = new Point(0, 0.5);
+            }
+
+            var center = container.TranslatePoint(new Point(), LinesHost).Y + container.ActualHeight / 2;
+            _rows.Add((container, scale, center));
+        }
+    }
+
+    private void ApplyEmphasis()
+    {
+        var anchor = Viewport.ActualHeight * AnchorRatio - ScrollTransform.Y;
+        var unit = LineUnit;
+        foreach (var (container, scale, center) in _rows)
+        {
+            var distance = (center - anchor) / unit;
+            container.Opacity = LyricsEmphasis.OpacityAt(distance);
+            scale.ScaleX = scale.ScaleY = LyricsEmphasis.ScaleAt(distance);
+        }
+    }
+
+    // Kenar maskesi görünümün kendi yüksekliğine göre, piksel cinsinden: göreli (0–1) maske öğenin değil içeriğinin
+    // sınırına yayılır; uzun söz listesinde saydam olmayan bant görünen alanın dışına düşüp bütün sözleri soldururdu.
+    private void UpdateEdgeMask()
+    {
+        var height = Viewport.ActualHeight;
+        if (height <= 0)
+        {
+            Viewport.OpacityMask = null;
+            return;
+        }
+
+        var mask = new LinearGradientBrush
+        {
+            MappingMode = BrushMappingMode.Absolute,
+            StartPoint = new Point(0, 0),
+            EndPoint = new Point(0, height),
+            GradientStops =
+            {
+                new GradientStop(Colors.Transparent, 0),
+                new GradientStop(Colors.Black, 0.22),
+                new GradientStop(Colors.Black, 0.72),
+                new GradientStop(Colors.Transparent, 1),
+            },
+        };
+        mask.Freeze();
+        Viewport.OpacityMask = mask;
     }
 
     private void WakeAnimation()
@@ -139,6 +241,7 @@ public partial class LyricsView : UserControl
 
         var moving = _scroll.Step(dt);
         ScrollTransform.Y = _scroll.Value;
+        ApplyEmphasis();
         if (!moving)
             StopAnimation();
     }

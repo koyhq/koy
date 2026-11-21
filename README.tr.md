@@ -35,14 +35,18 @@
 
 | | |
 | :---: | :---: |
-| <img alt="Kapalı çentik, müzik çalarken" src="docs/screenshots/centik-kapali.png" width="360"><br><sub>Kapalı çentik: müzik çalarken kapak ve dalga</sub> | <img alt="Dock" src="docs/screenshots/dock.png" width="420"><br><sub>Dock: Windows görev çubuğunun yerine</sub> |
-| <img alt="Çentik: Ana sayfa" src="docs/screenshots/centik-ana.png" width="420"><br><sub>Ana: tarih ve hava, sıradaki etkinlikler, odak sayacı, kulaklık pili, sistem ve ağ, hızlı başlat</sub> | <img alt="Çentik: Müzik sayfası" src="docs/screenshots/centik-muzik.png" width="420"><br><sub>Müzik: kapak, ilerleme ve kontroller kendi sayfasında</sub> |
+| <img alt="Kapalı çentik, müzik çalarken" src="docs/screenshots/centik-kapali.png" width="360"><br><sub>Kapalı çentik: müzik çalarken ilerleme halkalı kapak ve dalga</sub> | <img alt="Dock" src="docs/screenshots/dock.png" width="420"><br><sub>Dock: Windows görev çubuğunun yerine</sub> |
+| <img alt="Çentik: Ana sayfa" src="docs/screenshots/centik-ana.png" width="420"><br><sub>Ana: tarih ve hava, sıradaki etkinlikler, odak sayacı, kulaklık pili, sistem ve ağ, hızlı başlat</sub> | <img alt="Çentik: Müzik sayfası" src="docs/screenshots/centik-muzik.png" width="420"><br><sub>Müzik: akan kapak renkleri üstünde kapak renginde ayna dalga, plak ve sözler düğmeleri</sub> |
 | <img alt="Kontrol Merkezi" src="docs/screenshots/centik-kontrol.png" width="420"><br><sub>Kontrol Merkezi: Wi-Fi, Bluetooth, ses, parlaklık</sub> | <img alt="Takvim" src="docs/screenshots/centik-takvim.png" width="420"><br><sub>Takvim: ay, hafta ve gün görünümü, etkinlikler</sub> |
 | <img alt="Wi-Fi listesi" src="docs/screenshots/centik-wifi.png" width="420"><br><sub>Wi-Fi listesi: Windows'taki gibi ağ seçimi</sub> | |
 
 **Canlı arka planlar:** Açık çentiğin arkasında 17 hareketli arka plan oynar (istersen kendi resmini, GIF'ini ya da videonu seç).
 
 <p align="center"><img alt="Açık çentik, 17 canlı arka plan arasında geçiyor" src="docs/screenshots/koy-arkaplanlar.gif" width="640"></p>
+
+**Müzik sayfası:** çentik yayla açılır ve sayfa parça parça girer; parça değişince kapak kayar, plak modu kapağı dönen bir plağa çevirir (duraklatınca kol kalkar), eşzamanlı sözlerde çalan satır ortada durur.
+
+<p align="center"><img alt="Müzik sayfası: açılış, ayna dalga, parça geçişi, plak modu, eşzamanlı sözler ve kapanış" src="docs/screenshots/koy-muzik.gif" width="640"></p>
 
 <sub>Çentik görüntüleri örnek verilerle çizildi (`tools/Koy.UiSnapshots`); dock görüntüsü gerçek ekrandan.</sub>
 
@@ -68,11 +72,11 @@ Masaüstü özelleştirme araçlarının çoğu (Electron, Tauri veya WebView2 t
 
 ### 1. Yay Animasyonlu Çentik (Notch) & OSD HUD
 Ekranın üst ortasında (`Top = 0`), içbükey (*concave*) üst kulaklara sahip özel `NotchShape` vektör geometrisiyle konumlanır:
-- **Boşta Durum (236×34 px):** Solda saat, sağda pil yüzdesi; Kontrol paneli açıksa ortada Wi-Fi ve Bluetooth durum simgeleri (kapalıyken soluk ve üstü çizili, üzerine gelince durum yazar, tıklayınca Kontrol sekmesi açılır; radyo yoksa simge çıkmaz). Müzik çalarken solda albüm kapağı (22×22 px), sağda **%0 CPU** harcayan 4 çubuklu dalga ikonu.
+- **Boşta Durum (236×34 px):** Solda saat, sağda pil yüzdesi; Kontrol paneli açıksa ortada Wi-Fi ve Bluetooth durum simgeleri (kapalıyken soluk ve üstü çizili, üzerine gelince durum yazar, tıklayınca Kontrol sekmesi açılır; radyo yoksa simge çıkmaz). Müzik çalarken solda ilerleme halkalı yuvarlak kapak, ortada "Şarkı · Sanatçı", sağda küçük dalga.
 - **OSD HUD Göstergeleri (260×40 px):** Sistem sesi veya ekran parlaklığı değiştiğinde 1,5 saniye boyunca çentikte beliren akıcı gösterge (ses için beyaz `#F4F4F5`, parlaklık için sarı `#FACC15`). Sistem sesi (CoreAudio) ve parlaklık (WMI / DDC-CI) değişimlerine bağlıdır; Koy penceresinden ayrı ayrı kapatılır. Parlaklık göstergesi yalnız parlaklığı okunabilen ekranlarda çalışır.
 - **Pil ve Bluetooth Bildirimleri:** şarja takma/çıkarma, %20 ve %10 altı, dolu pil; eşleşmiş Bluetooth cihazı bağlanınca ya da ayrılınca adı ve pili çentikte kısa süre görünür.
 - **Genişleyen 7 Sekmeli Panel:** Alttaki sekme çubuğundan (Ana, Odak, Takvim, Raf, Pano, Sistem, Kontrol; ayarlarda açık olanlar, ayardaki sırayla) ya da fare tekerleğiyle paneller arasında geçilir.
-  - **Müzik:** `GlobalSystemMediaTransportControls` ile Spotify, YouTube (Edge/Chrome/Firefox) ve medya oynatıcılar için kapak resmi, şarkı/sanatçı bilgisi, interaktif zaman çubuğu (`Seek`) ve çoklu oturum geçişi.
+  - **Müzik:** `GlobalSystemMediaTransportControls` ile Spotify, YouTube (Edge/Chrome/Firefox) ve medya oynatıcılar için kapak resmi, şarkı/sanatçı bilgisi, interaktif zaman çubuğu (`Seek`) ve çoklu oturum geçişi. Kendi sayfasında parça geçişi, kapak renginde ayna dalga, kartın arkasında akan kapak renkleri, plak modu ve eşzamanlı sözler var. Hiçbir animasyon shader efekti kullanmaz; çentik kapanınca ya da müzik duraklayınca durur.
   - **Takvim & Pomodoro:** Pazartesi başlangıçlı ay görünümü ve çalışma/kısa mola/uzun mola durum makineli **Pomodoro** sayacı (süre bitiminde yay titreşimli Peek bildirimi).
   - **Raf (Shelf):** Dosya veya metinleri çentiğe sürükleyip bırakma (`%AppData%\Koy\shelf.json`). Bir dosyayı çentiğin üzerine sürüklediğinizde çentik kendiliğinden açılır ve Raf sekmesine geçer.
   - **Kontrol Merkezi:** CoreAudio ses seviyesi, WMI (dahili) ve DDC/CI (harici monitör) donanım parlaklık kaydırıcıları, Rahatsız Etme durumu ve gerçekten açıp kapatan Wi-Fi ve Bluetooth anahtarları (radyo yoksa, kapalıysa ya da Windows izin vermiyorsa döşeme bunu söyler ve Windows ayarlarını açar).

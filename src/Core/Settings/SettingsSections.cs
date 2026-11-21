@@ -396,6 +396,9 @@ public sealed record MusicSettings
     /// </summary>
     public bool LyricsEnabled { get; set; }
 
+    /// <summary>Müzik sayfasında kapak yerine dönen plak (#182). Sayfadaki düğmeyle açılıp kapanır.</summary>
+    public bool VinylMode { get; set; }
+
     /// <summary>Çentik görselleştiricisinin biçimi: çubuklar (varsayılan), dalga ya da noktalar.</summary>
     public NotchVisualizerStyle VisualizerStyle { get; set; } = NotchVisualizerStyle.Bars;
 

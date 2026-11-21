@@ -106,6 +106,13 @@ public static class Program
                 RenderEffectVideos(outDir, Arg(args, "--preset"), int.TryParse(Arg(args, "--fps"), out var fps) && fps is >= 1 and <= 30 ? fps : 15);
             else if (scene == "efekt-cpu")
                 MeasureEffects();
+            else if (scene == "muzik-kayit")
+                MusicPromoRecorder.Record(outDir, prefix + "-" + theme, MakeMusicNotchForRecording);
+            else if (scene == "sozler-canli")
+            {
+                LyricsLiveCheck.Run(outDir, prefix + "-" + theme, RenderElement);
+                LyricsInNotchCheck(outDir, prefix + "-" + theme);
+            }
             else if (scene == "arama")
                 SearchSnapshots.Render(outDir, prefix, theme, RenderElement);
             else if (scene == "sitedock")
@@ -132,6 +139,53 @@ public static class Program
 
         Console.WriteLine($"Bitti: {outDir}");
         return 0;
+    }
+
+    // Kayıt sahnesi için: örnek medya dışarıdan yönetilir (parça değişimi), konum gerçek zamanla ilerler.
+    private static (Koy.App.Features.Notch.NotchWindow Window, Koy.App.Features.Notch.NotchViewModel Vm, FakeMedia Media, byte[] SecondCover) MakeMusicNotchForRecording()
+    {
+        var info = new Koy.Core.Media.MediaInfo(Sample.T("Gece Yolculuğu", "Night Drive"), Sample.T("Mor ve Ötesi", "The Coves"), "Spotify.exe", true, FakeCover(300, 300));
+        var media = new FakeMedia(info, liveClock: true);
+        // Şarjda: pilde "hareketi azalt" ses çubuklarını kapatırdı, ayna dalga kayda girmezdi.
+        var set = MakeNotch(music: true, liveClock: true, media: media, power: new FakePower(86, charging: true));
+        return (set.Window, set.Vm, media, FakeCover(300, 300, warm: true));
+    }
+
+    // Sözler gerçek müzik sayfasının içinde (#182): çentik penceresi ekran dışında gösterilir, Müzik sayfası açık,
+    // konum gerçek zamanla ilerler. Etkin satır, kayma ve satır saydamlıkları yarım saniyede bir yazılır.
+    private static void LyricsInNotchCheck(string outDir, string prefix)
+    {
+        var set = MakeNotch(music: true, liveClock: true);
+        set.Window.Left = -4000;
+        set.Window.Top = -4000;
+        set.Window.Show();
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+        set.Vm.ShowHomePageCommand.Execute(Koy.Core.Notch.NotchHomePage.Music);
+        set.Vm.Music.Lyrics.SetAllowed(true);
+        var log = new List<string>();
+        var start = DateTime.Now;
+        while ((DateTime.Now - start).TotalSeconds < 8)
+        {
+            var frame = new System.Windows.Threading.DispatcherFrame();
+            var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+            timer.Tick += (_, _) => { timer.Stop(); frame.Continue = false; };
+            timer.Start();
+            System.Windows.Threading.Dispatcher.PushFrame(frame);
+
+            var view = FindDescendant<Koy.App.Features.Music.LyricsView>((DependencyObject)set.Window.Content);
+            var host = view?.FindName("LinesHost") as System.Windows.Controls.ItemsControl;
+            var ops = new List<string>();
+            for (var i = 0; host is not null && i < host.Items.Count; i++)
+                if (host.ItemContainerGenerator.ContainerFromIndex(i) is UIElement c)
+                    ops.Add(c.Opacity.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+            var lyrics = set.Vm.Music.Lyrics;
+            log.Add(FormattableString.Invariant($"{(DateTime.Now - start).TotalSeconds:0.0}s durum={lyrics.State} gosterilen={lyrics.IsShown} etkin={lyrics.ActiveLine?.Text ?? "-"} gorunur={view?.IsVisible} gorunumSaydam={view?.Opacity:0.00} boy={view?.ActualHeight:0} kayma={(host?.RenderTransform as System.Windows.Media.TranslateTransform)?.Y:0.0} satir=[{string.Join(" ", ops)}]"));
+        }
+        File.WriteAllLines(Path.Combine(outDir, prefix + "-sozler-centikte.txt"), log);
+        foreach (var line in log)
+            Console.WriteLine(line);
+        set.Window.Close();
+        set.Vm.Dispose();
     }
 
     private static void RenderDockFolders(string outDir, string prefix, string theme)
@@ -280,7 +334,7 @@ public static class Program
         bool locationBlocked = false, bool audioConnected = true, Func<Koy.Core.SystemStats.ISystemStatsService>? statsFactory = null,
         bool brightnessSupported = true, bool wideCover = false, Koy.Core.Notch.NotchStyleMode notchStyle = Koy.Core.Notch.NotchStyleMode.Pinned,
         Koy.Core.Notch.IdleDisplayMode idleMode = Koy.Core.Notch.IdleDisplayMode.ClockAndBattery, FakePower? power = null, string? language = null,
-        bool clockShowDate = false, string? liveBackground = null)
+        bool clockShowDate = false, string? liveBackground = null, bool liveClock = false, FakeMedia? media = null)
     {
         var settings = new AppSettings
         {
@@ -321,7 +375,7 @@ public static class Program
             settings,
             controller,
             // Yakalama başlatılmayan servis: çubuklar aşağıda sahte düzeylerle doldurulur, gerçek ses okunmaz.
-            new Koy.App.Features.Music.MusicViewModel(new FakeMedia(info), spectrumAcquire: () => new Koy.Platform.Audio.SpectrumCaptureService(), lyricsProvider: new FakeLyrics()),
+            new Koy.App.Features.Music.MusicViewModel(media ?? new FakeMedia(info, liveClock), spectrumAcquire: () => new Koy.Platform.Audio.SpectrumCaptureService(), lyricsProvider: new FakeLyrics()),
             new Koy.App.Features.ControlCenter.ControlCenterViewModel(
                 () => new FakeAudio(), () => new FakeRadio(), null, () => new FakeBrightness(brightnessSupported), new FakeFocusAssist(), settings,
                 wifiFactory: () => new FakeWifi(locationBlocked),
@@ -339,7 +393,7 @@ public static class Program
     }
 
     // Deneme kapağı: 300 px desenli PNG (gerçek kapaklar 300–640 px); keskinlik ve yuvarlak köşe kontrolü için ince çizgiler.
-    private static byte[] FakeCover(int width, int height)
+    private static byte[] FakeCover(int width, int height, bool warm = false)
     {
         var pixels = new byte[width * height * 4];
         for (var y = 0; y < height; y++)
@@ -347,9 +401,9 @@ public static class Program
             {
                 var i = (y * width + x) * 4;
                 var line = x % 20 == 0 || y % 20 == 0;
-                pixels[i] = (byte)(line ? 255 : 80 + x / 3);
-                pixels[i + 1] = (byte)(line ? 255 : 40 + y / 3);
-                pixels[i + 2] = (byte)(line ? 255 : 140);
+                pixels[i] = (byte)(line ? 255 : warm ? 40 : 80 + x / 3);
+                pixels[i + 1] = (byte)(line ? 255 : warm ? 90 + y / 3 : 40 + y / 3);
+                pixels[i + 2] = (byte)(line ? 255 : warm ? 160 + x / 4 : 140);
                 pixels[i + 3] = 255;
             }
         var bitmap = System.Windows.Media.Imaging.BitmapSource.Create(width, height, 96, 96, System.Windows.Media.PixelFormats.Bgra32, null, pixels, width * 4);
@@ -664,6 +718,47 @@ public static class Program
         set.Vm.ShowHomePageCommand.Execute(Koy.Core.Notch.NotchHomePage.Music);
         Flush();
         ShotNotch(set, name("muzik"), expanded: true);
+        // Parça değişimi geçişi (#182): eski kapak sola gider, yeni kapak sağdan büyüyerek, başlık aşağıdan gelir.
+        if (FindDescendant<Koy.App.Features.Home.HomePanel>((DependencyObject)set.Window.Content) is { } home)
+        {
+            var oldCover = new System.Windows.Media.Imaging.BitmapImage();
+            oldCover.BeginInit();
+            oldCover.StreamSource = new MemoryStream(FakeCover(300, 300, warm: true));
+            oldCover.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+            oldCover.EndInit();
+            oldCover.Freeze();
+            foreach (var p in new[] { 0.15, 0.35, 0.6, 0.85 })
+            {
+                home.TrackTransition.ShowFrame(oldCover, p);
+                Flush();
+                ShotNotch(set, name("muzik-gecis-" + (int)(p * 100)), expanded: true);
+            }
+            home.TrackTransition.ShowFrame(null, 1);
+            // Açılışta kademeli giriş (#182): kapak, başlık, dalga, ilerleme, denetimler 50 ms arayla.
+            foreach (var ms in new[] { 60, 140, 240 })
+            {
+                home.MusicEntrance.ShowFrame(ms / 1000.0);
+                Flush();
+                ShotNotch(set, name("muzik-acilis-" + ms), expanded: true);
+            }
+            home.MusicEntrance.Finish();
+            // Ayna dalga (#182): ortada bas, kenarlarda tiz, kapak renginde.
+            set.Vm.Music.SetSpectrumAllowed(true);
+            set.Vm.Music.Spectrum.Push([0.95f, 0.85f, 0.9f, 0.7f, 0.75f, 0.6f, 0.55f, 0.65f, 0.5f, 0.45f, 0.5f, 0.4f, 0.35f, 0.4f, 0.3f, 0.35f, 0.25f, 0.3f, 0.2f, 0.25f, 0.2f, 0.15f, 0.2f, 0.1f]);
+            Flush();
+            ShotNotch(set, name("muzik-dalga"), expanded: true);
+            // Plak modu (#182): kapak etiket olur, kol plağın yanında.
+            set.Vm.Music.SetVinyl(true);
+            Flush();
+            ShotNotch(set, name("muzik-plak"), expanded: true);
+            set.Vm.Music.SetVinyl(false);
+            // Sözler açık (#182): etkin satır ortada, öbürleri uzaklığa göre soluk.
+            set.Vm.Music.Lyrics.SetAllowed(true);
+            Settle();
+            FindDescendant<Koy.App.Features.Music.LyricsView>(home)?.SnapForSnapshot();
+            ShotNotch(set, name("muzik-sozler"), expanded: true);
+            set.Vm.Music.Lyrics.SetAllowed(false);
+        }
         set.Vm.Dispose();
 
         // Müzik kartı stilleri (#66): Albüm kapağı (küçük ve büyük kart) ve Düz.

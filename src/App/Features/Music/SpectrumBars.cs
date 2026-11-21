@@ -130,6 +130,20 @@ public sealed class SpectrumBars : FrameworkElement
         set => SetValue(VisualizerStyleProperty, value);
     }
 
+    /// <summary>
+    /// Ayna dalga (#182, <see cref="MirrorWave"/>): stil ve çubuk sayısı ayarına bakılmaz; çubuklar bütün genişliği
+    /// doldurur, ortada bas, kenarlarda tiz, ortadan iki yöne büyür. Müzik sayfası kullanır.
+    /// </summary>
+    public static readonly DependencyProperty MirrorProperty = DependencyProperty.Register(
+        nameof(Mirror), typeof(bool), typeof(SpectrumBars),
+        new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender));
+
+    public bool Mirror
+    {
+        get => (bool)GetValue(MirrorProperty);
+        set => SetValue(MirrorProperty, value);
+    }
+
     public static readonly DependencyProperty BarCountProperty = DependencyProperty.Register(
         nameof(BarCount), typeof(int), typeof(SpectrumBars),
         new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender));
@@ -191,6 +205,9 @@ public sealed class SpectrumBars : FrameworkElement
 
     protected override Size MeasureOverride(Size availableSize)
     {
+        if (Mirror)
+            return new Size(0, 0);
+
         var rawCount = Feed?.Levels.Length ?? 0;
         var count = BarCount > 0 ? Math.Min(rawCount, NotchVisualizer.ClampBarCount(BarCount)) : rawCount;
         return new Size(count > 0 ? count * BarWidth + (count - 1) * Gap : 0, 0);
@@ -205,6 +222,12 @@ public sealed class SpectrumBars : FrameworkElement
         var count = BarCount > 0 ? Math.Min(rawLevels.Length, NotchVisualizer.ClampBarCount(BarCount)) : rawLevels.Length;
         if (count <= 0)
             return;
+
+        if (Mirror)
+        {
+            RenderMirror(drawingContext, rawLevels);
+            return;
+        }
 
         var height = ActualHeight;
         var barWidth = BarWidth;
@@ -238,6 +261,26 @@ public sealed class SpectrumBars : FrameworkElement
                     drawingContext.DrawRoundedRectangle(fill, null, new Rect(x, height - barHeight, barWidth, barHeight), radius, radius);
                     break;
             }
+        }
+    }
+
+    private void RenderMirror(DrawingContext drawingContext, float[] levels)
+    {
+        var count = MirrorWave.DefaultBarCount;
+        var gap = Gap;
+        var barWidth = (ActualWidth - gap * (count - 1)) / count;
+        if (barWidth <= 0)
+            return;
+
+        var height = ActualHeight;
+        var midY = height / 2;
+        var radius = Math.Min(barWidth / 2, 2);
+        var fill = Fill ?? TryFindResource("KoyNotchMusicSpectrum") as Brush ?? Brushes.White;
+        var x = 0.0;
+        for (var i = 0; i < count; i++, x += barWidth + gap)
+        {
+            var halfH = Math.Max(MinBar / 2, MirrorWave.LevelFor(levels, i, count) * height / 2);
+            drawingContext.DrawRoundedRectangle(fill, null, new Rect(x, midY - halfH, barWidth, halfH * 2), radius, radius);
         }
     }
 

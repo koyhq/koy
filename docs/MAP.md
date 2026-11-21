@@ -82,6 +82,25 @@ Unutma: Bildirim yoklaması AGENTS #5'in tek yoklama istisnasıdır (paketsiz s�
 | App | `Settings/Pages/CentikPage.xaml`, `KoyWindowViewModel.cs` | "Görseller" bölümü: hedef, kaynak, önayar, dosya seçici, perde |
 
 Unutma: çentik kapalı / gizliyken hiçbir şey oynamaz ve kare tutulmaz (AGENTS #5, #6); hareketi azalt ve pil tasarrufunda yalnız ilk kare. Tuval 620×352 büyütülmez (AGENTS #13).
+## Müzik sayfası hareketleri (#182)
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Media/TrackTransition.cs` | Parça değişimi geçişi: tek ilerleme yayı, kapak/başlık kaydırma, ölçek ve saydamlık değerleri (testli) |
+| App | `src/App/Features/Music/TrackTransitionPresenter.cs` | Değerleri öğelere yazar; kare yalnız geçiş sürerken dinlenir, yüz gizlenince biter. Sekme geçişleri anahtarına uyar |
+| Core | `src/Core/Animation/StaggeredEntrance.cs` | Kademeli giriş zamanlaması (sıra gecikmesi, ölçek, kayma) ve kapanış solması süresi (testli) |
+| App | `src/App/Features/Notch/StaggeredEntrancePresenter.cs` | Öğeleri sırayla içeri alır; müzik yüzü görünür olunca oynar (`HomePanel`). Açılış/kapanış anahtarına uyar |
+| App | `src/App/Features/Notch/ExpandedExitFade.cs` | Kapanışta açık içeriğin 120 ms solması: durum değişmeden önce (`PropertyChanging`) görünüm sabitlenir |
+| Core, App | `src/Core/Notch/MirrorWave.cs`, `src/App/Features/Music/SpectrumBars.cs` (`Mirror`) | Ayna dalga: ortadan simetrik bant örneklemesi (testli), bütün genişliği dolduran çizim; fırça `MusicViewModel.MirrorWaveBrush` (kapak paleti) |
+| Core, App | `src/Core/Media/CoverBlobs.cs`, `src/App/Features/Music/CoverBlobsView.cs` | Akan kapak rengi: leke renkleri paletten, yavaş döngü (testli); çizim 15 fps, yalnız görünür ve çalarken, renk değişiminde 0,6 sn geçiş. Kart kapaktan boyanıyorsa lekeler kartta canlı arka plana göre önceliklidir: `HomePanel` karttaki `LiveBackgroundHost`'u `Off` yapar |
+| Core, App | `src/Core/Media/VinylMotion.cs`, `src/App/Features/Music/VinylView.cs` | Plak modu: dönüş hızı ve kol yayları (testli); yalnız etiket döner (30 fps). Ayar `MusicSettings.VinylMode`, düğme denetim sırasının solunda, kayıt `NotchFeature.SaveVinylMode` |
+| Core | `src/Core/Lyrics/LyricsEmphasis.cs` | Söz satırının etkin çizgiye uzaklığına göre saydamlık ve ölçeği (testli) |
+| App | `src/App/Features/Music/LyricsView.xaml(.cs)` | Etkin satırı ortaya yayla getirir, vurguyu konumdan hesaplar; kenar maskesi piksel cinsinden kurulur (göreli maske uzun listede bütün sözleri soldurur) |
+| App | `src/App/Features/Music/ProgressRing.cs`, `NotchWindow.xaml` (`MusicStateView`) | Kapalı çentikte kapak çevresindeki ilerleme halkası; ilerleme zamanlayıcısı kapalı çentik görünürken de çalışır |
+| App | `src/App/Features/Home/HomePanel.xaml` | `OutgoingCover`, `IncomingCover`, `TrackTitleBlock`; kademeli giriş öğeleri `CoverFrame`, `TitleRow`, `MusicWave`/`MusicLyrics`, `ProgressRow`, `ControlsRow` |
+| Araç | `tools/Koy.UiSnapshots` (`--scene centik`, `--scene sozler-canli`) | `muzik-gecis-*`, `muzik-acilis-*` ara kareleri, `kapali-muzik`, `muzik-dalga`, `muzik-plak`, `muzik-sozler`; `sozler-canli` sözleri gösterilen bir pencerede, zaman akarken dener ve etkin satır, kayma, saydamlık değerlerini yazar; `muzik-kayit` tanıtım GIF'i için müzik sayfası senaryosunu gerçek zamanlı kaydeder (`MusicPromoRecorder`) |
+
+Unutma: shader efekti yok (`DropShadowEffect`, `BlurEffect` Direct3D yığınını yükler); yalnız dönüşüm, saydamlık, gradyan, kırpma.
+
 ## Aramaya yeni kaynak eklemek
 | Katman | Dosya | Ne yapılır |
 |---|---|---|
@@ -186,6 +205,7 @@ dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix <ad> --th
 - Araç Win32 kancası, AppBar ya da görev çubuğu servisi başlatmaz; ayarları geçici dosyada tutar.
 - Sitedeki dock: `dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix site --scene sitedock --transparent --scale 2`. Simgeler görev çubuğuna sabitlenmiş gerçek uygulamalardan gelir; çıktı kırpılıp `site/img/dock.webp` olur.
 - README görselleri `docs/screenshots/` altındadır. Site için WebP'ye çevrilip `site/img/` içine konur.
+- Müzik sayfası GIF'i: `--scene muzik-kayit --lang tr|en` kareleri, GIF/WebP'ye çeviren betik git dışında (`marketing/tanitim-gif/araclar/make_music.py`).
 - Sitedeki çentik görüntüleri saydam zeminlidir (gece mavisi `.aurora` zemininin üstünde durur). Yeni görüntüyü WebP'ye çevirdikten sonra `python scripts/cut-notch-shots.py site/img/<dosya>.webp` ile gri zeminden ayır.
 
 ## Sürüm çıkarmak

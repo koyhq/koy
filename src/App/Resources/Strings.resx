@@ -3346,7 +3346,7 @@
     <value>Live background</value>
   </data>
   <data name="LiveBgTargetDesc" xml:space="preserve">
-    <value>Animated or looping backdrop behind the open notch and/or the music card. Plays only while the notch is open.</value>
+    <value>Animated or looping backdrop behind the open notch and/or the music card. Plays only while the notch is open. When the music card takes the album color, the card uses flowing cover colors instead.</value>
   </data>
   <data name="LiveBgTargetNone" xml:space="preserve">
     <value>Off</value>
@@ -4100,6 +4100,9 @@
   </data>
   <data name="NotchCollapsedBackgroundAmbient" xml:space="preserve">
     <value>Ambient</value>
+  </data>
+  <data name="MusicVinyl" xml:space="preserve">
+    <value>Vinyl view</value>
   </data>
 </root>
 

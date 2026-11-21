@@ -255,6 +255,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             visualizerBarCount: settings.Music.VisualizerBarCount,
             extractCoverPalette: settings.Notch.CollapsedBackground == Koy.Core.Notch.NotchCollapsedBackground.AlbumColor);
         musicVm.Lyrics.EnabledToggled += SaveLyricsEnabled;
+        musicVm.VinylToggled += SaveVinylMode;
         // Parlaklık, çentiğin o anki ekranına bağlanır; ekran düzeni değişince state.Monitor güncellenir.
         NotchWindowState? stateRef = null;
         var controlCenterVm = new ControlCenterViewModel(
@@ -610,6 +611,14 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         var store = new SettingsStore(SettingsStore.DefaultPath);
         var current = store.Load();
         store.Save(current with { Music = current.Music with { LyricsEnabled = enabled } });
+    }
+
+    private void SaveVinylMode(bool vinyl)
+    {
+        settings.Music.VinylMode = vinyl;
+        var store = new SettingsStore(SettingsStore.DefaultPath);
+        var current = store.Load();
+        store.Save(current with { Music = current.Music with { VinylMode = vinyl } });
     }
 
     private void SaveSearchPinned(bool pinned)

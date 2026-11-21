@@ -35,14 +35,18 @@
 
 | | |
 | :---: | :---: |
-| <img alt="Closed notch while music is playing" src="docs/screenshots/centik-kapali-en.png" width="360"><br><sub>Closed notch: cover art and waveform while music plays</sub> | <img alt="Dock" src="docs/screenshots/dock.png" width="420"><br><sub>Dock: replaces the Windows taskbar</sub> |
-| <img alt="Notch: Home page" src="docs/screenshots/centik-ana-en.png" width="420"><br><sub>Home: date and weather, upcoming events, focus timer, headphone battery, system and network, quick launch</sub> | <img alt="Notch: Music page" src="docs/screenshots/centik-muzik-en.png" width="420"><br><sub>Music: cover art, progress and controls on a page of its own</sub> |
+| <img alt="Closed notch while music is playing" src="docs/screenshots/centik-kapali-en.png" width="360"><br><sub>Closed notch: cover art with a progress ring and a waveform while music plays</sub> | <img alt="Dock" src="docs/screenshots/dock.png" width="420"><br><sub>Dock: replaces the Windows taskbar</sub> |
+| <img alt="Notch: Home page" src="docs/screenshots/centik-ana-en.png" width="420"><br><sub>Home: date and weather, upcoming events, focus timer, headphone battery, system and network, quick launch</sub> | <img alt="Notch: Music page" src="docs/screenshots/centik-muzik-en.png" width="420"><br><sub>Music: a mirror wave in the cover color over flowing cover colors, with vinyl and lyrics buttons</sub> |
 | <img alt="Control Center" src="docs/screenshots/centik-kontrol-en.png" width="420"><br><sub>Control Center: Wi-Fi, Bluetooth, volume, brightness</sub> | <img alt="Calendar" src="docs/screenshots/centik-takvim-en.png" width="420"><br><sub>Calendar: month, week and day views, events</sub> |
 | <img alt="Wi-Fi list" src="docs/screenshots/centik-wifi-en.png" width="420"><br><sub>Wi-Fi list: network selection like in Windows</sub> | |
 
 **Live backgrounds:** 17 moving backgrounds play behind the open notch (or pick your own image, GIF or video).
 
 <p align="center"><img alt="The open notch cycling through its 17 live backgrounds" src="docs/screenshots/koy-backgrounds.gif" width="640"></p>
+
+**Music page:** the notch springs open and the page enters piece by piece; the cover slides on a track change, vinyl mode spins the cover as a record (the tone arm lifts on pause), and synced lyrics keep the current line in the middle.
+
+<p align="center"><img alt="Music page: opening, mirror wave, track change, vinyl mode, synced lyrics and closing" src="docs/screenshots/koy-music.gif" width="640"></p>
 
 <sub>Notch images were rendered with sample data (`tools/Koy.UiSnapshots`); the dock image is from a real screen. The app UI is available in English and Turkish.</sub>
 
@@ -68,11 +72,11 @@ Most desktop customization tools (those based on Electron, Tauri or WebView2) st
 
 ### 1. Spring-Animated Notch & OSD HUD
 Positioned at the top center of the screen (`Top = 0`) with a custom `NotchShape` vector geometry that has concave top ears:
-- **Idle State (236×34 px):** Clock on the left, battery percentage on the right; if the Control panel is enabled, Wi-Fi and Bluetooth status icons in the middle (dimmed and struck through when off, show status on hover, open the Control tab on click; no icon appears if the radio is missing). While music plays, album art (22×22 px) on the left and a 4-bar waveform icon that uses **0% CPU** on the right.
+- **Idle State (236×34 px):** Clock on the left, battery percentage on the right; if the Control panel is enabled, Wi-Fi and Bluetooth status icons in the middle (dimmed and struck through when off, show status on hover, open the Control tab on click; no icon appears if the radio is missing). While music plays, round album art with a progress ring on the left, "Title · Artist" in the middle and a small waveform on the right.
 - **OSD HUD Indicators (260×40 px):** A smooth indicator appears in the notch for 1.5 seconds when system volume or display brightness changes (white `#F4F4F5` for volume, yellow `#FACC15` for brightness). Wired to system volume (CoreAudio) and brightness (WMI / DDC-CI) changes; each can be turned off separately in the Koy window. The brightness indicator only works on displays whose brightness can be read.
 - **Battery and Bluetooth Notifications:** Plugging in or unplugging the charger, below 20% and 10%, full battery; when a paired Bluetooth device connects or disconnects, its name and battery briefly appear in the notch.
 - **Expanding 7-Tab Panel:** Switch between panels from the tab bar at the bottom (Home, Focus, Calendar, Shelf, Clipboard, System, Control; those enabled in settings, in the configured order) or with the mouse wheel.
-  - **Music:** Cover art, track and artist info, an interactive timeline (`Seek`) and multi-session switching for Spotify, YouTube (Edge/Chrome/Firefox) and media players via `GlobalSystemMediaTransportControls`.
+  - **Music:** Cover art, track and artist info, an interactive timeline (`Seek`) and multi-session switching for Spotify, YouTube (Edge/Chrome/Firefox) and media players via `GlobalSystemMediaTransportControls`. Its own page adds a track change transition, a mirror wave in the cover color, flowing cover colors behind the card, vinyl mode and synced lyrics. Every animation is drawn without shader effects and stops when the notch closes or music pauses.
   - **Calendar & Pomodoro:** Monday-first month view and a state-machine **Pomodoro** timer with work, short break and long break (spring-bounce Peek notification when time is up).
   - **Shelf:** Drag and drop files or text onto the notch (`%AppData%\Koy\shelf.json`). When you drag a file over the notch, it opens by itself and switches to the Shelf tab.
   - **Control Center:** CoreAudio volume, WMI (built-in) and DDC/CI (external monitor) hardware brightness sliders, Do Not Disturb status, and Wi-Fi and Bluetooth toggles that really turn them on and off (if the radio is missing, off, or Windows does not allow it, the tile says so and opens Windows settings).
