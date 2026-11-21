@@ -34,6 +34,7 @@ public sealed class ContextRuleService
 
     private SharedServices? _services;
     private WindowTracker? _tracker;
+    private WindowHookLease? _hookLease;
     private IReadOnlyList<AutoRule> _rules = [];
     private RuleSource _needed;
     private SavedProfile? _snapshot;
@@ -98,9 +99,17 @@ public sealed class ContextRuleService
             _tracker = _services.AcquireWindowTracker();
             _tracker.ForegroundWindowChanged += OnForegroundWindowChanged;
             _profiles.Applied += OnProfileApplied;
-            _tracker.Start();
+            _hookLease = _tracker.Start(HookNeeds());
+        }
+        else
+        {
+            // Kurallar değişti: tam ekran koşulu eklendi ya da kalktı.
+            _hookLease?.Update(HookNeeds());
         }
     }
+
+    // Ön plan uygulaması yeter; tam ekran koşulu varsa ön plan pencerenin sınırları da gerekir.
+    private WindowHookNeeds HookNeeds() => WindowHookPolicy.ForContextRules(_needed.HasFlag(RuleSource.Fullscreen));
 
     private void Unsubscribe()
     {
@@ -113,6 +122,8 @@ public sealed class ContextRuleService
             return;
         _tracker.ForegroundWindowChanged -= OnForegroundWindowChanged;
         _profiles.Applied -= OnProfileApplied;
+        _hookLease?.Dispose();
+        _hookLease = null;
         _tracker = null;
         _services?.ReleaseWindowTracker();
     }

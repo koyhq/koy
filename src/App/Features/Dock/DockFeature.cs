@@ -54,6 +54,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     private OrderedPinnedAppsService? _pinnedAppsService;
     private readonly RecentFilesService _recentFiles = new();   // durumsuz; listeyi yalnız yığın açılınca okur
     private WindowTracker? _windowTracker;
+    private WindowHookLease? _windowHookLease;
     private ShellActionService? _shellActionService;
     private JumpListService? _jumpLists;   // yalnız dock açıkken var; listeyi ancak sağ tık menüsü açılınca okur
     private StartMenuActions? _startMenu;  // Başlat sağ tık menüsü; durumsuz, menü kapalıyken hiçbir şey çalışmaz
@@ -148,7 +149,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
         // İzleyici paylaşımlı: Notch onu önceden başlattıysa ilk ön plan olayı bir daha gelmez, mevcut durumu elle uygula.
         var trackerWasRunning = _windowTracker.IsStarted;
-        _windowTracker.Start();
+        _windowHookLease = _windowTracker.Start(WindowHookPolicy.ForDock());
         if (trackerWasRunning && _windowTracker.CurrentForeground is { } currentForeground)
             OnForegroundWindowChanged(this, currentForeground);
 
@@ -1140,6 +1141,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             }
             _windowTracker.ForegroundWindowChanged -= OnForegroundWindowChanged;
             _windowTracker.WindowsChanged -= OnWindowsChanged;
+            _windowHookLease?.Dispose();
+            _windowHookLease = null;
             _windowTracker = null;
             services.ReleaseWindowTracker();
         }
