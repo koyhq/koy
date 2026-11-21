@@ -189,32 +189,27 @@
         </Border>
 
         <!-- Akan kapak rengi (#182): kart kapaktan boyanıyorsa üç leke yavaşça dolaşır (çalarken, 15 fps).
-             Müzik kartında canlı arka plan açıksa çizilmez: iki zemin üst üste binmesin, işlemci iki kez harcanmasın. -->
-        <Grid Margin="-18" IsHitTestVisible="False">
-          <Grid.Style>
-            <Style TargetType="Grid">
-              <Setter Property="Visibility" Value="Collapsed" />
-              <Style.Triggers>
-                <DataTrigger Binding="{Binding Music.HasTint}" Value="True">
-                  <Setter Property="Visibility" Value="Visible" />
-                </DataTrigger>
-                <DataTrigger Binding="{Binding LiveBackground.MusicCardMode}" Value="Animate">
-                  <Setter Property="Visibility" Value="Collapsed" />
-                </DataTrigger>
-                <DataTrigger Binding="{Binding LiveBackground.MusicCardMode}" Value="StaticFirstFrame">
-                  <Setter Property="Visibility" Value="Collapsed" />
-                </DataTrigger>
-              </Style.Triggers>
-            </Style>
-          </Grid.Style>
+             Kartta canlı arka plana göre önceliklidir (Burhan, 2026-11-21): o zaman karttaki canlı arka plan çizilmez. -->
+        <Grid Margin="-18" IsHitTestVisible="False" Visibility="{Binding Music.HasTint, Converter={StaticResource BoolToVis}}">
           <music:CoverBlobsView Colors="{Binding Music.BlobColors}" IsPlaying="{Binding Music.IsPlaying}" />
         </Grid>
 
         <!-- Canlı arka plan (issue #67): kapalıyken (varsayılan) hiçbir şey çizilmez; koyu perde yazıyı korur. -->
+        <!-- Kart kapaktan boyanıyorsa (akan kapak rengi varken) kartta canlı arka plan oynamaz: kare de tutulmaz. -->
         <livebg:LiveBackgroundHost Margin="-18" CornerRadius="20"
                                    Selection="{Binding LiveBackground.Selection}"
-                                   Mode="{Binding LiveBackground.MusicCardMode}"
-                                   ScrimOpacity="{Binding LiveBackground.ScrimOpacity}" />
+                                   ScrimOpacity="{Binding LiveBackground.ScrimOpacity}">
+          <livebg:LiveBackgroundHost.Style>
+            <Style TargetType="livebg:LiveBackgroundHost">
+              <Setter Property="Mode" Value="{Binding LiveBackground.MusicCardMode}" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding Music.HasTint}" Value="True">
+                  <Setter Property="Mode" Value="Off" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </livebg:LiveBackgroundHost.Style>
+        </livebg:LiveBackgroundHost>
 
         <!-- Çalan bir şey yok -->
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
