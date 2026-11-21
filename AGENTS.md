@@ -122,6 +122,7 @@ Bağımlılık yönü: `App → Platform → Core` ve `App → Core`. Core hiçb
 - Private alanlar `_camelCase`. ViewModel'lerde `[ObservableProperty]` ve `[RelayCommand]`.
 - Yorumlar Türkçe ve kısa; *neden*i anlatır, *ne*yi değil.
 - Kullanıcıya görünen metin XAML'e ya da koda sabit yazılmaz: `src/App/Resources/Strings.resx` (İngilizce) ve `Strings.tr.resx` (Türkçe), ikisine birden eklenir (M3'te kurulur; o zamana kadar Türkçe sabit metin kabul).
+  Türkçe metin "sen" dilindedir (siz kipi yok); başlıklar ve etiketler iki dilde cümle büyük harfiyle yazılır (özel adlar ve Windows'un kendi adları hariç). Kullanılmayan anahtar bırakılmaz: iki resx'ten ve `Strings.cs`'ten birlikte silinir.
 - Platform servisleri Core'daki arayüzlerin arkasında olur (kural #11) ki mantık sahte servisle test edilebilsin.
 
 ## Bitti tanımı (her görev için)

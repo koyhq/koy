@@ -149,88 +149,88 @@ public static class AdvancedSettings
         ["General"] = ("Genel", "General"),
         ["Appearance"] = ("Görünüm", "Appearance"),
         ["Dock"] = ("Dock", "Dock"),
-        ["DockItems"] = ("Dock Öğeleri", "Dock Items"),
+        ["DockItems"] = ("Dock öğeleri", "Dock items"),
         ["Notch"] = ("Çentik", "Notch"),
         ["Music"] = ("Müzik", "Music"),
         ["Displays"] = ("Ekranlar", "Displays"),
         ["Shortcuts"] = ("Kısayollar", "Shortcuts"),
-        ["HotCorners"] = ("Sıcak Köşeler", "Hot Corners"),
-        ["Voice"] = ("Sesli Komut", "Voice Command"),
+        ["HotCorners"] = ("Sıcak köşeler", "Hot corners"),
+        ["Voice"] = ("Sesli komut", "Voice command"),
         ["Search"] = ("Arama", "Search"),
         ["Focus"] = ("Odak", "Focus"),
-        ["Weather"] = ("Hava Durumu", "Weather"),
+        ["Weather"] = ("Hava durumu", "Weather"),
         ["Clipboard"] = ("Pano", "Clipboard"),
-        ["QuickLaunch"] = ("Hızlı Başlat", "Quick Launch"),
+        ["QuickLaunch"] = ("Hızlı başlat", "Quick launch"),
     };
 
     private static readonly Dictionary<string, (string Tr, string En)> PropertyTitles = new(StringComparer.OrdinalIgnoreCase)
     {
         // Appearance
-        ["BaseFontSize"] = ("Taban Yazı Boyutu", "Base Font Size"),
-        ["ClockFontFamily"] = ("Saat Yazı Tipi", "Clock Font"),
-        ["FontFamily"] = ("Yazı Tipi Ailesi", "Font Family"),
-        ["FontWeight"] = ("Yazı Kalınlığı", "Font Weight"),
-        ["IconPack"] = ("Simge Paketi", "Icon Pack"),
-        ["IconPackFolder"] = ("Simge Paketi Klasörü", "Icon Pack Folder"),
-        ["UiScalePercent"] = ("Arayüz Ölçeği (%)", "UI Scale (%)"),
-        ["UserStyleOverridesEnabled"] = ("Kullanıcı Stil Dosyası", "User Style Overrides"),
+        ["BaseFontSize"] = ("Taban yazı boyutu", "Base font size"),
+        ["ClockFontFamily"] = ("Saat yazı tipi", "Clock font"),
+        ["FontFamily"] = ("Yazı tipi ailesi", "Font family"),
+        ["FontWeight"] = ("Yazı kalınlığı", "Font weight"),
+        ["IconPack"] = ("Simge paketi", "Icon pack"),
+        ["IconPackFolder"] = ("Simge paketi klasörü", "Icon pack folder"),
+        ["UiScalePercent"] = ("Arayüz ölçeği (%)", "UI scale (%)"),
+        ["UserStyleOverridesEnabled"] = ("Kullanıcı stil dosyası", "User style overrides"),
 
         // General
-        ["DeveloperMode"] = ("Geliştirici Modu", "Developer Mode"),
+        ["DeveloperMode"] = ("Geliştirici modu", "Developer mode"),
         ["Language"] = ("Dil", "Language"),
-        ["AutoCheckUpdates"] = ("Otomatik Güncelleme Denetimi", "Auto Check Updates"),
-        ["UpdateChannel"] = ("Güncelleme Kanalı", "Update Channel"),
-        ["TemperatureUnit"] = ("Sıcaklık Birimi", "Temperature Unit"),
-        ["WindSpeedUnit"] = ("Rüzgâr Hızı Birimi", "Wind Speed Unit"),
-        ["NetworkSpeedUnit"] = ("Ağ Hızı Birimi", "Network Speed Unit"),
+        ["AutoCheckUpdates"] = ("Otomatik güncelleme denetimi", "Auto check updates"),
+        ["UpdateChannel"] = ("Güncelleme kanalı", "Update channel"),
+        ["TemperatureUnit"] = ("Sıcaklık birimi", "Temperature unit"),
+        ["WindSpeedUnit"] = ("Rüzgâr hızı birimi", "Wind speed unit"),
+        ["NetworkSpeedUnit"] = ("Ağ hızı birimi", "Network speed unit"),
 
         // Dock
         ["LengthPercent"] = ("Uzunluk (%)", "Length (%)"),
-        ["EdgeOffsetDip"] = ("Kenar Uzaklığı (DIP)", "Edge Offset (DIP)"),
-        ["InnerPaddingDip"] = ("İç Dolgu (DIP)", "Inner Padding (DIP)"),
-        ["IconSpacingDip"] = ("Simge Boşluğu (DIP)", "Icon Spacing (DIP)"),
-        ["IndicatorColor"] = ("Gösterge Rengi", "Indicator Color"),
-        ["IndicatorCustomColor"] = ("Özel Gösterge Rengi", "Custom Indicator Color"),
-        ["IndicatorOnePerWindow"] = ("Pencere Başına Gösterge", "Indicator Per Window"),
-        ["BadgeColor"] = ("Rozet Rengi", "Badge Color"),
-        ["BadgeCustomColor"] = ("Özel Rozet Rengi", "Custom Badge Color"),
-        ["BadgeCorner"] = ("Rozet Köşesi", "Badge Corner"),
-        ["BadgeStyle"] = ("Rozet Stili", "Badge Style"),
-        ["RevealTrigger"] = ("Belirme Tetikleyicisi", "Reveal Trigger"),
-        ["RevealDelayMs"] = ("Belirme Gecikmesi (ms)", "Reveal Delay (ms)"),
-        ["HiddenEdgeLine"] = ("Gizli Kenar Çizgisi", "Hidden Edge Line"),
-        ["GroupingMode"] = ("Gruplama Kipi", "Grouping Mode"),
-        ["WindowMonitorScope"] = ("Pencere Monitör Kapsamı", "Window Monitor Scope"),
-        ["LeftClickAction"] = ("Sol Tık Eylemi", "Left Click Action"),
-        ["LabelMode"] = ("Etiket Kipi", "Label Mode"),
-        ["NewTrayIconVisibility"] = ("Yeni Tepsi Simgesi Görünürlüğü", "New Tray Icon Visibility"),
+        ["EdgeOffsetDip"] = ("Kenar uzaklığı (DIP)", "Edge offset (DIP)"),
+        ["InnerPaddingDip"] = ("İç dolgu (DIP)", "Inner padding (DIP)"),
+        ["IconSpacingDip"] = ("Simge boşluğu (DIP)", "Icon spacing (DIP)"),
+        ["IndicatorColor"] = ("Gösterge rengi", "Indicator color"),
+        ["IndicatorCustomColor"] = ("Özel gösterge rengi", "Custom indicator color"),
+        ["IndicatorOnePerWindow"] = ("Pencere başına gösterge", "Indicator per window"),
+        ["BadgeColor"] = ("Rozet rengi", "Badge color"),
+        ["BadgeCustomColor"] = ("Özel rozet rengi", "Custom badge color"),
+        ["BadgeCorner"] = ("Rozet köşesi", "Badge corner"),
+        ["BadgeStyle"] = ("Rozet stili", "Badge style"),
+        ["RevealTrigger"] = ("Belirme tetikleyicisi", "Reveal trigger"),
+        ["RevealDelayMs"] = ("Belirme gecikmesi (ms)", "Reveal delay (ms)"),
+        ["HiddenEdgeLine"] = ("Gizli kenar çizgisi", "Hidden edge line"),
+        ["GroupingMode"] = ("Gruplama kipi", "Grouping mode"),
+        ["WindowMonitorScope"] = ("Pencere monitör kapsamı", "Window monitor scope"),
+        ["LeftClickAction"] = ("Sol tık eylemi", "Left click action"),
+        ["LabelMode"] = ("Etiket kipi", "Label mode"),
+        ["NewTrayIconVisibility"] = ("Yeni tepsi simgesi görünürlüğü", "New tray icon visibility"),
 
         // Notch
-        ["OpenDelayMs"] = ("Açılma Gecikmesi (ms)", "Open Delay (ms)"),
-        ["CloseDelayMs"] = ("Kapanma Gecikmesi (ms)", "Close Delay (ms)"),
-        ["TabBarStyle"] = ("Sekme Çubuğu Stili", "Tab Bar Style"),
-        ["ClockHourFormat"] = ("Saat Biçimi (12/24)", "Clock Format (12/24)"),
-        ["ClockShowSeconds"] = ("Saniyeyi Göster", "Show Seconds"),
-        ["ClockShowDate"] = ("Tarihi Göster", "Show Date"),
-        ["ClockShowWeekNumber"] = ("Hafta Numarasını Göster", "Show Week Number"),
-        ["ClockFirstDayOfWeek"] = ("Haftanın İlk Günü", "First Day of Week"),
-        ["ClockCustomDateFormat"] = ("Özel Tarih Biçimi", "Custom Date Format"),
-        ["ClockSecondTimeZoneId"] = ("İkinci Saat Dilimi", "Second Time Zone"),
-        ["LiveBackgroundTarget"] = ("Canlı Arka Plan Hedefi", "Live Background Target"),
-        ["LiveBackgroundSource"] = ("Canlı Arka Plan Kaynağı", "Live Background Source"),
-        ["LiveBackgroundPreset"] = ("Canlı Arka Plan Önayarı", "Live Background Preset"),
-        ["LiveBackgroundFilePath"] = ("Canlı Arka Plan Dosyası", "Live Background File"),
-        ["LiveBackgroundScrimPercent"] = ("Canlı Arka Plan Perdesi (%)", "Live Background Scrim (%)"),
-        ["CollapsedBackground"] = ("Kapalı Çentik Arka Planı", "Collapsed Notch Background"),
+        ["OpenDelayMs"] = ("Açılma gecikmesi (ms)", "Open delay (ms)"),
+        ["CloseDelayMs"] = ("Kapanma gecikmesi (ms)", "Close delay (ms)"),
+        ["TabBarStyle"] = ("Sekme çubuğu stili", "Tab bar style"),
+        ["ClockHourFormat"] = ("Saat biçimi (12/24)", "Clock format (12/24)"),
+        ["ClockShowSeconds"] = ("Saniyeyi göster", "Show seconds"),
+        ["ClockShowDate"] = ("Tarihi göster", "Show date"),
+        ["ClockShowWeekNumber"] = ("Hafta numarasını göster", "Show week number"),
+        ["ClockFirstDayOfWeek"] = ("Haftanın ilk günü", "First day of week"),
+        ["ClockCustomDateFormat"] = ("Özel tarih biçimi", "Custom date format"),
+        ["ClockSecondTimeZoneId"] = ("İkinci saat dilimi", "Second time zone"),
+        ["LiveBackgroundTarget"] = ("Canlı arka plan hedefi", "Live background target"),
+        ["LiveBackgroundSource"] = ("Canlı arka plan kaynağı", "Live background source"),
+        ["LiveBackgroundPreset"] = ("Canlı arka plan önayarı", "Live background preset"),
+        ["LiveBackgroundFilePath"] = ("Canlı arka plan dosyası", "Live background file"),
+        ["LiveBackgroundScrimPercent"] = ("Canlı arka plan perdesi (%)", "Live background scrim (%)"),
+        ["CollapsedBackground"] = ("Kapalı çentik arka planı", "Collapsed notch background"),
 
         // Music
-        ["VisualizerStyle"] = ("Görselleştirici Stili", "Visualizer Style"),
-        ["VisualizerColorSource"] = ("Görselleştirici Renk Kaynağı", "Visualizer Color Source"),
-        ["VisualizerBarCount"] = ("Görselleştirici Çubuk Sayısı", "Visualizer Bar Count"),
+        ["VisualizerStyle"] = ("Görselleştirici stili", "Visualizer style"),
+        ["VisualizerColorSource"] = ("Görselleştirici renk kaynağı", "Visualizer color source"),
+        ["VisualizerBarCount"] = ("Görselleştirici çubuk sayısı", "Visualizer bar count"),
 
         // Search
-        ["RetainPrior"] = ("Son Sorguyu Koru", "Retain Prior Query"),
-        ["HistoryMode"] = ("Geçmiş Kipi", "History Mode"),
+        ["RetainPrior"] = ("Son sorguyu koru", "Retain prior query"),
+        ["HistoryMode"] = ("Geçmiş kipi", "History mode"),
         ["Pinned"] = ("Sabitli", "Pinned"),
     };
 
@@ -246,7 +246,7 @@ public static class AdvancedSettings
         if (SectionTitles.TryGetValue(section, out var pair))
             return isTurkish ? pair.Tr : pair.En;
 
-        return SplitPascalCase(section);
+        return SentenceCase(SplitPascalCase(section));
     }
 
     /// <summary>
@@ -267,7 +267,28 @@ public static class AdvancedSettings
         if (PropertyTitles.TryGetValue(propertyName, out var pair))
             return isTurkish ? pair.Tr : pair.En;
 
-        return SplitPascalCase(propertyName);
+        return SentenceCase(SplitPascalCase(propertyName));
+    }
+
+    /// <summary>
+    /// Başlığı cümle büyük harfine çevirir: ilk sözcük olduğu gibi, sonrakiler küçük harf ("Base Font Size" -> "Base font size").
+    /// Tamamı büyük harf olan kısaltmalar (UI, DIP) ve parantezle başlayan sözcükler korunur.
+    /// </summary>
+    public static string SentenceCase(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return "";
+
+        var words = input.Split(' ');
+        for (int i = 1; i < words.Length; i++)
+        {
+            var w = words[i];
+            if (w.Length == 0 || w[0] == '(' || (w.Length >= 2 && w.All(char.IsUpper)))
+                continue;
+            words[i] = w.ToLowerInvariant();
+        }
+
+        return string.Join(' ', words);
     }
 
     /// <summary>
