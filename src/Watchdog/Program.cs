@@ -15,6 +15,22 @@ internal static class Program
 {
     private static int Main(string[] args)
     {
+        try
+        {
+            return Run(args);
+        }
+        catch
+        {
+            // Gözcü hiçbir koşulda hata penceresi göstermemeli.
+            return 1;
+        }
+    }
+
+    private static int Run(string[] args)
+    {
+        if (WatchdogPolicy.IsRestoreOnly(args))
+            return RestoreOnly();
+
         if (!WatchdogPolicy.TryParseProcessId(args, out var koyPid))
             return 2;
 
@@ -39,6 +55,42 @@ internal static class Program
         }
 
         return 0;
+    }
+
+    /// <summary>
+    /// `--restore-taskbar` (RunOnce, oturum açılışı): Koy çalışmıyorsa durum dosyasına göre görev çubuğunu geri getirir.
+    /// Gezgin'in çubuğunu bekler (açılışta geç oluşur). Koy çalışıyorsa durumu o yönetir, dokunulmaz.
+    /// </summary>
+    private static int RestoreOnly()
+    {
+        // Watch kipindeki tek gözcü muteksini almaz: beklerken Koy açılırsa kendi gözcüsünü başlatabilmeli.
+        using var singleton = new Mutex(true, WatchdogPolicy.RestoreOnlySingletonMutexName, out var createdNew);
+        if (!createdNew)
+            return 0;
+
+        var deadline = Environment.TickCount64 + WatchdogPolicy.RestoreOnlyExplorerWaitMs;
+        while (!TaskbarService.IsExplorerTaskbarReady)
+        {
+            if (Environment.TickCount64 >= deadline)
+                return 0; // Durum dosyası kalır; Koy'un açılış Restore'u ya da sonraki oturum dener.
+
+            Thread.Sleep(500);
+        }
+
+        if (KoyIsRunning())
+            return 0;
+
+        TaskbarService.Restore();
+        return 0;
+    }
+
+    private static bool KoyIsRunning()
+    {
+        if (!Mutex.TryOpenExisting(WatchdogPolicy.KoySingleInstanceMutexName, out var koy))
+            return false;
+
+        koy.Dispose();
+        return true;
     }
 
     private static unsafe WatchdogWaitResult Wait(int koyPid)

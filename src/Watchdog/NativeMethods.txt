@@ -8,3 +8,5 @@ OpenProcess
 PROCESS_ACCESS_RIGHTS
 WaitForMultipleObjects
 CloseHandle
+
+MonitorFromWindow

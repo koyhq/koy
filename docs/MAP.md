@@ -138,8 +138,8 @@ Unutma: Servis yalnız gerektiğinde çalışır, son bırakan zamanlayıcıyı 
 | Katman | Dosya | Ne yapılır |
 |---|---|---|
 | Core | `src/Core/Dock/` | Konum, yakınlık, kenar ve hiza kararları (`DockPositionResolver`, `DockLayoutMath`, `DockFitMath`) |
-| Core | `src/Core/Shell/TaskbarStatePolicy.cs`, `src/Core/Shell/WatchdogPolicy.cs` | Görev çubuğu durumu ve gözcü kararları |
-| Platform | `src/Platform/Shell/TaskbarService.cs`, `src/Platform/Shell/ShellTrayLocator.cs` | Görev çubuğunu gizleme ve geri getirme |
+| Core | `src/Core/Shell/TaskbarStatePolicy.cs`, `TaskbarBarSelector.cs`, `TaskbarRunOncePolicy.cs`, `TaskbarShutdownGuard.cs`, `WatchdogPolicy.cs` | Görev çubuğu durumu, hangi çubuk gizlenir, RunOnce yedeği, oturum kapanışı ve gözcü kararları |
+| Platform | `src/Platform/Shell/TaskbarService.cs`, `TaskbarService.Watchdog.cs` (gözcüyü explorer ebeveynli başlatır), `TaskbarRunOnce.cs`, `ShellTrayLocator.cs` | Görev çubuğunu gizleme ve geri getirme |
 | Core | `src/Core/Dock/DockClickPolicy.cs`, `src/Core/Dock/DockMonitorFilter.cs`, `src/Core/Dock/DockWindowGrouping.cs` | Sol tık eylemi kararı, "yalnız bu monitörün pencereleri" süzgeci (pencere sınırlarının merkezi); gruplama kararı henüz bağlı değil |
 | App | `src/App/Features/Dock/DockFeature.cs` | Yaşam döngüsü |
 | App | `src/App/Features/Dock/DockViewModel.cs`, `src/App/Features/Dock/DockFullWidth.xaml`, `src/App/Features/Dock/DockCapsule.xaml`, `src/App/Features/Settings/Pages/DockPage.xaml` | Görünüm, kenar/uzunluk/boşluk bağlamaları ve ayar sayfası |
@@ -154,7 +154,7 @@ Dock'la ilgili her değişiklikte elle sınama (AGENTS #7):
 - [ ] Dock kapalıyken Windows görev çubuğuna hiç dokunulmamalı (AGENTS #12).
 - [ ] Tam ekranda ve iki ekranda davranış.
 
-Görev çubuğu dosyalarını değiştirirken dikkat: gözcü `TaskbarService.cs` ve `ShellTrayLocator.cs` dosyalarını bağlayarak derler.
+Görev çubuğu dosyalarını değiştirirken dikkat: gözcü `TaskbarService.cs`, `TaskbarRunOnce.cs` ve `ShellTrayLocator.cs` dosyalarını bağlayarak derler.
 
 ## Kısayol eklemek
 | Katman | Dosya | Ne yapılır |
