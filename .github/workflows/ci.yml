@@ -18,6 +18,7 @@ jobs:
   build-and-test:
     name: Build & Test (Windows 11 / .NET 10)
     runs-on: windows-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -30,8 +31,29 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore Koy.slnx
 
-      - name: Check vulnerable packages
-        run: dotnet list Koy.slnx package --vulnerable --include-transitive
+      # `dotnet list package --vulnerable` bulgu olsa da 0 doner; JSON ciktisinda "vulnerabilities" ya da "problems"
+      # (kaynaga ulasilamadi gibi) varsa adim kirilir. JSON, yerel dilden bagimsiz oldugu icin metin aramasindan saglamdir.
+      - name: Check vulnerable packages (fails on any finding)
+        shell: pwsh
+        run: |
+          $json = dotnet list Koy.slnx package --vulnerable --include-transitive --format json | Out-String
+          if ($LASTEXITCODE -ne 0) { Write-Host $json; throw "dotnet list package failed (exit $LASTEXITCODE)." }
+          $report = $json | ConvertFrom-Json
+          $found = @()
+          foreach ($project in $report.projects) {
+            foreach ($framework in $project.frameworks) {
+              foreach ($pkg in @($framework.topLevelPackages) + @($framework.transitivePackages)) {
+                if ($pkg -and $pkg.vulnerabilities) {
+                  foreach ($v in $pkg.vulnerabilities) {
+                    $found += "$($project.path): $($pkg.id) $($pkg.resolvedVersion) [$($v.severity)] $($v.advisoryurl)"
+                  }
+                }
+              }
+            }
+          }
+          if ($report.problems) { $report.problems | ForEach-Object { Write-Host "::error::$($_.text)" }; throw "dotnet list package reported problems." }
+          if ($found.Count -gt 0) { $found | ForEach-Object { Write-Host "::error::$_" }; throw "Vulnerable packages found: $($found.Count)." }
+          Write-Host "No vulnerable packages."
 
       - name: Build (Release, zero warnings)
         run: dotnet build Koy.slnx --no-restore -c Release -warnaserror
@@ -52,6 +74,7 @@ jobs:
   test-cultures:
     name: Tests (${{ matrix.culture }})
     runs-on: windows-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -81,6 +104,7 @@ jobs:
     name: Release notes in both languages
     if: ${{ github.event_name == 'pull_request' && startsWith(github.head_ref, 'release-please--') }}
     runs-on: windows-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
