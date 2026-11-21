@@ -5,6 +5,20 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.14](https://github.com/koyhq/koy/compare/v0.2.13...v0.2.14) (2026-11-21)
+Öne çıkanlar:
+- **Hareketli müzik sayfası:** Parça değişince kapak kayarak değişiyor, çentik açılınca sayfa parça parça giriyor ve kapanırken soluyor; başlığın altında kapak renginde ayna dalga, kartın arkasında kapak renginden akan lekeler var. Yeni plak modu kapağı dönen bir plağa çeviriyor, duraklatınca kol kalkıyor.
+- **Okunur sözler:** Sözler düğmesi oynatma düğmelerinin yanına geldi; çalan satır ortada duruyor, öbür satırlar uzaklaştıkça soluyor.
+- **Çentik kapanınca daha az bellek:** Koy yazılımla çizimde artık Direct3D yığınını yüklemiyor; çentik kapandıktan sonra bellek 196–315 MB'tan yaklaşık 93–101 MB'a iniyor.
+
+### Eklenenler
+
+* **notch:** hareketli birleşik müzik sayfası: parça geçişi, kapalı çentikte ilerleme halkası, kademeli açılış, ortalanmış eşzamanlı sözler, ayna dalga, akan kapak renkleri ve plak modu ([#183](https://github.com/koyhq/koy/issues/183)) ([8df8271](https://github.com/koyhq/koy/commit/8df8271d0fdbd1efc194d301624d4c9bd62a7b99))
+
+### Düzeltmeler
+
+* **perf:** yazılımla çizimde Direct3D yüklenmesi durduruldu: shader efektlerinin yerine gölge katmanları, canlı arka plan videosu MediaElement yerine yazılımla çözülüyor ([#181](https://github.com/koyhq/koy/issues/181)) ([de3205c](https://github.com/koyhq/koy/commit/de3205c07493ee35724ecbbe1a5b419b9d8efe90))
+
 ## [0.2.13](https://github.com/koyhq/koy/compare/v0.2.12...v0.2.13) (2026-11-16)
 Öne çıkanlar:
 - **Üst kenar çizgisi:** Çentiğin iki yanından ekranın üst kenarı boyunca uzanan ince çizgi eklendi; çentik açılıp kapanırken bu çizgiden çıkar ve içine çekilir (kalınlık ve renk ayarlanabilir, tam ekranda gizlenir).
