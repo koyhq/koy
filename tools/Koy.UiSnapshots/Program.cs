@@ -106,6 +106,8 @@ public static class Program
                 RenderEffectVideos(outDir, Arg(args, "--preset"), int.TryParse(Arg(args, "--fps"), out var fps) && fps is >= 1 and <= 30 ? fps : 15);
             else if (scene == "efekt-cpu")
                 MeasureEffects();
+            else if (scene == "muzik-kayit")
+                MusicPromoRecorder.Record(outDir, prefix + "-" + theme, MakeMusicNotchForRecording);
             else if (scene == "sozler-canli")
             {
                 LyricsLiveCheck.Run(outDir, prefix + "-" + theme, RenderElement);
@@ -137,6 +139,16 @@ public static class Program
 
         Console.WriteLine($"Bitti: {outDir}");
         return 0;
+    }
+
+    // Kayıt sahnesi için: örnek medya dışarıdan yönetilir (parça değişimi), konum gerçek zamanla ilerler.
+    private static (Koy.App.Features.Notch.NotchWindow Window, Koy.App.Features.Notch.NotchViewModel Vm, FakeMedia Media, byte[] SecondCover) MakeMusicNotchForRecording()
+    {
+        var info = new Koy.Core.Media.MediaInfo(Sample.T("Gece Yolculuğu", "Night Drive"), Sample.T("Mor ve Ötesi", "The Coves"), "Spotify.exe", true, FakeCover(300, 300));
+        var media = new FakeMedia(info, liveClock: true);
+        // Şarjda: pilde "hareketi azalt" ses çubuklarını kapatırdı, ayna dalga kayda girmezdi.
+        var set = MakeNotch(music: true, liveClock: true, media: media, power: new FakePower(86, charging: true));
+        return (set.Window, set.Vm, media, FakeCover(300, 300, warm: true));
     }
 
     // Sözler gerçek müzik sayfasının içinde (#182): çentik penceresi ekran dışında gösterilir, Müzik sayfası açık,
@@ -322,7 +334,7 @@ public static class Program
         bool locationBlocked = false, bool audioConnected = true, Func<Koy.Core.SystemStats.ISystemStatsService>? statsFactory = null,
         bool brightnessSupported = true, bool wideCover = false, Koy.Core.Notch.NotchStyleMode notchStyle = Koy.Core.Notch.NotchStyleMode.Pinned,
         Koy.Core.Notch.IdleDisplayMode idleMode = Koy.Core.Notch.IdleDisplayMode.ClockAndBattery, FakePower? power = null, string? language = null,
-        bool clockShowDate = false, string? liveBackground = null, bool liveClock = false)
+        bool clockShowDate = false, string? liveBackground = null, bool liveClock = false, FakeMedia? media = null)
     {
         var settings = new AppSettings
         {
@@ -363,7 +375,7 @@ public static class Program
             settings,
             controller,
             // Yakalama başlatılmayan servis: çubuklar aşağıda sahte düzeylerle doldurulur, gerçek ses okunmaz.
-            new Koy.App.Features.Music.MusicViewModel(new FakeMedia(info, liveClock), spectrumAcquire: () => new Koy.Platform.Audio.SpectrumCaptureService(), lyricsProvider: new FakeLyrics()),
+            new Koy.App.Features.Music.MusicViewModel(media ?? new FakeMedia(info, liveClock), spectrumAcquire: () => new Koy.Platform.Audio.SpectrumCaptureService(), lyricsProvider: new FakeLyrics()),
             new Koy.App.Features.ControlCenter.ControlCenterViewModel(
                 () => new FakeAudio(), () => new FakeRadio(), null, () => new FakeBrightness(brightnessSupported), new FakeFocusAssist(), settings,
                 wifiFactory: () => new FakeWifi(locationBlocked),

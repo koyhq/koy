@@ -14,14 +14,26 @@ namespace Koy.UiSnapshots;
 // liveClock: konum gerçek zamanla ilerler (sözlerin canlı kayma denetimi için); varsayılan sabit 1:24.
 internal sealed class FakeMedia(MediaInfo? current, bool liveClock = false) : IMediaService
 {
-    public event EventHandler<MediaInfo?>? Changed { add { } remove { } }
-    public event EventHandler<PlaybackTimeline?>? TimelineChanged { add { } remove { } }
+    public event EventHandler<MediaInfo?>? Changed;
+    public event EventHandler<PlaybackTimeline?>? TimelineChanged;
     public event EventHandler<IReadOnlyList<MediaSessionInfo>>? SessionsChanged { add { } remove { } }
 
-    public MediaInfo? Current { get; } = current;
-    public PlaybackTimeline? Timeline { get; } = current is null
+    public MediaInfo? Current { get; private set; } = current;
+    public PlaybackTimeline? Timeline { get; private set; } = current is null
         ? null
         : new PlaybackTimeline(TimeSpan.FromSeconds(84), TimeSpan.Zero, TimeSpan.FromSeconds(221), liveClock ? DateTimeOffset.Now : DateTimeOffset.MinValue);
+
+    /// <summary>Kayıt sahnesi için parça ya da çalma durumu değişimi: oynatıcı bildirimi gibi olay atar.</summary>
+    public void Set(MediaInfo info, TimeSpan? position = null)
+    {
+        Current = info;
+        Changed?.Invoke(this, info);
+        if (position is { } p)
+        {
+            Timeline = new PlaybackTimeline(p, TimeSpan.Zero, TimeSpan.FromSeconds(221), DateTimeOffset.Now);
+            TimelineChanged?.Invoke(this, Timeline);
+        }
+    }
     public IReadOnlyList<MediaSessionInfo> Sessions { get; } = [];
 
     public Task StartAsync() => Task.CompletedTask;

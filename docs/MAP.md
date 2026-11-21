@@ -97,7 +97,7 @@ Unutma: çentik kapalı / gizliyken hiçbir şey oynamaz ve kare tutulmaz (AGENT
 | App | `src/App/Features/Music/LyricsView.xaml(.cs)` | Etkin satırı ortaya yayla getirir, vurguyu konumdan hesaplar; kenar maskesi piksel cinsinden kurulur (göreli maske uzun listede bütün sözleri soldurur) |
 | App | `src/App/Features/Music/ProgressRing.cs`, `NotchWindow.xaml` (`MusicStateView`) | Kapalı çentikte kapak çevresindeki ilerleme halkası; ilerleme zamanlayıcısı kapalı çentik görünürken de çalışır |
 | App | `src/App/Features/Home/HomePanel.xaml` | `OutgoingCover`, `IncomingCover`, `TrackTitleBlock`; kademeli giriş öğeleri `CoverFrame`, `TitleRow`, `MusicWave`/`MusicLyrics`, `ProgressRow`, `ControlsRow` |
-| Araç | `tools/Koy.UiSnapshots` (`--scene centik`, `--scene sozler-canli`) | `muzik-gecis-*`, `muzik-acilis-*` ara kareleri, `kapali-muzik`, `muzik-dalga`, `muzik-plak`, `muzik-sozler`; `sozler-canli` sözleri gösterilen bir pencerede, zaman akarken dener ve etkin satır, kayma, saydamlık değerlerini yazar |
+| Araç | `tools/Koy.UiSnapshots` (`--scene centik`, `--scene sozler-canli`) | `muzik-gecis-*`, `muzik-acilis-*` ara kareleri, `kapali-muzik`, `muzik-dalga`, `muzik-plak`, `muzik-sozler`; `sozler-canli` sözleri gösterilen bir pencerede, zaman akarken dener ve etkin satır, kayma, saydamlık değerlerini yazar; `muzik-kayit` tanıtım GIF'i için müzik sayfası senaryosunu gerçek zamanlı kaydeder (`MusicPromoRecorder`) |
 
 Unutma: shader efekti yok (`DropShadowEffect`, `BlurEffect` Direct3D yığınını yükler); yalnız dönüşüm, saydamlık, gradyan, kırpma.
 
@@ -205,6 +205,7 @@ dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix <ad> --th
 - Araç Win32 kancası, AppBar ya da görev çubuğu servisi başlatmaz; ayarları geçici dosyada tutar.
 - Sitedeki dock: `dotnet run --project tools/Koy.UiSnapshots -- --out <klasör> --prefix site --scene sitedock --transparent --scale 2`. Simgeler görev çubuğuna sabitlenmiş gerçek uygulamalardan gelir; çıktı kırpılıp `site/img/dock.webp` olur.
 - README görselleri `docs/screenshots/` altındadır. Site için WebP'ye çevrilip `site/img/` içine konur.
+- Müzik sayfası GIF'i: `--scene muzik-kayit --lang tr|en` kareleri, GIF/WebP'ye çeviren betik git dışında (`marketing/tanitim-gif/araclar/make_music.py`).
 - Sitedeki çentik görüntüleri saydam zeminlidir (gece mavisi `.aurora` zemininin üstünde durur). Yeni görüntüyü WebP'ye çevirdikten sonra `python scripts/cut-notch-shots.py site/img/<dosya>.webp` ile gri zeminden ayır.
 
 ## Sürüm çıkarmak
