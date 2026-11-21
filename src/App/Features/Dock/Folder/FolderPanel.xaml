@@ -11,7 +11,7 @@
                AllowsTransparency="True"
                StaysOpen="True"
                PopupAnimation="None">
-            <Border x:Name="PopupBody"
+            <res:ShadowBorder ShadowBlur="12" ShadowDepth="4" ShadowOpacity="0.45" x:Name="PopupBody"
                     RenderTransformOrigin="0.5,1"
                     Background="{DynamicResource KoyMenuBg}"
                     BorderBrush="{DynamicResource KoyMenuBorder}"
@@ -22,19 +22,12 @@
                     MinWidth="200"
                     MaxWidth="320"
                     SnapsToDevicePixels="True">
-                <Border.RenderTransform>
+                <res:ShadowBorder.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform x:Name="PopupScale"/>
                         <TranslateTransform x:Name="PopupShift"/>
                     </TransformGroup>
-                </Border.RenderTransform>
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="24"
-                                      ShadowDepth="4"
-                                      Opacity="0.45"
-                                      Direction="270"
-                                      Color="{StaticResource KoyShadowColor}"/>
-                </Border.Effect>
+                </res:ShadowBorder.RenderTransform>
 
                 <StackPanel>
                     <!-- Başlık Bölümü: Başlık metni (tıklayınca düzenleme modu), Adını değiştir ve Klasörü dağıt düğmeleri -->
@@ -209,7 +202,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </StackPanel>
-            </Border>
+            </res:ShadowBorder>
         </Popup>
     </Grid>
 </UserControl>

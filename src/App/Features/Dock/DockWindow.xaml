@@ -87,19 +87,12 @@
                StaysOpen="True"
                MouseEnter="OnPopupMouseEnter"
                MouseLeave="OnPopupMouseLeave">
-            <Border Background="{DynamicResource KoyDockPreviewSurface}"
+            <res:ShadowBorder ShadowBlur="12" ShadowDepth="4" ShadowOpacity="0.45" Background="{DynamicResource KoyDockPreviewSurface}"
                     BorderBrush="{DynamicResource KoyDockCapsuleBorder}"
                     BorderThickness="1"
                     CornerRadius="14"
                     Padding="8"
                     SnapsToDevicePixels="True">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="24"
-                                      ShadowDepth="4"
-                                      Opacity="0.45"
-                                      Direction="270"
-                                      Color="#000000"/>
-                </Border.Effect>
 
                 <Grid>
                     <!-- Tekil Pencere Önizlemesi: 248 px genişlik, 132 px canlı küçük resim -->
@@ -187,7 +180,7 @@
                         </ItemsControl>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </res:ShadowBorder>
         </Popup>
     </Grid>
 </Window>

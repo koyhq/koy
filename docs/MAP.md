@@ -75,7 +75,9 @@ Unutma: Bildirim yoklaması AGENTS #5'in tek yoklama istisnasıdır (paketsiz s�
 | Core | `src/Core/Background/` | Eski dilim: `BackgroundAnimationPolicy` (hareket kuralı, `LiveBackgroundPlaybackPolicy` buna devreder) ve `BackgroundSourceValidator` (yol denetimi) |
 | Core | `src/Core/Settings/SettingsSections.cs` | `NotchSettings.LiveBackground*` (varsayılan hedef: Kapalı) |
 | Core | `src/Core/Notch/Effects/` | Kodlu efektler: `BackgroundEffect` (küçük tampon, `Downscale`, 15 fps), `BackgroundEffects.All`, `EffectMath` (gürültü, fbm, palet, ışık noktası). Yeni efekt: sınıf + `All` + `LiveBackgroundPresets`'e `Effect` alanlı satır + `LiveBgPreset<Ad>` (iki resx). Testler `tests/Core.Tests/Notch/BackgroundEffectsTests.cs` (kare süresi bütçesi dahil); görsel `Koy.UiSnapshots --scene efektler`, CPU `--scene efekt-cpu` |
-| App | `src/App/Features/Notch/LiveBackground/` | `LiveBackgroundState` (karar girdileri), `LiveBackgroundHost` (çizim, animasyon saatleri, video), `LiveBackgroundLoader` (GIF çözücü, 620 px, dondurulmuş kareler) |
+| App | `src/App/Features/Notch/LiveBackground/` | `LiveBackgroundState` (karar girdileri), `LiveBackgroundHost` (çizim, animasyon saatleri, video), `LiveBackgroundLoader` (GIF çözücü, 620 px, dondurulmuş kareler). Video `MediaElement` ile değil, `IVideoFrameReader` ile kare kare oynar (arka plan iş parçacığı, tek `WriteableBitmap`, 15 fps) |
+| Core | `src/Core/Media/IVideoFrameReader.cs`, `VideoFramePacer.cs` | Video kare okuyucu sözleşmesi; döngü ve hız zamanlaması, kare hızı sınırı (testli) |
+| Platform | `src/Platform/Media/MfVideoFrameReader.cs` | Media Foundation SourceReader, **yalnız yazılımla** çözme (DXVA kapalı, Direct3D yüklenmez; MediaElement donanımla çözünce ~150 MB kalıcı Direct3D yığını yüklüyordu, `docs/MEMORY.md` 2026-11-20) |
 | App | `NotchWindow.xaml`, `Home/HomePanel.xaml` | Host, çentik zemininin ve müzik kartı zemininin içeriğin altında |
 | App | `Settings/Pages/CentikPage.xaml`, `KoyWindowViewModel.cs` | "Görseller" bölümü: hedef, kaynak, önayar, dosya seçici, perde |
 

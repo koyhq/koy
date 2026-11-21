@@ -5,7 +5,9 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Koy.Core.Media;
 using Koy.Core.Notch;
+using Koy.Platform.Media;
 
 namespace Koy.App.Features.Notch.LiveBackground;
 
@@ -15,8 +17,8 @@ namespace Koy.App.Features.Notch.LiveBackground;
 /// Kararı vermez: <see cref="Mode"/> Core'dan gelir (<see cref="LiveBackgroundPlaybackPolicy.Decide"/>).
 /// <see cref="LiveBackgroundPlaybackMode.Off"/> iken (çentik kapalı / gizli, yüzey hedef dışı), öğe ağaçtan çıkınca ya da
 /// görünmez olunca bütün animasyon saatleri durdurulur, kareler ve medya bırakılır: boşta CPU ve bellek sıfır (AGENTS #5, #6).
-/// Renk geçişi, GIF ve video WPF animasyon saatleriyle döner. Kodlu efektler (<see cref="BackgroundEffect"/>) küçük bir
-/// tampona çizilir ve efektin kare hızında bir zamanlayıcıyla yenilenir; zamanlayıcı yalnız oynarken kuruludur.
+/// Renk geçişi, GIF ve video WPF animasyon saatleriyle döner. Video yalnız Animate'te açılır; durağan karede yerleşik
+/// döngülerin posteri gösterilir.
 /// </summary>
 public sealed class LiveBackgroundHost : Border
 {
@@ -26,10 +28,8 @@ public sealed class LiveBackgroundHost : Border
     // Yerleşik döngüler 3,5 sn'lik kısa kesitler; tam hızda hareket çentik zemini için fazla hızlı kalıyor.
     private const double BuiltinVideoSpeed = 0.5;
 
-    // MediaElement açılırken ve başa sararken bir an siyah kare boyar. Oynatma bu kadar ilerleyene dek video gizli kalır,
-    // alttaki poster (ya da son karenin donmuş görüntüsü) görünür. Kare gelmezse en geç RevealTimeout sonra açılır.
-    private static readonly TimeSpan RevealAfterPosition = TimeSpan.FromMilliseconds(60);
-    private static readonly TimeSpan RevealTimeout = TimeSpan.FromMilliseconds(800);
+    /// <summary>Video kare çözücüsü; varsayılanı Media Foundation ile yazılımla çözer (Direct3D yüklemez).</summary>
+    public static IVideoFrameReaderFactory VideoReaders { get; set; } = new MfVideoFrameReaderFactory();
 
     // Yerel video ilk kareyi çözene dek alttaki kart kapağı görünmesin diye çentik renginde dondurulmuş yedek zemin.
     private static readonly Brush VideoFallbackBrush = CreateFallbackBrush();
@@ -72,14 +72,11 @@ public sealed class LiveBackgroundHost : Border
     }
 
     private readonly Border _art = new();
-    private readonly Grid _mediaHost = new();
     // Perde yalnız bir arka plan gösterilirken çizilir: yoksa çentik zeminini (tema paketinin KoyNotchSurface rengi dahil)
     // siyahla koyultur ve saydam malzemede zemini neredeyse opak siyaha çevirirdi.
     private readonly Border _scrim = new() { Background = Brushes.Black, Opacity = 0.45, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
 
     private CancellationTokenSource? _loading;
-    private MediaElement? _media;
-    private DispatcherTimer? _revealTimer;
     private (LiveBackgroundSelection Selection, LiveBackgroundPlaybackMode Mode)? _applied;
 
     public LiveBackgroundHost()
@@ -90,7 +87,6 @@ public sealed class LiveBackgroundHost : Border
 
         var layers = new Grid();
         layers.Children.Add(_art);
-        layers.Children.Add(_mediaHost);
         layers.Children.Add(_scrim);
         Child = layers;
 
@@ -133,8 +129,12 @@ public sealed class LiveBackgroundHost : Border
         {
             case LiveBackgroundContentKind.Ambient when selection.Preset is { VideoFile: { } videoFile } preset:
                 var builtinVideoPath = Path.Combine(AppContext.BaseDirectory, "assets", "backgrounds", videoFile);
-                if (File.Exists(builtinVideoPath))
-                    ShowVideo(builtinVideoPath, animate, LiveBackgroundPreviewRenderer.Get(preset.Id), BuiltinVideoSpeed);
+                var poster = LiveBackgroundPreviewRenderer.Get(preset.Id);
+                if (!animate)
+                    // Durağan karede poster zaten 0. kare: video çözücü (ve ekran kartı sürücüleri) hiç açılmaz.
+                    ShowStill(poster);
+                else if (File.Exists(builtinVideoPath))
+                    ShowVideo(builtinVideoPath, animate, poster, BuiltinVideoSpeed);
                 else
                     ShowAmbient(preset, animate);
                 break;
@@ -210,121 +210,97 @@ public sealed class LiveBackgroundHost : Border
         brush.BeginAnimation(ImageBrush.ImageSourceProperty, animation);
     }
 
-    // ---- Video: sessiz MediaElement; ilk kare çözülene dek dondurulmuş poster alt katmanda kalır ----
+    // ---- Video: kendi yazılım çözücümüz (Media Foundation, DXVA kapalı); kareler tek bir WriteableBitmap'e yazılır ----
 
     private void ShowVideo(string path, bool animate, BitmapSource? poster, double speed)
     {
-        // MediaElement ilk kareyi boyayana kadar 0,3–1 sn saydam kalır; yerleşik döngülerde 0. karenin PNG posteri,
-        // yerel videoda ise koyu zemin hemen gösterilir ki çentik / müzik kartı arkadan parlamasın.
+        // İlk kare çözülene dek yerleşik döngülerde 0. karenin posteri, yerel videoda koyu zemin görünür.
         if (poster is not null)
-        {
-            var brush = new ImageBrush(poster) { Stretch = Stretch.UniformToFill };
-            RenderOptions.SetBitmapScalingMode(brush, BitmapScalingMode.HighQuality);
-            _art.Background = brush;
-        }
+            ShowStill(poster);
         else
-        {
             _art.Background = VideoFallbackBrush;
-        }
 
-        var media = new MediaElement
-        {
-            LoadedBehavior = MediaState.Manual,
-            UnloadedBehavior = MediaState.Manual,
-            ScrubbingEnabled = true,
-            IsMuted = true,
-            Volume = 0,
-            Stretch = Stretch.UniformToFill,
-            IsHitTestVisible = false,
-            Opacity = 0,
-            SpeedRatio = speed,
-        };
+        var cts = new CancellationTokenSource();
+        _loading = cts;
+        var token = cts.Token;
+        _ = Task.Factory.StartNew(() => RunVideo(path, animate, speed, token), token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+    }
 
-        media.MediaOpened += (_, _) =>
+    // Arka plan iş parçacığı: kareyi çöz, zamanı gelince arayüz iş parçacığında bitmap'e yaz. Hareket yoksa yalnız ilk kare.
+    private void RunVideo(string path, bool animate, double speed, CancellationToken token)
+    {
+        using var reader = VideoReaders.Open(path);
+        if (reader is null)
         {
-            if (!ReferenceEquals(_media, media))
-                return;
-            if (animate)
-            {
-                media.SpeedRatio = speed;
-                BeginReveal(media, waitForPlayback: true);
-                return;
-            }
-            media.Pause();
-            media.Position = TimeSpan.Zero;
-            BeginReveal(media, waitForPlayback: false);
-        };
-        media.MediaEnded += (_, _) =>
-        {
-            if (!ReferenceEquals(_media, media) || !animate)
-                return;
-            // Seamless döngünün son karesi ilk kareyle aynıdır: onu alta dondurup videoyu gizleyerek başa sarmak
-            // seek sırasındaki siyah kareyi örter.
-            FreezeCurrentFrame(media);
-            media.Opacity = 0;
-            media.Position = TimeSpan.Zero;
-            media.Play();
-            BeginReveal(media, waitForPlayback: true);
-        };
-        // Codec yoksa (webm için Windows eklentisi gerekebilir) ya da dosya bozuksa arka plan kalkar.
-        media.MediaFailed += (_, e) =>
-        {
-            e.Handled = true;
+            // Codec yoksa (webm için Windows eklentisi gerekebilir) ya da dosya bozuksa arka plan kalkar.
             Dispatcher.BeginInvoke(() =>
             {
-                if (ReferenceEquals(_media, media))
+                if (!token.IsCancellationRequested)
                     Clear();
             });
-        };
-
-        _media = media;
-        _mediaHost.Children.Add(media);
-        media.Source = new Uri(path, UriKind.Absolute);
-        media.Play();
-    }
-
-    // Video gerçekten kare çizene dek gizli kalır; oynarken konum ilerleyince, durağan ilk karede kısa bir beklemeden sonra açılır.
-    private void BeginReveal(MediaElement media, bool waitForPlayback)
-    {
-        StopReveal();
-        var startedAt = DateTime.UtcNow;
-        var timer = new DispatcherTimer(DispatcherPriority.Render, Dispatcher) { Interval = TimeSpan.FromMilliseconds(30) };
-        timer.Tick += (_, _) =>
-        {
-            if (!ReferenceEquals(_media, media))
-            {
-                StopReveal();
-                return;
-            }
-            var elapsed = DateTime.UtcNow - startedAt;
-            var ready = waitForPlayback ? media.Position >= RevealAfterPosition : elapsed >= TimeSpan.FromMilliseconds(150);
-            if (!ready && elapsed < RevealTimeout)
-                return;
-            media.Opacity = 1;
-            StopReveal();
-        };
-        _revealTimer = timer;
-        timer.Start();
-    }
-
-    private void StopReveal()
-    {
-        _revealTimer?.Stop();
-        _revealTimer = null;
-    }
-
-    // Videonun o anki karesini alttaki katmana sabit görüntü olarak koyar (önceki poster/donmuş kare bırakılır).
-    private void FreezeCurrentFrame(MediaElement media)
-    {
-        var width = (int)Math.Ceiling(media.ActualWidth);
-        var height = (int)Math.Ceiling(media.ActualHeight);
-        if (width <= 0 || height <= 0)
             return;
+        }
 
-        var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
-        bitmap.Render(media);
-        bitmap.Freeze();
-        var brush = new ImageBrush(bitmap) { Stretch = Stretch.Fill };
+        var frame = new byte[reader.Width * reader.Height * 4];
+        var pacer = new VideoFramePacer(speed, DesiredFrameRate);
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        var origin = TimeSpan.Zero; // ilk karenin gösterildiği an, onun zamanına eşlenir
+        WriteableBitmap? bitmap = null;
+
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                if (!reader.ReadNextFrame(frame, out var stamp))
+                    return;
+
+                var due = pacer.DueAt(stamp);
+                if (bitmap is not null)
+                {
+                    if (!pacer.ShouldShow(due, clock.Elapsed - origin))
+                        continue;
+                    var wait = due - (clock.Elapsed - origin);
+                    if (wait > TimeSpan.Zero && token.WaitHandle.WaitOne(wait))
+                        return;
+                }
+
+                // Arayüz kareyi kopyalayana dek beklenir: tek tampon yeter, çözücü arayüzün önüne geçmez.
+                Dispatcher.Invoke(() =>
+                {
+                    if (token.IsCancellationRequested)
+                        return;
+                    var rect = new Int32Rect(0, 0, reader.Width, reader.Height);
+                    if (bitmap is null)
+                    {
+                        bitmap = new WriteableBitmap(reader.Width, reader.Height, 96, 96, PixelFormats.Bgra32, null);
+                        bitmap.WritePixels(rect, frame, reader.Width * 4, 0);
+                        var brush = new ImageBrush(bitmap) { Stretch = Stretch.UniformToFill };
+                        RenderOptions.SetBitmapScalingMode(brush, BitmapScalingMode.HighQuality);
+                        _art.Background = brush;
+                        return;
+                    }
+                    bitmap.WritePixels(rect, frame, reader.Width * 4, 0);
+                }, DispatcherPriority.Render, token);
+
+                if (!animate)
+                    return;
+                if (origin == TimeSpan.Zero)
+                {
+                    origin = clock.Elapsed - due;
+                    pacer.ShouldShow(due, due);
+                }
+            }
+        }
+        catch (Exception ex) when (ex is OperationCanceledException or InvalidOperationException)
+        {
+            // Uygulama kapanırken Dispatcher.Invoke iptal edilebilir; çözücü yine bırakılır (using).
+        }
+    }
+
+    private void ShowStill(BitmapSource image)
+    {
+        var brush = new ImageBrush(image) { Stretch = Stretch.UniformToFill };
+        RenderOptions.SetBitmapScalingMode(brush, BitmapScalingMode.HighQuality);
         _art.Background = brush;
     }
 
@@ -333,8 +309,6 @@ public sealed class LiveBackgroundHost : Border
     {
         _applied = null;
         _scrim.Visibility = Visibility.Collapsed;
-        StopReveal();
-
         if (_loading is { } cts)
         {
             _loading = null;
@@ -355,14 +329,5 @@ public sealed class LiveBackgroundHost : Border
         }
 
         _art.Background = null;
-
-        if (_media is { } media)
-        {
-            _media = null;
-            _mediaHost.Children.Remove(media);
-            media.Stop();
-            media.Close();
-            media.Source = null;
-        }
     }
 }
