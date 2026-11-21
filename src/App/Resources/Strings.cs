@@ -17,7 +17,6 @@ public static class Strings
     public static string Shelf => Get(nameof(Shelf));
     public static string NoMediaPlaying => Get(nameof(NoMediaPlaying));
     public static string ClearAll => Get(nameof(ClearAll));
-    public static string DragDropPrompt => Get(nameof(DragDropPrompt));
     public static string Work => Get(nameof(Work));
     public static string ShortBreak => Get(nameof(ShortBreak));
     public static string LongBreak => Get(nameof(LongBreak));
@@ -32,7 +31,6 @@ public static class Strings
     public static string Loading => Get(nameof(Loading));
     public static string Reset => Get(nameof(Reset));
     public static string Start => Get(nameof(Start));
-    public static string NextPhase => Get(nameof(NextPhase));
     public static string Dock => Get(nameof(Dock));
     public static string LaunchNewInstance => Get(nameof(LaunchNewInstance));
     public static string DockItemChangeIcon => Get(nameof(DockItemChangeIcon));

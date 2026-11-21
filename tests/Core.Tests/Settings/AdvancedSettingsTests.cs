@@ -105,8 +105,8 @@ public class AdvancedSettingsTests
 
         Assert.Equal("Appearance", fontRow.Section);
         Assert.Equal("BaseFontSize", fontRow.PropertyName);
-        Assert.Equal("Taban Yazı Boyutu", fontRow.GetFriendlyTitle("tr"));
-        Assert.Equal("Base Font Size", fontRow.GetFriendlyTitle("en"));
+        Assert.Equal("Taban yazı boyutu", fontRow.GetFriendlyTitle("tr"));
+        Assert.Equal("Base font size", fontRow.GetFriendlyTitle("en"));
         Assert.Equal("Görünüm", fontRow.GetSectionTitle("tr"));
         Assert.Equal("Appearance", fontRow.GetSectionTitle("en"));
     }
@@ -124,15 +124,15 @@ public class AdvancedSettingsTests
     }
 
     [Theory]
-    [InlineData("BaseFontSize", "Taban Yazı Boyutu", "Base Font Size")]
-    [InlineData("ClockFontFamily", "Saat Yazı Tipi", "Clock Font")]
-    [InlineData("FontFamily", "Yazı Tipi Ailesi", "Font Family")]
-    [InlineData("FontWeight", "Yazı Kalınlığı", "Font Weight")]
-    [InlineData("IconPack", "Simge Paketi", "Icon Pack")]
-    [InlineData("IconPackFolder", "Simge Paketi Klasörü", "Icon Pack Folder")]
-    [InlineData("UiScalePercent", "Arayüz Ölçeği (%)", "UI Scale (%)")]
-    [InlineData("UserStyleOverridesEnabled", "Kullanıcı Stil Dosyası", "User Style Overrides")]
-    [InlineData("DeveloperMode", "Geliştirici Modu", "Developer Mode")]
+    [InlineData("BaseFontSize", "Taban yazı boyutu", "Base font size")]
+    [InlineData("ClockFontFamily", "Saat yazı tipi", "Clock font")]
+    [InlineData("FontFamily", "Yazı tipi ailesi", "Font family")]
+    [InlineData("FontWeight", "Yazı kalınlığı", "Font weight")]
+    [InlineData("IconPack", "Simge paketi", "Icon pack")]
+    [InlineData("IconPackFolder", "Simge paketi klasörü", "Icon pack folder")]
+    [InlineData("UiScalePercent", "Arayüz ölçeği (%)", "UI scale (%)")]
+    [InlineData("UserStyleOverridesEnabled", "Kullanıcı stil dosyası", "User style overrides")]
+    [InlineData("DeveloperMode", "Geliştirici modu", "Developer mode")]
     public void Property_titles_match_expected_translations(string propertyName, string expectedTr, string expectedEn)
     {
         Assert.Equal(expectedTr, AdvancedSettings.GetFriendlyTitle(propertyName, "tr"));
@@ -142,15 +142,26 @@ public class AdvancedSettingsTests
     }
 
     [Theory]
-    [InlineData("SomeFutureCustomSetting", "Some Future Custom Setting")]
-    [InlineData("EnableFastRenderingMode", "Enable Fast Rendering Mode")]
-    [InlineData("Simple", "Simple")]
-    public void Fallback_formatter_splits_pascal_case_into_words(string input, string expected)
+    [InlineData("SomeFutureCustomSetting", "Some Future Custom Setting", "Some future custom setting")]
+    [InlineData("EnableFastRenderingMode", "Enable Fast Rendering Mode", "Enable fast rendering mode")]
+    [InlineData("Simple", "Simple", "Simple")]
+    [InlineData("UiScale", "Ui Scale", "Ui scale")]
+    public void Fallback_formatter_splits_pascal_case_into_words(string input, string split, string expected)
     {
-        Assert.Equal(expected, AdvancedSettings.SplitPascalCase(input));
-        // When untranslated, GetFriendlyTitle falls back to SplitPascalCase
+        Assert.Equal(split, AdvancedSettings.SplitPascalCase(input));
+        // When untranslated, GetFriendlyTitle falls back to SplitPascalCase in sentence case
         Assert.Equal(expected, AdvancedSettings.GetFriendlyTitle(input, "tr"));
         Assert.Equal(expected, AdvancedSettings.GetFriendlyTitle(input, "en"));
+    }
+
+    [Theory]
+    [InlineData("Base Font Size", "Base font size")]
+    [InlineData("Edge Offset (DIP)", "Edge offset (DIP)")]
+    [InlineData("UI Scale", "UI scale")]
+    [InlineData("", "")]
+    public void SentenceCase_keeps_first_word_acronyms_and_parentheses(string input, string expected)
+    {
+        Assert.Equal(expected, AdvancedSettings.SentenceCase(input));
     }
 
     [Fact]

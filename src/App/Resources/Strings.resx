@@ -49,19 +49,16 @@
     <value>No media playing</value>
   </data>
   <data name="ClearAll" xml:space="preserve">
-    <value>Clear All</value>
-  </data>
-  <data name="DragDropPrompt" xml:space="preserve">
-    <value>Drag and drop files or text</value>
+    <value>Clear all</value>
   </data>
   <data name="Work" xml:space="preserve">
     <value>Work</value>
   </data>
   <data name="ShortBreak" xml:space="preserve">
-    <value>Short Break</value>
+    <value>Short break</value>
   </data>
   <data name="LongBreak" xml:space="preserve">
-    <value>Long Break</value>
+    <value>Long break</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
@@ -76,7 +73,7 @@
     <value>Bluetooth</value>
   </data>
   <data name="DoNotDisturb" xml:space="preserve">
-    <value>Do Not Disturb</value>
+    <value>Do not disturb</value>
   </data>
   <data name="On" xml:space="preserve">
     <value>On</value>
@@ -96,20 +93,17 @@
   <data name="Start" xml:space="preserve">
     <value>Start</value>
   </data>
-  <data name="NextPhase" xml:space="preserve">
-    <value>Next Phase</value>
-  </data>
   <data name="Dock" xml:space="preserve">
     <value>Dock</value>
   </data>
   <data name="LaunchNewInstance" xml:space="preserve">
-    <value>Open New Window</value>
+    <value>Open new window</value>
   </data>
   <data name="Close" xml:space="preserve">
     <value>Close</value>
   </data>
   <data name="EndTask" xml:space="preserve">
-    <value>End Task</value>
+    <value>End task</value>
   </data>
   <data name="DockJumpListRecent" xml:space="preserve">
     <value>Recent</value>
@@ -165,24 +159,6 @@
   <data name="NetworkCellularShort" xml:space="preserve">
     <value>Cellular</value>
   </data>
-  <data name="NotificationsButton" xml:space="preserve">
-    <value>Notifications</value>
-  </data>
-  <data name="NotificationsTooltip" xml:space="preserve">
-    <value>Open Notification Center</value>
-  </data>
-  <data name="HomeTimerLabel" xml:space="preserve">
-    <value>Timer {0}</value>
-  </data>
-  <data name="HomeStopwatchLabel" xml:space="preserve">
-    <value>Stopwatch {0}</value>
-  </data>
-  <data name="HomePomodoroLabel" xml:space="preserve">
-    <value>Pomodoro {0}</value>
-  </data>
-  <data name="PeekConnectionsTooltip" xml:space="preserve">
-    <value>Connections</value>
-  </data>
   <data name="CalViewMonth" xml:space="preserve">
     <value>Month</value>
   </data>
@@ -191,15 +167,6 @@
   </data>
   <data name="CalViewDay" xml:space="preserve">
     <value>Day</value>
-  </data>
-  <data name="CalToolPomodoro" xml:space="preserve">
-    <value>Pomodoro</value>
-  </data>
-  <data name="CalToolTimer" xml:space="preserve">
-    <value>Timer</value>
-  </data>
-  <data name="CalToolStopwatch" xml:space="preserve">
-    <value>Stopwatch</value>
   </data>
   <data name="CalAddEvent" xml:space="preserve">
     <value>Add</value>
@@ -225,26 +192,11 @@
   <data name="CalNext" xml:space="preserve">
     <value>Next</value>
   </data>
-  <data name="TimerDecrease" xml:space="preserve">
-    <value>Decrease</value>
-  </data>
-  <data name="TimerIncrease" xml:space="preserve">
-    <value>Increase</value>
-  </data>
   <data name="TimerPresetMinutes" xml:space="preserve">
     <value>{0} min</value>
   </data>
-  <data name="TimerPause" xml:space="preserve">
-    <value>Pause</value>
-  </data>
-  <data name="TimerLap" xml:space="preserve">
-    <value>Lap</value>
-  </data>
   <data name="TimerLapRow" xml:space="preserve">
     <value>Lap {0}</value>
-  </data>
-  <data name="TimerDone" xml:space="preserve">
-    <value>Done</value>
   </data>
   <data name="NavGeneral" xml:space="preserve">
     <value>General</value>
@@ -268,7 +220,7 @@
     <value>Dictation</value>
   </data>
   <data name="DictationSubtitle" xml:space="preserve">
-    <value>Run a coding assistant with your voice or a typed command</value>
+    <value>Run a coding tool with your voice or a typed command</value>
   </data>
   <data name="NavPerformance" xml:space="preserve">
     <value>Performance</value>
@@ -313,7 +265,7 @@
     <value>Hide Windows taskbar</value>
   </data>
   <data name="HideWindowsTaskbarDesc" xml:space="preserve">
-    <value>Single dock bar on screen when Dock is active</value>
+    <value>Single dock bar on screen when the dock is active</value>
   </data>
   <data name="LanguageHeader" xml:space="preserve">
     <value>Language</value>
@@ -328,7 +280,7 @@
     <value>Automatically check for updates</value>
   </data>
   <data name="ChannelTitle" xml:space="preserve">
-    <value>Update Channel</value>
+    <value>Update channel</value>
   </data>
   <data name="CheckNow" xml:space="preserve">
     <value>Check now</value>
@@ -340,7 +292,7 @@
     <value>General</value>
   </data>
   <data name="NotchEnabledTitle" xml:space="preserve">
-    <value>Enable Notch</value>
+    <value>Enable notch</value>
   </data>
   <data name="VisibilityTitle" xml:space="preserve">
     <value>Visibility mode</value>
@@ -408,26 +360,20 @@
   <data name="PanelsHeader" xml:space="preserve">
     <value>Active panels</value>
   </data>
-  <data name="PanelMusicTitle" xml:space="preserve">
-    <value>Music</value>
-  </data>
   <data name="PanelCalendarTitle" xml:space="preserve">
     <value>Calendar</value>
   </data>
   <data name="PanelShelfTitle" xml:space="preserve">
-    <value>Shelf (Drag &amp; drop)</value>
+    <value>Shelf (drag &amp; drop)</value>
   </data>
   <data name="PanelControlCenterTitle" xml:space="preserve">
-    <value>Control Center</value>
-  </data>
-  <data name="PanelStatusTitle" xml:space="preserve">
-    <value>Status (Battery, weather)</value>
+    <value>Control center</value>
   </data>
   <data name="DockGeneralHeader" xml:space="preserve">
     <value>General</value>
   </data>
   <data name="DockEnabledTitle" xml:space="preserve">
-    <value>Enable Dock</value>
+    <value>Enable dock</value>
   </data>
   <data name="DockStyleTitle" xml:space="preserve">
     <value>Dock style</value>
@@ -436,7 +382,7 @@
     <value>Floating capsule</value>
   </data>
   <data name="StyleFullWidth" xml:space="preserve">
-    <value>Full-width glass</value>
+    <value>Full width</value>
   </data>
   <data name="DockIconAlignmentTitle" xml:space="preserve">
     <value>Icon alignment</value>
@@ -516,9 +462,6 @@
   <data name="DockLeftClickTitle" xml:space="preserve">
     <value>Click on a running app</value>
   </data>
-  <data name="DockLeftClickDesc" xml:space="preserve">
-    <value>Minimize: click the active app to minimize it. Front: always bring it to front. Cycle: step through its windows. Previews: show window thumbnails.</value>
-  </data>
   <data name="DockLeftClickMinimize" xml:space="preserve">
     <value>Minimize</value>
   </data>
@@ -573,14 +516,8 @@
   <data name="FoldersSectionTitle" xml:space="preserve">
     <value>Folders section (Downloads)</value>
   </data>
-  <data name="TaskbarRecoveryHeader" xml:space="preserve">
-    <value>Taskbar recovery</value>
-  </data>
   <data name="RestoreTaskbarTitle" xml:space="preserve">
     <value>Restore Windows taskbar</value>
-  </data>
-  <data name="RestoreTaskbarDesc" xml:space="preserve">
-    <value>Makes Windows taskbar visible immediately if hidden</value>
   </data>
   <data name="ChannelStable" xml:space="preserve">
     <value>Stable</value>
@@ -591,17 +528,11 @@
   <data name="LyricsSettingTitle" xml:space="preserve">
     <value>Song lyrics</value>
   </data>
-  <data name="LyricsSettingDesc" xml:space="preserve">
-    <value>Shows synced lyrics on the Home music card. While Home is open, the title and artist of what's playing are sent to LRCLIB once per track. .lrc files in Music\Lyrics are used first.</value>
-  </data>
   <data name="MusicWaveformTitle" xml:space="preserve">
     <value>Show album art and waveform when playing</value>
   </data>
   <data name="MusicCardStyleTitle" xml:space="preserve">
     <value>Music card style</value>
-  </data>
-  <data name="MusicCardStyleDesc" xml:space="preserve">
-    <value>Plain keeps the fixed card. Album color tints it from the cover. Album art uses the cover as a dimmed backdrop. Grey covers always use the plain card.</value>
   </data>
   <data name="MusicCardStyleNeutral" xml:space="preserve">
     <value>Plain</value>
@@ -618,26 +549,17 @@
   <data name="VolumeOsdTitle" xml:space="preserve">
     <value>Volume indicator</value>
   </data>
-  <data name="VolumeOsdDesc" xml:space="preserve">
-    <value>Brief overlay when volume changes</value>
-  </data>
   <data name="BrightnessOsdTitle" xml:space="preserve">
     <value>Brightness indicator</value>
   </data>
   <data name="SectionsHeader" xml:space="preserve">
     <value>Sections</value>
   </data>
-  <data name="PrimaryScreenHeader" xml:space="preserve">
-    <value>Display 1 · primary · 1920×1080</value>
-  </data>
   <data name="ScreenNotchTitle" xml:space="preserve">
     <value>Notch</value>
   </data>
   <data name="ScreenDockTitle" xml:space="preserve">
     <value>Dock</value>
-  </data>
-  <data name="ScreenDockWindowsOnlyTitle" xml:space="preserve">
-    <value>Show only windows from this display in dock</value>
   </data>
   <data name="NewDisplaysHeader" xml:space="preserve">
     <value>New displays</value>
@@ -681,9 +603,6 @@
   <data name="MaterialTitle" xml:space="preserve">
     <value>Material</value>
   </data>
-  <data name="MaterialDesc" xml:space="preserve">
-    <value>Frosted is 86% opaque, Glass 72%; there is no blur. The Koy window, the open notch, the dock and menus follow it. The closed notch always stays solid.</value>
-  </data>
   <data name="MaterialFrosted" xml:space="preserve">
     <value>Frosted</value>
   </data>
@@ -700,7 +619,7 @@
     <value>Readability guard</value>
   </data>
   <data name="ReadabilityGuardDesc" xml:space="preserve">
-    <value>On a light wallpaper, Glass moves up to Frosted (or Solid if needed) so secondary text keeps 4.5:1 contrast. The wallpaper is measured once, and again when it changes.</value>
+    <value>On a light wallpaper, moves Glass up to Frosted (or Solid) if needed so text stays readable.</value>
   </data>
   <data name="MaterialSolid" xml:space="preserve">
     <value>Solid</value>
@@ -733,13 +652,13 @@
     <value>Keyboard</value>
   </data>
   <data name="ShortcutToggleNotch" xml:space="preserve">
-    <value>Toggle Notch</value>
+    <value>Toggle notch</value>
   </data>
   <data name="ShortcutOpenShelf" xml:space="preserve">
     <value>Open Shelf</value>
   </data>
   <data name="ShortcutToggleDock" xml:space="preserve">
-    <value>Toggle Dock</value>
+    <value>Toggle dock</value>
   </data>
   <data name="ShortcutOpenMenu" xml:space="preserve">
     <value>Koy menu</value>
@@ -751,10 +670,10 @@
     <value>Search clipboard text</value>
   </data>
   <data name="ShortcutVoiceCommand" xml:space="preserve">
-    <value>Voice command (harness)</value>
+    <value>Voice command</value>
   </data>
   <data name="ShortcutOpenKoyWindow" xml:space="preserve">
-    <value>Open Koy settings window</value>
+    <value>Open Koy window</value>
   </data>
   <data name="CornersHeader" xml:space="preserve">
     <value>Screen corners</value>
@@ -766,16 +685,16 @@
     <value>None</value>
   </data>
   <data name="CornerActionOpenNotch" xml:space="preserve">
-    <value>Open / close Notch</value>
+    <value>Open / close notch</value>
   </data>
   <data name="CornerActionOpenSearch" xml:space="preserve">
     <value>Open search</value>
   </data>
   <data name="CornerActionOpenKoyWindow" xml:space="preserve">
-    <value>Open Koy settings</value>
+    <value>Open Koy window</value>
   </data>
   <data name="CornerActionToggleDock" xml:space="preserve">
-    <value>Show / hide Dock</value>
+    <value>Show / hide dock</value>
   </data>
   <data name="CornerDwellTitle" xml:space="preserve">
     <value>Hold time in the corner</value>
@@ -784,10 +703,10 @@
     <value>Off while a full-screen app is active</value>
   </data>
   <data name="VoiceHeader" xml:space="preserve">
-    <value>VOICE COMMAND &amp; HARNESS</value>
+    <value>Voice command and coding tool</value>
   </data>
   <data name="VoiceHarnessTitle" xml:space="preserve">
-    <value>Coding Assistant (Harness)</value>
+    <value>Coding tool</value>
   </data>
   <data name="VoiceHarnessDesc" xml:space="preserve">
     <value>CLI tool that runs your command. Ctrl+Alt+V opens a box in the notch and starts Windows voice typing (Win+H): speak in your keyboard language, such as Turkish or English, or just type. Voice typing uses Microsoft's online speech recognition.</value>
@@ -829,13 +748,13 @@
     <value>Default</value>
   </data>
   <data name="VoiceCustomCommandTitle" xml:space="preserve">
-    <value>Custom Command Template</value>
+    <value>Custom command template</value>
   </data>
   <data name="VoiceCustomCommandDesc" xml:space="preserve">
     <value>Command template with optional {prompt} placeholder (e.g. gh copilot suggest "{prompt}").</value>
   </data>
   <data name="VoiceWorkingDirTitle" xml:space="preserve">
-    <value>Working Directory</value>
+    <value>Working directory</value>
   </data>
   <data name="VoiceWorkingDirDesc" xml:space="preserve">
     <value>Execution directory for CLI commands (leave blank for user profile).</value>
@@ -881,9 +800,6 @@
   </data>
   <data name="SearchActRunInTerminal" xml:space="preserve">
     <value>Run in terminal</value>
-  </data>
-  <data name="SearchActRequestClose" xml:space="preserve">
-    <value>Ask to close</value>
   </data>
   <data name="SearchHintCopy" xml:space="preserve">
     <value>Press Enter to copy</value>
@@ -1155,9 +1071,6 @@
   <data name="SearchRetainTitle" xml:space="preserve">
     <value>Keep last search</value>
   </data>
-  <data name="SearchRetainDesc" xml:space="preserve">
-    <value>The last search comes back selected when the panel opens.</value>
-  </data>
   <data name="SearchHistoryTitle" xml:space="preserve">
     <value>Search history</value>
   </data>
@@ -1252,7 +1165,7 @@
     <value>Mouse</value>
   </data>
   <data name="WheelActionTitle" xml:space="preserve">
-    <value>Mouse wheel on Notch</value>
+    <value>Mouse wheel on notch</value>
   </data>
   <data name="WheelSwitchPanel" xml:space="preserve">
     <value>Switch panel</value>
@@ -1261,7 +1174,7 @@
     <value>Volume</value>
   </data>
   <data name="MiddleClickTitle" xml:space="preserve">
-    <value>Middle-click on Dock</value>
+    <value>Middle-click on dock</value>
   </data>
   <data name="MidClickNewWindow" xml:space="preserve">
     <value>New window</value>
@@ -1393,13 +1306,10 @@
     <value>Hide window (Koy keeps running)</value>
   </data>
   <data name="ThemeDesc" xml:space="preserve">
-    <value>System follows the Windows app theme and updates as soon as it changes. The Koy window follows it; the notch and dock keep their own dark look.</value>
-  </data>
-  <data name="AccentColorDesc2" xml:space="preserve">
-    <value>Used on switches, selected items and primary buttons. Also used for the dock and notch accents (active indicator, Koy button, switches, sliders).</value>
+    <value>System follows the Windows app theme. Only the Koy window changes; the notch and dock stay dark.</value>
   </data>
   <data name="UseWindowsAccentDesc" xml:space="preserve">
-    <value>Uses the Windows accent color; the color choice above is disabled.</value>
+    <value>While on, the color choice above is disabled.</value>
   </data>
   <data name="SurfaceHeader" xml:space="preserve">
     <value>Surface</value>
@@ -1416,17 +1326,11 @@
   <data name="CornerRound" xml:space="preserve">
     <value>Round</value>
   </data>
-  <data name="AnimationDesc" xml:space="preserve">
-    <value>Page transitions, hover and switch motion. When off, everything is instant.</value>
-  </data>
   <data name="ReduceMotionDesc" xml:space="preserve">
     <value>If animations are off in Windows, Koy turns motion off too.</value>
   </data>
   <data name="MotionTogglesTitle" xml:space="preserve">
     <value>Individual animations</value>
-  </data>
-  <data name="MotionTogglesDesc" xml:space="preserve">
-    <value>Turn off a single animation; it then jumps straight to its final state.</value>
   </data>
   <data name="MotionTogglesDisabledHint" xml:space="preserve">
     <value>These have no effect while the overall animation setting is off.</value>
@@ -1443,9 +1347,6 @@
   <data name="MotionOsd" xml:space="preserve">
     <value>Volume, brightness and notification pop-ups</value>
   </data>
-  <data name="MotionBadgeBounce" xml:space="preserve">
-    <value>Badge bounce</value>
-  </data>
   <data name="MotionTabTransitions" xml:space="preserve">
     <value>Notch tab transitions</value>
   </data>
@@ -1454,9 +1355,6 @@
   </data>
   <data name="ClockHourFormatTitle" xml:space="preserve">
     <value>Time format</value>
-  </data>
-  <data name="ClockHourFormatDesc" xml:space="preserve">
-    <value>Automatic follows the interface language.</value>
   </data>
   <data name="ClockFormatAuto" xml:space="preserve">
     <value>Automatic</value>
@@ -1470,14 +1368,8 @@
   <data name="ClockShowSecondsTitle" xml:space="preserve">
     <value>Show seconds</value>
   </data>
-  <data name="ClockShowSecondsDesc" xml:space="preserve">
-    <value>In the notch clock. Updates every second only while the notch is visible.</value>
-  </data>
   <data name="ClockFirstDayTitle" xml:space="preserve">
     <value>First day of the week</value>
-  </data>
-  <data name="ClockFirstDayDesc" xml:space="preserve">
-    <value>Used by the calendar month grid and week numbers.</value>
   </data>
   <data name="ClockFirstDayMonday" xml:space="preserve">
     <value>Monday</value>
@@ -1490,9 +1382,6 @@
   </data>
   <data name="ClockShowWeekNumberTitle" xml:space="preserve">
     <value>Show week number</value>
-  </data>
-  <data name="ClockShowWeekNumberDesc" xml:space="preserve">
-    <value>Next to the selected day in the calendar.</value>
   </data>
   <data name="ClockCustomDateTitle" xml:space="preserve">
     <value>Custom date format</value>
@@ -1527,41 +1416,17 @@
   <data name="ClockShowDateTitle" xml:space="preserve">
     <value>Show date next to the time</value>
   </data>
-  <data name="ClockShowDateDesc" xml:space="preserve">
-    <value>Adds the short date after the clock in the collapsed and peeking notch. Off by default.</value>
-  </data>
   <data name="ClockSecondTimeZoneTitle" xml:space="preserve">
     <value>Second time zone</value>
   </data>
-  <data name="ClockSecondTimeZoneDesc" xml:space="preserve">
-    <value>Shows a small second clock line in the peeking and open notch.</value>
-  </data>
   <data name="ClockSecondTimeZoneNone" xml:space="preserve">
     <value>None</value>
-  </data>
-  <data name="UnitWindTitle" xml:space="preserve">
-    <value>Wind speed</value>
-  </data>
-  <data name="UnitWindKmh" xml:space="preserve">
-    <value>km/h</value>
-  </data>
-  <data name="UnitWindMs" xml:space="preserve">
-    <value>m/s</value>
-  </data>
-  <data name="UnitWindMph" xml:space="preserve">
-    <value>mph</value>
-  </data>
-  <data name="UnitWindKnots" xml:space="preserve">
-    <value>knots</value>
   </data>
   <data name="WeatherWindTooltip" xml:space="preserve">
     <value>Wind {0}</value>
   </data>
   <data name="UnitNetworkSpeedTitle" xml:space="preserve">
     <value>Network speed</value>
-  </data>
-  <data name="UnitNetworkSpeedDesc" xml:space="preserve">
-    <value>Bytes (MB/s) or bits (Mb/s) on the System page.</value>
   </data>
   <data name="UnitBytes" xml:space="preserve">
     <value>Bytes</value>
@@ -1662,9 +1527,6 @@
   <data name="AdvancedFilterPlaceholder" xml:space="preserve">
     <value>Search setting or key...</value>
   </data>
-  <data name="AdvancedFilterHint" xml:space="preserve">
-    <value>Filter by key</value>
-  </data>
   <data name="AdvancedDefault" xml:space="preserve">
     <value>Default: {0}</value>
   </data>
@@ -1695,9 +1557,6 @@
   <data name="NotchOpenDelayTitle" xml:space="preserve">
     <value>Open delay</value>
   </data>
-  <data name="NotchOpenDelayDesc" xml:space="preserve">
-    <value>Wait before opening on hover or on drag. Clicking always opens at once.</value>
-  </data>
   <data name="NotchCloseDelayTitle" xml:space="preserve">
     <value>Close delay after the pointer leaves</value>
   </data>
@@ -1706,9 +1565,6 @@
   </data>
   <data name="NotchTabBarDesc" xml:space="preserve">
     <value>When hidden, switch pages with the mouse wheel or shortcuts.</value>
-  </data>
-  <data name="NotchTabBarIconLabel" xml:space="preserve">
-    <value>Icon and name</value>
   </data>
   <data name="NotchTabBarIcon" xml:space="preserve">
     <value>Icon only</value>
@@ -1801,7 +1657,7 @@
     <value>Identify displays</value>
   </data>
   <data name="WizTitle" xml:space="preserve">
-    <value>Koy Setup</value>
+    <value>Koy setup</value>
   </data>
   <data name="WizStep1" xml:space="preserve">
     <value>Step 1 / 4</value>
@@ -1855,7 +1711,7 @@
     <value>Use your location for weather?</value>
   </data>
   <data name="WizLocationBody" xml:space="preserve">
-    <value>The notch can show the weather. Your location is read once when Koy starts (at most once a day) and stays on this computer; only rounded coordinates are sent to Open-Meteo for the forecast and to OpenStreetMap for the city name. You can change this later in Settings.</value>
+    <value>The notch can show the weather. Your location is read only when Koy starts (at most once a day) and stays on this computer; only rounded coordinates are sent to Open-Meteo for the forecast and to OpenStreetMap for the city name. You can change this later in the Koy window.</value>
   </data>
   <data name="WizLocationYes" xml:space="preserve">
     <value>Yes, use my location</value>
@@ -1867,7 +1723,7 @@
     <value>Not now</value>
   </data>
   <data name="WizLocationNoDesc" xml:space="preserve">
-    <value>Weather stays hidden until you pick a city or turn location on in Settings.</value>
+    <value>Weather stays hidden until you pick a city or turn location on in the Koy window.</value>
   </data>
   <data name="WizLocating" xml:space="preserve">
     <value>Getting your location…</value>
@@ -1936,7 +1792,7 @@
     <value>All set!</value>
   </data>
   <data name="WizDoneBody" xml:space="preserve">
-    <value>Your choices have been applied. You can change settings anytime from the menu at the bottom right or the Koy window.</value>
+    <value>Your choices have been applied. You can change settings anytime from the menu at the bottom right or from the Koy window.</value>
   </data>
   <data name="WizStartupTitle" xml:space="preserve">
     <value>Start Koy when Windows starts</value>
@@ -2019,14 +1875,8 @@
   <data name="OpenInSettings" xml:space="preserve">
     <value>Open in Settings</value>
   </data>
-  <data name="TabMusic" xml:space="preserve">
-    <value>Music</value>
-  </data>
   <data name="TabControlCenter" xml:space="preserve">
     <value>Controls</value>
-  </data>
-  <data name="TabStatus" xml:space="preserve">
-    <value>Status</value>
   </data>
   <data name="TabCalendar" xml:space="preserve">
     <value>Calendar</value>
@@ -2079,9 +1929,6 @@
   <data name="DockShowRecentsTitle" xml:space="preserve">
     <value>Recent files</value>
   </data>
-  <data name="DockShowRecentsDesc" xml:space="preserve">
-    <value>A stack button in the dock lists the last 10 files you opened (Windows Recent folder).</value>
-  </data>
   <data name="RecentFiles" xml:space="preserve">
     <value>Recent files</value>
   </data>
@@ -2109,9 +1956,6 @@
   <data name="WeatherPlaceDevice" xml:space="preserve">
     <value>My location</value>
   </data>
-  <data name="WeatherNoLocation" xml:space="preserve">
-    <value>No location set for weather</value>
-  </data>
   <data name="WeatherPickLocation" xml:space="preserve">
     <value>Choose location</value>
   </data>
@@ -2132,12 +1976,6 @@
   </data>
   <data name="FocusRound" xml:space="preserve">
     <value>Round {0} / {1}</value>
-  </data>
-  <data name="FocusSessions" xml:space="preserve">
-    <value>Completed sessions</value>
-  </data>
-  <data name="FocusPause" xml:space="preserve">
-    <value>Pause</value>
   </data>
   <data name="FocusSkip" xml:space="preserve">
     <value>Skip to next phase</value>
@@ -2535,24 +2373,6 @@
   <data name="AboutSiteDesc" xml:space="preserve">
     <value>Screenshots, downloads and news at koyhq.github.io/koy.</value>
   </data>
-  <data name="AboutThanksTitle" xml:space="preserve">
-    <value>Thanks and inspiration</value>
-  </data>
-  <data name="AboutThanksDesc" xml:space="preserve">
-    <value>Koy grew from the ideas of two projects. No code, images or text were taken from either.</value>
-  </data>
-  <data name="AboutNectarTitle" xml:space="preserve">
-    <value>Nectar</value>
-  </data>
-  <data name="AboutNectarDesc" xml:space="preserve">
-    <value>The idea of a spring-animated notch at the top of the screen.</value>
-  </data>
-  <data name="AboutSeelenTitle" xml:space="preserve">
-    <value>Seelen UI</value>
-  </data>
-  <data name="AboutSeelenDesc" xml:space="preserve">
-    <value>A floating dock that replaces the taskbar, and smart placement near windows.</value>
-  </data>
   <data name="UpdateReadyOnExit" xml:space="preserve">
     <value>A new version was downloaded and will install when Koy closes. Check now to install it immediately.</value>
   </data>
@@ -2644,7 +2464,7 @@
     <value>Updated to Koy {0}</value>
   </data>
   <data name="WhatsNewIntro" xml:space="preserve">
-    <value>Here's what's new in this release:</value>
+    <value>Here's what's new in this release.</value>
   </data>
   <data name="WhatsNewDone" xml:space="preserve">
     <value>Got it</value>
@@ -2653,7 +2473,7 @@
     <value>Microphone and camera indicator</value>
   </data>
   <data name="PrivacyIndicatorDesc" xml:space="preserve">
-    <value>Shows a coloured dot on the notch when an app uses the camera or microphone.</value>
+    <value>Shows a colored dot on the notch when an app uses the camera or microphone.</value>
   </data>
   <data name="PrivacyTooltipCamAndMic" xml:space="preserve">
     <value>Camera ({0}) and microphone ({1}) in use</value>
@@ -2755,10 +2575,7 @@
     <value>Unknown artist</value>
   </data>
   <data name="MenuWindowTitle" xml:space="preserve">
-    <value>Koy Menu</value>
-  </data>
-  <data name="WizardWindowTitle" xml:space="preserve">
-    <value>Koy Setup</value>
+    <value>Koy menu</value>
   </data>
   <data name="PrivacyUnknownApp" xml:space="preserve">
     <value>Unknown app</value>
@@ -2899,13 +2716,13 @@
     <value>Notch style</value>
   </data>
   <data name="NotchStyleDesc" xml:space="preserve">
-    <value>Pinned touches the top edge of the screen; Floating is a rounded island with a small gap above.</value>
+    <value>Pinned touches the top edge of the screen; Floating leaves a small gap above.</value>
   </data>
   <data name="NotchStylePinned" xml:space="preserve">
     <value>Pinned to screen</value>
   </data>
   <data name="NotchStyleFloating" xml:space="preserve">
-    <value>Floating island</value>
+    <value>Floating</value>
   </data>
   <data name="DockItemChangeIcon" xml:space="preserve">
     <value>Change icon...</value>
@@ -2921,9 +2738,6 @@
   </data>
   <data name="IconPackTitle" xml:space="preserve">
     <value>Icon pack</value>
-  </data>
-  <data name="IconPackDesc" xml:space="preserve">
-    <value>Replace dock app icons with images from a folder. Name files like the shortcut: Firefox.png, Notepad.ico. Apps without a file keep their own icon.</value>
   </data>
   <data name="IconPackBuiltin" xml:space="preserve">
     <value>Built-in</value>
@@ -2945,9 +2759,6 @@
   </data>
   <data name="ProfilesSaveTitle" xml:space="preserve">
     <value>Save current settings as a profile</value>
-  </data>
-  <data name="ProfilesSaveDesc" xml:space="preserve">
-    <value>Pick the parts to keep. A profile can be applied later or exported to a file. Machine-specific values (displays, weather location, pinned apps, local icon paths) are never included.</value>
   </data>
   <data name="ProfilesNameHint" xml:space="preserve">
     <value>Profile name</value>
@@ -3127,7 +2938,7 @@
     <value>With the dot style, show a dot for each open window (up to three).</value>
   </data>
   <data name="DockBadgesHeader" xml:space="preserve">
-    <value>BADGES</value>
+    <value>Badges</value>
   </data>
   <data name="DockShowBadgesTitle" xml:space="preserve">
     <value>Show badges</value>
@@ -3162,9 +2973,6 @@
   <data name="RevealTriggerTitle" xml:space="preserve">
     <value>Reveal trigger</value>
   </data>
-  <data name="RevealTriggerDesc" xml:space="preserve">
-    <value>How a hidden dock comes back when the pointer reaches the bottom edge.</value>
-  </data>
   <data name="RevealEdgeTouch" xml:space="preserve">
     <value>Touch edge</value>
   </data>
@@ -3194,9 +3002,6 @@
   </data>
   <data name="RulesAddTitle" xml:space="preserve">
     <value>Switch profile per app</value>
-  </data>
-  <data name="RulesAddDesc" xml:space="preserve">
-    <value>While the app is in front, Koy applies the chosen profile; when you leave it, Koy goes back to what the profile changed. A rule is applied after the app has stayed in front for about a second. New rules start switched off. Applying a profile never changes the rules.</value>
   </data>
   <data name="RulesProcessHint" xml:space="preserve">
     <value>App executable name, for example chrome.exe</value>
@@ -3278,9 +3083,6 @@
   </data>
   <data name="UserStyleTitle" xml:space="preserve">
     <value>Override theme values from a file</value>
-  </data>
-  <data name="UserStyleDesc" xml:space="preserve">
-    <value>Reads user-theme.json from the Koy folder and overrides allowed colors, sizes, corners and fonts. Nothing else in the file is used, and it cannot run code.</value>
   </data>
   <data name="UserStyleOpenFolder" xml:space="preserve">
     <value>Open folder</value>
@@ -3366,9 +3168,6 @@
   <data name="LiveBgSourceTitle" xml:space="preserve">
     <value>Source</value>
   </data>
-  <data name="LiveBgSourceDesc" xml:space="preserve">
-    <value>A built-in ambient gradient or your own GIF, short video (MP4, WebM) or WebP image. Reduce motion and battery saver show a still first frame.</value>
-  </data>
   <data name="LiveBgSourceAmbient" xml:space="preserve">
     <value>Ambient</value>
   </data>
@@ -3377,9 +3176,6 @@
   </data>
   <data name="LiveBgPresetTitle" xml:space="preserve">
     <value>Ambient preset</value>
-  </data>
-  <data name="LiveBgPresetDesc" xml:space="preserve">
-    <value>Slowly shifting dark colors. No file is loaded.</value>
   </data>
   <data name="LiveBgPresetAurora" xml:space="preserve">
     <value>Aurora</value>
@@ -3462,9 +3258,6 @@
   <data name="LiveBgScrimTitle" xml:space="preserve">
     <value>Dark overlay</value>
   </data>
-  <data name="LiveBgScrimDesc" xml:space="preserve">
-    <value>Darkens the background so text stays readable (percent).</value>
-  </data>
   <data name="LiveBgErrorMissing" xml:space="preserve">
     <value>No file chosen.</value>
   </data>
@@ -3486,14 +3279,11 @@
   <data name="HomeCardSectionTitle" xml:space="preserve">
     <value>Home cards</value>
   </data>
-  <data name="HomeCardSectionDesc" xml:space="preserve">
-    <value>Choose which cards appear on the Home tab and their display order.</value>
-  </data>
   <data name="HomeCardMusic" xml:space="preserve">
-    <value>Music / Now playing</value>
+    <value>Music / now playing</value>
   </data>
   <data name="HomeCardHeadphoneBattery" xml:space="preserve">
-    <value>Connected audio / Battery</value>
+    <value>Connected audio / battery</value>
   </data>
   <data name="HomeCardSystemNetwork" xml:space="preserve">
     <value>System and network</value>
@@ -3507,20 +3297,8 @@
   <data name="HomeCardTimers" xml:space="preserve">
     <value>Timers</value>
   </data>
-  <data name="HomeCardMoveUp" xml:space="preserve">
-    <value>Move up</value>
-  </data>
-  <data name="HomeCardMoveDown" xml:space="preserve">
-    <value>Move down</value>
-  </data>
-  <data name="VisualizerSectionTitle" xml:space="preserve">
-    <value>Audio visualizer</value>
-  </data>
   <data name="VisualizerStyleTitle" xml:space="preserve">
     <value>Visualizer style</value>
-  </data>
-  <data name="VisualizerStyleDesc" xml:space="preserve">
-    <value>Visual representation of the audio spectrum during playback.</value>
   </data>
   <data name="VisualizerStyleBars" xml:space="preserve">
     <value>Bars</value>
@@ -3534,9 +3312,6 @@
   <data name="VisualizerColorSourceTitle" xml:space="preserve">
     <value>Visualizer color</value>
   </data>
-  <data name="VisualizerColorSourceDesc" xml:space="preserve">
-    <value>Whether the spectrum follows the theme accent or album artwork.</value>
-  </data>
   <data name="VisualizerColorSourceAccent" xml:space="preserve">
     <value>Theme accent</value>
   </data>
@@ -3546,14 +3321,8 @@
   <data name="VisualizerBarCountTitle" xml:space="preserve">
     <value>Bar count</value>
   </data>
-  <data name="VisualizerBarCountDesc" xml:space="preserve">
-    <value>Number of frequency bars displayed (between 3 and 16).</value>
-  </data>
   <data name="DockGroupingModeTitle" xml:space="preserve">
     <value>Window grouping</value>
-  </data>
-  <data name="DockGroupingModeDesc" xml:space="preserve">
-    <value>Group multiple windows of the same application into a single dock icon.</value>
   </data>
   <data name="DockGroupingModeNever" xml:space="preserve">
     <value>Never</value>
@@ -3566,9 +3335,6 @@
   </data>
   <data name="DockLabelModeTitle" xml:space="preserve">
     <value>App labels</value>
-  </data>
-  <data name="DockLabelModeDesc" xml:space="preserve">
-    <value>Show application title labels beneath dock icons.</value>
   </data>
   <data name="DockLabelModeNever" xml:space="preserve">
     <value>Never</value>
@@ -3958,19 +3724,19 @@
     <value>Google Calendar</value>
   </data>
   <data name="CalGoogleClientId" xml:space="preserve">
-    <value>Google OAuth Client ID</value>
+    <value>Google OAuth client ID</value>
   </data>
   <data name="CalOutlookTitle" xml:space="preserve">
     <value>Outlook Calendar</value>
   </data>
   <data name="CalOutlookClientId" xml:space="preserve">
-    <value>Outlook OAuth Client ID</value>
+    <value>Outlook OAuth client ID</value>
   </data>
   <data name="CalClientIdHint" xml:space="preserve">
     <value>Optional: your own OAuth Client ID (Koy's client is used when empty)</value>
   </data>
   <data name="CalGoogleClientSecret" xml:space="preserve">
-    <value>Google OAuth Client Secret</value>
+    <value>Google OAuth client secret</value>
   </data>
   <data name="CalClientSecretHint" xml:space="preserve">
     <value>Client secret Google issued for your own Client ID</value>
@@ -4027,7 +3793,7 @@
     <value>Optional calendar sync privacy</value>
   </data>
   <data name="WizCalendarPrivacyDesc" xml:space="preserve">
-    <value>Connecting Google or Outlook in Settings is optional and strictly read-only. Tokens are encrypted on your device via Windows DPAPI and cached locally for offline viewing.</value>
+    <value>Connecting Google or Outlook from the Koy window is optional and strictly read-only. Tokens are encrypted on your device via Windows DPAPI and cached locally for offline viewing.</value>
   </data>
   <data name="SubTabGeneralSystem" xml:space="preserve">
     <value>System &amp; units</value>
@@ -4070,21 +3836,6 @@
   </data>
   <data name="LiveBgKindVideo" xml:space="preserve">
     <value>Video loop</value>
-  </data>
-  <data name="LiveBgPresetNebulaFlow" xml:space="preserve">
-    <value>Nebula flow</value>
-  </data>
-  <data name="LiveBgPresetLiquidGold" xml:space="preserve">
-    <value>Liquid gold</value>
-  </data>
-  <data name="LiveBgPresetDeepOcean" xml:space="preserve">
-    <value>Deep ocean</value>
-  </data>
-  <data name="LiveBgPresetVelvetAurora" xml:space="preserve">
-    <value>Velvet aurora</value>
-  </data>
-  <data name="LiveBgKindEffect" xml:space="preserve">
-    <value>Code effect</value>
   </data>
   <data name="LiveBgKindAmbient" xml:space="preserve">
     <value>Ambient</value>
