@@ -7,6 +7,26 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.14](https://github.com/koyhq/koy/compare/v0.2.13...v0.2.14) (2026-11-21)
+
+
+### Added
+
+* **notch:** add a mirrored cover-colored wave to the music page ([6e90d6c](https://github.com/koyhq/koy/commit/6e90d6cd2bcc846f81dc6a815da4dbf258cb1917))
+* **notch:** add collapsed progress ring and staggered music page entrance ([0ed5e39](https://github.com/koyhq/koy/commit/0ed5e396000dc62b9f256be67ffead3725beb7c4))
+* **notch:** add flowing cover colors and a vinyl mode to the music page ([b0da69e](https://github.com/koyhq/koy/commit/b0da69e2a2278d7249c6b2960a6f490ac39b39f1))
+* **notch:** animate track changes on the music page ([24f2ced](https://github.com/koyhq/koy/commit/24f2ced909155101c0f1d0bfe1870c5ba84e1f0e))
+* **notch:** center synced lyrics with distance fade and move the lyrics toggle ([f1efa21](https://github.com/koyhq/koy/commit/f1efa21d32d361cea84fb53a314592f5917fac5d))
+* **notch:** prefer flowing cover colors over the live background on the music card ([519a20b](https://github.com/koyhq/koy/commit/519a20b6f3211f87766bfb5fb40dab55b51d8a89))
+* **notch:** unified music page with motion ([8df8271](https://github.com/koyhq/koy/commit/8df8271d0fdbd1efc194d301624d4c9bd62a7b99))
+
+
+### Fixed
+
+* **notch:** decode live background video in software instead of MediaElement ([4a73423](https://github.com/koyhq/koy/commit/4a7342385c2786796f5cea087053f20a29c0fb77))
+* **perf:** stop shader effects from loading the Direct3D stack ([c266420](https://github.com/koyhq/koy/commit/c26642094e9dc093bce24eba571e48340f493bb3))
+* stop Direct3D from loading in software rendering (shader effects, MediaElement) ([de3205c](https://github.com/koyhq/koy/commit/de3205c07493ee35724ecbbe1a5b419b9d8efe90))
+
 ## [0.2.13](https://github.com/koyhq/koy/compare/v0.2.12...v0.2.13) (2026-11-16)
 
 
