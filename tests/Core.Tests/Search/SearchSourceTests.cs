@@ -691,6 +691,7 @@ public class SearchSourceTests
         public bool SetPinned(Guid id, bool pinned) => true;
         public bool Remove(Guid id) => true;
         public void Clear() { }
+        public void Restore(IReadOnlyList<ClipboardItem> items) { }
         public bool CopyBack(Guid id) { Copied.Add(id); return true; }
         public void Dispose() { }
     }

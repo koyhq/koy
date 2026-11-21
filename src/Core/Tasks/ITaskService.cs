@@ -34,4 +34,7 @@ public interface ITaskService
     bool SetDone(Guid id, bool done);
 
     bool Remove(Guid id);
+
+    /// <summary>Silinen görevi aynı kimlik, gün, saat ve tamamlanma durumuyla geri koyar ("Geri al"). Zaten varsa ya da başlık boşsa false.</summary>
+    bool Restore(TaskItem item);
 }

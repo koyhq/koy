@@ -3867,5 +3867,47 @@
   <data name="UpdateReleaseNotes" xml:space="preserve">
     <value>Bütün notlar</value>
   </data>
+  <data name="UndoAction" xml:space="preserve">
+    <value>Geri al</value>
+  </data>
+  <data name="UndoClipboardCleared" xml:space="preserve">
+    <value>Pano temizlendi</value>
+  </data>
+  <data name="UndoClipboardItemRemoved" xml:space="preserve">
+    <value>Pano öğesi silindi</value>
+  </data>
+  <data name="UndoShelfCleared" xml:space="preserve">
+    <value>Raf temizlendi</value>
+  </data>
+  <data name="UndoShelfItemRemoved" xml:space="preserve">
+    <value>Raftan kaldırıldı</value>
+  </data>
+  <data name="UndoEventDeleted" xml:space="preserve">
+    <value>Etkinlik silindi</value>
+  </data>
+  <data name="UndoTaskDeleted" xml:space="preserve">
+    <value>Görev silindi</value>
+  </data>
+  <data name="FormTitleEmpty" xml:space="preserve">
+    <value>Önce bir başlık yaz</value>
+  </data>
+  <data name="ShelfRemoveItem" xml:space="preserve">
+    <value>Raftan kaldır</value>
+  </data>
+  <data name="MusicProgress" xml:space="preserve">
+    <value>Çalma konumu</value>
+  </data>
+  <data name="CalDayToday" xml:space="preserve">
+    <value>bugün</value>
+  </data>
+  <data name="CalDaySelected" xml:space="preserve">
+    <value>seçili</value>
+  </data>
+  <data name="CalDayHasEvents" xml:space="preserve">
+    <value>etkinlik var</value>
+  </data>
+  <data name="TabSelected" xml:space="preserve">
+    <value>Seçili</value>
+  </data>
 </root>
 

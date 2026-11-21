@@ -108,6 +108,7 @@ internal sealed class FakeShelf(IReadOnlyList<ShelfItem> items) : IShelfService
     public void AddText(string text) { }
     public void Remove(string id) { }
     public void Clear() { }
+    public void Restore(IReadOnlyList<ShelfItem> items) { }
     public void Dispose() { }
 }
 

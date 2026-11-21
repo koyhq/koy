@@ -123,6 +123,24 @@ public sealed class TaskService : ITaskService
         return true;
     }
 
+    public bool Restore(TaskItem item)
+    {
+        if (item is null || string.IsNullOrWhiteSpace(item.Title))
+            return false;
+
+        lock (_gate)
+        {
+            if (_items.Any(t => t.Id == item.Id))
+                return false;
+            _items.Add(item);
+            Prune();
+            _file.Save(_items);
+        }
+
+        Changed?.Invoke(this, EventArgs.Empty);
+        return true;
+    }
+
     private DateOnly Today() => DateOnly.FromDateTime(_now().LocalDateTime);
 
     /// <summary>

@@ -3,9 +3,13 @@ using System.Globalization;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Koy.App.Features.Notch;
+using Koy.App.Resources;
 using Koy.Core.Calendar;
 using Koy.Core.Clock;
+using Koy.Core.Notch;
 using Koy.Core.Settings;
+using Koy.Core.Undo;
 
 namespace Koy.App.Features.Calendar;
 
@@ -13,10 +17,32 @@ namespace Koy.App.Features.Calendar;
 public sealed record CalendarCell(DateOnly Date, bool IsCurrentMonth, bool IsToday, bool IsSelected, bool HasEvents)
 {
     public int Day => Date.Day;
+
+    /// <summary>Ekran okuyucu adı: "14 Kasım Cumartesi, bugün, etkinlik var" (yalnız "14" okunmasın).</summary>
+    public string AutomationName => CalendarDayNames.For(Date, IsToday, IsSelected, HasEvents);
 }
 
 /// <summary>Hafta görünümünün bir satırı.</summary>
-public sealed record WeekDayRow(DateOnly Date, string Label, bool IsToday, bool IsSelected, string Summary, bool HasEvents);
+public sealed record WeekDayRow(DateOnly Date, string Label, bool IsToday, bool IsSelected, string Summary, bool HasEvents)
+{
+    public string AutomationName => CalendarDayNames.For(Date, IsToday, IsSelected, HasEvents);
+}
+
+/// <summary>Takvim gün düğmelerinin ekran okuyucu adı (tarih mevcut arayüz dilinde).</summary>
+internal static class CalendarDayNames
+{
+    public static string For(DateOnly date, bool today, bool selected, bool hasEvents)
+    {
+        var parts = new List<string> { date.ToString("d MMMM dddd", CultureInfo.CurrentCulture) };
+        if (today)
+            parts.Add(Strings.Get("CalDayToday"));
+        if (selected)
+            parts.Add(Strings.Get("CalDaySelected"));
+        if (hasEvents)
+            parts.Add(Strings.Get("CalDayHasEvents"));
+        return string.Join(", ", parts);
+    }
+}
 
 /// <summary>Seçili günün bir etkinlik satırı.</summary>
 public sealed record EventRow(string Id, string TimeText, string Title, CalendarEventSource Source = CalendarEventSource.Local)
@@ -119,7 +145,11 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private bool _newEventTimeInvalid;
 
-    partial void OnNewEventTimeChanged(string value) => NewEventTimeInvalid = false;
+    partial void OnNewEventTimeChanged(string value)
+    {
+        NewEventTimeInvalid = false;
+        FormError = "";
+    }
 
     partial void OnViewModeChanged(CalendarViewMode value) => Refresh();
 
@@ -257,21 +287,51 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
         Refresh();
     }
 
+    /// <summary>Forma yazılan başlık ya da saat geçersizse görünen hata ("Önce bir başlık yaz"); yoksa boş.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasFormError))]
+    private string _formError = "";
+
+    public bool HasFormError => FormError.Length > 0;
+
+    partial void OnNewEventTitleChanged(string value) => FormError = "";
+
     [RelayCommand]
     private void AddEvent()
     {
-        NewEventTimeInvalid = !EventAgenda.TryParseTime(NewEventTime, out var time);
-        if (NewEventTimeInvalid)
+        var error = QuickAddValidation.ForEvent(NewEventTitle, NewEventTime);
+        NewEventTimeInvalid = error == QuickAddError.TimeInvalid;
+        FormError = error switch
+        {
+            QuickAddError.TitleEmpty => Strings.Get("FormTitleEmpty"),
+            QuickAddError.TimeInvalid => Strings.Get("TaskTimeInvalid"),
+            _ => ""
+        };
+        if (error != QuickAddError.None)
             return;
 
+        // Doğrulama geçti: saat çözülür.
+        _ = EventAgenda.TryParseTime(NewEventTime, out var time);
         if (_events.Book.Add(NewEventTitle, Anchor, time) is null)
             return;
 
         NewEventTitle = "";
     }
 
+    /// <summary>Onay sormaz: etkinlik hemen silinir, birkaç saniye "Geri al" çıkar (Burhan kararı, 2026-11-21).</summary>
     [RelayCommand]
-    private void DeleteEvent(string id) => _events.Book.Remove(id);
+    private void DeleteEvent(string id)
+    {
+        var removed = _events.Book.Events.FirstOrDefault(e => e.Id == id && e.Source == CalendarEventSource.Local);
+        if (!_events.Book.Remove(id))
+            return;
+
+        if (removed is not null)
+            Undo?.Offer(UndoKind.EventDeleted, 1, () => _events.Book.Restore(removed));
+    }
+
+    /// <summary>Geri al şeridi (NotchFeature verir; yoksa silme yine hemen olur, geri alma çıkmaz).</summary>
+    public UndoToastViewModel? Undo { get; set; }
 
     public void Dispose()
     {

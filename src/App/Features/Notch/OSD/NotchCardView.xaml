@@ -58,7 +58,14 @@
       </Grid>
     </Border>
 
+    <!-- Uzun bildirim metni: alt başlık iki satıra sığar, kalanı kesilir; imleç üstündeyken tam metin ipucunda. -->
     <StackPanel Grid.Column="1" Margin="12,0,10,0" VerticalAlignment="Center">
+      <StackPanel.ToolTip>
+        <StackPanel MaxWidth="320">
+          <TextBlock Text="{Binding Card.Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding Card.Subtitle}" TextWrapping="Wrap" Margin="0,3,0,0" />
+        </StackPanel>
+      </StackPanel.ToolTip>
       <TextBlock Text="{Binding Card.Header}" FontSize="10.5" Foreground="{DynamicResource KoyNotchTextMuted}" Margin="0,0,0,1"
                  TextTrimming="CharacterEllipsis">
         <TextBlock.Style>
@@ -75,6 +82,7 @@
       <TextBlock Text="{Binding Card.Title}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource KoyNotchText}"
                  TextTrimming="CharacterEllipsis" />
       <TextBlock Text="{Binding Card.Subtitle}" FontSize="11" Foreground="{DynamicResource KoyNotchTextMuted}" Margin="0,2,0,0"
+                 TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="14" MaxHeight="28"
                  TextTrimming="CharacterEllipsis">
         <TextBlock.Style>
           <Style TargetType="TextBlock">

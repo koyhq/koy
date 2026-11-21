@@ -13,7 +13,7 @@ namespace Koy.UiSnapshots;
 /// <summary>
 /// Koy'un pencerelerini ekrana çıkarmadan PNG'ye çevirir. Hiçbir Win32 kancası, AppBar ya da görev çubuğu
 /// servisi başlatılmaz; pencereler gösterilmez, yalnız ölçülüp çizilir.
-/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall|centik|dock|dockbar|jumplist|startmenu|eklentiler|efektler]
+/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall|centik|centik-erisim|dock|dockbar|jumplist|startmenu|eklentiler|efektler]
 /// <c>--scene jumplist</c>: dock sağ tık menüsünün bölümlü atlama listesi hâli (sentetik veri).
 /// <c>--scene startmenu</c>: Başlat düğmesinin sağ tık menüsü (Win+X karşılığı), alt menü açık hâliyle.
 /// <c>--scene eklentiler</c>: Eklentiler sayfası (depodaki store/ klasöründen sahte ağla; kurulum, uygulama ve hata durumları).
@@ -100,6 +100,8 @@ public static class Program
                 RenderUninstall(outDir, prefix, theme);
             else if (scene == "centik")
                 RenderCentik(outDir, prefix, theme);
+            else if (scene == "centik-erisim")
+                RenderNotchAccessibilityScenes(n => Path.Combine(outDir, $"{prefix}-{theme}-{n}.png"));
             else if (scene is "efektler" or "effects")
                 RenderEffects(outDir, prefix, theme);
             else if (scene == "efekt-video")
@@ -650,6 +652,44 @@ public static class Program
         return null;
     }
 
+    /// <summary>Çentik erişilebilirliği ve güvenli silme sahneleri (--scene centik-erisim): hızlı çalışır, tam centik sahnesini beklemeden.</summary>
+    private static void RenderNotchAccessibilityScenes(Func<string, string> name)
+    {
+        var shelfItems = new[]
+        {
+            new Koy.Core.Shelf.ShelfItem("1", Sample.T("sunum.pdf", "slides.pdf"), Sample.T(@"C:\Belgeler\sunum.pdf", @"C:\Documents\slides.pdf"), Koy.Core.Shelf.ShelfItemKind.File, DateTimeOffset.Now),
+            new Koy.Core.Shelf.ShelfItem("2", Sample.T("notlar", "notes"), Sample.T(@"C:\Belgeler\notlar", @"C:\Documents\notes"), Koy.Core.Shelf.ShelfItemKind.Directory, DateTimeOffset.Now),
+        };
+
+        // Çentik erişilebilirliği ve güvenli silme: form hatası, Geri al şeridi, düşük pil ve şarj (varsayılan "Saat ve pil" kipi).
+        var set = MakeNotch(music: false);
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Calendar);
+        set.Vm.Calendar.NewEventTitle = "";
+        set.Vm.Calendar.AddEventCommand.Execute(null);
+        ShotNotch(set, name("takvim-hata-baslik"), expanded: true);
+        set.Vm.Calendar.NewEventTitle = Sample.T("Toplantı", "Meeting");
+        set.Vm.Calendar.NewEventTime = "25:99";
+        set.Vm.Calendar.AddEventCommand.Execute(null);
+        ShotNotch(set, name("takvim-hata-saat"), expanded: true);
+        set.Vm.Dispose();
+
+        set = MakeNotch(music: false, shelfItems, power: new FakePower(12));
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Shelf);
+        set.Vm.Shelf.ClearAllCommand.Execute(null);
+        Flush();
+        ShotNotch(set, name("raf-geri-al-pil-dusuk"), expanded: true);
+        set.Vm.Dispose();
+
+        set = MakeNotch(music: false, power: new FakePower(12));
+        ShotNotch(set, name("kapali-pil-dusuk"), expanded: false);
+        set.Vm.Dispose();
+        set = MakeNotch(music: false, power: new FakePower(64, charging: true));
+        ShotNotch(set, name("kapali-pil-sarj"), expanded: false);
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+        ShotNotch(set, name("ana-pil-sarj"), expanded: true);
+        set.Vm.Dispose();
+    }
+
     private static void RenderNotchScenes(Func<string, string> name)
     {
         var shelfItems = new[]
@@ -859,6 +899,8 @@ public static class Program
         set.Vm.Calendar.SetViewCommand.Execute(Koy.Core.Calendar.CalendarViewMode.Day);
         ShotNotch(set, name("takvim-gun"), expanded: true);
         set.Vm.Dispose();
+
+        RenderNotchAccessibilityScenes(name);
 
         // Raf: dolu ve boş. Kontrol: varsayılan sıra ve kayıtlı özel sıra.
         set = MakeNotch(music: false, shelfItems);

@@ -77,6 +77,7 @@ internal sealed class FakeClipboard : IClipboardHistoryService
     public bool SetPinned(Guid id, bool pinned) => true;
     public bool Remove(Guid id) => true;
     public void Clear() { }
+    public void Restore(IReadOnlyList<ClipboardItem> items) { }
     public bool CopyBack(Guid id) => true;
     public void Dispose() { }
 }

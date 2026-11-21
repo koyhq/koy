@@ -3867,5 +3867,47 @@
   <data name="UpdateReleaseNotes" xml:space="preserve">
     <value>Full release notes</value>
   </data>
+  <data name="UndoAction" xml:space="preserve">
+    <value>Undo</value>
+  </data>
+  <data name="UndoClipboardCleared" xml:space="preserve">
+    <value>Clipboard cleared</value>
+  </data>
+  <data name="UndoClipboardItemRemoved" xml:space="preserve">
+    <value>Clip removed</value>
+  </data>
+  <data name="UndoShelfCleared" xml:space="preserve">
+    <value>Shelf cleared</value>
+  </data>
+  <data name="UndoShelfItemRemoved" xml:space="preserve">
+    <value>Removed from shelf</value>
+  </data>
+  <data name="UndoEventDeleted" xml:space="preserve">
+    <value>Event deleted</value>
+  </data>
+  <data name="UndoTaskDeleted" xml:space="preserve">
+    <value>Task deleted</value>
+  </data>
+  <data name="FormTitleEmpty" xml:space="preserve">
+    <value>Write a title first</value>
+  </data>
+  <data name="ShelfRemoveItem" xml:space="preserve">
+    <value>Remove from shelf</value>
+  </data>
+  <data name="MusicProgress" xml:space="preserve">
+    <value>Playback position</value>
+  </data>
+  <data name="CalDayToday" xml:space="preserve">
+    <value>today</value>
+  </data>
+  <data name="CalDaySelected" xml:space="preserve">
+    <value>selected</value>
+  </data>
+  <data name="CalDayHasEvents" xml:space="preserve">
+    <value>has events</value>
+  </data>
+  <data name="TabSelected" xml:space="preserve">
+    <value>Selected</value>
+  </data>
 </root>
 

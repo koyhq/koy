@@ -120,6 +120,29 @@ public sealed class ShelfService : IShelfService
         }
     }
 
+    public void Restore(IReadOnlyList<ShelfItem> items)
+    {
+        var added = false;
+        foreach (var item in items)
+        {
+            if (item is null || _items.Any(i => i.Id == item.Id
+                    || (item.Kind != ShelfItemKind.Text && string.Equals(i.PathOrContent, item.PathOrContent, StringComparison.OrdinalIgnoreCase))))
+                continue;
+            _items.Add(item);
+            added = true;
+        }
+
+        if (!added)
+            return;
+
+        // OrderBy kararlı: eklenme zamanına göre en yeni başta.
+        var sorted = _items.OrderByDescending(i => i.AddedAt).ToList();
+        _items.Clear();
+        _items.AddRange(sorted);
+        Save();
+        ItemsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
     public void Dispose()
     {
     }

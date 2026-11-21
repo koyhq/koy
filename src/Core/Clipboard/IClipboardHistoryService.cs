@@ -33,6 +33,9 @@ public interface IClipboardHistoryService : IDisposable
     /// <summary>Sabitlenmeyenleri siler.</summary>
     void Clear();
 
+    /// <summary>Silinen öğeleri geri koyar ("Geri al"; sabitler dahil). Bir şey eklendiyse <see cref="Changed"/> gelir.</summary>
+    void Restore(IReadOnlyList<ClipboardItem> items);
+
     /// <summary>Öğeyi panoya yazar; bu yazma geçmişe yeniden eklenmez (öğe başa taşınmaz). Başarılıysa true.</summary>
     bool CopyBack(Guid id);
 }

@@ -16,7 +16,7 @@
     <!-- Süzgeç hapı: seçili olan vurgu renginde -->
     <Style x:Key="FilterChip" TargetType="Button">
       <Setter Property="Cursor" Value="Hand" />
-      <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+      <Setter Property="FocusVisualStyle" Value="{DynamicResource NotchFocusVisual}" />
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
@@ -40,7 +40,7 @@
       <Setter Property="Width" Value="22" />
       <Setter Property="Height" Value="22" />
       <Setter Property="Cursor" Value="Hand" />
-      <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+      <Setter Property="FocusVisualStyle" Value="{DynamicResource NotchFocusVisual}" />
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
@@ -61,7 +61,7 @@
     <Style x:Key="ClipCardButton" TargetType="Button">
       <Setter Property="Foreground" Value="{DynamicResource KoyNotchText}" />
       <Setter Property="Cursor" Value="Hand" />
-      <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+      <Setter Property="FocusVisualStyle" Value="{DynamicResource NotchFocusVisual}" />
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">

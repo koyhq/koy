@@ -92,7 +92,12 @@
     <SolidColorBrush x:Key="KoyNotchChip" Color="#1F1F23" />
     <SolidColorBrush x:Key="KoyNotchMuted" Color="#A1A1AA" />
     <SolidColorBrush x:Key="KoyNotchDim" Color="#71717A" />
+    <!-- Klavye odağı halkası (NotchFocusVisual) -->
+    <SolidColorBrush x:Key="KoyNotchFocusRing" Color="#F4F4F5" />
     <SolidColorBrush x:Key="KoyNotchOk" Color="#34D399" />
+    <!-- Pil çubuğu: normal ve düşük (≤ %20, şarjda değil) -->
+    <SolidColorBrush x:Key="KoyNotchBatteryOk" Color="#4ADE80" />
+    <SolidColorBrush x:Key="KoyNotchBatteryLow" Color="#FB7185" />
     <!-- Sekme vurguları (seçili sekmenin simgesi bu renge boyanır) -->
     <SolidColorBrush x:Key="KoyNotchAccentHome" Color="#F4F4F5" />
     <SolidColorBrush x:Key="KoyNotchAccentFocus" Color="#FB7185" />

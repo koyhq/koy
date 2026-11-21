@@ -59,7 +59,7 @@
     <Style x:Key="PlayerButtonStyle" TargetType="Button">
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="Cursor" Value="Hand" />
-      <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+      <Setter Property="FocusVisualStyle" Value="{DynamicResource NotchFocusVisual}" />
       <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
       <Setter Property="RenderTransform">
         <Setter.Value>
@@ -98,7 +98,7 @@
     <Style x:Key="CardButtonStyle" TargetType="Button">
       <Setter Property="Foreground" Value="{DynamicResource KoyNotchText}" />
       <Setter Property="Cursor" Value="Hand" />
-      <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+      <Setter Property="FocusVisualStyle" Value="{DynamicResource NotchFocusVisual}" />
       <Setter Property="HorizontalContentAlignment" Value="Stretch" />
       <Setter Property="Template">
         <Setter.Value>
@@ -326,9 +326,12 @@
                   </Style.Triggers>
                 </Style>
               </StackPanel.Style>
-              <ProgressBar Minimum="0" Maximum="1" Value="{Binding Music.Progress, Mode=OneWay}" Height="4"
-                           Background="#2EFFFFFF" Foreground="{DynamicResource KoyNotchText}" BorderThickness="0"
-                           Cursor="Hand" MouseLeftButtonDown="ProgressBar_MouseLeftButtonDown" />
+              <!-- Tıklama alanı 16 px (görünür çubuk 4 px kalır): 4 px'lik hedefe isabet etmek zordu. -->
+              <Grid Height="16" Margin="0,-6" Background="Transparent" Cursor="Hand" MouseLeftButtonDown="ProgressBar_MouseLeftButtonDown"
+                    AutomationProperties.Name="{Binding [MusicProgress], Source={x:Static res:Loc.Instance}}">
+                <ProgressBar Minimum="0" Maximum="1" Value="{Binding Music.Progress, Mode=OneWay}" Height="4" VerticalAlignment="Center"
+                             Background="#2EFFFFFF" Foreground="{DynamicResource KoyNotchText}" BorderThickness="0" IsHitTestVisible="False" />
+              </Grid>
               <Grid Margin="0,5,0,0">
                 <TextBlock Text="{Binding Music.PositionText}" FontSize="11" Foreground="#8CFFFFFF" />
                 <TextBlock Text="{Binding Music.DurationText}" FontSize="11" Foreground="#8CFFFFFF" HorizontalAlignment="Right" />

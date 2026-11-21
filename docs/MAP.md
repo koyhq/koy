@@ -103,6 +103,19 @@ Unutma: çentik kapalı / gizliyken hiçbir şey oynamaz ve kare tutulmaz (AGENT
 
 Unutma: shader efekti yok (`DropShadowEffect`, `BlurEffect` Direct3D yığınını yükler); yalnız dönüşüm, saydamlık, gradyan, kırpma.
 
+## Geri al (onaysız silme) ve çentik erişilebilirliği
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Undo/UndoBuffer.cs` | Tek yuvalı geri alma kaydı (tür, sayı, bitiş, eylem): `Push`, `TryUndo`, `ExpireIfDue`, `Clear`; süre `TimeProvider`'dan (5 sn). Yeni geri alınabilir silme: `UndoKind`'a değer + `UndoToastViewModel.KeyFor`'a metin anahtarı (iki resx) |
+| Core | `EventBook.Restore`, `ITaskService.Restore`, `ClipboardHistory.Restore` / `IClipboardHistoryService.Restore`, `IShelfService.Restore` | Silinen öğeyi aynı kimlikle geri koyar. Raf yalnız yol tutar: "Temizle" dosyaya dokunmaz |
+| App | `src/App/Features/Notch/UndoToastViewModel.cs`, `NotchWindow.xaml` ("Geri al şeridi") | Metin ve süre zamanlayıcısı; zamanlayıcı yalnız şerit görünürken çalışır, çentik kapanınca ya da gizlenince kayıt bırakılır (`NotchViewModel.UpdateActivePanels` → `Undo.SetActive`). NotchFeature bir örneği Pano/Raf/Takvim/Görev VM'lerine `Undo` olarak verir; onlar silmeden sonra `Undo?.Offer(...)` çağırır |
+| Core | `src/Core/Notch/QuickAddValidation.cs` | Takvim ve görev formunun hata kararı (boş başlık, geçersiz saat); App `FormError` metnini gösterir |
+| Core, App | `src/Core/Appearance/NotchHighContrastMap.cs`, `src/App/Resources/NotchHighContrast.cs` | Windows Yüksek Karşıtlıkta çentik token'ları sistem renklerine bağlanır (ThemeManager override sözlüğünün sonunda). Yeni çentik rengi token'ı eklenince tabloya da eklenir (test token dosyasını okur) |
+| App | `src/App/Resources/StylesNotch.xaml` (`NotchFocusVisual`), `Tokens.xaml` (`KoyNotchFocusRing`) | Odak halkası; çentikteki düğmeler `FocusVisualStyle="{DynamicResource NotchFocusVisual}"` kullanır (yeni düğmede `{x:Null}` yazma) |
+| App | `NotchWindow.xaml.cs` (`FocusForKeyboard`, `ReleaseKeyboardFocus`, `OnPreviewKeyDown`) | Çentik yalnız kısayolla açılınca (`NotchFeature.ToggleExpanded`) klavye odağı alır; Tab / ok tuşları WPF gezintisi, Ctrl+Tab sekme, Esc kapatır ve önceki pencereye döner. Fareyle açılınca odak çalınmaz (AGENTS #5 ruhu) |
+
+Unutma: ekran okuyucu için yeni denetimde `AutomationProperties.Name`; durum yalnız renkle verilmez (`ItemStatus`, simge).
+
 ## Aramaya yeni kaynak eklemek
 | Katman | Dosya | Ne yapılır |
 |---|---|---|

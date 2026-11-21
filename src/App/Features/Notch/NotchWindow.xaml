@@ -32,12 +32,21 @@
 
   <Window.Resources>
     <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    <!-- Pil çubuğunun dolgusu: varsayılan Tamam yeşili, ≤ %20 ve şarjda değilken kırmızı (renk tek başına taşımaz: şarjda şimşek de çıkar) -->
+    <Style x:Key="BatteryFillStyle" TargetType="Border">
+      <Setter Property="Background" Value="{DynamicResource KoyNotchBatteryOk}" />
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding IsBatteryLow}" Value="True">
+          <Setter Property="Background" Value="{DynamicResource KoyNotchBatteryLow}" />
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
     <!-- Durum satırındaki yuvarlak simge düğmeleri (Bildirim Merkezi, çentiği açık tut) -->
     <Style x:Key="NotchStatusButtonStyle" TargetType="Button">
       <Setter Property="Width" Value="26" />
       <Setter Property="Height" Value="26" />
       <Setter Property="Cursor" Value="Hand" />
-      <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+      <Setter Property="FocusVisualStyle" Value="{DynamicResource NotchFocusVisual}" />
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
@@ -56,7 +65,7 @@
     <!-- Üst ortadaki Müzik / Ana anahtarının düğmesi: Tag seçili mi (bool) -->
     <Style x:Key="NotchSwitchButtonStyle" TargetType="Button">
       <Setter Property="Cursor" Value="Hand" />
-      <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+      <Setter Property="FocusVisualStyle" Value="{DynamicResource NotchFocusVisual}" />
       <Setter Property="Foreground" Value="{DynamicResource KoyNotchDim}" />
       <Setter Property="Template">
         <Setter.Value>
@@ -169,7 +178,7 @@
             <Button HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Cursor="Hand"
-                    FocusVisualStyle="{x:Null}"
+                    FocusVisualStyle="{DynamicResource NotchFocusVisual}"
                     Foreground="{DynamicResource KoyNotchText}"
                     Command="{Binding OpenControlCenterCommand}"
                     Visibility="{Binding ShowIdleRadio, Converter={StaticResource BoolToVis}}">
@@ -346,8 +355,11 @@
                  Masaüstü kasada pil yok; boş bir pil çizmek yanıltıcı olur (ShowIdleBattery HasBattery'yi de hesaba katar). -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
                         Visibility="{Binding ShowIdleBattery, Converter={StaticResource BoolToVis}}">
+              <Path Data="M13 2L4 14h7l-1 8 9-12h-7z" Fill="{DynamicResource KoyNotchText}" Width="9" Height="9" Stretch="Uniform"
+                    Margin="0,0,3,0" VerticalAlignment="Center"
+                    Visibility="{Binding IsCharging, Converter={StaticResource BoolToVis}}" />
               <Border Width="22" Height="11" BorderThickness="1.5" BorderBrush="{DynamicResource KoyNotchText}" CornerRadius="3" Padding="1" Background="Transparent">
-                <Border HorizontalAlignment="Left" Width="{Binding BatteryFillWidth}" Height="6" Background="#4ADE80" CornerRadius="1" />
+                <Border HorizontalAlignment="Left" Width="{Binding BatteryFillWidth}" Height="6" Style="{StaticResource BatteryFillStyle}" CornerRadius="1" />
               </Border>
               <Border Width="2" Height="5" Background="{DynamicResource KoyNotchText}" CornerRadius="1" Margin="2,0,0,0" VerticalAlignment="Center" />
             </StackPanel>
@@ -586,10 +598,13 @@
               <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0"
                           Visibility="{Binding HasBattery, Converter={StaticResource BoolToVis}}">
                 <Border Width="20" Height="10" BorderThickness="1.5" BorderBrush="{DynamicResource KoyNotchMuted}" CornerRadius="3" Padding="1" VerticalAlignment="Center">
-                  <Border HorizontalAlignment="Left" Width="{Binding BatteryFillWidth}" MaxWidth="14" Background="#4ADE80" CornerRadius="1" />
+                  <Border HorizontalAlignment="Left" Width="{Binding BatteryFillWidth}" MaxWidth="14" Style="{StaticResource BatteryFillStyle}" CornerRadius="1" />
                 </Border>
                 <TextBlock Text="{Binding BatteryPercent, Converter={x:Static res:PercentTextConverter.Instance}}" FontSize="12"
                            Foreground="{DynamicResource KoyNotchMuted}" Margin="5,0,0,0" VerticalAlignment="Center" />
+                <Path Data="M13 2L4 14h7l-1 8 9-12h-7z" Fill="{DynamicResource KoyNotchMuted}" Width="9" Height="9" Stretch="Uniform"
+                      Margin="3,0,0,0" VerticalAlignment="Center"
+                      Visibility="{Binding IsCharging, Converter={StaticResource BoolToVis}}" />
               </StackPanel>
             </StackPanel>
 
@@ -630,11 +645,12 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                   <DataTemplate DataType="{x:Type local:NotchTabViewModel}">
-                    <Button Margin="1,0" Width="27" Height="27" Cursor="Hand" FocusVisualStyle="{x:Null}"
+                    <Button Margin="1,0" Width="27" Height="27" Cursor="Hand" FocusVisualStyle="{DynamicResource NotchFocusVisual}"
                             Command="{Binding DataContext.SelectTabCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                             CommandParameter="{Binding Panel}"
                             ToolTip="{Binding Label}" ToolTipService.InitialShowDelay="250"
-                            AutomationProperties.Name="{Binding Label}">
+                            AutomationProperties.Name="{Binding Label}"
+                            AutomationProperties.ItemStatus="{Binding SelectionStatus}">
                       <Button.Template>
                         <ControlTemplate TargetType="Button">
                           <Border x:Name="Pill" CornerRadius="8" Background="Transparent">
@@ -667,7 +683,8 @@
               </Button>
               <Button Style="{StaticResource NotchStatusButtonStyle}" Command="{Binding TogglePinnedCommand}"
                       ToolTip="{Binding [NotchPin], Source={x:Static res:Loc.Instance}}"
-                      AutomationProperties.Name="{Binding [NotchPin], Source={x:Static res:Loc.Instance}}">
+                      AutomationProperties.Name="{Binding [NotchPin], Source={x:Static res:Loc.Instance}}"
+                      AutomationProperties.ItemStatus="{Binding PinStatus}">
                 <res:KoyIcon Data="{DynamicResource IconPin}" Size="15">
                   <res:KoyIcon.Style>
                     <Style TargetType="res:KoyIcon">
@@ -683,6 +700,34 @@
               </Button>
             </StackPanel>
           </Grid>
+
+          <!-- Geri al şeridi: silme onaysız ve hemen olur, birkaç saniye geri alınabilir. Üst satırın ortasında (sayfa formlarını örtmez),
+               Müzik / Ana anahtarının üstünde kısa süre durur. Metin canlı bölge: ekran okuyucu silmeyi duyurur. -->
+          <Border Grid.Row="0" Panel.ZIndex="5" HorizontalAlignment="Center" VerticalAlignment="Center" Height="28" CornerRadius="14"
+                  Padding="14,0,4,0" Background="{DynamicResource KoyNotchSurface}" BorderThickness="1" BorderBrush="{DynamicResource KoyNotchCardBorder}"
+                  Visibility="{Binding Undo.IsVisible, Converter={StaticResource BoolToVis}}">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="{Binding Undo.Message}" FontSize="12" Foreground="{DynamicResource KoyNotchText}" VerticalAlignment="Center"
+                         AutomationProperties.LiveSetting="Assertive" />
+              <Button Margin="8,0,0,0" Height="22" Padding="10,0" Cursor="Hand" Command="{Binding Undo.UndoCommand}"
+                      FocusVisualStyle="{DynamicResource NotchFocusVisual}"
+                      AutomationProperties.Name="{Binding [UndoAction], Source={x:Static res:Loc.Instance}}">
+                <Button.Template>
+                  <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bg" CornerRadius="11" Background="{DynamicResource KoyNotchActive}" Padding="{TemplateBinding Padding}">
+                      <TextBlock Text="{Binding [UndoAction], Source={x:Static res:Loc.Instance}}" FontSize="12" FontWeight="SemiBold"
+                                 Foreground="{DynamicResource KoyNotchText}" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                      <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="Bg" Property="Background" Value="{DynamicResource KoyNotchPressed}" />
+                      </Trigger>
+                    </ControlTemplate.Triggers>
+                  </ControlTemplate>
+                </Button.Template>
+              </Button>
+            </StackPanel>
+          </Border>
 
           <!-- Sayfa: sekme değişiminde yatay kayma ve solma yalnız burada (üst satır yerinde kalır) -->
           <ContentControl x:Name="BodyHost" Grid.Row="1" Margin="0,8,0,0" Foreground="{DynamicResource KoyNotchText}" Content="{Binding CurrentPanelContent}" ClipToBounds="False">
