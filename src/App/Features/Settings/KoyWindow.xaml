@@ -259,6 +259,11 @@
                             Visibility="{Binding SettingsFileInvalid, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}">
                         <TextBlock Text="{Binding [SettingsFileInvalid], Source={x:Static res:Loc.Instance}}" Foreground="{DynamicResource KoyDangerText}" TextWrapping="Wrap" MaxWidth="520" />
                     </Border>
+                    <Border Background="{DynamicResource KoyDangerBg}" BorderBrush="{DynamicResource KoyDangerBorder}" BorderThickness="1"
+                            CornerRadius="{DynamicResource KoyRadiusRow}" Padding="14,10" Margin="0,8,0,0"
+                            Visibility="{Binding SettingsSaveFailed, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}">
+                        <TextBlock Text="{Binding [SettingsSaveFailed], Source={x:Static res:Loc.Instance}}" Foreground="{DynamicResource KoyDangerText}" TextWrapping="Wrap" MaxWidth="520" />
+                    </Border>
                 </StackPanel>
 
                 <!-- Sağ içerik alanı -->
