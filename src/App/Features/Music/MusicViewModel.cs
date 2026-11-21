@@ -133,6 +133,10 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private Brush? _mirrorWaveBrush;
 
+    /// <summary>Müzik sayfasında akan zeminin üç leke rengi (#182); kapak paleti yoksa null.</summary>
+    [ObservableProperty]
+    private Koy.Core.Appearance.Rgb[]? _blobColors;
+
     [ObservableProperty]
     private NotchVisualizerStyle _visualizerStyle = NotchVisualizerStyle.Bars;
 
@@ -230,12 +234,14 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
             HasTint = false;
             HasBackdrop = false;
             CardBrush = SubTextBrush = SpectrumBrush = TintOverlayBrush = BackdropBrush = MirrorWaveBrush = null;
+            BlobColors = null;
             return;
         }
 
         // Kapalı çentik için her zaman tam opak fırça; müzik kartı Düz ise kart fırçaları temiz kalır.
         CollapsedAlbumBrush = CardFill(palette, 255);
         MirrorWaveBrush = MirrorFill(palette.Spectrum);
+        BlobColors = CoverBlobs.ColorsFrom(palette);
         SpectrumBrush = VisualizerColorSource == NotchVisualizerColorSource.Artwork
             ? Solid(palette.Spectrum, 0xBF)
             : null;
@@ -323,6 +329,26 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
 
     /// <summary>Müzik kartındaki eşzamanlı sözler.</summary>
     public LyricsViewModel Lyrics { get; }
+
+    /// <summary>Müzik sayfasında kapak yerine dönen plak (#182).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCoverMode))]
+    private bool _isVinyl;
+
+    public bool IsCoverMode => !IsVinyl;
+
+    /// <summary>Kullanıcı plak düğmesine bastı; ayar kalıcı olarak kaydedilmeli.</summary>
+    public event Action<bool>? VinylToggled;
+
+    /// <summary>Ayardaki plak modu (her çentik açılışında ve ayar değişince).</summary>
+    public void SetVinyl(bool vinyl) => IsVinyl = vinyl;
+
+    [RelayCommand]
+    private void ToggleVinyl()
+    {
+        IsVinyl = !IsVinyl;
+        VinylToggled?.Invoke(IsVinyl);
+    }
 
     public MusicViewModel(IMediaService mediaService, Dispatcher? dispatcher = null,
         Func<SpectrumCaptureService>? spectrumAcquire = null, Action? spectrumRelease = null,

@@ -29,7 +29,7 @@ public partial class HomePanel : UserControl
         _trackTransition = new TrackTransitionPresenter(MusicFace, IncomingCover, OutgoingCover, TrackTitleBlock);
         // Tasarımdaki sıra (#182): kapak, başlık, dalga/sözler, ilerleme, denetimler.
         _musicEntrance = new StaggeredEntrancePresenter(
-            (CoverFrame, 0), (TitleRow, 1), (MusicWave, 2), (MusicLyrics, 2), (ProgressRow, 3), (ControlsRow, 4));
+            (CoverFrame, 0), (VinylFrame, 0), (TitleRow, 1), (MusicWave, 2), (MusicLyrics, 2), (ProgressRow, 3), (ControlsRow, 4));
         MusicFace.IsVisibleChanged += (_, e) =>
         {
             if (e.NewValue is true)

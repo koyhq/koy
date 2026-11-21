@@ -701,6 +701,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         // Ses çubukları "kapak ve dalga" ayarına bağlı; pil tasarrufu hareketi kısarken hiç yakalanmaz.
         _music.SetSpectrumAllowed(Settings.Music.ShowWaveform && !ReduceMotion);
         _music.Lyrics.SetAllowed(Settings.Music.LyricsEnabled);
+        _music.SetVinyl(Settings.Music.VinylMode);
         var onHome = CurrentPanel == NotchPanel.Home;
         _music.SetActive(shown && onHome && Home.IsMusicPage);
         _music.SetCollapsedSpectrumActive(IsNotchVisible && State == NotchState.Collapsed && !Osd.IsActive);

@@ -188,6 +188,28 @@
           <Border CornerRadius="20" Background="{StaticResource MusicArtworkVeil}" />
         </Border>
 
+        <!-- Akan kapak rengi (#182): kart kapaktan boyanıyorsa üç leke yavaşça dolaşır (çalarken, 15 fps).
+             Müzik kartında canlı arka plan açıksa çizilmez: iki zemin üst üste binmesin, işlemci iki kez harcanmasın. -->
+        <Grid Margin="-18" IsHitTestVisible="False">
+          <Grid.Style>
+            <Style TargetType="Grid">
+              <Setter Property="Visibility" Value="Collapsed" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding Music.HasTint}" Value="True">
+                  <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding LiveBackground.MusicCardMode}" Value="Animate">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding LiveBackground.MusicCardMode}" Value="StaticFirstFrame">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Grid.Style>
+          <music:CoverBlobsView Colors="{Binding Music.BlobColors}" IsPlaying="{Binding Music.IsPlaying}" />
+        </Grid>
+
         <!-- Canlı arka plan (issue #67): kapalıyken (varsayılan) hiçbir şey çizilmez; koyu perde yazıyı korur. -->
         <livebg:LiveBackgroundHost Margin="-18" CornerRadius="20"
                                    Selection="{Binding LiveBackground.Selection}"
@@ -218,7 +240,10 @@
             <ColumnDefinition Width="*" />
           </Grid.ColumnDefinitions>
 
-          <Border x:Name="CoverFrame" Width="200" Height="200" CornerRadius="20" ClipToBounds="True" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+          <!-- Kapak ya da plak (#182): plak düğmesi ikisi arasında geçer; ton kolu çerçevenin dışına taşar, bu yüzden ayrı. -->
+          <Grid VerticalAlignment="Center">
+          <Border x:Name="CoverFrame" Width="200" Height="200" CornerRadius="20" ClipToBounds="True" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5"
+                  Visibility="{Binding Music.IsCoverMode, Converter={StaticResource BoolToVis}}">
             <Grid>
               <Grid.Clip>
                 <RectangleGeometry Rect="0,0,200,200" RadiusX="20" RadiusY="20" />
@@ -236,6 +261,9 @@
               </ContentPresenter>
             </Grid>
           </Border>
+          <music:VinylView x:Name="VinylFrame" Cover="{Binding Music.Thumbnail}" IsPlaying="{Binding Music.IsPlaying}"
+                           Visibility="{Binding Music.IsVinyl, Converter={StaticResource BoolToVis}}" />
+          </Grid>
 
           <Grid Grid.Column="1" Margin="20,0,0,0">
             <Grid.RowDefinitions>
@@ -313,13 +341,32 @@
             </StackPanel>
 
             <!-- Denetimler: büyük beyaz oynat / duraklat, iki yanında önceki / sonraki (canlıda soluk) -->
-            <!-- Denetimler (#182): [Plak, 5. adımda]  önceki  oynat  sonraki  [Sözler]. Yan sütunlar eşit: oynat ortada kalır. -->
+            <!-- Denetimler (#182): [Plak]  önceki  oynat  sonraki  [Sözler]. Yan sütunlar eşit: oynat ortada kalır. -->
             <Grid x:Name="ControlsRow" Grid.Row="3">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="40" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="40" />
               </Grid.ColumnDefinitions>
+            <!-- Plak: kapak ↔ dönen plak. Açıkken dolu zemin. -->
+            <Button Grid.Column="0" Width="40" Height="40" VerticalAlignment="Center" Command="{Binding Music.ToggleVinylCommand}"
+                    ToolTip="{Binding [MusicVinyl], Source={x:Static res:Loc.Instance}}"
+                    AutomationProperties.Name="{Binding [MusicVinyl], Source={x:Static res:Loc.Instance}}">
+              <Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource PlayerButtonStyle}">
+                  <Setter Property="Background" Value="#0FFFFFFF" />
+                  <Setter Property="Opacity" Value="0.7" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding Music.IsVinyl}" Value="True">
+                      <Setter Property="Background" Value="#33FFFFFF" />
+                      <Setter Property="Opacity" Value="1" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Button.Style>
+              <Path Width="17" Height="17" Stretch="Uniform" Stroke="{DynamicResource KoyNotchText}" StrokeThickness="2"
+                    Data="M12 3a9 9 0 1 1 0 18a9 9 0 1 1 0-18M12 9a3 3 0 1 1 0 6a3 3 0 1 1 0-6" />
+            </Button>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
               <Button Style="{StaticResource PlayerButtonStyle}" Width="40" Height="40" Command="{Binding Music.PreviousCommand}"
                       IsEnabled="{Binding Music.IsLive, Converter={x:Static local:NotConverter.Instance}}"

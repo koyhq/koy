@@ -4101,5 +4101,8 @@
   <data name="NotchCollapsedBackgroundAmbient" xml:space="preserve">
     <value>Ambient</value>
   </data>
+  <data name="MusicVinyl" xml:space="preserve">
+    <value>Vinyl view</value>
+  </data>
 </root>
 
