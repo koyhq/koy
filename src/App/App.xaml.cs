@@ -423,12 +423,14 @@ public partial class App : Application, IDisposable
         DispatcherUnhandledException += (_, args) =>
         {
             CrashLog.Write("Dispatcher Unhandled", args.Exception);
-            SafeRestoreTaskbar();
+            // Koy açık kalacaksa görev çubuğuna dokunulmaz: Restore gözcüyü durdurur ve çubuğu gösterir, dock ise
+            // çalışmaya devam ederdi (çift çubuk, gözcüsüz dock). Geri getirme yalnız süreç gerçekten kapanırken.
             if (uiPolicy.ShouldHandle(args.Exception, DateTime.UtcNow))
             {
                 args.Handled = true;
                 return;
             }
+            SafeRestoreTaskbar();
             SafeCloseTrayHost();
         };
 
