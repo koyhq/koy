@@ -7,6 +7,21 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.14](https://github.com/koyhq/koy/compare/v0.2.13...v0.2.14) (2026-11-21)
+Highlights:
+- **A music page that moves:** the cover slides on a track change, the page enters piece by piece when the notch opens and fades out when it closes, a mirror wave in the cover color plays under the title, flowing cover colors drift behind the card, and a new vinyl mode spins the cover as a record (the tone arm lifts on pause).
+- **Lyrics you can read:** the lyrics button moved next to the controls; the current line sits in the middle and the other lines fade with their distance.
+- **Less memory after the notch closes:** Koy no longer loads the Direct3D stack in software rendering, so private memory after closing the notch drops from 196-315 MB to about 93-101 MB.
+
+### Added
+
+* **notch:** unified music page with motion: track change transition, progress ring in the collapsed notch, staggered opening, centered synced lyrics, mirror wave, flowing cover colors and vinyl mode ([#183](https://github.com/koyhq/koy/issues/183)) ([8df8271](https://github.com/koyhq/koy/commit/8df8271d0fdbd1efc194d301624d4c9bd62a7b99))
+
+
+### Fixed
+
+* **perf:** stop Direct3D from loading in software rendering: shader effects replaced, live background video decoded in software instead of MediaElement ([#181](https://github.com/koyhq/koy/issues/181)) ([de3205c](https://github.com/koyhq/koy/commit/de3205c07493ee35724ecbbe1a5b419b9d8efe90))
+
 ## [0.2.13](https://github.com/koyhq/koy/compare/v0.2.12...v0.2.13) (2026-11-16)
 
 
