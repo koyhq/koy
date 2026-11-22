@@ -128,6 +128,16 @@ public sealed class ClipboardHistoryService : IClipboardHistoryService
             Changed?.Invoke(this, EventArgs.Empty);
     }
 
+    public void Restore(IReadOnlyList<ClipboardItem> items)
+    {
+        if (_history.Restore(items) == 0)
+            return;
+
+        if (items.Any(i => i.Pinned))
+            _store.Save(_history.PinnedSnapshot());
+        Changed?.Invoke(this, EventArgs.Empty);
+    }
+
     public bool CopyBack(Guid id)
     {
         HWND hwnd;

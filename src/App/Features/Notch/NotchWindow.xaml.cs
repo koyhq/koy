@@ -78,7 +78,63 @@ public partial class NotchWindow : Window
                 VoiceCancelRequested?.Invoke();
                 e.Handled = true;
             }
+
+            return;
         }
+
+        // Klavye gezintisi (yalnız kısayolla odak alındıysa gelir): Esc açık çentiği kapatır, Ctrl+Tab sekme değiştirir.
+        // Tab ve ok tuşları WPF'in kendi odak gezintisidir (denetimler odak halkası gösterir).
+        if (ViewModel is not { State: NotchState.Expanded, IsSearchOpen: false } viewModel)
+            return;
+
+        if (e.Key == Key.Escape)
+        {
+            viewModel.Controller.OnClick();
+            ReleaseKeyboardFocus();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Tab && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+        {
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+                viewModel.PreviousPanelCommand.Execute(null);
+            else
+                viewModel.NextPanelCommand.Execute(null);
+            e.Handled = true;
+        }
+    }
+
+    // Kısayolla açılınca odağın geri verileceği pencere (0: yok).
+    private nint _restoreForeground;
+
+    /// <summary>
+    /// Açık çentiğe klavye odağını verir (çentik kısayolla açıldığında). Çentik normalde odak çalmaz (WS_EX_NOACTIVATE) ve
+    /// fareyle açılınca da çalmaz; bu yol yalnız kullanıcı kısayola bastığında gelir, o yüzden Windows öne geçmeye izin verir
+    /// (arama kutusuyla aynı kalıp). Odak gidince ya da Esc'de odak çalmama geri gelir ve önceki pencere öne alınır.
+    /// </summary>
+    public void FocusForKeyboard(nint restoreTo)
+    {
+        if (_hwnd == 0)
+            return;
+
+        _restoreForeground = restoreTo;
+        WindowStyles.SetNoActivate(_hwnd, false);
+        Activate();
+        WindowStyles.SetForeground(_hwnd);
+        // Görünür olmayan denetim odak alamaz: düzen bittikten sonra ilk denetime geçilir.
+        Dispatcher.BeginInvoke(() => ExpandedView.MoveFocus(new TraversalRequest(FocusNavigationDirection.First)),
+            System.Windows.Threading.DispatcherPriority.Input);
+    }
+
+    /// <summary>Esc ile kapanırken odak çalmama stilini geri getirir ve kısayoldan önceki pencereyi öne alır.</summary>
+    public void ReleaseKeyboardFocus()
+    {
+        if (_hwnd != 0)
+            WindowStyles.SetNoActivate(_hwnd, true);
+
+        var restoreTo = _restoreForeground;
+        _restoreForeground = 0;
+        if (restoreTo != 0)
+            WindowStyles.SetForeground(restoreTo);
     }
 
     private const int WmDisplayChange = 0x007E;
@@ -289,6 +345,7 @@ public partial class NotchWindow : Window
     protected override void OnDeactivated(EventArgs e)
     {
         base.OnDeactivated(e);
+        _restoreForeground = 0;
         if (_hwnd != 0)
             WindowStyles.SetNoActivate(_hwnd, true);
 

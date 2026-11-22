@@ -68,6 +68,24 @@ public partial class ShelfPanel : UserControl
         }
     }
 
+    // Enter / Boşluk açar, Delete raftan kaldırır (geri alınabilir).
+    private void Item_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.OriginalSource != sender || sender is not FrameworkElement { DataContext: ShelfItem item })
+            return;
+
+        if (e.Key is Key.Enter or Key.Space)
+        {
+            ViewModel?.OpenItemCommand.Execute(item);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Delete)
+        {
+            ViewModel?.RemoveItemCommand.Execute(item.Id);
+            e.Handled = true;
+        }
+    }
+
     private void Item_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ClickCount == 2 && sender is FrameworkElement element && element.DataContext is ShelfItem item)

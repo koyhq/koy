@@ -150,6 +150,9 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     /// <summary>Canlı arka plan (issue #67): açık çentik zemini ve müzik kartı zemini için seçim ve oynatma kararı. Varsayılan kapalı.</summary>
     public LiveBackgroundState LiveBackground { get; }
 
+    /// <summary>"Geri al" şeridi: Pano/Raf temizleme, etkinlik ve görev silme onaysız olur, birkaç saniye geri alınabilir.</summary>
+    public UndoToastViewModel Undo { get; }
+
     /// <summary>Müzik çalarken dalga simgesi gösterilsin mi.</summary>
     public bool ShowMusicWaveform => Settings.Music.ShowWaveform;
 
@@ -186,6 +189,9 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     /// <summary>"Çentiği açık tut" açık: fare çıkınca kapanmaz.</summary>
     public bool IsPinned => _controller.IsPinned;
+
+    /// <summary>İğnenin durumu ekran okuyucuya: açık ("Açık") ya da kapalı ("Kapalı").</summary>
+    public string PinStatus => Strings.Get(IsPinned ? "On" : "Off");
 
     // --- GİZLİLİK GÖSTERGESİ (KAMERA / MİKROFON) ---
     [ObservableProperty]
@@ -316,6 +322,10 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private double _batteryFillWidth = 17;
 
+    /// <summary>Pil ≤ %20 ve şarjda değil: çubuk dolgusu kırmızı (Core: <see cref="IdleDisplayFormat.IsLow"/>).</summary>
+    [ObservableProperty]
+    private bool _isBatteryLow;
+
     public bool IsMusicPlaying => Music.HasTrack && Music.IsPlaying;
 
     public event Action<double, double>? TargetSizeChanged;
@@ -338,7 +348,8 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         VisibilityController? visibility = null,
         OsdIndicatorViewModel? osd = null,
         Dispatcher? dispatcher = null,
-        Koy.Core.Shell.IShellActionService? shellActions = null)
+        Koy.Core.Shell.IShellActionService? shellActions = null,
+        UndoToastViewModel? undo = null)
     {
         Settings = settings;
         _controller = controller;
@@ -360,6 +371,14 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         quickLaunch.HoldOpen = HoldOpenForPicker;
         _visibility = visibility ?? new VisibilityController(settings.Notch.Visibility);
         _dispatcher = dispatcher ?? (System.Windows.Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher);
+        Undo = undo ?? new UndoToastViewModel(_dispatcher);
+        // Silme yapan paneller aynı şeridi kullanır (NotchFeature bir örnek verir, araçlar vermezse kendi örneğimiz bağlanır).
+        _shelf.Undo ??= Undo;
+        _calendar.Undo ??= Undo;
+        if (_clipboard is not null)
+            _clipboard.Undo ??= Undo;
+        if (_focus.Tasks is { } tasks)
+            tasks.Undo ??= Undo;
         Osd = osd ?? new OsdIndicatorViewModel(_dispatcher);
 
         _isNotchVisible = _visibility.IsVisible;
@@ -441,6 +460,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         IsCharging = _status.IsCharging;
         HasBattery = _status.HasBattery;
         var pct = Math.Clamp(BatteryPercent, 0, 100);
+        IsBatteryLow = HasBattery && IdleDisplayFormat.IsLow(pct, IsCharging);
         // Dış gövde 22 DIP, iç dolgu alanı 17 DIP (22 - 3 - 2)
         BatteryFillWidth = Math.Max(2.0, 17.0 * pct / 100.0);
 
@@ -536,7 +556,11 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         }
     }
 
-    private void OnPinnedChanged(object? sender, EventArgs e) => RunOnUi(() => OnPropertyChanged(nameof(IsPinned)));
+    private void OnPinnedChanged(object? sender, EventArgs e) => RunOnUi(() =>
+    {
+        OnPropertyChanged(nameof(IsPinned));
+        OnPropertyChanged(nameof(PinStatus));
+    });
 
     // Zamanlayıcı çalışmaya başlayınca / durunca kapalı çentikte pil ve simgeler ile süre yer değiştirir.
     private void OnFocusPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -705,6 +729,8 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         // Arama açıkken sayfalar görünmez; servisleri de çalışmaz.
         var isExpanded = State == NotchState.Expanded && !IsSearchOpen;
         var shown = isExpanded && IsNotchVisible;
+        // Geri al şeridi ve süre zamanlayıcısı yalnız görünür açık çentikte; kapanınca kayıt bırakılır.
+        Undo.SetActive(shown);
         // Ses çubukları "kapak ve dalga" ayarına bağlı; pil tasarrufu hareketi kısarken hiç yakalanmaz.
         _music.SetSpectrumAllowed(Settings.Music.ShowWaveform && !ReduceMotion);
         _music.Lyrics.SetAllowed(Settings.Music.LyricsEnabled);
@@ -978,6 +1004,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         _shelf.Dispose();
         _calendar.Dispose();
         _clipboard?.Dispose();
+        Undo.Dispose();
         _search?.Dispose();
         Home.Dispose();
     }

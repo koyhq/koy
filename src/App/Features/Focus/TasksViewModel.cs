@@ -4,7 +4,10 @@ using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Koy.App.Resources;
+using Koy.App.Features.Notch;
+using Koy.Core.Notch;
 using Koy.Core.Tasks;
+using Koy.Core.Undo;
 
 namespace Koy.App.Features.Focus;
 
@@ -13,6 +16,7 @@ public sealed class TaskRowViewModel
 {
     public TaskRowViewModel(TaskItem item, bool isNext, string dayText, DateOnly today, TimeOnly now)
     {
+        Source = item;
         Id = item.Id;
         Title = item.Title;
         Done = item.Done;
@@ -22,6 +26,9 @@ public sealed class TaskRowViewModel
         TimeText = timeText;
         DayText = dayText;
     }
+
+    /// <summary>Silinirse "Geri al" için kayıt.</summary>
+    public TaskItem Source { get; }
 
     public Guid Id { get; }
     public string Title { get; }
@@ -90,7 +97,11 @@ public sealed partial class TasksViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private bool _newTimeInvalid;
 
-    partial void OnNewTimeChanged(string value) => NewTimeInvalid = false;
+    partial void OnNewTimeChanged(string value)
+    {
+        NewTimeInvalid = false;
+        FormError = "";
+    }
 
     partial void OnScopeChanged(TaskScope value)
     {
@@ -166,15 +177,19 @@ public sealed partial class TasksViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void Add()
     {
-        if (string.IsNullOrWhiteSpace(NewTitle))
-            return;
-
-        if (!TaskViews.TryParseTime(NewTime, out var time))
+        var error = QuickAddValidation.ForTask(NewTitle, NewTime);
+        NewTimeInvalid = error == QuickAddError.TimeInvalid;
+        FormError = error switch
         {
-            NewTimeInvalid = true;
+            QuickAddError.TitleEmpty => Strings.Get("FormTitleEmpty"),
+            QuickAddError.TimeInvalid => Strings.Get("TaskTimeInvalid"),
+            _ => ""
+        };
+        if (error != QuickAddError.None)
             return;
-        }
 
+        // Doğrulama geçti: saat (boş olabilir) çözülür.
+        _ = TaskViews.TryParseTime(NewTime, out var time);
         if (_tasks.Add(NewTitle, time) is null)
             return;
 
@@ -192,9 +207,25 @@ public sealed partial class TasksViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void Remove(TaskRowViewModel? row)
     {
-        if (row is not null)
-            _tasks.Remove(row.Id);
+        if (row is null || !_tasks.Remove(row.Id))
+            return;
+
+        // Onay sormaz: görev hemen silinir, birkaç saniye "Geri al" çıkar (Burhan kararı, 2026-11-21).
+        var source = row.Source;
+        Undo?.Offer(UndoKind.TaskDeleted, 1, () => _tasks.Restore(source));
     }
+
+    /// <summary>Geri al şeridi (NotchFeature verir).</summary>
+    public UndoToastViewModel? Undo { get; set; }
+
+    /// <summary>Başlık boşsa ya da saat geçersizse görünen hata; yoksa boş.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasFormError))]
+    private string _formError = "";
+
+    public bool HasFormError => FormError.Length > 0;
+
+    partial void OnNewTitleChanged(string value) => FormError = "";
 
     public void Dispose()
     {

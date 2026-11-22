@@ -27,4 +27,7 @@ public interface IShelfService : IDisposable
     void AddText(string text);
     void Remove(string id);
     void Clear();
+
+    /// <summary>Kaldırılan öğeleri aynı kimlikle geri koyar ("Geri al"); en yeni başta olacak biçimde yerleşir. Yalnız yol tutulur, dosyaya dokunulmaz.</summary>
+    void Restore(IReadOnlyList<ShelfItem> items);
 }

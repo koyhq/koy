@@ -125,7 +125,7 @@ public static class AllowedTokens
         "KoyScrollThumb", "KoyScrollThumbHover", "KoyScrollThumbDrag",
         "KoyNotchText", "KoyNotchTextSecondary", "KoyNotchTextOnLight", "KoyNotchHover", "KoyNotchPressed", "KoyNotchActive",
         "KoyNotchTextMuted", "KoyNotchDivider", "KoyNotchSurface", "KoyNotchCard", "KoyNotchCardBorder", "KoyNotchChip", "KoyNotchMuted",
-        "KoyNotchDim", "KoyNotchOk", "KoyNotchAccentHome", "KoyNotchAccentFocus", "KoyNotchAccentShelf",
+        "KoyNotchDim", "KoyNotchFocusRing", "KoyNotchOk", "KoyNotchBatteryOk", "KoyNotchBatteryLow", "KoyNotchAccentHome", "KoyNotchAccentFocus", "KoyNotchAccentShelf",
         "KoyNotchAccentClipboard", "KoyNotchAccentSystem", "KoyNotchAccentControl", "KoyNotchMusicCard",
         "KoyNotchMusicCover", "KoyNotchMusicSub", "KoyNotchMusicSpectrum", "KoyNotchWeatherCard", "KoyNotchWeatherSoft",
         "KoyNotchWeatherIconBg", "KoyNotchFocusCard", "KoyNotchFocusTrack", "KoyNotchFocusButton", "KoyNotchFocusSoft",

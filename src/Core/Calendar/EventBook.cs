@@ -78,6 +78,23 @@ public sealed class EventBook
         return removed;
     }
 
+    /// <summary>
+    /// Silinen yerel etkinliği aynı kimlikle geri koyar ("Geri al"). Zaten varsa, yerel değilse ya da defter doluysa eklenmez.
+    /// </summary>
+    public bool Restore(CalendarEvent restored)
+    {
+        if (restored is null || restored.Source != CalendarEventSource.Local || _localEvents.Count >= MaxEvents
+            || _localEvents.Any(e => e.Id == restored.Id))
+            return false;
+
+        var index = _localEvents.FindIndex(e => e.Start > restored.Start);
+        _localEvents.Insert(index < 0 ? _localEvents.Count : index, restored);
+        RebuildMerged();
+        LocalChanged?.Invoke(this, EventArgs.Empty);
+        Changed?.Invoke(this, EventArgs.Empty);
+        return true;
+    }
+
     /// <summary>Belirtilen harici kaynağın etkinliklerini yenileriyle değiştirir (salt okunur birleştirme).</summary>
     public void ReplaceExternal(CalendarEventSource source, IEnumerable<CalendarEvent> events)
     {

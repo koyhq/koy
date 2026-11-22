@@ -4,7 +4,9 @@ using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Koy.App.Resources;
+using Koy.App.Features.Notch;
 using Koy.Core.Clipboard;
+using Koy.Core.Undo;
 
 namespace Koy.App.Features.ClipboardPanel;
 
@@ -215,13 +217,27 @@ public sealed partial class ClipboardViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void Remove(ClipboardItemViewModel? item)
     {
-        if (item is not null)
-            _service.Remove(item.Id);
+        if (item is null)
+            return;
+
+        // Onay sormaz: hemen silinir, birkaç saniye "Geri al" çıkar (Burhan kararı, 2026-11-21).
+        var removed = _service.Query().FirstOrDefault(i => i.Id == item.Id);
+        if (_service.Remove(item.Id) && removed is not null)
+            Undo?.Offer(UndoKind.ClipboardItemRemoved, 1, () => _service.Restore([removed]));
     }
 
-    /// <summary>Sabitlenmeyenleri siler.</summary>
+    /// <summary>Sabitlenmeyenleri siler; onay sormaz, birkaç saniye "Geri al" çıkar.</summary>
     [RelayCommand]
-    private void Clear() => _service.Clear();
+    private void Clear()
+    {
+        var removed = _service.Query().Where(i => !i.Pinned).ToList();
+        _service.Clear();
+        if (removed.Count > 0)
+            Undo?.Offer(UndoKind.ClipboardCleared, removed.Count, () => _service.Restore(removed));
+    }
+
+    /// <summary>Geri al şeridi (NotchFeature verir).</summary>
+    public UndoToastViewModel? Undo { get; set; }
 
     private void ClearFlash()
     {

@@ -85,6 +85,37 @@ public sealed class ClipboardHistory(Func<DateTimeOffset>? now = null)
             return _items.RemoveAll(i => !i.Pinned);
     }
 
+    /// <summary>
+    /// Silinen öğeleri kimlikleriyle geri koyar ("Geri al"); kopyalanma zamanına göre en yeni başta kalacak biçimde yerleşir.
+    /// Aynı kimlik ya da aynı metin zaten varsa o öğe atlanır. Eklenen sayısını döner.
+    /// </summary>
+    public int Restore(IEnumerable<ClipboardItem> removed)
+    {
+        lock (_gate)
+        {
+            var added = 0;
+            foreach (var item in removed)
+            {
+                if (item is null || string.IsNullOrWhiteSpace(item.Text)
+                    || _items.Any(i => i.Id == item.Id || string.Equals(i.Text, item.Text, StringComparison.Ordinal)))
+                    continue;
+                _items.Add(item);
+                added++;
+            }
+
+            if (added > 0)
+            {
+                // OrderBy kararlıdır: aynı zamanlılar eski sırasını korur.
+                var sorted = _items.OrderByDescending(i => i.CopiedAt).ToList();
+                _items.Clear();
+                _items.AddRange(sorted);
+                TrimLocked();
+            }
+
+            return added;
+        }
+    }
+
     /// <summary>Sabit öğeler (diske yazılacak olan), en yeni başta.</summary>
     public List<ClipboardItem> PinnedSnapshot()
     {

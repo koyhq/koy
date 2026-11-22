@@ -21,7 +21,7 @@
     <Style x:Key="ShelfChipStyle" TargetType="Button">
       <Setter Property="Foreground" Value="{DynamicResource KoyNotchShelfChipText}" />
       <Setter Property="Cursor" Value="Hand" />
-      <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+      <Setter Property="FocusVisualStyle" Value="{DynamicResource NotchFocusVisual}" />
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
@@ -77,8 +77,12 @@
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
           <DataTemplate DataType="{x:Type shelf:ShelfItem}">
+            <!-- Klavye: Tab ile gelinir, Enter ya da Boşluk açar, Delete kaldırır; ekran okuyucu dosya adını okur. -->
             <Border Width="120" Height="78" Margin="0,0,10,8" CornerRadius="16" Background="{DynamicResource KoyNotchSurface}"
                     Padding="8" Cursor="Hand" ToolTip="{Binding PathOrContent}"
+                    Focusable="True" FocusVisualStyle="{DynamicResource NotchFocusVisual}"
+                    AutomationProperties.Name="{Binding DisplayName}" AutomationProperties.HelpText="{Binding PathOrContent}"
+                    KeyDown="Item_KeyDown"
                     MouseMove="Item_MouseMove" MouseLeftButtonDown="Item_MouseLeftButtonDown">
               <Grid>
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -102,12 +106,15 @@
                   <TextBlock Text="{Binding DisplayName}" FontSize="11" Margin="0,8,0,0" TextAlignment="Center"
                              TextTrimming="CharacterEllipsis" MaxWidth="108" />
                 </StackPanel>
-                <Button HorizontalAlignment="Right" VerticalAlignment="Top" Width="18" Height="18" Cursor="Hand" FocusVisualStyle="{x:Null}"
+                <!-- Hedef 24 px (WCAG 2.5.8); görünür daire 18 px kalır. -->
+                <Button HorizontalAlignment="Right" VerticalAlignment="Top" Width="24" Height="24" Margin="0,-5,-5,0" Cursor="Hand" FocusVisualStyle="{DynamicResource NotchFocusVisual}"
                         Command="{Binding DataContext.RemoveItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                        CommandParameter="{Binding Id}">
+                        CommandParameter="{Binding Id}"
+                        ToolTip="{Binding [ShelfRemoveItem], Source={x:Static res:Loc.Instance}}"
+                        AutomationProperties.Name="{Binding [ShelfRemoveItem], Source={x:Static res:Loc.Instance}}">
                   <Button.Template>
                     <ControlTemplate TargetType="Button">
-                      <Border x:Name="Bg" CornerRadius="9" Background="Transparent">
+                      <Border x:Name="Bg" Width="18" Height="18" CornerRadius="9" Background="Transparent">
                         <res:KoyIcon Data="{DynamicResource IconX}" Size="10" Foreground="{DynamicResource KoyNotchMuted}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                       </Border>
                       <ControlTemplate.Triggers>

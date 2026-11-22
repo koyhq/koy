@@ -1,5 +1,6 @@
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Koy.App.Resources;
 using Koy.Core.Notch;
 
 namespace Koy.App.Features.Notch;
@@ -18,5 +19,9 @@ public sealed partial class NotchTabViewModel(NotchPanel panel, string label, Ge
     public Brush? Accent { get; } = accent;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectionStatus))]
     private bool _isSelected;
+
+    /// <summary>Ekran okuyucu için seçili durumu (renk tek başına taşımaz): "Seçili" ya da boş.</summary>
+    public string SelectionStatus => IsSelected ? Strings.Get("TabSelected") : "";
 }

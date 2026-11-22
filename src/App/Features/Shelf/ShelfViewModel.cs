@@ -3,7 +3,9 @@ using System.Diagnostics;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Koy.App.Features.Notch;
 using Koy.Core.Shelf;
+using Koy.Core.Undo;
 
 namespace Koy.App.Features.Shelf;
 
@@ -53,14 +55,24 @@ public sealed partial class ShelfViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void RemoveItem(string id)
     {
+        // Raf yalnız yol tutar: kaldırmak dosyaya dokunmaz, geri alma kaydı aynı yolu aynı kimlikle geri koyar.
+        var removed = _shelfService.Items.FirstOrDefault(i => i.Id == id);
         _shelfService.Remove(id);
+        if (removed is not null)
+            Undo?.Offer(UndoKind.ShelfItemRemoved, 1, () => _shelfService.Restore([removed]));
     }
 
     [RelayCommand]
     private void ClearAll()
     {
+        var removed = _shelfService.Items.ToList();
         _shelfService.Clear();
+        if (removed.Count > 0)
+            Undo?.Offer(UndoKind.ShelfCleared, removed.Count, () => _shelfService.Restore(removed));
     }
+
+    /// <summary>Geri al şeridi (NotchFeature verir).</summary>
+    public UndoToastViewModel? Undo { get; set; }
 
     [RelayCommand]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]

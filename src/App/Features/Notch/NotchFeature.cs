@@ -567,9 +567,17 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
 
         var controller = state.Controller;
         if (controller.State == NotchState.Expanded)
+        {
             controller.OnClick();
+            state.Window.ReleaseKeyboardFocus();
+        }
         else
+        {
+            // Kısayol bilinçli bir istektir: açık çentik klavye odağını alır (Tab, ok tuşları, Esc); kapanınca önceki pencere geri gelir.
+            var previous = _windowTracker?.CurrentForeground?.Handle ?? 0;
             controller.Expand();
+            state.Window.FocusForKeyboard(previous);
+        }
     }
 
     /// <summary>Kısayol: fare hangi ekrandaysa orada aramayı açar, açıksa kapatır. Tam ekranda hiçbir şey yapmaz.</summary>

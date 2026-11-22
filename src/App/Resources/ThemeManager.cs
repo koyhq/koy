@@ -108,6 +108,8 @@ public static class ThemeManager
         if (settings.Appearance.Theme == AppTheme.System)
             WatchSystemTheme(app);
 
+        WatchHighContrast(app);
+
         Applied?.Invoke();
     }
 
@@ -186,6 +188,9 @@ public static class ThemeManager
             foreach (var key in NotchPageChips)
                 o[key] = new SolidColorBrush(Color.FromArgb(0x17, 0xFF, 0xFF, 0xFF));
         }
+
+        // Windows Yüksek Karşıtlık: çentik yazısı, yüzeyi ve kenarı sistem renklerine bağlanır (en son, her şeyi ezer).
+        NotchHighContrast.Apply(o);
     }
 
     private static readonly string[] NotchPageCards =
@@ -326,6 +331,27 @@ public static class ThemeManager
         {
             return false;
         }
+    }
+
+    private static bool _watchingHighContrast;
+
+    // Yüksek Karşıtlık açılıp kapanınca (Windows ayarı ya da kısayol) çentik yeniden boyanır.
+    private static void WatchHighContrast(Application app)
+    {
+        if (_watchingHighContrast)
+            return;
+        _watchingHighContrast = true;
+
+        SystemParameters.StaticPropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName != nameof(SystemParameters.HighContrast))
+                return;
+            app.Dispatcher.BeginInvoke(() =>
+            {
+                if (_last is { } s)
+                    Apply(app, s);
+            });
+        };
     }
 
     private static void WatchSystemTheme(Application app)

@@ -109,9 +109,9 @@ public partial class HomePanel : UserControl
 
     private void ProgressBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (sender is ProgressBar bar && DataContext is HomeViewModel vm)
+        if (sender is FrameworkElement bar && DataContext is HomeViewModel vm)
         {
-            var fraction = bar.ActualWidth > 0 ? e.GetPosition(bar).X / bar.ActualWidth : 0;
+            var fraction = bar.ActualWidth > 0 ? Math.Clamp(e.GetPosition(bar).X / bar.ActualWidth, 0, 1) : 0;
             vm.Music.SeekCommand.Execute(fraction);
             // Atlama tıklaması karta ulaşıp kartı büyütmesin, çentiğe ulaşıp onu kapatmasın.
             e.Handled = true;
