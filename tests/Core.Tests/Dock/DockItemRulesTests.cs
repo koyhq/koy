@@ -16,6 +16,7 @@ public class DockItemRulesTests
     [InlineData("clock", DockItemKind.Clock)]
     [InlineData("trash", DockItemKind.Trash)]
     [InlineData("custom", DockItemKind.Custom)]
+    [InlineData("Battery", DockItemKind.Battery)]
     public void TryParseKind_bilinen_turleri_tanir(string text, DockItemKind expected)
     {
         Assert.True(DockItemRules.TryParseKind(text, out var kind));
@@ -23,7 +24,7 @@ public class DockItemRulesTests
     }
 
     [Theory]
-    [InlineData("battery")]
+    [InlineData("wifi")]
     [InlineData("5")]
     [InlineData("")]
     [InlineData(null)]
@@ -37,7 +38,7 @@ public class DockItemRulesTests
     {
         var result = DockItemRules.Normalize([
             E("app", "A.lnk"),
-            E("battery"),
+            E("wifi"),
             E("clock"),
             E("hologram", "x"),
             E("app", "B.lnk"),
@@ -104,6 +105,16 @@ public class DockItemRulesTests
 
         Assert.Equal([DockItemKind.Clock, DockItemKind.Trash], result.Select(r => r.Kind));
         Assert.Equal(["Clock", "Trash"], result.Select(r => r.Id));
+    }
+
+    [Fact]
+    public void Normalize_pil_en_fazla_bir_kez_ve_sabit_kimlikle_kalir()
+    {
+        var result = DockItemRules.Normalize([E("battery", "x"), E("BATTERY"), E("battery", "baska")]);
+
+        var only = Assert.Single(result);
+        Assert.Equal(DockItemKind.Battery, only.Kind);
+        Assert.Equal("Battery", only.Id);
     }
 
     [Fact]
@@ -267,7 +278,7 @@ public class DockItemRulesTests
     [Fact]
     public void Resolve_kayitlar_var_ama_hepsi_gecersizse_bos_doner()
     {
-        Assert.Empty(DockItemRules.Resolve([E("battery")], ["Obsidian.lnk"]));
+        Assert.Empty(DockItemRules.Resolve([E("wifi")], ["Obsidian.lnk"]));
     }
 
     [Fact]

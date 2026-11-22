@@ -316,6 +316,14 @@
                                 <DataTrigger Binding="{Binding IsClock}" Value="True">
                                     <Setter Property="Width" Value="72"/>
                                 </DataTrigger>
+                                <!-- Pil: yatay dock'ta simge yanında yüzde (geniş), dikeyde simge üstünde yüzde (ItemSize genişliği) -->
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsBattery}" Value="True"/>
+                                        <Condition Binding="{Binding DataContext.IsVertical, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}" Value="False"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Width" Value="62"/>
+                                </MultiDataTrigger>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter Property="Background" Value="{DynamicResource KoyDockHover}"/>
                                 </Trigger>
@@ -352,6 +360,59 @@
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    Visibility="{Binding IsGlyphButton, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
+
+                        <!-- Pil: Fluent pil simgesi + yüzde. Düşük pilde uyarı rengi. -->
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Visibility="{Binding IsBattery, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Orientation" Value="Horizontal"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.IsVertical, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}" Value="True">
+                                            <Setter Property="Orientation" Value="Vertical"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock Text="{Binding BatteryGlyph}"
+                                       FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                       FontSize="18"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource KoyDockGlyph}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsLowBattery}" Value="True">
+                                                <Setter Property="Foreground" Value="{DynamicResource KoyDangerText}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <TextBlock Text="{Binding PercentText}"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Margin="3,0,0,0"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource KoyDockClockText}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsLowBattery}" Value="True">
+                                                <Setter Property="Foreground" Value="{DynamicResource KoyDangerText}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding DataContext.IsVertical, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}" Value="True">
+                                                <Setter Property="FontSize" Value="10"/>
+                                                <Setter Property="Margin" Value="0,-1,0,0"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
 
                         <!-- Saat: saat ve tarih -->
                         <StackPanel HorizontalAlignment="Center"

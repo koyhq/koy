@@ -2397,6 +2397,12 @@
   <data name="DockAddTrash" xml:space="preserve">
     <value>Recycle Bin</value>
   </data>
+  <data name="DockAddBattery" xml:space="preserve">
+    <value>Battery</value>
+  </data>
+  <data name="DockBatteryCharging" xml:space="preserve">
+    <value>Charging: {0}%</value>
+  </data>
   <data name="DockAddCustom" xml:space="preserve">
     <value>Custom button...</value>
   </data>

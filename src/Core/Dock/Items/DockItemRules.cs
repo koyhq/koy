@@ -26,6 +26,7 @@ public static class DockItemRules
             case "clock": kind = DockItemKind.Clock; return true;
             case "trash": kind = DockItemKind.Trash; return true;
             case "custom": kind = DockItemKind.Custom; return true;
+            case "battery": kind = DockItemKind.Battery; return true;
             default: kind = default; return false;
         }
     }
@@ -34,7 +35,7 @@ public static class DockItemRules
     /// Ham kayıtları doğrular ve sırasını korur. Bilinmeyen tür, boş kimlik, dosya adı olamayan uygulama kimliği,
     /// boş ya da çok uzun özel komut atılır.
     /// Tekilleştirme: App, Folder ve Custom kendi türünde kimliğe göre (büyük/küçük harf duyarsız) tekildir;
-    /// Clock ve Trash en fazla bir kez bulunur; Separator ve Spacer tekrarlanabilir.
+    /// Clock, Trash ve Battery en fazla bir kez bulunur; Separator ve Spacer tekrarlanabilir.
     /// Sınır aşılınca kalan kayıtlar atılır (ilk gelenler kalır).
     /// </summary>
     public static IReadOnlyList<DockItemSpec> Normalize(IEnumerable<DockItemEntry> entries, int maxCount = MaxItemCount)
@@ -76,6 +77,7 @@ public static class DockItemRules
 
                 case DockItemKind.Clock:
                 case DockItemKind.Trash:
+                case DockItemKind.Battery:
                     // Tekil öğeler: kimlik türün adına sabitlenir, böylece iki kez eklenemez.
                     id = kind.ToString();
                     command = "";

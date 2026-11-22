@@ -26,7 +26,7 @@ public class DockItemSettingsTests
           "DockItems": {
             "Items": [
               { "Kind": "app", "Id": "Obsidian.lnk" },
-              { "Kind": "battery", "Id": "" },
+              { "Kind": "wifi", "Id": "" },
               { "Kind": "custom", "Id": "c1", "Command": "calc.exe" }
             ]
           }
