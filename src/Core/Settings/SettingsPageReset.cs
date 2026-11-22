@@ -23,7 +23,6 @@ public static class SettingsPageReset
         nameof(AppSettings.Voice),
         nameof(AppSettings.HotCorners),
         nameof(AppSettings.Dock),
-        nameof(AppSettings.Displays),
     };
 
     /// <summary>Bölümün tamamı yerine tek alanı sıfırlanabilen hedefler ("Bölüm.Alan"): sayfa başka sayfaların da kullandığı bölümden yalnız kendi satırlarını sıfırlar.</summary>
@@ -38,7 +37,7 @@ public static class SettingsPageReset
         PageShortcuts = 5, PageDictation = 6, PagePerformance = 7;
 
     /// <summary>
-    /// Sayfa dizinine göre sıfırlanacak hedefler (bölüm adı ya da "Bölüm.Alan"); sıfırlaması olmayan sayfa (Hakkında,
+    /// Sayfa dizinine göre sıfırlanacak hedefler (bölüm adı ya da "Bölüm.Alan"); sıfırlaması olmayan sayfa (Ekranlar, Hakkında,
     /// Gelişmiş, Eklentiler) için boş. Hava durumu konumu kullanıcı verisidir, hiçbir sayfa sıfırlamasında yer almaz.
     /// </summary>
     public static IReadOnlyList<string> TargetsFor(int pageIndex) => pageIndex switch
@@ -46,7 +45,8 @@ public static class SettingsPageReset
         PageGeneral => [nameof(AppSettings.General)],
         PageNotch => [nameof(AppSettings.Notch), nameof(AppSettings.Music), nameof(AppSettings.Focus), nameof(AppSettings.Search), nameof(AppSettings.Clipboard)],
         PageDock => [nameof(AppSettings.Dock)],
-        PageDisplays => [nameof(AppSettings.Displays)],
+        // Ekranlar sıfırlanmaz: monitör başına dock'u açmak o ekranın görev çubuğunu onaysız gizleyebilir (AGENTS #7).
+        PageDisplays => [],
         PageAppearance => [nameof(AppSettings.Appearance)],
         PageShortcuts => [nameof(AppSettings.Shortcuts), nameof(AppSettings.HotCorners)],
         PageDictation => [nameof(AppSettings.Voice)],
@@ -86,7 +86,6 @@ public static class SettingsPageReset
                         HideWindowsTaskbar = current.Dock.HideWindowsTaskbar,
                     }
                 },
-                nameof(AppSettings.Displays) => result with { Displays = new DisplaysSettings() },
                 nameof(AppSettings.HotCorners) => result with { HotCorners = new HotCornersSettings() },
                 nameof(AppSettings.General) => result with
                 {

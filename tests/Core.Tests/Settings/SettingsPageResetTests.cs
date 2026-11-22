@@ -92,23 +92,24 @@ public class SettingsPageResetTests
     }
 
     [Fact]
-    public void Displays_and_hot_corners_reset_to_defaults()
+    public void Hot_corners_reset_to_defaults_and_displays_are_never_reset()
     {
         var current = Customized();
         current.Displays.NewScreenDefault = Koy.Core.Display.NewScreenMode.None;
         current.HotCorners.DwellMs = 999;
 
-        var reset = SettingsPageReset.Reset(current, ["Displays", "HotCorners"]);
+        var reset = SettingsPageReset.Reset(current, ["HotCorners"]);
 
-        Assert.Equal(new DisplaysSettings(), reset.Displays);
         Assert.Equal(new HotCornersSettings(), reset.HotCorners);
+        Assert.Equal(Koy.Core.Display.NewScreenMode.None, reset.Displays.NewScreenDefault);
+        Assert.Empty(SettingsPageReset.TargetsFor(3));
+        Assert.Throws<ArgumentException>(() => SettingsPageReset.Reset(current, ["Displays"]));
     }
 
     [Theory]
     [InlineData(0, "General")]
     [InlineData(1, "Notch")]
     [InlineData(2, "Dock")]
-    [InlineData(3, "Displays")]
     [InlineData(4, "Appearance")]
     [InlineData(5, "Shortcuts")]
     [InlineData(6, "Voice")]
