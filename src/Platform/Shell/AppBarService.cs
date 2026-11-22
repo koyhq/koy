@@ -65,6 +65,9 @@ public sealed class AppBarService : IAppBarService
 
     private bool _ownsBottomEdge;
 
+    // Sıradaki SETPOS'tan önce geçici (1 px büyük) alan gönderilsin: aynı alan tekrar istenince Windows çalışma alanını yenilemiyor.
+    private bool _nudgeNext;
+
     public unsafe void Register(nint windowHandle, double heightDip, double dpiScale = 1.0, DockEdge edge = DockEdge.Bottom, double edgeOffsetDip = 0.0)
     {
         if (windowHandle == 0 || _registeredHandles.Contains(windowHandle))
@@ -83,6 +86,7 @@ public sealed class AppBarService : IAppBarService
         };
 
         var registered = PInvoke.SHAppBarMessage(ABM_NEW, ref data);
+        CrashLog.Write($"AppBar kaydı: ABM_NEW={registered}, hwnd=0x{windowHandle:X}, kenar={edge}, görev çubuğu bizde={OwnsBottomEdge}", null);
         if (registered != 0)
         {
             _registeredHandles.Add(windowHandle);
@@ -111,6 +115,8 @@ public sealed class AppBarService : IAppBarService
             return false;
 
         var hwnd = new HWND(windowHandle);
+        // Yeniden iddia, aynı dikdörtgenle gelse bile çalışma alanını yeniden hesaplatmalı (AppBarMath.NudgedRect).
+        _nudgeNext = true;
         if (onlyIfNeeded)
         {
             var hMonitor = PInvoke.MonitorFromWindow(hwnd, MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST);
@@ -263,8 +269,31 @@ public sealed class AppBarService : IAppBarService
         var queried = new WindowRect(data.rc.left, data.rc.top, data.rc.right, data.rc.bottom);
         var final = AppBarMath.FinalRect(edge, new WindowRect(screenLeft, screenTop, screenRight, screenBottom), heightPx, queried, OwnsBottomEdge);
         data.rc = new RECT { left = final.Left, top = final.Top, right = final.Right, bottom = final.Bottom };
+        var nudge = _nudgeNext;
+        _nudgeNext = false;
+        if (nudge)
+        {
+            var temp = AppBarMath.NudgedRect(edge, final);
+            data.rc = new RECT { left = temp.Left, top = temp.Top, right = temp.Right, bottom = temp.Bottom };
+            PInvoke.SHAppBarMessage(ABM_SETPOS, ref data);
+            data.rc = new RECT { left = final.Left, top = final.Top, right = final.Right, bottom = final.Bottom };
+        }
+
         PInvoke.SHAppBarMessage(ABM_SETPOS, ref data);
         _placements.Record(handle, requested);
+
+        if (nudge && hMonitor != 0)
+        {
+            // Tanı: gönderilen alanlar ve SETPOS sonrası çalışma alanı (Gezgin güncellemeyi geç yapabilir: değer yine de yazılır).
+            var after = new MONITORINFOEXW { monitorInfo = new MONITORINFO { cbSize = (uint)sizeof(MONITORINFOEXW) } };
+            if (PInvoke.GetMonitorInfo(hMonitor, (MONITORINFO*)&after))
+            {
+                var w = after.monitorInfo.rcWork;
+                CrashLog.Write($"AppBar SETPOS: hwnd=0x{handle:X}, kenar={edge}, istenen=({requested.Left},{requested.Top},{requested.Right},{requested.Bottom}), " +
+                    $"QUERYPOS=({queried.Left},{queried.Top},{queried.Right},{queried.Bottom}), gönderilen=({final.Left},{final.Top},{final.Right},{final.Bottom}), " +
+                    $"çalışma alanı sonrası=({w.left},{w.top},{w.right},{w.bottom})", null);
+            }
+        }
     }
 
     public void Dispose()

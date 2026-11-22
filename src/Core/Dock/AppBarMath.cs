@@ -64,4 +64,18 @@ public static class AppBarMath
     /// <param name="ownsBottomEdge">Windows görev çubuğu gizli: alt kenar Koy'un, Gezgin'in itmesi yok sayılır.</param>
     public static WindowRect FinalRect(WindowRect monitor, int heightPx, WindowRect queried, bool ownsBottomEdge)
         => FinalRect(DockEdge.Bottom, monitor, heightPx, queried, ownsBottomEdge);
+
+    /// <summary>
+    /// Aynı alanı tekrar ISTEMEK Windows'ta çalışma alanını yeniden hesaplatmaz: SETPOS aynı dikdörtgenle gelirse Gezgin değişiklik
+    /// görmez. Gezgin otomatik gizlenen görev çubuğu yüzünden çalışma alanını sıfırladıktan sonra (kayıt, görev çubuğu görünürken
+    /// yapılmıştı) payı geri getirmek için önce kalınlığı 1 piksel büyütülmüş geçici bir alan, ardından gerçek alan gönderilir.
+    /// Bu fonksiyon geçici alanı üretir: dock'un oturduğu kenar sabit, iç kenar 1 px içeri kayar.
+    /// </summary>
+    public static WindowRect NudgedRect(DockEdge edge, WindowRect rect) => edge switch
+    {
+        DockEdge.Top => rect with { Bottom = rect.Bottom + 1 },
+        DockEdge.Left => rect with { Right = rect.Right + 1 },
+        DockEdge.Right => rect with { Left = rect.Left - 1 },
+        _ => rect with { Top = rect.Top - 1 }
+    };
 }

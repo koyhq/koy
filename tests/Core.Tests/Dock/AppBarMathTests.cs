@@ -209,4 +209,18 @@ public class AppBarMathTests
         Assert.False(AppBarOwnership.NeedsReassert(Monitor, new WindowRect(0, 0, 1920, 1022), 58, ownsBottomEdge: true));
         Assert.True(AppBarOwnership.NeedsReassert(Monitor, new WindowRect(0, 0, 1920, 962), 58, ownsBottomEdge: true));
     }
+
+    [Theory]
+    [InlineData(DockEdge.Bottom, 0, 1020, 1920, 1080, 0, 1019, 1920, 1080)]
+    [InlineData(DockEdge.Top, 0, 0, 1920, 60, 0, 0, 1920, 61)]
+    [InlineData(DockEdge.Left, 0, 0, 60, 1080, 0, 0, 61, 1080)]
+    [InlineData(DockEdge.Right, 1860, 0, 1920, 1080, 1859, 0, 1920, 1080)]
+    public void NudgedRect_grows_the_inner_edge_by_one_pixel_and_keeps_the_screen_edge(
+        DockEdge edge, int l, int t, int r, int b, int el, int et, int er, int eb)
+    {
+        var n = AppBarMath.NudgedRect(edge, new WindowRect(l, t, r, b));
+
+        Assert.Equal(new WindowRect(el, et, er, eb), n);
+        Assert.NotEqual(new WindowRect(l, t, r, b), n);   // aynı alan değil: Windows değişiklik görür
+    }
 }
