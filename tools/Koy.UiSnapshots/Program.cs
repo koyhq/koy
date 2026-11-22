@@ -335,6 +335,18 @@ public static class Program
         }
     }
 
+    /// <summary>Arka plan iş parçacıklarının Dispatcher.Invoke'ları işlensin diye verilen süre boyunca kuyruğu pompalar.</summary>
+    private static void PumpFor(TimeSpan duration)
+    {
+        var until = DateTime.UtcNow + duration;
+        do
+        {
+            Flush();
+            Thread.Sleep(5);
+        }
+        while (DateTime.UtcNow < until);
+    }
+
     private static void Flush() =>
         System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.ContextIdle);
 
@@ -579,7 +591,7 @@ public static class Program
 
     /// <summary>
     /// Video önayarlarının 4 sn'lik döngüsünü açık çentikte (Ana) kare kare çizer: &lt;out&gt;/&lt;önayar&gt;/f000.png…
-    /// Video durdurulup her kare için konumu elle ayarlanır (ScrubbingEnabled), böylece kareler eşit aralıklı olur.
+    /// Video kendi hızında oynar, kareler gerçek zamanda 1/fps aralıkla yakalanır (çizim yavaşsa aralık hafif kayabilir).
     /// README ve site için GIF / video üretmekte kullanılır.
     /// </summary>
     private static void RenderEffectVideos(string outDir, string? only, int fps)
@@ -608,8 +620,10 @@ public static class Program
             host.Show();
             Settle();
 
-            var media = FindDescendant<System.Windows.Controls.MediaElement>(content);
-            if (media is null)
+            // Video artık MediaElement değil, LiveBackgroundHost'un kendi kare okuyucusuyla (IVideoFrameReader) oynuyor;
+            // konum elle ayarlanamaz. Dispatcher gerçek zamanda pompalanır ve kareler 1/fps aralıkla yakalanır.
+            var host2 = FindDescendant<Koy.App.Features.Notch.LiveBackground.LiveBackgroundHost>(content);
+            if (host2 is null)
             {
                 Console.WriteLine($"{preset.Id}: video yok, atlandı");
             }
@@ -617,17 +631,14 @@ public static class Program
             {
                 var dir = Path.Combine(outDir, preset.Id);
                 Directory.CreateDirectory(dir);
-                media.Pause();
+                // Ekran dışı pencerede oynatma kararı durağan kareye düşer; kayıt için oynatma zorlanır.
+                host2.Mode = Koy.Core.Notch.LiveBackgroundPlaybackMode.Animate;
+                PumpFor(TimeSpan.FromMilliseconds(600)); // ilk kare çözülsün
                 var frames = 4 * fps;
+                var watch = System.Diagnostics.Stopwatch.StartNew();
                 for (var i = 0; i < frames; i++)
                 {
-                    media.Position = TimeSpan.FromSeconds((double)i / fps);
-                    // Konum değişince yeni kare kod çözücüden eşzamansız gelir; kısa bekleyip kuyruğu boşalt.
-                    for (var k = 0; k < 3; k++)
-                    {
-                        Thread.Sleep(40);
-                        Flush();
-                    }
+                    PumpFor(TimeSpan.FromSeconds((double)i / fps) - watch.Elapsed);
                     clock ??= set.Vm.Status.CurrentTime;
                     set.Vm.Status.CurrentTime = clock;
                     RenderElement(content, Koy.Core.Notch.NotchLayout.CanvasWidth, Koy.Core.Notch.NotchLayout.CanvasHeight,
