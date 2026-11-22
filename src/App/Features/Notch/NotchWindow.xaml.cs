@@ -87,6 +87,10 @@ public partial class NotchWindow : Window
         if (ViewModel is not { State: NotchState.Expanded, IsSearchOpen: false } viewModel)
             return;
 
+        // Müzik çubuğunda sürükleme sürerken Esc yalnız sürüklemeyi iptal eder (çubuk işler), çentiği kapatmaz.
+        if (e.Key == Key.Escape && viewModel.Music.IsScrubbing)
+            return;
+
         if (e.Key == Key.Escape)
         {
             viewModel.Controller.OnClick();

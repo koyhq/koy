@@ -13,7 +13,7 @@ namespace Koy.UiSnapshots;
 /// <summary>
 /// Koy'un pencerelerini ekrana çıkarmadan PNG'ye çevirir. Hiçbir Win32 kancası, AppBar ya da görev çubuğu
 /// servisi başlatılmaz; pencereler gösterilmez, yalnız ölçülüp çizilir.
-/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall|centik|centik-erisim|geri-al|dock|dockbar|jumplist|startmenu|eklentiler|efektler]
+/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall|centik|muzik-sarma|centik-erisim|geri-al|dock|dockbar|jumplist|startmenu|eklentiler|efektler]
 /// <c>--scene jumplist</c>: dock sağ tık menüsünün bölümlü atlama listesi hâli (sentetik veri).
 /// <c>--scene startmenu</c>: Başlat düğmesinin sağ tık menüsü (Win+X karşılığı), alt menü açık hâliyle.
 /// <c>--scene eklentiler</c>: Eklentiler sayfası (depodaki store/ klasöründen sahte ağla; kurulum, uygulama ve hata durumları).
@@ -100,6 +100,8 @@ public static class Program
                 RenderUninstall(outDir, prefix, theme);
             else if (scene == "centik")
                 RenderCentik(outDir, prefix, theme);
+            else if (scene == "muzik-sarma")
+                RenderScrubScenes(n => Path.Combine(outDir, $"{prefix}-{theme}-{n}.png"));
             else if (scene == "geri-al")
                 RenderUndoStripScenes(n => Path.Combine(outDir, $"{prefix}-{theme}-{n}.png"));
             else if (scene == "centik-erisim")
@@ -684,6 +686,25 @@ public static class Program
         set.Vm.Focus.Tasks!.RemoveCommand.Execute(set.Vm.Focus.Tasks!.Rows[1]);
         Flush();
         ShotNotch(set, name("geri-al-odak"), expanded: true);
+        set.Vm.Dispose();
+    }
+
+    /// <summary>Müzik çubuğunda sürükleyerek sarma (--scene muzik-sarma): sürükleme anı, balon süreyi gösterir.</summary>
+    private static void RenderScrubScenes(Func<string, string> name)
+    {
+        var set = MakeNotch(music: true);
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+        set.Vm.ShowHomePageCommand.Execute(Koy.Core.Notch.NotchHomePage.Music);
+        Flush();
+        // Panel görsel ağaca ilk çizimde girer: önce sürüklemesiz kare (karşılaştırma için), sonra sürükleme anı.
+        ShotNotch(set, name("muzik-sarma-onceki"), expanded: true);
+        if (FindDescendant<Koy.App.Features.Home.HomePanel>((DependencyObject)set.Window.Content) is { } home)
+        {
+            home.ShowScrubForSnapshot(0.62);
+            Flush();
+            ShotNotch(set, name("muzik-sarma"), expanded: true);
+            set.Vm.Music.CancelScrub();
+        }
         set.Vm.Dispose();
     }
 

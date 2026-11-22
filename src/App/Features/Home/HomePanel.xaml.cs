@@ -107,15 +107,89 @@ public partial class HomePanel : UserControl
         return 999;
     }
 
+    private static double FractionAt(FrameworkElement bar, MouseEventArgs e) =>
+        bar.ActualWidth > 0 ? Math.Clamp(e.GetPosition(bar).X / bar.ActualWidth, 0, 1) : 0;
+
+    // Basınca fare yakalanır ve sürükleme başlar; sarma yalnız bırakınca olur (tek tıklama = basıp bırakma, bugünkü davranış).
+    // Atlama ya da sürükleme kartı büyütmesin, çentiği kapatmasın: olay işlenmiş sayılır.
     private void ProgressBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (sender is FrameworkElement bar && DataContext is HomeViewModel vm)
+        if (sender is not FrameworkElement bar || DataContext is not HomeViewModel vm)
+            return;
+
+        e.Handled = true;
+        if (!vm.Music.BeginScrub(FractionAt(bar, e)))
+            return;
+
+        bar.CaptureMouse();
+        bar.Focus();
+        PlaceScrubVisuals(bar, vm.Music);
+    }
+
+    private void ProgressBar_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (sender is FrameworkElement { IsMouseCaptured: true } bar && DataContext is HomeViewModel vm)
         {
-            var fraction = bar.ActualWidth > 0 ? Math.Clamp(e.GetPosition(bar).X / bar.ActualWidth, 0, 1) : 0;
-            vm.Music.SeekCommand.Execute(fraction);
-            // Atlama tıklaması karta ulaşıp kartı büyütmesin, çentiğe ulaşıp onu kapatmasın.
+            vm.Music.MoveScrub(FractionAt(bar, e));
+            PlaceScrubVisuals(bar, vm.Music);
             e.Handled = true;
         }
+    }
+
+    private void ProgressBar_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not FrameworkElement { IsMouseCaptured: true } bar || DataContext is not HomeViewModel vm)
+            return;
+
+        // Bırakma konumu son taşımadan farklı olabilir (hızlı tık): önce son kesri işle, sonra bitir.
+        vm.Music.MoveScrub(FractionAt(bar, e));
+        e.Handled = true;
+        _ = vm.Music.EndScrub();
+        bar.ReleaseMouseCapture();
+    }
+
+    // Yakalama başka bir sebeple kaybolursa (Esc, pencere kaybı) sürükleme iptal; bırakmada EndScrub zaten bitirmiştir.
+    private void ProgressBar_LostMouseCapture(object sender, MouseEventArgs e)
+    {
+        if (DataContext is HomeViewModel vm)
+            vm.Music.CancelScrub();
+    }
+
+    private void ProgressBar_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (DataContext is not HomeViewModel vm)
+            return;
+
+        if (e.Key == Key.Escape && vm.Music.IsScrubbing)
+        {
+            vm.Music.CancelScrub();
+            ((FrameworkElement)sender).ReleaseMouseCapture();
+            e.Handled = true;
+        }
+        else if (e.Key is Key.Left or Key.Right && !vm.Music.IsLive)
+        {
+            _ = vm.Music.StepSeek(e.Key == Key.Left ? -1 : 1);
+            e.Handled = true;
+        }
+    }
+
+    /// <summary>Anlık görüntü aracı için: sürükleme anını (dolu kısım, nokta, süre balonu) fare olmadan kurar.</summary>
+    public void ShowScrubForSnapshot(double fraction)
+    {
+        if (DataContext is not HomeViewModel vm || !vm.Music.BeginScrub(fraction))
+            return;
+
+        ScrubHit.UpdateLayout();
+        PlaceScrubVisuals(ScrubHit, vm.Music);
+    }
+
+    private void PlaceScrubVisuals(FrameworkElement bar, MusicViewModel music)
+    {
+        var x = music.Progress * bar.ActualWidth;
+        ScrubThumbShift.X = Math.Clamp(x - ScrubThumb.Width / 2, 0, Math.Max(0, bar.ActualWidth - ScrubThumb.Width));
+        ScrubBalloon.UpdateLayout();
+        var w = ScrubBalloon.ActualWidth;
+        ScrubBalloonShift.X = Math.Clamp(x - w / 2, 0, Math.Max(0, bar.ActualWidth - w));
     }
 
     // Müzik kartının boş yerine tıklama işlenmiş sayılır: yoksa çentik penceresi tıklamayı "boşluğa tıklandı" sayıp

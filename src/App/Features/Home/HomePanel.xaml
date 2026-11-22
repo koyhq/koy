@@ -326,11 +326,42 @@
                   </Style.Triggers>
                 </Style>
               </StackPanel.Style>
-              <!-- Tıklama alanı 16 px (görünür çubuk 4 px kalır): 4 px'lik hedefe isabet etmek zordu. -->
-              <Grid Height="16" Margin="0,-6" Background="Transparent" Cursor="Hand" MouseLeftButtonDown="ProgressBar_MouseLeftButtonDown"
+              <!-- Tıklama alanı 16 px (görünür çubuk 4 px kalır): 4 px'lik hedefe isabet etmek zordu. Basınca fare yakalanır,
+                   sürüklerken dolu kısım, nokta ve süre balonu parmağı izler; bırakınca tek seek (MusicViewModel.EndScrub). -->
+              <Grid x:Name="ScrubHit" Height="16" Margin="0,-6" Background="Transparent" Cursor="Hand" Focusable="True"
+                    MouseLeftButtonDown="ProgressBar_MouseLeftButtonDown" MouseMove="ProgressBar_MouseMove"
+                    MouseLeftButtonUp="ProgressBar_MouseLeftButtonUp" LostMouseCapture="ProgressBar_LostMouseCapture"
+                    PreviewKeyDown="ProgressBar_PreviewKeyDown"
                     AutomationProperties.Name="{Binding [MusicProgress], Source={x:Static res:Loc.Instance}}">
                 <ProgressBar Minimum="0" Maximum="1" Value="{Binding Music.Progress, Mode=OneWay}" Height="4" VerticalAlignment="Center"
-                             Background="#2EFFFFFF" Foreground="{DynamicResource KoyNotchText}" BorderThickness="0" IsHitTestVisible="False" />
+                             Background="#2EFFFFFF" Foreground="{DynamicResource KoyNotchText}" BorderThickness="0" IsHitTestVisible="False">
+                  <ProgressBar.Style>
+                    <Style TargetType="ProgressBar">
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsMouseOver, ElementName=ScrubHit}" Value="True">
+                          <Setter Property="Height" Value="6" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Music.IsScrubbing}" Value="True">
+                          <Setter Property="Height" Value="6" />
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </ProgressBar.Style>
+                </ProgressBar>
+                <Ellipse x:Name="ScrubThumb" Width="12" Height="12" HorizontalAlignment="Left" VerticalAlignment="Center"
+                         Fill="{DynamicResource KoyNotchText}" IsHitTestVisible="False" Visibility="{Binding Music.IsScrubbing, Converter={StaticResource BoolToVis}}">
+                  <Ellipse.RenderTransform>
+                    <TranslateTransform x:Name="ScrubThumbShift" />
+                  </Ellipse.RenderTransform>
+                </Ellipse>
+                <Border x:Name="ScrubBalloon" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,-30,0,0" Padding="7,3" CornerRadius="7"
+                        Background="{DynamicResource KoyNotchText}" IsHitTestVisible="False" Panel.ZIndex="2"
+                        Visibility="{Binding Music.IsScrubbing, Converter={StaticResource BoolToVis}}">
+                  <Border.RenderTransform>
+                    <TranslateTransform x:Name="ScrubBalloonShift" />
+                  </Border.RenderTransform>
+                  <TextBlock Text="{Binding Music.ScrubText}" FontSize="11" FontWeight="SemiBold" Foreground="#FF111111" />
+                </Border>
               </Grid>
               <Grid Margin="0,5,0,0">
                 <TextBlock Text="{Binding Music.PositionText}" FontSize="11" Foreground="#8CFFFFFF" />
