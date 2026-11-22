@@ -5,6 +5,14 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.18](https://github.com/koyhq/koy/compare/v0.2.17...v0.2.18) (2026-11-22)
+Öne çıkanlar:
+- **Güncelleme kilidi düzeltildi (v0.2.17 güncelleme hatası):** v0.2.17 ve önceki sürümlerde dock, arama veya atlama listesinden açılan uygulamalar `current` kurulum klasörünü çalışma dizini olarak miras aldığı için güncelleme sırasında Windows dosya kilidi (hata 32) oluşabiliyor ve yeni sürüm uygulanamıyordu. Koy ve başlattığı tüm uygulamalar artık güvenli çalışma diziniyle açılır; v0.2.17 veya öncesinden geçerken dock'tan açılmış uygulamaları bir kez kapatman gerekir, v0.2.18 sonrasında bu kilit bir daha yaşanmaz.
+
+### Düzeltmeler
+
+* **updates:** dock, arama ve atlama listesinden açılan uygulamaların güncelleme sırasında `current` kurulum klasörünü kilitlemesine yol açan çalışma dizini mirası kaldırıldı ([#210](https://github.com/koyhq/koy/pull/210)) ([fc09f8e](https://github.com/koyhq/koy/commit/fc09f8e02a4db94174e264fe2cceab4a0d60563d))
+
 ## [0.2.17](https://github.com/koyhq/koy/compare/v0.2.16...v0.2.17) (2026-11-22)
 Öne çıkanlar:
 - **Windows 11 görev çubuğu düzeni:** Tam genişlik dock artık hava durumu, Başlat, Ara, Görev görünümü ve sağ sistem alanıyla (tepsi simgeleri, Wi-Fi/ses/pil hapı, saat/tarih, bildirim zili, masaüstünü göster) Windows 11 görev çubuğu gibi çalışıyor ve sistem açık/koyu temasını izliyor.
