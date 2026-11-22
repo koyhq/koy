@@ -1,6 +1,6 @@
 # Araştırma: Kendi sesle yazma aracımız
 
-**Tarih:** 2026-11-22. **Durum:** araştırma, karar bekliyor.
+**Tarih:** 2026-11-22. **Durum:** ilk uygulama yapıldı (aşağıda "Uygulanan"); yerel model yönetimi, toplantı ve dosya çevirisi yok.
 
 Soru: Kısayola basıp konuşunca metnin temizlenip odaktaki pencereye yazıldığı, GPLv3 lisanslı açık kaynaklı bir masaüstü sesle yazma aracı var. Koy'un sesle yazması da aynı işi yapsın istiyoruz. Araç ne yapıyor, nasıl çalışıyor ve Koy'un kurallarıyla nasıl bağdaştırılır?
 
@@ -183,3 +183,17 @@ Her aşama sonunda AGENTS #1 gereği `measure-memory.ps1` ve `docs/MEMORY.md`.
 
 ## Sonraki adım
 Kararlar (özellikle 1, 2 ve 3) alınınca Aşama 1–2 için GitHub issue'ları açılır; her biri `Closes #N` ile PR'a bağlanır, Core parçaları testlidir, görsel kanıt `tools/Koy.UiSnapshots` ile alınır.
+
+## Uygulanan (2026-11-22)
+Aşama 1–4 ve 6'nın büyük kısmı tek PR'da: kayıt, sessizlik denetimi, bulut / kendi sunucundaki tanıma, temizleme + çeviri, sözlük (öğrenmeli), profiller, yapıştırma ve pano geri yükleme, geçmiş + yeniden deneme, ayar bölümü. Kodun haritası `docs/MAP.md`.
+
+Kararlar (proje sahibi verene kadar bu varsayılanlarla):
+- **Yerel tanıma:** Koy bir sunucu *başlatmaz* (AGENTS #4 korunur). Kullanıcı kendi bilgisayarında OpenAI uyumlu bir sunucu çalıştırıp adresini yazarsa ses bilgisayardan çıkmaz. Koy'un modeli kendisi indirip çalıştırması ayrı karar.
+- **Gizlilik:** özellik varsayılan kapalı; açıklamada sesin adrese gittiği yazar. API anahtarı DPAPI ile şifreli ayrı dosyada; ayarları silerek kaldırınca silinir.
+- **Ses yakalama:** WinRT `MediaCapture` (paket ve P/Invoke yok). Canlı dalga formu yok; çentikte kart gösterilir. Düzeyler kayıt bitince WAV'dan okunur.
+- **Temizleme:** varsayılan açık; ek bir istek harcar, ayardan kapatılır.
+- **Win+H:** sesli komut için olduğu gibi kaldı; sesle yazma ondan bağımsız.
+
+Henüz yok: Koy'un yerel model indirip çalıştırması, toplantı kaydı, dosya/altyazı çevirisi, seçili metin hakkında soru, komut satırı, sesli komutun yeni hatta bağlanması (Aşama 6'nın geri kalanı), köşe göstergesi (çentik kapalıyken görsel gösterge).
+
+Elle sınanmadı: gerçek mikrofonla kayıt, Windows'un mikrofon izni, farklı programlarda yapıştırma, panonun geri yüklenmesi, iki ekran, uzun kayıt, hız sınırı davranışı. Bu liste #156'ya, bellek ölçümü #157'ye eklendi.
