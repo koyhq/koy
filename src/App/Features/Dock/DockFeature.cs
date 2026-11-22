@@ -591,7 +591,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     {
         var viewModel = new DockViewModel(settings, _controller!, _shellActionService!, visibilityController, status: null,
             mediaService: _mediaService, trayService: _trayService, recentFiles: _recentFiles, jumpLists: _jumpLists,
-            startMenu: _startMenu)
+            startMenu: _startMenu, acquirePower: services.AcquirePowerService, releasePower: services.ReleasePowerService)
         {
             ReduceMotion = _reduceMotion
         };

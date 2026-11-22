@@ -5,6 +5,8 @@ using System.Windows.Media;
 using Koy.App.Features.Dock;
 using Koy.Core.Display;
 using Koy.Core.Dock;
+using Koy.Core.Dock.Items;
+using Koy.Core.Power;
 using Koy.Core.Settings;
 using Koy.Core.Shell;
 using Koy.Core.Tray;
@@ -30,6 +32,16 @@ internal static class DockBarSnapshots
         public bool IsRunning => true;
         public void Start() { }
         public void Stop() { }
+        public void Dispose() { }
+    }
+
+    private sealed class FakePower(int percent, bool charging) : IPowerService
+    {
+        public bool HasBattery => true;
+        public int RemainingPercent => percent;
+        public bool IsCharging => charging;
+        public BatteryStatus Status => charging ? BatteryStatus.Charging : BatteryStatus.Discharging;
+        public event EventHandler<PowerChangedEventArgs>? PowerChanged { add { } remove { } }
         public void Dispose() { }
     }
 
@@ -64,6 +76,13 @@ internal static class DockBarSnapshots
         // 8. Başlat simgesi: varsayılan Koy simgesi yukarıdaki bütün çekimlerde görünür; burada Windows logosu, özel dosya ve bozuk dosya
         Shoot(outDir, prefix, theme, "dockbar-tam-genislik-baslat-windows", renderElement, fullWidth: true, smallTray: true, appCount: 8, startIcon: DockStartIcon.Windows);
         Shoot(outDir, prefix, theme, "dockbar-kapsul-baslat-windows", renderElement, fullWidth: false, smallTray: true, appCount: 8, startIcon: DockStartIcon.Windows);
+
+        // 9. Pil öğesi (sahte güç verisi): %82 deşarj ve %15 şarjda (düşük eşiğin altında ama şarjda: uyarı rengi yok)
+        Shoot(outDir, prefix, theme, "dockbar-tam-genislik-pil-82", renderElement, fullWidth: true, smallTray: true, appCount: 8, battery: new FakePower(82, false));
+        Shoot(outDir, prefix, theme, "dockbar-kapsul-pil-82", renderElement, fullWidth: false, smallTray: true, appCount: 8, battery: new FakePower(82, false));
+        Shoot(outDir, prefix, theme, "dockbar-tam-genislik-pil-15-sarjda", renderElement, fullWidth: true, smallTray: true, appCount: 8, battery: new FakePower(15, true));
+        Shoot(outDir, prefix, theme, "dockbar-kapsul-pil-15-sarjda", renderElement, fullWidth: false, smallTray: true, appCount: 8, battery: new FakePower(15, true));
+        Shoot(outDir, prefix, theme, "dockbar-kapsul-pil-15-dusuk", renderElement, fullWidth: false, smallTray: true, appCount: 8, battery: new FakePower(15, false));
 
         var dir = Path.Combine(Path.GetTempPath(), "koy-snap-baslat-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(dir);
@@ -147,7 +166,7 @@ internal static class DockBarSnapshots
         string outDir, string prefix, string theme, string name,
         Action<FrameworkElement, double, double, string> renderElement,
         bool fullWidth, bool smallTray, int appCount, int pressedIndex = -1, DockIconAlignment alignment = DockIconAlignment.Center,
-        DockStartIcon startIcon = DockStartIcon.Koy, string startIconPath = "", IReadOnlyList<DockEntryViewModel>? entries = null, bool hug = false)
+        DockStartIcon startIcon = DockStartIcon.Koy, string startIconPath = "", IReadOnlyList<DockEntryViewModel>? entries = null, bool hug = false, IPowerService? battery = null)
     {
         var settings = new AppSettings
         {
@@ -161,19 +180,25 @@ internal static class DockBarSnapshots
                 ShowFolders = true,
                 ShowRecents = false
             },
+            DockItems = battery is null ? new DockItemsSettings() : new DockItemsSettings { Items = [new DockItemEntry { Kind = "Battery", Id = "Battery" }] },
             Appearance = new AppearanceSettings
             {
                 Material = Program.Material
             }
         };
 
-        var vm = new DockViewModel(settings, DockFolderSnapshots.SharedController, new DockFolderSnapshots.FakeShellActionService(), trayService: new FakeTray());
+        var vm = new DockViewModel(settings, DockFolderSnapshots.SharedController, new DockFolderSnapshots.FakeShellActionService(), trayService: new FakeTray(),
+            acquirePower: battery is null ? null : () => battery, releasePower: () => { });
 
         // Kurucunun kuyruğa attığı ilk öğe eşitlemesi (boş denetleyici) çalışsın, sonra sahte öğeler eklensin.
         Pump();
+        // Pil öğesi gerçek yoldan (ComposeExtras) kurulduysa korunur; sahte öğeler onun önüne eklenir.
+        var batteryItem = vm.Items.OfType<DockExtraViewModel>().FirstOrDefault(x => x.IsBattery);
         vm.Items.Clear();
         foreach (var entry in entries ?? BuildEntries(appCount))
             vm.Items.Add(entry);
+        if (battery is not null)
+            vm.Items.Add(batteryItem ?? throw new InvalidOperationException("Pil öğesi oluşmadı"));
 
         vm.SetMonitor(Monitor);
 

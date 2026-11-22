@@ -76,6 +76,7 @@ public partial class DockWindow : Window
         if (ContextMenu is not { } menu)
             return;
 
+        ViewModel?.RefreshCanAddBattery();
         e.Handled = true;
         DockContextMenuManager.Open(menu, this);
     }

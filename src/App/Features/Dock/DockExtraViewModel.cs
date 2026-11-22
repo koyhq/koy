@@ -4,7 +4,7 @@ using Koy.Core.Dock.Items;
 namespace Koy.App.Features.Dock;
 
 /// <summary>
-/// Dock şeridindeki ek öğenin (ayırıcı, boşluk, saat, çöp kutusu, özel düğme) görünüm modeli. Yalnız durum taşır:
+/// Dock şeridindeki ek öğenin (ayırıcı, boşluk, saat, çöp kutusu, özel düğme, pil) görünüm modeli. Yalnız durum taşır:
 /// ne zaman çalışacağı, hangi komutun geçerli olduğu ve saat metni Core'da (DockItemLayout, DockCustomCommand, DockClockTick).
 /// Tıklamayı DockViewModel.ActivateExtra yürütür.
 /// </summary>
@@ -54,6 +54,7 @@ public sealed partial class DockExtraViewModel : DockEntryViewModel
     public bool IsSeparator => Kind == DockItemKind.Separator;
     public bool IsSpacer => Kind == DockItemKind.Spacer;
     public bool IsClock => Kind == DockItemKind.Clock;
+    public bool IsBattery => Kind == DockItemKind.Battery;
     public bool IsGlyphButton => Kind is DockItemKind.Trash or DockItemKind.Custom;
 
     /// <summary>Tıklanabilir mi (ayırıcı ve boşluk değil).</summary>
@@ -66,6 +67,16 @@ public sealed partial class DockExtraViewModel : DockEntryViewModel
 
     [ObservableProperty]
     private string _dateText = string.Empty;
+
+    [ObservableProperty]
+    private string _batteryGlyph = string.Empty;
+
+    [ObservableProperty]
+    private string _percentText = string.Empty;
+
+    /// <summary>Düşük pil (<see cref="DockBatteryPolicy.IsLow"/>): yüzde ve simge uyarı renginde.</summary>
+    [ObservableProperty]
+    private bool _isLowBattery;
 
     public void Update(DockItemSpec spec, int layoutIndex)
     {

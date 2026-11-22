@@ -43,6 +43,7 @@ public static class Strings
     public static string DockAddSpacer => Get(nameof(DockAddSpacer));
     public static string DockAddClock => Get(nameof(DockAddClock));
     public static string DockAddTrash => Get(nameof(DockAddTrash));
+    public static string DockAddBattery => Get(nameof(DockAddBattery));
     public static string DockAddCustom => Get(nameof(DockAddCustom));
     public static string VolumeLevel => Get(nameof(VolumeLevel));
     public static string MonitorSummary => Get(nameof(MonitorSummary));
