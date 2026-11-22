@@ -1111,96 +1111,38 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
         resolved = StabilizeSnap(resolved);
 
+        // Boşluk, köşe, görünürlük, kayma hedefi ve fare izleme kararı Core'da (DockPresentationPolicy).
+        var decision = DockPresentationPolicy.Decide(new DockPresentationInput(
+            resolved, Edge, EffectiveProximity,
+            _settings.Dock.HideInFullscreen, _settings.Dock.HiddenEdgeLine, _settings.Dock.EdgeOffsetDip,
+            _isForegroundWindowFullscreen, _isMouseAtBottomEdge,
+            _visibilityController?.IsVisible));
+
         IsFullWidthMode = resolved.IsFullWidth;
         IsSnapped = resolved.IsSnapped;
         IsHandleVisible = resolved.IsHandleVisible;
         DockHeight = IsVertical ? resolved.WidthDip : resolved.HeightDip;
         CapsuleWidth = IsVertical ? DockHeight : double.NaN;
         CapsuleHeight = IsVertical ? double.NaN : DockHeight;
+        DockMargin = new Thickness(decision.Margin.Left, decision.Margin.Top, decision.Margin.Right, decision.Margin.Bottom);
+        CapsuleCornerRadius = new CornerRadius(decision.Corners.TopLeft, decision.Corners.TopRight,
+            decision.Corners.BottomRight, decision.Corners.BottomLeft);
 
-        if (resolved.IsFullWidth)
-        {
-            DockMargin = new Thickness(0);
-            CapsuleCornerRadius = new CornerRadius(0);
-        }
-        else if (resolved.IsSnapped)
-        {
-            DockMargin = Edge switch
-            {
-                DockEdge.Top => new Thickness(12, 0, 12, 12),
-                DockEdge.Left => new Thickness(0, 12, 12, 12),
-                DockEdge.Right => new Thickness(12, 12, 0, 12),
-                _ => new Thickness(12, 12, 12, 0)
-            };
-            CapsuleCornerRadius = new CornerRadius(
-                resolved.CornerRadiusTopLeft,
-                resolved.CornerRadiusTopRight,
-                resolved.CornerRadiusBottomRight,
-                resolved.CornerRadiusBottomLeft);
-        }
-        else
-        {
-            DockMargin = Edge switch
-            {
-                DockEdge.Top => new Thickness(12, 10, 12, 12),
-                DockEdge.Left => new Thickness(10, 12, 12, 12),
-                DockEdge.Right => new Thickness(12, 12, 10, 12),
-                _ => new Thickness(12, 12, 12, 10)
-            };
-            CapsuleCornerRadius = new CornerRadius(18);
-        }
-
-        // Tam ekran bu monitör için hesaplanır (yan ekrandaki oyun bu ekrandaki dock'u gizlemez; denetleyicinin
-        // sistem geneli bayrağı bilerek kullanılmaz).
-        var isBlockedByFullscreen = _settings.Dock.HideInFullscreen && _isForegroundWindowFullscreen;
-        var shouldShow = !resolved.IsHidden && !isBlockedByFullscreen;
-        if (_visibilityController is not null && EffectiveProximity != DockProximityMode.ReserveSpace)
-        {
-            shouldShow = shouldShow && _visibilityController.IsVisible;
-        }
-
+        var shouldShow = decision.ShouldShow;
         IsVisible = shouldShow;
-        // Çekil tutamağı zaten gizli dock'u işaret eder; ikisi üst üste çizilmez.
-        IsEdgeLineVisible = !resolved.IsHandleVisible && DockPresentationMath.ShowsHiddenEdgeLine(
-            _settings.Dock.HiddenEdgeLine, !shouldShow, isBlockedByFullscreen || _isForegroundWindowFullscreen);
+        IsEdgeLineVisible = decision.IsEdgeLineVisible;
         Status?.SetActive(shouldShow);
         SyncClockTimer();
 
-        // Fare izleme yalnız dock gizliyken (ya da kenardan açıldıysa, kapanışını görmek için) ve tam ekranda değilken
-        // gerekir; tam ekranda kenardan açılma yok.
-        var needsEdgeWatch = (!shouldShow || _isMouseAtBottomEdge) && !isBlockedByFullscreen && !_isForegroundWindowFullscreen;
-        if (needsEdgeWatch != NeedsEdgeWatch)
+        if (decision.NeedsEdgeWatch != NeedsEdgeWatch)
         {
-            NeedsEdgeWatch = needsEdgeWatch;
+            NeedsEdgeWatch = decision.NeedsEdgeWatch;
             EdgeWatchChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        double targetX, targetY;
-        if (shouldShow)
-        {
-            targetX = resolved.TranslationX;
-            targetY = resolved.TranslationY;
-        }
-        else if (resolved.IsHidden)
-        {
-            targetX = resolved.TranslationX;
-            targetY = resolved.TranslationY;
-        }
-        else
-        {
-            var thickness = resolved.IsFullWidth ? DockPositionResolver.FullWidthHeightDip : (resolved.IsSnapped ? DockPositionResolver.SnappedHeightDip : DockPositionResolver.FloatingHeightDip);
-            var offset = resolved.IsFullWidth ? _settings.Dock.EdgeOffsetDip : (resolved.IsSnapped ? _settings.Dock.EdgeOffsetDip : (DockPositionResolver.FloatingBottomMarginDip + _settings.Dock.EdgeOffsetDip));
-            var shift = thickness + offset + 10.0;
-            (targetX, targetY) = _settings.Dock.Edge switch
-            {
-                DockEdge.Top => (0.0, -shift),
-                DockEdge.Left => (-shift, 0.0),
-                DockEdge.Right => (shift, 0.0),
-                _ => (0.0, shift)
-            };
-        }
-
-        var targetOpacity = shouldShow ? resolved.Opacity : 0.0;
+        var targetX = decision.TargetX;
+        var targetY = decision.TargetY;
+        var targetOpacity = decision.TargetOpacity;
 
         if (ReduceMotion)
         {
@@ -1565,141 +1507,74 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     #endregion
 
+    private DockItemViewModel NewItemViewModel(DockItem model)
+    {
+        var vm = new DockItemViewModel(model, _controller)
+        {
+            IconSize = IconSize,
+            ItemSize = ItemSize,
+            Presentation = _presentation
+        };
+        AttachAppIcon(vm);
+        return vm;
+    }
+
     private void UpdateItems()
     {
         Application.Current?.Dispatcher.InvokeAsync(() =>
         {
-            var models = VisibleModels();
-            var folders = _settings.DockItems.Folders ?? [];
-            var pinnedOrder = _settings.DockItems.PinnedOrder ?? [];
+            // Hangi simge, hangi sırayla, hangileri klasörde: karar Core'da (DockEntryPlanner). Burada plan,
+            // var olan görünümlerle eşlenir (varsa güncellenir, yoksa üretilir).
+            var plan = DockEntryPlanner.Plan(
+                VisibleModels(),
+                _settings.DockItems.PinnedOrder ?? [],
+                _settings.DockItems.Folders ?? []);
+            _effectiveOrder = [.. plan.EffectiveOrder];
 
-            // 1. Klasörlerdeki uygulamaları tespit et (bunlar ana dock sırasında ayrıca görünmez)
-            var folderAppMap = new Dictionary<string, DockFolder>(StringComparer.OrdinalIgnoreCase);
-            foreach (var folder in folders)
-            {
-                foreach (var app in folder.Items)
-                {
-                    folderAppMap[app] = folder;
-                }
-            }
-
-            // 2. DockItemViewModel'leri model kimliği veya kısayol adına göre eşle
-            var itemVmCache = new Dictionary<string, DockItemViewModel>(StringComparer.OrdinalIgnoreCase);
-            foreach (var m in models)
-            {
-                var vm = new DockItemViewModel(m, _controller)
-                {
-                    IconSize = IconSize,
-                    ItemSize = ItemSize,
-                    Presentation = _presentation
-                };
-                AttachAppIcon(vm);
-                itemVmCache[m.Id] = vm;
-                itemVmCache[PinnedOrder.IdOf(m.Id)] = vm;
-            }
-
-            // 3. Hedef dock sırasını belirle
-            var availableLnkIds = models.Where(m => m.IsPinned).Select(m => PinnedOrder.IdOf(m.Id)).ToList();
-            var (effectiveOrder, reconciledFolders) = PinnedOrder.Reconcile(pinnedOrder, availableLnkIds, folders);
-            _effectiveOrder = effectiveOrder;
-
-            var folderDict = reconciledFolders.ToDictionary(f => f.Id, StringComparer.OrdinalIgnoreCase);
             var desiredEntries = new List<DockEntryViewModel>();
-
-            // Sabitli öğeleri ve klasörleri sırayla ekle
-            foreach (var token in effectiveOrder)
+            foreach (var planned in plan.Entries)
             {
-                if (PinnedOrder.IsFolderId(token))
+                switch (planned)
                 {
-                    var fId = PinnedOrder.ExtractFolderId(token);
-                    if (folderDict.TryGetValue(fId, out var folder))
+                    case PlannedFolder pf:
                     {
-                        var folderItems = new List<DockItemViewModel>();
-                        foreach (var itemId in folder.Items)
-                        {
-                            if (itemVmCache.TryGetValue(itemId, out var itemVm))
-                            {
-                                folderItems.Add(itemVm);
-                            }
-                            else
-                            {
-                                var fallbackModel = new DockItem(
-                                    Id: itemId,
-                                    Title: Path.GetFileNameWithoutExtension(itemId),
-                                    FilePath: itemId,
-                                    TargetPath: null,
-                                    IconData: null,
-                                    IsPinned: true,
-                                    IsRunning: false,
-                                    IsActive: false,
-                                    WindowHandles: []);
-                                var fallbackVm = new DockItemViewModel(fallbackModel, _controller)
-                                {
-                                    IconSize = IconSize,
-                                    ItemSize = ItemSize,
-                                    Presentation = _presentation
-                                };
-                                AttachAppIcon(fallbackVm);
-                                folderItems.Add(fallbackVm);
-                            }
-                        }
-
-                        var existingFolder = Items.OfType<DockFolderViewModel>().FirstOrDefault(f => string.Equals(f.Folder.Id, folder.Id, StringComparison.OrdinalIgnoreCase));
+                        var folderItems = pf.Members.Select(member => NewItemViewModel(member.Model)).ToList();
+                        var existingFolder = Items.OfType<DockFolderViewModel>().FirstOrDefault(f => string.Equals(f.Folder.Id, pf.Folder.Id, StringComparison.OrdinalIgnoreCase));
                         if (existingFolder is not null)
                         {
                             existingFolder.IconSize = IconSize;
                             existingFolder.ItemSize = ItemSize;
                             existingFolder.OwnerViewModel = this;
-                            existingFolder.UpdateFolder(folder, folderItems);
+                            existingFolder.UpdateFolder(pf.Folder, folderItems);
                             desiredEntries.Add(existingFolder);
                         }
                         else
                         {
-                            var newFolderVm = new DockFolderViewModel(folder, folderItems, this)
+                            desiredEntries.Add(new DockFolderViewModel(pf.Folder, folderItems, this)
                             {
                                 IconSize = IconSize,
                                 ItemSize = ItemSize
-                            };
-                            desiredEntries.Add(newFolderVm);
+                            });
                         }
+
+                        break;
                     }
-                }
-                else
-                {
-                    if (!folderAppMap.ContainsKey(token) && itemVmCache.TryGetValue(token, out var itemVm))
+                    case PlannedItem pi:
                     {
-                        var existingItem = Items.OfType<DockItemViewModel>().FirstOrDefault(i => string.Equals(i.Model.Id, itemVm.Model.Id, StringComparison.OrdinalIgnoreCase));
+                        var existingItem = Items.OfType<DockItemViewModel>().FirstOrDefault(i => string.Equals(i.Model.Id, pi.Model.Id, StringComparison.OrdinalIgnoreCase));
                         if (existingItem is not null)
                         {
                             existingItem.IconSize = IconSize;
                             existingItem.ItemSize = ItemSize;
-                            existingItem.Update(itemVm.Model);
+                            existingItem.Update(pi.UpdateModel);
                             desiredEntries.Add(existingItem);
                         }
                         else
                         {
-                            desiredEntries.Add(itemVm);
+                            desiredEntries.Add(NewItemViewModel(pi.Model));
                         }
-                    }
-                }
-            }
 
-            // Sabitli olmayan açık (çalışan) pencereleri ekle
-            foreach (var m in models.Where(m => !m.IsPinned))
-            {
-                if (!folderAppMap.ContainsKey(PinnedOrder.IdOf(m.Id)) && !folderAppMap.ContainsKey(m.Id))
-                {
-                    var existingItem = Items.OfType<DockItemViewModel>().FirstOrDefault(i => string.Equals(i.Model.Id, m.Id, StringComparison.OrdinalIgnoreCase));
-                    if (existingItem is not null)
-                    {
-                        existingItem.IconSize = IconSize;
-                        existingItem.ItemSize = ItemSize;
-                        existingItem.Update(m);
-                        desiredEntries.Add(existingItem);
-                    }
-                    else if (itemVmCache.TryGetValue(m.Id, out var itemVm))
-                    {
-                        desiredEntries.Add(itemVm);
+                        break;
                     }
                 }
             }
@@ -1707,45 +1582,26 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             // Ek öğeler varsa şerit düzenine katılır (yoksa desiredEntries aynen kalır).
             desiredEntries = ComposeExtras(desiredEntries);
 
-            // 4. Koleksiyonu yerinde güncelle
+            // Koleksiyonu yerinde güncelle (çıkar / taşı / ekle işlemleri Core'da: DockListSync).
             foreach (var entry in desiredEntries)
                 entry.IsVertical = IsVertical;
 
-            var desiredIds = new HashSet<string>(desiredEntries.Select(e => e.Id), StringComparer.OrdinalIgnoreCase);
-            for (var i = Items.Count - 1; i >= 0; i--)
+            foreach (var op in DockListSync.Plan(Items.Select(e => e.Id).ToList(), desiredEntries.Select(e => e.Id).ToList()))
             {
-                if (!desiredIds.Contains(Items[i].Id))
+                switch (op.Kind)
                 {
-                    Items.RemoveAt(i);
-                }
-            }
-
-            for (var targetIndex = 0; targetIndex < desiredEntries.Count; targetIndex++)
-            {
-                var entry = desiredEntries[targetIndex];
-                var existingIndex = -1;
-                for (var j = 0; j < Items.Count; j++)
-                {
-                    if (string.Equals(Items[j].Id, entry.Id, StringComparison.OrdinalIgnoreCase))
-                    {
-                        existingIndex = j;
+                    case DockListOpKind.Remove:
+                        Items.RemoveAt(op.Index);
                         break;
-                    }
-                }
-
-                if (existingIndex >= 0)
-                {
-                    if (existingIndex != targetIndex && existingIndex < Items.Count && targetIndex < Items.Count)
-                    {
-                        Items.Move(existingIndex, targetIndex);
-                    }
-                }
-                else
-                {
-                    if (targetIndex < Items.Count)
-                        Items.Insert(targetIndex, entry);
-                    else
-                        Items.Add(entry);
+                    case DockListOpKind.Move:
+                        Items.Move(op.Index, op.ToIndex);
+                        break;
+                    case DockListOpKind.Insert:
+                        Items.Insert(op.ToIndex, desiredEntries[op.ToIndex]);
+                        break;
+                    case DockListOpKind.Add:
+                        Items.Add(desiredEntries[op.ToIndex]);
+                        break;
                 }
             }
 

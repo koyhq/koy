@@ -129,12 +129,7 @@ public sealed class DockController : IDisposable
         }
 
         // 2. Sabitlenmemiş açık pencereleri grupla ve ilk görülme sırasını koru (Alt+Tab zıplamasını engelle)
-        var shouldGroup = GroupingMode switch
-        {
-            DockGroupingMode.Always => true,
-            DockGroupingMode.WhenSpaceRunsOut => (newItems.Count + remainingWindows.Count) > 16,
-            _ => false
-        };
+        var shouldGroup = DockWindowGrouping.ShouldGroup(GroupingMode, newItems.Count + remainingWindows.Count);
 
         var unpinnedGroups = shouldGroup
             ? remainingWindows

@@ -1551,17 +1551,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     {
         base.OnPropertyChanged(e);
         if (_isLoading) return;
-        if (e.PropertyName is nameof(SelectedPageIndex) or nameof(GeneralSubTabIndex) or nameof(NotchSubTabIndex)
-            or nameof(DockSubTabIndex) or nameof(AppearanceSubTabIndex)
-            or nameof(MotionTogglesActive) or nameof(MotionTogglesInactive) or nameof(ClockCustomDateFormatInvalid)
-            or nameof(IsApplyRevertPending) or nameof(ApplyRevertSecondsLeft) or nameof(AdvancedRows) or nameof(AdvancedGroups) or nameof(SettingsFileInvalid) or nameof(SettingsSaveFailed) or nameof(AdvancedFilter)
-            or nameof(HasTrayAppRows)
-            or nameof(SettingsSearchQuery) or nameof(IsSettingsSearching) or nameof(SettingsSearchResults)
-            or nameof(SettingsSearchNoResult) or nameof(ShowChangedOnly) or nameof(CanResetPage) or nameof(IsPageResetConfirming) or nameof(PageResetDone)
-            or nameof(MemoryUsageMb) or nameof(MemoryUsageText) or nameof(MemoryPct) or nameof(MemoryLevel)
-            or nameof(IsResetConfirming) or nameof(UninstallAvailability) or nameof(CanUninstall) or nameof(UninstallRowDescription)
-            or nameof(UserStyleStatusText)
-            or nameof(StartIconFileName) or nameof(IconPackFolderName) or nameof(IsUninstallConfirming) or nameof(KeepSettingsOnUninstall) or nameof(UninstallError) or nameof(IsCheckingUpdates) or nameof(LastCheckText) or nameof(AboutStatusText) or nameof(CheckButtonText) or nameof(CanCheckUpdates) or nameof(DownloadProgressText))
+        // Hangi özellik değişimi kaydedilir / tema ve özellikleri etkiler: açık kümeler Core'da (SettingsPropertyEffects).
+        if (!SettingsPropertyEffects.IsSaved(e.PropertyName))
             return;
 
         SaveSettings();
@@ -1569,12 +1560,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         if (Application.Current is not App app)
             return;
 
-        if (e.PropertyName is nameof(Theme) or nameof(AccentColor) or nameof(UseWindowsAccent) or nameof(Material)
-            or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
-            or nameof(CornerRadius) or nameof(AnimationSpeed) or nameof(RespectReduceMotion) or nameof(BatterySaverReduceMotion)
-            or nameof(MotionNotchOpenClose) or nameof(MotionTabTransitions) or nameof(MotionOsd) or nameof(MotionDockMagnify) or nameof(MotionFolderPanel)
-            or nameof(UiFontFamily) or nameof(ClockFontFamily) or nameof(BaseFontSize) or nameof(UiFontWeight) or nameof(UiScalePercent)
-            or nameof(UserStyleOverridesEnabled))
+        if (SettingsPropertyEffects.AppliesThemeTo(e.PropertyName))
         {
             // Animasyon anahtarları da buradan (Motion.Refresh) canlı uygulanır; çentik ve dock yeniden kurulmaz.
             // Yazı ve ölçek de kaynaklardan (DynamicResource) ve ThemeManager.Applied'dan canlı uygulanır.
@@ -1593,37 +1579,12 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         else
         {
             // Özellikler ayarı kurulurken okur; seçenek değişince ilgili özellik yeni ayarla yeniden kurulur.
-            if (AffectsDock(e.PropertyName))
+            if (SettingsPropertyEffects.RebuildsDock(e.PropertyName))
                 app.ReloadDock();
-            if (AffectsNotch(e.PropertyName))
+            if (SettingsPropertyEffects.RebuildsNotchFor(e.PropertyName))
                 app.ReloadNotch();
         }
     }
-
-    private static bool AffectsDock(string? name) =>
-        name is not null && name != nameof(DockEnabled) &&
-        (name.StartsWith("Dock", StringComparison.Ordinal) ||
-         name is nameof(HideWindowsTaskbar) or nameof(BatterySaverReduceMotion) or nameof(MiddleClickAction) or nameof(Material)
-             or nameof(IconPack) or nameof(IconPackFolder)
-             or nameof(MaterialReadabilityGuard)
-             or nameof(AnimationSpeed) or nameof(RespectReduceMotion));
-
-    private static bool AffectsNotch(string? name) =>
-        name is nameof(NotchVisibility) or nameof(NotchHideInFullscreen) or nameof(NotchEdgeLine) or nameof(NotchEdgeLineColor) or nameof(NotchEdgeLineThickness) or nameof(MusicShowWaveform) or nameof(MusicCardStyle) or nameof(MusicLyricsEnabled)
-            or nameof(ShowVolumeOsd) or nameof(ShowBrightnessOsd) or nameof(ShowPrivacyIndicator) or nameof(NotchShowNotifications) or nameof(NotchNotificationsHideBody) or nameof(IdleDisplayMode) or nameof(NotchStyle)
-            or nameof(Material) or nameof(MaterialReadabilityGuard) or nameof(NotchFollowsMaterial)
-            or nameof(NotchOpenBehavior) or nameof(WheelAction) or nameof(BatterySaverReduceMotion)
-            or nameof(NotchOpenDelayMs) or nameof(NotchCloseDelayMs) or nameof(NotchTabBarStyle) or nameof(NotchTabOrderVersion)
-            or nameof(HomeCardOrderVersion) or nameof(VisualizerStyle) or nameof(VisualizerColorSource) or nameof(VisualizerBarCount)
-            or nameof(LiveBackgroundTarget) or nameof(LiveBackgroundSource) or nameof(LiveBackgroundPreset) or nameof(LiveBackgroundFilePath) or nameof(LiveBackgroundScrimPercent) or nameof(NotchCollapsedBackground)
-            or nameof(WeatherRefreshInterval) or nameof(PomodoroWorkMinutes) or nameof(PomodoroShortBreakMinutes) or nameof(PomodoroLongBreakMinutes)
-            or nameof(PanelFocus) or nameof(PanelShelf) or nameof(PanelCalendar)
-            or nameof(PanelControlCenter) or nameof(PanelClipboard) or nameof(PanelSystem) or nameof(ClipboardHistoryEnabled)
-            or nameof(VoiceHarness) or nameof(VoiceClaudePermission) or nameof(VoiceModel) or nameof(VoiceCustomCommand) or nameof(VoiceWorkingDirectory) or nameof(VoiceTimeoutSeconds)
-            or nameof(SearchRetainPrior) or nameof(SearchHistoryMode) or nameof(SearchSourcesVersion)
-            or nameof(ClockHourFormat) or nameof(ClockShowSeconds) or nameof(ClockShowWeekNumber) or nameof(ClockFirstDayOfWeek)
-            or nameof(ClockCustomDateFormat) or nameof(TemperatureUnit) or nameof(NetworkSpeedUnit)
-            or nameof(ClockShowDate) or nameof(ClockSecondTimeZoneId) or nameof(WindSpeedUnit);
 
     partial void OnLanguageChanged(string value)
     {

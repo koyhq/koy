@@ -11,16 +11,6 @@ public enum DockDropZone
 }
 
 /// <summary>
-/// Geriye dönük uyumluluk veya alternatif adlandırma için eylem takma adı.
-/// </summary>
-public enum DockDropAction
-{
-    Before,
-    Merge,
-    After
-}
-
-/// <summary>
 /// Dock öğeleri üzerinde sürükleme bölgelerini hesaplayan saf geometri motoru.
 /// </summary>
 public static class DockDropZones
@@ -57,24 +47,6 @@ public static class DockDropZones
 
         return DockDropZone.Merge;
     }
-
-    /// <summary>
-    /// İmlecin mutlak X koordinatı, yuvanın sol kenarı ve genişliğine göre bölgeyi hesaplar.
-    /// </summary>
-    public static DockDropZone ResolveZone(double cursorX, double slotLeft, double slotWidth, double mergeRatio = 0.5) =>
-        DetectZone(slotWidth, cursorX - slotLeft, mergeRatio);
-}
-
-/// <summary>
-/// Bölge tespiti için ek statik sarmalayıcı sınıf.
-/// </summary>
-public static class DockDropZoneDetector
-{
-    public static DockDropZone DetectZone(double itemWidth, double relativeX, double mergeRatio = 0.5) =>
-        DockDropZones.DetectZone(itemWidth, relativeX, mergeRatio);
-
-    public static DockDropZone ResolveZone(double cursorX, double slotLeft, double slotWidth, double mergeRatio = 0.5) =>
-        DockDropZones.ResolveZone(cursorX, slotLeft, slotWidth, mergeRatio);
 }
 
 /// <summary>
@@ -83,28 +55,11 @@ public static class DockDropZoneDetector
 /// </summary>
 public sealed class DockDropZoneTracker
 {
-    public static readonly TimeSpan MergeHoverDelay = DockDropZones.MergeHoverDelay;
-
-    public static DockDropZone DetectZone(double itemWidth, double relativeX, double mergeRatio = 0.5) =>
-        DockDropZones.DetectZone(itemWidth, relativeX, mergeRatio);
-
-    public static DockDropZone ResolveZone(double cursorX, double slotLeft, double slotWidth, double mergeRatio = 0.5) =>
-        DockDropZones.ResolveZone(cursorX, slotLeft, slotWidth, mergeRatio);
-
     private int _targetSlot = -1;
-    private string? _targetKey;
     private TimeSpan? _hoverStartTime;
-    private readonly TimeProvider? _timeProvider;
 
     public bool IsMergeArmed { get; private set; }
     public int TargetSlot => _targetSlot;
-    public string? TargetKey => _targetKey;
-    public TimeSpan? HoverStartTime => _hoverStartTime;
-
-    public DockDropZoneTracker(TimeProvider? timeProvider = null)
-    {
-        _timeProvider = timeProvider;
-    }
 
     /// <summary>
     /// İndeks tabanlı yuva ve zaman damgasıyla durumu günceller.
@@ -121,67 +76,18 @@ public sealed class DockDropZoneTracker
         if (_targetSlot != targetSlot)
         {
             _targetSlot = targetSlot;
-            _targetKey = null;
             _hoverStartTime = now;
             IsMergeArmed = false;
             return false;
         }
 
         _hoverStartTime ??= now;
-        if (now - _hoverStartTime.Value >= MergeHoverDelay)
+        if (now - _hoverStartTime.Value >= DockDropZones.MergeHoverDelay)
         {
             IsMergeArmed = true;
         }
 
         return IsMergeArmed;
-    }
-
-    /// <summary>
-    /// Anahtar/kimlik tabanlı yuva ve zaman damgasıyla durumu günceller.
-    /// </summary>
-    public bool Update(string targetKey, DockDropZone zone, TimeSpan now)
-    {
-        if (zone != DockDropZone.Merge || string.IsNullOrEmpty(targetKey))
-        {
-            Reset();
-            return false;
-        }
-
-        if (!string.Equals(_targetKey, targetKey, StringComparison.OrdinalIgnoreCase))
-        {
-            _targetKey = targetKey;
-            _targetSlot = -1;
-            _hoverStartTime = now;
-            IsMergeArmed = false;
-            return false;
-        }
-
-        _hoverStartTime ??= now;
-        if (now - _hoverStartTime.Value >= MergeHoverDelay)
-        {
-            IsMergeArmed = true;
-        }
-
-        return IsMergeArmed;
-    }
-
-    /// <summary>
-    /// TimeProvider ile zaman damgasını hesaplayarak durumu günceller.
-    /// </summary>
-    public bool Update(int targetSlot, DockDropZone zone, TimeProvider timeProvider)
-    {
-        return Update(targetSlot, zone, TimeSpan.FromTicks(timeProvider.GetTimestamp()));
-    }
-
-    /// <summary>
-    /// Yapıcıda TimeProvider verilmişse parametresiz zaman güncellemesi yapar.
-    /// </summary>
-    public bool Update(int targetSlot, DockDropZone zone)
-    {
-        if (_timeProvider is null)
-            throw new InvalidOperationException("TimeProvider yapıcıda sağlanmadı. Update(targetSlot, zone, TimeSpan now) kullanın.");
-
-        return Update(targetSlot, zone, TimeSpan.FromTicks(_timeProvider.GetTimestamp()));
     }
 
     /// <summary>
@@ -190,7 +96,6 @@ public sealed class DockDropZoneTracker
     public void Reset()
     {
         _targetSlot = -1;
-        _targetKey = null;
         _hoverStartTime = null;
         IsMergeArmed = false;
     }
