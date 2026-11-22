@@ -55,6 +55,12 @@ public sealed class TrayHostService : ITrayService
     // Stop beklemeden döner; kapanmakta olan iş parçacığı burada tutulur ki sıradaki Start sınıf adı boşalana dek beklesin.
     private static Thread? s_closingThread;
 
+    // SHAppBarMessage Windows içinde FindWindow("Shell_TrayWnd", null) çağırır; çağrı boyunca Koy penceresini geçici
+    // olarak Gezgin'in arkasında bırakırken tepsi iş parçacığının MakeTopmost çağrılarıyla çakışmayı önler.
+    private static readonly object ZOrderGate = new();
+    private static long s_activeHwnd;
+    private static int s_explorerFirstDepth;
+
     private readonly object _gate = new();
     private readonly TrayIconStore _store = new();
     private readonly TrayBalloonFilter _balloonFilter = new();
@@ -103,7 +109,15 @@ public sealed class TrayHostService : ITrayService
     private HWND Hwnd
     {
         get => new(Volatile.Read(ref _hwndValue));
-        set { unsafe { Volatile.Write(ref _hwndValue, (nint)value.Value); } }
+        set
+        {
+            unsafe
+            {
+                var raw = (nint)value.Value;
+                Volatile.Write(ref _hwndValue, raw);
+                Volatile.Write(ref s_activeHwnd, raw);
+            }
+        }
     }
 
     /// <summary>Tepsi penceresi gerçekten kuruldu ve çalışıyor (başlatma başarısızsa ya da kapandıysa false).</summary>
@@ -160,12 +174,70 @@ public sealed class TrayHostService : ITrayService
     /// </summary>
     public void EnsureFirst()
     {
+        if (Volatile.Read(ref s_explorerFirstDepth) > 0)
+            return;
+
         var hwnd = Hwnd;
         if (hwnd.IsNull)
             return;
 
         if (PInvoke.FindWindow(ShellTrayLocator.TrayClassName, null) != hwnd)
             PInvoke.PostMessage(hwnd, WmResync, default, default);
+    }
+
+    /// <summary>
+    /// SHAppBarMessage Windows içinde FindWindow("Shell_TrayWnd", null) çağırır; Koy'un tepsi penceresi
+    /// en üstteyken çağrı Koy'a gider ve paylaşılan bellek (SHAllocShared) Gezgin'e iletilemez. Çağrı boyunca
+    /// Koy penceresini geçici olarak Gezgin'in arkasına alır, bitince geri öne çıkarır.
+    /// </summary>
+    internal static unsafe T WithExplorerTrayFirst<T>(Func<T> action)
+    {
+        lock (ZOrderGate)
+        {
+            var tray = new HWND((nint)Volatile.Read(ref s_activeHwnd));
+            if (tray.IsNull || !PInvoke.IsWindow(tray))
+                return action();
+
+            var explorer = ShellTrayLocator.FindExplorerTray();
+            if (explorer.IsNull)
+                return action();
+
+            var lowered = false;
+            Interlocked.Increment(ref s_explorerFirstDepth);
+            try
+            {
+                if (PInvoke.FindWindow(ShellTrayLocator.TrayClassName, null) == tray)
+                {
+                    const SET_WINDOW_POS_FLAGS zOrderOnly =
+                        SET_WINDOW_POS_FLAGS.SWP_NOMOVE |
+                        SET_WINDOW_POS_FLAGS.SWP_NOSIZE |
+                        SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE;
+
+                    PInvoke.SetWindowPos(tray, explorer, 0, 0, 0, 0, zOrderOnly);
+                    if (PInvoke.FindWindow(ShellTrayLocator.TrayClassName, null) == tray)
+                        PInvoke.SetWindowPos(tray, new HWND(-2), 0, 0, 0, 0, zOrderOnly); // HWND_NOTOPMOST
+
+                    lowered = true;
+                }
+
+                return action();
+            }
+            finally
+            {
+                if (lowered && PInvoke.IsWindow(tray))
+                {
+                    PInvoke.SetWindowPos(
+                        tray,
+                        new HWND(-1), // HWND_TOPMOST
+                        0, 0, 0, 0,
+                        SET_WINDOW_POS_FLAGS.SWP_NOMOVE |
+                        SET_WINDOW_POS_FLAGS.SWP_NOSIZE |
+                        SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE);
+                }
+
+                Interlocked.Decrement(ref s_explorerFirstDepth);
+            }
+        }
     }
 
     public IReadOnlyList<TrayIcon> GetVisibleIcons()
@@ -559,20 +631,26 @@ public sealed class TrayHostService : ITrayService
 
     private void MakeTopmost()
     {
-        if (Hwnd.IsNull)
+        if (Hwnd.IsNull || Volatile.Read(ref s_explorerFirstDepth) > 0)
             return;
 
-        // Görev çubuğu yer değiştirmiş olabilir (ekran değişimi); konum da eşitlenir. Pencere gösterilmez.
-        var bounds = GetExplorerTrayBounds();
-        var flags = SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE;
-        if (bounds.right <= bounds.left || bounds.bottom <= bounds.top)
-            flags |= SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE;
+        lock (ZOrderGate)
+        {
+            if (Hwnd.IsNull || Volatile.Read(ref s_explorerFirstDepth) > 0)
+                return;
 
-        PInvoke.SetWindowPos(
-            Hwnd,
-            new HWND(-1), // HWND_TOPMOST
-            bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top,
-            flags);
+            // Görev çubuğu yer değiştirmiş olabilir (ekran değişimi); konum da eşitlenir. Pencere gösterilmez.
+            var bounds = GetExplorerTrayBounds();
+            var flags = SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE;
+            if (bounds.right <= bounds.left || bounds.bottom <= bounds.top)
+                flags |= SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE;
+
+            PInvoke.SetWindowPos(
+                Hwnd,
+                new HWND(-1), // HWND_TOPMOST
+                bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top,
+                flags);
+        }
     }
 
     private static RECT GetExplorerTrayBounds()

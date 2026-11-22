@@ -289,9 +289,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             _lastAppBarReassert[state.Hwnd] = now;
         }
 
-        var height = state.Window.ActualThickness > 0 ? state.Window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
         var dpiScale = DpiScaleFor(state.Monitor, settings.Dock.Edge);
-        _appBarService.Reassert(state.Hwnd, height, dpiScale, onlyIfNeeded, settings.Dock.Edge, settings.Dock.EdgeOffsetDip);
+        _appBarService.Reassert(state.Hwnd, state.Window.ReservedHeight, dpiScale, onlyIfNeeded, settings.Dock.Edge, settings.Dock.EdgeOffsetDip);
     }
 
     /// <summary>
@@ -568,8 +567,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             if (_appBarService is not null)
             {
                 var dpiScale = DpiScaleFor(state.Monitor, settings.Dock.Edge);
-                var height = window.ActualThickness > 0 ? window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
-                _appBarService.Register(hwnd, height, dpiScale, settings.Dock.Edge, settings.Dock.EdgeOffsetDip);
+                _appBarService.Register(hwnd, window.ReservedHeight, dpiScale, settings.Dock.Edge, settings.Dock.EdgeOffsetDip);
             }
 
             UpdateDockBounds(window, state.VisibilityController);
@@ -796,7 +794,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
                     continue;
 
                 var dpiScale = DpiScaleFor(state.Monitor, settings.Dock.Edge);
-                var height = state.Window.ActualThickness > 0 ? state.Window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
+                var height = state.Window.ReservedHeight;
                 _appBarService.Register(state.Hwnd, height, dpiScale, settings.Dock.Edge, settings.Dock.EdgeOffsetDip);   // kayıtlıysa dokunmaz
                 _appBarService.UpdatePosition(state.Hwnd, height, dpiScale, settings.Dock.Edge, settings.Dock.EdgeOffsetDip);
             }

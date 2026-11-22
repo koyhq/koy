@@ -223,4 +223,25 @@ public class AppBarMathTests
         Assert.Equal(new WindowRect(el, et, er, eb), n);
         Assert.NotEqual(new WindowRect(l, t, r, b), n);   // aynı alan değil: Windows değişiklik görür
     }
+
+    [Theory]
+    [InlineData(DockEdge.Bottom, true, 48, 0, 1.25, 58)]
+    [InlineData(DockEdge.Bottom, true, 48, 0, 1.00, 46)]
+    [InlineData(DockEdge.Bottom, true, 48, 8, 1.25, 68)]
+    [InlineData(DockEdge.Bottom, false, 48, 0, 1.25, 60)]
+    [InlineData(DockEdge.Top, true, 48, 0, 1.25, 60)]
+    [InlineData(DockEdge.Left, true, 48, 0, 1.25, 60)]
+    [InlineData(DockEdge.Right, true, 48, 0, 1.25, 60)]
+    public void ReservedPixels_compensates_autohide_shrink_only_on_owned_bottom_edge(
+        DockEdge edge, bool ownsBottomEdge, double thicknessDip, double offsetDip, double scale, int expected)
+    {
+        Assert.Equal(expected, AppBarMath.ReservedPixels(thicknessDip, offsetDip, scale, edge, ownsBottomEdge));
+    }
+
+    [Fact]
+    public void ReservedPixels_clamps_compensated_thickness_to_at_least_one_pixel()
+    {
+        Assert.Equal(1, AppBarMath.ReservedPixels(2, 0, 1.0, DockEdge.Bottom, ownsBottomEdge: true));
+        Assert.Equal(1, AppBarMath.ReservedPixels(1, 0, 1.0, DockEdge.Bottom, ownsBottomEdge: true));
+    }
 }

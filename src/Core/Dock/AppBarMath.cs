@@ -11,6 +11,14 @@ namespace Koy.Core.Dock;
 public static class AppBarMath
 {
     /// <summary>
+    /// Windows görev çubuğu gizlenirken ABS_AUTOHIDE durumunda bırakılır; Chromium/Electron/WinUI pencereleri
+    /// büyütülünce alt kenarda otomatik gizlenen çubuğu algılayıp çalışma alanının altından 2 px keser
+    /// (kAutoHideTaskbarThicknessPx = 2). Bu pay ayrılan alandan düşülünce büyütülmüş pencereler dock'un
+    /// üst kenarına boşluksuz dayanır.
+    /// </summary>
+    public const int AutoHideBottomCompensationPx = 2;
+
+    /// <summary>
     /// AppBar'ın ayıracağı kalınlık (piksel): dock penceresinin kalınlığı ile kenar boşluğu, pencerenin yerleşiminde
     /// (<see cref="WindowPlacementMath.EdgeBar"/>, <see cref="WindowPlacementMath.EdgeCapsule"/>) kullanılan AYNI kuralla
     /// ayrı ayrı piksele çevrilip toplanır. Böylece büyütülmüş pencerenin altı dock'un üst kenarına tam dayanır:
@@ -22,6 +30,18 @@ public static class AppBarMath
     public static int ReservedPixels(double thicknessDip, double edgeOffsetDip, double dpiScale) =>
         WindowPlacementMath.ToPixels(thicknessDip, dpiScale)
         + WindowPlacementMath.ToPixels(DockLayoutLimits.ClampEdgeOffsetDip(edgeOffsetDip), dpiScale);
+
+    /// <summary>
+    /// Alt kenarda görev çubuğu Koy'dayken (<paramref name="ownsBottomEdge"/>) Windows'taki gizli görev çubuğunun
+    /// ABS_AUTOHIDE kayması (<see cref="AutoHideBottomCompensationPx"/>) ayrılan paydan düşülür.
+    /// </summary>
+    public static int ReservedPixels(double thicknessDip, double edgeOffsetDip, double dpiScale, DockEdge edge, bool ownsBottomEdge)
+    {
+        var raw = ReservedPixels(thicknessDip, edgeOffsetDip, dpiScale);
+        return ownsBottomEdge && edge == DockEdge.Bottom
+            ? Math.Max(1, raw - AutoHideBottomCompensationPx)
+            : raw;
+    }
 
     /// <param name="edge">Dock'un oturduğu ekran kenarı.</param>
     /// <param name="monitor">Monitörün tam sınırları (piksel).</param>

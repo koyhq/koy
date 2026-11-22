@@ -85,7 +85,11 @@ public sealed class AppBarService : IAppBarService
             uCallbackMessage = 0x0400 + 100 // WM_USER + 100
         };
 
-        var registered = PInvoke.SHAppBarMessage(ABM_NEW, ref data);
+        var registered = TrayHostService.WithExplorerTrayFirst(() =>
+        {
+            var local = data;
+            return PInvoke.SHAppBarMessage(ABM_NEW, ref local);
+        });
         CrashLog.Write($"AppBar kaydı: ABM_NEW={registered}, hwnd=0x{windowHandle:X}, kenar={edge}, görev çubuğu bizde={OwnsBottomEdge}", null);
         if (registered != 0)
         {
@@ -126,7 +130,7 @@ public sealed class AppBarService : IAppBarService
                 var bounds = mi.monitorInfo.rcMonitor;
                 var work = mi.monitorInfo.rcWork;
                 var monitorRect = new WindowRect(bounds.left, bounds.top, bounds.right, bounds.bottom);
-                var heightPx = AppBarMath.ReservedPixels(heightDip <= 0 ? 46 : heightDip, edgeOffsetDip, dpiScale);
+                var heightPx = AppBarMath.ReservedPixels(heightDip <= 0 ? 46 : heightDip, edgeOffsetDip, dpiScale, edge, OwnsBottomEdge);
                 int? unresolvedCoord = null;
                 if (_unresolvedWorkEdge.TryGetValue(windowHandle, out var unresolved)
                     && TimeSpan.FromTicks(Environment.TickCount64 * TimeSpan.TicksPerMillisecond - unresolved.Ticks) < UnresolvedRetryAfter)
@@ -201,7 +205,11 @@ public sealed class AppBarService : IAppBarService
             hWnd = hwnd
         };
 
-        PInvoke.SHAppBarMessage(ABM_REMOVE, ref data);
+        _ = TrayHostService.WithExplorerTrayFirst(() =>
+        {
+            var local = data;
+            return PInvoke.SHAppBarMessage(ABM_REMOVE, ref local);
+        });
     }
 
     private unsafe void UpdatePositionInternal(HWND hwnd, double heightDip, double dpiScale, bool force, DockEdge edge = DockEdge.Bottom, double edgeOffsetDip = 0.0)
@@ -242,7 +250,7 @@ public sealed class AppBarService : IAppBarService
         }
 
         // Pencere yerleşimiyle aynı piksel kuralı (AppBarMath.ReservedPixels): çubuk ile çalışma alanı arasında boşluk kalmaz.
-        var heightPx = AppBarMath.ReservedPixels(heightDip, edgeOffsetDip, dpiScale);
+        var heightPx = AppBarMath.ReservedPixels(heightDip, edgeOffsetDip, dpiScale, edge, OwnsBottomEdge);
         var uEdge = ToAppBarEdge(edge);
 
         var data = new APPBARDATA
@@ -265,21 +273,26 @@ public sealed class AppBarService : IAppBarService
         if (!_placements.ShouldSend(handle, requested, OwnsBottomEdge, force))
             return;
 
-        PInvoke.SHAppBarMessage(ABM_QUERYPOS, ref data);
-        var queried = new WindowRect(data.rc.left, data.rc.top, data.rc.right, data.rc.bottom);
-        var final = AppBarMath.FinalRect(edge, new WindowRect(screenLeft, screenTop, screenRight, screenBottom), heightPx, queried, OwnsBottomEdge);
-        data.rc = new RECT { left = final.Left, top = final.Top, right = final.Right, bottom = final.Bottom };
         var nudge = _nudgeNext;
         _nudgeNext = false;
-        if (nudge)
+        var monitorBounds = new WindowRect(screenLeft, screenTop, screenRight, screenBottom);
+        var (queried, final) = TrayHostService.WithExplorerTrayFirst(() =>
         {
-            var temp = AppBarMath.NudgedRect(edge, final);
-            data.rc = new RECT { left = temp.Left, top = temp.Top, right = temp.Right, bottom = temp.Bottom };
-            PInvoke.SHAppBarMessage(ABM_SETPOS, ref data);
-            data.rc = new RECT { left = final.Left, top = final.Top, right = final.Right, bottom = final.Bottom };
-        }
+            var local = data;
+            PInvoke.SHAppBarMessage(ABM_QUERYPOS, ref local);
+            var q = new WindowRect(local.rc.left, local.rc.top, local.rc.right, local.rc.bottom);
+            var f = AppBarMath.FinalRect(edge, monitorBounds, heightPx, q, OwnsBottomEdge);
+            if (nudge)
+            {
+                var temp = AppBarMath.NudgedRect(edge, f);
+                local.rc = new RECT { left = temp.Left, top = temp.Top, right = temp.Right, bottom = temp.Bottom };
+                PInvoke.SHAppBarMessage(ABM_SETPOS, ref local);
+            }
 
-        PInvoke.SHAppBarMessage(ABM_SETPOS, ref data);
+            local.rc = new RECT { left = f.Left, top = f.Top, right = f.Right, bottom = f.Bottom };
+            PInvoke.SHAppBarMessage(ABM_SETPOS, ref local);
+            return (q, f);
+        });
         _placements.Record(handle, requested);
 
         if (nudge && hMonitor != 0)

@@ -34,15 +34,15 @@
     </UserControl.Resources>
 
     <!-- Windows tarzı tam genişlik: kalınlık DockPositionResolver.FullWidthHeightDip (48), kenardan uzaklık ve uzunluk ayarına uyar,
-         yüzey malzeme ayarına uyar (Katı / Buzlu / Cam; DockViewModel.FullWidthSurface). -->
+         yüzey malzeme ayarına uyar (Katı / Buzlu / Cam; DockViewModel.FullWidthSurface). Kenarlık yüzeyin üstüne çizilir:
+         aksi halde BorderThickness altında yüzey boyanmadığından şeffaf pencerede üstte 1 px boşluk çizgisi görünürdü. -->
     <Border Background="{Binding FullWidthSurface}"
-            BorderBrush="{Binding FullWidthBorderBrush}"
-            BorderThickness="{Binding FullWidthBorderThickness}"
             Width="{Binding CapsuleWidth}"
             Height="{Binding CapsuleHeight}"
-            Padding="{Binding FullWidthPadding}"
-            SnapsToDevicePixels="True">
+            SnapsToDevicePixels="True"
+            UseLayoutRounding="True">
         <Grid>
+            <Grid Margin="{Binding FullWidthPadding}">
             <!-- 1. Yatay Düzen (Alt ve Üst Kenar) -->
             <Grid Grid.IsSharedSizeScope="True"
                   Visibility="{Binding IsVertical, Converter={x:Static local:DockConverters.InverseBoolToVisibilityConverter}}">
@@ -313,6 +313,12 @@
                     <tray:TrayButton IsCompact="True"/>
                 </StackPanel>
             </Grid>
+            </Grid>
+
+            <Border BorderBrush="{Binding FullWidthBorderBrush}"
+                    BorderThickness="{Binding FullWidthBorderThickness}"
+                    IsHitTestVisible="False"
+                    SnapsToDevicePixels="True"/>
         </Grid>
     </Border>
 </UserControl>
