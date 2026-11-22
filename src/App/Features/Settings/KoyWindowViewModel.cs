@@ -7,6 +7,7 @@ using Koy.Core.Notch;
 using Koy.App.Resources;
 using Koy.Core.Appearance;
 using Koy.Core.Dock;
+using Koy.Core.Dock.SystemArea;
 using Koy.Core.Media;
 using Koy.Core.Settings;
 using Koy.Core.Uninstall;
@@ -545,7 +546,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private int _notchCloseDelayMs = NotchOpenPolicy.DefaultCloseDelayMs;
 
     [ObservableProperty]
-    private NotchTabBarStyle _notchTabBarStyle = NotchTabBarStyle.IconAndLabel;
+    private NotchTabBarStyle _notchTabBarStyle = NotchTabBarStyle.IconOnly;
 
     /// <summary>Sekme sırası satırları (bütün paneller, görünürlükten bağımsız).</summary>
     public ObservableCollection<NotchTabOrderItem> NotchTabOrder { get; } = [];
@@ -661,17 +662,52 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private DockIconAlignment _dockIconAlignment = DockIconAlignment.Center;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DockTaskbarAutoHide))]
     private DockProximityMode _dockProximity = DockProximityMode.ReserveSpace;
+
+    /// <summary>
+    /// Windows 11 "Görev çubuğunu otomatik olarak gizle" (tam genişlik): yakınlık ayarının Windows karşılığı (Yer ayır ↔ Hep gizli).
+    /// Ayrı bir anahtar yoktur; açıkken Hep gizli, kapalıyken Yer ayır yazılır.
+    /// </summary>
+    public bool DockTaskbarAutoHide
+    {
+        get => DockProximityMapping.Effective(DockStyle, DockProximity) == DockProximityMode.AlwaysHidden;
+        set => DockProximity = value ? DockProximityMode.AlwaysHidden : DockProximityMode.ReserveSpace;
+    }
+
+    // ---- Windows 11 "Görev çubuğu davranışları/öğeleri" (yalnız tam genişlik; Core/Dock/DockSettingsMatrix) ----
+    [ObservableProperty]
+    private TaskbarSearchMode _dockTaskbarSearch = TaskbarSearchMode.Box;
+
+    [ObservableProperty]
+    private bool _dockTaskbarShowTaskView = true;
+
+    [ObservableProperty]
+    private bool _dockTaskbarShowWidgets = true;
+
+    [ObservableProperty]
+    private bool _dockTaskbarShowFlashing = true;
+
+    [ObservableProperty]
+    private bool _dockTaskbarClockSeconds;
+
+    [ObservableProperty]
+    private bool _dockTaskbarShowDesktopCorner = true;
 
     // Tam genişlikte Aşağı yapış / Çekil sunulmaz: seçiliyse geçerli karşılığına (Yer ayır / Hep gizli) çekilir.
     // Kapsüle dönünce yeni seçim yapılır; ayar dosyası yüklenirken değer bozulmaz.
     partial void OnDockStyleChanged(DockStyleMode value)
     {
+        OnPropertyChanged(nameof(DockIsFullWidth));
+        OnPropertyChanged(nameof(DockTaskbarAutoHide));
         if (_isLoading)
             return;
 
         DockProximity = DockProximityMapping.Effective(value, DockProximity);
     }
+
+    /// <summary>Seçili dock stili tam genişlik (ayar satırları buna göre gizlenir; Core: DockSettingsMatrix).</summary>
+    public bool DockIsFullWidth => DockStyle == DockStyleMode.FullWidth;
 
     [ObservableProperty]
     private bool _dockHideInFullscreen = true;
@@ -1239,6 +1275,12 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             DockInnerPaddingDip = DockLayoutLimits.ClampInnerPaddingDip(s.Dock.InnerPaddingDip);
             DockIconSpacingDip = DockLayoutLimits.ClampIconSpacingDip(s.Dock.IconSpacingDip);
             DockIconAlignment = s.Dock.IconAlignment;
+            DockTaskbarSearch = s.Dock.TaskbarSearch;
+            DockTaskbarShowTaskView = s.Dock.TaskbarShowTaskView;
+            DockTaskbarShowWidgets = s.Dock.TaskbarShowWidgets;
+            DockTaskbarShowFlashing = s.Dock.TaskbarShowFlashing;
+            DockTaskbarClockSeconds = s.Dock.TaskbarClockSeconds;
+            DockTaskbarShowDesktopCorner = s.Dock.TaskbarShowDesktopCorner;
             DockProximity = s.Dock.Proximity;
             DockHideInFullscreen = s.Dock.HideInFullscreen;
             DockEdgeReveal = s.Dock.EdgeReveal;
@@ -1527,6 +1569,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         RebuildAdvancedRows();
     }
 
+    /// <summary>Çentik sayfasının Paneller alt sekmesi (sekme sırası ve Ana sayfa kartları).</summary>
+    public const int NotchPanelsSubTab = 2;
+
     /// <summary>Ayar aramasından gidilen satırın ait olduğu alt sekmeyi etkinleştirir.</summary>
     public void SelectSubTab(int pageIndex, int subTabIndex)
     {
@@ -1678,6 +1723,12 @@ public sealed partial class KoyWindowViewModel : ObservableObject
                 InnerPaddingDip = DockLayoutLimits.ClampInnerPaddingDip(DockInnerPaddingDip),
                 IconSpacingDip = DockLayoutLimits.ClampIconSpacingDip(DockIconSpacingDip),
                 IconAlignment = DockIconAlignment,
+                TaskbarSearch = DockTaskbarSearch,
+                TaskbarShowTaskView = DockTaskbarShowTaskView,
+                TaskbarShowWidgets = DockTaskbarShowWidgets,
+                TaskbarShowFlashing = DockTaskbarShowFlashing,
+                TaskbarClockSeconds = DockTaskbarClockSeconds,
+                TaskbarShowDesktopCorner = DockTaskbarShowDesktopCorner,
                 Proximity = DockProximity,
                 HideInFullscreen = DockHideInFullscreen,
                 EdgeReveal = DockEdgeReveal,

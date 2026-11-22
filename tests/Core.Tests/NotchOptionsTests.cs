@@ -121,8 +121,8 @@ public class NotchOptionsTests
         var notch = new AppSettings().Notch;
         var music = new AppSettings().Music;
 
-        // Bugünkü sekme çubuğu simge ve adı birlikte gösterir; varsayılan onu korur.
-        Assert.Equal(NotchTabBarStyle.IconAndLabel, notch.TabBarStyle);
+        // Sekme çubuğu yalnız simge gösterir (etiketler D yerleşiminde kaldırıldı).
+        Assert.Equal(NotchTabBarStyle.IconOnly, notch.TabBarStyle);
         Assert.Equal(0, notch.OpenDelayMs);
         Assert.Equal(NotchOpenPolicy.DefaultCloseDelayMs, notch.CloseDelayMs);
         Assert.Empty(notch.PanelOrder);
@@ -171,5 +171,39 @@ public class NotchOptionsTests
         {
             File.Delete(path);
         }
+    }
+
+    [Theory]
+    [InlineData("IconAndLabel")]
+    [InlineData("iconandlabel")]
+    public void Removed_icon_and_label_tab_bar_style_becomes_icon_only(string old)
+    {
+        // Ayar dosyası "simge ve ad" ile yazılmışsa seçenek kaldırıldığı için tipli okuma onu bozuk sayardı; göç "IconOnly" yapar,
+        // aynı dosyadaki öteki ayarlar korunur.
+        var loaded = SettingsFile.Load("{ \"Version\": 4, \"Notch\": { \"TabBarStyle\": \"" + old + "\", \"Style\": \"Floating\", \"OpenDelayMs\": 300 } }");
+
+        Assert.Equal(NotchTabBarStyle.IconOnly, loaded.Notch.TabBarStyle);
+        Assert.Equal(NotchStyleMode.Floating, loaded.Notch.Style);
+        Assert.Equal(300, loaded.Notch.OpenDelayMs);
+    }
+
+    [Fact]
+    public void Hidden_tab_bar_style_is_kept()
+    {
+        var loaded = SettingsFile.Load("""{ "Version": 4, "Notch": { "TabBarStyle": "Hidden" } }""");
+        Assert.Equal(NotchTabBarStyle.Hidden, loaded.Notch.TabBarStyle);
+    }
+
+    [Fact]
+    public void Empty_home_cards_list_in_the_file_stays_empty_and_is_reported_as_empty()
+    {
+        // Gerçek kullanıcı dosyası: "HomeCards": [] -> Ana sayfa kartsız (geçerli ayar). Varsayılana dönmez; arayüz boş durumu gösterir.
+        var loaded = SettingsFile.Load("""{ "Version": 4, "Notch": { "HomeCards": [] } }""");
+
+        Assert.Empty(loaded.Notch.HomeCards);
+        Assert.True(HomeCardLayout.IsEmpty(loaded.Notch.HomeCards));
+        Assert.True(HomeCardLayout.IsEmpty(HomeCardLayout.Normalize(loaded.Notch.HomeCards)));
+        Assert.False(HomeCardLayout.IsEmpty(HomeCardLayout.Default));
+        Assert.False(HomeCardLayout.IsEmpty(HomeCardLayout.Normalize([HomeCard.Weather])));
     }
 }

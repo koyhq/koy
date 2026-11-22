@@ -236,6 +236,13 @@ public sealed class DockController : IDisposable
         Refresh();
     }
 
+    /// <summary>Sıra dışarıda kalıcı yazıldıysa kaynağın bellekteki kopyasını eşitler (eski sıranın geri yazılmasını önler).</summary>
+    public void SyncPinnedOrder(IReadOnlyList<string> order)
+    {
+        if (_pinnedAppsService is IReorderablePinnedApps reorderable)
+            reorderable.SetOrder(order);
+    }
+
     public void HandleItemClick(DockItem item)
     {
         if (!item.IsRunning)

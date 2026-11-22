@@ -7,6 +7,13 @@ namespace Koy.Core.Dock;
 public static class DockFolders
 {
     /// <summary>
+    /// Sıra ve klasörler uygulamayı kısayol dosyasının adıyla tutar (<see cref="PinnedOrder.IdOf"/>); dock görünümü ise tam yol
+    /// taşır (DockItem.Id). Çağıran hangisini verirse versin eşleşme dosya adıyla yapılır; aksi halde sürüklenen uygulama
+    /// sıradan çıkmaz, hedef klasöre dönüşmez ve klasör üyeleri "diskte yok" sayılıp klasör kaybolur. Klasör belirteçleri aynen kalır.
+    /// </summary>
+    public static string KeyOf(string id) => PinnedOrder.IsFolderId(id) ? id : PinnedOrder.IdOf(id);
+
+    /// <summary>
     /// Bir uygulamanın diğerinin üzerine bırakılmasıyla yeni bir klasör oluşturur.
     /// Hedef zaten bir klasör ise <see cref="AddToFolder"/> metoduna yönlendirir.
     /// </summary>
@@ -17,6 +24,8 @@ public static class DockFolders
         string target,
         string defaultName)
     {
+        dragged = KeyOf(dragged);
+        target = KeyOf(target);
         if (string.Equals(dragged, target, StringComparison.OrdinalIgnoreCase))
             return ([.. order], [.. folders]);
 
@@ -60,6 +69,7 @@ public static class DockFolders
         string dragged,
         string folderId)
     {
+        dragged = KeyOf(dragged);
         if (PinnedOrder.IsFolderId(dragged))
             return ([.. order], [.. folders]);
 
@@ -98,6 +108,7 @@ public static class DockFolders
         string item,
         int insertIndex)
     {
+        item = KeyOf(item);
         var fId = PinnedOrder.ExtractFolderId(folderId);
         var targetFolder = folders.FirstOrDefault(f => string.Equals(f.Id, fId, StringComparison.OrdinalIgnoreCase));
         if (targetFolder is null || !targetFolder.Items.Contains(item, StringComparer.OrdinalIgnoreCase))

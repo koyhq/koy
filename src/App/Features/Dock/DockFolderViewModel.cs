@@ -52,10 +52,10 @@ public sealed partial class DockFolderViewModel : DockEntryViewModel
     public string DissolveTooltip => Resources.Strings.Get("DockFolderDissolve");
 
     /// <summary>
-    /// Dock üzerindeki 2×2 mini ızgara için ilk 4 uygulamanın simgeleri.
+    /// Dock üzerindeki 2×2 kapak: her hücre için simge, boş hücre için null (kural Core'da: <see cref="DockFolderCover"/>).
     /// </summary>
     public IReadOnlyList<ImageSource?> PreviewIcons =>
-        Items.Take(4).Select(i => i.Icon).ToList();
+        DockFolderCover.Cells(Items.Count).Select(index => index is { } i ? Items[i].Icon : null).ToList();
 
     public DockFolderViewModel(
         DockFolder folder,

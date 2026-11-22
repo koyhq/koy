@@ -11,10 +11,10 @@ public static class TrayGlyphs
     public const string Ethernet = "\uE839";
     public const string Offline = "\uF384";
     public const string Notifications = "\uEA8F";
+    /// <summary>Rahatsız etmeyin açıkken zil (üstü çizili).</summary>
+    public const string NotificationsMuted = "";
 
     private const string Mute = "\uE74F";
-    private const int Battery0 = 0xEBA0;          // EBA0..EBAA: %0..%100
-    private const int BatteryCharging0 = 0xEBAB;  // EBAB..EBB5: şarjda %0..%100
 
     /// <summary>Ağ simgesi. Kablosuzda tam simge soluk çizilir, üstüne <see cref="WiFiLevel"/> dolu çubukları koyar.</summary>
     /// <remarks>Bağlı ama internet yoksa Windows gibi "bağlantı yok" küresi gösterilir.</remarks>
@@ -53,11 +53,5 @@ public static class TrayGlyphs
             < 0.67f => "\uE994",
             _ => "\uE995"
         };
-    }
-
-    public static string Battery(int percent, bool charging)
-    {
-        var level = Math.Clamp((int)Math.Round(percent / 10.0), 0, 10);
-        return char.ConvertFromUtf32((charging ? BatteryCharging0 : Battery0) + level);
     }
 }

@@ -8,11 +8,12 @@ public enum NotchHomePage
 }
 
 /// <summary>
-/// Ana sekmesinde hangi yüzün gösterileceği. Kullanıcının seçtiği yüz (Ana veya Müzik) çentik kapansa da korunur;
-/// ancak parça yoksa ya da müzik kartı ayarlarda kapalıysa Ana yüzüne düşer.
+/// Ana sekmesinde hangi yüzün gösterileceği. Kullanıcının son bıraktığı yüz (Ana veya Müzik) çentik kapansa da açılışta korunur.
+/// Müzik yüzü parça çalmıyorken de seçilebilir (boş durumunu gösterir); parça yokluğu ya da "Ana sayfa kartları" listesi karar vermez.
+/// Yalnız Müzik yüzüne gerçekten ulaşılamıyorsa (<paramref name="musicFaceReachable"/> yanlış) Ana'ya düşülür.
 /// </summary>
 public static class NotchHomePages
 {
-    public static NotchHomePage OnOpen(NotchHomePage current, bool hasTrack, bool musicEnabled) =>
-        hasTrack && musicEnabled ? current : NotchHomePage.Home;
+    public static NotchHomePage OnOpen(NotchHomePage current, bool musicFaceReachable = true) =>
+        musicFaceReachable ? current : NotchHomePage.Home;
 }

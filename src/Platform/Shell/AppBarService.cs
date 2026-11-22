@@ -1,3 +1,4 @@
+using Koy.Core.Diagnostics;
 using Koy.Core.Display;
 using Koy.Core.Dock;
 using Koy.Core.Shell;
@@ -39,8 +40,9 @@ public sealed class AppBarService : IAppBarService
     private readonly AppBarPlacementCache _placements = new();
 
     // Yeniden iddiadan sonra da uyuşmayan çalışma alanı kenarı (başka çubuk): aynı değer için kısa süre tekrar denenmez.
+    // 1 sn: açılışta Gezgin çalışma alanını 1,5 / 3 / 5 sn aralıklı yeniden hesaplar (DockFeature.AppBarSettleDelaysMs); her uğrakta bir deneme hakkı olsun.
     private readonly Dictionary<nint, (int Coord, long Ticks)> _unresolvedWorkEdge = [];
-    private static readonly TimeSpan UnresolvedRetryAfter = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan UnresolvedRetryAfter = TimeSpan.FromSeconds(1);
     private bool _disposed;
 
     /// <summary>
@@ -63,7 +65,10 @@ public sealed class AppBarService : IAppBarService
 
     private bool _ownsBottomEdge;
 
-    public unsafe void Register(nint windowHandle, double heightDip, double dpiScale = 1.0, DockEdge edge = DockEdge.Bottom)
+    // Sıradaki SETPOS'tan önce geçici (1 px büyük) alan gönderilsin: aynı alan tekrar istenince Windows çalışma alanını yenilemiyor.
+    private bool _nudgeNext;
+
+    public unsafe void Register(nint windowHandle, double heightDip, double dpiScale = 1.0, DockEdge edge = DockEdge.Bottom, double edgeOffsetDip = 0.0)
     {
         if (windowHandle == 0 || _registeredHandles.Contains(windowHandle))
             return;
@@ -80,21 +85,26 @@ public sealed class AppBarService : IAppBarService
             uCallbackMessage = 0x0400 + 100 // WM_USER + 100
         };
 
-        var registered = PInvoke.SHAppBarMessage(ABM_NEW, ref data);
+        var registered = TrayHostService.WithExplorerTrayFirst(() =>
+        {
+            var local = data;
+            return PInvoke.SHAppBarMessage(ABM_NEW, ref local);
+        });
+        CrashLog.Write($"AppBar kaydı: ABM_NEW={registered}, hwnd=0x{windowHandle:X}, kenar={edge}, görev çubuğu bizde={OwnsBottomEdge}", null);
         if (registered != 0)
         {
             _registeredHandles.Add(windowHandle);
             _registeredEdges[windowHandle] = edge;
-            UpdatePositionInternal(hwnd, heightDip, dpiScale, force: true, edge);
+            UpdatePositionInternal(hwnd, heightDip, dpiScale, force: true, edge, edgeOffsetDip);
         }
     }
 
-    public unsafe void UpdatePosition(nint windowHandle, double heightDip, double dpiScale = 1.0, DockEdge edge = DockEdge.Bottom)
+    public unsafe void UpdatePosition(nint windowHandle, double heightDip, double dpiScale = 1.0, DockEdge edge = DockEdge.Bottom, double edgeOffsetDip = 0.0)
     {
         if (windowHandle == 0 || !_registeredHandles.Contains(windowHandle))
             return;
 
-        UpdatePositionInternal(new HWND(windowHandle), heightDip, dpiScale, force: false, edge);
+        UpdatePositionInternal(new HWND(windowHandle), heightDip, dpiScale, force: false, edge, edgeOffsetDip);
     }
 
     /// <summary>
@@ -103,12 +113,14 @@ public sealed class AppBarService : IAppBarService
     /// </summary>
     /// <param name="onlyIfNeeded">true ise monitörün çalışma alanı payı zaten karşılıyorsa SETPOS gönderilmez (bildirim yolu).</param>
     /// <returns>SETPOS gönderildi mi.</returns>
-    public unsafe bool Reassert(nint windowHandle, double heightDip, double dpiScale = 1.0, bool onlyIfNeeded = false, DockEdge edge = DockEdge.Bottom)
+    public unsafe bool Reassert(nint windowHandle, double heightDip, double dpiScale = 1.0, bool onlyIfNeeded = false, DockEdge edge = DockEdge.Bottom, double edgeOffsetDip = 0.0)
     {
         if (windowHandle == 0 || !_registeredHandles.Contains(windowHandle))
             return false;
 
         var hwnd = new HWND(windowHandle);
+        // Yeniden iddia, aynı dikdörtgenle gelse bile çalışma alanını yeniden hesaplatmalı (AppBarMath.NudgedRect).
+        _nudgeNext = true;
         if (onlyIfNeeded)
         {
             var hMonitor = PInvoke.MonitorFromWindow(hwnd, MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST);
@@ -118,7 +130,7 @@ public sealed class AppBarService : IAppBarService
                 var bounds = mi.monitorInfo.rcMonitor;
                 var work = mi.monitorInfo.rcWork;
                 var monitorRect = new WindowRect(bounds.left, bounds.top, bounds.right, bounds.bottom);
-                var heightPx = WindowPlacementMath.ToPixels(heightDip <= 0 ? 46 : heightDip, dpiScale);
+                var heightPx = AppBarMath.ReservedPixels(heightDip <= 0 ? 46 : heightDip, edgeOffsetDip, dpiScale, edge, OwnsBottomEdge);
                 int? unresolvedCoord = null;
                 if (_unresolvedWorkEdge.TryGetValue(windowHandle, out var unresolved)
                     && TimeSpan.FromTicks(Environment.TickCount64 * TimeSpan.TicksPerMillisecond - unresolved.Ticks) < UnresolvedRetryAfter)
@@ -130,7 +142,9 @@ public sealed class AppBarService : IAppBarService
                 if (!needed)
                     return false;
 
-                UpdatePositionInternal(hwnd, heightDip, dpiScale, force: true, edge);
+                // Tanı: yalnız uyuşmazlıkta (sessiz yol) bir satır; Gezgin'in geç güncellediği açılışlarda nedeni görmek için.
+                CrashLog.Write($"AppBar yeniden iddia: kenar={edge}, çalışma alanı=({work.left},{work.top},{work.right},{work.bottom}), pay={heightPx}px, görev çubuğu bizde={OwnsBottomEdge}", null);
+                UpdatePositionInternal(hwnd, heightDip, dpiScale, force: true, edge, edgeOffsetDip);
 
                 // Düzelmediyse (başka bir çubuk payı etkiliyor) aynı çalışma alanı için tekrar denenmez.
                 var after = new MONITORINFOEXW { monitorInfo = new MONITORINFO { cbSize = (uint)sizeof(MONITORINFOEXW) } };
@@ -162,18 +176,18 @@ public sealed class AppBarService : IAppBarService
             }
         }
 
-        UpdatePositionInternal(hwnd, heightDip, dpiScale, force: true, edge);
+        UpdatePositionInternal(hwnd, heightDip, dpiScale, force: true, edge, edgeOffsetDip);
         return true;
     }
 
-    public void Reregister(nint windowHandle, double heightDip, double dpiScale = 1.0, DockEdge edge = DockEdge.Bottom)
+    public void Reregister(nint windowHandle, double heightDip, double dpiScale = 1.0, DockEdge edge = DockEdge.Bottom, double edgeOffsetDip = 0.0)
     {
         if (windowHandle == 0)
             return;
 
         // Eski Explorer'ın kaydı yok olmuştur; ABM_REMOVE zararsızdır ve yerel kayıt kümesini de temizler.
         Unregister(windowHandle);
-        Register(windowHandle, heightDip, dpiScale, edge);
+        Register(windowHandle, heightDip, dpiScale, edge, edgeOffsetDip);
     }
 
     public unsafe void Unregister(nint windowHandle)
@@ -191,17 +205,21 @@ public sealed class AppBarService : IAppBarService
             hWnd = hwnd
         };
 
-        PInvoke.SHAppBarMessage(ABM_REMOVE, ref data);
+        _ = TrayHostService.WithExplorerTrayFirst(() =>
+        {
+            var local = data;
+            return PInvoke.SHAppBarMessage(ABM_REMOVE, ref local);
+        });
     }
 
-    private unsafe void UpdatePositionInternal(HWND hwnd, double heightDip, double dpiScale, bool force, DockEdge edge = DockEdge.Bottom)
+    private unsafe void UpdatePositionInternal(HWND hwnd, double heightDip, double dpiScale, bool force, DockEdge edge = DockEdge.Bottom, double edgeOffsetDip = 0.0)
     {
         var handle = (nint)hwnd.Value;
         if (_registeredEdges.TryGetValue(handle, out var prevEdge) && prevEdge != edge)
         {
             // Win32 AppBar: Kenar değiştiğinde eski kenarın çalışma alanını geri vermek için ABM_REMOVE
             // ve yeni kenarda ABM_NEW zorunludur; aksi halde eski kenar payı Windows'ta asılı kalır.
-            Reregister(handle, heightDip, dpiScale, edge);
+            Reregister(handle, heightDip, dpiScale, edge, edgeOffsetDip);
             return;
         }
 
@@ -231,8 +249,8 @@ public sealed class AppBarService : IAppBarService
             }
         }
 
-        // Pencere yüksekliğiyle aynı piksel kuralı (WindowPlacementMath.ToPixels): çubuk ile çalışma alanı arasında boşluk kalmaz.
-        var heightPx = WindowPlacementMath.ToPixels(heightDip, dpiScale);
+        // Pencere yerleşimiyle aynı piksel kuralı (AppBarMath.ReservedPixels): çubuk ile çalışma alanı arasında boşluk kalmaz.
+        var heightPx = AppBarMath.ReservedPixels(heightDip, edgeOffsetDip, dpiScale, edge, OwnsBottomEdge);
         var uEdge = ToAppBarEdge(edge);
 
         var data = new APPBARDATA
@@ -255,12 +273,40 @@ public sealed class AppBarService : IAppBarService
         if (!_placements.ShouldSend(handle, requested, OwnsBottomEdge, force))
             return;
 
-        PInvoke.SHAppBarMessage(ABM_QUERYPOS, ref data);
-        var queried = new WindowRect(data.rc.left, data.rc.top, data.rc.right, data.rc.bottom);
-        var final = AppBarMath.FinalRect(edge, new WindowRect(screenLeft, screenTop, screenRight, screenBottom), heightPx, queried, OwnsBottomEdge);
-        data.rc = new RECT { left = final.Left, top = final.Top, right = final.Right, bottom = final.Bottom };
-        PInvoke.SHAppBarMessage(ABM_SETPOS, ref data);
+        var nudge = _nudgeNext;
+        _nudgeNext = false;
+        var monitorBounds = new WindowRect(screenLeft, screenTop, screenRight, screenBottom);
+        var (queried, final) = TrayHostService.WithExplorerTrayFirst(() =>
+        {
+            var local = data;
+            PInvoke.SHAppBarMessage(ABM_QUERYPOS, ref local);
+            var q = new WindowRect(local.rc.left, local.rc.top, local.rc.right, local.rc.bottom);
+            var f = AppBarMath.FinalRect(edge, monitorBounds, heightPx, q, OwnsBottomEdge);
+            if (nudge)
+            {
+                var temp = AppBarMath.NudgedRect(edge, f);
+                local.rc = new RECT { left = temp.Left, top = temp.Top, right = temp.Right, bottom = temp.Bottom };
+                PInvoke.SHAppBarMessage(ABM_SETPOS, ref local);
+            }
+
+            local.rc = new RECT { left = f.Left, top = f.Top, right = f.Right, bottom = f.Bottom };
+            PInvoke.SHAppBarMessage(ABM_SETPOS, ref local);
+            return (q, f);
+        });
         _placements.Record(handle, requested);
+
+        if (nudge && hMonitor != 0)
+        {
+            // Tanı: gönderilen alanlar ve SETPOS sonrası çalışma alanı (Gezgin güncellemeyi geç yapabilir: değer yine de yazılır).
+            var after = new MONITORINFOEXW { monitorInfo = new MONITORINFO { cbSize = (uint)sizeof(MONITORINFOEXW) } };
+            if (PInvoke.GetMonitorInfo(hMonitor, (MONITORINFO*)&after))
+            {
+                var w = after.monitorInfo.rcWork;
+                CrashLog.Write($"AppBar SETPOS: hwnd=0x{handle:X}, kenar={edge}, istenen=({requested.Left},{requested.Top},{requested.Right},{requested.Bottom}), " +
+                    $"QUERYPOS=({queried.Left},{queried.Top},{queried.Right},{queried.Bottom}), gönderilen=({final.Left},{final.Top},{final.Right},{final.Bottom}), " +
+                    $"çalışma alanı sonrası=({w.left},{w.top},{w.right},{w.bottom})", null);
+            }
+        }
     }
 
     public void Dispose()

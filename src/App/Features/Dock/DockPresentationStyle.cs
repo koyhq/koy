@@ -22,6 +22,9 @@ public sealed class DockPresentationStyle
     public bool DrawsMark => DockPresentationMath.DrawsIndicatorMark(IndicatorStyle);
     public bool OnePerWindow { get; private init; }
 
+    /// <summary>Dikkat bekleyen uygulamanın yanıp sönmesi gösterilir (tam genişlikte Windows "yanıp sönmeyi göster" ayarı).</summary>
+    public bool ShowAttention { get; private init; } = true;
+
     /// <summary>Gösterge fırçası; vurgu rengi seçiliyse null (tema vurgusu).</summary>
     public Brush? IndicatorBrush { get; private init; }
 
@@ -52,6 +55,7 @@ public sealed class DockPresentationStyle
         {
             IndicatorStyle = dock.IndicatorStyle,
             OnePerWindow = dock.IndicatorOnePerWindow,
+            ShowAttention = dock.Style != DockStyleMode.FullWidth || dock.TaskbarShowFlashing,
             IndicatorBrush = indicator,
             HighlightBrush = highlight,
             ShowBadges = dock.ShowBadges,

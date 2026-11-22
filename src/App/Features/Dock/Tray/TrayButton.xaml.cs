@@ -52,6 +52,35 @@ public partial class TrayButton : UserControl
         set => SetValue(IsCompactProperty, value);
     }
 
+    /// <summary>
+    /// Sistem alanı (tam genişlik, Windows 11 tarzı) taşma oku: dar, hover hapı cam karo dilinde. Görünürlüğü sistem alanı kuralından
+    /// (DockSystemArea.ShowOverflowArrow) gelir; tepsi penceresi ve simge tıklamaları öteki kiplerle aynıdır.
+    /// </summary>
+    public static readonly DependencyProperty IsSystemAreaProperty = DependencyProperty.Register(
+        nameof(IsSystemArea), typeof(bool), typeof(TrayButton),
+        new PropertyMetadata(false, (d, e) => ((TrayButton)d).ApplySystemArea((bool)e.NewValue)));
+
+    public bool IsSystemArea
+    {
+        get => (bool)GetValue(IsSystemAreaProperty);
+        set => SetValue(IsSystemAreaProperty, value);
+    }
+
+    private void ApplySystemArea(bool systemArea)
+    {
+        if (!systemArea)
+            return;
+
+        SetBinding(VisibilityProperty, new System.Windows.Data.Binding("SystemArea.ShowOverflowArrow")
+        {
+            Converter = DockConverters.BoolToVisibilityConverter
+        });
+        TrayToggle.SetValue(WidthProperty, 26.0);
+        TrayToggle.SetValue(HeightProperty, 36.0);
+        TrayToggle.Margin = new Thickness(1, 0, 0, 0);
+        TrayToggle.Tag = "system";
+    }
+
     private void ApplyCompact(bool compact)
     {
         if (!compact)

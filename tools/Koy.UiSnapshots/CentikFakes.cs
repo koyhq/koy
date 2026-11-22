@@ -79,11 +79,15 @@ internal sealed class FakeLyrics : Koy.Core.Lyrics.ILyricsProvider
             Sample.Select((text, i) => new Koy.Core.Lyrics.LyricLine(TimeSpan.FromSeconds(70 + i * 5), text)).ToArray()));
 }
 
-internal sealed class FakePower(int percent = 86, bool charging = false, bool hasBattery = true) : IPowerService
+internal sealed class FakePower(
+    int percent = 86, bool charging = false, bool hasBattery = true, bool ac = false, bool saver = false, TimeSpan? time = null) : IPowerService
 {
     public bool HasBattery => hasBattery;
     public int RemainingPercent => percent;
     public bool IsCharging => charging;
+    public bool IsAcConnected => ac || charging;
+    public bool IsEnergySaverOn => saver;
+    public TimeSpan? RemainingTime => time;
     public BatteryStatus Status => charging ? BatteryStatus.Charging : BatteryStatus.Discharging;
     public event EventHandler<PowerChangedEventArgs>? PowerChanged { add { } remove { } }
     public void Dispose() { }
@@ -139,9 +143,12 @@ internal sealed class FakeBrightness : IBrightnessService
 
 internal sealed class FakeRadio : IRadioService
 {
+    /// <summary>Kontrol sahnesi: Bluetooth radyosu kapalı (Windows eşleşmiş cihazlarda bayat "bağlı" işareti bırakır).</summary>
+    public static bool BluetoothOff { get; set; }
+
     public RadioAccess Access => RadioAccess.Allowed;
     public RadioState WiFiState => RadioState.On;
-    public RadioState BluetoothState => RadioState.On;
+    public RadioState BluetoothState => BluetoothOff ? RadioState.Off : RadioState.On;
     public event EventHandler<RadioStateChangedEventArgs>? StateChanged { add { } remove { } }
     public Task RefreshAsync() => Task.CompletedTask;
     public Task<bool> SetStateAsync(RadioKind kind, bool enable) => Task.FromResult(true);

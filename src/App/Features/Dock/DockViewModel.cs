@@ -11,12 +11,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Koy.App.Features.Dock.Tray;
 using Koy.App.Features.Settings;
+using Koy.App.Features.Status;
 using Koy.App.Resources;
 using Koy.Core.Animation;
 using Koy.Core.Appearance;
 using Koy.Core.Display;
 using Koy.Core.Dock;
 using Koy.Core.Dock.Items;
+using Koy.Core.Dock.SystemArea;
 using Koy.Core.JumpList;
 using Koy.Core.Media;
 using Koy.Core.Power;
@@ -323,7 +325,46 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         EvaluatePosition(_lastContentWidth);
     }
 
+    /// <summary>Taşma penceresindeki simgeler (tam genişlikte yalnız "Taşma" olanlar; kapsülde gizli olmayanların hepsi).</summary>
     public ObservableCollection<TrayIconViewModel> TrayIcons { get; } = [];
+
+    /// <summary>
+    /// Tam genişlik sistem alanında doğrudan görünen tepsi simgeleri (uygulama başına ayar "Göster"). Windows görev çubuğundaki
+    /// gibi taşma okunun yanında durur; kapsülde ve sistem alanı yokken boştur.
+    /// </summary>
+    public ObservableCollection<TrayIconViewModel> VisibleTrayIcons { get; } = [];
+
+    /// <summary>Windows 11 görev çubuğu düzeni (sol, orta ve sağ uç); yalnız tam genişlik ve yatay kenarda (Core: TaskbarLayout).</summary>
+    public TaskbarLayoutDecision Taskbar => TaskbarLayout.Resolve(
+        Status is not null && _settings.Dock.Style == DockStyleMode.FullWidth, IsVertical, _settings.Dock.IconAlignment, HasTray, Status?.HasBattery == true,
+        TaskbarOptions.From(_settings.Dock));
+
+    /// <summary>Sistem alanı (sağ uç) parçaları.</summary>
+    public DockSystemAreaLayout SystemArea => Taskbar.SystemArea;
+
+    /// <summary>Windows düzeni çiziliyor: Başlat, Ara, Görev görünümü ve pencere öğeleri; eski sol bölüm (Başlat + çalan müzik) yerine.</summary>
+    public bool ShowTaskbar => Taskbar.IsActive;
+
+    /// <summary>Eski sol bölüm (kapsül, dikey kenar ve Windows düzeni yokken).</summary>
+    public bool ShowLegacyLeftSection => !Taskbar.IsActive;
+
+    /// <summary>Orta bölümdeki grubun (Başlat, Ara, Görev görünümü, uygulamalar) hizası: Windows düzeninde Orta/Sol, eskisinde ayardaki.</summary>
+    public HorizontalAlignment CenterGroupAlignment => Taskbar.IsActive
+        ? (Taskbar.Alignment == TaskbarAlignment.Left ? HorizontalAlignment.Left : HorizontalAlignment.Center)
+        : StripAlignment;
+
+    /// <summary>Çalan müzik hapı Windows düzeninde yoktur.</summary>
+    public bool ShowNowPlayingPill => HasNowPlaying && !Taskbar.IsActive;
+
+    /// <summary>Sistem alanı çiziliyor: sağ bölümde eski düğmeler (İndirilenler, Son kullanılanlar, Koy menüsü) yerine o gelir.</summary>
+    public bool ShowSystemArea => SystemArea.IsActive;
+
+    /// <summary>Eski sağ bölüm (kapsül ve dikey kenar).</summary>
+    public bool ShowLegacyRightSection => !ShowSystemArea;
+
+    /// <summary>Sistem alanının ince "Masaüstünü göster" şeridinin genişliği (DIP).</summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "XAML binding")]
+    public double DesktopStripWidth => DockSystemArea.DesktopStripWidthDip;
 
     // Tam Genişlik Modu: Çalan müzik hapı (Sol bölüm)
     [ObservableProperty]
@@ -406,19 +447,22 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     private void UpdateMaterialSurfaces()
     {
         var level = MaterialState.ForDock(_materialSettings);
-        var highlight = ReadColor("KoyDockHighlight", DefaultHighlightColor);
+        // Tam genişlik (Windows görev çubuğu düzeni) sistem temasına uyar: aynı roller KoyTaskbar* fırçalarından okunur (Core: TaskbarTheme).
+        var follow = Taskbar.IsActive;
+        string K(string key) => follow ? TaskbarTheme.TokenFor(key) : key;
+        var highlight = ReadColor(K("KoyDockHighlight"), DefaultHighlightColor);
 
         var fullLook = DockMaterialPolicy.For(level, Edge, fullWidth: true);
-        FullWidthSurface = DockSurfaceBrushes.Surface(fullLook, ReadColor("KoyDockSurface", DefaultFullWidthColor));
-        FullWidthBorderBrush = DockSurfaceBrushes.Border(fullLook, ReadBrush("KoyDockBorder", DefaultFullWidthBorder), highlight, gradient: false);
+        FullWidthSurface = DockSurfaceBrushes.Surface(fullLook, ReadColor(K("KoyDockSurface"), DefaultFullWidthColor));
+        FullWidthBorderBrush = DockSurfaceBrushes.Border(fullLook, ReadBrush(K("KoyDockBorder"), DefaultFullWidthBorder), highlight, gradient: false);
 
         var capsuleLook = DockMaterialPolicy.For(level, Edge, fullWidth: false);
         CapsuleSurface = DockSurfaceBrushes.Surface(capsuleLook, ReadColor("KoyDockCapsuleSurface", DefaultCapsuleColor));
         CapsuleBorderBrush = DockSurfaceBrushes.Border(capsuleLook, ReadBrush("KoyDockCapsuleBorder", DefaultCapsuleBorder), highlight, gradient: true);
 
         // Simge karoları (etkin / üstüne gelinen): iki dock'ta aynı; Katı'da eski KoyDockActive / KoyDockHover fırçası, kenarlık yok.
-        TileActiveFill = DockSurfaceBrushes.TileFill(fullLook, ReadBrush("KoyDockActive", DefaultTileActive), highlight, hover: false);
-        TileHoverFill = DockSurfaceBrushes.TileFill(fullLook, ReadBrush("KoyDockHover", DefaultTileHover), highlight, hover: true);
+        TileActiveFill = DockSurfaceBrushes.TileFill(fullLook, ReadBrush(K("KoyDockActive"), DefaultTileActive), highlight, hover: false);
+        TileHoverFill = DockSurfaceBrushes.TileFill(fullLook, ReadBrush(K("KoyDockHover"), DefaultTileHover), highlight, hover: true);
         TileBorderBrush = DockSurfaceBrushes.TileBorder(fullLook, highlight);
         TileBorderThickness = fullLook.HasTile ? new Thickness(1) : new Thickness(0);
     }
@@ -552,10 +596,19 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         (Application.Current as App)?.ReloadDock();
     }
 
+    /// <summary>
+    /// Tam genişlik ve yatay kenarda (sistem alanı olan) Windows 11 görev çubuğu ayarları; yoksa kullanıcının ayarı. Yalnız
+    /// <c>Dock</c> bölümü kopyalanır, öteki bölümler (sabit sırası, klasörler) aynı nesneyi paylaşır.
+    /// </summary>
+    private AppSettings EffectiveSettings(AppSettings settings) =>
+        Status is not null && settings.Dock.Style == DockStyleMode.FullWidth && settings.Dock.Edge is not (DockEdge.Left or DockEdge.Right)
+            ? settings with { Dock = TaskbarLayout.ApplyWindowsStyle(settings.Dock) }
+            : settings;
+
     /// <summary>Ayar nesnesini değiştirir (yerinde ayar uygulaması): sabit sırası/klasör yazımları ile okuyucular aynı nesneyi görür.</summary>
     public void AdoptSettings(AppSettings settings)
     {
-        _settings = settings;
+        _settings = EffectiveSettings(settings);
         OnPropertyChanged(nameof(Edge));
         OnPropertyChanged(nameof(IsVertical));
         OnPropertyChanged(nameof(StripOrientation));
@@ -605,6 +658,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             : _controller.Items;
     public DockStatusViewModel? Status { get; }
 
+    /// <summary>Pencere öğeleri (hava durumu) verisi; yalnız tam genişlik dock'ta vardır.</summary>
+    public DockWeatherViewModel? Weather { get; }
+
     public DockViewModel(
         AppSettings settings,
         DockController controller,
@@ -617,16 +673,22 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         IJumpListService? jumpLists = null,
         StartMenuActions? startMenu = null,
         Func<IPowerService>? acquirePower = null,
-        Action? releasePower = null)
+        Action? releasePower = null,
+        DockWeatherViewModel? weather = null)
     {
         _acquirePower = acquirePower;
         _releasePower = releasePower;
+        Weather = weather;
+        Status = status;
+        // Tam genişlikte (yatay) Windows 11 görev çubuğu: Windows'ta olmayan ya da farklı davranan ayarlar sabitlenir (TaskbarLayout).
+        settings = EffectiveSettings(settings);
         _settings = settings;
         _appIcons = new DockAppIcons(settings);
         _recentFiles = recentFiles;
         JumpLists = jumpLists;
         StartContextMenu = startMenu;
-        Status = status;
+        if (Status is not null && Weather is not null)
+            Status.MinuteElapsed += Weather.Request;
         _controller = controller;
         _shellActionService = shellActionService;
         _visibilityController = visibilityController;
@@ -695,6 +757,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             _trayService.IconsChanged += OnTrayIconsChanged;
         }
 
+        SyncVisibleTrayIcons();
         UpdateItems();
     }
 
@@ -718,7 +781,13 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         IsTrayPopupOpen = false;
         TrayIcons.Clear();
         HasTrayIcons = false;
+        VisibleTrayIcons.Clear();
         OnPropertyChanged(nameof(HasTray));
+        OnPropertyChanged(nameof(Taskbar));
+        OnPropertyChanged(nameof(SystemArea));
+        OnPropertyChanged(nameof(ShowSystemArea));
+        OnPropertyChanged(nameof(ShowLegacyRightSection));
+        SyncVisibleTrayIcons();
         OnPropertyChanged(nameof(ShowRightSection));
         OnPropertyChanged(nameof(ShowFullTray));
         OnPropertyChanged(nameof(ShowSmallTray));
@@ -819,8 +888,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     private void OnTrayIconsChanged(object? sender, EventArgs e)
     {
-        // Tepsi iş parçacığından gelir. Pencere kapalıyken arayüze hiç dönülmez: açılırken liste zaten baştan okunur.
-        if (!_trayPopupOpen)
+        // Tepsi iş parçacığından gelir. Pencere kapalıyken ve doğrudan görünen simge yokken arayüze hiç dönülmez:
+        // açılırken liste zaten baştan okunur. Sistem alanı varken görünen simgeler olay gelince tazelenir (yoklama yok).
+        if (!_trayPopupOpen && !SystemArea.ShowVisibleTray)
             return;
 
         // Sık değişen simgelerde (animasyonlu ipucu, rozet) arka arkaya iş biriktirme: bekleyen tek bir eşitleme yeter.
@@ -839,6 +909,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             Volatile.Write(ref _traySyncQueued, 0);
             if (IsTrayPopupOpen)
                 SyncTrayIcons();
+            SyncVisibleTrayIcons();
         }, DispatcherPriority.Background);
     }
 
@@ -851,8 +922,11 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         // başına bir kez okunur; pencere kapanınca önbellek simgelerle birlikte bırakılır.
         var perApp = _settings.Dock.TrayAppVisibility ?? new ValueDictionary<TrayIconVisibility>();
         var newDefault = _settings.Dock.NewTrayIconVisibility;
+        // Sistem alanı varken "Göster" simgeler doğrudan görünür (VisibleTrayIcons); taşma penceresinde yalnız "Taşma" olanlar kalır.
+        var inlineShown = SystemArea.ShowVisibleTray;
         var models = _trayService.GetVisibleIcons()
-            .Where(m => TrayIconVisibilityPolicy.Resolve(TrayExeName(m.OwnerHwnd), perApp, newDefault) != TrayIconVisibility.Hidden)
+            .Where(m => TrayIconVisibilityPolicy.Resolve(TrayExeName(m.OwnerHwnd), perApp, newDefault) is var v
+                        && v != TrayIconVisibility.Hidden && !(inlineShown && v == TrayIconVisibility.Shown))
             .ToList();
 
         for (var i = TrayIcons.Count - 1; i >= 0; i--)
@@ -894,6 +968,59 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         HasTrayIcons = TrayIcons.Count > 0;
     }
 
+    /// <summary>Doğrudan görünen simgeleri tepsi servisinden eşitler (sistem alanı yoksa liste boşalır ve bellek bırakılır).</summary>
+    private void SyncVisibleTrayIcons()
+    {
+        if (_trayService is null || !SystemArea.ShowVisibleTray)
+        {
+            if (VisibleTrayIcons.Count > 0)
+                VisibleTrayIcons.Clear();
+            return;
+        }
+
+        var perApp = _settings.Dock.TrayAppVisibility ?? new ValueDictionary<TrayIconVisibility>();
+        var newDefault = _settings.Dock.NewTrayIconVisibility;
+        var models = _trayService.GetVisibleIcons()
+            .Where(m => TrayIconVisibilityPolicy.Resolve(TrayExeName(m.OwnerHwnd), perApp, newDefault) == TrayIconVisibility.Shown)
+            .ToList();
+
+        for (var i = VisibleTrayIcons.Count - 1; i >= 0; i--)
+        {
+            var key = VisibleTrayIcons[i].Key;
+            if (!models.Any(m => m.Key == key))
+                VisibleTrayIcons.RemoveAt(i);
+        }
+
+        for (var targetIndex = 0; targetIndex < models.Count; targetIndex++)
+        {
+            var model = models[targetIndex];
+            var existingIndex = -1;
+            for (var j = 0; j < VisibleTrayIcons.Count; j++)
+            {
+                if (VisibleTrayIcons[j].Key == model.Key)
+                {
+                    existingIndex = j;
+                    break;
+                }
+            }
+
+            TrayIconViewModel vm;
+            if (existingIndex >= 0)
+            {
+                vm = VisibleTrayIcons[existingIndex];
+                if (existingIndex != targetIndex)
+                    VisibleTrayIcons.Move(existingIndex, targetIndex);
+            }
+            else
+            {
+                vm = new TrayIconViewModel(model, TrayExeName(model.OwnerHwnd));
+                VisibleTrayIcons.Insert(targetIndex, vm);
+            }
+
+            vm.Update(model, _trayService.GetIconImage);
+        }
+    }
+
     private readonly Dictionary<nint, string> _trayExeByOwner = [];
 
     private string TrayExeName(nint ownerHwnd)
@@ -912,6 +1039,18 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     {
         _shellActionService.SendWinKey();
     }
+
+    /// <summary>Tam genişlik "Ara" kutusu: Windows arama (Win+S).</summary>
+    [RelayCommand]
+    private void OpenSearch() => _shellActionService.OpenSearch();
+
+    /// <summary>Tam genişlik "Görev görünümü" düğmesi: Win+Tab.</summary>
+    [RelayCommand]
+    private void OpenTaskView() => _shellActionService.OpenTaskView();
+
+    /// <summary>Sağ tık menüsü (tam genişlik): Windows görev çubuğundaki "Görev Yöneticisi".</summary>
+    [RelayCommand]
+    private void OpenTaskManager() => _shellActionService.Launch("taskmgr.exe");
 
     [RelayCommand]
     private void SystemTray()
@@ -1002,8 +1141,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             if (_centerWidth <= 0)
                 return;
 
-            icon = DockFitMath.FitIconSize(_preferredIconSize, Items.Count, 0, _centerWidth, spacing);
-            maxWidth = _centerWidth;
+            // Windows düzeninde Başlat, Ara, Görev görünümü (ve sol hizada pencere öğeleri) orta sütundadır: şerit kalanı alır.
+            var leading = TaskbarLayout.LeadingWidthDip(Taskbar);
+            icon = DockFitMath.FitIconSize(_preferredIconSize, Items.Count, leading, _centerWidth, spacing);
+            maxWidth = DockFitMath.StripMaxWidth(_centerWidth, leading);
         }
         else
         {
@@ -1186,6 +1327,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         IsVisible = shouldShow;
         IsEdgeLineVisible = decision.IsEdgeLineVisible;
         Status?.SetActive(shouldShow);
+        Weather?.SetActive(shouldShow);
         SyncClockTimer();
         SyncBatteryText();
 
@@ -1369,9 +1511,39 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     /// <summary>Öğe sürüklenebilir mi: sabitli, sıralama destekleniyor ve en az iki sabitli var.</summary>
     public bool CanStartReorder(DockEntryViewModel item)
-        => !_hasExtras && item.IsPinned && _controller.CanReorderPinned && Items.Count(i => i.IsPinned) > 1;
+        => item.IsPinned && _controller.CanReorderPinned && Items.Count(i => i.IsPinned) > 1;
 
     public int PinnedCount => Items.Count(i => i.IsPinned);
+
+    /// <summary>
+    /// Sürükleme yuvaları: şeridin başından son sabitli ya da ek öğeye kadar. Sabitsiz çalışan simgeler ve ötesi
+    /// hedef olamaz; ek öğelerin arasına da bırakılabilir.
+    /// </summary>
+    private int LastDragIndex()
+    {
+        for (var i = Items.Count - 1; i >= 0; i--)
+        {
+            if (Items[i].IsPinned || Items[i] is DockExtraViewModel)
+                return i;
+        }
+        return -1;
+    }
+
+    /// <summary>Yalnız sabitli uygulama ya da klasör bir klasör hedefi olabilir (ek öğe ve çalışan simge olamaz).</summary>
+    private bool IsMergeTargetAt(int index) =>
+        index >= 0 && index < Items.Count && Items[index].IsPinned && Items[index] is DockItemViewModel or DockFolderViewModel;
+
+    /// <summary>İmleç konumundan sürükleme kararı (Core: <see cref="DockReorderMath.Evaluate"/>). Sürüklenen klasörse hiçbir yuva birleştirme hedefi değildir.</summary>
+    public DockDragPlan EvaluateDrag(DockEntryViewModel dragged, int originalIndex, double dragOffset, IReadOnlyList<double> widths)
+    {
+        var canMerge = dragged is DockItemViewModel;
+        return DockReorderMath.Evaluate(originalIndex, dragOffset, widths, 0, Math.Max(LastDragIndex(), originalIndex),
+            index => canMerge && IsMergeTargetAt(index));
+    }
+
+    /// <summary>Sürükleme için imleç ofsetinin sınırları (merkez en çok ilk ve son sürükleme yuvasına kadar).</summary>
+    public (double Min, double Max) DragOffsetRange(int originalIndex, IReadOnlyList<double> widths) =>
+        DockReorderMath.OffsetRange(widths, originalIndex, 0, Math.Max(LastDragIndex(), originalIndex));
 
     public void BeginReorder()
     {
@@ -1380,17 +1552,19 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         OnHoverEnded();
     }
 
-    /// <summary>Sürükleme sırasında: öğe imleci izler, aradakiler hedef yuvaya göre bir yuva kayar.</summary>
-    public void UpdateReorder(DockEntryViewModel dragged, int originalIndex, double dragOffset, double slotWidth)
+    /// <summary>Sürükleme sırasında: öğe imleci izler, aradakiler <paramref name="shiftTarget"/>'a göre bir yuva kayar.</summary>
+    public void UpdateReorder(DockEntryViewModel dragged, int originalIndex, double dragOffset, int shiftTarget, double slotWidth)
     {
-        var count = PinnedCount;
-        var target = DockReorderMath.TargetIndex(count, originalIndex, dragOffset, slotWidth);
         dragged.SnapOffset(dragOffset);
 
-        for (var i = 0; i < count && i < Items.Count; i++)
+        var shifted = DockReorderMath.ShiftedIndices(originalIndex, shiftTarget).ToHashSet();
+        for (var i = 0; i < Items.Count; i++)
         {
-            if (i != originalIndex)
-                Items[i].SetTargetOffset(DockReorderMath.ShiftFor(i, originalIndex, target, slotWidth));
+            if (i == originalIndex)
+                continue;
+
+            // Yalnız sürükleme yuvalarındaki öğeler kayar (çalışan simgeler ve ötesi yerinde).
+            Items[i].SetTargetOffset(shifted.Contains(i) ? DockReorderMath.ShiftFor(i, originalIndex, shiftTarget, slotWidth) : 0);
         }
 
         _isAnimating = true;
@@ -1401,11 +1575,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     /// Bırakıldı. Sıra değiştiyse koleksiyon hemen yeni sıraya taşınır ve her öğenin ekrandaki konumu korunacak biçimde
     /// kayması ayarlanır; sonra yay sıfıra çeker (zıplama olmaz). Sıra kalıcı yazılır.
     /// </summary>
-    public void CommitReorder(DockEntryViewModel dragged, int originalIndex, double dragOffset, double slotWidth)
+    public void CommitReorder(DockEntryViewModel dragged, int originalIndex, int target, IReadOnlyList<double> widths)
     {
         _isReordering = false;
-        var count = PinnedCount;
-        var target = DockReorderMath.TargetIndex(count, originalIndex, dragOffset, slotWidth);
 
         if (target == originalIndex)
         {
@@ -1414,20 +1586,22 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
         else
         {
-            // Bırakma anındaki ekran konumları: yuva dizini × genişlik + o anki kayma.
-            var visual = new Dictionary<DockEntryViewModel, double>();
-            for (var i = 0; i < Items.Count; i++)
-                visual[Items[i]] = i * slotWidth + Items[i].OffsetX;
+            // Bırakma anındaki ekran konumları korunur: her öğenin ofseti yeni yuvasına göre yeniden hesaplanır.
+            var offsets = DockReorderMath.CommitOffsets(widths, Items.Select(i => i.OffsetX).ToList(), originalIndex, target);
 
             Items.Move(originalIndex, target);
 
             for (var i = 0; i < Items.Count; i++)
             {
-                Items[i].SnapOffset(visual[Items[i]] - i * slotWidth);
+                Items[i].SnapOffset(offsets[i]);
                 Items[i].SetTargetOffset(0);
             }
 
-            if (dragged is DockItemViewModel itemVm)
+            if (_hasExtras)
+            {
+                PersistStripOrder();
+            }
+            else if (dragged is DockItemViewModel itemVm)
             {
                 _controller.MovePinned(itemVm.Model.Id, target);
             }
@@ -1436,6 +1610,90 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                 var newOrder = PinnedOrder.Move(_settings.DockItems.PinnedOrder, folderVm.Id, target);
                 DockFeature.SavePinnedOrder(newOrder, _settings.DockItems.Folders, _settings);
             }
+        }
+
+        _isAnimating = true;
+        AnimationNeeded?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Ek öğeli düzende sürükleme sonrası: şeritteki yeni sıradan düzen (Items) ve PinnedOrder türetilip tek yazmada kaydedilir.
+    /// Eşleşmeyen bir öğe çıkarsa (sürükleme sırasında şerit yenilendi) yazılmaz, şerit kayıttan yeniden kurulur.
+    /// </summary>
+    private void PersistStripOrder()
+    {
+        var layout = DockItemLayout.Merge(
+            DockItemRules.Resolve(_settings.DockItems.Items, _settings.DockItems.PinnedOrder ?? []), _effectiveOrder);
+
+        var visible = new List<int>();
+        foreach (var entry in Items)
+        {
+            if (entry is DockExtraViewModel extra)
+            {
+                if (extra.LayoutIndex < 0 || extra.LayoutIndex >= layout.Count || layout[extra.LayoutIndex].Kind != extra.Kind)
+                {
+                    UpdateItems();
+                    return;
+                }
+                visible.Add(extra.LayoutIndex);
+            }
+            else if (entry.IsPinned)
+            {
+                var token = entry is DockFolderViewModel ? entry.Id : PinnedOrder.IdOf(entry.Id);
+                var index = -1;
+                for (var i = 0; i < layout.Count; i++)
+                {
+                    if (string.Equals(DockItemLayout.TokenOf(layout[i]), token, StringComparison.OrdinalIgnoreCase))
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index < 0)
+                {
+                    UpdateItems();
+                    return;
+                }
+                visible.Add(index);
+            }
+        }
+
+        var next = DockItemLayout.Reorder(layout, visible);
+        var order = DockItemLayout.ToTokens(next);
+        DockFeature.SavePinnedOrder(order, null, _settings, DockItemLayout.ToStoredEntries(next));
+        _controller.SyncPinnedOrder(order);
+        UpdateItems();
+    }
+
+    /// <summary>
+    /// Klasör işlemlerinden sonra sırayı ve klasörleri kaydeder. Ek öğeli düzende Items da yeni sıraya uyarlanır
+    /// (ek öğeler yerinde kalır) ve üç kayıt tek yazmada değişir.
+    /// </summary>
+    private void SaveOrderAndFolders(List<string> order, List<DockFolder> folders)
+    {
+        var specs = DockItemRules.Resolve(_settings.DockItems.Items, _settings.DockItems.PinnedOrder ?? []);
+        IReadOnlyList<DockItemEntry>? items = null;
+        if (DockItemLayout.HasExtras(specs))
+        {
+            var layout = DockItemLayout.Merge(specs, _effectiveOrder);
+            var next = DockItemLayout.Rebase(layout, order, _settings.DockItems.Folders ?? [], folders);
+            items = DockItemLayout.ToStoredEntries(next);
+        }
+
+        DockFeature.SavePinnedOrder(order, folders, _settings, items);
+    }
+
+    /// <summary>
+    /// Sürükleme bir klasöre bırakılarak bitti (birleştirme): sürükleme durumu kapanır ve bütün öğelerin kayması sıfırlanır.
+    /// Birleştirme sırasında araya giren öğeler kaymış olabilir; sıfırlanmazsa sürüklenen uygulamanın eski yerinde boşluk kalır.
+    /// </summary>
+    public void FinishMerge()
+    {
+        _isReordering = false;
+        foreach (var item in Items)
+        {
+            item.SnapOffset(0);
+            item.SetTargetOffset(0);
         }
 
         _isAnimating = true;
@@ -1520,7 +1778,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     public void DissolveFolder(DockFolderViewModel folderVm)
     {
         var (order, folders) = DockFolders.Dissolve(_settings.DockItems.PinnedOrder, _settings.DockItems.Folders, folderVm.Folder.Id);
-        DockFeature.SavePinnedOrder(order, folders, _settings);
+        SaveOrderAndFolders(order, folders);
         UpdateItems();
     }
 
@@ -1541,7 +1799,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
 
         var (order, folders) = DockFolders.RemoveFromFolder(_settings.DockItems.PinnedOrder, _settings.DockItems.Folders, folderId, itemId, insertIndex);
-        DockFeature.SavePinnedOrder(order, folders, _settings);
+        SaveOrderAndFolders(order, folders);
         UpdateItems();
     }
 
@@ -1549,14 +1807,14 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     {
         var defaultName = DockFolders.NextDefaultName(_settings.DockItems.Folders, Resources.Strings.Get("DockFolder"));
         var (order, folders) = DockFolders.CreateFromDrop(_settings.DockItems.PinnedOrder, _settings.DockItems.Folders, draggedId, targetId, defaultName);
-        DockFeature.SavePinnedOrder(order, folders, _settings);
+        SaveOrderAndFolders(order, folders);
         UpdateItems();
     }
 
     public void AddAppToFolder(string draggedId, string folderId)
     {
         var (order, folders) = DockFolders.AddToFolder(_settings.DockItems.PinnedOrder, _settings.DockItems.Folders, draggedId, folderId);
-        DockFeature.SavePinnedOrder(order, folders, _settings);
+        SaveOrderAndFolders(order, folders);
         UpdateItems();
     }
 
@@ -1686,7 +1944,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
         var layout = DockItemLayout.Merge(specs, _effectiveOrder);
         _layout = layout;
-        SetBatteryPower(layout.Any(i => i.Kind == DockItemKind.Battery));
+        // Sistem alanı pili ve saati zaten çiziyorsa ek öğeleri ikinci kez çizilmez (kayıtlı düzenden silinmez).
+        var systemArea = SystemArea;
+        SetBatteryPower(layout.Any(i => i.Kind == DockItemKind.Battery && !DockSystemArea.HidesExtra(i.Kind, systemArea)));
 
         var pinned = new Dictionary<string, DockEntryViewModel>(StringComparer.OrdinalIgnoreCase);
         var running = new List<DockEntryViewModel>();
@@ -1711,6 +1971,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                     result.Add(entry);
                 continue;
             }
+
+            if (DockSystemArea.HidesExtra(spec.Kind, systemArea))
+                continue;
 
             // Pili olmayan makinede pil öğesi şeritte yer tutmaz (kayıtlı düzende kalır).
             if (spec.Kind == DockItemKind.Battery && !(_power is { } power && DockBatteryPolicy.IsShown(power.HasBattery)))
@@ -1917,15 +2180,13 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         if (_power is null || batteries.Count == 0 || _disposed || !IsVisible)
             return;
 
-        var percent = DockBatteryPolicy.Clamp(_power.RemainingPercent);
-        var charging = _power.IsCharging;
-        var format = charging ? Resources.Strings.Get("DockBatteryCharging") : Resources.Strings.BatteryLevel;
-        var tooltip = string.Format(System.Globalization.CultureInfo.CurrentCulture, format, percent);
+        var display = _power.Display();
+        var tooltip = BatteryText.Tooltip(display);
         foreach (var battery in batteries)
         {
-            battery.BatteryGlyph = TrayGlyphs.Battery(percent, charging);
-            battery.PercentText = DockBatteryPolicy.FormatPercent(percent);
-            battery.IsLowBattery = DockBatteryPolicy.IsLow(percent, charging);
+            battery.Battery = display;
+            battery.PercentText = display.PercentText;
+            battery.IsLowBattery = display.Tone != BatteryTone.Normal;
             battery.Title = tooltip;
         }
     }
@@ -1961,6 +2222,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         if (info is null || !info.IsPlaying)
         {
             HasNowPlaying = false;
+            OnPropertyChanged(nameof(ShowNowPlayingPill));
             NowPlayingTitle = Strings.NoMediaPlaying;
             NowPlayingArtist = "Koy";
             NowPlayingCover = null;
@@ -1969,6 +2231,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
 
         HasNowPlaying = true;
+        OnPropertyChanged(nameof(ShowNowPlayingPill));
         NowPlayingTitle = !string.IsNullOrWhiteSpace(info.Title) ? info.Title : Strings.Get("UnknownTrack");
         NowPlayingArtist = !string.IsNullOrWhiteSpace(info.Artist) ? info.Artist : Strings.Get("UnknownArtist");
 
@@ -2036,6 +2299,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _dodgeHoverTimer.Stop();
         _snapTimer?.Stop();
         SetBatteryPower(false);
+        if (Status is not null && Weather is not null)
+            Status.MinuteElapsed -= Weather.Request;
+        Weather?.Dispose();
+        Status?.Dispose();
         if (_clockTimer is not null)
         {
             _clockTimer.Stop();

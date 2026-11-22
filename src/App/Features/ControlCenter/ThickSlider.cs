@@ -22,8 +22,8 @@ public sealed class ThickSlider : FrameworkElement
         nameof(Value), typeof(double), typeof(ThickSlider),
         new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender));
 
-    public static readonly DependencyProperty IconProperty = DependencyProperty.Register(
-        nameof(Icon), typeof(Geometry), typeof(ThickSlider),
+    public static readonly DependencyProperty GlyphProperty = DependencyProperty.Register(
+        nameof(Glyph), typeof(string), typeof(ThickSlider),
         new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
 
     public static readonly DependencyProperty LabelProperty = DependencyProperty.Register(
@@ -41,7 +41,9 @@ public sealed class ThickSlider : FrameworkElement
     private static readonly Brush Track = Frozen(Color.FromArgb(0x17, 0xFF, 0xFF, 0xFF));
     private static readonly Brush Light = Frozen(Color.FromRgb(0xF4, 0xF4, 0xF5));
     private static readonly Brush LightMuted = Frozen(Color.FromArgb(0xB3, 0xF4, 0xF4, 0xF5));
-    private static readonly Brush Dark = Frozen(Color.FromRgb(0x0A, 0x0A, 0x0B));
+    // Açık dolgunun üstündeki yazı ve simge: saf siyah değil, koyu gri (sert görünmesin).
+    private static readonly Brush Dark = Frozen(Color.FromRgb(0x2B, 0x2B, 0x30));
+    private static readonly FontFamily GlyphFont = new("Segoe Fluent Icons, Segoe MDL2 Assets");
 
     private Point _pressAt;
     private bool _pressedOnIcon;
@@ -63,10 +65,11 @@ public sealed class ThickSlider : FrameworkElement
         set => SetValue(ValueProperty, value);
     }
 
-    public Geometry? Icon
+    /// <summary>Simge: Segoe Fluent Icons karakteri (ince çizgili sistem simgesi).</summary>
+    public string? Glyph
     {
-        get => (Geometry?)GetValue(IconProperty);
-        set => SetValue(IconProperty, value);
+        get => (string?)GetValue(GlyphProperty);
+        set => SetValue(GlyphProperty, value);
     }
 
     public string Label
@@ -134,27 +137,24 @@ public sealed class ThickSlider : FrameworkElement
     {
         var dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
         var family = (TryFindResource("KoyNotchFont") as FontFamily) ?? new FontFamily("Segoe UI");
-        var typeface = new Typeface(family, FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal);
+        // Orta kalınlık: büyük metinde SemiBold ağır duruyordu; Light de kullanılmaz (koyu zeminde silikleşir).
+        var typeface = new Typeface(family, FontStyles.Normal, FontWeights.Medium, FontStretches.Normal);
         var x = 16.0;
 
-        if (Icon is { } geometry)
+        if (!string.IsNullOrEmpty(Glyph))
         {
-            const double size = 17;
-            var b = geometry.Bounds;
-            var scale = b.Width > 0 && b.Height > 0 ? size / Math.Max(b.Width, b.Height) : 1;
-            dc.PushTransform(new TranslateTransform(x - b.X * scale, (h - size) / 2 - b.Y * scale));
-            dc.PushTransform(new ScaleTransform(scale, scale));
-            dc.DrawGeometry(null, new Pen(icon, 2 / scale) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round, LineJoin = PenLineJoin.Round }, geometry);
-            dc.Pop();
-            dc.Pop();
+            const double size = 18;
+            var glyph = new FormattedText(Glyph, System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
+                new Typeface(GlyphFont, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal), size, icon, dpi);
+            dc.DrawText(glyph, new Point(x, (h - glyph.Height) / 2));
             x += size + 10;
         }
 
-        var label = new FormattedText(Label ?? "", System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 13, text, dpi);
+        var label = new FormattedText(Label ?? "", System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 14, text, dpi);
         dc.DrawText(label, new Point(x, (h - label.Height) / 2));
 
         var percent = PercentTextConverter.Instance.Convert((int)Math.Round(Value), typeof(string), string.Empty, System.Globalization.CultureInfo.CurrentCulture) as string ?? "";
-        var value = new FormattedText(percent, System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 13, text, dpi);
+        var value = new FormattedText(percent, System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 14, text, dpi);
         dc.DrawText(value, new Point(w - 16 - value.Width, (h - value.Height) / 2));
     }
 

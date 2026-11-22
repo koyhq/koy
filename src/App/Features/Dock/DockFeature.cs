@@ -11,11 +11,14 @@ using Koy.Core.Shell;
 using Koy.Core.StartMenu;
 using Koy.Core.Tray;
 using Koy.Core.Visibility;
+using Koy.Core.Weather;
+using Koy.Platform.Audio;
 using Koy.Platform.Display;
 using Koy.Platform.JumpList;
 using Koy.Platform.Media;
 using Koy.Platform.Power;
 using Koy.Platform.Search;
+using Koy.Platform.Weather;
 using Koy.Platform.Shell;
 using Koy.Platform.StartMenu;
 
@@ -110,7 +113,13 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         // Yalnızca ReserveSpace (Yer ayır / tam genişlikte "Her zaman göster") modunda masaüstü çalışma alanından (AppBar) yer ayır
         if (EffectiveProximity == DockProximityMode.ReserveSpace)
         {
-            _appBarService = new AppBarService();   // sahiplik görev çubuğu gerçekten gizlenince (UpdateAppBarOwnership) verilir
+            // Görev çubuğu bu noktada hâlâ görünür ama hemen ardından gizlenecekse (ApplyTaskbarPolicy) alt kenar baştan Koy'un
+            // sayılır: ilk kayıt Gezgin'in çubuğunun üstüne yığılmaz. Gizleme başarısız olursa UpdateAppBarOwnership düşürür.
+            _appBarService = new AppBarService
+            {
+                OwnsBottomEdge = AppBarOwnership.OwnsBottomEdgeAtStart(
+                    settings.Dock.HideWindowsTaskbar, TaskbarService.IsExplorerTaskbarReady, _trayReleasedByUser)
+            };
         }
 
         // Medya servisi (Tam genişlik Now Playing hapı için); Notch ile paylaşılan tek örnek
@@ -171,7 +180,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     public static void SavePinnedOrder(
         IReadOnlyList<string> order,
         IReadOnlyList<DockFolder>? folders = null,
-        AppSettings? inMemorySettings = null)
+        AppSettings? inMemorySettings = null,
+        IReadOnlyList<DockItemEntry>? items = null)
     {
         var store = new SettingsStore(SettingsStore.DefaultPath);
         var current = store.Load();
@@ -182,9 +192,16 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             if (inMemorySettings is not null)
                 inMemorySettings.DockItems.Folders = [.. folders];
         }
+        // Ek öğeli düzende sıra iki kayıtta (PinnedOrder ve Items) durur; ikisi tek yazmada değişir, arada tutarsızlık kalmaz.
+        if (items is not null)
+            updated = updated with { DockItems = updated.DockItems with { Items = [.. items] } };
         store.Save(updated);
         if (inMemorySettings is not null)
+        {
             inMemorySettings.DockItems.PinnedOrder = [.. order];
+            if (items is not null)
+                inMemorySettings.DockItems.Items = [.. items];
+        }
     }
 
     /// <summary>
@@ -245,7 +262,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
                 continue;
 
             var dpiScale = DpiScaleFor(state.Monitor, settings.Dock.Edge);
-            _appBarService.Reregister(state.Hwnd, state.Window.ReservedHeight, dpiScale, settings.Dock.Edge);
+            _appBarService.Reregister(state.Hwnd, state.Window.ReservedHeight, dpiScale, settings.Dock.Edge, settings.Dock.EdgeOffsetDip);
         }
     }
 
@@ -272,27 +289,28 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             _lastAppBarReassert[state.Hwnd] = now;
         }
 
-        var height = state.Window.ActualThickness > 0 ? state.Window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
         var dpiScale = DpiScaleFor(state.Monitor, settings.Dock.Edge);
-        _appBarService.Reassert(state.Hwnd, height, dpiScale, onlyIfNeeded, settings.Dock.Edge);
+        _appBarService.Reassert(state.Hwnd, state.Window.ReservedHeight, dpiScale, onlyIfNeeded, settings.Dock.Edge, settings.Dock.EdgeOffsetDip);
     }
 
     /// <summary>
     /// AppBar alt kenarın sahibi mi: TEK yerden hesaplanır (Core: AppBarOwnership). Görev çubuğunun gizli durumu her
     /// değiştiğinde çağrılır; sahiplik değişirse bütün AppBar'lar hemen yeniden iddia edilir (eski alan geçersiz sayılır).
     /// </summary>
-    private void UpdateAppBarOwnership()
+    /// <returns>Sahiplik değişti (bütün AppBar'lar yeniden iddia edildi).</returns>
+    private bool UpdateAppBarOwnership()
     {
         if (_appBarService is null)
-            return;
+            return false;
 
         var owns = AppBarOwnership.OwnsBottomEdge(settings.Dock.HideWindowsTaskbar, _taskbarHidden, _trayReleasedByUser);
         if (_appBarService.OwnsBottomEdge == owns)
-            return;
+            return false;
 
         _appBarService.OwnsBottomEdge = owns;
         foreach (var state in _windowStates.Values)
             ReassertAppBar(state);
+        return true;
     }
 
     // Gezgin otomatik gizleme durumunu işleyince çalışma alanını birkaç yüz ms sonra yeniden hesaplar ve payı düşürebilir.
@@ -404,7 +422,14 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
             // Görev çubuğu artık gizli: alt kenar Koy'un (sahiplik değişirse hemen yeniden iddia); Gezgin durumu işleyince
             // çalışma alanını yeniden hesaplayabilir, bu yüzden bir kez daha gecikmeli (yalnız gerekirse).
-            UpdateAppBarOwnership();
+            // Sahiplik baştan alınmışsa (OwnsBottomEdgeAtStart) değişiklik olmaz ve iddia tazelenmezdi: çubuk gizlendi, alanı
+            // bir kez daha, zorla iste (aynı alan için önbellek yoksa gönderilir).
+            if (!UpdateAppBarOwnership() && _appBarService is not null)
+            {
+                foreach (var state in _windowStates.Values)
+                    ReassertAppBar(state);
+            }
+
             ScheduleAppBarSettle();
         }
         else if (_taskbarHidden)
@@ -542,8 +567,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             if (_appBarService is not null)
             {
                 var dpiScale = DpiScaleFor(state.Monitor, settings.Dock.Edge);
-                var height = window.ActualThickness > 0 ? window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
-                _appBarService.Register(hwnd, height, dpiScale, settings.Dock.Edge);
+                _appBarService.Register(hwnd, window.ReservedHeight, dpiScale, settings.Dock.Edge, settings.Dock.EdgeOffsetDip);
             }
 
             UpdateDockBounds(window, state.VisibilityController);
@@ -556,7 +580,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             if (_appBarService is not null && state.Hwnd != 0 && (e.NewSize.Height > 0 || e.NewSize.Width > 0))
             {
                 var dpiScale = DpiScaleFor(state.Monitor, settings.Dock.Edge);
-                _appBarService.UpdatePosition(state.Hwnd, window.ReservedHeight, dpiScale, settings.Dock.Edge);
+                _appBarService.UpdatePosition(state.Hwnd, window.ReservedHeight, dpiScale, settings.Dock.Edge, settings.Dock.EdgeOffsetDip);
             }
         };
 
@@ -570,7 +594,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         {
             UpdateDockBounds(window, state.VisibilityController);
             if (_appBarService is not null && state.Hwnd != 0 && (window.ActualHeight > 0 || window.ActualWidth > 0))
-                _appBarService.UpdatePosition(state.Hwnd, window.ReservedHeight, DpiScaleFor(state.Monitor, settings.Dock.Edge), settings.Dock.Edge);
+                _appBarService.UpdatePosition(state.Hwnd, window.ReservedHeight, DpiScaleFor(state.Monitor, settings.Dock.Edge), settings.Dock.Edge, settings.Dock.EdgeOffsetDip);
         };
 
         window.DisplayChangeHandler = () =>
@@ -589,14 +613,71 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
     private DockViewModel CreateViewModel(VisibilityController visibilityController, WindowRect monitorBounds)
     {
-        var viewModel = new DockViewModel(settings, _controller!, _shellActionService!, visibilityController, status: null,
+        var viewModel = new DockViewModel(settings, _controller!, _shellActionService!, visibilityController, status: CreateStatus(),
             mediaService: _mediaService, trayService: _trayService, recentFiles: _recentFiles, jumpLists: _jumpLists,
-            startMenu: _startMenu, acquirePower: services.AcquirePowerService, releasePower: services.ReleasePowerService)
+            startMenu: _startMenu, acquirePower: services.AcquirePowerService, releasePower: services.ReleasePowerService,
+            weather: CreateWeather())
         {
             ReduceMotion = _reduceMotion
         };
         viewModel.SetMonitorBounds(monitorBounds);
         return viewModel;
+    }
+
+    // Tam genişlik dock'un sistem alanı (Wi-Fi, ses, pil, saat, zil) için servisler: yalnız tam genişlik ve yatay kenarda alınır,
+    // son kullanan bırakınca bırakılır (AGENTS #5). Ağ ve güç paylaşımlı sayaçlı servislerdir; ses ve odak yardımı Dock'a özel.
+    private AudioService? _dockAudio;
+    private FocusAssistService? _dockFocus;
+    private int _statusUsers;
+
+    private DockStatusViewModel? CreateStatus()
+    {
+        if (settings.Dock.Style != DockStyleMode.FullWidth || settings.Dock.Edge is DockEdge.Left or DockEdge.Right || _shellActionService is null)
+            return null;
+
+        _statusUsers++;
+        _dockAudio ??= new AudioService();
+        _dockFocus ??= new FocusAssistService();
+        return new DockStatusViewModel(services.AcquireNetworkService(), _dockAudio, services.AcquirePowerService(),
+            _shellActionService, _dockFocus, ReleaseStatusServices, clockSeconds: settings.Dock.TaskbarClockSeconds);
+    }
+
+    // Pencere öğeleri (hava durumu): yalnız tam genişlik ve yatay kenarda, tek hava servisi tüm monitörlerce paylaşılır.
+    private WeatherService? _dockWeather;
+    private int _weatherUsers;
+
+    private DockWeatherViewModel? CreateWeather()
+    {
+        if (settings.Dock.Style != DockStyleMode.FullWidth || settings.Dock.Edge is DockEdge.Left or DockEdge.Right || _shellActionService is null)
+            return null;
+
+        _weatherUsers++;
+        _dockWeather ??= new WeatherService(cacheDuration: WeatherRefreshPolicy.CacheDuration(settings.Weather.RefreshInterval));
+        return new DockWeatherViewModel(_dockWeather, settings, _shellActionService, ReleaseWeather);
+    }
+
+    private void ReleaseWeather()
+    {
+        if (--_weatherUsers > 0)
+            return;
+
+        _weatherUsers = 0;
+        _dockWeather?.Dispose();
+        _dockWeather = null;
+    }
+
+    private void ReleaseStatusServices()
+    {
+        services.ReleaseNetworkService();
+        services.ReleasePowerService();
+        if (--_statusUsers > 0)
+            return;
+
+        _statusUsers = 0;
+        _dockAudio?.Dispose();
+        _dockAudio = null;
+        _dockFocus?.Dispose();
+        _dockFocus = null;
     }
 
     /// <summary>Pencere davranışı ayarlarını paylaşılan denetleyiciye uygular (sol tık eylemi, taşıma izleme).</summary>
@@ -702,7 +783,10 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     {
         if (EffectiveProximity == DockProximityMode.ReserveSpace)
         {
-            _appBarService ??= new AppBarService();
+            _appBarService ??= new AppBarService
+            {
+                OwnsBottomEdge = AppBarOwnership.OwnsBottomEdge(settings.Dock.HideWindowsTaskbar, _taskbarHidden, _trayReleasedByUser)
+            };
             UpdateAppBarOwnership();
             foreach (var state in _windowStates.Values)
             {
@@ -710,9 +794,9 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
                     continue;
 
                 var dpiScale = DpiScaleFor(state.Monitor, settings.Dock.Edge);
-                var height = state.Window.ActualThickness > 0 ? state.Window.ReservedHeight : DockPositionResolver.SnappedHeightDip;
-                _appBarService.Register(state.Hwnd, height, dpiScale, settings.Dock.Edge);   // kayıtlıysa dokunmaz
-                _appBarService.UpdatePosition(state.Hwnd, height, dpiScale, settings.Dock.Edge);
+                var height = state.Window.ReservedHeight;
+                _appBarService.Register(state.Hwnd, height, dpiScale, settings.Dock.Edge, settings.Dock.EdgeOffsetDip);   // kayıtlıysa dokunmaz
+                _appBarService.UpdatePosition(state.Hwnd, height, dpiScale, settings.Dock.Edge, settings.Dock.EdgeOffsetDip);
             }
         }
         else if (_appBarService is not null)

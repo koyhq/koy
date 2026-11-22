@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:res="clr-namespace:Koy.App.Resources"
              xmlns:local="clr-namespace:Koy.App.Features.Dock"
-             xmlns:folder="clr-namespace:Koy.App.Features.Dock.Folder">
+             xmlns:folder="clr-namespace:Koy.App.Features.Dock.Folder"
+             xmlns:status="clr-namespace:Koy.App.Features.Status">
 
     <!-- Uygulama ve klasör şeridi: kapsül ve tam genişlik dock aynı şablonları kullanır (çalışma göstergeleri, rozet, dikkat) -->
     <ItemsControl x:Name="DockItemsList"
@@ -349,7 +350,7 @@
                     <Border.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}"/>
-                            <TranslateTransform X="{Binding OffsetX}"/>
+                            <TranslateTransform X="{Binding TranslateX}" Y="{Binding TranslateY}"/>
                         </TransformGroup>
                     </Border.RenderTransform>
 
@@ -370,7 +371,7 @@
                                    VerticalAlignment="Center"
                                    Visibility="{Binding IsGlyphButton, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
 
-                        <!-- Pil: Fluent pil simgesi + yüzde. Düşük pilde uyarı rengi. -->
+                        <!-- Pil: Windows 11 tarzı pil simgesi (BatteryIcon) + yüzde. Düşük pilde yüzde uyarı renginde. -->
                         <StackPanel HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     Visibility="{Binding IsBattery, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
@@ -384,22 +385,12 @@
                                     </Style.Triggers>
                                 </Style>
                             </StackPanel.Style>
-                            <TextBlock Text="{Binding BatteryGlyph}"
-                                       FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
-                                       FontSize="18"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Center">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{DynamicResource KoyDockGlyph}"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsLowBattery}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource KoyDangerText}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
+                            <status:BatteryIcon Display="{Binding Battery}"
+                                                OutlineBrush="{DynamicResource KoyDockGlyph}"
+                                                OkBrush="{DynamicResource KoyNotchBatteryOk}"
+                                                CriticalBrush="{DynamicResource KoyNotchBatteryLow}"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center"/>
                             <TextBlock Text="{Binding PercentText}"
                                        FontSize="12"
                                        FontWeight="SemiBold"
@@ -529,6 +520,11 @@
                 </Grid>
             </DataTemplate>
         </ItemsControl.Resources>
+        <ItemsControl.ItemContainerStyle>
+            <Style TargetType="ContentPresenter">
+                <Setter Property="Panel.ZIndex" Value="{Binding DragZ}"/>
+            </Style>
+        </ItemsControl.ItemContainerStyle>
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
                 <StackPanel Orientation="{Binding DataContext.StripOrientation, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}"/>

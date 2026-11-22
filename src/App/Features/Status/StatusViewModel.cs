@@ -66,6 +66,10 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private string _batteryText = "";
 
+    /// <summary>Pil gösterim kararı (durum, simge işareti, renk, ipucu); çentik ve dock aynı kararı kullanır.</summary>
+    [ObservableProperty]
+    private BatteryDisplay _batteryDisplay = BatteryDisplay.None;
+
     /// <summary>Cihaz şu an pille (şarj olmadan) çalışıyor mu. Pil tasarrufu kararlarında kullanılır.</summary>
     public bool IsOnBattery { get; private set; }
 
@@ -292,23 +296,21 @@ public sealed partial class StatusViewModel : ObservableObject, IDisposable
 
     private void OnPowerChanged(object? sender, PowerChangedEventArgs e)
     {
-        _dispatcher.InvokeAsync(() =>
-        {
-            HasBattery = e.HasBattery;
-            BatteryPercent = e.RemainingPercent;
-            IsCharging = e.IsCharging;
-            SetBatteryStatus(e.Status);
-            BatteryText = IsCharging ? $"{SystemFormat.Percent(BatteryPercent, CultureInfo.CurrentCulture)} ({Strings.Charging})" : SystemFormat.Percent(BatteryPercent, CultureInfo.CurrentCulture);
-        });
+        _dispatcher.InvokeAsync(() => ApplyPower(e.Display(), e.Status));
     }
 
-    private void UpdatePowerState()
+    private void UpdatePowerState() => ApplyPower(_powerService.Display(), _powerService.Status);
+
+    private void ApplyPower(BatteryDisplay display, BatteryStatus status)
     {
-        HasBattery = _powerService.HasBattery;
-        BatteryPercent = _powerService.RemainingPercent;
-        IsCharging = _powerService.IsCharging;
-        SetBatteryStatus(_powerService.Status);
-        BatteryText = IsCharging ? $"{SystemFormat.Percent(BatteryPercent, CultureInfo.CurrentCulture)} ({Strings.Charging})" : SystemFormat.Percent(BatteryPercent, CultureInfo.CurrentCulture);
+        HasBattery = display.HasBattery;
+        BatteryPercent = display.Percent;
+        IsCharging = display.State == BatteryState.Charging;
+        BatteryDisplay = display;
+        // Prizde takılıyken pil boşalıyor görünse bile (şarj sınırı) pille çalışma sayılmaz.
+        SetBatteryStatus(display.IsPluggedIn && status == BatteryStatus.Discharging ? BatteryStatus.Idle : status);
+        var percent = SystemFormat.Percent(BatteryPercent, CultureInfo.CurrentCulture);
+        BatteryText = IsCharging ? $"{percent} ({Strings.Charging})" : percent;
     }
 
     private void SetBatteryStatus(BatteryStatus status)

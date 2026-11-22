@@ -6,6 +6,7 @@ using Koy.App.Features.Menu;
 using Koy.App.Features.Settings;
 using Koy.App.Features.Wizard;
 using Koy.App.Resources;
+using Koy.Core.Dock;
 using Koy.Core.Settings;
 
 namespace Koy.UiSnapshots;
@@ -37,6 +38,9 @@ public static class Program
     /// <summary>Görüntülerde kullanılan malzeme (Katı / Buzlu / Cam).</summary>
     internal static Koy.Core.Appearance.MaterialLevel Material { get; private set; } = Koy.Core.Appearance.MaterialLevel.Solid;
 
+    /// <summary>--settings ile verilen ayar dosyası (gerçek yükleme ve göç yolundan geçer; çentik sahneleri bunu kullanır). Dosya değiştirilmez: bir kopya verilmelidir.</summary>
+    internal static string? SettingsPath { get; private set; }
+
     /// <summary>--user-theme ile verilen stil dosyası; null ise kullanıcı stili uygulanmaz (temasız görünüm).</summary>
     internal static string? UserThemePath { get; private set; }
 
@@ -63,6 +67,8 @@ public static class Program
             System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
             System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
         }
+        if (Arg(args, "--settings") is { Length: > 0 } settingsPath)
+            SettingsPath = Path.GetFullPath(settingsPath);
         if (Arg(args, "--user-theme") is { Length: > 0 } userTheme)
         {
             UserThemePath = Path.GetFullPath(userTheme);
@@ -125,6 +131,22 @@ public static class Program
                 DockBarSnapshots.RenderSite(outDir, prefix, theme, RenderElement);
             else if (scene is "dockbar" or "dockbars")
                 DockBarSnapshots.Render(outDir, prefix, theme, RenderElement);
+            else if (scene is "pil" or "battery")
+                RenderBattery(outDir, prefix, theme);
+            else if (scene is "dock-surukle" or "dockdrag")
+                DockBarSnapshots.RenderDrag(outDir, prefix, theme, RenderElement);
+            else if (scene is "kontrol" or "control")
+                RenderControl(outDir, prefix, theme);
+            else if (scene is "ana" or "home")
+                RenderHome(outDir, prefix, theme);
+            else if (scene is "ayar" or "settings")
+                RenderSettingsPages(outDir, prefix, theme);
+            else if (scene is "klasor-tam" or "folder-fullwidth")
+                DockBarSnapshots.RenderFolderFullWidth(outDir, prefix, theme, RenderElement);
+            else if (scene is "taskbar" or "gorevcubugu")
+                DockBarSnapshots.RenderTaskbar(outDir, prefix, theme, RenderElement);
+            else if (scene is "dock-sistem" or "docksystem")
+                DockBarSnapshots.RenderSystemArea(outDir, prefix, theme, RenderElement);
             else if (scene is "dockmat" or "dockmaterial")
                 DockBarSnapshots.RenderMaterials(outDir, prefix, theme, RenderElement);
             else if (scene is "dock" or "folder" or "folders")
@@ -362,10 +384,11 @@ public static class Program
         Koy.Core.Timers.FocusTimers Timers);
 
     private static NotchSet MakeNotch(bool music, IReadOnlyList<Koy.Core.Shelf.ShelfItem>? shelf = null, List<string>? tileOrder = null,
-        bool locationBlocked = false, bool audioConnected = true, Func<Koy.Core.SystemStats.ISystemStatsService>? statsFactory = null,
+        bool locationBlocked = false, bool audioConnected = true, bool bluetoothNoneConnected = false, Func<Koy.Core.SystemStats.ISystemStatsService>? statsFactory = null,
         bool brightnessSupported = true, bool wideCover = false, Koy.Core.Notch.NotchStyleMode notchStyle = Koy.Core.Notch.NotchStyleMode.Pinned,
         Koy.Core.Notch.IdleDisplayMode idleMode = Koy.Core.Notch.IdleDisplayMode.ClockAndBattery, FakePower? power = null, string? language = null,
-        bool clockShowDate = false, string? liveBackground = null, bool liveClock = false, FakeMedia? media = null)
+        bool clockShowDate = false, string? liveBackground = null, bool liveClock = false, FakeMedia? media = null,
+        Koy.Core.Notch.HomeCard[]? homeCards = null)
     {
         var settings = new AppSettings
         {
@@ -380,7 +403,8 @@ public static class Program
                 ClockShowDate = clockShowDate,
                 ControlCenterLayout = tileOrder is null ? new AppSettings().Notch.ControlCenterLayout : new Koy.Core.Settings.ValueList<string>(tileOrder),
                 LiveBackgroundTarget = liveBackground is null ? Koy.Core.Notch.LiveBackgroundTarget.None : Koy.Core.Notch.LiveBackgroundTarget.Notch,
-                LiveBackgroundPreset = liveBackground ?? Koy.Core.Notch.LiveBackgroundPresets.DefaultId
+                LiveBackgroundPreset = liveBackground ?? Koy.Core.Notch.LiveBackgroundPresets.DefaultId,
+                HomeCards = homeCards is null ? new AppSettings().Notch.HomeCards : new Koy.Core.Settings.ValueList<Koy.Core.Notch.HomeCard>(homeCards)
             },
             Appearance = new AppearanceSettings
             {
@@ -394,6 +418,9 @@ public static class Program
                 Longitude = 28.97
             }
         };
+        // --settings: ayarlar gerçek SettingsStore yükleme ve göç yolundan gelir (kullanıcının dosyasının kopyası).
+        if (SettingsPath is not null)
+            settings = new SettingsStore(SettingsPath).Load();
         if ((language ?? Language) is { } lang)
             settings.General.Language = lang;
 
@@ -410,7 +437,7 @@ public static class Program
             new Koy.App.Features.ControlCenter.ControlCenterViewModel(
                 () => new FakeAudio(), () => new FakeRadio(), null, () => new FakeBrightness(brightnessSupported), new FakeFocusAssist(), settings,
                 wifiFactory: () => new FakeWifi(locationBlocked),
-                bluetoothDevices: new Koy.App.Features.ControlCenter.BluetoothDevicesViewModel(() => new FakeBluetooth(audioConnected), null)),
+                bluetoothDevices: new Koy.App.Features.ControlCenter.BluetoothDevicesViewModel(() => new FakeBluetooth(audioConnected, !bluetoothNoneConnected), null)),
             new Koy.App.Features.Status.StatusViewModel(power ?? new FakePower(), new FakeWeather(), settings),
             new Koy.App.Features.Focus.FocusViewModel(timers, settings, tasks: MakeTasks()),
             new Koy.App.Features.Shelf.ShelfViewModel(new FakeShelf(shelf ?? [])),
@@ -746,6 +773,141 @@ public static class Program
         set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
         ShotNotch(set, name("ana-pil-sarj"), expanded: true);
         set.Vm.Dispose();
+    }
+
+    /// <summary>
+    /// Ayar sayfalarının tam boy görüntüleri: Dock (kapsül ve tam genişlik, üç alt sekme) ve Çentik (üç alt sekme). Ayarlar geçici dosyada;
+    /// sayfa kaydırması kapalı, pencere içeriğe göre uzar. Dosya adı: ayar-{sayfa}-{durum}-{alt sekme}. <c>--scene ayar</c>.
+    /// </summary>
+    private static void RenderSettingsPages(string outDir, string prefix, string theme)
+    {
+        foreach (var (label, style) in new[] { ("kapsul", DockStyleMode.FloatingCapsule), ("tam", DockStyleMode.FullWidth) })
+        {
+            var temp = Path.Combine(Path.GetTempPath(), "koy-uisnap-ayar-" + Guid.NewGuid().ToString("N") + ".json");
+            var store = new SettingsStore(temp);
+            store.Save(new AppSettings
+            {
+                General = new GeneralSettings { FirstRunCompleted = true },
+                Appearance = new AppearanceSettings { Material = Material },
+                Dock = new DockSettings { Style = style }
+            });
+            try
+            {
+                var vm = new KoyWindowViewModel(store);
+                var win = new KoyWindow(vm);
+                if (win.FindName("ContentScrollViewer") is System.Windows.Controls.ScrollViewer sv)
+                    sv.VerticalScrollBarVisibility = System.Windows.Controls.ScrollBarVisibility.Disabled;
+                ((FrameworkElement)win.Content).Measure(new Size(880, double.PositiveInfinity));
+
+                for (var sub = 0; sub < 3; sub++)
+                {
+                    vm.SelectPage(2);
+                    vm.DockSubTabIndex = sub;
+                    RenderElement((FrameworkElement)win.Content, 880, 1500, Path.Combine(outDir, $"{prefix}-{theme}-ayar-dock-{label}-{sub}.png"));
+                }
+
+                if (style == DockStyleMode.FloatingCapsule)
+                {
+                    for (var sub = 0; sub < 3; sub++)
+                    {
+                        vm.SelectPage(1);
+                        vm.NotchSubTabIndex = sub;
+                        RenderElement((FrameworkElement)win.Content, 880, 1500, Path.Combine(outDir, $"{prefix}-{theme}-ayar-centik-{sub}.png"));
+                    }
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch (IOException) { }
+            }
+        }
+    }
+
+    /// <summary>Pil durumları: simge levhası, dock ve çentik (klasik boşta, halka, açık Ana sayfa). <c>--scene pil</c>.</summary>
+    private static void RenderBattery(string outDir, string prefix, string theme)
+    {
+        BatterySnapshots.RenderSheet(outDir, prefix, theme, RenderElement);
+        DockBarSnapshots.RenderBattery(outDir, prefix, theme, RenderElement);
+
+        string Name(string n) => Path.Combine(outDir, $"{prefix}-{theme}-{n}.png");
+        var ring = Koy.Core.Notch.IdleDisplayMode.RingClockDay;
+        foreach (var (state, power) in BatterySnapshots.States)
+        {
+            var set = MakeNotch(music: false, power: power);
+            ShotNotch(set, Name("centikpil-" + state), expanded: false);
+            set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+            ShotNotch(set, Name("centikpil-ana-" + state), expanded: true);
+            set.Vm.Dispose();
+
+            set = MakeNotch(music: false, idleMode: ring, power: power);
+            ShotNotch(set, Name("centikpil-halka-" + state), expanded: false);
+            set.Vm.Dispose();
+        }
+    }
+
+    /// <summary>Kontrol sayfası: normal, Bluetooth kapalı (bayat bağlı cihaz yok), bağlı cihaz yok. <c>--scene kontrol</c>.</summary>
+    private static void RenderControl(string outDir, string prefix, string theme)
+    {
+        string Name(string n) => Path.Combine(outDir, $"{prefix}-{theme}-{n}.png");
+        var set = MakeNotch(music: false);
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.ControlCenter);
+        Flush();
+        ShotNotch(set, Name("kontrol"), expanded: true);
+        set.Vm.Dispose();
+
+        // Bluetooth kapalı ama Windows eşleşmiş cihazı hâlâ "bağlı" bildiriyor (gerçek hata): kart boş olmalı.
+        FakeRadio.BluetoothOff = true;
+        try
+        {
+            set = MakeNotch(music: false);
+            set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.ControlCenter);
+            Flush();
+            ShotNotch(set, Name("kontrol-bt-kapali"), expanded: true);
+            set.Vm.Dispose();
+        }
+        finally
+        {
+            FakeRadio.BluetoothOff = false;
+        }
+
+        // Radyo açık ama hiçbir cihaz bağlı değil.
+        set = MakeNotch(music: false, audioConnected: false, bluetoothNoneConnected: true);
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.ControlCenter);
+        Flush();
+        ShotNotch(set, Name("kontrol-bagli-yok"), expanded: true);
+        set.Vm.Dispose();
+    }
+
+    /// <summary>
+    /// Açık çentiğin Ana sayfası (müzik yok): bütün kartlar açık ve hiç kart açık değil (boş durum: kart eklemeye yönlendirme).
+    /// <c>--settings</c> verilirse kullanıcının ayarıyla (kopya) ek bir kare: <c>ana-ayar</c>. <c>--scene ana</c>.
+    /// </summary>
+    private static void RenderHome(string outDir, string prefix, string theme)
+    {
+        var set = MakeNotch(music: false);
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+        ShotNotch(set, Path.Combine(outDir, $"{prefix}-{theme}-ana.png"), expanded: true);
+        set.Vm.Dispose();
+
+        set = MakeNotch(music: false, homeCards: []);
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+        ShotNotch(set, Path.Combine(outDir, $"{prefix}-{theme}-ana-bos.png"), expanded: true);
+        set.Vm.Dispose();
+
+        // Bazı kartlar kapalı: yalnız Hava ve Hızlı başlat (sıra ayardaki sıradır).
+        set = MakeNotch(music: false, homeCards: [Koy.Core.Notch.HomeCard.QuickLaunch, Koy.Core.Notch.HomeCard.Weather]);
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+        ShotNotch(set, Path.Combine(outDir, $"{prefix}-{theme}-ana-iki-kart.png"), expanded: true);
+        set.Vm.Dispose();
+
+        if (SettingsPath is not null)
+        {
+            set = MakeNotch(music: false);
+            Console.WriteLine("  --settings kartlar: " + (set.Vm.Home.Cards.Count == 0 ? "(boş)" : string.Join(", ", set.Vm.Home.Cards)));
+            set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+            ShotNotch(set, Path.Combine(outDir, $"{prefix}-{theme}-ana-ayar.png"), expanded: true);
+            set.Vm.Dispose();
+        }
     }
 
     private static void RenderNotchScenes(Func<string, string> name)

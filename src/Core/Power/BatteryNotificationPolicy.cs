@@ -122,5 +122,5 @@ public sealed class BatteryNotificationPolicy
     public BatteryAlertResult ProcessChange(PowerChangedEventArgs current) => Update(current);
 
     private static bool IsPlugged(PowerChangedEventArgs current) =>
-        current.IsCharging || current.Status is BatteryStatus.Charging or BatteryStatus.Idle;
+        current.IsCharging || current.IsAcConnected || current.Status is BatteryStatus.Charging or BatteryStatus.Idle;
 }

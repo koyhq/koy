@@ -6,6 +6,7 @@ using Koy.Core.Shell;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Threading;
+using Windows.Win32.UI.Shell;
 using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Koy.Platform.Shell;
@@ -14,6 +15,14 @@ namespace Koy.Platform.Shell;
 // gözcü durdurulur ve yedek silinir. Bu dosya Koy.Watchdog projesine bağlanmaz (orada kısmi yöntemler boştur).
 public static partial class TaskbarService
 {
+    static partial void SendAppBarMessageOverride(uint message, ref APPBARDATA data, ref nuint result, ref bool handled)
+    {
+        var copy = data;
+        result = TrayHostService.WithExplorerTrayFirst(() => PInvoke.SHAppBarMessage(message, ref copy));
+        data = copy;
+        handled = true;
+    }
+
     static partial void OnHidden()
     {
         WatchdogLauncher.EnsureRunning();

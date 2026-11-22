@@ -51,6 +51,16 @@
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [NotchStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding [NotchStyleDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <StackPanel Margin="0,0,14,0">
+                            <local:SettingsPreview Kind="NotchPinned" Stroke="{DynamicResource KoyTextMuted}" Accent="{DynamicResource KoyAccent}"/>
+                            <TextBlock Text="{Binding [NotchStylePinned], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,14,0">
+                            <local:SettingsPreview Kind="NotchFloating" Stroke="{DynamicResource KoyTextMuted}" Accent="{DynamicResource KoyAccent}"/>
+                            <TextBlock Text="{Binding [NotchStyleFloating], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
                 <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
@@ -134,9 +144,9 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [HideInFullscreenTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [NotchHideInFullscreenTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [HideInFullscreenTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding NotchHideInFullscreen}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [NotchHideInFullscreenTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding NotchHideInFullscreen}" HorizontalAlignment="Right" VerticalAlignment="Center"
                           Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
@@ -265,8 +275,8 @@
             </Grid>
         </Border>
 
-        <!-- İNCE AYAR (gecikmeler ve bildirim ayrıntısı) -->
-        <TextBlock Text="{Binding [NotchFineTuneHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+        <!-- AÇILIŞ VE KAPANIŞ (gecikmeler ve bildirim ayrıntısı) -->
+        <TextBlock Text="{Binding [NotchOpenCloseHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 
         <Border Style="{StaticResource SettingRowStyle}" MinHeight="44">
             <Grid>

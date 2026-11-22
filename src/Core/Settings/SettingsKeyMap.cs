@@ -40,7 +40,10 @@ public static class SettingsKeyMap
             "DockStartIcon=StartIcon", "DockStartIconPath=StartIconPath", "DockShowFolders=ShowFolders",
             "DockShowRecents=ShowRecents", "DockShowTray=ShowTray", "DockSmallTray=SmallTray", "DockShowBadges=ShowBadges",
             "DockThumbnailPreview=ThumbnailPreview", "DockThumbnailDelayMs=ThumbnailDelayMs", "DockDodgeDelayMs=DodgeDelayMs",
-            "DockIconSize=IconSize", "DockIndicatorStyle=IndicatorStyle", "MiddleClickAction");
+            "DockIconSize=IconSize", "DockIndicatorStyle=IndicatorStyle", "MiddleClickAction",
+            "DockTaskbarSearch=TaskbarSearch", "DockTaskbarShowTaskView=TaskbarShowTaskView", "DockTaskbarShowWidgets=TaskbarShowWidgets",
+            "DockTaskbarShowFlashing=TaskbarShowFlashing", "DockTaskbarClockSeconds=TaskbarClockSeconds",
+            "DockTaskbarShowDesktopCorner=TaskbarShowDesktopCorner");
         Add("DockItems", "DockPinnedOrder=PinnedOrder", "DockFolders=Folders");
         Add("Notch", "NotchEnabled=Enabled", "NotchVisibility=Visibility", "NotchStyle=Style", "NotchOpenBehavior=OpenBehavior",
             "IdleDisplayMode=IdleDisplay", "WheelAction", "NotchHideInFullscreen=HideInFullscreen", "NotchEdgeLine=EdgeLine", "NotchEdgeLineColor=EdgeLineColor", "NotchEdgeLineThickness=EdgeLineThickness",

@@ -331,8 +331,8 @@
             </Grid>
         </Border>
 
-        <!-- İNCE AYAR: sekme çubuğu biçimi, sekme sırası ve ana sayfa kartları -->
-        <TextBlock Text="{Binding [NotchFineTuneHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+        <!-- SEKME ÇUBUĞU: biçim, sıra; ardından ana sayfa kartları -->
+        <TextBlock Text="{Binding [NotchTabBarHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 
         <Border Style="{StaticResource SettingRowStyle}" MinHeight="44">
             <Grid>
@@ -358,6 +358,7 @@
         </Border>
 
         <TextBlock Text="{Binding [NotchTabOrderTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+        <TextBlock Text="{Binding [NotchTabOrderDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,0,0,8" />
         <ItemsControl ItemsSource="{Binding NotchTabOrder}" Focusable="False">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
@@ -382,6 +383,7 @@
         </ItemsControl>
 
         <TextBlock Text="{Binding [HomeCardSectionTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+        <TextBlock Text="{Binding [HomeCardSectionDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,0,0,8" />
         <ItemsControl ItemsSource="{Binding HomeCardOrder}" Focusable="False">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>

@@ -8,8 +8,64 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:KoyWindowViewModel}">
 
+    <UserControl.Resources>
+        <!-- Seçenek kartı: yan yana tüm seçenekler görünür; seçili olan vurgu çerçevesi alır. İçerik: küçük vektör önizleme, ad, açıklama. -->
+        <Style x:Key="DockOptionCardStyle" TargetType="RadioButton">
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="card" CornerRadius="10" BorderThickness="1" Padding="12,10"
+                                BorderBrush="{DynamicResource KoyBorderControl}" Background="{DynamicResource KoyBgRow}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="card" Property="Background" Value="{DynamicResource KoyBgHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="card" Property="BorderBrush" Value="{DynamicResource KoyAccent}"/>
+                                <Setter TargetName="card" Property="Background" Value="{DynamicResource KoyAccentSubtle}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
     <StackPanel>
-        <!-- Ekran kenarı: Alt, Üst, Sol, Sağ -->
+        <TextBlock Text="{Binding [DockStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+        <RadioButton Style="{StaticResource DockOptionCardStyle}" GroupName="DockStyle"
+                     IsChecked="{Binding DockStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=FloatingCapsule}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <local:SettingsPreview Kind="DockCapsule" Stroke="{DynamicResource KoyTextMuted}" Accent="{DynamicResource KoyAccent}" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding [StyleCapsule], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DockStyleCapsuleDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+            </Grid>
+        </RadioButton>
+        <RadioButton Style="{StaticResource DockOptionCardStyle}" GroupName="DockStyle"
+                     IsChecked="{Binding DockStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=FullWidth}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <local:SettingsPreview Kind="DockFullWidth" Stroke="{DynamicResource KoyTextMuted}" Accent="{DynamicResource KoyAccent}" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding [StyleFullWidth], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DockStyleFullDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+            </Grid>
+        </RadioButton>
+        <TextBlock Text="{Binding [DockPositionHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -38,213 +94,280 @@
             </Grid>
         </Border>
 
-        <Border Style="{StaticResource SettingRowStyle}">
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=LengthPercent}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [DockLengthTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Slider Width="140" Minimum="10" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True"
+                                Value="{Binding DockLengthPercent}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding DockLengthPercent, StringFormat='{}{0}%'}"
+                                   Foreground="{DynamicResource KoyTextSecondary}"
+                                   FontSize="{DynamicResource KoyFontCaption}"
+                                   Width="44" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+        </StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=EdgeOffsetDip}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [DockEdgeOffsetTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Slider Width="140" Minimum="0" Maximum="96" TickFrequency="2" IsSnapToTickEnabled="True"
+                                Value="{Binding DockEdgeOffsetDip}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding DockEdgeOffsetDip, StringFormat='{}{0:0} px'}"
+                                   Foreground="{DynamicResource KoyTextSecondary}"
+                                   FontSize="{DynamicResource KoyFontCaption}"
+                                   Width="44" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+        </StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=InnerPaddingDip}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [DockInnerPaddingTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Slider Width="140" Minimum="0" Maximum="24" TickFrequency="2" IsSnapToTickEnabled="True"
+                                Value="{Binding DockInnerPaddingDip}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding DockInnerPaddingDip, StringFormat='{}{0:0} px'}"
+                                   Foreground="{DynamicResource KoyTextSecondary}"
+                                   FontSize="{DynamicResource KoyFontCaption}"
+                                   Width="44" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+        </StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=IconAlignment}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [DockTaskbarAlignmentTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    </StackPanel>
+                    <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Content="{Binding [DockIconAlignLeft], Source={x:Static res:Loc.Instance}}" GroupName="DockIconAlignment"
+                                         IsChecked="{Binding DockIconAlignment, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Left}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [DockIconAlignCenter], Source={x:Static res:Loc.Instance}}" GroupName="DockIconAlignment"
+                                         IsChecked="{Binding DockIconAlignment, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Center}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+        </StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=@FullWidth}">
+            <TextBlock Text="{Binding [DockTaskbarItemsHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+            <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [DockStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DockTaskbarSearchTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
                 <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                     <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="{Binding [StyleCapsule], Source={x:Static res:Loc.Instance}}" GroupName="DockStyle"
-                                     IsChecked="{Binding DockStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=FloatingCapsule}"
+                        <RadioButton Content="{Binding [DockSearchHide], Source={x:Static res:Loc.Instance}}" GroupName="DockTaskbarSearch"
+                                     IsChecked="{Binding DockTaskbarSearch, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Hidden}"
                                      Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [StyleFullWidth], Source={x:Static res:Loc.Instance}}" GroupName="DockStyle"
-                                     IsChecked="{Binding DockStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=FullWidth}"
+                        <RadioButton Content="{Binding [DockSearchIcon], Source={x:Static res:Loc.Instance}}" GroupName="DockTaskbarSearch"
+                                     IsChecked="{Binding DockTaskbarSearch, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=IconOnly}"
                                      Style="{StaticResource SegRadioStyle}" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
-
-        <!-- Dock uzunluğu: %10..%100 -->
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [DockLengthTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Slider Width="140" Minimum="10" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True"
-                            Value="{Binding DockLengthPercent}" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding DockLengthPercent, StringFormat='{}{0}%'}"
-                               Foreground="{DynamicResource KoyTextSecondary}"
-                               FontSize="{DynamicResource KoyFontCaption}"
-                               Width="44" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <!-- Kenardan uzaklık: 0..96 px -->
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [DockEdgeOffsetTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Slider Width="140" Minimum="0" Maximum="96" TickFrequency="2" IsSnapToTickEnabled="True"
-                            Value="{Binding DockEdgeOffsetDip}" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding DockEdgeOffsetDip, StringFormat='{}{0:0} px'}"
-                               Foreground="{DynamicResource KoyTextSecondary}"
-                               FontSize="{DynamicResource KoyFontCaption}"
-                               Width="44" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <!-- İç dolgu: 0..24 px -->
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [DockInnerPaddingTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Slider Width="140" Minimum="0" Maximum="24" TickFrequency="2" IsSnapToTickEnabled="True"
-                            Value="{Binding DockInnerPaddingDip}" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding DockInnerPaddingDip, StringFormat='{}{0:0} px'}"
-                               Foreground="{DynamicResource KoyTextSecondary}"
-                               FontSize="{DynamicResource KoyFontCaption}"
-                               Width="44" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <!-- Yalnız tam genişlikte: kapsül içeriği kadar geniştir, hizalanacak boşluğu yoktur. -->
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Border.Visibility>
-                <Binding Path="DockStyle" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="FullWidth" />
-            </Border.Visibility>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [DockIconAlignmentTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="{Binding [DockIconAlignLeft], Source={x:Static res:Loc.Instance}}" GroupName="DockIconAlignment"
-                                     IsChecked="{Binding DockIconAlignment, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Left}"
+                        <RadioButton Content="{Binding [DockSearchIconLabel], Source={x:Static res:Loc.Instance}}" GroupName="DockTaskbarSearch"
+                                     IsChecked="{Binding DockTaskbarSearch, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=IconAndLabel}"
                                      Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [DockIconAlignCenter], Source={x:Static res:Loc.Instance}}" GroupName="DockIconAlignment"
-                                     IsChecked="{Binding DockIconAlignment, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Center}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [DockIconAlignRight], Source={x:Static res:Loc.Instance}}" GroupName="DockIconAlignment"
-                                     IsChecked="{Binding DockIconAlignment, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Right}"
+                        <RadioButton Content="{Binding [DockSearchBoxOpt], Source={x:Static res:Loc.Instance}}" GroupName="DockTaskbarSearch"
+                                     IsChecked="{Binding DockTaskbarSearch, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Box}"
                                      Style="{StaticResource SegRadioStyle}" />
                     </StackPanel>
                 </Border>
             </Grid>
         </Border>
-
-        <!-- PENCERE YAKLAŞINCA -->
-        <TextBlock Text="{Binding [DockProximityTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <StackPanel>
+            <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
-                <!-- Satır başlığı yok: hemen üstündeki bölüm başlığı aynı metin, beş segment de tam genişliği ister. -->
-                <!-- Tam genişlikte yalnız Windows görev çubuğunun iki hâli: hep göster (yer ayırır) ve otomatik gizle.
-                     Aşağı yapış ve Çekil kapsüle özgüdür (DockProximityMapping). -->
-                <Border Style="{StaticResource SegmentContainerStyle}" HorizontalAlignment="Left">
-                    <Border.Visibility>
-                        <Binding Path="DockStyle" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="FullWidth" />
-                    </Border.Visibility>
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="{Binding [ProxFullAlwaysShow], Source={x:Static res:Loc.Instance}}" GroupName="DockProximityFull"
-                                     IsChecked="{Binding DockProximity, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=ReserveSpace}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [ProxFullAutoHide], Source={x:Static res:Loc.Instance}}" GroupName="DockProximityFull"
-                                     IsChecked="{Binding DockProximity, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=AlwaysHidden}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                    </StackPanel>
-                </Border>
-                <Border Style="{StaticResource SegmentContainerStyle}" HorizontalAlignment="Left">
-                    <Border.Visibility>
-                        <Binding Path="DockStyle" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="FloatingCapsule" />
-                    </Border.Visibility>
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="{Binding [ProxReserve], Source={x:Static res:Loc.Instance}}" GroupName="DockProximity"
-                                     IsChecked="{Binding DockProximity, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=ReserveSpace}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [ProxDockDown], Source={x:Static res:Loc.Instance}}" GroupName="DockProximity"
-                                     IsChecked="{Binding DockProximity, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=DockDown}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [ProxDodge], Source={x:Static res:Loc.Instance}}" GroupName="DockProximity"
-                                     IsChecked="{Binding DockProximity, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Dodge}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [ProxAlwaysHidden], Source={x:Static res:Loc.Instance}}" GroupName="DockProximity"
-                                     IsChecked="{Binding DockProximity, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=AlwaysHidden}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [ProxAlwaysFloating], Source={x:Static res:Loc.Instance}}" GroupName="DockProximity"
-                                     IsChecked="{Binding DockProximity, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=AlwaysFloating}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                    </StackPanel>
-                </Border>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockTaskViewTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [DockTaskViewTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockTaskbarShowTaskView}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
-            <Grid>
-                <Grid.Visibility>
-                    <Binding Path="DockStyle" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="FullWidth" />
-                </Grid.Visibility>
-                <TextBlock Text="{Binding [ProxFullAlwaysShowDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,8,0,0">
-                    <TextBlock.Visibility>
-                        <Binding Path="DockProximity" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="ReserveSpace" />
-                    </TextBlock.Visibility>
-                </TextBlock>
-                <TextBlock Text="{Binding [ProxFullAutoHideDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,8,0,0">
-                    <TextBlock.Visibility>
-                        <Binding Path="DockProximity" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="AlwaysHidden" />
-                    </TextBlock.Visibility>
-                </TextBlock>
-            </Grid>
-            <Grid>
-                <Grid.Visibility>
-                    <Binding Path="DockStyle" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="FloatingCapsule" />
-                </Grid.Visibility>
-                <TextBlock Text="{Binding [ProxReserveDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,8,0,0">
-                    <TextBlock.Visibility>
-                        <Binding Path="DockProximity" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="ReserveSpace" />
-                    </TextBlock.Visibility>
-                </TextBlock>
-                <TextBlock Text="{Binding [ProxDockDownDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,8,0,0">
-                    <TextBlock.Visibility>
-                        <Binding Path="DockProximity" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="DockDown" />
-                    </TextBlock.Visibility>
-                </TextBlock>
-                <TextBlock Text="{Binding [ProxDodgeDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,8,0,0">
-                    <TextBlock.Visibility>
-                        <Binding Path="DockProximity" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="Dodge" />
-                    </TextBlock.Visibility>
-                </TextBlock>
-                <TextBlock Text="{Binding [ProxAlwaysHiddenDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,8,0,0">
-                    <TextBlock.Visibility>
-                        <Binding Path="DockProximity" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="AlwaysHidden" />
-                    </TextBlock.Visibility>
-                </TextBlock>
-                <TextBlock Text="{Binding [ProxAlwaysFloatingDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" Margin="0,8,0,0">
-                    <TextBlock.Visibility>
-                        <Binding Path="DockProximity" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="AlwaysFloating" />
-                    </TextBlock.Visibility>
-                </TextBlock>
-            </Grid>
-            </StackPanel>
         </Border>
-
+            <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockWidgetsTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [DockWidgetsTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockTaskbarShowWidgets}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+            <TextBlock Text="{Binding [DockTaskbarBehaviorsHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+            <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockTaskbarAutoHideTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ProxFullAutoHideDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [DockTaskbarAutoHideTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockTaskbarAutoHide}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+            <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockTaskbarFlashingTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [DockTaskbarFlashingTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockTaskbarShowFlashing}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+            <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockTaskbarSecondsTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [DockTaskbarSecondsTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockTaskbarClockSeconds}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+            <Border Style="{StaticResource SettingRowStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [DockTaskbarCornerTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [DockTaskbarCornerTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockTaskbarShowDesktopCorner}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+        </StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=Proximity}">
+            <TextBlock Text="{Binding [DockProximityTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+            <RadioButton Style="{StaticResource DockOptionCardStyle}" GroupName="DockProximity"
+                     IsChecked="{Binding DockProximity, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=ReserveSpace}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <local:SettingsPreview Kind="ProxReserve" Stroke="{DynamicResource KoyTextMuted}" Accent="{DynamicResource KoyAccent}" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding [ProxReserve], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ProxReserveDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+            </Grid>
+        </RadioButton>
+            <RadioButton Style="{StaticResource DockOptionCardStyle}" GroupName="DockProximity"
+                     IsChecked="{Binding DockProximity, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=DockDown}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <local:SettingsPreview Kind="ProxDockDown" Stroke="{DynamicResource KoyTextMuted}" Accent="{DynamicResource KoyAccent}" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding [ProxDockDown], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ProxDockDownDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+            </Grid>
+        </RadioButton>
+            <RadioButton Style="{StaticResource DockOptionCardStyle}" GroupName="DockProximity"
+                     IsChecked="{Binding DockProximity, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Dodge}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <local:SettingsPreview Kind="ProxDodge" Stroke="{DynamicResource KoyTextMuted}" Accent="{DynamicResource KoyAccent}" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding [ProxDodge], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ProxDodgeDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+            </Grid>
+        </RadioButton>
+            <RadioButton Style="{StaticResource DockOptionCardStyle}" GroupName="DockProximity"
+                     IsChecked="{Binding DockProximity, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=AlwaysHidden}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <local:SettingsPreview Kind="ProxAlwaysHidden" Stroke="{DynamicResource KoyTextMuted}" Accent="{DynamicResource KoyAccent}" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding [ProxAlwaysHidden], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ProxAlwaysHiddenDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+            </Grid>
+        </RadioButton>
+            <RadioButton Style="{StaticResource DockOptionCardStyle}" GroupName="DockProximity"
+                     IsChecked="{Binding DockProximity, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=AlwaysFloating}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <local:SettingsPreview Kind="ProxAlwaysFloating" Stroke="{DynamicResource KoyTextMuted}" Accent="{DynamicResource KoyAccent}" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding [ProxAlwaysFloating], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [ProxAlwaysFloatingDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+            </Grid>
+        </RadioButton>
+        </StackPanel>
+        <TextBlock Text="{Binding [DockFullscreenHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -252,126 +375,133 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [HideInFullscreenTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [DockHideInFullscreenTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                 </StackPanel>
-                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [HideInFullscreenTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockHideInFullscreen}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [DockHideInFullscreenTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockHideInFullscreen}" HorizontalAlignment="Right" VerticalAlignment="Center"
                           Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>
 
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [DockEdgeRevealTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [DockEdgeRevealDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                </StackPanel>
-                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [DockEdgeRevealTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockEdgeReveal}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                          Style="{StaticResource ToggleSwitchStyle}" />
-            </Grid>
-        </Border>
-
-        <!-- Otomatik gizleme: açılma tetikleyicisi. "Yalnız kısayol" bilerek sunulmaz (kısayol yolu henüz yok;
-             seçilince dock'a erişim kalmazdı). -->
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [RevealTriggerTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="{Binding [RevealEdgeTouch], Source={x:Static res:Loc.Instance}}" GroupName="RevealTrigger"
-                                     IsChecked="{Binding DockRevealTrigger, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=EdgeTouch}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [RevealEdgeHold], Source={x:Static res:Loc.Instance}}" GroupName="RevealTrigger"
-                                     IsChecked="{Binding DockRevealTrigger, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=EdgeHold}"
-                                     Style="{StaticResource SegRadioStyle}" />
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=EdgeReveal}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [DockEdgeRevealTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                        <TextBlock Text="{Binding [DockEdgeRevealDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
                     </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
+                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [DockEdgeRevealTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockEdgeReveal}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                              Style="{StaticResource ToggleSwitchStyle}" />
+                </Grid>
+            </Border>
 
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Border.Visibility>
-                <Binding Path="DockRevealTrigger" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="EdgeHold" />
-            </Border.Visibility>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [RevealDelayTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="{Binding [RevealDelayShort], Source={x:Static res:Loc.Instance}}" GroupName="RevealDelay"
-                                     IsChecked="{Binding DockRevealDelayMs, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=150}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [RevealDelayNormal], Source={x:Static res:Loc.Instance}}" GroupName="RevealDelay"
-                                     IsChecked="{Binding DockRevealDelayMs, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=300}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [RevealDelayLong], Source={x:Static res:Loc.Instance}}" GroupName="RevealDelay"
-                                     IsChecked="{Binding DockRevealDelayMs, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=600}"
-                                     Style="{StaticResource SegRadioStyle}" />
+        </StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=RevealTrigger}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [RevealTriggerTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
+                    <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Content="{Binding [RevealEdgeTouch], Source={x:Static res:Loc.Instance}}" GroupName="RevealTrigger"
+                                         IsChecked="{Binding DockRevealTrigger, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=EdgeTouch}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [RevealEdgeHold], Source={x:Static res:Loc.Instance}}" GroupName="RevealTrigger"
+                                         IsChecked="{Binding DockRevealTrigger, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=EdgeHold}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
 
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [HiddenEdgeLineTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [HiddenEdgeLineDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
-                </StackPanel>
-                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [HiddenEdgeLineTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockHiddenEdgeLine}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                          Style="{StaticResource ToggleSwitchStyle}" />
-            </Grid>
-        </Border>
+        </StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=RevealDelayMs}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Border.Visibility>
+                    <Binding Path="DockRevealTrigger" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="EdgeHold" />
+                </Border.Visibility>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [RevealDelayTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    </StackPanel>
+                    <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Content="{Binding [RevealDelayShort], Source={x:Static res:Loc.Instance}}" GroupName="RevealDelay"
+                                         IsChecked="{Binding DockRevealDelayMs, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=150}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [RevealDelayNormal], Source={x:Static res:Loc.Instance}}" GroupName="RevealDelay"
+                                         IsChecked="{Binding DockRevealDelayMs, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=300}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [RevealDelayLong], Source={x:Static res:Loc.Instance}}" GroupName="RevealDelay"
+                                         IsChecked="{Binding DockRevealDelayMs, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=600}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
 
-        <!-- PENCERE DAVRANIŞI -->
+        </StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=HiddenEdgeLine}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [HiddenEdgeLineTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                        <TextBlock Text="{Binding [HiddenEdgeLineDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                    </StackPanel>
+                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [HiddenEdgeLineTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockHiddenEdgeLine}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                              Style="{StaticResource ToggleSwitchStyle}" />
+                </Grid>
+            </Border>
+
+        </StackPanel>
         <TextBlock Text="{Binding [DockWindowBehaviorHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [DockLeftClickTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="{Binding [DockLeftClickMinimize], Source={x:Static res:Loc.Instance}}" GroupName="DockLeftClick"
-                                     IsChecked="{Binding DockLeftClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=MinimizeIfActive}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [DockLeftClickFront], Source={x:Static res:Loc.Instance}}" GroupName="DockLeftClick"
-                                     IsChecked="{Binding DockLeftClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=BringToFront}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [DockLeftClickCycle], Source={x:Static res:Loc.Instance}}" GroupName="DockLeftClick"
-                                     IsChecked="{Binding DockLeftClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=CycleWindows}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [DockLeftClickThumbnails], Source={x:Static res:Loc.Instance}}" GroupName="DockLeftClick"
-                                     IsChecked="{Binding DockLeftClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=ShowThumbnails}"
-                                     Style="{StaticResource SegRadioStyle}" />
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=LeftClickAction}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [DockLeftClickTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
+                    <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Content="{Binding [DockLeftClickMinimize], Source={x:Static res:Loc.Instance}}" GroupName="DockLeftClick"
+                                         IsChecked="{Binding DockLeftClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=MinimizeIfActive}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [DockLeftClickFront], Source={x:Static res:Loc.Instance}}" GroupName="DockLeftClick"
+                                         IsChecked="{Binding DockLeftClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=BringToFront}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [DockLeftClickCycle], Source={x:Static res:Loc.Instance}}" GroupName="DockLeftClick"
+                                         IsChecked="{Binding DockLeftClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=CycleWindows}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [DockLeftClickThumbnails], Source={x:Static res:Loc.Instance}}" GroupName="DockLeftClick"
+                                         IsChecked="{Binding DockLeftClickAction, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=ShowThumbnails}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
 
+        </StackPanel>
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -395,56 +525,58 @@
             </Grid>
         </Border>
 
-        <!-- Pencere Gruplama -->
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [DockGroupingModeTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="{Binding [DockGroupingModeNever], Source={x:Static res:Loc.Instance}}" GroupName="DockGroupingMode"
-                                     IsChecked="{Binding DockGroupingMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Never}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [DockGroupingModeAlways], Source={x:Static res:Loc.Instance}}" GroupName="DockGroupingMode"
-                                     IsChecked="{Binding DockGroupingMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Always}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [DockGroupingModeWhenSpaceRunsOut], Source={x:Static res:Loc.Instance}}" GroupName="DockGroupingMode"
-                                     IsChecked="{Binding DockGroupingMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=WhenSpaceRunsOut}"
-                                     Style="{StaticResource SegRadioStyle}" />
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=GroupingMode}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [DockGroupingModeTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
+                    <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Content="{Binding [DockGroupingModeNever], Source={x:Static res:Loc.Instance}}" GroupName="DockGroupingMode"
+                                         IsChecked="{Binding DockGroupingMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Never}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [DockGroupingModeAlways], Source={x:Static res:Loc.Instance}}" GroupName="DockGroupingMode"
+                                         IsChecked="{Binding DockGroupingMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Always}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [DockGroupingModeWhenSpaceRunsOut], Source={x:Static res:Loc.Instance}}" GroupName="DockGroupingMode"
+                                         IsChecked="{Binding DockGroupingMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=WhenSpaceRunsOut}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
 
-        <!-- Uygulama Etiketleri -->
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [DockLabelModeTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="{Binding [DockLabelModeNever], Source={x:Static res:Loc.Instance}}" GroupName="DockLabelMode"
-                                     IsChecked="{Binding DockLabelMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Never}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [DockLabelModeAlways], Source={x:Static res:Loc.Instance}}" GroupName="DockLabelMode"
-                                     IsChecked="{Binding DockLabelMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Always}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [DockLabelModeOnHover], Source={x:Static res:Loc.Instance}}" GroupName="DockLabelMode"
-                                     IsChecked="{Binding DockLabelMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=OnHover}"
-                                     Style="{StaticResource SegRadioStyle}" />
+        </StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=LabelMode}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [DockLabelModeTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
+                    <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Content="{Binding [DockLabelModeNever], Source={x:Static res:Loc.Instance}}" GroupName="DockLabelMode"
+                                         IsChecked="{Binding DockLabelMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Never}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [DockLabelModeAlways], Source={x:Static res:Loc.Instance}}" GroupName="DockLabelMode"
+                                         IsChecked="{Binding DockLabelMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Always}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [DockLabelModeOnHover], Source={x:Static res:Loc.Instance}}" GroupName="DockLabelMode"
+                                         IsChecked="{Binding DockLabelMode, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=OnHover}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </StackPanel>
     </StackPanel>
 </UserControl>

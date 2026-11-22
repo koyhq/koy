@@ -310,7 +310,7 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
             ViewModel = viewModel,
             VisibilityController = visibilityController,
             Controller = controller,
-            Line = settings.Notch.EdgeLine ? new NotchLineWindow(monitor, settings.Notch.EdgeLineColor, settings.Notch.EdgeLineThickness) : null
+            Line = settings.Notch.EdgeLine ? new NotchLineWindow(monitor, settings.Notch.EdgeLineColor, settings.Notch.EdgeLineThickness, NotchStyle.TopOffsetDip(settings.Notch.Style)) : null
         };
 
         stateRef = state;

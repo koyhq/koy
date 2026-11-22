@@ -83,7 +83,7 @@ public static partial class TaskbarService
                 cbSize = (uint)sizeof(APPBARDATA),
                 hWnd = primary
             };
-            var current = (int)PInvoke.SHAppBarMessage(ABM_GETSTATE, ref data);
+            var current = (int)SendAppBarMessage(ABM_GETSTATE, ref data);
             var prevState = TaskbarStatePolicy.ChoosePreviousState(read, current);
 
             // 1. Durum önce yazılır: SETSTATE'ten sonra ölürsek Restore'un neyi geri getireceği bellidir.
@@ -99,7 +99,7 @@ public static partial class TaskbarService
             if ((current & ABS_AUTOHIDE) == 0)
             {
                 data.lParam = new LPARAM((nint)ABS_AUTOHIDE);
-                PInvoke.SHAppBarMessage(ABM_SETSTATE, ref data);
+                SendAppBarMessage(ABM_SETSTATE, ref data);
             }
 
             // 4. Yalnız dock'lu monitörlerdeki çubuklar SW_HIDE; daha önce gizlediğimiz ama artık hedef olmayan geri gösterilir.
@@ -139,12 +139,12 @@ public static partial class TaskbarService
                 cbSize = (uint)sizeof(APPBARDATA),
                 hWnd = primary
             };
-            var current = (int)PInvoke.SHAppBarMessage(ABM_GETSTATE, ref data);
+            var current = (int)SendAppBarMessage(ABM_GETSTATE, ref data);
             var decision = TaskbarStatePolicy.DecideRestore(read, current, force);
             if (decision.SendState)
             {
                 data.lParam = new LPARAM((nint)decision.State);
-                PInvoke.SHAppBarMessage(ABM_SETSTATE, ref data);
+                SendAppBarMessage(ABM_SETSTATE, ref data);
             }
 
             Finish();
@@ -175,6 +175,16 @@ public static partial class TaskbarService
     }
 
     // Koy'da gözcüyü başlatır/RunOnce yazar ve durdurur/siler; gözcü projesinde gövde yoktur (derleyici çağrıyı siler).
+    private static unsafe nuint SendAppBarMessage(uint message, ref APPBARDATA data)
+    {
+        nuint result = 0;
+        var handled = false;
+        SendAppBarMessageOverride(message, ref data, ref result, ref handled);
+        return handled ? result : PInvoke.SHAppBarMessage(message, ref data);
+    }
+
+    static partial void SendAppBarMessageOverride(uint message, ref APPBARDATA data, ref nuint result, ref bool handled);
+
     static partial void OnHidden();
 
     static partial void OnRestoring();

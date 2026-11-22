@@ -1,0 +1,146 @@
+<UserControl x:Class="Koy.App.Features.Dock.DockSystemAreaControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="clr-namespace:Koy.App.Resources"
+             xmlns:local="clr-namespace:Koy.App.Features.Dock"
+             xmlns:tray="clr-namespace:Koy.App.Features.Dock.Tray"
+             xmlns:status="clr-namespace:Koy.App.Features.Status"
+             Focusable="False">
+
+    <!-- Tam genişlik dock'un sağ ucu (Windows 11 görev çubuğu sistem alanı). Soldan sağa: taşma oku, görünür tepsi simgeleri,
+         Wi-Fi + ses + pil grubu (tek hap), saat ve tarih, bildirim zili, masaüstünü göster şeridi. Hover hapları Koy'un cam karo
+         dilini kullanır (DockViewModel.TileHoverFill / TileBorderBrush); malzeme ve renkler dock token'larından gelir.
+         Veri DockStatusViewModel'den (olay tabanlı), tepsi simgeleri DockViewModel'den. -->
+    <UserControl.Resources>
+        <FontFamily x:Key="SystemIconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+
+        <!-- Hover hapı: Styles.xaml'deki ortak cam hap düğmesi. -->
+        <Style x:Key="SystemPillStyle" TargetType="Button" BasedOn="{StaticResource DockPillButtonStyle}"/>
+
+        <Style x:Key="SystemGlyphStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource SystemIconFont}"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="{DynamicResource KoyDockGlyph}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid VerticalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+            <!-- 1. Taşma oku: gizli tepsi simgeleri penceresi (mevcut Koy tepsi yapısı) -->
+            <tray:TrayButton IsSystemArea="True"/>
+
+            <!-- 2. Görünür tepsi simgeleri (uygulama başına ayar "Göster"): sol/sağ/çift tık uygulamaya iletilir -->
+            <ItemsControl ItemsSource="{Binding VisibleTrayIcons}" Focusable="False" VerticalAlignment="Center">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type tray:TrayIconViewModel}">
+                        <Border Width="30" Height="36" Margin="0" CornerRadius="6" Cursor="Hand"
+                                ToolTip="{Binding Tooltip}"
+                                AutomationProperties.Name="{Binding Tooltip}"
+                                MouseLeftButtonDown="OnTrayIconLeftDown"
+                                MouseLeftButtonUp="OnTrayIconLeftUp"
+                                MouseRightButtonUp="OnTrayIconRightUp">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{Binding DataContext.TileHoverFill, RelativeSource={RelativeSource AncestorType=local:DockSystemAreaControl}}"/>
+                                            <Setter Property="BorderBrush" Value="{Binding DataContext.TileBorderBrush, RelativeSource={RelativeSource AncestorType=local:DockSystemAreaControl}}"/>
+                                            <Setter Property="BorderThickness" Value="{Binding DataContext.TileBorderThickness, RelativeSource={RelativeSource AncestorType=local:DockSystemAreaControl}}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <!-- Uygulamalar simgeyi sistemin küçük simge boyutunda verir: büyütülmez, piksel ızgarasına oturur -->
+                            <Image Source="{Binding Icon}" Width="16" Height="16" Stretch="Uniform"
+                                   UseLayoutRounding="True" SnapsToDevicePixels="True"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- 3. Wi-Fi + ses + pil: tek hap, tıklayınca Windows Hızlı ayarlar; her simgenin kendi ipucu var -->
+            <Button x:Name="StatusGroup" Style="{StaticResource SystemPillStyle}" Padding="10,0"
+                    Command="{Binding Status.OpenQuickSettingsCommand}"
+                    AutomationProperties.Name="{Binding Status.NetworkTooltip}">
+                <StackPanel Orientation="Horizontal">
+                    <!-- Ağ: tam simge soluk, üstüne dolu çubuklar (kablosuzda), kablolu/bağlantı yok kendi glifi -->
+                    <Grid Margin="0,0,12,0" ToolTip="{Binding Status.NetworkTooltip}" Background="Transparent">
+                        <TextBlock Text="{Binding Status.NetworkGlyph}" Style="{StaticResource SystemGlyphStyle}"
+                                   Opacity="{Binding Status.NetworkBaseOpacity}"/>
+                        <TextBlock Text="{Binding Status.WiFiLevelGlyph}" Style="{StaticResource SystemGlyphStyle}"/>
+                    </Grid>
+                    <!-- Ses: tekerlek %2 adım -->
+                    <TextBlock x:Name="VolumeGlyph" Text="{Binding Status.VolumeGlyph}" Style="{StaticResource SystemGlyphStyle}"
+                               ToolTip="{Binding Status.VolumeTooltip}" Background="Transparent" MouseWheel="OnVolumeWheel"/>
+                    <!-- Pil: yalnız pilli makinede; simge ve "100%" -->
+                    <StackPanel Orientation="Horizontal" Margin="12,0,0,0" VerticalAlignment="Center" Background="Transparent"
+                                ToolTip="{Binding Status.BatteryTooltip}"
+                                Visibility="{Binding Status.HasBattery, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                        <status:BatteryIcon Display="{Binding Status.Battery}" Width="22" Height="12" VerticalAlignment="Center"
+                                            OutlineBrush="{DynamicResource KoyDockGlyph}"
+                                            OkBrush="{DynamicResource KoyNotchBatteryOk}"
+                                            CriticalBrush="{DynamicResource KoyNotchBatteryLow}"/>
+                        <TextBlock Text="{Binding Status.Battery.PercentText}" FontSize="12" Margin="5,0,0,0" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource KoyDockClockText}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Button>
+
+            <!-- 4. Saat ve tarih: iki satır, sağa yaslı; ipucu uzun tarih ve gün; Windows bildirim merkezi/takvim -->
+            <Button x:Name="ClockButton" Style="{StaticResource SystemPillStyle}" Padding="8,0"
+                    Command="{Binding Status.OpenNotificationCenterCommand}"
+                    ToolTip="{Binding Status.ClockTooltip}"
+                    AutomationProperties.Name="{Binding Status.ClockTooltip}">
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Status.TimeText}" FontSize="12" Foreground="{DynamicResource KoyDockClockText}" TextAlignment="Right" HorizontalAlignment="Right"/>
+                    <TextBlock Text="{Binding Status.DateText}" FontSize="12" Foreground="{DynamicResource KoyDockClockText}" TextAlignment="Right" HorizontalAlignment="Right"/>
+                </StackPanel>
+            </Button>
+
+            <!-- 5. Bildirim zili: rahatsız etmeyin açıkken üstü çizili; Win+N -->
+            <Button x:Name="BellButton" Style="{StaticResource SystemPillStyle}" Padding="8,0"
+                    Command="{Binding Status.OpenNotificationCenterCommand}"
+                    ToolTip="{Binding Status.BellTooltip}"
+                    AutomationProperties.Name="{Binding Status.BellTooltip}">
+                <TextBlock Text="{Binding Status.BellGlyph}" Style="{StaticResource SystemGlyphStyle}"/>
+            </Button>
+        </StackPanel>
+
+        <!-- 6. Masaüstünü göster: ince, tüm yükseklikte tıklanabilir şerit; solunda ince çizgi -->
+        <Border Grid.Column="1" x:Name="DesktopStrip" Width="{Binding DesktopStripWidth}" Margin="4,0,0,0" Cursor="Hand" Background="Transparent"
+                BorderBrush="{DynamicResource KoyDockSeparator}" BorderThickness="1,0,0,0"
+                Visibility="{Binding SystemArea.ShowDesktopStrip, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"
+                ToolTip="{Binding [DockShowDesktop], Source={x:Static res:Loc.Instance}}"
+                AutomationProperties.Name="{Binding [DockShowDesktop], Source={x:Static res:Loc.Instance}}"
+                MouseLeftButtonUp="OnDesktopStripClick">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{Binding DataContext.TileHoverFill, RelativeSource={RelativeSource AncestorType=local:DockSystemAreaControl}}"/>
+                        </Trigger>
+                        <Trigger Property="Tag" Value="hover">
+                            <Setter Property="Background" Value="{Binding DataContext.TileHoverFill, RelativeSource={RelativeSource AncestorType=local:DockSystemAreaControl}}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+        </Border>
+    </Grid>
+</UserControl>

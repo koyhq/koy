@@ -34,15 +34,15 @@
     </UserControl.Resources>
 
     <!-- Windows tarzı tam genişlik: kalınlık DockPositionResolver.FullWidthHeightDip (48), kenardan uzaklık ve uzunluk ayarına uyar,
-         yüzey malzeme ayarına uyar (Katı / Buzlu / Cam; DockViewModel.FullWidthSurface). -->
+         yüzey malzeme ayarına uyar (Katı / Buzlu / Cam; DockViewModel.FullWidthSurface). Kenarlık yüzeyin üstüne çizilir:
+         aksi halde BorderThickness altında yüzey boyanmadığından şeffaf pencerede üstte 1 px boşluk çizgisi görünürdü. -->
     <Border Background="{Binding FullWidthSurface}"
-            BorderBrush="{Binding FullWidthBorderBrush}"
-            BorderThickness="{Binding FullWidthBorderThickness}"
             Width="{Binding CapsuleWidth}"
             Height="{Binding CapsuleHeight}"
-            Padding="{Binding FullWidthPadding}"
-            SnapsToDevicePixels="True">
+            SnapsToDevicePixels="True"
+            UseLayoutRounding="True">
         <Grid>
+            <Grid Margin="{Binding FullWidthPadding}">
             <!-- 1. Yatay Düzen (Alt ve Üst Kenar) -->
             <Grid Grid.IsSharedSizeScope="True"
                   Visibility="{Binding IsVertical, Converter={x:Static local:DockConverters.InverseBoolToVisibilityConverter}}">
@@ -52,8 +52,13 @@
                     <ColumnDefinition Width="Auto" Style="{StaticResource DockSideColumnStyle}"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Sol Bölüm: Windows Başlat Düğmesi + Çalan Müzik Hapı -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <!-- Sol Bölüm (Windows düzeninde): pencere öğeleri, ortada hizada en solda (Windows 11 hava durumu) -->
+                <local:DockWeatherWidget Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,0,0,0"
+                                         Visibility="{Binding Taskbar.ShowWidgetsLeading, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
+
+                <!-- Sol Bölüm (eski düzen): Windows Başlat Düğmesi + Çalan Müzik Hapı -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center"
+                            Visibility="{Binding ShowLegacyLeftSection, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
                     <!-- Windows Başlat Düğmesi -->
                     <Button Style="{StaticResource DockFlatButtonStyle}"
                             Command="{Binding StartMenuCommand}"
@@ -75,7 +80,7 @@
                             Padding="6,4"
                             MouseLeftButtonUp="OnNowPlayingClick"
                             ToolTip="{Binding [DockNowPlayingTooltip], Source={x:Static res:Loc.Instance}}"
-                            Visibility="{Binding HasNowPlaying, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                            Visibility="{Binding ShowNowPlayingPill, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <!-- Albüm Kapağı -->
                             <Border Width="24"
@@ -106,15 +111,87 @@
                 </StackPanel>
 
                 <!-- Orta Bölüm: uygulamalar, kapsülle aynı şerit ve göstergeler -->
+                <!-- Windows düzeninde bu grup (Başlat, Ara, Görev görünümü, uygulamalar, sol hizada pencere öğeleri) birlikte hizalanır:
+                     Orta'da ekranın ortasında (yan sütunlar eşit), Sol'da sola yaslı. Eski düzende yalnız uygulama şeridi kalır. -->
                 <Grid Grid.Column="1" SizeChanged="OnCenterSizeChanged">
-                    <local:DockItemsStrip HorizontalAlignment="{Binding StripAlignment}" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="{Binding CenterGroupAlignment}" VerticalAlignment="Center">
+                        <!-- Başlat: Windows Başlat menüsü (Win tuşu), Windows 11 logosu; sağ tık Win+X menüsü. Koy menüsü sağ tık menüsünde. -->
+                        <Button Style="{StaticResource DockPillButtonStyle}" Width="40" Padding="0"
+                                Command="{Binding StartMenuCommand}"
+                                ToolTip="{x:Static res:Strings.StartMenu}"
+                                AutomationProperties.Name="{x:Static res:Strings.StartMenu}"
+                                MouseRightButtonUp="OnStartRightClick"
+                                Visibility="{Binding Taskbar.ShowStart, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                            <Image Source="{Binding StartIcon}" Width="20" Height="20" RenderOptions.BitmapScalingMode="HighQuality"/>
+                        </Button>
+
+                        <!-- Ara: Windows arama (Win+S). Windows 11 "Arama" ayarı: Arama kutusu (büyüteç ve "Ara"), Arama simgesi ve etiketi,
+                             Yalnız arama simgesi; Gizle'de hiçbiri görünmez. -->
+                        <Button Style="{StaticResource DockPillButtonStyle}" Width="128" Padding="4,0"
+                                Command="{Binding OpenSearchCommand}"
+                                ToolTip="{Binding [DockSearchBox], Source={x:Static res:Loc.Instance}}"
+                                AutomationProperties.Name="{Binding [DockSearchBox], Source={x:Static res:Loc.Instance}}"
+                                Visibility="{Binding Taskbar.ShowSearchBox, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                            <Border CornerRadius="16" Height="32" Width="116" Background="{DynamicResource KoyDockPill}">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE721;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="14"
+                                               Foreground="{DynamicResource KoyDockGlyph}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding [DockSearchBox], Source={x:Static res:Loc.Instance}}" FontSize="12.5" Margin="8,0,0,0"
+                                               Foreground="{DynamicResource KoyDockClockText}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </Button>
+                        <Button Style="{StaticResource DockPillButtonStyle}" Width="80" Padding="0"
+                                Command="{Binding OpenSearchCommand}"
+                                ToolTip="{Binding [DockSearchBox], Source={x:Static res:Loc.Instance}}"
+                                AutomationProperties.Name="{Binding [DockSearchBox], Source={x:Static res:Loc.Instance}}"
+                                Visibility="{Binding Taskbar.ShowSearchLabel, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="&#xE721;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16"
+                                           Foreground="{DynamicResource KoyDockGlyph}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding [DockSearchBox], Source={x:Static res:Loc.Instance}}" FontSize="12.5" Margin="6,0,0,0"
+                                           Foreground="{DynamicResource KoyDockClockText}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource DockPillButtonStyle}" Width="40" Padding="0"
+                                Command="{Binding OpenSearchCommand}"
+                                ToolTip="{Binding [DockSearchBox], Source={x:Static res:Loc.Instance}}"
+                                AutomationProperties.Name="{Binding [DockSearchBox], Source={x:Static res:Loc.Instance}}"
+                                Visibility="{Binding Taskbar.ShowSearchIconOnly, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                            <TextBlock Text="&#xE721;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16"
+                                       Foreground="{DynamicResource KoyDockGlyph}"/>
+                        </Button>
+
+                        <!-- Görev görünümü: Win+Tab -->
+                        <Button Style="{StaticResource DockPillButtonStyle}" Width="40" Padding="0"
+                                Command="{Binding OpenTaskViewCommand}"
+                                ToolTip="{Binding [DockTaskView], Source={x:Static res:Loc.Instance}}"
+                                AutomationProperties.Name="{Binding [DockTaskView], Source={x:Static res:Loc.Instance}}"
+                                Visibility="{Binding Taskbar.ShowTaskView, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                            <TextBlock Text="&#xE7C4;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="18"
+                                       Foreground="{DynamicResource KoyDockGlyph}"/>
+                        </Button>
+
+                        <local:DockItemsStrip HorizontalAlignment="{Binding StripAlignment}" VerticalAlignment="Center"/>
+
+                        <!-- Sol hizada pencere öğeleri uygulamaların sağına geçer (yalnız simge ve sıcaklık) -->
+                        <local:DockWeatherWidget IsCompact="True" VerticalAlignment="Center" Margin="4,0,0,0"
+                                                 Visibility="{Binding Taskbar.ShowWidgetsAfterItems, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
+                    </StackPanel>
                 </Grid>
 
-                <!-- Sağ Bölüm: İndirilenler, Son kullanılanlar, Tepsi | Koy menüsü, küçük tepsi (ayarlar kapsülle aynı) -->
+                <!-- Sağ Bölüm: Windows 11 sistem alanı (taşma oku, tepsi simgeleri, Wi-Fi + ses + pil, saat, zil, masaüstünü göster).
+                     Windows'ta olmayan düğmeler (İndirilenler, Son kullanılanlar, Koy menüsü) tam genişlikte yoktur; Koy menüsüne
+                     sağ tık menüsünden ulaşılır. Sistem alanı çizilmiyorsa (Status yok) eski düğmeler kalır. -->
+                <local:DockSystemAreaControl Grid.Column="2"
+                                      HorizontalAlignment="Right"
+                                      VerticalAlignment="Stretch"
+                                      Visibility="{Binding ShowSystemArea, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
                 <StackPanel Grid.Column="2"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right"
-                            VerticalAlignment="Center">
+                            VerticalAlignment="Center"
+                            Visibility="{Binding ShowLegacyRightSection, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
                     <Button Style="{StaticResource DockFlatButtonStyle}"
                             Command="{Binding OpenDownloadsCommand}"
                             ToolTip="{Binding [DockDownloads], Source={x:Static res:Loc.Instance}}"
@@ -236,6 +313,12 @@
                     <tray:TrayButton IsCompact="True"/>
                 </StackPanel>
             </Grid>
+            </Grid>
+
+            <Border BorderBrush="{Binding FullWidthBorderBrush}"
+                    BorderThickness="{Binding FullWidthBorderThickness}"
+                    IsHitTestVisible="False"
+                    SnapsToDevicePixels="True"/>
         </Grid>
     </Border>
 </UserControl>

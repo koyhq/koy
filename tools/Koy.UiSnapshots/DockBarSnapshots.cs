@@ -35,16 +35,6 @@ internal static class DockBarSnapshots
         public void Dispose() { }
     }
 
-    private sealed class FakePower(int percent, bool charging) : IPowerService
-    {
-        public bool HasBattery => true;
-        public int RemainingPercent => percent;
-        public bool IsCharging => charging;
-        public BatteryStatus Status => charging ? BatteryStatus.Charging : BatteryStatus.Discharging;
-        public event EventHandler<PowerChangedEventArgs>? PowerChanged { add { } remove { } }
-        public void Dispose() { }
-    }
-
     private static readonly DisplayMonitor Monitor = new(
         "snap", "Snapshot", new WindowRect(0, 0, 1280, 720), new WindowRect(0, 0, 1280, 720), true);
 
@@ -105,6 +95,247 @@ internal static class DockBarSnapshots
         {
             Directory.Delete(dir, recursive: true);
         }
+    }
+
+    /// <summary>Pil durumları (sahte güç verisi): tam genişlik dock'ta her durum için bir kare. Dosya adı: dockpil-{durum}.</summary>
+    public static void RenderBattery(string outDir, string prefix, string theme, Action<FrameworkElement, double, double, string> renderElement)
+    {
+        foreach (var (name, power) in BatterySnapshots.States)
+            Shoot(outDir, prefix, theme, "dockpil-" + name, renderElement, fullWidth: true, smallTray: true, appCount: 8, battery: power);
+    }
+
+    /// <summary>
+    /// Sürükleme ara kareleri (ek öğe varken: pil): 2. simge 4. simgeye doğru sürükleniyor. Karar gerçek Core yolundan
+    /// (<see cref="DockViewModel.EvaluateDrag"/>) geçer. Kareler: orta bant (komşu yerinde, hedef büyümüş ve parlıyor) ve
+    /// sağ kenar bölgesi (komşu kaymış). Dosya adı: dockdrag-{tam|kapsul|kapsul-sol}-{bant|kenar}.
+    /// </summary>
+    public static void RenderDrag(string outDir, string prefix, string theme, Action<FrameworkElement, double, double, string> renderElement)
+    {
+        foreach (var (label, fullWidth, edge) in new[]
+        {
+            ("tam", true, DockEdge.Bottom), ("kapsul", false, DockEdge.Bottom), ("kapsul-sol", false, DockEdge.Left)
+        })
+        foreach (var (state, fraction) in new[] { ("bant", 0.0), ("kenar", 0.3) })
+        {
+            var vertical = edge is DockEdge.Left or DockEdge.Right;
+            Shoot(outDir, prefix, theme, $"dockdrag-{label}-{state}", renderElement, fullWidth, smallTray: true, appCount: 8,
+                edge: edge, colorful: vertical, battery: new FakePower(82),
+                prepare: (vm, host) => ApplyDrag(vm, host, vertical, from: 1, to: 3, fraction));
+        }
+    }
+
+    /// <summary>
+    /// Tam genişlik dock'un sağ ucu (Windows 11 sistem alanı): pilli ve pilsiz makine, bildirim zili, rahatsız etme, görünür tepsi
+    /// simgesi ve üzerine gelme halleri (hap vurgusu). Dosya adı: docksistem-{durum}. Kare dar tutulur (sağ uç görünsün diye).
+    /// </summary>
+    public static void RenderSystemArea(string outDir, string prefix, string theme, Action<FrameworkElement, double, double, string> renderElement)
+    {
+        foreach (var (name, battery, dnd, icon, hover) in new (string, FakePower?, bool, bool, string?)[]
+        {
+            ("pilli", new FakePower(100, ac: true), false, false, null),
+            ("pil-pilde", new FakePower(54, time: new TimeSpan(3, 25, 0)), false, false, null),
+            ("pilsiz", null, false, false, null),
+            ("rahatsiz-etme", new FakePower(100, ac: true), true, false, null),
+            ("tepsi-simgesi", new FakePower(100, ac: true), false, true, null),
+            ("hover-grup", new FakePower(100, ac: true), false, false, "StatusGroup"),
+            ("hover-saat", new FakePower(100, ac: true), false, false, "ClockButton"),
+            ("hover-zil", new FakePower(100, ac: true), false, false, "BellButton"),
+            ("hover-seritt", new FakePower(100, ac: true), false, false, "DesktopStrip"),
+        })
+        {
+            var power = battery ?? new FakePower(hasBattery: false);
+            var status = new DockStatusViewModel(new SnapshotNetwork(), new FakeAudio(), power, new DockFolderSnapshots.FakeShellActionService(),
+                new SnapshotFocus(dnd));
+            Shoot(outDir, prefix, theme, "docksistem-" + name, renderElement, fullWidth: true, smallTray: false, appCount: 5,
+                status: status, tray: new SnapshotTray(icon), width: 760, newTrayDefault: Koy.Core.Tray.TrayIconVisibility.Shown,
+                prepare: hover is null ? null : (vm, host) => ForceHover(host, hover));
+        }
+    }
+
+    /// <summary>
+    /// Tam genişlik dock'un tamamı (Windows 11 görev çubuğu): 1920 DIP, ortada ve sol hizada; hava var ve konum yok. Referans:
+    /// Windows 11 görev çubuğu (5.png) ile yan yana karşılaştırılır. Dosya adı: taskbar-{orta|sol}-{hava|konumsuz}.
+    /// </summary>
+    public static void RenderTaskbar(string outDir, string prefix, string theme, Action<FrameworkElement, double, double, string> renderElement)
+    {
+        foreach (var (label, alignment) in new[] { ("orta", DockIconAlignment.Center), ("sol", DockIconAlignment.Left) })
+        foreach (var (state, hasLocation) in new[] { ("hava", true), ("konumsuz", false) })
+        {
+            var weatherSettings = new AppSettings
+            {
+                Weather = hasLocation
+                    ? new WeatherSettings { LocationSource = Koy.Core.Weather.WeatherLocationSource.City, City = "İstanbul", Latitude = 41.01, Longitude = 28.97 }
+                    : new WeatherSettings()
+            };
+            var weather = new DockWeatherViewModel(hasLocation ? new FakeWeather() : new NoWeather(), weatherSettings, new DockFolderSnapshots.FakeShellActionService());
+            var status = new DockStatusViewModel(new SnapshotNetwork(), new FakeAudio(), new FakePower(100, ac: true),
+                new DockFolderSnapshots.FakeShellActionService(), new SnapshotFocus(false));
+            Shoot(outDir, prefix, theme, $"taskbar-{label}-{state}", renderElement, fullWidth: true, smallTray: false, appCount: 8,
+                alignment: alignment, status: status, weather: weather, tray: new SnapshotTray(withIcon: true), width: 1920,
+                newTrayDefault: Koy.Core.Tray.TrayIconVisibility.Shown);
+        }
+    }
+
+    /// <summary>
+    /// Tam genişlikte klasör kapakları (gerçek DockItemsStrip şablonu): 2, 3, 4 ve 6 uygulamalı klasör yan yana, her biri 2x2 kapakla;
+    /// ayrıca 6 uygulamalı klasörün açık paneli (açılır pencere görüntüsü, kapsülle aynı). Dosya adı: klasor-tam-serit, klasor-tam-panel.
+    /// </summary>
+    public static void RenderFolderFullWidth(string outDir, string prefix, string theme, Action<FrameworkElement, double, double, string> renderElement)
+    {
+        var palette = new[]
+        {
+            ("chrome", "Google Chrome", Color.FromRgb(0x42, 0x85, 0xF4), "C"),
+            ("firefox", "Mozilla Firefox", Color.FromRgb(0xFF, 0x71, 0x39), "F"),
+            ("edge", "Microsoft Edge", Color.FromRgb(0x00, 0x78, 0xD7), "E"),
+            ("brave", "Brave Browser", Color.FromRgb(0xFB, 0x54, 0x2B), "B"),
+            ("code", "Visual Studio Code", Color.FromRgb(0x00, 0x98, 0xFF), "V"),
+            ("terminal", "Windows Terminal", Color.FromRgb(0x30, 0x30, 0x30), "T"),
+        };
+
+        DockItemViewModel Vm(int i, bool running = false) =>
+            DockFolderSnapshots.CreateAppVm(palette[i].Item1, palette[i].Item2, palette[i].Item3, palette[i].Item4, running);
+
+        DockFolderViewModel Folder(string id, string name, int count) =>
+            new(new DockFolder(id, name, palette.Take(count).Select(p => p.Item1).ToList()), Enumerable.Range(0, count).Select(i => Vm(i)).ToList());
+
+        var entries = new List<DockEntryViewModel>
+        {
+            DockFolderSnapshots.CreateAppVm("explorer", "Dosya Gezgini", Color.FromRgb(0xF5, 0xB0, 0x2A), "E", isRunning: true),
+            Folder("f2", "İki", 2),
+            Folder("f3", "Üç", 3),
+            Folder("f4", "Dört", 4),
+            Folder("f6", "Altı", 6),
+            DockFolderSnapshots.CreateAppVm("spotify", "Spotify", Color.FromRgb(0x1D, 0xB9, 0x54), "S", isRunning: true)
+        };
+        Shoot(outDir, prefix, theme, "klasor-tam-serit", renderElement, fullWidth: true, smallTray: false, appCount: 0, entries: entries,
+            tray: new SnapshotTray(withIcon: true), width: 1920);
+
+        var six = Folder("f6", "Altı", 6);
+        var panel = new Koy.App.Features.Dock.Folder.FolderPanel { DataContext = six };
+        var body = panel.DetachBodyForSnapshot();
+        body.DataContext = six;
+        renderElement(body, 280, 0, Path.Combine(outDir, $"{prefix}-{theme}-klasor-tam-panel.png"));
+    }
+
+    private sealed class NoWeather : Koy.Core.Weather.IWeatherService
+    {
+        public Koy.Core.Weather.WeatherInfo? CurrentWeather => null;
+        public event EventHandler<Koy.Core.Weather.WeatherInfo?>? WeatherChanged { add { } remove { } }
+        public Task<Koy.Core.Weather.WeatherInfo?> GetCurrentWeatherAsync(double latitude, double longitude, CancellationToken cancellationToken = default) => Task.FromResult<Koy.Core.Weather.WeatherInfo?>(null);
+        public Task RefreshAsync(double latitude, double longitude, CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public void Dispose() { }
+    }
+
+    private static void ForceHover(DependencyObject root, string name)
+    {
+        var target = FindNamed(root, name);
+        if (target is not null)
+            target.Tag = "hover";
+    }
+
+    private static FrameworkElement? FindNamed(DependencyObject root, string name)
+    {
+        if (root is FrameworkElement { Name: var n } fe && n == name)
+            return fe;
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            if (FindNamed(VisualTreeHelper.GetChild(root, i), name) is { } found)
+                return found;
+        }
+        return null;
+    }
+
+    private sealed class SnapshotNetwork : Koy.Core.Network.INetworkService
+    {
+        public Koy.Core.Network.NetworkStatus Current { get; } = new(Koy.Core.Network.NetworkKind.WiFi, true, 4, "TP-Link_D4A3");
+        public event EventHandler<Koy.Core.Network.NetworkStatus>? Changed { add { } remove { } }
+        public void Dispose() { }
+    }
+
+    private sealed class SnapshotFocus(bool dnd) : Koy.Core.Shell.IFocusAssistService
+    {
+        public bool IsActive => dnd;
+        public bool IsDoNotDisturb => dnd;
+        public event EventHandler<bool>? StateChanged { add { } remove { } }
+        public void OpenSettings() { }
+        public void Dispose() { }
+    }
+
+    /// <summary>Tepsi: isteğe bağlı tek görünür simge (düz renkli 16 px kare); taşma penceresi boş.</summary>
+    private sealed class SnapshotTray(bool withIcon) : ITrayService
+    {
+        private static readonly TrayIcon Icon = new(new TrayIconKey(0, 1, Guid.NewGuid()), 0, 1, 0, 1, "Discord", false, 4);
+        public event EventHandler? IconsChanged { add { } remove { } }
+        public event EventHandler<TrayBalloonNotification>? BalloonReceived { add { } remove { } }
+        public IReadOnlyList<TrayIcon> GetVisibleIcons() => withIcon ? [Icon] : [];
+        public byte[]? GetIconImage(TrayIconKey key)
+        {
+            var pixels = new byte[16 * 16 * 4];
+            for (var i = 0; i < 16 * 16; i++)
+            {
+                pixels[i * 4] = 0xF2; pixels[i * 4 + 1] = 0x65; pixels[i * 4 + 2] = 0x58; pixels[i * 4 + 3] = 255;
+            }
+            var bitmap = System.Windows.Media.Imaging.BitmapSource.Create(16, 16, 96, 96, PixelFormats.Bgra32, null, pixels, 16 * 4);
+            var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+            encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bitmap));
+            using var stream = new MemoryStream();
+            encoder.Save(stream);
+            return stream.ToArray();
+        }
+        public void SendMouse(TrayIconKey key, TrayMouseAction action, int cursorX, int cursorY) { }
+        public void RemoveDeadIcons() { }
+        public bool IsRunning => true;
+        public void Start() { }
+        public void Stop() { }
+        public void Dispose() { }
+    }
+
+    /// <summary>İkinci simgeyi üçüncü simgenin (to) merkezine + kesir kadar sürüklenmiş gösterir; yaylar beklenmeden son değere oturur.</summary>
+    private static void ApplyDrag(DockViewModel vm, Grid host, bool vertical, int from, int to, double fraction)
+    {
+        var list = FindList(host) ?? throw new InvalidOperationException("DockItemsList bulunamadı");
+        var widths = new List<double>();
+        for (var i = 0; i < vm.Items.Count; i++)
+        {
+            var c = (FrameworkElement)list.ItemContainerGenerator.ContainerFromIndex(i)!;
+            widths.Add(vertical ? c.ActualHeight : c.ActualWidth);
+        }
+
+        var centers = Koy.Core.Dock.DockReorderMath.Centers(widths);
+        var offset = centers[to] + fraction * widths[to] - centers[from];
+        var dragged = vm.Items[from];
+        var plan = vm.EvaluateDrag(dragged, from, offset, widths);
+        Console.WriteLine($"  sürükleme: hedef={plan.HoveredIndex} bölge={plan.Zone} birleştir={plan.CanMerge} kayma-hedefi={plan.ShiftTarget}");
+
+        vm.BeginReorder();
+        dragged.DragZ = 10;
+        dragged.SnapOffset(offset);
+        for (var i = 0; i < vm.Items.Count; i++)
+        {
+            if (i == from)
+                continue;
+            vm.Items[i].SnapOffset(DockReorderMath.ShiftedIndices(from, plan.ShiftTarget).Contains(i)
+                ? DockReorderMath.ShiftFor(i, from, plan.ShiftTarget, widths[from])
+                : 0);
+        }
+
+        if (plan.CanMerge)
+        {
+            vm.Items[plan.HoveredIndex].IsTargetGlow = true;
+            vm.Items[plan.HoveredIndex].SnapScale(1.1);
+        }
+    }
+
+    private static ItemsControl? FindList(DependencyObject root)
+    {
+        if (root is ItemsControl { Name: "DockItemsList" } list)
+            return list;
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            if (FindList(VisualTreeHelper.GetChild(root, i)) is { } found)
+                return found;
+        }
+        return null;
     }
 
     /// <summary>
@@ -214,7 +445,9 @@ internal static class DockBarSnapshots
         Action<FrameworkElement, double, double, string> renderElement,
         bool fullWidth, bool smallTray, int appCount, int pressedIndex = -1, DockIconAlignment alignment = DockIconAlignment.Center,
         DockStartIcon startIcon = DockStartIcon.Koy, string startIconPath = "", IReadOnlyList<DockEntryViewModel>? entries = null, bool hug = false,
-        Koy.Core.Appearance.MaterialLevel? material = null, DockEdge edge = DockEdge.Bottom, bool colorful = false, IPowerService? battery = null)
+        Koy.Core.Appearance.MaterialLevel? material = null, DockEdge edge = DockEdge.Bottom, bool colorful = false, IPowerService? battery = null,
+        Action<DockViewModel, Grid>? prepare = null, DockStatusViewModel? status = null, ITrayService? tray = null, double? width = null,
+        Koy.Core.Tray.TrayIconVisibility? newTrayDefault = null, DockWeatherViewModel? weather = null)
     {
         var settings = new AppSettings
         {
@@ -227,7 +460,8 @@ internal static class DockBarSnapshots
                 StartIconPath = startIconPath,
                 SmallTray = smallTray,
                 ShowFolders = true,
-                ShowRecents = false
+                ShowRecents = false,
+                NewTrayIconVisibility = newTrayDefault ?? Koy.Core.Tray.TrayIconVisibilityPolicy.DefaultNewIcon
             },
             DockItems = battery is null ? new DockItemsSettings() : new DockItemsSettings { Items = [new DockItemEntry { Kind = "Battery", Id = "Battery" }] },
             Appearance = new AppearanceSettings
@@ -236,8 +470,8 @@ internal static class DockBarSnapshots
             }
         };
 
-        var vm = new DockViewModel(settings, DockFolderSnapshots.SharedController, new DockFolderSnapshots.FakeShellActionService(), trayService: new FakeTray(),
-            acquirePower: battery is null ? null : () => battery, releasePower: () => { });
+        var vm = new DockViewModel(settings, DockFolderSnapshots.SharedController, new DockFolderSnapshots.FakeShellActionService(), status: status, trayService: tray ?? new FakeTray(),
+            acquirePower: battery is null ? null : () => battery, releasePower: () => { }, weather: weather);
 
         // Kurucunun kuyruğa attığı ilk öğe eşitlemesi (boş denetleyici) çalışsın, sonra sahte öğeler eklensin.
         Pump();
@@ -271,9 +505,11 @@ internal static class DockBarSnapshots
 
         // Düzen iki geçişte oturur: ilk geçiş orta sütun genişliğini bildirir, simgeler yeniden boyutlanır.
         var vertical = edge is DockEdge.Left or DockEdge.Right;
-        var hostWidth = colorful && vertical ? 360 : Monitor.WidthDip;
+        var hostWidth = colorful && vertical ? 360 : width ?? Monitor.WidthDip;
         var hostHeight = colorful ? (vertical ? 380 : 150) : double.NaN;
         var host = new Grid { Width = hostWidth, DataContext = vm };
+        // Pencerede ApplyTaskbarTheme yapar; görsel kanıt aracında pencere yok, aynı gölgeleme host'a uygulanır.
+        TaskbarThemeResources.Apply(host.Resources, vm.Taskbar.IsActive);
         if (colorful)
         {
             host.Height = hostHeight;
@@ -301,13 +537,20 @@ internal static class DockBarSnapshots
             host.UpdateLayout();
         }
 
+        if (prepare is not null)
+        {
+            prepare(vm, host);
+            host.UpdateLayout();
+            Pump();
+        }
+
         if (colorful)
         {
             renderElement(host, hostWidth, hostHeight, Path.Combine(outDir, $"{prefix}-{theme}-{name}.png"));
             return;
         }
 
-        renderElement(host, Monitor.WidthDip, fullWidth ? DockPositionResolver.FullWidthHeightDip : hug ? 120 : 80, Path.Combine(outDir, $"{prefix}-{theme}-{name}.png"));
+        renderElement(host, width ?? Monitor.WidthDip, fullWidth ? DockPositionResolver.FullWidthHeightDip : hug ? 120 : 80, Path.Combine(outDir, $"{prefix}-{theme}-{name}.png"));
     }
 
     private static List<DockEntryViewModel> BuildEntries(int count)

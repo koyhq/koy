@@ -16,9 +16,6 @@ public static class IdleDisplayFormat
     /// <summary>Halka kalınlığı (DIP).</summary>
     public const double RingThickness = 2.5;
 
-    /// <summary>Bu yüzde ve altında, şarj olmuyorsa halka düşük pil rengine geçer.</summary>
-    public const int LowBatteryPercent = 20;
-
     /// <summary>Kısa gün adı ve saat: "Sal 19:21" / "Tue 7:21 PM". Desen <see cref="Clock.ClockFormatPolicy.ResolveTimePattern"/>'den gelir.</summary>
     public static string DayTime(DateTime now, CultureInfo culture, string timePattern = "HH:mm") =>
         culture.DateTimeFormat.GetAbbreviatedDayName(now.DayOfWeek) + " " + now.ToString(timePattern, culture);
@@ -34,23 +31,6 @@ public static class IdleDisplayFormat
         var pattern = culture.DateTimeFormat.MonthDayPattern.Replace("MMMM", "MMM", StringComparison.Ordinal);
         return now.ToString(pattern, culture);
     }
-
-    /// <summary>Yüzde, dilin yazımıyla: "%43" (Türkçe) / "43%" (İngilizce).</summary>
-    public static string Percent(int percent, CultureInfo culture)
-    {
-        var n = Math.Clamp(percent, 0, 100).ToString(culture);
-        var sign = culture.NumberFormat.PercentSymbol;
-        return culture.NumberFormat.PercentPositivePattern switch
-        {
-            0 => n + " " + sign,
-            2 => sign + n,
-            3 => sign + " " + n,
-            _ => n + sign
-        };
-    }
-
-    /// <summary>Halka düşük pil renginde mi: şarj olmuyor ve yüzde eşikte ya da altında.</summary>
-    public static bool IsLow(int percent, bool charging) => !charging && percent <= LowBatteryPercent;
 
     /// <summary>
     /// Halkanın dolu kısmının yay sonundaki nokta. Yay en üstten (saat 12) başlar ve saat yönünde ilerler.

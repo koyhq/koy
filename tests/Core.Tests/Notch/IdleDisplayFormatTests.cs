@@ -42,27 +42,6 @@ public class IdleDisplayFormatTests
     }
 
     [Theory]
-    [InlineData(43, "%43", "43%")]
-    [InlineData(100, "%100", "100%")]
-    [InlineData(150, "%100", "100%")] // taşan değer kıskaçlanır
-    [InlineData(-5, "%0", "0%")]
-    public void Percent_follows_language_sign_position(int value, string tr, string en)
-    {
-        Assert.Equal(tr, IdleDisplayFormat.Percent(value, Tr));
-        Assert.Equal(en, IdleDisplayFormat.Percent(value, En));
-    }
-
-    [Theory]
-    [InlineData(12, false, true)]
-    [InlineData(20, false, true)]
-    [InlineData(21, false, false)]
-    [InlineData(12, true, false)] // şarjda düşük renk yok
-    public void IsLow_only_when_discharging_at_or_below_threshold(int percent, bool charging, bool expected)
-    {
-        Assert.Equal(expected, IdleDisplayFormat.IsLow(percent, charging));
-    }
-
-    [Theory]
     [InlineData(0, 9, 1.75)]     // en üst
     [InlineData(25, 16.25, 9)]   // sağ
     [InlineData(50, 9, 16.25)]   // alt

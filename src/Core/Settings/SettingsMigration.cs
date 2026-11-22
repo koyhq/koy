@@ -28,6 +28,10 @@ public static class SettingsMigration
     public static int Migrate(JsonObject root)
     {
         var original = ReadVersion(root);
+
+        // Değer onarımı (sürüm artırmaz, eski sürümlerle dosya uyumu bozulmaz): kaldırılan "simge ve ad" seçeneği.
+        RepairRemovedTabBarStyle(root);
+
         if (original >= AppSettings.CurrentVersion)
             return original;
 
@@ -79,6 +83,21 @@ public static class SettingsMigration
         root["Version"] = version;
         foreach (var (name, section) in sections)
             root[name] = section;
+    }
+
+    /// <summary>
+    /// "Notch.TabBarStyle": "IconAndLabel" kaldırıldı (etiketler çıkarıldığında seçenek hiçbir şey yapmıyordu ve ayar
+    /// sayfasında seçili görünmüyordu). Eski değer "IconOnly" olur; yoksa tipli okuma alanı varsayılana düşürürdü.
+    /// </summary>
+    private static void RepairRemovedTabBarStyle(JsonObject root)
+    {
+        if (root["Notch"] is JsonObject notch
+            && notch["TabBarStyle"] is JsonValue value
+            && value.TryGetValue<string>(out var style)
+            && string.Equals(style, "IconAndLabel", StringComparison.OrdinalIgnoreCase))
+        {
+            notch["TabBarStyle"] = "IconOnly";
+        }
     }
 
     private static int ReadVersion(JsonObject root)

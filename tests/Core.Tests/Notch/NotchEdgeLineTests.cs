@@ -51,4 +51,24 @@ public class NotchEdgeLineTests
     [InlineData(true, false, true)]
     public void Hides_only_when_notch_hides_in_fullscreen(bool fullscreen, bool hideInFullscreen, bool expected) =>
         Assert.Equal(expected, NotchEdgeLine.IsVisible(fullscreen, hideInFullscreen));
+
+    [Fact]
+    public void Floating_style_moves_the_line_down_with_the_notch_and_classic_stays_on_the_edge()
+    {
+        var monitor = Monitor(new WindowRect(0, 0, 1920, 1080), 1.0);
+
+        Assert.Equal(0, NotchEdgeLine.Bounds(monitor, 2, NotchStyle.TopOffsetDip(NotchStyleMode.Pinned)).Top);
+        var floating = NotchEdgeLine.Bounds(monitor, 2, NotchStyle.TopOffsetDip(NotchStyleMode.Floating));
+        Assert.Equal(9, floating.Top);
+        Assert.Equal(11, floating.Bottom);
+    }
+
+    [Fact]
+    public void Line_offset_uses_the_monitor_scale_and_ignores_negative_values()
+    {
+        var monitor = Monitor(new WindowRect(0, 0, 1920, 1080), 1.5);
+
+        Assert.Equal(14, NotchEdgeLine.Bounds(monitor, 2, 9).Top);   // 13,5 -> 14 (yarım yukarı)
+        Assert.Equal(0, NotchEdgeLine.Bounds(monitor, 2, -5).Top);
+    }
 }

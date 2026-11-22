@@ -589,11 +589,14 @@ public partial class KoyWindow : Window, IDisposable
         }
     }
 
-    public static void ShowInstance(int pageIndex = 0)
+    /// <param name="subTabIndex">Sayfanın alt sekmesi (örn. Çentik › Paneller); verilmezse sayfanın kendi seçimi kalır.</param>
+    public static void ShowInstance(int pageIndex = 0, int subTabIndex = -1)
     {
         var win = Instance;
         win.ViewModel.LoadFromSettings();
         win.ViewModel.SelectPage(pageIndex);
+        if (subTabIndex >= 0)
+            win.ViewModel.SelectSubTab(pageIndex, subTabIndex);
         win.ApplyChangedMarks();
         win.ContentScrollViewer?.ScrollToTop();
 

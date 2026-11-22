@@ -48,7 +48,6 @@ public static class Strings
     public static string VolumeLevel => Get(nameof(VolumeLevel));
     public static string MonitorSummary => Get(nameof(MonitorSummary));
     public static string VolumeMuted => Get(nameof(VolumeMuted));
-    public static string BatteryLevel => Get(nameof(BatteryLevel));
     public static string BatteryCharging => Get(nameof(BatteryCharging));
     public static string NetworkWiFi => Get(nameof(NetworkWiFi));
     public static string NetworkEthernet => Get(nameof(NetworkEthernet));

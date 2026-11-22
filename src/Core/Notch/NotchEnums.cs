@@ -26,11 +26,13 @@ public enum NotchOpenBehavior
     DragOver
 }
 
-/// <summary>Sekme çubuğunun görünümü: yalnız simge, simge ve ad, ya da hiç.</summary>
+/// <summary>
+/// Sekme çubuğunun görünümü: yalnız simge ya da hiç. Eskiden "simge ve ad" da vardı; etiketler D yerleşiminde kaldırıldığı
+/// için seçenek anlamsızdı. Eski dosyadaki "IconAndLabel" göçle "IconOnly" olur (<see cref="Settings.SettingsMigration"/>).
+/// </summary>
 public enum NotchTabBarStyle
 {
     IconOnly,
-    IconAndLabel,
     Hidden
 }
 

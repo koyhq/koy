@@ -23,9 +23,10 @@ public partial class DockWindow : Window
     public double ActualThickness => IsVertical ? ActualWidth : ActualHeight;
 
     /// <summary>
-    /// Çalışma alanından ayrılacak yükseklik:
-    /// Yüzen dock için 60 px + 10 px alt boşluk; Tam genişlik için FullWidthHeightDip (48); Yer ayır için 46 px.
-    /// DIP olarak döner; piksele çevirme tek kuralla (WindowPlacementMath.ToPixels) AppBar'da yapılır.
+    /// Çalışma alanından ayrılacak kalınlık (kenar boşluğu hariç): Tam genişlik için FullWidthHeightDip (48), Yer ayır
+    /// kapsülü için SnappedHeightDip (46); diğer kiplerde pencerenin kendi ölçüsü.
+    /// DIP olarak döner; kenar boşluğu (EdgeOffsetDip) ve piksele çevirme tek kuralla AppBarMath.ReservedPixels'te toplanır
+    /// (pencere yerleşimiyle aynı yuvarlama).
     /// </summary>
     public double ReservedHeight
     {
@@ -140,6 +141,7 @@ public partial class DockWindow : Window
 
         StopRendering();
         DataContext = viewModel;
+        ApplyTaskbarTheme(viewModel);
         viewModel.AnimationNeeded += OnAnimationNeeded;
         viewModel.AnimationStopped += OnAnimationStopped;
         viewModel.RequestReposition += OnRequestReposition;
@@ -149,8 +151,23 @@ public partial class DockWindow : Window
         Reposition(_targetMonitor);
     }
 
+    /// <summary>
+    /// Tam genişlik (Windows görev çubuğu düzeni) sistem temasına uyar: pencere kaynaklarında KoyDock* adları KoyTaskbar* fırçalarıyla
+    /// gölgelenir, içerideki bütün DynamicResource kullanımları (metin, simge, ayırıcı) açık temada açık yüzeye uygun renge döner.
+    /// Kapsülde gölge yoktur; KoyDock* her temada koyu kalır. Tema değişince (ThemeManager.Applied) yenilenir.
+    /// </summary>
+    private void ApplyTaskbarTheme(DockViewModel? viewModel = null)
+    {
+        viewModel ??= ViewModel;
+        TaskbarThemeResources.Apply(Resources, viewModel?.Taskbar.IsActive == true);
+    }
+
+    private void OnThemeApplied() => ApplyTaskbarTheme();
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        Koy.App.Resources.ThemeManager.Applied += OnThemeApplied;
+        Closed += (_, _) => Koy.App.Resources.ThemeManager.Applied -= OnThemeApplied;
         if (ViewModel is not null)
         {
             ViewModel.AnimationNeeded += OnAnimationNeeded;

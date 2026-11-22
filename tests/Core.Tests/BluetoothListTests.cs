@@ -166,4 +166,51 @@ public class BluetoothListTests
         Assert.Equal("BluetoothConnected", BluetoothList.StatusKey(Dev("1", "K", connected: true)));
         Assert.Equal("BluetoothNotConnected", BluetoothList.StatusKey(Dev("1", "K", connected: false)));
     }
+
+    [Theory]
+    [InlineData(RadioTileStatus.Off)]
+    [InlineData(RadioTileStatus.HardwareOff)]
+    [InlineData(RadioTileStatus.NotFound)]
+    [InlineData(RadioTileStatus.NoAccess)]
+    public void ConnectedOnly_RadioUnavailable_ShowsNothingEvenIfWindowsKeepsStaleConnectedFlag(RadioTileStatus radio)
+    {
+        // Gerçek hata: Bluetooth kapalıyken JBL Flip 6 "Bağlı cihazlar"da kalıyordu (bayat Aep.IsConnected).
+        var devices = BluetoothList.Normalize([Dev("a", "JBL Flip 6", BluetoothDeviceKind.Speaker, connected: true, battery: 80)]);
+
+        Assert.Empty(BluetoothList.ConnectedOnly(radio, devices));
+        Assert.Null(BluetoothList.PrimaryAudio(BluetoothList.ApplyRadio(radio, devices)));
+    }
+
+    [Theory]
+    [InlineData(RadioTileStatus.On)]
+    [InlineData(RadioTileStatus.Loading)]
+    [InlineData(RadioTileStatus.Failed)]
+    public void ConnectedOnly_RadioUsable_ListsOnlyTheReallyConnectedDevices(RadioTileStatus radio)
+    {
+        var devices = BluetoothList.Normalize(
+        [
+            Dev("a", "JBL Flip 6", BluetoothDeviceKind.Speaker, connected: true),
+            Dev("b", "Eski kulaklık", BluetoothDeviceKind.Headphones, connected: false),
+            Dev("c", "Fare", BluetoothDeviceKind.Mouse, connected: true)
+        ]);
+
+        var connected = BluetoothList.ConnectedOnly(radio, devices);
+
+        Assert.Equal(["Fare", "JBL Flip 6"], connected.Select(d => d.Name));
+    }
+
+    [Fact]
+    public void ApplyRadio_Off_KeepsPairedDevicesSortedByNameAndMarksThemDisconnected()
+    {
+        var devices = BluetoothList.Normalize(
+        [
+            Dev("a", "Zeta", connected: true),
+            Dev("b", "Alfa", connected: false)
+        ]);
+
+        var result = BluetoothList.ApplyRadio(RadioTileStatus.Off, devices);
+
+        Assert.Equal(["Alfa", "Zeta"], result.Select(d => d.Name));
+        Assert.All(result, d => Assert.False(d.IsConnected));
+    }
 }

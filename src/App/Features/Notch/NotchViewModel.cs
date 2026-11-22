@@ -101,13 +101,17 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private Geometry? _batteryRingGeometry;
 
-    /// <summary>Halka rengi: düşük pilde (≤%20, şarjda değil) kırmızı, aksi halde yeşil.</summary>
+    /// <summary>Halka rengi: normalde yeşil, düşükte uyarı, kritikte kırmızı (Core: <see cref="BatteryTone"/>).</summary>
     [ObservableProperty]
     private Brush _batteryRingBrush = RingNormalBrush;
 
-    /// <summary>Halkanın yanındaki yüzde, dilin yazımıyla ("%43" / "43%").</summary>
+    /// <summary>Halkanın yanındaki yüzde ("43%", Windows tepsisi gibi).</summary>
     [ObservableProperty]
     private string _batteryPercentText = "";
+
+    /// <summary>Halkanın yanındaki küçük işaret (yıldırım, fiş, yaprak); yoksa null.</summary>
+    [ObservableProperty]
+    private Geometry? _batteryMark;
 
     /// <summary>Halka modunda sağdaki gün ve saat ("Sal 19:21").</summary>
     [ObservableProperty]
@@ -118,6 +122,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private string _idlePeekDate = "";
 
     private static readonly Brush RingNormalBrush = Frozen(0x4A, 0xDE, 0x80);
+    private static readonly Brush RingWarningBrush = Frozen(0xFB, 0xBF, 0x24);
     private static readonly Brush RingLowBrush = Frozen(0xFB, 0x71, 0x85);
 
     private static SolidColorBrush Frozen(byte r, byte g, byte b)
@@ -177,7 +182,6 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     public bool ShowTabBar => Settings.Notch.TabBarStyle != NotchTabBarStyle.Hidden;
 
     /// <summary>Sekme adları görünür mü (biçim "simge ve ad").</summary>
-    public bool ShowTabLabels => Settings.Notch.TabBarStyle == NotchTabBarStyle.IconAndLabel;
 
     /// <summary>Kontrol paneli açıksa Wi-Fi / Bluetooth izlenir ve kapalı çentikte simgeleri gösterilebilir.</summary>
     public bool ShowRadioStatus { get; }
@@ -287,13 +291,15 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     public string ClockDisplay => ClockTime + ClockExtras;
 
     [ObservableProperty]
-    private int _batteryPercent = 100;
-
-    [ObservableProperty]
-    private bool _isCharging;
-
-    [ObservableProperty]
     private bool _hasBattery;
+
+    /// <summary>Pil gösterim kararı (Core: <see cref="BatteryDisplayPolicy"/>): simge, işaret, renk, yüzde.</summary>
+    [ObservableProperty]
+    private BatteryDisplay _battery = BatteryDisplay.None;
+
+    /// <summary>Pil simgesinin ipucu ("Pil durumu: tam dolu 100%").</summary>
+    [ObservableProperty]
+    private string _batteryTooltip = "";
 
     /// <summary>Boşta yerleşimi (saat, pil, simgeler) çizilsin mi: kapalıyken ve parça yokken fareyle üstüne gelince de (bkz. <see cref="NotchLayout"/>).</summary>
     public bool ShowCollapsedLayout => NotchLayout.ShowCollapsedLayout(State, Music.HasTrack);
@@ -318,13 +324,6 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(ShowIdleBattery));
         OnPropertyChanged(nameof(ShowIdleRing));
     }
-
-    [ObservableProperty]
-    private double _batteryFillWidth = 17;
-
-    /// <summary>Pil ≤ %20 ve şarjda değil: çubuk dolgusu kırmızı (Core: <see cref="IdleDisplayFormat.IsLow"/>).</summary>
-    [ObservableProperty]
-    private bool _isBatteryLow;
 
     public bool IsMusicPlaying => Music.HasTrack && Music.IsPlaying;
 
@@ -444,7 +443,7 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     private void OnStatusPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(StatusViewModel.BatteryPercent) or nameof(StatusViewModel.IsCharging) or nameof(StatusViewModel.HasBattery))
+        if (e.PropertyName is nameof(StatusViewModel.BatteryDisplay) or nameof(StatusViewModel.HasBattery))
         {
             UpdateBatteryState();
         }
@@ -456,29 +455,35 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     private void UpdateBatteryState()
     {
-        BatteryPercent = _status.BatteryPercent;
-        IsCharging = _status.IsCharging;
         HasBattery = _status.HasBattery;
-        var pct = Math.Clamp(BatteryPercent, 0, 100);
-        IsBatteryLow = HasBattery && IdleDisplayFormat.IsLow(pct, IsCharging);
-        // Dış gövde 22 DIP, iç dolgu alanı 17 DIP (22 - 3 - 2)
-        BatteryFillWidth = Math.Max(2.0, 17.0 * pct / 100.0);
+        var display = _status.BatteryDisplay;
+        Battery = display;
+        BatteryTooltip = BatteryText.Tooltip(display);
 
         if (IsIdleRing)
-            UpdateBatteryRing(pct);
+            UpdateBatteryRing(display);
     }
 
-    private int _ringPercent = -1;
+    private BatteryDisplay _ringShown = BatteryDisplay.None;
+    private bool _ringBuilt;
 
-    private void UpdateBatteryRing(int pct)
+    private void UpdateBatteryRing(BatteryDisplay display)
     {
-        BatteryRingBrush = IdleDisplayFormat.IsLow(pct, IsCharging) ? RingLowBrush : RingNormalBrush;
-        if (pct == _ringPercent)
+        // Halka, yüzde ve işaret yalnız karar değişince yeniden kurulur (dondurulmuş geometri, zamanlayıcı yok).
+        if (_ringBuilt && display == _ringShown)
             return;
 
-        _ringPercent = pct;
-        BatteryPercentText = IdleDisplayFormat.Percent(pct, IdleCulture);
-        var data = IdleDisplayFormat.ArcPath(pct);
+        _ringBuilt = true;
+        _ringShown = display;
+        BatteryRingBrush = display.Tone switch
+        {
+            BatteryTone.Critical => RingLowBrush,
+            BatteryTone.Warning => RingWarningBrush,
+            _ => RingNormalBrush
+        };
+        BatteryPercentText = display.PercentText;
+        BatteryMark = BatteryMarks.For(display.Overlay);
+        var data = IdleDisplayFormat.ArcPath(display.Percent);
         Geometry? geometry = null;
         if (data.Length > 0)
         {
@@ -644,9 +649,9 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     private void ApplyState(NotchState newState)
     {
-        // Kullanıcının seçtiği Ana/Müzik yüzü korunur; parça yoksa ya da müzik kartı kapalıysa Ana yüzüne düşer.
+        // Kullanıcının son bıraktığı Ana/Müzik yüzü açılışta korunur (üstteki Müzik/Ana anahtarı her zaman görünür, yüzlere ulaşılabilir).
         if (newState == NotchState.Expanded && State != NotchState.Expanded)
-            Home.Page = NotchHomePages.OnOpen(Home.Page, Music.HasTrack, Home.Cards.Contains(HomeCard.Music));
+            Home.Page = NotchHomePages.OnOpen(Home.Page);
 
         State = newState;
         // Kart çentik açılınca kalkar (açık çentik kartın yerine geçer).
