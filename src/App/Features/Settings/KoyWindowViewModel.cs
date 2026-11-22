@@ -545,7 +545,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private int _notchCloseDelayMs = NotchOpenPolicy.DefaultCloseDelayMs;
 
     [ObservableProperty]
-    private NotchTabBarStyle _notchTabBarStyle = NotchTabBarStyle.IconAndLabel;
+    private NotchTabBarStyle _notchTabBarStyle = NotchTabBarStyle.IconOnly;
 
     /// <summary>Sekme sırası satırları (bütün paneller, görünürlükten bağımsız).</summary>
     public ObservableCollection<NotchTabOrderItem> NotchTabOrder { get; } = [];
@@ -1526,6 +1526,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
         // Gelişmiş tablosu yalnız sayfası açıkken tutulur; başka sayfaya geçince bırakılır.
         RebuildAdvancedRows();
     }
+
+    /// <summary>Çentik sayfasının Paneller alt sekmesi (sekme sırası ve Ana sayfa kartları).</summary>
+    public const int NotchPanelsSubTab = 2;
 
     /// <summary>Ayar aramasından gidilen satırın ait olduğu alt sekmeyi etkinleştirir.</summary>
     public void SelectSubTab(int pageIndex, int subTabIndex)

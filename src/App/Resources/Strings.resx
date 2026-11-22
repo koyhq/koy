@@ -3717,6 +3717,12 @@
   <data name="HomeNextUp" xml:space="preserve">
     <value>UP NEXT</value>
   </data>
+  <data name="HomeNoCardsHint" xml:space="preserve">
+    <value>No cards are shown on Home.</value>
+  </data>
+  <data name="HomeNoCardsAction" xml:space="preserve">
+    <value>Add cards to Home</value>
+  </data>
   <data name="HomeNoEvents" xml:space="preserve">
     <value>No upcoming events.</value>
   </data>

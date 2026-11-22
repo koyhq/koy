@@ -84,6 +84,9 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     /// <summary>Hızlı başlat şeridi.</summary>
     public bool ShowQuickLaunchCard => Cards.Contains(HomeCard.QuickLaunch);
 
+    /// <summary>Hiç kart açık değil: sağ taraf boş kalmasın, kart eklemeye yönlendiren kısa bir bağlantı gösterilir.</summary>
+    public bool ShowNoCards => HomeCardLayout.IsEmpty(Cards);
+
     /// <summary>Hava durumu (Bugün kartı ve üst satır).</summary>
     public bool ShowWeatherCard => Cards.Contains(HomeCard.Weather);
 
@@ -203,6 +206,11 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     [RelayCommand]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
     private void ChooseWeatherLocation() => KoyWindow.ShowInstance(1);
+
+    /// <summary>Boş Ana sayfadan: Koy penceresinin Çentik sayfası, Paneller sekmesi (kart listesi orada) açılır.</summary>
+    [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "RelayCommand")]
+    private void OpenCardSettings() => KoyWindow.ShowInstance(1, KoyWindowViewModel.NotchPanelsSubTab);
 
     public void Dispose()
     {

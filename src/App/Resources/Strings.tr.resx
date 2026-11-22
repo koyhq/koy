@@ -3717,6 +3717,12 @@
   <data name="HomeNextUp" xml:space="preserve">
     <value>SIRADAKİ</value>
   </data>
+  <data name="HomeNoCardsHint" xml:space="preserve">
+    <value>Ana sayfada gösterilen kart yok.</value>
+  </data>
+  <data name="HomeNoCardsAction" xml:space="preserve">
+    <value>Ana sayfaya kart ekle</value>
+  </data>
   <data name="HomeNoEvents" xml:space="preserve">
     <value>Yaklaşan etkinlik yok.</value>
   </data>

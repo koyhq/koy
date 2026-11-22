@@ -11,6 +11,9 @@ public static class HomeCardLayout
     public static IReadOnlyList<HomeCard> Default { get; } =
         [HomeCard.Music, HomeCard.HeadphoneBattery, HomeCard.SystemNetwork, HomeCard.QuickLaunch, HomeCard.Weather, HomeCard.Timers];
 
+    /// <summary>Hiç kart açık değil mi (Ana sayfa boş görünür; arayüz kart eklemeye yönlendirir).</summary>
+    public static bool IsEmpty(IEnumerable<HomeCard> cards) => !cards.Any();
+
     /// <summary>Sıra korunur, ilk görülen kazanır. <c>null</c> ise varsayılan düzen döner.</summary>
     public static ValueList<HomeCard> Normalize(IEnumerable<HomeCard>? cards)
     {

@@ -285,7 +285,7 @@ public sealed record NotchSettings
     /// Sekme çubuğu: simge ve ad (varsayılan, bugünkü görünüm), yalnız simge ya da gizli. Varsayılan arayüz bağlanırken
     /// IconOnly'den buna çekildi; aksi halde güncellemeyle herkesin sekme adları kaybolurdu (issue #78).
     /// </summary>
-    public NotchTabBarStyle TabBarStyle { get; set; } = NotchTabBarStyle.IconAndLabel;
+    public NotchTabBarStyle TabBarStyle { get; set; } = NotchTabBarStyle.IconOnly;
 
     /// <summary>
     /// Sekmelerin kullanıcı sırası (panel anahtarları). Boşsa ya da eksikse varsayılan sıra kullanılır; görünürlük

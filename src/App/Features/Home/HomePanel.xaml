@@ -614,6 +614,18 @@
           </Grid>
         </Border>
 
+        <!-- Hiç kart açık değilken sağ taraf boş kalmasın: kısa açıklama ve ayarlara götüren bağlantı. -->
+        <Button Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource CardButtonStyle}"
+                Command="{Binding OpenCardSettingsCommand}"
+                Visibility="{Binding ShowNoCards, Converter={StaticResource BoolToVis}}">
+          <StackPanel HorizontalAlignment="Center">
+            <TextBlock Text="{Binding [HomeNoCardsHint], Source={x:Static res:Loc.Instance}}" FontSize="12" Foreground="{DynamicResource KoyNotchMuted}"
+                       HorizontalAlignment="Center" />
+            <TextBlock Text="{Binding [HomeNoCardsAction], Source={x:Static res:Loc.Instance}}" FontSize="14" FontWeight="SemiBold"
+                       HorizontalAlignment="Center" Margin="0,4,0,0" />
+          </StackPanel>
+        </Button>
+
         <Grid x:Name="RightColumnGrid" Grid.Row="1">
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
