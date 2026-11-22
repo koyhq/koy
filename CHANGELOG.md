@@ -8,46 +8,33 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 ---
 
 ## [0.2.16](https://github.com/koyhq/koy/compare/v0.2.15...v0.2.16) (2026-11-22)
-
+Highlights:
+- **Safer taskbar:** if Koy is killed, even together with its process tree, the Windows taskbar comes back; it is also restored when you sign out, and a monitor without the dock keeps its own taskbar.
+- **Undo instead of losing things:** clearing the clipboard or shelf and deleting an event or task happens at once, with an Undo button for a few seconds. The notch also gets keyboard focus when opened with its shortcut and better High Contrast support.
+- **Lighter notch:** the music page and notch opening cost less CPU, and window hooks are installed only for the features that need them.
+- **Glass dock:** the Glass and Frosted materials now look like glass (sheen, specular edge, glass tiles), and the dock can show a battery item.
 
 ### Added
 
-* **dock:** add battery dock item ([f7d14bb](https://github.com/koyhq/koy/commit/f7d14bbaa919b8f3eb84f3543077ec17c8e300d9))
-* **dock:** add battery dock item ([e4feffd](https://github.com/koyhq/koy/commit/e4feffd95cdd31ed4a18253aebb99df27fd098e9))
-* **dock:** give Glass and Frosted dock materials a sheen and specular edge ([d33fd32](https://github.com/koyhq/koy/commit/d33fd3278ee67aa7681fc497cd48d8ecf715be34))
-* **dock:** glass look for Frosted and Glass materials ([ea401d9](https://github.com/koyhq/koy/commit/ea401d908f9ea9a0decab3487e3f798647a3a01e))
-* **dock:** stronger full-width glass sheen and glass tiles behind active icons ([32cc0de](https://github.com/koyhq/koy/commit/32cc0dee2fb82f07f82c0b2d4416caddd741de20))
-* **notch:** add undo for deletes, keyboard focus and accessibility ([69c6b8a](https://github.com/koyhq/koy/commit/69c6b8a90ccc63be34c83f8e0fa8d00d6c3d04d5))
-* **notch:** drag to scrub on the music progress bar ([613385c](https://github.com/koyhq/koy/commit/613385c3ec5dcc192310a75297a0c3dcd13908f0))
-* **notch:** drag to scrub on the music progress bar ([6557f75](https://github.com/koyhq/koy/commit/6557f75d48fec249fc86915208a41a0d53579911))
-* **notch:** undo for deletes, keyboard focus and accessibility ([250b640](https://github.com/koyhq/koy/commit/250b640ed0fffaf1d345e6d9b84694d4b727e80e))
-* **settings:** consistent reset to defaults and naming cleanup ([b0efbfa](https://github.com/koyhq/koy/commit/b0efbfa0a7f44edc2c6dbe1f322993438c7627f8))
-* **settings:** consistent reset to defaults and naming cleanup ([08c0183](https://github.com/koyhq/koy/commit/08c01832611bdccef2c7db00e0df36a3e5b31280)), closes [#195](https://github.com/koyhq/koy/issues/195)
+* **dock:** glass look for the Frosted and Glass materials: a sheen band and specular edge on the bar, a diagonal highlight around the capsule, and glass tiles behind active and hovered apps; Solid is unchanged ([#203](https://github.com/koyhq/koy/pull/203)) ([ea401d9](https://github.com/koyhq/koy/commit/ea401d9))
+* **dock:** optional battery item (right-click > Add item > Battery) with glyph and percent, warning colour under 20%, hidden on machines without a battery ([#202](https://github.com/koyhq/koy/pull/202)) ([f7d14bb](https://github.com/koyhq/koy/commit/f7d14bb))
+* **notch:** drag to scrub on the music progress bar: a time balloon shows the target, one seek on release, Esc cancels, Left / Right seek 5 s ([#201](https://github.com/koyhq/koy/pull/201)) ([613385c](https://github.com/koyhq/koy/commit/613385c3ec5dcc192310a75297a0c3dcd13908f0))
+* **notch:** undo for deletes, keyboard focus and accessibility ([#196](https://github.com/koyhq/koy/pull/196)) ([250b640](https://github.com/koyhq/koy/commit/250b640ed0fffaf1d345e6d9b84694d4b727e80e))
+* **settings:** one "Reset to defaults" on every page that has settings (Dock and Performance included), "Fine-tuning" sections on the Notch page, no duplicate names in the extension list ([#195](https://github.com/koyhq/koy/issues/195)) ([08c0183](https://github.com/koyhq/koy/commit/08c01832611bdccef2c7db00e0df36a3e5b31280))
 
 
 ### Fixed
 
-* **app:** keep the taskbar hidden when a UI exception is handled ([899fd6b](https://github.com/koyhq/koy/commit/899fd6b9504df87554f9ffea46a0bc71fc89f564))
-* **dock:** harden Windows taskbar safety (watchdog parent, state-first hide, RunOnce, session end, per-monitor hide) ([67ec041](https://github.com/koyhq/koy/commit/67ec04117d6e927cc455cde43083f6e0547cc35d))
-* **dock:** taskbar safety (watchdog parent, state-first hide, RunOnce, session end, per-monitor hide) ([7344125](https://github.com/koyhq/koy/commit/73441258fee845bec2b1f0b266ff70f7706fc13e))
-* **dock:** write the command line terminator as an escape instead of a raw NUL byte ([0908c62](https://github.com/koyhq/koy/commit/0908c62a68b037b068ed715438c0434591bfd738))
-* **notch:** move undo strip off the music/home switch, add shelf drop highlight, event-book-full error and card header tooltip ([1d62931](https://github.com/koyhq/koy/commit/1d6293127d2a7bd904877f96ae00e391adc39401))
-* **notch:** undo strip clears the page switch, shelf drop highlight, event limit error, card header tooltip ([c6a0ca5](https://github.com/koyhq/koy/commit/c6a0ca5a2431a363bf12bfc5cbbe327f972813f8))
-* **settings:** keep the Displays page out of page reset to protect the taskbar ([24c5772](https://github.com/koyhq/koy/commit/24c577201fefaa7ea8f334371d5719c033dfd73c))
-* **settings:** survive settings.json I/O errors and keep Koy alive on UI exceptions ([14f7c24](https://github.com/koyhq/koy/commit/14f7c240a5ed6bd440d7b90fda559ef3391b4aad))
-* **settings:** survive settings.json I/O errors and keep Koy alive on UI exceptions ([6628adf](https://github.com/koyhq/koy/commit/6628adf041eece8c3305fb52bd50209885ab2fa1))
-* small leftovers from the code scan (flaky test, video snapshots, map) ([147d220](https://github.com/koyhq/koy/commit/147d2200cf206ee074eedfec4bd6c1fdba40703c))
-* **tools:** capture video background frames from the frame reader instead of MediaElement ([5f9819e](https://github.com/koyhq/koy/commit/5f9819eee215848a04ce920a98e691e074b29eb7))
-* **ui:** consistent copy (informal tone, sentence case, restored descriptions, unused strings) ([a209822](https://github.com/koyhq/koy/commit/a2098226fb6ef6d57792dcb0c0302589f7b500a4))
-* **ui:** unify Turkish tone to informal, use sentence case headings, restore setting descriptions, drop unused strings ([922a438](https://github.com/koyhq/koy/commit/922a438636cbebe4e3e6c60677bd2c14c687b1aa))
+* **notch:** the undo strip no longer covers the Music/Home switch; the shelf drop box highlights while dragging; adding an event when the book is full (500) shows an error; the notification card tooltip includes its header ([#200](https://github.com/koyhq/koy/pull/200)) ([c6a0ca5](https://github.com/koyhq/koy/commit/c6a0ca5a2431a363bf12bfc5cbbe327f972813f8))
+* **dock:** harden Windows taskbar safety: watchdog started under Explorer, state written before hiding, RunOnce fallback, restore on sign-out, hide only on monitors with a dock ([7344125](https://github.com/koyhq/koy/commit/73441258fee845bec2b1f0b266ff70f7706fc13e))
+* **settings:** survive settings.json I/O errors and keep Koy alive on UI exceptions without bringing the taskbar back ([6628adf](https://github.com/koyhq/koy/commit/6628adf041eece8c3305fb52bd50209885ab2fa1))
+* **ui:** consistent copy: informal Turkish, sentence case headings, restored setting descriptions, unused strings removed ([a209822](https://github.com/koyhq/koy/commit/a2098226fb6ef6d57792dcb0c0302589f7b500a4))
 
 
 ### Performance
 
-* **notch:** cut music page and notch open cost ([fc1100c](https://github.com/koyhq/koy/commit/fc1100c3f01fb721d5f86cfbd88fe715a2c30da8))
-* **notch:** cut music page and notch open cost ([574ac47](https://github.com/koyhq/koy/commit/574ac47975d28f7366f2cc814cca605378258541))
-* **notch:** install window hooks per consumer and filter events before syscalls ([edcaf2a](https://github.com/koyhq/koy/commit/edcaf2ad6b82ebc102461f91fdcd039dda575bd7))
-* **notch:** install window hooks per consumer and filter events before syscalls ([107d6ed](https://github.com/koyhq/koy/commit/107d6ed160088685184df46449f5ba713df3cd60))
+* **notch:** cut music page and notch open cost ([#193](https://github.com/koyhq/koy/pull/193)) ([fc1100c](https://github.com/koyhq/koy/commit/fc1100c3f01fb721d5f86cfbd88fe715a2c30da8))
+* **notch:** install window hooks per consumer and filter events before system calls ([edcaf2a](https://github.com/koyhq/koy/commit/edcaf2ad6b82ebc102461f91fdcd039dda575bd7))
 
 ## [0.2.15](https://github.com/koyhq/koy/compare/v0.2.14...v0.2.15) (2026-11-21)
 Highlights:
