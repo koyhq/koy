@@ -5,6 +5,33 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.16](https://github.com/koyhq/koy/compare/v0.2.15...v0.2.16) (2026-11-22)
+Öne çıkanlar:
+- **Daha güvenli görev çubuğu:** Koy süreç ağacıyla birlikte sonlandırılsa bile Windows görev çubuğu geri geliyor; oturum kapatırken de geri getiriliyor, dock'u olmayan monitör kendi görev çubuğunu koruyor.
+- **Silmede Geri al:** Pano ya da Raf temizleme, etkinlik ve görev silme hemen oluyor, birkaç saniye "Geri al" düğmesi çıkıyor. Çentik kısayolla açılınca klavye odağı alıyor, Yüksek Karşıtlık desteği iyileşti.
+- **Daha hafif çentik:** Müzik sayfası ve çentik açılışı daha az işlemci harcıyor; pencere kancaları yalnız onlara ihtiyaç duyan özellikler için kuruluyor.
+- **Cam dock:** Cam ve Buzlu malzeme artık gerçekten cam gibi (parlama, parlak kenar, cam karo); dock pil öğesi de gösterebiliyor.
+
+### Eklenenler
+
+* **dock:** Buzlu ve Cam malzemede cam görünümü: çubukta parlama bandı ve parlak kenar, kapsülde çapraz parlama, etkin ve üzerine gelinen uygulamaların arkasında cam karo; Katı değişmedi ([#203](https://github.com/koyhq/koy/pull/203)) ([ea401d9](https://github.com/koyhq/koy/commit/ea401d9))
+* **dock:** isteğe bağlı pil öğesi (sağ tık > Öğe ekle > Pil): simge ve yüzde, %20 altında uyarı rengi, pilsiz makinede görünmez ([#202](https://github.com/koyhq/koy/pull/202)) ([f7d14bb](https://github.com/koyhq/koy/commit/f7d14bb))
+* **notch:** müzik ilerleme çubuğunda sürükleyerek sarma: süre balonu hedefi gösteriyor, bırakınca tek atlama, Esc iptal eder, sol / sağ ok 5 sn sarar ([#201](https://github.com/koyhq/koy/pull/201)) ([613385c](https://github.com/koyhq/koy/commit/613385c3ec5dcc192310a75297a0c3dcd13908f0))
+* **notch:** silmelerde geri al, klavye odağı ve erişilebilirlik ([#196](https://github.com/koyhq/koy/pull/196)) ([250b640](https://github.com/koyhq/koy/commit/250b640ed0fffaf1d345e6d9b84694d4b727e80e))
+* **settings:** ayarı olan her sayfada tek "Varsayılana döndür" (Dock ve Performans dahil), Çentik sayfasında "İnce ayar" bölümleri, eklenti listesinde yinelenen ad yok ([#195](https://github.com/koyhq/koy/issues/195)) ([08c0183](https://github.com/koyhq/koy/commit/08c01832611bdccef2c7db00e0df36a3e5b31280))
+
+### Düzeltmeler
+
+* **notch:** Geri al şeridi artık Müzik/Ana anahtarını örtmüyor; Raf kutusu sürüklerken vurgulanıyor; defter doluyken (500) etkinlik eklemek hata gösteriyor; bildirim kartı ipucunda üst başlık da var ([#200](https://github.com/koyhq/koy/pull/200)) ([c6a0ca5](https://github.com/koyhq/koy/commit/c6a0ca5a2431a363bf12bfc5cbbe327f972813f8))
+* **dock:** görev çubuğu güvenliği sağlamlaştırıldı: gözcü Gezgin altında başlıyor, gizlemeden önce durum yazılıyor, RunOnce yedeği, oturum kapanırken geri yükleme, yalnız dock'lu monitörlerde gizleme ([7344125](https://github.com/koyhq/koy/commit/73441258fee845bec2b1f0b266ff70f7706fc13e))
+* **settings:** settings.json okuma/yazma hatalarında Koy kapanmıyor, arayüz istisnasında açık kalıyor ve görev çubuğunu gereksiz yere geri getirmiyor ([6628adf](https://github.com/koyhq/koy/commit/6628adf041eece8c3305fb52bd50209885ab2fa1))
+* **ui:** tutarlı metin: Türkçede "sen" dili, cümle büyük harfli başlıklar, geri gelen ayar açıklamaları, kullanılmayan metinler silindi ([a209822](https://github.com/koyhq/koy/commit/a2098226fb6ef6d57792dcb0c0302589f7b500a4))
+
+### Performans
+
+* **notch:** müzik sayfası ve çentik açılış maliyeti düşürüldü ([#193](https://github.com/koyhq/koy/pull/193)) ([fc1100c](https://github.com/koyhq/koy/commit/fc1100c3f01fb721d5f86cfbd88fe715a2c30da8))
+* **notch:** pencere kancaları tüketiciye göre kuruluyor, olaylar sistem çağrısından önce süzülüyor ([edcaf2a](https://github.com/koyhq/koy/commit/edcaf2ad6b82ebc102461f91fdcd039dda575bd7))
+
 ## [0.2.15](https://github.com/koyhq/koy/compare/v0.2.14...v0.2.15) (2026-11-21)
 Öne çıkanlar:
 - **Çok daha küçük güncellemeler:** Her sürüm artık bir delta paketi de içeriyor; önceki sürümden güncellerken ~79 MB'lık paketin tamamı yerine yalnız değişen dosyalar (birkaç MB) iniyor.

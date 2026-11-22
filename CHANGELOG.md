@@ -7,6 +7,35 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.16](https://github.com/koyhq/koy/compare/v0.2.15...v0.2.16) (2026-11-22)
+Highlights:
+- **Safer taskbar:** if Koy is killed, even together with its process tree, the Windows taskbar comes back; it is also restored when you sign out, and a monitor without the dock keeps its own taskbar.
+- **Undo instead of losing things:** clearing the clipboard or shelf and deleting an event or task happens at once, with an Undo button for a few seconds. The notch also gets keyboard focus when opened with its shortcut and better High Contrast support.
+- **Lighter notch:** the music page and notch opening cost less CPU, and window hooks are installed only for the features that need them.
+- **Glass dock:** the Glass and Frosted materials now look like glass (sheen, specular edge, glass tiles), and the dock can show a battery item.
+
+### Added
+
+* **dock:** glass look for the Frosted and Glass materials: a sheen band and specular edge on the bar, a diagonal highlight around the capsule, and glass tiles behind active and hovered apps; Solid is unchanged ([#203](https://github.com/koyhq/koy/pull/203)) ([ea401d9](https://github.com/koyhq/koy/commit/ea401d9))
+* **dock:** optional battery item (right-click > Add item > Battery) with glyph and percent, warning colour under 20%, hidden on machines without a battery ([#202](https://github.com/koyhq/koy/pull/202)) ([f7d14bb](https://github.com/koyhq/koy/commit/f7d14bb))
+* **notch:** drag to scrub on the music progress bar: a time balloon shows the target, one seek on release, Esc cancels, Left / Right seek 5 s ([#201](https://github.com/koyhq/koy/pull/201)) ([613385c](https://github.com/koyhq/koy/commit/613385c3ec5dcc192310a75297a0c3dcd13908f0))
+* **notch:** undo for deletes, keyboard focus and accessibility ([#196](https://github.com/koyhq/koy/pull/196)) ([250b640](https://github.com/koyhq/koy/commit/250b640ed0fffaf1d345e6d9b84694d4b727e80e))
+* **settings:** one "Reset to defaults" on every page that has settings (Dock and Performance included), "Fine-tuning" sections on the Notch page, no duplicate names in the extension list ([#195](https://github.com/koyhq/koy/issues/195)) ([08c0183](https://github.com/koyhq/koy/commit/08c01832611bdccef2c7db00e0df36a3e5b31280))
+
+
+### Fixed
+
+* **notch:** the undo strip no longer covers the Music/Home switch; the shelf drop box highlights while dragging; adding an event when the book is full (500) shows an error; the notification card tooltip includes its header ([#200](https://github.com/koyhq/koy/pull/200)) ([c6a0ca5](https://github.com/koyhq/koy/commit/c6a0ca5a2431a363bf12bfc5cbbe327f972813f8))
+* **dock:** harden Windows taskbar safety: watchdog started under Explorer, state written before hiding, RunOnce fallback, restore on sign-out, hide only on monitors with a dock ([7344125](https://github.com/koyhq/koy/commit/73441258fee845bec2b1f0b266ff70f7706fc13e))
+* **settings:** survive settings.json I/O errors and keep Koy alive on UI exceptions without bringing the taskbar back ([6628adf](https://github.com/koyhq/koy/commit/6628adf041eece8c3305fb52bd50209885ab2fa1))
+* **ui:** consistent copy: informal Turkish, sentence case headings, restored setting descriptions, unused strings removed ([a209822](https://github.com/koyhq/koy/commit/a2098226fb6ef6d57792dcb0c0302589f7b500a4))
+
+
+### Performance
+
+* **notch:** cut music page and notch open cost ([#193](https://github.com/koyhq/koy/pull/193)) ([fc1100c](https://github.com/koyhq/koy/commit/fc1100c3f01fb721d5f86cfbd88fe715a2c30da8))
+* **notch:** install window hooks per consumer and filter events before system calls ([edcaf2a](https://github.com/koyhq/koy/commit/edcaf2ad6b82ebc102461f91fdcd039dda575bd7))
+
 ## [0.2.15](https://github.com/koyhq/koy/compare/v0.2.14...v0.2.15) (2026-11-21)
 Highlights:
 - **Much smaller updates:** every release now also ships a delta package, so updating from the previous version downloads only the changed files (a few MB) instead of the full ~79 MB package.
