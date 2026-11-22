@@ -5,6 +5,32 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.17](https://github.com/koyhq/koy/compare/v0.2.16...v0.2.17) (2026-11-22)
+Öne çıkanlar:
+- **Windows 11 görev çubuğu düzeni:** Tam genişlik dock artık hava durumu, Başlat, Ara, Görev görünümü ve sağ sistem alanıyla (tepsi simgeleri, Wi-Fi/ses/pil hapı, saat/tarih, bildirim zili, masaüstünü göster) Windows 11 görev çubuğu gibi çalışıyor ve sistem açık/koyu temasını izliyor.
+- **İsteğe bağlı otomatik güncelleme ve daha hızlı denetim:** Genel > Güncellemeler altında varsayılanı kapalı "Güncellemeleri otomatik indir ve kur" ayarı eklendi; Kararlı kanal artık doğrudan son sürüm adresinden tek istekle denetliyor.
+- **Daha sade ayarlar ve düzeltmeler:** Dock ayarları stile göre sadeleşti, önizlemeler ve pil durumu simgeleri eklendi; tam genişlik dock'ta açılışta pencere çakışması ve üst kenar çizgi boşluğu giderildi, sürükleyerek sıralama/klasörleme ve Kontrol Merkezi düzeltildi.
+
+### Eklenenler
+
+* **dock:** tam genişlik dock Windows 11 görev çubuğuna dönüştürüldü ve v0.2.16 el sınaması bulguları düzeltildi ([#206](https://github.com/koyhq/koy/pull/206)) ([dcb9e5a](https://github.com/koyhq/koy/commit/dcb9e5ad8a32452029928db5faa98a54ffd76607))
+* **dock:** tam genişlik dock'a Windows 11 tarzı sistem alanı eklendi (taşma oku, tepsi simgeleri, Wi-Fi/ses/pil hapı, saat/tarih, zil, masaüstünü göster) ([7a960ae](https://github.com/koyhq/koy/commit/7a960aea25ef0acd7fa6692deb9abc708ddac124))
+* **dock:** tam genişlik dock'un sol ve orta bölümü (Başlat, Ara, Görev görünümü, hava durumu, Orta/Sol hiza) Windows 11'e göre düzenlendi ([eb4c614](https://github.com/koyhq/koy/commit/eb4c61409efb1c007431790f6122a571703bf99f))
+* **dock:** tam genişlik dock sistem açık/koyu temasını izler ([4a68739](https://github.com/koyhq/koy/commit/4a68739ce509df50508a4097be72d03877f188f5))
+* **dock:** stile göre geçerli olmayan ayarlar gizlenir, Windows görev çubuğu ayarları eklendi ([acf7ae1](https://github.com/koyhq/koy/commit/acf7ae186c769c1b1ec925802f4985e99c994a75))
+* **power:** prizde, şarjda ve enerji tasarrufu pil durumları Windows 11 gibi gösterilir ([684eaef](https://github.com/koyhq/koy/commit/684eaef8694d790f6c2f97eead18ec05655b03a7))
+* **notch:** boş Ana sayfasında ayarlara yönlendiren "Kart ekle" eylemi eklendi ve ölü sekme etiketi seçeneği kaldırıldı ([4808f74](https://github.com/koyhq/koy/commit/4808f7434117fe72373eed36f4adc6145f4d13ce))
+* **settings:** daha anlaşılır adlar, çentik ve dock vektör önizlemeleri eklendi ([6ca7848](https://github.com/koyhq/koy/commit/6ca784886fa8f1e4e93ae4a70881ff519f40a421))
+* **updates:** isteğe bağlı otomatik indirme/kapanışta sessiz kurulum ve Kararlı kanalda doğrudan hızlı güncelleme denetimi eklendi ([#209](https://github.com/koyhq/koy/pull/209)) ([921723e](https://github.com/koyhq/koy/commit/921723e3043a3f4bf02adb86e114eac15b3f34c3))
+
+### Düzeltmeler
+
+* **dock:** açılışta görev çubuğu gizlenirken AppBar çalışma alanı monitör kenarından ayrılır, `SHAppBarMessage` sırasında tepsi penceresi Gezgin'in arkasına alınır ve tam genişlik üst kenar boşluğu giderildi ([b9fd4c9](https://github.com/koyhq/koy/commit/b9fd4c98b5188bfad4268e1553bd1a26b3484182), [4b3790f](https://github.com/koyhq/koy/commit/4b3790f97ea737e14270adf636fa1012dd05ddda), [a49d80e](https://github.com/koyhq/koy/commit/a49d80e0b15718fb41f334c6e3a6bf11022aeb31))
+* **dock:** ek öğelerle sürükleyerek sıralama ve kısayol adıyla klasör oluşturma düzeltildi; birleştirme sonrası boşluk kalmaz, klasör kapağı dört uygulamayla sınırlı ([30ae853](https://github.com/koyhq/koy/commit/30ae85350f7b70dc39404e7cb6cccf5d74ea6354), [9b3d0dd](https://github.com/koyhq/koy/commit/9b3d0ddf504df8d7652ff98cfd3976662a81cf15))
+* **dock:** dock uzunluk ayarı tüm stillerde gizlendi ([736f42b](https://github.com/koyhq/koy/commit/736f42b27a785c01fc971dbaff29acd32a7b9bfe))
+* **notch:** çentik yeniden açıldığında son Ana yüzü (Müzik veya Ana) korunur ([04004c0](https://github.com/koyhq/koy/commit/04004c0b0b71a1e5bbeebb5638cd39d63b30ef6b))
+* **control:** Bluetooth kapalıyken bağlı cihaz görünmez; karolar ve kaydırıcılar yumuşatıldı ([efccae2](https://github.com/koyhq/koy/commit/efccae29e58cf70eba3646ecfe97e7026451a610))
+
 ## [0.2.16](https://github.com/koyhq/koy/compare/v0.2.15...v0.2.16) (2026-11-22)
 Öne çıkanlar:
 - **Daha güvenli görev çubuğu:** Koy süreç ağacıyla birlikte sonlandırılsa bile Windows görev çubuğu geri geliyor; oturum kapatırken de geri getiriliyor, dock'u olmayan monitör kendi görev çubuğunu koruyor.
