@@ -55,6 +55,7 @@
     <SolidColorBrush x:Key="KoyDockCapsuleSurface" Color="#18181B" />
     <SolidColorBrush x:Key="KoyDockBorder" Color="#26FFFFFF" />
     <SolidColorBrush x:Key="KoyDockCapsuleBorder" Color="#1AFFFFFF" />
+    <SolidColorBrush x:Key="KoyDockHighlight" Color="#FFFFFF" />
     <SolidColorBrush x:Key="KoyDockSeparator" Color="#29FFFFFF" />
     <SolidColorBrush x:Key="KoyDockDivider" Color="#33FFFFFF" />
     <SolidColorBrush x:Key="KoyDockHover" Color="#22FFFFFF" />

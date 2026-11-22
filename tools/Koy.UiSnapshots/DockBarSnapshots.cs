@@ -77,12 +77,14 @@ internal static class DockBarSnapshots
         Shoot(outDir, prefix, theme, "dockbar-tam-genislik-baslat-windows", renderElement, fullWidth: true, smallTray: true, appCount: 8, startIcon: DockStartIcon.Windows);
         Shoot(outDir, prefix, theme, "dockbar-kapsul-baslat-windows", renderElement, fullWidth: false, smallTray: true, appCount: 8, startIcon: DockStartIcon.Windows);
 
-        // 9. Pil öğesi (sahte güç verisi): %82 deşarj ve %15 şarjda (düşük eşiğin altında ama şarjda: uyarı rengi yok)
+        // 10. Pil öğesi (sahte güç verisi): %82 deşarj ve %15 şarjda (düşük eşiğin altında ama şarjda: uyarı rengi yok)
         Shoot(outDir, prefix, theme, "dockbar-tam-genislik-pil-82", renderElement, fullWidth: true, smallTray: true, appCount: 8, battery: new FakePower(82, false));
         Shoot(outDir, prefix, theme, "dockbar-kapsul-pil-82", renderElement, fullWidth: false, smallTray: true, appCount: 8, battery: new FakePower(82, false));
         Shoot(outDir, prefix, theme, "dockbar-tam-genislik-pil-15-sarjda", renderElement, fullWidth: true, smallTray: true, appCount: 8, battery: new FakePower(15, true));
         Shoot(outDir, prefix, theme, "dockbar-kapsul-pil-15-sarjda", renderElement, fullWidth: false, smallTray: true, appCount: 8, battery: new FakePower(15, true));
         Shoot(outDir, prefix, theme, "dockbar-kapsul-pil-15-dusuk", renderElement, fullWidth: false, smallTray: true, appCount: 8, battery: new FakePower(15, false));
+        // 9. Malzeme varyantı: Katı / Buzlu / Cam, renkli zeminde, alt ve sol kenar
+        RenderMaterials(outDir, prefix, theme, renderElement);
 
         var dir = Path.Combine(Path.GetTempPath(), "koy-snap-baslat-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(dir);
@@ -103,6 +105,51 @@ internal static class DockBarSnapshots
         {
             Directory.Delete(dir, recursive: true);
         }
+    }
+
+    /// <summary>
+    /// Malzeme varyantı: tam genişlik ve kapsül dock Katı / Buzlu / Cam, renkli bir arka planın üstünde (saydamlık ve iç
+    /// kenar çizgisi görünsün diye); alt kenar ve bir dikey kenar (sol). Dosya adı: dockmat-{tam|kapsul}-{kenar}-{malzeme}.
+    /// </summary>
+    public static void RenderMaterials(string outDir, string prefix, string theme, Action<FrameworkElement, double, double, string> renderElement)
+    {
+        foreach (var edge in new[] { DockEdge.Bottom, DockEdge.Left })
+        foreach (var fullWidth in new[] { true, false })
+        foreach (var material in new[] { Koy.Core.Appearance.MaterialLevel.Solid, Koy.Core.Appearance.MaterialLevel.Frosted, Koy.Core.Appearance.MaterialLevel.Glass })
+        {
+            var name = $"dockmat-{(fullWidth ? "tam" : "kapsul")}-{edge.ToString().ToLowerInvariant()}-{material.ToString().ToLowerInvariant()}";
+            Shoot(outDir, prefix, theme, name, renderElement, fullWidth, smallTray: true, appCount: edge == DockEdge.Bottom ? 8 : 6,
+                hug: !fullWidth, material: material, edge: edge, colorful: true);
+        }
+    }
+
+    private static Grid ColorfulBackdrop(double width, double height)
+    {
+        var grid = new Grid
+        {
+            Width = width,
+            Height = height,
+            ClipToBounds = true,
+            Background = new LinearGradientBrush(
+                [new GradientStop(Color.FromRgb(0xFF, 0x3D, 0x81), 0), new GradientStop(Color.FromRgb(0xFF, 0xB3, 0x47), 0.45),
+                 new GradientStop(Color.FromRgb(0x2D, 0xD4, 0xBF), 0.75), new GradientStop(Color.FromRgb(0x3B, 0x82, 0xF6), 1)],
+                new Point(0, 0), new Point(1, 1))
+        };
+        (double X, double Y, double R, string C)[] blobs =
+        [
+            (0.12, 0.70, 70, "#FFFFFF"), (0.35, 0.40, 55, "#7C3AED"), (0.58, 0.78, 80, "#FFE14D"),
+            (0.80, 0.45, 60, "#0B1B3A"), (0.93, 0.80, 50, "#FFFFFF")
+        ];
+        var canvas = new Canvas();
+        foreach (var (x, y, r, c) in blobs)
+        {
+            var e = new System.Windows.Shapes.Ellipse { Width = r * 2, Height = r * 2, Fill = (Brush)new BrushConverter().ConvertFromString(c)! };
+            Canvas.SetLeft(e, width * x - r);
+            Canvas.SetTop(e, height * y - r);
+            canvas.Children.Add(e);
+        }
+        grid.Children.Add(canvas);
+        return grid;
     }
 
     /// <summary>Özel simge örneği: turuncu yuvarlak karo, ortasında beyaz yıldız benzeri halka.</summary>
@@ -166,13 +213,15 @@ internal static class DockBarSnapshots
         string outDir, string prefix, string theme, string name,
         Action<FrameworkElement, double, double, string> renderElement,
         bool fullWidth, bool smallTray, int appCount, int pressedIndex = -1, DockIconAlignment alignment = DockIconAlignment.Center,
-        DockStartIcon startIcon = DockStartIcon.Koy, string startIconPath = "", IReadOnlyList<DockEntryViewModel>? entries = null, bool hug = false, IPowerService? battery = null)
+        DockStartIcon startIcon = DockStartIcon.Koy, string startIconPath = "", IReadOnlyList<DockEntryViewModel>? entries = null, bool hug = false,
+        Koy.Core.Appearance.MaterialLevel? material = null, DockEdge edge = DockEdge.Bottom, bool colorful = false, IPowerService? battery = null)
     {
         var settings = new AppSettings
         {
             Dock = new DockSettings
             {
                 Style = fullWidth ? DockStyleMode.FullWidth : DockStyleMode.FloatingCapsule,
+                Edge = edge,
                 IconAlignment = alignment,
                 StartIcon = startIcon,
                 StartIconPath = startIconPath,
@@ -183,7 +232,7 @@ internal static class DockBarSnapshots
             DockItems = battery is null ? new DockItemsSettings() : new DockItemsSettings { Items = [new DockItemEntry { Kind = "Battery", Id = "Battery" }] },
             Appearance = new AppearanceSettings
             {
-                Material = Program.Material
+                Material = material ?? Program.Material
             }
         };
 
@@ -206,18 +255,41 @@ internal static class DockBarSnapshots
         // Site görüntüsü: kapsül gerçekteki gibi içeriği kadar, ekran genişliğine yayılmaz.
         if (hug)
         {
-            view.HorizontalAlignment = HorizontalAlignment.Center;
+            if (edge is DockEdge.Left or DockEdge.Right)
+            {
+                view.VerticalAlignment = VerticalAlignment.Center;
+                view.HorizontalAlignment = edge == DockEdge.Left ? HorizontalAlignment.Left : HorizontalAlignment.Right;
+            }
+            else
+            {
+                view.HorizontalAlignment = HorizontalAlignment.Center;
+            }
             // Serbest yüzen kapsül (pencereye yapışık değil): dört köşe yuvarlak.
             vm.CapsuleCornerRadius = new CornerRadius(18);
             vm.DockMargin = new Thickness(12, 12, 12, 10);
         }
 
         // Düzen iki geçişte oturur: ilk geçiş orta sütun genişliğini bildirir, simgeler yeniden boyutlanır.
-        var host = new Grid { Width = Monitor.WidthDip, DataContext = vm };
+        var vertical = edge is DockEdge.Left or DockEdge.Right;
+        var hostWidth = colorful && vertical ? 360 : Monitor.WidthDip;
+        var hostHeight = colorful ? (vertical ? 380 : 150) : double.NaN;
+        var host = new Grid { Width = hostWidth, DataContext = vm };
+        if (colorful)
+        {
+            host.Height = hostHeight;
+            host.Children.Add(ColorfulBackdrop(hostWidth, hostHeight));
+            view.HorizontalAlignment = vertical ? (edge == DockEdge.Left ? HorizontalAlignment.Left : HorizontalAlignment.Right) : HorizontalAlignment.Stretch;
+            view.VerticalAlignment = vertical ? VerticalAlignment.Stretch : VerticalAlignment.Bottom;
+            if (hug)
+            {
+                view.HorizontalAlignment = vertical ? view.HorizontalAlignment : HorizontalAlignment.Center;
+                if (vertical) view.VerticalAlignment = VerticalAlignment.Center;
+            }
+        }
         host.Children.Add(view);
         for (var i = 0; i < 2; i++)
         {
-            host.Measure(new Size(Monitor.WidthDip, double.PositiveInfinity));
+            host.Measure(new Size(hostWidth, colorful ? hostHeight : double.PositiveInfinity));
             host.Arrange(new Rect(0, 0, host.DesiredSize.Width, host.DesiredSize.Height));
             host.UpdateLayout();
             Pump();
@@ -227,6 +299,12 @@ internal static class DockBarSnapshots
         {
             vm.Items[pressedIndex].SnapPress(true);
             host.UpdateLayout();
+        }
+
+        if (colorful)
+        {
+            renderElement(host, hostWidth, hostHeight, Path.Combine(outDir, $"{prefix}-{theme}-{name}.png"));
+            return;
         }
 
         renderElement(host, Monitor.WidthDip, fullWidth ? DockPositionResolver.FullWidthHeightDip : hug ? 120 : 80, Path.Combine(outDir, $"{prefix}-{theme}-{name}.png"));

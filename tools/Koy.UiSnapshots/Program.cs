@@ -125,6 +125,8 @@ public static class Program
                 DockBarSnapshots.RenderSite(outDir, prefix, theme, RenderElement);
             else if (scene is "dockbar" or "dockbars")
                 DockBarSnapshots.Render(outDir, prefix, theme, RenderElement);
+            else if (scene is "dockmat" or "dockmaterial")
+                DockBarSnapshots.RenderMaterials(outDir, prefix, theme, RenderElement);
             else if (scene is "dock" or "folder" or "folders")
                 RenderDockFolders(outDir, prefix, theme);
             else if (scene is "jumplist" or "atlama")

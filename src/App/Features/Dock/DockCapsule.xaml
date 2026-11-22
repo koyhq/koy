@@ -9,7 +9,7 @@
 
     <!-- Seelen UI Yüzen Kapsül Tabanı: 60 px yükseklik (aşağı yapışınca 46 px), 18 px köşe yuvarlama (yapışınca 14,14,0,0) -->
     <res:ShadowBorder ShadowBlur="12" ShadowDepth="4" ShadowOpacity="0.35" Background="{Binding CapsuleSurface}"
-            BorderBrush="{DynamicResource KoyDockCapsuleBorder}"
+            BorderBrush="{Binding CapsuleBorderBrush}"
             BorderThickness="1"
             CornerRadius="{Binding CapsuleCornerRadius}"
             Width="{Binding CapsuleWidth}"

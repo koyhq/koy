@@ -355,6 +355,27 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private Brush _capsuleSurface = Brushes.Black;
 
+    /// <summary>Simge karosu zeminleri (etkin, üstüne gelinen) ve kenarlığı; Katı'da eski fırçalar, kenarlık yok. DockItemsStrip bağlar.</summary>
+    [ObservableProperty]
+    private Brush _tileActiveFill = Brushes.Transparent;
+
+    [ObservableProperty]
+    private Brush _tileHoverFill = Brushes.Transparent;
+
+    [ObservableProperty]
+    private Brush _tileBorderBrush = Brushes.Transparent;
+
+    [ObservableProperty]
+    private Thickness _tileBorderThickness;
+
+    /// <summary>Tam genişlik kenarlığı: Katı'da KoyDockBorder, Buzlu/Cam'da parlak iç kenar çizgisi.</summary>
+    [ObservableProperty]
+    private Brush _fullWidthBorderBrush = Brushes.Transparent;
+
+    /// <summary>Kapsül kenarlığı: Katı'da KoyDockCapsuleBorder, Buzlu/Cam'da iç kenardan dışa inen ışıklı çizgi.</summary>
+    [ObservableProperty]
+    private Brush _capsuleBorderBrush = Brushes.Transparent;
+
     private readonly AppSettings _materialSettings;
 
     // Taban renkler KoyDockSurface / KoyDockCapsuleSurface kaynaklarından okunur (varsayılan #121216 / #18181B); tema
@@ -366,19 +387,40 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     private static Color ReadColor(string key, Color fallback) =>
         System.Windows.Application.Current?.TryFindResource(key) is SolidColorBrush b ? b.Color : fallback;
 
+    private static readonly Color DefaultTileActive = Color.FromArgb(0x1A, 0xFF, 0xFF, 0xFF);
+    private static readonly Color DefaultTileHover = Color.FromArgb(0x22, 0xFF, 0xFF, 0xFF);
+    private static readonly Color DefaultHighlightColor = Colors.White;
+    private static readonly Color DefaultFullWidthBorder = Color.FromArgb(0x26, 0xFF, 0xFF, 0xFF);
+    private static readonly Color DefaultCapsuleBorder = Color.FromArgb(0x1A, 0xFF, 0xFF, 0xFF);
+
+    private static Brush ReadBrush(string key, Color fallback)
+    {
+        if (System.Windows.Application.Current?.TryFindResource(key) is Brush b)
+            return b;
+        var f = new SolidColorBrush(fallback);
+        f.Freeze();
+        return f;
+    }
+
+    // Hangi ipucu hangi malzeme ve kenarda: Core/Dock/DockMaterialPolicy; burada yalnız dondurulmuş fırçaya çevrilir.
     private void UpdateMaterialSurfaces()
     {
         var level = MaterialState.ForDock(_materialSettings);
-        var fullBase = ReadColor("KoyDockSurface", DefaultFullWidthColor);
-        var full = new SolidColorBrush(Color.FromArgb(MaterialSetting.LayeredAlpha(level), fullBase.R, fullBase.G, fullBase.B));
-        full.Freeze();
-        FullWidthSurface = full;
+        var highlight = ReadColor("KoyDockHighlight", DefaultHighlightColor);
 
-        var capsuleBase = ReadColor("KoyDockCapsuleSurface", DefaultCapsuleColor);
-        var capsuleAlpha = Math.Min((byte)0xE6, MaterialSetting.LayeredAlpha(level)); // kapsül Katı'da da %90; daha opak olmaz
-        var capsule = new SolidColorBrush(Color.FromArgb(capsuleAlpha, capsuleBase.R, capsuleBase.G, capsuleBase.B));
-        capsule.Freeze();
-        CapsuleSurface = capsule;
+        var fullLook = DockMaterialPolicy.For(level, Edge, fullWidth: true);
+        FullWidthSurface = DockSurfaceBrushes.Surface(fullLook, ReadColor("KoyDockSurface", DefaultFullWidthColor));
+        FullWidthBorderBrush = DockSurfaceBrushes.Border(fullLook, ReadBrush("KoyDockBorder", DefaultFullWidthBorder), highlight, gradient: false);
+
+        var capsuleLook = DockMaterialPolicy.For(level, Edge, fullWidth: false);
+        CapsuleSurface = DockSurfaceBrushes.Surface(capsuleLook, ReadColor("KoyDockCapsuleSurface", DefaultCapsuleColor));
+        CapsuleBorderBrush = DockSurfaceBrushes.Border(capsuleLook, ReadBrush("KoyDockCapsuleBorder", DefaultCapsuleBorder), highlight, gradient: true);
+
+        // Simge karoları (etkin / üstüne gelinen): iki dock'ta aynı; Katı'da eski KoyDockActive / KoyDockHover fırçası, kenarlık yok.
+        TileActiveFill = DockSurfaceBrushes.TileFill(fullLook, ReadBrush("KoyDockActive", DefaultTileActive), highlight, hover: false);
+        TileHoverFill = DockSurfaceBrushes.TileFill(fullLook, ReadBrush("KoyDockHover", DefaultTileHover), highlight, hover: true);
+        TileBorderBrush = DockSurfaceBrushes.TileBorder(fullLook, highlight);
+        TileBorderThickness = fullLook.HasTile ? new Thickness(1) : new Thickness(0);
     }
 
     private void OnMaterialChanged() => UpdateMaterialSurfaces();
@@ -533,6 +575,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(DodgeHandleVerticalAlignment));
         OnPropertyChanged(nameof(DodgeHandleMargin));
         OnPropertyChanged(nameof(FullWidthBorderThickness));
+        UpdateMaterialSurfaces(); // sheen yönü kenarı izler
         OnPropertyChanged(nameof(FullWidthPadding));
         OnPropertyChanged(nameof(StripAlignment));
         OnPropertyChanged(nameof(VerticalStripAlignment));
