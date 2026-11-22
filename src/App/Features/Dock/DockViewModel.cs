@@ -18,6 +18,7 @@ using Koy.Core.Appearance;
 using Koy.Core.Display;
 using Koy.Core.Dock;
 using Koy.Core.Dock.Items;
+using Koy.Core.Dock.SystemArea;
 using Koy.Core.JumpList;
 using Koy.Core.Media;
 using Koy.Core.Power;
@@ -324,7 +325,28 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         EvaluatePosition(_lastContentWidth);
     }
 
+    /// <summary>Taşma penceresindeki simgeler (tam genişlikte yalnız "Taşma" olanlar; kapsülde gizli olmayanların hepsi).</summary>
     public ObservableCollection<TrayIconViewModel> TrayIcons { get; } = [];
+
+    /// <summary>
+    /// Tam genişlik sistem alanında doğrudan görünen tepsi simgeleri (uygulama başına ayar "Göster"). Windows görev çubuğundaki
+    /// gibi taşma okunun yanında durur; kapsülde ve sistem alanı yokken boştur.
+    /// </summary>
+    public ObservableCollection<TrayIconViewModel> VisibleTrayIcons { get; } = [];
+
+    /// <summary>Sistem alanı (Windows 11 görev çubuğu sağ ucu) parçaları; yalnız tam genişlik ve yatay kenarda.</summary>
+    public DockSystemAreaLayout SystemArea => DockSystemArea.Resolve(
+        Status is not null && _settings.Dock.Style == DockStyleMode.FullWidth, IsVertical, HasTray, Status?.HasBattery == true);
+
+    /// <summary>Sistem alanı çiziliyor: sağ bölümde eski düğmeler (İndirilenler, Son kullanılanlar, Koy menüsü) yerine o gelir.</summary>
+    public bool ShowSystemArea => SystemArea.IsActive;
+
+    /// <summary>Eski sağ bölüm (kapsül ve dikey kenar).</summary>
+    public bool ShowLegacyRightSection => !ShowSystemArea;
+
+    /// <summary>Sistem alanının ince "Masaüstünü göster" şeridinin genişliği (DIP).</summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "XAML binding")]
+    public double DesktopStripWidth => DockSystemArea.DesktopStripWidthDip;
 
     // Tam Genişlik Modu: Çalan müzik hapı (Sol bölüm)
     [ObservableProperty]
@@ -696,6 +718,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             _trayService.IconsChanged += OnTrayIconsChanged;
         }
 
+        SyncVisibleTrayIcons();
         UpdateItems();
     }
 
@@ -719,7 +742,12 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         IsTrayPopupOpen = false;
         TrayIcons.Clear();
         HasTrayIcons = false;
+        VisibleTrayIcons.Clear();
         OnPropertyChanged(nameof(HasTray));
+        OnPropertyChanged(nameof(SystemArea));
+        OnPropertyChanged(nameof(ShowSystemArea));
+        OnPropertyChanged(nameof(ShowLegacyRightSection));
+        SyncVisibleTrayIcons();
         OnPropertyChanged(nameof(ShowRightSection));
         OnPropertyChanged(nameof(ShowFullTray));
         OnPropertyChanged(nameof(ShowSmallTray));
@@ -820,8 +848,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     private void OnTrayIconsChanged(object? sender, EventArgs e)
     {
-        // Tepsi iş parçacığından gelir. Pencere kapalıyken arayüze hiç dönülmez: açılırken liste zaten baştan okunur.
-        if (!_trayPopupOpen)
+        // Tepsi iş parçacığından gelir. Pencere kapalıyken ve doğrudan görünen simge yokken arayüze hiç dönülmez:
+        // açılırken liste zaten baştan okunur. Sistem alanı varken görünen simgeler olay gelince tazelenir (yoklama yok).
+        if (!_trayPopupOpen && !SystemArea.ShowVisibleTray)
             return;
 
         // Sık değişen simgelerde (animasyonlu ipucu, rozet) arka arkaya iş biriktirme: bekleyen tek bir eşitleme yeter.
@@ -840,6 +869,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             Volatile.Write(ref _traySyncQueued, 0);
             if (IsTrayPopupOpen)
                 SyncTrayIcons();
+            SyncVisibleTrayIcons();
         }, DispatcherPriority.Background);
     }
 
@@ -852,8 +882,11 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         // başına bir kez okunur; pencere kapanınca önbellek simgelerle birlikte bırakılır.
         var perApp = _settings.Dock.TrayAppVisibility ?? new ValueDictionary<TrayIconVisibility>();
         var newDefault = _settings.Dock.NewTrayIconVisibility;
+        // Sistem alanı varken "Göster" simgeler doğrudan görünür (VisibleTrayIcons); taşma penceresinde yalnız "Taşma" olanlar kalır.
+        var inlineShown = SystemArea.ShowVisibleTray;
         var models = _trayService.GetVisibleIcons()
-            .Where(m => TrayIconVisibilityPolicy.Resolve(TrayExeName(m.OwnerHwnd), perApp, newDefault) != TrayIconVisibility.Hidden)
+            .Where(m => TrayIconVisibilityPolicy.Resolve(TrayExeName(m.OwnerHwnd), perApp, newDefault) is var v
+                        && v != TrayIconVisibility.Hidden && !(inlineShown && v == TrayIconVisibility.Shown))
             .ToList();
 
         for (var i = TrayIcons.Count - 1; i >= 0; i--)
@@ -895,6 +928,59 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         HasTrayIcons = TrayIcons.Count > 0;
     }
 
+    /// <summary>Doğrudan görünen simgeleri tepsi servisinden eşitler (sistem alanı yoksa liste boşalır ve bellek bırakılır).</summary>
+    private void SyncVisibleTrayIcons()
+    {
+        if (_trayService is null || !SystemArea.ShowVisibleTray)
+        {
+            if (VisibleTrayIcons.Count > 0)
+                VisibleTrayIcons.Clear();
+            return;
+        }
+
+        var perApp = _settings.Dock.TrayAppVisibility ?? new ValueDictionary<TrayIconVisibility>();
+        var newDefault = _settings.Dock.NewTrayIconVisibility;
+        var models = _trayService.GetVisibleIcons()
+            .Where(m => TrayIconVisibilityPolicy.Resolve(TrayExeName(m.OwnerHwnd), perApp, newDefault) == TrayIconVisibility.Shown)
+            .ToList();
+
+        for (var i = VisibleTrayIcons.Count - 1; i >= 0; i--)
+        {
+            var key = VisibleTrayIcons[i].Key;
+            if (!models.Any(m => m.Key == key))
+                VisibleTrayIcons.RemoveAt(i);
+        }
+
+        for (var targetIndex = 0; targetIndex < models.Count; targetIndex++)
+        {
+            var model = models[targetIndex];
+            var existingIndex = -1;
+            for (var j = 0; j < VisibleTrayIcons.Count; j++)
+            {
+                if (VisibleTrayIcons[j].Key == model.Key)
+                {
+                    existingIndex = j;
+                    break;
+                }
+            }
+
+            TrayIconViewModel vm;
+            if (existingIndex >= 0)
+            {
+                vm = VisibleTrayIcons[existingIndex];
+                if (existingIndex != targetIndex)
+                    VisibleTrayIcons.Move(existingIndex, targetIndex);
+            }
+            else
+            {
+                vm = new TrayIconViewModel(model, TrayExeName(model.OwnerHwnd));
+                VisibleTrayIcons.Insert(targetIndex, vm);
+            }
+
+            vm.Update(model, _trayService.GetIconImage);
+        }
+    }
+
     private readonly Dictionary<nint, string> _trayExeByOwner = [];
 
     private string TrayExeName(nint ownerHwnd)
@@ -913,6 +999,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     {
         _shellActionService.SendWinKey();
     }
+
+    /// <summary>Sağ tık menüsü (tam genişlik): Windows görev çubuğundaki "Görev Yöneticisi".</summary>
+    [RelayCommand]
+    private void OpenTaskManager() => _shellActionService.Launch("taskmgr.exe");
 
     [RelayCommand]
     private void SystemTray()
@@ -1786,7 +1876,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
         var layout = DockItemLayout.Merge(specs, _effectiveOrder);
         _layout = layout;
-        SetBatteryPower(layout.Any(i => i.Kind == DockItemKind.Battery));
+        // Sistem alanı pili ve saati zaten çiziyorsa ek öğeleri ikinci kez çizilmez (kayıtlı düzenden silinmez).
+        var systemArea = SystemArea;
+        SetBatteryPower(layout.Any(i => i.Kind == DockItemKind.Battery && !DockSystemArea.HidesExtra(i.Kind, systemArea)));
 
         var pinned = new Dictionary<string, DockEntryViewModel>(StringComparer.OrdinalIgnoreCase);
         var running = new List<DockEntryViewModel>();
@@ -1811,6 +1903,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                     result.Add(entry);
                 continue;
             }
+
+            if (DockSystemArea.HidesExtra(spec.Kind, systemArea))
+                continue;
 
             // Pili olmayan makinede pil öğesi şeritte yer tutmaz (kayıtlı düzende kalır).
             if (spec.Kind == DockItemKind.Battery && !(_power is { } power && DockBatteryPolicy.IsShown(power.HasBattery)))
@@ -2134,6 +2229,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _dodgeHoverTimer.Stop();
         _snapTimer?.Stop();
         SetBatteryPower(false);
+        Status?.Dispose();
         if (_clockTimer is not null)
         {
             _clockTimer.Stop();

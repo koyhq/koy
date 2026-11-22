@@ -1917,6 +1917,21 @@
   <data name="DockDownloads" xml:space="preserve">
     <value>Downloads folder</value>
   </data>
+  <data name="DockBellTooltip" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="DockBellTooltipDnd" xml:space="preserve">
+    <value>Notifications (do not disturb is on)</value>
+  </data>
+  <data name="DockShowDesktop" xml:space="preserve">
+    <value>Show desktop</value>
+  </data>
+  <data name="DockTaskManager" xml:space="preserve">
+    <value>Task Manager</value>
+  </data>
+  <data name="DockTaskbarSettings" xml:space="preserve">
+    <value>Taskbar settings</value>
+  </data>
   <data name="DockKoyMenu" xml:space="preserve">
     <value>Koy menu</value>
   </data>

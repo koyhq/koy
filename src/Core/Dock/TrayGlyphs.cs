@@ -11,6 +11,8 @@ public static class TrayGlyphs
     public const string Ethernet = "\uE839";
     public const string Offline = "\uF384";
     public const string Notifications = "\uEA8F";
+    /// <summary>Rahatsız etmeyin açıkken zil (üstü çizili).</summary>
+    public const string NotificationsMuted = "";
 
     private const string Mute = "\uE74F";
 

@@ -110,11 +110,18 @@
                     <local:DockItemsStrip HorizontalAlignment="{Binding StripAlignment}" VerticalAlignment="Center"/>
                 </Grid>
 
-                <!-- Sağ Bölüm: İndirilenler, Son kullanılanlar, Tepsi | Koy menüsü, küçük tepsi (ayarlar kapsülle aynı) -->
+                <!-- Sağ Bölüm: Windows 11 sistem alanı (taşma oku, tepsi simgeleri, Wi-Fi + ses + pil, saat, zil, masaüstünü göster).
+                     Windows'ta olmayan düğmeler (İndirilenler, Son kullanılanlar, Koy menüsü) tam genişlikte yoktur; Koy menüsüne
+                     sağ tık menüsünden ulaşılır. Sistem alanı çizilmiyorsa (Status yok) eski düğmeler kalır. -->
+                <local:DockSystemAreaControl Grid.Column="2"
+                                      HorizontalAlignment="Right"
+                                      VerticalAlignment="Stretch"
+                                      Visibility="{Binding ShowSystemArea, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"/>
                 <StackPanel Grid.Column="2"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right"
-                            VerticalAlignment="Center">
+                            VerticalAlignment="Center"
+                            Visibility="{Binding ShowLegacyRightSection, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
                     <Button Style="{StaticResource DockFlatButtonStyle}"
                             Command="{Binding OpenDownloadsCommand}"
                             ToolTip="{Binding [DockDownloads], Source={x:Static res:Loc.Instance}}"

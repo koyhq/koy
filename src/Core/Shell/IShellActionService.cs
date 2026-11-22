@@ -26,6 +26,14 @@ public interface IShellActionService
     void OpenNotificationCenter();
 
     /// <summary>
+    /// Masaüstünü göster / geri getir (Windows "Masaüstünü göster" düğmesi; Win+D girdisi gönderir). Varsayılan gövde boştur:
+    /// yalnız gerçek kabuk uygulaması (<c>ShellActionService</c>) bir şey yapar, sahte uygulamaların değişmesi gerekmez.
+    /// </summary>
+    void ShowDesktop()
+    {
+    }
+
+    /// <summary>
     /// Belirtilen dosya veya kısayolu çalıştırır.
     /// </summary>
     void Launch(string path, string? arguments = null);

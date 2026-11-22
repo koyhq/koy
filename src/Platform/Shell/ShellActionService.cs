@@ -31,6 +31,9 @@ public sealed class ShellActionService : IShellActionService
 
     public void OpenQuickSettings() => SendWinCombo(VIRTUAL_KEY.VK_A);
 
+    // Win + D: açık pencereleri küçültür, ikinci basışta geri getirir (Windows "Masaüstünü göster" düğmesiyle aynı davranış).
+    public void ShowDesktop() => SendWinCombo(VIRTUAL_KEY.VK_D);
+
     public void OpenNotificationCenter() =>
         SendWinCombo(OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000)
             ? VIRTUAL_KEY.VK_N

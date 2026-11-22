@@ -11,6 +11,7 @@ using Koy.Core.Shell;
 using Koy.Core.StartMenu;
 using Koy.Core.Tray;
 using Koy.Core.Visibility;
+using Koy.Platform.Audio;
 using Koy.Platform.Display;
 using Koy.Platform.JumpList;
 using Koy.Platform.Media;
@@ -612,7 +613,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
     private DockViewModel CreateViewModel(VisibilityController visibilityController, WindowRect monitorBounds)
     {
-        var viewModel = new DockViewModel(settings, _controller!, _shellActionService!, visibilityController, status: null,
+        var viewModel = new DockViewModel(settings, _controller!, _shellActionService!, visibilityController, status: CreateStatus(),
             mediaService: _mediaService, trayService: _trayService, recentFiles: _recentFiles, jumpLists: _jumpLists,
             startMenu: _startMenu, acquirePower: services.AcquirePowerService, releasePower: services.ReleasePowerService)
         {
@@ -620,6 +621,38 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         };
         viewModel.SetMonitorBounds(monitorBounds);
         return viewModel;
+    }
+
+    // Tam genişlik dock'un sistem alanı (Wi-Fi, ses, pil, saat, zil) için servisler: yalnız tam genişlik ve yatay kenarda alınır,
+    // son kullanan bırakınca bırakılır (AGENTS #5). Ağ ve güç paylaşımlı sayaçlı servislerdir; ses ve odak yardımı Dock'a özel.
+    private AudioService? _dockAudio;
+    private FocusAssistService? _dockFocus;
+    private int _statusUsers;
+
+    private DockStatusViewModel? CreateStatus()
+    {
+        if (settings.Dock.Style != DockStyleMode.FullWidth || settings.Dock.Edge is DockEdge.Left or DockEdge.Right || _shellActionService is null)
+            return null;
+
+        _statusUsers++;
+        _dockAudio ??= new AudioService();
+        _dockFocus ??= new FocusAssistService();
+        return new DockStatusViewModel(services.AcquireNetworkService(), _dockAudio, services.AcquirePowerService(),
+            _shellActionService, _dockFocus, ReleaseStatusServices);
+    }
+
+    private void ReleaseStatusServices()
+    {
+        services.ReleaseNetworkService();
+        services.ReleasePowerService();
+        if (--_statusUsers > 0)
+            return;
+
+        _statusUsers = 0;
+        _dockAudio?.Dispose();
+        _dockAudio = null;
+        _dockFocus?.Dispose();
+        _dockFocus = null;
     }
 
     /// <summary>Pencere davranışı ayarlarını paylaşılan denetleyiciye uygular (sol tık eylemi, taşıma izleme).</summary>

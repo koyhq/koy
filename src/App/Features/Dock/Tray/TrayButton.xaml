@@ -42,6 +42,20 @@
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource KoyNotchHover}"/>
                         </Trigger>
+                        <!-- Sistem alanı oku: Windows gibi dar, hap köşesi 6; hover Koy'un cam karosu (DockViewModel.TileHoverFill) -->
+                        <Trigger Property="Tag" Value="system">
+                            <Setter TargetName="chevron" Property="Size" Value="14"/>
+                            <Setter TargetName="border" Property="CornerRadius" Value="6"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Tag" Value="system"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="border" Property="Background" Value="{Binding DataContext.TileHoverFill, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{Binding DataContext.TileBorderBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            <Setter TargetName="border" Property="BorderThickness" Value="{Binding DataContext.TileBorderThickness, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        </MultiTrigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource KoyNotchPressed}"/>
                         </Trigger>
