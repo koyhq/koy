@@ -188,6 +188,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private void ApplyLoadedSettings()
     {
         LoadFromSettings();
+        // Ekranlar sayfasının kartları LoadFromSettings'te yenilenmez; sıfırlanan monitör ayarını göstersin.
+        Displays.Refresh();
         SettingsSaved?.Invoke();
         if (Application.Current is { } current)
             ThemeManager.Apply(current, _store.Load());
@@ -1929,17 +1931,8 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     /// <summary>Varsayılandan farklı ayar anahtarları ("Dock.ShowTray"); pencere satırları buna göre işaretler.</summary>
     public IReadOnlyList<string> ChangedSettingKeys() => SettingsChanges.ChangedKeys(_store.Load(), new AppSettings());
 
-    /// <summary>Sayfa dizinine göre sıfırlanacak bölümler. Dock ve Ekranlar yok (görev çubuğu / AppBar etkisi).</summary>
-    public static IReadOnlyList<string> ResetSectionsFor(int pageIndex) => pageIndex switch
-    {
-        0 => [nameof(AppSettings.General)],
-        // Hava durumu konumu kullanıcı verisidir, sayfa sıfırlamada korunur.
-        1 => [nameof(AppSettings.Notch), nameof(AppSettings.Music), nameof(AppSettings.Focus), nameof(AppSettings.Search), nameof(AppSettings.Clipboard)],
-        4 => [nameof(AppSettings.Appearance)],
-        5 => [nameof(AppSettings.Shortcuts)],
-        6 => [nameof(AppSettings.Voice)],
-        _ => [],
-    };
+    /// <summary>Sayfa dizinine göre sıfırlanacak hedefler; eşleme Core'da (<see cref="SettingsPageReset.TargetsFor"/>).</summary>
+    public static IReadOnlyList<string> ResetSectionsFor(int pageIndex) => SettingsPageReset.TargetsFor(pageIndex);
 
     public bool CanResetPage => ResetSectionsFor(SelectedPageIndex).Count > 0;
 
