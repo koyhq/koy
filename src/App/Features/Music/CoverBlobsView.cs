@@ -9,14 +9,15 @@ namespace Koy.App.Features.Music;
 
 /// <summary>
 /// Müzik sayfasında kapak renginden akan zemin (issue #182, hesap <see cref="CoverBlobs"/>). Üç radyal gradyanlı
-/// elips yavaşça kayar ve büyüyüp küçülür. Kare yalnız görünürken ve çalarken, en çok 15 fps; duraklatınca lekeler
-/// oldukları yerde durur. Parça değişince renkler 0,6 sn'de yenilerine geçer (duraklatılmışken de).
+/// elips yavaşça kayar ve büyüyüp küçülür. Kare yalnız görünürken ve çalarken, 10 fps (hareket en hızlı noktada
+/// saniyede ~11 DIP, kare başına ~1 DIP; gradyan kenarları yumuşak olduğu için akıcı görünür) ve ortak müzik saatinde
+/// (<see cref="MusicFrameClock">plakla aynı vuruş</see>); duraklatınca lekeler oldukları yerde durur. Parça değişince renkler 0,6 sn'de yenilerine geçer (duraklatılmışken de).
 /// Hareket kapalıysa (Windows "animasyonları azalt", pil tasarrufu, Animasyon: Kapalı) lekeler sabit durur.
 /// Shader efekti yok: yalnız gradyan, kayma ve ölçek.
 /// </summary>
 public sealed class CoverBlobsView : Canvas
 {
-    private const double FrameSeconds = 1.0 / 15;
+    private const double Fps = 10;
 
     // Lekelerin kartın sol üstüne göre yeri ve çapı (tasarım: 620×352 çentikte 420 / 460 / 360).
     private static readonly (double X, double Y, double Size, double Alpha)[] Layout =
@@ -53,9 +54,7 @@ public sealed class CoverBlobsView : Canvas
     private Rgb[] _to = [];
     private double _fade = 1;
 
-    private bool _rendering;
-    private TimeSpan _lastFrame;
-    private double _sinceDraw;
+    private object? _clock;
     private double _seconds;
 
     public CoverBlobsView()
@@ -151,40 +150,16 @@ public sealed class CoverBlobsView : Canvas
             StopClock();
     }
 
-    private void StartClock()
-    {
-        if (_rendering)
-            return;
-
-        _rendering = true;
-        _lastFrame = TimeSpan.Zero;
-        _sinceDraw = FrameSeconds;
-        CompositionTarget.Rendering += OnRendering;
-    }
+    private void StartClock() => _clock ??= MusicFrameClock.Subscribe(Fps, OnFrame);
 
     private void StopClock()
     {
-        if (!_rendering)
-            return;
-
-        CompositionTarget.Rendering -= OnRendering;
-        _rendering = false;
+        MusicFrameClock.Unsubscribe(_clock);
+        _clock = null;
     }
 
-    private void OnRendering(object? sender, EventArgs e)
+    private void OnFrame(double step)
     {
-        var now = ((RenderingEventArgs)e).RenderingTime;
-        var dt = _lastFrame == TimeSpan.Zero ? 0 : (now - _lastFrame).TotalSeconds;
-        _lastFrame = now;
-        if (dt < 0)
-            return;
-
-        _sinceDraw += dt;
-        if (_sinceDraw < FrameSeconds)
-            return;
-
-        var step = _sinceDraw;
-        _sinceDraw = 0;
         if (IsPlaying && Motion.Enabled)
         {
             _seconds += step;

@@ -69,6 +69,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     private TrayHostService? _trayService;   // yalnız görev çubuğu gizliyken dolu (ApplyTrayPolicy)
     private DockController? _controller;
     private DispatcherTimer? _edgePeekTimer;
+    private RefreshDebouncer? _windowsRecheck;  // pencere olayı fırtınasında ön plan denetimini birleştirir (DockWindowEventPolicy)
 
     /// <summary>Açık dock penceresi sayısı. Dock'ta Koy düğmesi göründüğü için bildirim alanı simgesi buna bakar.</summary>
     public int WindowCount => _windowStates.Count;
@@ -146,6 +147,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
         _windowTracker.ForegroundWindowChanged += OnForegroundWindowChanged;
         _windowTracker.WindowsChanged += OnWindowsChanged;
+        _windowsRecheck = new RefreshDebouncer(RecheckForegroundFromWindowEvent, DockWindowEventPolicy.RecheckDelay,
+            post: action => Application.Current?.Dispatcher.InvokeAsync(action));
 
         // İzleyici paylaşımlı: Notch onu önceden başlattıysa ilk ön plan olayı bir daha gelmez, mevcut durumu elle uygula.
         var trackerWasRunning = _windowTracker.IsStarted;
@@ -824,6 +827,15 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         // Bir pencere gösterildiğinde (görev çubuğu dahil) tetiklenir; görev çubuğu yeniden göründüyse gizle.
         EnsureTaskbarHidden();
 
+        // Ağır kısım (çok monitörde EnumWindows + z-sırası) fırtınada tek denetime birleşir.
+        _windowsRecheck?.Request();
+    }
+
+    private void RecheckForegroundFromWindowEvent()
+    {
+        if (_stopping)
+            return;
+
         if (_windowTracker?.CurrentForeground is { } fg && fg.Handle != 0)
         {
             RecheckForegroundState(fg);
@@ -1141,6 +1153,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             }
             _windowTracker.ForegroundWindowChanged -= OnForegroundWindowChanged;
             _windowTracker.WindowsChanged -= OnWindowsChanged;
+            _windowsRecheck?.Dispose();
+            _windowsRecheck = null;
             _windowHookLease?.Dispose();
             _windowHookLease = null;
             _windowTracker = null;

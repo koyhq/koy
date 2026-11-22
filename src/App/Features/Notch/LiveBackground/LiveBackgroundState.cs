@@ -70,9 +70,9 @@ public sealed partial class LiveBackgroundState : ObservableObject
     /// <summary>
     /// Durum değişince (çentik açıldı/kapandı, görünürlük, pil) çağrılır. Hareketi azalt = Koy'un hareket çarpanı 0
     /// (Windows "animasyonları azalt", Animasyon: Kapalı ya da pil tasarrufu); pil tasarrufu = pille çalışırken
-    /// "pil tasarrufunda animasyonları azalt" açık.
+    /// "pil tasarrufunda animasyonları azalt" açık. <paramref name="isBackdropCovered"/>: çentik zemini opak müzik kartının altında.
     /// </summary>
-    public void Update(bool isNotchExpanded, bool isWindowVisible, bool isBatterySaver)
+    public void Update(bool isNotchExpanded, bool isWindowVisible, bool isBatterySaver, bool isBackdropCovered = false)
     {
         if (Selection.Kind == LiveBackgroundContentKind.None)
         {
@@ -83,7 +83,7 @@ public sealed partial class LiveBackgroundState : ObservableObject
         var reduceMotion = !Motion.Enabled;
         var isVideo = Selection.IsVideo;
         NotchMode = LiveBackgroundPlaybackPolicy.Decide(
-            isNotchExpanded, isWindowVisible, reduceMotion, isBatterySaver, _target, LiveBackgroundSurface.Notch, isVideo);
+            isNotchExpanded, isWindowVisible, reduceMotion, isBatterySaver, _target, LiveBackgroundSurface.Notch, isVideo, isBackdropCovered);
         MusicCardMode = LiveBackgroundPlaybackPolicy.Decide(
             isNotchExpanded, isWindowVisible, reduceMotion, isBatterySaver, _target, LiveBackgroundSurface.MusicCard, isVideo);
     }

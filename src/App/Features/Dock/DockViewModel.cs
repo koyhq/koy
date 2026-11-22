@@ -1957,12 +1957,17 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             NowPlayingTitle = Strings.NoMediaPlaying;
             NowPlayingArtist = "Koy";
             NowPlayingCover = null;
+            _coverTracker.Reset();
             return;
         }
 
         HasNowPlaying = true;
         NowPlayingTitle = !string.IsNullOrWhiteSpace(info.Title) ? info.Title : Strings.Get("UnknownTrack");
         NowPlayingArtist = !string.IsNullOrWhiteSpace(info.Artist) ? info.Artist : Strings.Get("UnknownArtist");
+
+        // Oynat/duraklat ve aynı albümün parçaları aynı kapağı getirir: yeniden çözülmez.
+        if (!_coverTracker.HasChanged(info.Thumbnail))
+            return;
 
         if (info.Thumbnail is { Length: > 0 })
         {
@@ -1981,6 +1986,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             catch
             {
                 NowPlayingCover = null;
+                _coverTracker.Reset();
             }
         }
         else
@@ -1988,6 +1994,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             NowPlayingCover = null;
         }
     }
+
+    private readonly Koy.Core.Media.CoverChangeTracker _coverTracker = new();
 
     private void OnControllerItemsChanged(object? sender, EventArgs e) => UpdateItems();
     private void OnFullscreenStateChanged(object? sender, bool isFullscreen) => EvaluatePosition(_lastContentWidth);

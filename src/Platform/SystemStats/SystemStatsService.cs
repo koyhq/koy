@@ -16,7 +16,8 @@ namespace Koy.Platform.SystemStats;
 /// GetSystemTimes, GlobalMemoryStatusEx, GetIfTable2, K32GetProcessMemoryInfo (mikrosaniyeler).
 ///
 /// "En çok CPU kullanan süreç" PAHALI: Process.GetProcesses her taramada onlarca-yüzlerce süreç nesnesi ve
-/// TotalProcessorTime için süreç başına tutamaç açar (tek tarama on ms mertebesi, çöp üretir). Bu yüzden 3 saniyede
+/// TotalProcessorTime için süreç başına tutamaç açar (tek tarama on ms mertebesi, çöp üretir). Taban taraması
+/// <see cref="Start"/>'ı çağıran (arayüz) iş parçacığında değil, ilk örnekte thread pool'da yapılır. Bu yüzden 3 saniyede
 /// bir yapılır (<see cref="ProcessScanEveryTicks"/>); iki tarama arası değer sabit kalır. 1 sn'de bir yapmak
 /// çentik açıkken bile gereksiz CPU yakardı; 3 sn gözle fark edilmez.
 /// <see cref="Updated"/> zamanlayıcının thread pool iş parçacığından gelir (UI'ya Dispatcher ile geçirin).
@@ -39,6 +40,7 @@ public sealed class SystemStatsService : ISystemStatsService
     private ulong _prevIn, _prevOut;
     private long _prevTicks;
     private int _tick;
+    private bool _needProcessBaseline;
     private Dictionary<int, double> _prevProcessCpu = [];
     private long _prevScanTicks;
     private string? _topName;
@@ -72,7 +74,9 @@ public sealed class SystemStatsService : ISystemStatsService
             ReadNetworkCounters(out _prevIn, out _prevOut);
             _prevTicks = Stopwatch.GetTimestamp();
             _tick = 0;
-            _prevProcessCpu = ScanProcesses(out _);
+            // Süreç taban taraması (yüzlerce tutamaç) çentik açılış yayında arayüzü tutmasın: ilk örnekte, thread pool'da yapılır.
+            _needProcessBaseline = true;
+            _prevProcessCpu = [];
             _prevScanTicks = _prevTicks;
             _topName = null;
             _topPercent = 0;
@@ -174,7 +178,15 @@ public sealed class SystemStatsService : ISystemStatsService
         var up = SystemStatsMath.BytesPerSecond(_prevOut, outBytes, elapsed);
         (_prevIn, _prevOut) = (inBytes, outBytes);
 
-        if (++_tick % ProcessScanEveryTicks == 0)
+        if (_needProcessBaseline)
+        {
+            // İlk tur: yalnız taban (en çok CPU henüz bilinmez); tarama sayacı buradan başlar.
+            _prevProcessCpu = ScanProcesses(out _);
+            _prevScanTicks = Stopwatch.GetTimestamp();
+            _tick = 0;
+            _needProcessBaseline = false;
+        }
+        else if (++_tick % ProcessScanEveryTicks == 0)
         {
             var current = ScanProcesses(out var samples);
             var scanElapsed = (nowTicks - _prevScanTicks) / (double)Stopwatch.Frequency;

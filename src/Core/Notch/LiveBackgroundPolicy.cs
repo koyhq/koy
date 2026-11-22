@@ -1,4 +1,5 @@
 using System.Globalization;
+using Koy.Core.Media;
 using Koy.Core.Background;
 
 namespace Koy.Core.Notch;
@@ -227,15 +228,20 @@ public static class LiveBackgroundPlaybackPolicy
     /// Yüzey için tam karar. Hedef bu yüzeyi içermiyorsa, çentik kapalıysa ya da pencere görünmüyorsa <see cref="LiveBackgroundPlaybackMode.Off"/>
     /// (kare ve çözülmüş bellek serbest bırakılır). Açık ve görünürken hareketi azalt / pil tasarrufu varsa
     /// <see cref="LiveBackgroundPlaybackMode.StaticFirstFrame"/>, yoksa <see cref="LiveBackgroundPlaybackMode.Animate"/>.
+    /// <paramref name="isBackdropCovered"/>: çentik zemini opak bir kartın altında kalıyor (<see cref="MusicCardCoverage"/>);
+    /// görünmeyen zemin için video çözülmez ve kare çizilmez, durağan kare kalır.
     /// </summary>
     public static LiveBackgroundPlaybackMode Decide(
         bool isNotchExpanded, bool isWindowVisible, bool reduceMotion, bool isBatterySaver,
-        LiveBackgroundTarget target, LiveBackgroundSurface surface, bool isVideo = false)
+        LiveBackgroundTarget target, LiveBackgroundSurface surface, bool isVideo = false, bool isBackdropCovered = false)
     {
         if (!AppliesTo(target, surface) || !isNotchExpanded || !isWindowVisible)
             return LiveBackgroundPlaybackMode.Off;
 
         if (!ShouldAnimate(isNotchExpanded, isWindowVisible, reduceMotion, isBatterySaver, target))
+            return LiveBackgroundPlaybackMode.StaticFirstFrame;
+
+        if (isBackdropCovered && surface == LiveBackgroundSurface.Notch)
             return LiveBackgroundPlaybackMode.StaticFirstFrame;
 
         // İki yüzeyde aynı video iki ayrı çözücüyle oynardı (iki kat CPU ve bellek, ölçüm 2026-11-20): video yalnız

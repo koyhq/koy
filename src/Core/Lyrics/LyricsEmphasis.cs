@@ -12,6 +12,13 @@ public static class LyricsEmphasis
     private static readonly double[] Opacities = [1.0, 0.6, 0.4, 0.28];
     private static readonly double[] Scales = [1.0, 0.92, 0.9, 0.9];
 
+    /// <summary>Bu uzaklıktan (satır) ötesinde değerler sabittir (tablonun son girdisi): ayrıca yazmak gerekmez.</summary>
+    public static double SettledDistance => Opacities.Length - 1;
+
+    /// <summary>Satır sabit bölgede mi: önceden de sabitse görünüme yeniden yazılmaz (uzun listede her karede yüzlerce yazım).</summary>
+    public static bool IsSettled(double distanceInLines) =>
+        !double.IsFinite(distanceInLines) || Math.Abs(distanceInLines) >= SettledDistance;
+
     public static double OpacityAt(double distanceInLines) => Lerp(Opacities, distanceInLines);
 
     public static double ScaleAt(double distanceInLines) => Lerp(Scales, distanceInLines);
