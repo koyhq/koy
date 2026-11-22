@@ -1230,9 +1230,6 @@
   <data name="ResetSettingsTitle" xml:space="preserve">
     <value>Reset all settings to default</value>
   </data>
-  <data name="ResetButton" xml:space="preserve">
-    <value>Reset</value>
-  </data>
   <data name="LinksHeader" xml:space="preserve">
     <value>Links</value>
   </data>
@@ -1262,9 +1259,6 @@
   </data>
   <data name="ShortcutNone" xml:space="preserve">
     <value>Not set</value>
-  </data>
-  <data name="ShortcutReset" xml:space="preserve">
-    <value>Reset to default</value>
   </data>
   <data name="ShortcutErrInvalid" xml:space="preserve">
     <value>This key can't be used as a shortcut.</value>
@@ -1450,13 +1444,13 @@
     <value>All settings on this page are set to their default values.</value>
   </data>
   <data name="SettingsResetPage" xml:space="preserve">
-    <value>Restore defaults</value>
+    <value>Reset to defaults</value>
   </data>
   <data name="SettingsResetPageConfirm" xml:space="preserve">
-    <value>Restore this page to defaults?</value>
+    <value>Reset this page to defaults?</value>
   </data>
   <data name="SettingsResetPageDone" xml:space="preserve">
-    <value>Page restored to defaults.</value>
+    <value>Page reset to defaults.</value>
   </data>
   <data name="FontSectionTitle" xml:space="preserve">
     <value>Text</value>
@@ -1509,6 +1503,9 @@
   <data name="TrayAppsEmpty" xml:space="preserve">
     <value>Open the dock tray once; apps with tray icons will be listed here.</value>
   </data>
+  <data name="NotchFineTuneHeader" xml:space="preserve">
+    <value>Fine-tuning</value>
+  </data>
   <data name="NavAdvanced" xml:space="preserve">
     <value>Advanced</value>
   </data>
@@ -1532,9 +1529,6 @@
   </data>
   <data name="AdvancedInvalid" xml:space="preserve">
     <value>Not a valid value for this setting; nothing was saved.</value>
-  </data>
-  <data name="AdvancedResetRow" xml:space="preserve">
-    <value>Reset</value>
   </data>
   <data name="ApplyRevertPrompt" xml:space="preserve">
     <value>Keep this change?</value>
@@ -3379,7 +3373,7 @@
     <value>Refresh</value>
   </data>
   <data name="ExtCategoryAll" xml:space="preserve">
-    <value>All</value>
+    <value>All types</value>
   </data>
   <data name="ExtCategoryTheme" xml:space="preserve">
     <value>Themes</value>

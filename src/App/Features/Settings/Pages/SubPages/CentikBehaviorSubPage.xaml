@@ -266,7 +266,7 @@
         </Border>
 
         <!-- İNCE AYAR (gecikmeler ve bildirim ayrıntısı) -->
-        <TextBlock Text="{Binding [NavAdvanced], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+        <TextBlock Text="{Binding [NotchFineTuneHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 
         <Border Style="{StaticResource SettingRowStyle}" MinHeight="44">
             <Grid>

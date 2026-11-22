@@ -116,7 +116,7 @@
                             </Style.Triggers>
                         </Style>
                     </StackPanel.Style>
-                    <Button Content="{Binding [ResetButton], Source={x:Static res:Loc.Instance}}" Command="{Binding RequestResetCommand}" Style="{StaticResource DangerButtonStyle}" />
+                    <Button Content="{Binding [SettingsResetPage], Source={x:Static res:Loc.Instance}}" Command="{Binding RequestResetCommand}" Style="{StaticResource DangerButtonStyle}" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <StackPanel.Style>

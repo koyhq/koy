@@ -1230,9 +1230,6 @@
   <data name="ResetSettingsTitle" xml:space="preserve">
     <value>Bütün ayarları varsayılana döndür</value>
   </data>
-  <data name="ResetButton" xml:space="preserve">
-    <value>Sıfırla</value>
-  </data>
   <data name="LinksHeader" xml:space="preserve">
     <value>Bağlantılar</value>
   </data>
@@ -1262,9 +1259,6 @@
   </data>
   <data name="ShortcutNone" xml:space="preserve">
     <value>Atanmamış</value>
-  </data>
-  <data name="ShortcutReset" xml:space="preserve">
-    <value>Varsayılana dön</value>
   </data>
   <data name="ShortcutErrInvalid" xml:space="preserve">
     <value>Bu tuş kısayol olarak kullanılamıyor.</value>
@@ -1509,6 +1503,9 @@
   <data name="TrayAppsEmpty" xml:space="preserve">
     <value>Dock tepsisini bir kez aç; tepsi simgesi olan uygulamalar burada listelenir.</value>
   </data>
+  <data name="NotchFineTuneHeader" xml:space="preserve">
+    <value>İnce ayar</value>
+  </data>
   <data name="NavAdvanced" xml:space="preserve">
     <value>Gelişmiş</value>
   </data>
@@ -1532,9 +1529,6 @@
   </data>
   <data name="AdvancedInvalid" xml:space="preserve">
     <value>Bu ayar için geçerli bir değer değil; hiçbir şey kaydedilmedi.</value>
-  </data>
-  <data name="AdvancedResetRow" xml:space="preserve">
-    <value>Sıfırla</value>
   </data>
   <data name="ApplyRevertPrompt" xml:space="preserve">
     <value>Bu değişiklik kalsın mı?</value>
@@ -3379,7 +3373,7 @@
     <value>Yenile</value>
   </data>
   <data name="ExtCategoryAll" xml:space="preserve">
-    <value>Tümü</value>
+    <value>Tüm türler</value>
   </data>
   <data name="ExtCategoryTheme" xml:space="preserve">
     <value>Temalar</value>
