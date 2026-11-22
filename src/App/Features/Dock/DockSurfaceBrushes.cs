@@ -23,9 +23,10 @@ internal static class DockSurfaceBrushes
         {
             // Beyaza doğru karıştırma: alfa değişmez, yalnız renk açılır (altındaki masaüstü saydamlığı korunur).
             var lit = Lighten(baseColor, look.SheenLighten, look.SurfaceAlpha);
-            brush = new LinearGradientBrush(
-                new GradientStopCollection { new GradientStop(lit, 0), new GradientStop(plain, 1) },
-                ToPoint(look.GradientStart), ToPoint(look.GradientEnd));
+            var stops = new GradientStopCollection { new GradientStop(lit, 0), new GradientStop(plain, look.SheenReach) };
+            if (look.SheenReach < 1)
+                stops.Add(new GradientStop(plain, 1));
+            brush = new LinearGradientBrush(stops, ToPoint(look.GradientStart), ToPoint(look.GradientEnd));
         }
 
         brush.Freeze();
@@ -65,6 +66,44 @@ internal static class DockSurfaceBrushes
                 ToPoint(look.RimStart), ToPoint(look.RimEnd));
         }
 
+        brush.Freeze();
+        return brush;
+    }
+
+    /// <summary>
+    /// Cam karosu (etkin / üstüne gelinen simgenin zemini): üstten alta çok hafif beyaz dolgu. Katı'da (karo yok) verilen
+    /// eski fırça aynen döner.
+    /// </summary>
+    public static Brush TileFill(DockMaterialLook look, Brush legacy, Color highlight, bool hover)
+    {
+        if (!look.HasTile)
+            return legacy;
+
+        var boost = hover ? look.TileHoverBoost : 0;
+        var brush = new LinearGradientBrush(
+            Color.FromArgb((byte)Math.Min(255, look.TileFillTopAlpha + boost), highlight.R, highlight.G, highlight.B),
+            Color.FromArgb((byte)Math.Min(255, look.TileFillBottomAlpha + boost), highlight.R, highlight.G, highlight.B),
+            new Point(0.5, 0), new Point(0.5, 1));
+        brush.Freeze();
+        return brush;
+    }
+
+    /// <summary>Cam karosunun 135° köşegen 1 px kenarlığı: sol üst parlak, ortası sönük, sağ alt orta. Karo yoksa şeffaf.</summary>
+    public static Brush TileBorder(DockMaterialLook look, Color highlight)
+    {
+        if (!look.HasTile)
+            return Brushes.Transparent;
+
+        var peak = Color.FromArgb(look.TileBorderAlpha, highlight.R, highlight.G, highlight.B);
+        var brush = new LinearGradientBrush(
+            new GradientStopCollection
+            {
+                new GradientStop(peak, 0),
+                new GradientStop(Scale(peak, look.TileBorderMidFactor), 0.45),
+                new GradientStop(Scale(peak, look.TileBorderMidFactor * 0.8), 0.6),
+                new GradientStop(Scale(peak, 0.55), 1)
+            },
+            new Point(0, 0), new Point(1, 1));
         brush.Freeze();
         return brush;
     }

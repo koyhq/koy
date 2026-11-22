@@ -6,13 +6,18 @@ namespace Koy.Core.Dock;
 public readonly record struct DockUnitPoint(double X, double Y);
 
 /// <summary>
-/// Dock yüzeyinin malzemeye göre görsel ipuçları. <paramref name="SurfaceAlpha"/> yüzeyin alfası (0–255);
+/// <para>Dock yüzeyinin malzemeye göre görsel ipuçları. <paramref name="SurfaceAlpha"/> yüzeyin alfası (0–255);
 /// <paramref name="SheenLighten"/> yüzeyin ekran merkezine bakan kenarda beyaza doğru ne kadar açıldığı (0..1, 0 = parlama yok);
 /// <paramref name="HighlightAlpha"/> iç kenar çizgisinin beyaz alfası (0 = ek çizgi yok, eski kenarlık kalır).
 /// Gradyan <paramref name="GradientStart"/> (iç kenar) → <paramref name="GradientEnd"/> (dış kenar) yönündedir.
 /// Tam genişlikte iç kenar çizgisi uçlara doğru <paramref name="LineEndsFade"/> katına solar (1 = düz; ortada parlak, ucu sönük
 /// "ışık vuran kenar"); çizginin ekseni <paramref name="RimStart"/> → <paramref name="RimEnd"/>. Kapsülde aynı iki nokta köşegen
-/// kenarlık gradyanıdır (iç köşede parlak, ortada <paramref name="RimMidAlpha"/> katına sönük, karşı köşede yeniden parlar).
+/// kenarlık gradyanıdır (iç köşede parlak, ortada <paramref name="RimMidAlpha"/> katına sönük, karşı köşede yeniden parlar).</para>
+/// <para><paramref name="SheenReach"/>: parlamanın kalınlığın hangi oranında sıfıra indiği (1 = bütün kalınlık).
+/// Cam "karoları" (etkin / üstüne gelinen simgenin zemini): <paramref name="TileBorderAlpha"/> köşegen (135°) 1 px kenarlığın
+/// parlak köşe alfası (0 = karo ipucu yok, eski düz zemin), <paramref name="TileBorderMidFactor"/> ortadaki sönüklük,
+/// <paramref name="TileFillTopAlpha"/> / <paramref name="TileFillBottomAlpha"/> dolgunun üst ve alt beyaz alfası,
+/// <paramref name="TileHoverBoost"/> üstüne gelince dolguya eklenen alfa.</para>
 /// </summary>
 public readonly record struct DockMaterialLook(
     byte SurfaceAlpha,
@@ -23,10 +28,19 @@ public readonly record struct DockMaterialLook(
     double LineEndsFade = 1,
     DockUnitPoint RimStart = default,
     DockUnitPoint RimEnd = default,
-    double RimMidAlpha = 1)
+    double RimMidAlpha = 1,
+    double SheenReach = 1,
+    byte TileBorderAlpha = 0,
+    double TileBorderMidFactor = 0.3,
+    byte TileFillTopAlpha = 0,
+    byte TileFillBottomAlpha = 0,
+    byte TileHoverBoost = 0)
 {
     /// <summary>Ek ipucu var mı: yoksa (Katı) yüzey bugünkü düz fırça ve kenarlıkla çizilir.</summary>
     public bool HasCues => SheenLighten > 0 || HighlightAlpha > 0;
+
+    /// <summary>Cam karo ipucu var mı: yoksa (Katı) simge zemini bugünkü düz fırçadır.</summary>
+    public bool HasTile => TileBorderAlpha > 0;
 }
 
 /// <summary>
@@ -54,11 +68,13 @@ public static class DockMaterialPolicy
         return level switch
         {
             // Cam: belirgin parlama, ortada parlak ve uçlara sönen kenar çizgisi (tam genişlik), köşegen özel parıltılı kenarlık (kapsül).
-            MaterialLevel.Glass => new DockMaterialLook(alpha, fullWidth ? 0.13 : 0.10, fullWidth ? (byte)0x4A : (byte)0x5C, start, end,
-                fullWidth ? 0.25 : 1, rimStart, rimEnd, RimMidAlpha: 0.38),
+            MaterialLevel.Glass => new DockMaterialLook(alpha, fullWidth ? 0.17 : 0.10, fullWidth ? (byte)0x70 : (byte)0x5C, start, end,
+                fullWidth ? 0.25 : 1, rimStart, rimEnd, RimMidAlpha: 0.38, SheenReach: fullWidth ? 0.55 : 1,
+                TileBorderAlpha: 0xB0, TileBorderMidFactor: 0.25, TileFillTopAlpha: 0x2C, TileFillBottomAlpha: 0x0A, TileHoverBoost: 0x0C),
             // Buzlu: aynı dil, daha yumuşak.
-            MaterialLevel.Frosted => new DockMaterialLook(alpha, fullWidth ? 0.045 : 0.035, fullWidth ? (byte)0x30 : (byte)0x38, start, end,
-                fullWidth ? 0.55 : 1, rimStart, rimEnd, RimMidAlpha: 0.55),
+            MaterialLevel.Frosted => new DockMaterialLook(alpha, fullWidth ? 0.075 : 0.035, fullWidth ? (byte)0x44 : (byte)0x38, start, end,
+                fullWidth ? 0.55 : 1, rimStart, rimEnd, RimMidAlpha: 0.55, SheenReach: fullWidth ? 0.55 : 1,
+                TileBorderAlpha: 0x60, TileBorderMidFactor: 0.4, TileFillTopAlpha: 0x1E, TileFillBottomAlpha: 0x08, TileHoverBoost: 0x08),
             _ => new DockMaterialLook(alpha, 0, 0, start, end)
         };
     }

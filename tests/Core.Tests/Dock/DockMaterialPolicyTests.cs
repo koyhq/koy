@@ -17,6 +17,8 @@ public class DockMaterialPolicyTests
 
         Assert.False(full.HasCues);
         Assert.False(capsule.HasCues);
+        Assert.False(full.HasTile);
+        Assert.Equal(0, full.TileBorderAlpha);
         Assert.Equal(255, full.SurfaceAlpha);
         Assert.Equal(0xE6, capsule.SurfaceAlpha); // kapsül Katı'da da %90
     }
@@ -33,6 +35,8 @@ public class DockMaterialPolicyTests
         Assert.True(frosted.SheenLighten > 0 && frosted.HighlightAlpha > 0);
         Assert.True(glass.SheenLighten > frosted.SheenLighten);
         Assert.True(glass.SheenLighten < 0.2); // ince kalmalı
+        Assert.True(glass.HasTile && frosted.HasTile);
+        Assert.True(glass.TileBorderAlpha > frosted.TileBorderAlpha);
     }
 
     [Theory]
@@ -81,5 +85,20 @@ public class DockMaterialPolicyTests
         Assert.Equal(new DockUnitPoint(0, 0), look.RimStart);
         Assert.Equal(new DockUnitPoint(1, 1), look.RimEnd);
         Assert.True(look.RimMidAlpha < 1);
+    }
+
+    [Fact]
+    public void Full_width_glass_sheen_is_a_band_that_fades_before_the_far_edge_and_the_line_peaks_bright()
+    {
+        var glass = DockMaterialPolicy.For(MaterialLevel.Glass, DockEdge.Bottom, fullWidth: true);
+        var frosted = DockMaterialPolicy.For(MaterialLevel.Frosted, DockEdge.Bottom, fullWidth: true);
+        var capsule = DockMaterialPolicy.For(MaterialLevel.Glass, DockEdge.Bottom, fullWidth: false);
+
+        Assert.InRange(glass.SheenLighten, 0.14, 0.18);
+        Assert.InRange(glass.SheenReach, 0.5, 0.6);
+        Assert.True(glass.HighlightAlpha >= 0x70);
+        Assert.True(frosted.SheenLighten < glass.SheenLighten && frosted.SheenLighten > 0);
+        Assert.Equal(1, capsule.SheenReach); // kapsül değişmedi
+        Assert.Equal(0x5C, capsule.HighlightAlpha);
     }
 }

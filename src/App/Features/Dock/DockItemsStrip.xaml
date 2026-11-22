@@ -36,13 +36,22 @@
                         <Style TargetType="Border">
                             <Setter Property="Background" Value="Transparent"/>
                             <Style.Triggers>
+                                <!-- Cam/Buzlu karosu: köşegen ince kenarlık (Katı'da kalınlık 0, hiçbir şey çizilmez). Hedef parıltısının kenarlığı bunun üstüne yazar. -->
+                                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                    <Setter Property="BorderBrush" Value="{Binding DataContext.TileBorderBrush, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}"/>
+                                    <Setter Property="BorderThickness" Value="{Binding DataContext.TileBorderThickness, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}"/>
+                                </DataTrigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="BorderBrush" Value="{Binding DataContext.TileBorderBrush, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}"/>
+                                    <Setter Property="BorderThickness" Value="{Binding DataContext.TileBorderThickness, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}"/>
+                                </Trigger>
                                 <DataTrigger Binding="{Binding IsTargetGlow}" Value="True">
                                     <Setter Property="Background" Value="{DynamicResource KoyAccentSubtle}"/>
                                     <Setter Property="BorderBrush" Value="{DynamicResource KoyAccent}"/>
                                     <Setter Property="BorderThickness" Value="1.5"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource KoyDockActive}"/>
+                                    <Setter Property="Background" Value="{Binding DataContext.TileActiveFill, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}"/>
                                 </DataTrigger>
                                 <!-- Gösterge stili "Arka plan": çalışan uygulamanın zemini vurgu rengiyle boyanır (nokta/çizgi çizilmez) -->
                                 <MultiDataTrigger>
@@ -64,7 +73,7 @@
                                     <Setter Property="Background" Value="#2EF97316"/>
                                 </DataTrigger>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource KoyDockHover}"/>
+                                    <Setter Property="Background" Value="{Binding DataContext.TileHoverFill, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
