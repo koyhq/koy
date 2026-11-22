@@ -57,22 +57,20 @@ public class CrashLogTests
     [Fact]
     public void Guard_IstisnayiYutarVeLogaYazar()
     {
+        // Küresel LogPath'e dokunulmaz: paralel testlerin logu bu dosyaya düşmesin, klasör silinirken açık kalmasın.
         var dir = Path.Combine(Path.GetTempPath(), "koy-crashlog-" + Guid.NewGuid().ToString("N"));
         var path = Path.Combine(dir, "crash.log");
-        var old = CrashLog.LogPath;
         try
         {
-            CrashLog.LogPath = path;
             var ran = false;
-            CrashLog.Guard("test", () => { ran = true; throw new InvalidOperationException("sizmamali"); });
+            CrashLog.GuardTo(path, "test", () => { ran = true; throw new InvalidOperationException("sizmamali"); });
 
             Assert.True(ran);
             Assert.Contains("sizmamali", File.ReadAllText(path));
         }
         finally
         {
-            CrashLog.LogPath = old;
-            if (Directory.Exists(dir)) Directory.Delete(dir, true);
+            try { if (Directory.Exists(dir)) Directory.Delete(dir, true); } catch (IOException) { }
         }
     }
 }

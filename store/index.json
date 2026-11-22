@@ -1,13 +1,13 @@
 {
   "format": "koy-store-index",
   "formatVersion": 1,
-  "generated": "2026-11-14T00:00:00Z",
+  "generated": "2026-11-22T00:00:00Z",
   "items": [
     {
       "id": "koyhq.aurora-background",
-      "name": "Aurora",
+      "name": "Aurora Loop",
       "kind": "background",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": "Koy",
       "license": "CC-BY-SA-4.0",
       "summary": {
@@ -19,12 +19,12 @@
         "tr": "Yumuşak yeşil, turkuaz ve mor renk geçişleri olan, 620x352 açık çentik boyutuna göre hazırlanmış küçük, kesintisiz döngülü bir GIF. Uyguladıktan sonra nerede gösterileceğini (çentik ya da müzik kartı) çentik ayarlarından seçersin."
       },
       "homepage": "https://github.com/koyhq/koy",
-      "updated": "2026-11-12",
+      "updated": "2026-11-22",
       "downloads": 0,
       "package": {
-        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.aurora-background-1.0.0.koyext",
-        "sha256": "4da91ca0803abd2a89b70117831bdeb74a29a2d32cebfdf43b7b6c28534f7914",
-        "size": 160727
+        "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/packages/koyhq.aurora-background-1.0.1.koyext",
+        "sha256": "0412f4b6a1827ddf8d45f6503137d139316ad320269c1008627c1bbf50048493",
+        "size": 160825
       },
       "preview": {
         "url": "https://raw.githubusercontent.com/koyhq/koy/main/store/previews/koyhq.aurora-background.png",

@@ -152,8 +152,8 @@
 
                                             <!-- Sağ: Sıfırla Düğmesi -->
                                             <Button Grid.Column="2" Margin="8,0,0,0" Command="{Binding ResetCommand}" Style="{StaticResource SettingButtonStyle}"
-                                                    Content="{Binding [AdvancedResetRow], Source={x:Static res:Loc.Instance}}"
-                                                    AutomationProperties.Name="{Binding [AdvancedResetRow], Source={x:Static res:Loc.Instance}}"
+                                                    Content="{Binding [SettingsResetPage], Source={x:Static res:Loc.Instance}}"
+                                                    AutomationProperties.Name="{Binding [SettingsResetPage], Source={x:Static res:Loc.Instance}}"
                                                     Visibility="{Binding IsChanged, Converter={x:Static local:ComparisonToVisibilityConverter.Instance}, ConverterParameter=True}" />
                                         </Grid>
                                     </Border>

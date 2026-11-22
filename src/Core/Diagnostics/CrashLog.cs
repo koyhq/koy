@@ -72,7 +72,10 @@ public static class CrashLog
     /// Win32 geri çağrıları (WndProc, WinEvent, zamanlayıcı) içinde çalıştır: istisna loga yazılır, işletim sistemine sızmaz.
     /// Sızarsa süreç STATUS_FATAL_USER_CALLBACK_EXCEPTION ile düşer.
     /// </summary>
-    public static void Guard(string source, Action action)
+    public static void Guard(string source, Action action) => GuardTo(LogPath, source, action);
+
+    /// <summary>Guard'ın açık yollu hâli; testler küresel <see cref="LogPath"/>'e dokunmadan kullanır.</summary>
+    public static void GuardTo(string path, string source, Action action)
     {
         try
         {
@@ -80,7 +83,7 @@ public static class CrashLog
         }
         catch (Exception ex)
         {
-            Write(source, ex);
+            WriteTo(path, source, ex);
         }
     }
 }

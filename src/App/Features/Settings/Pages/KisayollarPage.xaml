@@ -96,7 +96,7 @@
                                         </TextBlock>
                                     </Grid>
                                 </Button>
-                                <Button Content="{Binding [ShortcutReset], Source={x:Static res:Loc.Instance}}"
+                                <Button Content="{Binding [SettingsResetPage], Source={x:Static res:Loc.Instance}}"
                                         Command="{Binding ResetToDefaultCommand}"
                                         Margin="8,0,0,0">
                                     <Button.Style>
