@@ -143,9 +143,12 @@ internal sealed class FakeBrightness : IBrightnessService
 
 internal sealed class FakeRadio : IRadioService
 {
+    /// <summary>Kontrol sahnesi: Bluetooth radyosu kapalı (Windows eşleşmiş cihazlarda bayat "bağlı" işareti bırakır).</summary>
+    public static bool BluetoothOff { get; set; }
+
     public RadioAccess Access => RadioAccess.Allowed;
     public RadioState WiFiState => RadioState.On;
-    public RadioState BluetoothState => RadioState.On;
+    public RadioState BluetoothState => BluetoothOff ? RadioState.Off : RadioState.On;
     public event EventHandler<RadioStateChangedEventArgs>? StateChanged { add { } remove { } }
     public Task RefreshAsync() => Task.CompletedTask;
     public Task<bool> SetStateAsync(RadioKind kind, bool enable) => Task.FromResult(true);

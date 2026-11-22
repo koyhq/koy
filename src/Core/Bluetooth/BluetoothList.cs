@@ -105,6 +105,32 @@ public static class BluetoothList
             .ToList();
     }
 
+    /// <summary>
+    /// Radyo kapalıyken ya da yokken hiçbir cihaz "bağlı" sayılmaz. Windows, radyo kapanırken eşleşmiş cihazların
+    /// "bağlı" işaretini çoğu zaman güncellemez (DeviceWatcher olay göndermez); ham değere güvenmek kapalı Bluetooth'ta
+    /// "Bağlı cihazlar" kartında bayat cihaz gösterir. Radyo açık / yükleniyor / belirsizse ham değer korunur.
+    /// </summary>
+    public static List<BluetoothDeviceInfo> ApplyRadio(RadioTileStatus radio, IReadOnlyList<BluetoothDeviceInfo> normalized)
+    {
+        if (!IsLinkAvailable(radio))
+        {
+            return normalized
+                .Select(d => d.IsConnected ? d with { IsConnected = false } : d)
+                .OrderBy(d => d.Name, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+        }
+
+        return normalized.ToList();
+    }
+
+    /// <summary>Radyo cihazlarla bağlantı kurabilir durumda mı (kapalı, donanım kapalı, yok ya da izin yok değil).</summary>
+    public static bool IsLinkAvailable(RadioTileStatus radio) =>
+        radio is not (RadioTileStatus.Off or RadioTileStatus.HardwareOff or RadioTileStatus.NotFound or RadioTileStatus.NoAccess);
+
+    /// <summary>"Bağlı cihazlar" kartı: yalnız gerçekten bağlı olanlar, bağlı olmayan eşleşmişler asla.</summary>
+    public static List<BluetoothDeviceInfo> ConnectedOnly(RadioTileStatus radio, IReadOnlyList<BluetoothDeviceInfo> normalized) =>
+        ApplyRadio(radio, normalized).Where(d => d.IsConnected).ToList();
+
     /// <summary>Ana'daki kulaklık kartı için: bağlı ses cihazı (pili olan önce); yoksa null.</summary>
     public static BluetoothDeviceInfo? PrimaryAudio(IEnumerable<BluetoothDeviceInfo> normalized) =>
         normalized.Where(d => d.IsConnected && d.IsAudio)

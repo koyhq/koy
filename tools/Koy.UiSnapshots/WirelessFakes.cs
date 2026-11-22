@@ -33,14 +33,14 @@ internal sealed class FakeWifi(bool locationBlocked = false) : IWifiService
     public void Dispose() { }
 }
 
-internal sealed class FakeBluetooth(bool anyAudioConnected = true) : IBluetoothService
+internal sealed class FakeBluetooth(bool anyAudioConnected = true, bool mouseConnected = true) : IBluetoothService
 {
     public bool IsReady => true;
 
     public IReadOnlyList<BluetoothDeviceInfo> Devices { get; } =
     [
         new("a", Sample.T("Kulaklık Pro", "Headphones Pro"), BluetoothDeviceKind.Headphones, anyAudioConnected, anyAudioConnected ? 86 : null, "c1"),
-        new("b", Sample.T("Sessiz Fare", "Silent Mouse"), BluetoothDeviceKind.Mouse, true, 40, "c2"),
+        new("b", Sample.T("Sessiz Fare", "Silent Mouse"), BluetoothDeviceKind.Mouse, mouseConnected, mouseConnected ? 40 : null, "c2"),
         new("c", Sample.T("Salon Hoparlörü", "Living Room Speaker"), BluetoothDeviceKind.Speaker, false, null, "c3"),
         new("d", Sample.T("Mekanik Klavye", "Mechanical Keyboard"), BluetoothDeviceKind.Keyboard, false, null, "c4"),
         new("e", Sample.T("Telefonum", "My Phone"), BluetoothDeviceKind.Phone, false, null, "c5"),

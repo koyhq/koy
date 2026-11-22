@@ -111,6 +111,7 @@ public sealed partial class BluetoothDevicesViewModel : ObservableObject, IDispo
     private IBluetoothService? _service;
     private bool _syncQueued;
     private bool _disposed;
+    private RadioTileStatus _radio = RadioTileStatus.Loading;
 
     /// <summary>Bluetooth listesi sayfası: bütün eşleşmiş cihazlar (bağlı olanlar üstte).</summary>
     public ObservableCollection<BluetoothDeviceRowViewModel> Devices { get; } = [];
@@ -187,6 +188,19 @@ public sealed partial class BluetoothDevicesViewModel : ObservableObject, IDispo
         IsReady = false;
     }
 
+    /// <summary>
+    /// Bluetooth radyosunun durumu (Kontrol'deki döşemeyle aynı kaynak). Radyo kapanınca bütün cihazlar "bağlı değil"
+    /// sayılır (bkz. <see cref="BluetoothList.ApplyRadio"/>); durum değiştiğinde olay tabanlı yeniden eşitlenir.
+    /// </summary>
+    public void SetRadioStatus(RadioTileStatus radio)
+    {
+        if (_disposed || _radio == radio)
+            return;
+
+        _radio = radio;
+        Sync();
+    }
+
     private void OnDevicesChanged(object? sender, EventArgs e)
     {
         // WinRT iş parçacığından gelir; art arda olaylar tek eşitlemeye indirilir.
@@ -207,7 +221,7 @@ public sealed partial class BluetoothDevicesViewModel : ObservableObject, IDispo
             return;
 
         IsReady = _service.IsReady;
-        var devices = BluetoothList.Normalize(_service.Devices);
+        var devices = BluetoothList.ApplyRadio(_radio, BluetoothList.Normalize(_service.Devices));
 
         var next = new List<BluetoothDeviceRowViewModel>(devices.Count);
         var seen = new HashSet<string>(StringComparer.Ordinal);

@@ -135,6 +135,8 @@ public static class Program
                 RenderBattery(outDir, prefix, theme);
             else if (scene is "dock-surukle" or "dockdrag")
                 DockBarSnapshots.RenderDrag(outDir, prefix, theme, RenderElement);
+            else if (scene is "kontrol" or "control")
+                RenderControl(outDir, prefix, theme);
             else if (scene is "ana" or "home")
                 RenderHome(outDir, prefix, theme);
             else if (scene is "ayar" or "settings")
@@ -380,7 +382,7 @@ public static class Program
         Koy.Core.Timers.FocusTimers Timers);
 
     private static NotchSet MakeNotch(bool music, IReadOnlyList<Koy.Core.Shelf.ShelfItem>? shelf = null, List<string>? tileOrder = null,
-        bool locationBlocked = false, bool audioConnected = true, Func<Koy.Core.SystemStats.ISystemStatsService>? statsFactory = null,
+        bool locationBlocked = false, bool audioConnected = true, bool bluetoothNoneConnected = false, Func<Koy.Core.SystemStats.ISystemStatsService>? statsFactory = null,
         bool brightnessSupported = true, bool wideCover = false, Koy.Core.Notch.NotchStyleMode notchStyle = Koy.Core.Notch.NotchStyleMode.Pinned,
         Koy.Core.Notch.IdleDisplayMode idleMode = Koy.Core.Notch.IdleDisplayMode.ClockAndBattery, FakePower? power = null, string? language = null,
         bool clockShowDate = false, string? liveBackground = null, bool liveClock = false, FakeMedia? media = null,
@@ -433,7 +435,7 @@ public static class Program
             new Koy.App.Features.ControlCenter.ControlCenterViewModel(
                 () => new FakeAudio(), () => new FakeRadio(), null, () => new FakeBrightness(brightnessSupported), new FakeFocusAssist(), settings,
                 wifiFactory: () => new FakeWifi(locationBlocked),
-                bluetoothDevices: new Koy.App.Features.ControlCenter.BluetoothDevicesViewModel(() => new FakeBluetooth(audioConnected), null)),
+                bluetoothDevices: new Koy.App.Features.ControlCenter.BluetoothDevicesViewModel(() => new FakeBluetooth(audioConnected, !bluetoothNoneConnected), null)),
             new Koy.App.Features.Status.StatusViewModel(power ?? new FakePower(), new FakeWeather(), settings),
             new Koy.App.Features.Focus.FocusViewModel(timers, settings, tasks: MakeTasks()),
             new Koy.App.Features.Shelf.ShelfViewModel(new FakeShelf(shelf ?? [])),
@@ -839,6 +841,39 @@ public static class Program
             ShotNotch(set, Name("centikpil-halka-" + state), expanded: false);
             set.Vm.Dispose();
         }
+    }
+
+    /// <summary>Kontrol sayfası: normal, Bluetooth kapalı (bayat bağlı cihaz yok), bağlı cihaz yok. <c>--scene kontrol</c>.</summary>
+    private static void RenderControl(string outDir, string prefix, string theme)
+    {
+        string Name(string n) => Path.Combine(outDir, $"{prefix}-{theme}-{n}.png");
+        var set = MakeNotch(music: false);
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.ControlCenter);
+        Flush();
+        ShotNotch(set, Name("kontrol"), expanded: true);
+        set.Vm.Dispose();
+
+        // Bluetooth kapalı ama Windows eşleşmiş cihazı hâlâ "bağlı" bildiriyor (gerçek hata): kart boş olmalı.
+        FakeRadio.BluetoothOff = true;
+        try
+        {
+            set = MakeNotch(music: false);
+            set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.ControlCenter);
+            Flush();
+            ShotNotch(set, Name("kontrol-bt-kapali"), expanded: true);
+            set.Vm.Dispose();
+        }
+        finally
+        {
+            FakeRadio.BluetoothOff = false;
+        }
+
+        // Radyo açık ama hiçbir cihaz bağlı değil.
+        set = MakeNotch(music: false, audioConnected: false, bluetoothNoneConnected: true);
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.ControlCenter);
+        Flush();
+        ShotNotch(set, Name("kontrol-bagli-yok"), expanded: true);
+        set.Vm.Dispose();
     }
 
     /// <summary>

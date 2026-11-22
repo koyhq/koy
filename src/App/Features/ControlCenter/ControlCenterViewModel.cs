@@ -167,6 +167,7 @@ public sealed partial class ControlCenterViewModel : ObservableObject, IDisposab
     private void UpdateBluetoothView()
     {
         var radio = Bluetooth.State.Status;
+        BluetoothDevices.SetRadioStatus(radio);
         var state = BluetoothDevices.StateFor(radio);
         ShowBluetoothList = state == BluetoothListState.Ready;
         ShowBluetoothMessage = !ShowBluetoothList;
@@ -180,7 +181,8 @@ public sealed partial class ControlCenterViewModel : ObservableObject, IDisposab
         };
         ShowConnectedCard = radio is not (RadioTileStatus.NotFound or RadioTileStatus.NoAccess or RadioTileStatus.Loading);
         ShowConnectedEmpty = !BluetoothDevices.HasConnected;
-        ConnectedEmptyText = Strings.Get(state == BluetoothListState.RadioOff ? "BluetoothRadioOff" : "BluetoothNoConnected");
+        // Bağlı cihaz yoksa neden olursa olsun (radyo kapalı dahil) aynı kısa yazı.
+        ConnectedEmptyText = Strings.Get("BluetoothNoConnected");
     }
 
     /// <summary>
