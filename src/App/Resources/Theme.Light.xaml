@@ -70,4 +70,19 @@
     <SolidColorBrush x:Key="KoyDockClockSubtext" Color="#B3FFFFFF" />
     <SolidColorBrush x:Key="KoyDockPreviewSurface" Color="#F51C1C1E" />
     <SolidColorBrush x:Key="KoyDockPreviewText" Color="#D4D4D8" />
+    <!-- Tam genişlik dock (Windows 11 görev çubuğu gibi sistem temasına uyar; kapsül KoyDock* ile sabit koyu kalır). Açık: açık cam yüzey, koyu metin ve simge. -->
+    <SolidColorBrush x:Key="KoyTaskbarSurface" Color="#F3F3F3" />
+    <SolidColorBrush x:Key="KoyTaskbarBorder" Color="#1F000000" />
+    <SolidColorBrush x:Key="KoyTaskbarHighlight" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="KoyTaskbarSeparator" Color="#26000000" />
+    <SolidColorBrush x:Key="KoyTaskbarDivider" Color="#2E000000" />
+    <SolidColorBrush x:Key="KoyTaskbarHover" Color="#14000000" />
+    <SolidColorBrush x:Key="KoyTaskbarActive" Color="#0F000000" />
+    <SolidColorBrush x:Key="KoyTaskbarPill" Color="#0D000000" />
+    <SolidColorBrush x:Key="KoyTaskbarIndicator" Color="#6B6B72" />
+    <SolidColorBrush x:Key="KoyTaskbarText" Color="#1B1B1D" />
+    <SolidColorBrush x:Key="KoyTaskbarTextSecondary" Color="#5F5F66" />
+    <SolidColorBrush x:Key="KoyTaskbarGlyph" Color="#E61B1B1D" />
+    <SolidColorBrush x:Key="KoyTaskbarClockText" Color="#F21B1B1D" />
+    <SolidColorBrush x:Key="KoyTaskbarClockSubtext" Color="#B31B1B1D" />
 </ResourceDictionary>

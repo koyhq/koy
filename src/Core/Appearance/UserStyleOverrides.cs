@@ -115,7 +115,11 @@ public static class AllowedTokens
         "KoyDockSurface", "KoyDockCapsuleSurface", "KoyDockBorder", "KoyDockCapsuleBorder", "KoyDockHighlight", "KoyDockSeparator",
         "KoyDockDivider", "KoyDockHover", "KoyDockActive", "KoyDockPill", "KoyDockCover", "KoyDockIndicator",
         "KoyDockText", "KoyDockTextSecondary", "KoyDockGlyph", "KoyDockClockText", "KoyDockClockSubtext",
-        "KoyDockPreviewSurface", "KoyDockPreviewText"
+        "KoyDockPreviewSurface", "KoyDockPreviewText",
+        // Tam genişlik dock (sistem temasına uyar; bkz. Core/Appearance/TaskbarTheme).
+        "KoyTaskbarSurface", "KoyTaskbarBorder", "KoyTaskbarHighlight", "KoyTaskbarSeparator", "KoyTaskbarDivider", "KoyTaskbarHover",
+        "KoyTaskbarActive", "KoyTaskbarPill", "KoyTaskbarIndicator", "KoyTaskbarText", "KoyTaskbarTextSecondary", "KoyTaskbarGlyph",
+        "KoyTaskbarClockText", "KoyTaskbarClockSubtext"
     ];
 
     // Tokens.xaml fırçaları: bağlam menüsü, kaydırma çubuğu ve çentik (temadan bağımsız koyu yüzey).

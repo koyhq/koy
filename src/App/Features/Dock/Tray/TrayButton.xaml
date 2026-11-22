@@ -45,6 +45,7 @@
                         <!-- Sistem alanı oku: Windows gibi dar, hap köşesi 6; hover Koy'un cam karosu (DockViewModel.TileHoverFill) -->
                         <Trigger Property="Tag" Value="system">
                             <Setter TargetName="chevron" Property="Size" Value="14"/>
+                            <Setter TargetName="chevron" Property="Foreground" Value="{DynamicResource KoyDockGlyph}"/>
                             <Setter TargetName="border" Property="CornerRadius" Value="6"/>
                         </Trigger>
                         <MultiTrigger>

@@ -446,19 +446,22 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     private void UpdateMaterialSurfaces()
     {
         var level = MaterialState.ForDock(_materialSettings);
-        var highlight = ReadColor("KoyDockHighlight", DefaultHighlightColor);
+        // Tam genişlik (Windows görev çubuğu düzeni) sistem temasına uyar: aynı roller KoyTaskbar* fırçalarından okunur (Core: TaskbarTheme).
+        var follow = Taskbar.IsActive;
+        string K(string key) => follow ? TaskbarTheme.TokenFor(key) : key;
+        var highlight = ReadColor(K("KoyDockHighlight"), DefaultHighlightColor);
 
         var fullLook = DockMaterialPolicy.For(level, Edge, fullWidth: true);
-        FullWidthSurface = DockSurfaceBrushes.Surface(fullLook, ReadColor("KoyDockSurface", DefaultFullWidthColor));
-        FullWidthBorderBrush = DockSurfaceBrushes.Border(fullLook, ReadBrush("KoyDockBorder", DefaultFullWidthBorder), highlight, gradient: false);
+        FullWidthSurface = DockSurfaceBrushes.Surface(fullLook, ReadColor(K("KoyDockSurface"), DefaultFullWidthColor));
+        FullWidthBorderBrush = DockSurfaceBrushes.Border(fullLook, ReadBrush(K("KoyDockBorder"), DefaultFullWidthBorder), highlight, gradient: false);
 
         var capsuleLook = DockMaterialPolicy.For(level, Edge, fullWidth: false);
         CapsuleSurface = DockSurfaceBrushes.Surface(capsuleLook, ReadColor("KoyDockCapsuleSurface", DefaultCapsuleColor));
         CapsuleBorderBrush = DockSurfaceBrushes.Border(capsuleLook, ReadBrush("KoyDockCapsuleBorder", DefaultCapsuleBorder), highlight, gradient: true);
 
         // Simge karoları (etkin / üstüne gelinen): iki dock'ta aynı; Katı'da eski KoyDockActive / KoyDockHover fırçası, kenarlık yok.
-        TileActiveFill = DockSurfaceBrushes.TileFill(fullLook, ReadBrush("KoyDockActive", DefaultTileActive), highlight, hover: false);
-        TileHoverFill = DockSurfaceBrushes.TileFill(fullLook, ReadBrush("KoyDockHover", DefaultTileHover), highlight, hover: true);
+        TileActiveFill = DockSurfaceBrushes.TileFill(fullLook, ReadBrush(K("KoyDockActive"), DefaultTileActive), highlight, hover: false);
+        TileHoverFill = DockSurfaceBrushes.TileFill(fullLook, ReadBrush(K("KoyDockHover"), DefaultTileHover), highlight, hover: true);
         TileBorderBrush = DockSurfaceBrushes.TileBorder(fullLook, highlight);
         TileBorderThickness = fullLook.HasTile ? new Thickness(1) : new Thickness(0);
     }

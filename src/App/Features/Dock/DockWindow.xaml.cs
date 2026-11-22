@@ -141,6 +141,7 @@ public partial class DockWindow : Window
 
         StopRendering();
         DataContext = viewModel;
+        ApplyTaskbarTheme(viewModel);
         viewModel.AnimationNeeded += OnAnimationNeeded;
         viewModel.AnimationStopped += OnAnimationStopped;
         viewModel.RequestReposition += OnRequestReposition;
@@ -150,8 +151,23 @@ public partial class DockWindow : Window
         Reposition(_targetMonitor);
     }
 
+    /// <summary>
+    /// Tam genişlik (Windows görev çubuğu düzeni) sistem temasına uyar: pencere kaynaklarında KoyDock* adları KoyTaskbar* fırçalarıyla
+    /// gölgelenir, içerideki bütün DynamicResource kullanımları (metin, simge, ayırıcı) açık temada açık yüzeye uygun renge döner.
+    /// Kapsülde gölge yoktur; KoyDock* her temada koyu kalır. Tema değişince (ThemeManager.Applied) yenilenir.
+    /// </summary>
+    private void ApplyTaskbarTheme(DockViewModel? viewModel = null)
+    {
+        viewModel ??= ViewModel;
+        TaskbarThemeResources.Apply(Resources, viewModel?.Taskbar.IsActive == true);
+    }
+
+    private void OnThemeApplied() => ApplyTaskbarTheme();
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        Koy.App.Resources.ThemeManager.Applied += OnThemeApplied;
+        Closed += (_, _) => Koy.App.Resources.ThemeManager.Applied -= OnThemeApplied;
         if (ViewModel is not null)
         {
             ViewModel.AnimationNeeded += OnAnimationNeeded;

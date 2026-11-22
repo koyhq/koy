@@ -467,6 +467,8 @@ internal static class DockBarSnapshots
         var hostWidth = colorful && vertical ? 360 : width ?? Monitor.WidthDip;
         var hostHeight = colorful ? (vertical ? 380 : 150) : double.NaN;
         var host = new Grid { Width = hostWidth, DataContext = vm };
+        // Pencerede ApplyTaskbarTheme yapar; görsel kanıt aracında pencere yok, aynı gölgeleme host'a uygulanır.
+        TaskbarThemeResources.Apply(host.Resources, vm.Taskbar.IsActive);
         if (colorful)
         {
             host.Height = hostHeight;
