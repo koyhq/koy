@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Koy.Core.Clipboard;
+using Koy.Core.Dictation;
 using Koy.Core.Rules;
 using Koy.Core.Settings.Profiles;
 using Koy.Core.Tasks;
@@ -12,4 +13,7 @@ namespace Koy.Core.Settings;
 [JsonSerializable(typeof(List<TaskItem>))]
 [JsonSerializable(typeof(List<SavedProfile>))]
 [JsonSerializable(typeof(List<RuleDraft>))]
+[JsonSerializable(typeof(DictationConfig))]
+[JsonSerializable(typeof(DictionaryFile))]
+[JsonSerializable(typeof(List<DictationHistoryEntry>))]
 internal sealed partial class DataJsonContext : JsonSerializerContext;
