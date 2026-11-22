@@ -12,7 +12,10 @@ public enum DockSettingScope
     FullWidthOnly,
 
     /// <summary>İki stilde de geçerli.</summary>
-    Both
+    Both,
+
+    /// <summary>Hiçbir stilde gösterilmez (alan uyumluluk için dosyada kalır). Ör. uzunluk: Windows çubuğu hep ekran genişliğinde, kapsülde etkisizdi.</summary>
+    Never
 }
 
 /// <summary>
@@ -39,8 +42,7 @@ public static class DockSettingsMatrix
         [nameof(DockSettings.NewTrayIconVisibility)] = DockSettingScope.Both,
         [nameof(DockSettings.TrayAppVisibility)] = DockSettingScope.Both,
 
-        // Yalnız tam genişlik: Windows 11 görev çubuğu ayarları (ve "Uzunluk": kapsül içeriği kadar geniştir, uzunluk etkisizdi)
-        [nameof(DockSettings.LengthPercent)] = DockSettingScope.FullWidthOnly,
+        // Yalnız tam genişlik: Windows 11 görev çubuğu ayarları
         [nameof(DockSettings.IconAlignment)] = DockSettingScope.FullWidthOnly,
         [nameof(DockSettings.TaskbarSearch)] = DockSettingScope.FullWidthOnly,
         [nameof(DockSettings.TaskbarShowTaskView)] = DockSettingScope.FullWidthOnly,
@@ -48,6 +50,9 @@ public static class DockSettingsMatrix
         [nameof(DockSettings.TaskbarShowFlashing)] = DockSettingScope.FullWidthOnly,
         [nameof(DockSettings.TaskbarClockSeconds)] = DockSettingScope.FullWidthOnly,
         [nameof(DockSettings.TaskbarShowDesktopCorner)] = DockSettingScope.FullWidthOnly,
+
+        // Hiçbir stilde: dosyada kalır, arayüzde yok
+        [nameof(DockSettings.LengthPercent)] = DockSettingScope.Never,
 
         // Yalnız kapsül: Koy'a özgü ya da Windows'ta olmayan
         [nameof(DockSettings.EdgeOffsetDip)] = DockSettingScope.CapsuleOnly,
@@ -93,6 +98,7 @@ public static class DockSettingsMatrix
     {
         DockSettingScope.Both => true,
         DockSettingScope.FullWidthOnly => style == DockStyleMode.FullWidth,
+        DockSettingScope.Never => false,
         _ => style != DockStyleMode.FullWidth
     };
 }

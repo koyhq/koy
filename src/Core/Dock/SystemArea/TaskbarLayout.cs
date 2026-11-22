@@ -171,6 +171,8 @@ public static class TaskbarLayout
     /// </summary>
     public static DockSettings ApplyWindowsStyle(DockSettings dock) => dock with
     {
+        // Windows görev çubuğunun uzunluk ayarı yok: her zaman ekran genişliği.
+        LengthPercent = DockLayoutLimits.MaxLengthPercent,
         IconSize = IconSizeDip,
         IconSpacingDip = SlotDip - DockFitMath.ItemSizeFor(IconSizeDip),
         HoverMagnify = false,

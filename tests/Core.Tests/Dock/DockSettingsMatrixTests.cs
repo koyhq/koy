@@ -34,7 +34,7 @@ public class DockSettingsMatrixTests
             IconSize = 40, IconSpacingDip = 0, HoverMagnify = true, IndicatorStyle = DockIndicatorStyle.Highlight,
             IndicatorColor = DockColorSource.Custom, IndicatorOnePerWindow = true, LabelMode = DockLabelMode.Always,
             ShowStartButton = false, StartIcon = DockStartIcon.Koy, ShowFolders = true, ShowRecents = true,
-            GroupingMode = DockGroupingMode.Never, LeftClickAction = DockLeftClickAction.CycleWindows, IconAlignment = DockIconAlignment.Right
+            LengthPercent = 60, GroupingMode = DockGroupingMode.Never, LeftClickAction = DockLeftClickAction.CycleWindows, IconAlignment = DockIconAlignment.Right
         };
         var pinned = TaskbarLayout.ApplyWindowsStyle(user);
 
@@ -47,12 +47,13 @@ public class DockSettingsMatrixTests
             if (p.Name == nameof(DockSettings.IconAlignment))
                 continue;
 
-            Assert.True(DockSettingsMatrix.ScopeOf(p.Name) == DockSettingScope.CapsuleOnly, $"{p.Name} tam genişlikte sabitleniyor ama yalnız kapsül değil");
+            var scope = DockSettingsMatrix.ScopeOf(p.Name);
+            Assert.True(scope is DockSettingScope.CapsuleOnly or DockSettingScope.Never, $"{p.Name} tam genişlikte sabitleniyor ama tam genişlikte görünür");
         }
     }
 
     [Theory]
-    [InlineData(nameof(DockSettings.LengthPercent), false, true)]      // kapsülde etkisizdi: kapsülde gizle
+    [InlineData(nameof(DockSettings.LengthPercent), false, false)]     // hiçbir stilde gösterilmez (Windows'ta yok, kapsülde etkisizdi)
     [InlineData(nameof(DockSettings.InnerPaddingDip), true, false)]    // tam genişlikte etkisizdi: tam genişlikte gizle
     [InlineData(nameof(DockSettings.HoverMagnify), true, false)]
     [InlineData(nameof(DockSettings.TaskbarSearch), false, true)]
@@ -164,5 +165,14 @@ public class DockSettingsMatrixTests
 
         Assert.Equal(DockGroupingMode.Always, w.GroupingMode);
         Assert.Equal(DockLeftClickAction.MinimizeIfActive, w.LeftClickAction);
+    }
+
+    [Fact]
+    public void Windows_style_pins_the_length_to_the_full_screen_width_without_touching_the_user_value()
+    {
+        var user = new DockSettings { LengthPercent = 60 };
+
+        Assert.Equal(100, TaskbarLayout.ApplyWindowsStyle(user).LengthPercent);
+        Assert.Equal(60, user.LengthPercent);   // dosyadaki değer korunur
     }
 }
