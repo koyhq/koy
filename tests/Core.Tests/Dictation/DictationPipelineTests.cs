@@ -106,6 +106,18 @@ public sealed class DictationPipelineTests : IDisposable
     }
 
     [Fact]
+    public async Task A_recording_too_short_to_use_is_reported_not_swallowed()
+    {
+        _recorder.Audio = null;
+
+        var outcome = await DictateAsync();
+
+        Assert.Equal(DictationOutcomeKind.NoSpeech, outcome.Kind);
+        Assert.Equal(DictationPipeline.TooShort, outcome.Detail);
+        Assert.Empty(_speech.Requests);
+    }
+
+    [Fact]
     public async Task Silence_never_reaches_the_speech_model()
     {
         _recorder.Audio = Silence();

@@ -37,7 +37,10 @@ public static class UninstallPlan
         "calendar-settings.json", "calendar-settings.json.tmp",
         "calendar-token-google.dat", "calendar-token-google.dat.tmp",
         "calendar-token-outlook.dat", "calendar-token-outlook.dat.tmp",
-        "calendar-cache.json", "calendar-cache.json.tmp"
+        "calendar-cache.json", "calendar-cache.json.tmp",
+        // Sesle yazma: ayarlar, sözlük, geçmiş (söylenenler) ve DPAPI ile şifreli API anahtarı.
+        "dictation.json", "dictation.json.tmp", "dictation-dictionary.json", "dictation-dictionary.json.tmp",
+        "dictation-history.json", "dictation-history.json.tmp", "dictation.key"
     ];
 
     /// <summary>Çalışma durumu: yeniden kurulumda işe yaramaz, her kaldırmada silinir.</summary>

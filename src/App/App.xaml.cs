@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Koy.App.Features;
 using Koy.App.Features.Actions;
+using Koy.App.Features.Dictation;
 using Koy.App.Features.Dock;
 using Koy.App.Features.Menu;
 using Koy.App.Features.Notch;
@@ -298,6 +299,15 @@ public partial class App : Application, IDisposable
                 break;
             case ShortcutAction.VoiceCommand:
                 _features.OfType<NotchFeature>().FirstOrDefault()?.ToggleVoiceCommand();
+                break;
+            case ShortcutAction.Dictate:
+                _ = DictationService.Instance.ToggleAsync();
+                break;
+            case ShortcutAction.DictateCancel:
+                _ = DictationService.Instance.CancelAsync();
+                break;
+            case ShortcutAction.DictatePause:
+                _ = DictationService.Instance.TogglePauseAsync();
                 break;
         }
     }

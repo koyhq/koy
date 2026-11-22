@@ -440,6 +440,9 @@ public sealed record ShortcutsSettings
     public string OpenSearchClipboard { get; set; } = "Alt+Shift+F2";
     public string VoiceCommand { get; set; } = "Ctrl+Alt+V";
     public string OpenKoyWindow { get; set; } = "";
+    public string Dictate { get; set; } = "Ctrl+Alt+H";
+    public string DictateCancel { get; set; } = "";
+    public string DictatePause { get; set; } = "";
 }
 
 /// <summary>

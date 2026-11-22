@@ -13,7 +13,10 @@ public enum ShortcutAction
     OpenSearch,
     OpenSearchClipboard,
     VoiceCommand,
-    OpenKoyWindow
+    OpenKoyWindow,
+    Dictate,
+    DictateCancel,
+    DictatePause
 }
 
 /// <summary>Eylem ile ayar alanı ve varsayılan tuş eşlemesi.</summary>
@@ -37,6 +40,11 @@ public static class ShortcutBindings
         ShortcutAction.VoiceCommand => "Ctrl+Alt+V",
         // Atanmamış gelir: bugün bağlı olmayan bir kombinasyon yeni çakışma üretmesin.
         ShortcutAction.OpenKoyWindow => "",
+        // Sesle yazma: aç/kapa kayıt. Ctrl+Alt+H sistemde ayrılmış değil. Kapalıyken basılınca Koy penceresi açılır,
+        // tuş yutulmaz değil ama yazma başlamaz; iptal ve duraklatma atanmamış gelir (çakışma üretmesin).
+        ShortcutAction.Dictate => "Ctrl+Alt+H",
+        ShortcutAction.DictateCancel => "",
+        ShortcutAction.DictatePause => "",
         _ => ""
     };
 
@@ -51,6 +59,9 @@ public static class ShortcutBindings
         ShortcutAction.OpenSearchClipboard => settings.Shortcuts.OpenSearchClipboard,
         ShortcutAction.VoiceCommand => settings.Shortcuts.VoiceCommand,
         ShortcutAction.OpenKoyWindow => settings.Shortcuts.OpenKoyWindow,
+        ShortcutAction.Dictate => settings.Shortcuts.Dictate,
+        ShortcutAction.DictateCancel => settings.Shortcuts.DictateCancel,
+        ShortcutAction.DictatePause => settings.Shortcuts.DictatePause,
         _ => ""
     };
 
@@ -65,6 +76,9 @@ public static class ShortcutBindings
         ShortcutAction.OpenSearchClipboard => settings with { Shortcuts = settings.Shortcuts with { OpenSearchClipboard = text } },
         ShortcutAction.VoiceCommand => settings with { Shortcuts = settings.Shortcuts with { VoiceCommand = text } },
         ShortcutAction.OpenKoyWindow => settings with { Shortcuts = settings.Shortcuts with { OpenKoyWindow = text } },
+        ShortcutAction.Dictate => settings with { Shortcuts = settings.Shortcuts with { Dictate = text } },
+        ShortcutAction.DictateCancel => settings with { Shortcuts = settings.Shortcuts with { DictateCancel = text } },
+        ShortcutAction.DictatePause => settings with { Shortcuts = settings.Shortcuts with { DictatePause = text } },
         _ => settings
     };
 

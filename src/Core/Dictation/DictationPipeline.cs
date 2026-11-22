@@ -64,6 +64,9 @@ public sealed class DictationPipeline : IDisposable
         _recorder.LevelChanged += OnLevel;
     }
 
+    /// <summary><see cref="DictationOutcome.Detail"/> değeri: kayıt işlenemeyecek kadar kısa.</summary>
+    public const string TooShort = "short";
+
     public DictationState State { get; private set; } = DictationState.Idle;
 
     /// <summary>Sırada ya da işlenmekte olan iş sayısı.</summary>
@@ -156,7 +159,11 @@ public sealed class DictationPipeline : IDisposable
 
         Raise(StateChanged, DictationState.Idle);
         if (audio is null)
+        {
+            // Bir sözcük bile olmayacak kadar kısa: iş açılmaz, ama kullanıcı sessizce yutulmuş sanmasın.
+            Raise(Finished, new DictationOutcome(DictationOutcomeKind.NoSpeech, Detail: TooShort));
             return;
+        }
 
         Interlocked.Increment(ref _pending);
         await RunJobAsync(audio.Wav, audio.Seconds, audio.RmsLevels, audio.ChunkSeconds, choice, retry: null).ConfigureAwait(false);

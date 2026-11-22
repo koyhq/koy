@@ -5,12 +5,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:Koy.App.Features.Settings"
              xmlns:res="clr-namespace:Koy.App.Resources"
+             xmlns:dict="clr-namespace:Koy.App.Features.Dictation"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:KoyWindowViewModel}">
 
     <StackPanel Margin="0,0,16,24">
         <TextBlock Text="{Binding [NavDictation], Source={x:Static res:Loc.Instance}}" Style="{StaticResource PageTitleStyle}" />
         <TextBlock Text="{Binding [DictationSubtitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource PageSubtitleStyle}" Margin="0,4,0,8" />
+
+        <!-- SESLE YAZMA: kendi ViewModel'i ve ayar dosyası var (dictation.json) -->
+        <dict:DictationSettingsView />
 
         <!-- SESLİ KOMUT VE HARNESS -->
         <TextBlock Text="{Binding [VoiceHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
