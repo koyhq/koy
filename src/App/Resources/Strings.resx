@@ -3882,6 +3882,9 @@
   <data name="UndoTaskDeleted" xml:space="preserve">
     <value>Task deleted</value>
   </data>
+  <data name="CalEventsFull" xml:space="preserve">
+    <value>You reached the event limit ({0}); delete old ones.</value>
+  </data>
   <data name="FormTitleEmpty" xml:space="preserve">
     <value>Write a title first</value>
   </data>

@@ -3882,6 +3882,9 @@
   <data name="UndoTaskDeleted" xml:space="preserve">
     <value>Görev silindi</value>
   </data>
+  <data name="CalEventsFull" xml:space="preserve">
+    <value>Etkinlik sınırına ulaştın ({0}); eskilerini sil.</value>
+  </data>
   <data name="FormTitleEmpty" xml:space="preserve">
     <value>Önce bir başlık yaz</value>
   </data>

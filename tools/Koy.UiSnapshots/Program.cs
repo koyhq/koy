@@ -13,7 +13,7 @@ namespace Koy.UiSnapshots;
 /// <summary>
 /// Koy'un pencerelerini ekrana çıkarmadan PNG'ye çevirir. Hiçbir Win32 kancası, AppBar ya da görev çubuğu
 /// servisi başlatılmaz; pencereler gösterilmez, yalnız ölçülüp çizilir.
-/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall|centik|centik-erisim|dock|dockbar|jumplist|startmenu|eklentiler|efektler]
+/// Kullanım: Koy.UiSnapshots --out &lt;klasör&gt; --prefix once|sonra [--theme dark|light|both] [--scene all|uninstall|centik|centik-erisim|geri-al|dock|dockbar|jumplist|startmenu|eklentiler|efektler]
 /// <c>--scene jumplist</c>: dock sağ tık menüsünün bölümlü atlama listesi hâli (sentetik veri).
 /// <c>--scene startmenu</c>: Başlat düğmesinin sağ tık menüsü (Win+X karşılığı), alt menü açık hâliyle.
 /// <c>--scene eklentiler</c>: Eklentiler sayfası (depodaki store/ klasöründen sahte ağla; kurulum, uygulama ve hata durumları).
@@ -100,6 +100,8 @@ public static class Program
                 RenderUninstall(outDir, prefix, theme);
             else if (scene == "centik")
                 RenderCentik(outDir, prefix, theme);
+            else if (scene == "geri-al")
+                RenderUndoStripScenes(n => Path.Combine(outDir, $"{prefix}-{theme}-{n}.png"));
             else if (scene == "centik-erisim")
                 RenderNotchAccessibilityScenes(n => Path.Combine(outDir, $"{prefix}-{theme}-{n}.png"));
             else if (scene is "efektler" or "effects")
@@ -661,6 +663,28 @@ public static class Program
                 return deeper;
         }
         return null;
+    }
+
+    /// <summary>Geri al şeridinin konumu (--scene geri-al): Takvim ve Odak sayfalarında bir kayıt silinmiş, şerit görünür.</summary>
+    private static void RenderUndoStripScenes(Func<string, string> name)
+    {
+        var set = MakeNotch(music: false);
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Calendar);
+        var day = DateOnly.FromDateTime(DateTime.Today);
+        var ev = set.Vm.Calendar.Events.Book.Add(Sample.T("Toplantı", "Meeting"), day, new TimeOnly(10, 0));
+        Flush();
+        set.Vm.Calendar.DeleteEventCommand.Execute(ev!.Id);
+        Flush();
+        ShotNotch(set, name("geri-al-takvim"), expanded: true);
+        set.Vm.Dispose();
+
+        set = MakeNotch(music: false);
+        set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Focus);
+        Flush();
+        set.Vm.Focus.Tasks!.RemoveCommand.Execute(set.Vm.Focus.Tasks!.Rows[1]);
+        Flush();
+        ShotNotch(set, name("geri-al-odak"), expanded: true);
+        set.Vm.Dispose();
     }
 
     /// <summary>Çentik erişilebilirliği ve güvenli silme sahneleri (--scene centik-erisim): hızlı çalışır, tam centik sahnesini beklemeden.</summary>

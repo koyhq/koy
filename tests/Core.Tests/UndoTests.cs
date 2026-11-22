@@ -216,6 +216,21 @@ public class QuickAddValidationTests
         Assert.Equal(expected, QuickAddValidation.ForEvent(title, time));
 
     [Theory]
+    [InlineData(0, QuickAddError.None)]
+    [InlineData(EventBook.MaxEvents - 1, QuickAddError.None)]
+    [InlineData(EventBook.MaxEvents, QuickAddError.EventBookFull)]
+    [InlineData(EventBook.MaxEvents + 5, QuickAddError.EventBookFull)]
+    public void Event_form_reports_full_book(int count, QuickAddError expected) =>
+        Assert.Equal(expected, QuickAddValidation.ForEvent("Toplantı", "09:30", count));
+
+    [Fact]
+    public void Event_form_full_book_does_not_hide_title_or_time_errors()
+    {
+        Assert.Equal(QuickAddError.TitleEmpty, QuickAddValidation.ForEvent("", "09:30", EventBook.MaxEvents));
+        Assert.Equal(QuickAddError.TimeInvalid, QuickAddValidation.ForEvent("Toplantı", "99:99", EventBook.MaxEvents));
+    }
+
+    [Theory]
     [InlineData("rapor", "", QuickAddError.None)]
     [InlineData("rapor", "14:30", QuickAddError.None)]
     [InlineData("", "14:30", QuickAddError.TitleEmpty)]

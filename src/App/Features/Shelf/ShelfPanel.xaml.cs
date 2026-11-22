@@ -10,26 +10,41 @@ public partial class ShelfPanel : UserControl
 {
     private ShelfViewModel? ViewModel => DataContext as ShelfViewModel;
 
+    /// <summary>Kabul edilen bir sürükleme panelin üstündeyken true; bırakma kutusu vurgulanır.</summary>
+    public static readonly DependencyProperty IsDropTargetProperty =
+        DependencyProperty.Register(nameof(IsDropTarget), typeof(bool), typeof(ShelfPanel), new PropertyMetadata(false));
+
+    public bool IsDropTarget
+    {
+        get => (bool)GetValue(IsDropTargetProperty);
+        set => SetValue(IsDropTargetProperty, value);
+    }
+
     public ShelfPanel()
     {
         InitializeComponent();
     }
+
+    private void ShelfPanel_DragLeave(object sender, DragEventArgs e) => IsDropTarget = false;
 
     private void ShelfPanel_DragOver(object sender, DragEventArgs e)
     {
         if (e.Data.GetDataPresent(DataFormats.FileDrop) || e.Data.GetDataPresent(DataFormats.Text))
         {
             e.Effects = DragDropEffects.Copy;
+            IsDropTarget = true;
         }
         else
         {
             e.Effects = DragDropEffects.None;
+            IsDropTarget = false;
         }
         e.Handled = true;
     }
 
     private void ShelfPanel_Drop(object sender, DragEventArgs e)
     {
+        IsDropTarget = false;
         if (ViewModel is null)
             return;
 
