@@ -701,9 +701,11 @@
             </StackPanel>
           </Grid>
 
-          <!-- Geri al şeridi: silme onaysız ve hemen olur, birkaç saniye geri alınabilir. Üst satırın ortasında (sayfa formlarını örtmez),
-               Müzik / Ana anahtarının üstünde kısa süre durur. Metin canlı bölge: ekran okuyucu silmeyi duyurur. -->
-          <Border Grid.Row="0" Panel.ZIndex="5" HorizontalAlignment="Center" VerticalAlignment="Center" Height="28" CornerRadius="14"
+          <!-- Geri al şeridi: silme onaysız ve hemen olur, birkaç saniye geri alınabilir. Gövdenin (BodyHost) üst kenarında ortalı, üst satırla
+               kartların arasındaki boşlukta yüzer: Müzik / Ana anahtarını örtmez. Alt kenar denendi ama Takvim / Odak hızlı ekleme formunun
+               (başlık kutusu, hata metni) üstüne biniyordu; üstte yalnız kartların iç boşluğuna girer (tuval boyutu değişmez).
+               Metin canlı bölge: ekran okuyucu silmeyi duyurur. -->
+          <Border Grid.Row="1" Panel.ZIndex="5" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,0,0,0" Height="28" CornerRadius="14"
                   Padding="14,0,4,0" Background="{DynamicResource KoyNotchSurface}" BorderThickness="1" BorderBrush="{DynamicResource KoyNotchCardBorder}"
                   Visibility="{Binding Undo.IsVisible, Converter={StaticResource BoolToVis}}">
             <StackPanel Orientation="Horizontal">

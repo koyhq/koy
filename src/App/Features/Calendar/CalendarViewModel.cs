@@ -299,12 +299,13 @@ public sealed partial class CalendarViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void AddEvent()
     {
-        var error = QuickAddValidation.ForEvent(NewEventTitle, NewEventTime);
+        var error = QuickAddValidation.ForEvent(NewEventTitle, NewEventTime, _events.Book.LocalEvents.Count);
         NewEventTimeInvalid = error == QuickAddError.TimeInvalid;
         FormError = error switch
         {
             QuickAddError.TitleEmpty => Strings.Get("FormTitleEmpty"),
             QuickAddError.TimeInvalid => Strings.Get("TaskTimeInvalid"),
+            QuickAddError.EventBookFull => string.Format(CultureInfo.CurrentCulture, Strings.Get("CalEventsFull"), EventBook.MaxEvents),
             _ => ""
         };
         if (error != QuickAddError.None)

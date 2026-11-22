@@ -12,7 +12,8 @@
              FontSize="11"
              AllowDrop="True"
              Drop="ShelfPanel_Drop"
-             DragOver="ShelfPanel_DragOver">
+             DragOver="ShelfPanel_DragOver"
+             DragLeave="ShelfPanel_DragLeave">
 
   <UserControl.Resources>
     <BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -135,7 +136,21 @@
         <Grid Grid.Column="1">
       <!-- Bırakma kutusu -->
         <Grid Width="120" Height="78" VerticalAlignment="Top">
-          <Rectangle RadiusX="16" RadiusY="16" Stroke="{DynamicResource KoyNotchShelfDash}" StrokeThickness="1.5" StrokeDashArray="3 3" />
+          <!-- Dosya üstüne gelince kenar ve zemin vurgulanır (IsDropTarget: DragOver / DragLeave / Drop) -->
+          <Rectangle x:Name="DropBoxFrame" RadiusX="16" RadiusY="16" StrokeThickness="1.5" StrokeDashArray="3 3">
+            <Rectangle.Style>
+              <Style TargetType="Rectangle">
+                <Setter Property="Stroke" Value="{DynamicResource KoyNotchShelfDash}" />
+                <Setter Property="Fill" Value="Transparent" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsDropTarget, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                    <Setter Property="Stroke" Value="{DynamicResource KoyNotchShelfSoft}" />
+                    <Setter Property="Fill" Value="{DynamicResource KoyNotchHover}" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Rectangle.Style>
+          </Rectangle>
           <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
             <res:KoyIcon Data="{DynamicResource IconDownload}" Size="20" Foreground="{DynamicResource KoyNotchShelfSoft}" HorizontalAlignment="Center" />
             <TextBlock Text="{Binding [ShelfDropHere], Source={x:Static res:Loc.Instance}}" FontSize="11" Margin="0,6,0,0"

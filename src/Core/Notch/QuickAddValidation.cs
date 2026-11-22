@@ -8,7 +8,9 @@ public enum QuickAddError
 {
     None = 0,
     TitleEmpty = 1,
-    TimeInvalid = 2
+    TimeInvalid = 2,
+    /// <summary>Yerel etkinlik defteri dolu (<see cref="EventBook.MaxEvents"/>); yeni etkinlik eklenemez.</summary>
+    EventBookFull = 3
 }
 
 /// <summary>
@@ -24,6 +26,19 @@ public static class QuickAddValidation
             return QuickAddError.TitleEmpty;
 
         return EventAgenda.TryParseTime(time, out _) ? QuickAddError.None : QuickAddError.TimeInvalid;
+    }
+
+    /// <summary>
+    /// Yukarıdaki denetime ek olarak defter doluysa <see cref="QuickAddError.EventBookFull"/> döner (ekleme sessizce
+    /// başarısız olmasın). Başlık ve saat hatası önce gelir: kullanıcı önce onu düzeltir.
+    /// </summary>
+    public static QuickAddError ForEvent(string? title, string? time, int localEventCount)
+    {
+        var error = ForEvent(title, time);
+        if (error != QuickAddError.None)
+            return error;
+
+        return localEventCount >= EventBook.MaxEvents ? QuickAddError.EventBookFull : QuickAddError.None;
     }
 
     /// <summary>Görevde saat isteğe bağlıdır: boş geçerlidir, dolu ama bozuksa hatadır.</summary>
