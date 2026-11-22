@@ -112,7 +112,7 @@ public static class AllowedTokens
         "KoyDangerText", "KoyDangerBorder", "KoyDangerBg", "KoyScrim", "KoyStatusOk", "KoyStatusWarn",
         "KoyToggleTrackOff", "KoyToggleKnobOff", "KoyToggleKnobOn",
         // Dock (Koyu ve Açık aynı değerleri taşır; dock temadan bağımsız koyu yüzeydir, tema paketi ezer).
-        "KoyDockSurface", "KoyDockCapsuleSurface", "KoyDockBorder", "KoyDockCapsuleBorder", "KoyDockSeparator",
+        "KoyDockSurface", "KoyDockCapsuleSurface", "KoyDockBorder", "KoyDockCapsuleBorder", "KoyDockHighlight", "KoyDockSeparator",
         "KoyDockDivider", "KoyDockHover", "KoyDockActive", "KoyDockPill", "KoyDockCover", "KoyDockIndicator",
         "KoyDockText", "KoyDockTextSecondary", "KoyDockGlyph", "KoyDockClockText", "KoyDockClockSubtext",
         "KoyDockPreviewSurface", "KoyDockPreviewText"

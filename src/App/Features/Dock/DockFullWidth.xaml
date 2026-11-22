@@ -36,7 +36,7 @@
     <!-- Windows tarzı tam genişlik: kalınlık DockPositionResolver.FullWidthHeightDip (48), kenardan uzaklık ve uzunluk ayarına uyar,
          yüzey malzeme ayarına uyar (Katı / Buzlu / Cam; DockViewModel.FullWidthSurface). -->
     <Border Background="{Binding FullWidthSurface}"
-            BorderBrush="{DynamicResource KoyDockBorder}"
+            BorderBrush="{Binding FullWidthBorderBrush}"
             BorderThickness="{Binding FullWidthBorderThickness}"
             Width="{Binding CapsuleWidth}"
             Height="{Binding CapsuleHeight}"
