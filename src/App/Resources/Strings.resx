@@ -303,6 +303,12 @@
   <data name="AutoCheckUpdatesTitle" xml:space="preserve">
     <value>Automatically check for updates</value>
   </data>
+  <data name="AutoInstallUpdatesTitle" xml:space="preserve">
+    <value>Download and install updates automatically</value>
+  </data>
+  <data name="AutoInstallUpdatesDesc" xml:space="preserve">
+    <value>Off by default. When enabled, new versions download quietly and install when Koy exits.</value>
+  </data>
   <data name="ChannelTitle" xml:space="preserve">
     <value>Update channel</value>
   </data>

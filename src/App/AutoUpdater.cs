@@ -80,6 +80,16 @@ internal static class AutoUpdater
                 return;
 
             await UpdateClient.CheckAsync(general.UpdateChannel, "Otomatik güncelleme denetimi");
+
+            if (AutoUpdatePolicy.ShouldAutoStage(
+                general.AutoCheckUpdates,
+                general.AutoInstallUpdates,
+                UpdateStatus.HasAvailableUpdate,
+                UpdateStatus.LastResult == UpdateCheckResult.UpdateReady,
+                Koy.Platform.Power.PowerService.IsSystemEnergySaverOn()))
+            {
+                await UpdateClient.DownloadAndStageForExitAsync(general.UpdateChannel, "Otomatik güncelleme indirme");
+            }
         }
         catch (Exception ex)
         {
