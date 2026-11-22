@@ -127,6 +127,8 @@ public static class Program
                 DockBarSnapshots.Render(outDir, prefix, theme, RenderElement);
             else if (scene is "pil" or "battery")
                 RenderBattery(outDir, prefix, theme);
+            else if (scene is "dock-surukle" or "dockdrag")
+                DockBarSnapshots.RenderDrag(outDir, prefix, theme, RenderElement);
             else if (scene is "dockmat" or "dockmaterial")
                 DockBarSnapshots.RenderMaterials(outDir, prefix, theme, RenderElement);
             else if (scene is "dock" or "folder" or "folders")

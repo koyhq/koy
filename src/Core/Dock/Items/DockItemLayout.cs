@@ -67,6 +67,103 @@ public static class DockItemLayout
     }
 
     /// <summary>
+    /// Sürükleme sonrası düzen. <paramref name="visibleInNewOrder"/> şeritte görünen öğelerin (kayıtlı düzendeki dizinleriyle)
+    /// yeni şerit sırasıdır; görünen öğeler, kendi yuvalarını (dizinlerinin artan sırası) bu sırayla doldurur.
+    /// Şeritte görünmeyen öğeler (pili olmayan makinedeki pil) yerinde kalır. Geçersiz ya da yinelenen dizinde düzen değişmez.
+    /// </summary>
+    public static IReadOnlyList<DockItemSpec> Reorder(IReadOnlyList<DockItemSpec> layout, IReadOnlyList<int> visibleInNewOrder)
+    {
+        var slots = visibleInNewOrder.OrderBy(i => i).ToList();
+        if (slots.Count != slots.Distinct().Count() || slots.Any(i => i < 0 || i >= layout.Count))
+            return layout;
+
+        var result = layout.ToList();
+        for (var k = 0; k < slots.Count; k++)
+            result[slots[k]] = layout[visibleInNewOrder[k]];
+        return result;
+    }
+
+    /// <summary>
+    /// Uygulama/klasör kümesi ya da sırası değişti (klasör oluşturma, ekleme, çıkarma, dağıtma): düzeni yeni sıraya uyarlar.
+    /// Ek öğeler, kendinden önce kaç uygulama/klasör olduğunu korur; uygulamalar klasörde birleşince klasör, uygulamaların
+    /// en sağdakinin yerini alır (ek öğe klasörün hemen önünde ya da arkasında kalır).
+    /// </summary>
+    public static IReadOnlyList<DockItemSpec> Rebase(
+        IReadOnlyList<DockItemSpec> layout, IReadOnlyList<string> newOrder,
+        IReadOnlyList<DockFolder> oldFolders, IReadOnlyList<DockFolder> newFolders)
+    {
+        // Eski sıradaki konum: uygulama kendi konumu, klasördeki uygulama klasörünün konumu.
+        var oldTokens = ToTokens(layout);
+        var position = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        for (var i = 0; i < oldTokens.Count; i++)
+        {
+            position[oldTokens[i]] = i;
+            if (PinnedOrder.IsFolderId(oldTokens[i]))
+            {
+                var folder = oldFolders.FirstOrDefault(f => string.Equals(f.Id, PinnedOrder.ExtractFolderId(oldTokens[i]), StringComparison.OrdinalIgnoreCase));
+                foreach (var member in folder?.Items ?? [])
+                    position.TryAdd(member, i);
+            }
+        }
+
+        int PositionOf(string token)
+        {
+            if (position.TryGetValue(token, out var known))
+                return known;
+            if (PinnedOrder.IsFolderId(token))
+            {
+                var folder = newFolders.FirstOrDefault(f => string.Equals(f.Id, PinnedOrder.ExtractFolderId(token), StringComparison.OrdinalIgnoreCase));
+                var members = (folder?.Items ?? []).Where(position.ContainsKey).Select(m => position[m]).ToList();
+                if (members.Count > 0)
+                    return members.Max();
+            }
+            return int.MaxValue;
+        }
+
+        // Her ek öğe, kendinden önceki uygulama/klasör sayısıyla tutunur.
+        var extrasAt = new SortedDictionary<int, List<DockItemSpec>>();
+        var before = 0;
+        foreach (var spec in layout)
+        {
+            if (IsExtra(spec.Kind))
+            {
+                if (!extrasAt.TryGetValue(before, out var list))
+                    extrasAt[before] = list = [];
+                list.Add(spec);
+            }
+            else
+            {
+                before++;
+            }
+        }
+
+        var newPositions = newOrder.Select(PositionOf).ToList();
+        var result = new List<DockItemSpec>();
+        for (var k = 0; k <= newOrder.Count; k++)
+        {
+            // Eski konumu "kendinden önceki sayı"dan küçük olan yeni öğe sayısı k ise ek öğe k'inci yuvadan önce gelir.
+            foreach (var (oldCount, extras) in extrasAt)
+            {
+                if (newPositions.Count(p => p < oldCount) == k)
+                    result.AddRange(extras);
+            }
+
+            if (k < newOrder.Count)
+            {
+                var token = newOrder[k];
+                result.Add(PinnedOrder.IsFolderId(token)
+                    ? new DockItemSpec(DockItemKind.Folder, PinnedOrder.ExtractFolderId(token), "")
+                    : new DockItemSpec(DockItemKind.App, token, ""));
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>Düzendeki uygulama ve klasörlerin PinnedOrder belirteçleri, düzen sırasıyla.</summary>
+    public static List<string> ToTokens(IEnumerable<DockItemSpec> layout) => DockItemRules.ToPinnedOrder(layout);
+
+    /// <summary>
     /// Öğeyi sona ekler. Sınır aşılırsa ya da tekil bir öğe (saat, çöp kutusu) zaten varsa liste değişmeden döner
     /// (doğrulama <see cref="DockItemRules.Normalize"/> ile aynıdır).
     /// </summary>

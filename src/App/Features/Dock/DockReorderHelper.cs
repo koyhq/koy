@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Koy.Core.Dock;
@@ -27,6 +28,8 @@ internal sealed class DockReorderHelper
     private int _originalIndex;
     private double _slotWidth;
     private double _lastOffset;
+    private DockDragPlan _lastPlan;
+    private IReadOnlyList<double> _widths = [];
 
     public DockReorderHelper(Func<DockViewModel?> viewModel)
     {
@@ -91,55 +94,42 @@ internal sealed class DockReorderHelper
             _slotWidth = isVertical
                 ? (_element.ActualHeight + _element.Margin.Top + _element.Margin.Bottom)
                 : (_element.ActualWidth + _element.Margin.Left + _element.Margin.Right);
+            _widths = MeasureSlots(vm, _element, isVertical, _slotWidth);
             _dragging = true;
             // Sürükleme başladı: basma geri bildirimi iptal (öğe imleci izlerken içe çökük kalmaz).
             ReleasePress();
             _element.CaptureMouse();
+            _lastPlan = new DockDragPlan(_originalIndex, DockDropZone.Merge, false, _originalIndex);
             vm.BeginReorder();
+            _item.DragZ = 10;
         }
 
-        // İmleç yalnız sabitli yuvalar arasında gezer: sınırın ötesine kayma kırpılır.
-        var count = vm.PinnedCount;
-        var min = -_originalIndex * _slotWidth;
-        var max = (count - 1 - _originalIndex) * _slotWidth;
+        // İmleç yalnız sürükleme yuvaları (sabitliler ve ek öğeler) arasında gezer: sınırın ötesine kayma kırpılır.
+        var (min, max) = vm.DragOffsetRange(_originalIndex, _widths);
         _lastOffset = Math.Clamp(dragDelta, min, max);
 
-        var targetIndex = DockReorderMath.TargetIndex(count, _originalIndex, _lastOffset, _slotWidth);
+        // Karar Core'da: hedef yuva, bölge ve komşuların kayacağı hedef. Orta bantta kayma donar, hedef kaçmaz.
+        var plan = vm.EvaluateDrag(_item, _originalIndex, _lastOffset, _widths);
+        _lastPlan = plan;
 
-        // Yalnızca normal uygulamalar başka bir uygulama veya klasörle birleştirilebilir (klasörler iç içe geçmez).
-        var canMerge = _item is DockItemViewModel &&
-                       targetIndex != _originalIndex &&
-                       targetIndex >= 0 &&
-                       targetIndex < vm.Items.Count;
-
-        if (canMerge)
+        if (plan.CanMerge)
         {
-            var relativeX = (_slotWidth * 0.5) + (_lastOffset - (targetIndex - _originalIndex) * _slotWidth);
-            var zone = DockDropZones.DetectZone(_slotWidth, relativeX, 0.5);
+            var now = TimeSpan.FromTicks(Stopwatch.GetTimestamp());
+            var armed = _dropZoneTracker.Update(plan.HoveredIndex, plan.Zone, now);
 
-            if (zone == DockDropZone.Merge)
-            {
-                var now = TimeSpan.FromTicks(Stopwatch.GetTimestamp());
-                var armed = _dropZoneTracker.Update(targetIndex, zone, now);
-
-                if (armed)
-                {
-                    _mergeHoverTimer.Stop();
-                    ArmMerge(vm, targetIndex);
-                    return;
-                }
-
-                if (!_mergeHoverTimer.IsEnabled)
-                {
-                    _mergeHoverTimer.Start();
-                }
-            }
-            else
+            if (armed)
             {
                 _mergeHoverTimer.Stop();
-                _dropZoneTracker.Reset();
-                ClearGlow();
+                ArmMerge(vm, plan.HoveredIndex);
             }
+            else if (!_mergeHoverTimer.IsEnabled)
+            {
+                _mergeHoverTimer.Start();
+            }
+
+            // Hedef değiştiyse eskisinin parıltısı kalmaz; yenisi bekleme sonunda büyür.
+            if (!_dropZoneTracker.IsMergeArmed)
+                ClearGlow();
         }
         else
         {
@@ -148,10 +138,32 @@ internal sealed class DockReorderHelper
             ClearGlow();
         }
 
-        if (!_dropZoneTracker.IsMergeArmed)
+        // Kayma her harekette güncellenir: bantta Core zaten komşuyu yerinde tutar, kollu hedef de değişmez.
+        vm.UpdateReorder(_item, _originalIndex, _lastOffset, plan.ShiftTarget, _slotWidth);
+    }
+
+    /// <summary>
+    /// Şeritteki her yuvanın sürükleme yönündeki genişliği (kenar boşlukları dahil). Ek öğeler (saat, pil, ayırıcı) simgelerden
+    /// farklı genişlikte olduğu için yuvalar eşit varsayılmaz; ölçülemeyen yuva sürüklenenin genişliğini alır.
+    /// </summary>
+    private static List<double> MeasureSlots(DockViewModel vm, FrameworkElement element, bool vertical, double fallback)
+    {
+        var widths = new List<double>(vm.Items.Count);
+        DependencyObject? parent = element;
+        ItemsControl? list = null;
+        while (parent is not null && list is null)
         {
-            vm.UpdateReorder(_item, _originalIndex, _lastOffset, _slotWidth);
+            parent = System.Windows.Media.VisualTreeHelper.GetParent(parent);
+            list = parent as ItemsControl;
         }
+
+        for (var i = 0; i < vm.Items.Count; i++)
+        {
+            var container = list?.ItemContainerGenerator.ContainerFromIndex(i) as FrameworkElement;
+            var size = container is null ? 0 : vertical ? container.ActualHeight : container.ActualWidth;
+            widths.Add(size > 0 ? size : fallback);
+        }
+        return widths;
     }
 
     private void OnMergeHoverTimerTick(object? sender, EventArgs e)
@@ -160,13 +172,13 @@ internal sealed class DockReorderHelper
         if (!_dragging || _item is null || _viewModel() is not { } vm)
             return;
 
-        var count = vm.PinnedCount;
-        var targetIndex = DockReorderMath.TargetIndex(count, _originalIndex, _lastOffset, _slotWidth);
-        if (targetIndex != _originalIndex && targetIndex >= 0 && targetIndex < vm.Items.Count)
+        // Bekleme bitti: imleç hâlâ aynı yuvanın orta bandındaysa hedef silahlanır.
+        var plan = vm.EvaluateDrag(_item, _originalIndex, _lastOffset, _widths);
+        if (plan.CanMerge)
         {
             var now = TimeSpan.FromTicks(Stopwatch.GetTimestamp());
-            _dropZoneTracker.Update(targetIndex, DockDropZone.Merge, now);
-            ArmMerge(vm, targetIndex);
+            _dropZoneTracker.Update(plan.HoveredIndex, DockDropZone.Merge, now);
+            ArmMerge(vm, plan.HoveredIndex);
         }
     }
 
@@ -184,13 +196,8 @@ internal sealed class DockReorderHelper
             _glowingEntry.SetTargetScale(1.1);
         }
 
-        // Birleştirme hedeflendiğinde diğer simgelerin yer değiştirmesini durdur, sürüklenen imleçte kalsın
+        // Kayma bantta zaten donuk (DockReorderMath.Evaluate); sürüklenen imleçte kalır, hedef büyüyüp parlar.
         _item?.SnapOffset(_lastOffset);
-        for (var i = 0; i < vm.PinnedCount && i < vm.Items.Count; i++)
-        {
-            if (i != _originalIndex)
-                vm.Items[i].SetTargetOffset(0);
-        }
     }
 
     /// <summary>Bırakma: sürükleme sürmüşse tamamlar ve true döner (çağıran tıklamayı işlemez).</summary>
@@ -230,7 +237,7 @@ internal sealed class DockReorderHelper
                 return true;
             }
 
-            vm.CommitReorder(item, _originalIndex, _lastOffset, _slotWidth);
+            vm.CommitReorder(item, _originalIndex, _lastPlan.ShiftTarget, _widths);
             return true;
         }
 
@@ -280,6 +287,8 @@ internal sealed class DockReorderHelper
 
     private void Clear()
     {
+        if (_item is not null)
+            _item.DragZ = 0;
         _element = null;
         _item = null;
         _dragging = false;

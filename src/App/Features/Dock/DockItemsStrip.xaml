@@ -350,7 +350,7 @@
                     <Border.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}"/>
-                            <TranslateTransform X="{Binding OffsetX}"/>
+                            <TranslateTransform X="{Binding TranslateX}" Y="{Binding TranslateY}"/>
                         </TransformGroup>
                     </Border.RenderTransform>
 
@@ -520,6 +520,11 @@
                 </Grid>
             </DataTemplate>
         </ItemsControl.Resources>
+        <ItemsControl.ItemContainerStyle>
+            <Style TargetType="ContentPresenter">
+                <Setter Property="Panel.ZIndex" Value="{Binding DragZ}"/>
+            </Style>
+        </ItemsControl.ItemContainerStyle>
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
                 <StackPanel Orientation="{Binding DataContext.StripOrientation, RelativeSource={RelativeSource AncestorType=local:DockItemsStrip}}"/>

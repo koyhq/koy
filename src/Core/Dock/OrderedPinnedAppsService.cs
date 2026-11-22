@@ -5,6 +5,9 @@ public interface IReorderablePinnedApps : IPinnedAppsService
 {
     /// <summary>Kimliği verilen sabitli uygulamayı yeni dizine taşır ve sırayı kalıcı yapar.</summary>
     void MoveTo(string id, int newIndex);
+
+    /// <summary>Sıra başka yoldan (ek öğeli düzende sürükleme) kalıcı yazıldı: bellekteki kopya eşitlenir, yazma yapılmaz.</summary>
+    void SetOrder(IReadOnlyList<string> order);
 }
 
 /// <summary>
@@ -70,6 +73,8 @@ public sealed class OrderedPinnedAppsService(
         _order = moved;
         Save();
     }
+
+    public void SetOrder(IReadOnlyList<string> order) => _order = [.. order];
 
     private void Save()
     {

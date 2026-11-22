@@ -1370,9 +1370,39 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     /// <summary>Öğe sürüklenebilir mi: sabitli, sıralama destekleniyor ve en az iki sabitli var.</summary>
     public bool CanStartReorder(DockEntryViewModel item)
-        => !_hasExtras && item.IsPinned && _controller.CanReorderPinned && Items.Count(i => i.IsPinned) > 1;
+        => item.IsPinned && _controller.CanReorderPinned && Items.Count(i => i.IsPinned) > 1;
 
     public int PinnedCount => Items.Count(i => i.IsPinned);
+
+    /// <summary>
+    /// Sürükleme yuvaları: şeridin başından son sabitli ya da ek öğeye kadar. Sabitsiz çalışan simgeler ve ötesi
+    /// hedef olamaz; ek öğelerin arasına da bırakılabilir.
+    /// </summary>
+    private int LastDragIndex()
+    {
+        for (var i = Items.Count - 1; i >= 0; i--)
+        {
+            if (Items[i].IsPinned || Items[i] is DockExtraViewModel)
+                return i;
+        }
+        return -1;
+    }
+
+    /// <summary>Yalnız sabitli uygulama ya da klasör bir klasör hedefi olabilir (ek öğe ve çalışan simge olamaz).</summary>
+    private bool IsMergeTargetAt(int index) =>
+        index >= 0 && index < Items.Count && Items[index].IsPinned && Items[index] is DockItemViewModel or DockFolderViewModel;
+
+    /// <summary>İmleç konumundan sürükleme kararı (Core: <see cref="DockReorderMath.Evaluate"/>). Sürüklenen klasörse hiçbir yuva birleştirme hedefi değildir.</summary>
+    public DockDragPlan EvaluateDrag(DockEntryViewModel dragged, int originalIndex, double dragOffset, IReadOnlyList<double> widths)
+    {
+        var canMerge = dragged is DockItemViewModel;
+        return DockReorderMath.Evaluate(originalIndex, dragOffset, widths, 0, Math.Max(LastDragIndex(), originalIndex),
+            index => canMerge && IsMergeTargetAt(index));
+    }
+
+    /// <summary>Sürükleme için imleç ofsetinin sınırları (merkez en çok ilk ve son sürükleme yuvasına kadar).</summary>
+    public (double Min, double Max) DragOffsetRange(int originalIndex, IReadOnlyList<double> widths) =>
+        DockReorderMath.OffsetRange(widths, originalIndex, 0, Math.Max(LastDragIndex(), originalIndex));
 
     public void BeginReorder()
     {
@@ -1381,17 +1411,19 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         OnHoverEnded();
     }
 
-    /// <summary>Sürükleme sırasında: öğe imleci izler, aradakiler hedef yuvaya göre bir yuva kayar.</summary>
-    public void UpdateReorder(DockEntryViewModel dragged, int originalIndex, double dragOffset, double slotWidth)
+    /// <summary>Sürükleme sırasında: öğe imleci izler, aradakiler <paramref name="shiftTarget"/>'a göre bir yuva kayar.</summary>
+    public void UpdateReorder(DockEntryViewModel dragged, int originalIndex, double dragOffset, int shiftTarget, double slotWidth)
     {
-        var count = PinnedCount;
-        var target = DockReorderMath.TargetIndex(count, originalIndex, dragOffset, slotWidth);
         dragged.SnapOffset(dragOffset);
 
-        for (var i = 0; i < count && i < Items.Count; i++)
+        var shifted = DockReorderMath.ShiftedIndices(originalIndex, shiftTarget).ToHashSet();
+        for (var i = 0; i < Items.Count; i++)
         {
-            if (i != originalIndex)
-                Items[i].SetTargetOffset(DockReorderMath.ShiftFor(i, originalIndex, target, slotWidth));
+            if (i == originalIndex)
+                continue;
+
+            // Yalnız sürükleme yuvalarındaki öğeler kayar (çalışan simgeler ve ötesi yerinde).
+            Items[i].SetTargetOffset(shifted.Contains(i) ? DockReorderMath.ShiftFor(i, originalIndex, shiftTarget, slotWidth) : 0);
         }
 
         _isAnimating = true;
@@ -1402,11 +1434,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     /// Bırakıldı. Sıra değiştiyse koleksiyon hemen yeni sıraya taşınır ve her öğenin ekrandaki konumu korunacak biçimde
     /// kayması ayarlanır; sonra yay sıfıra çeker (zıplama olmaz). Sıra kalıcı yazılır.
     /// </summary>
-    public void CommitReorder(DockEntryViewModel dragged, int originalIndex, double dragOffset, double slotWidth)
+    public void CommitReorder(DockEntryViewModel dragged, int originalIndex, int target, IReadOnlyList<double> widths)
     {
         _isReordering = false;
-        var count = PinnedCount;
-        var target = DockReorderMath.TargetIndex(count, originalIndex, dragOffset, slotWidth);
 
         if (target == originalIndex)
         {
@@ -1415,20 +1445,22 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
         else
         {
-            // Bırakma anındaki ekran konumları: yuva dizini × genişlik + o anki kayma.
-            var visual = new Dictionary<DockEntryViewModel, double>();
-            for (var i = 0; i < Items.Count; i++)
-                visual[Items[i]] = i * slotWidth + Items[i].OffsetX;
+            // Bırakma anındaki ekran konumları korunur: her öğenin ofseti yeni yuvasına göre yeniden hesaplanır.
+            var offsets = DockReorderMath.CommitOffsets(widths, Items.Select(i => i.OffsetX).ToList(), originalIndex, target);
 
             Items.Move(originalIndex, target);
 
             for (var i = 0; i < Items.Count; i++)
             {
-                Items[i].SnapOffset(visual[Items[i]] - i * slotWidth);
+                Items[i].SnapOffset(offsets[i]);
                 Items[i].SetTargetOffset(0);
             }
 
-            if (dragged is DockItemViewModel itemVm)
+            if (_hasExtras)
+            {
+                PersistStripOrder();
+            }
+            else if (dragged is DockItemViewModel itemVm)
             {
                 _controller.MovePinned(itemVm.Model.Id, target);
             }
@@ -1441,6 +1473,73 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
         _isAnimating = true;
         AnimationNeeded?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Ek öğeli düzende sürükleme sonrası: şeritteki yeni sıradan düzen (Items) ve PinnedOrder türetilip tek yazmada kaydedilir.
+    /// Eşleşmeyen bir öğe çıkarsa (sürükleme sırasında şerit yenilendi) yazılmaz, şerit kayıttan yeniden kurulur.
+    /// </summary>
+    private void PersistStripOrder()
+    {
+        var layout = DockItemLayout.Merge(
+            DockItemRules.Resolve(_settings.DockItems.Items, _settings.DockItems.PinnedOrder ?? []), _effectiveOrder);
+
+        var visible = new List<int>();
+        foreach (var entry in Items)
+        {
+            if (entry is DockExtraViewModel extra)
+            {
+                if (extra.LayoutIndex < 0 || extra.LayoutIndex >= layout.Count || layout[extra.LayoutIndex].Kind != extra.Kind)
+                {
+                    UpdateItems();
+                    return;
+                }
+                visible.Add(extra.LayoutIndex);
+            }
+            else if (entry.IsPinned)
+            {
+                var token = entry is DockFolderViewModel ? entry.Id : PinnedOrder.IdOf(entry.Id);
+                var index = -1;
+                for (var i = 0; i < layout.Count; i++)
+                {
+                    if (string.Equals(DockItemLayout.TokenOf(layout[i]), token, StringComparison.OrdinalIgnoreCase))
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index < 0)
+                {
+                    UpdateItems();
+                    return;
+                }
+                visible.Add(index);
+            }
+        }
+
+        var next = DockItemLayout.Reorder(layout, visible);
+        var order = DockItemLayout.ToTokens(next);
+        DockFeature.SavePinnedOrder(order, null, _settings, DockItemLayout.ToStoredEntries(next));
+        _controller.SyncPinnedOrder(order);
+        UpdateItems();
+    }
+
+    /// <summary>
+    /// Klasör işlemlerinden sonra sırayı ve klasörleri kaydeder. Ek öğeli düzende Items da yeni sıraya uyarlanır
+    /// (ek öğeler yerinde kalır) ve üç kayıt tek yazmada değişir.
+    /// </summary>
+    private void SaveOrderAndFolders(List<string> order, List<DockFolder> folders)
+    {
+        var specs = DockItemRules.Resolve(_settings.DockItems.Items, _settings.DockItems.PinnedOrder ?? []);
+        IReadOnlyList<DockItemEntry>? items = null;
+        if (DockItemLayout.HasExtras(specs))
+        {
+            var layout = DockItemLayout.Merge(specs, _effectiveOrder);
+            var next = DockItemLayout.Rebase(layout, order, _settings.DockItems.Folders ?? [], folders);
+            items = DockItemLayout.ToStoredEntries(next);
+        }
+
+        DockFeature.SavePinnedOrder(order, folders, _settings, items);
     }
 
     /// <summary>Sürükleme yarıda kesildi (yakalama kaybı, Esc): her şey yerine döner.</summary>
@@ -1521,7 +1620,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     public void DissolveFolder(DockFolderViewModel folderVm)
     {
         var (order, folders) = DockFolders.Dissolve(_settings.DockItems.PinnedOrder, _settings.DockItems.Folders, folderVm.Folder.Id);
-        DockFeature.SavePinnedOrder(order, folders, _settings);
+        SaveOrderAndFolders(order, folders);
         UpdateItems();
     }
 
@@ -1542,7 +1641,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
 
         var (order, folders) = DockFolders.RemoveFromFolder(_settings.DockItems.PinnedOrder, _settings.DockItems.Folders, folderId, itemId, insertIndex);
-        DockFeature.SavePinnedOrder(order, folders, _settings);
+        SaveOrderAndFolders(order, folders);
         UpdateItems();
     }
 
@@ -1550,14 +1649,14 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     {
         var defaultName = DockFolders.NextDefaultName(_settings.DockItems.Folders, Resources.Strings.Get("DockFolder"));
         var (order, folders) = DockFolders.CreateFromDrop(_settings.DockItems.PinnedOrder, _settings.DockItems.Folders, draggedId, targetId, defaultName);
-        DockFeature.SavePinnedOrder(order, folders, _settings);
+        SaveOrderAndFolders(order, folders);
         UpdateItems();
     }
 
     public void AddAppToFolder(string draggedId, string folderId)
     {
         var (order, folders) = DockFolders.AddToFolder(_settings.DockItems.PinnedOrder, _settings.DockItems.Folders, draggedId, folderId);
-        DockFeature.SavePinnedOrder(order, folders, _settings);
+        SaveOrderAndFolders(order, folders);
         UpdateItems();
     }
 

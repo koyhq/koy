@@ -105,6 +105,74 @@ internal static class DockBarSnapshots
     }
 
     /// <summary>
+    /// Sürükleme ara kareleri (ek öğe varken: pil): 2. simge 4. simgeye doğru sürükleniyor. Karar gerçek Core yolundan
+    /// (<see cref="DockViewModel.EvaluateDrag"/>) geçer. Kareler: orta bant (komşu yerinde, hedef büyümüş ve parlıyor) ve
+    /// sağ kenar bölgesi (komşu kaymış). Dosya adı: dockdrag-{tam|kapsul|kapsul-sol}-{bant|kenar}.
+    /// </summary>
+    public static void RenderDrag(string outDir, string prefix, string theme, Action<FrameworkElement, double, double, string> renderElement)
+    {
+        foreach (var (label, fullWidth, edge) in new[]
+        {
+            ("tam", true, DockEdge.Bottom), ("kapsul", false, DockEdge.Bottom), ("kapsul-sol", false, DockEdge.Left)
+        })
+        foreach (var (state, fraction) in new[] { ("bant", 0.0), ("kenar", 0.3) })
+        {
+            var vertical = edge is DockEdge.Left or DockEdge.Right;
+            Shoot(outDir, prefix, theme, $"dockdrag-{label}-{state}", renderElement, fullWidth, smallTray: true, appCount: 8,
+                edge: edge, colorful: vertical, battery: new FakePower(82),
+                prepare: (vm, host) => ApplyDrag(vm, host, vertical, from: 1, to: 3, fraction));
+        }
+    }
+
+    /// <summary>İkinci simgeyi üçüncü simgenin (to) merkezine + kesir kadar sürüklenmiş gösterir; yaylar beklenmeden son değere oturur.</summary>
+    private static void ApplyDrag(DockViewModel vm, Grid host, bool vertical, int from, int to, double fraction)
+    {
+        var list = FindList(host) ?? throw new InvalidOperationException("DockItemsList bulunamadı");
+        var widths = new List<double>();
+        for (var i = 0; i < vm.Items.Count; i++)
+        {
+            var c = (FrameworkElement)list.ItemContainerGenerator.ContainerFromIndex(i)!;
+            widths.Add(vertical ? c.ActualHeight : c.ActualWidth);
+        }
+
+        var centers = Koy.Core.Dock.DockReorderMath.Centers(widths);
+        var offset = centers[to] + fraction * widths[to] - centers[from];
+        var dragged = vm.Items[from];
+        var plan = vm.EvaluateDrag(dragged, from, offset, widths);
+        Console.WriteLine($"  sürükleme: hedef={plan.HoveredIndex} bölge={plan.Zone} birleştir={plan.CanMerge} kayma-hedefi={plan.ShiftTarget}");
+
+        vm.BeginReorder();
+        dragged.DragZ = 10;
+        dragged.SnapOffset(offset);
+        for (var i = 0; i < vm.Items.Count; i++)
+        {
+            if (i == from)
+                continue;
+            vm.Items[i].SnapOffset(DockReorderMath.ShiftedIndices(from, plan.ShiftTarget).Contains(i)
+                ? DockReorderMath.ShiftFor(i, from, plan.ShiftTarget, widths[from])
+                : 0);
+        }
+
+        if (plan.CanMerge)
+        {
+            vm.Items[plan.HoveredIndex].IsTargetGlow = true;
+            vm.Items[plan.HoveredIndex].SnapScale(1.1);
+        }
+    }
+
+    private static ItemsControl? FindList(DependencyObject root)
+    {
+        if (root is ItemsControl { Name: "DockItemsList" } list)
+            return list;
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            if (FindList(VisualTreeHelper.GetChild(root, i)) is { } found)
+                return found;
+        }
+        return null;
+    }
+
+    /// <summary>
     /// Malzeme varyantı: tam genişlik ve kapsül dock Katı / Buzlu / Cam, renkli bir arka planın üstünde (saydamlık ve iç
     /// kenar çizgisi görünsün diye); alt kenar ve bir dikey kenar (sol). Dosya adı: dockmat-{tam|kapsul}-{kenar}-{malzeme}.
     /// </summary>
@@ -211,7 +279,8 @@ internal static class DockBarSnapshots
         Action<FrameworkElement, double, double, string> renderElement,
         bool fullWidth, bool smallTray, int appCount, int pressedIndex = -1, DockIconAlignment alignment = DockIconAlignment.Center,
         DockStartIcon startIcon = DockStartIcon.Koy, string startIconPath = "", IReadOnlyList<DockEntryViewModel>? entries = null, bool hug = false,
-        Koy.Core.Appearance.MaterialLevel? material = null, DockEdge edge = DockEdge.Bottom, bool colorful = false, IPowerService? battery = null)
+        Koy.Core.Appearance.MaterialLevel? material = null, DockEdge edge = DockEdge.Bottom, bool colorful = false, IPowerService? battery = null,
+        Action<DockViewModel, Grid>? prepare = null)
     {
         var settings = new AppSettings
         {
@@ -296,6 +365,13 @@ internal static class DockBarSnapshots
         {
             vm.Items[pressedIndex].SnapPress(true);
             host.UpdateLayout();
+        }
+
+        if (prepare is not null)
+        {
+            prepare(vm, host);
+            host.UpdateLayout();
+            Pump();
         }
 
         if (colorful)

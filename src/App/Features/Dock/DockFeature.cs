@@ -171,7 +171,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     public static void SavePinnedOrder(
         IReadOnlyList<string> order,
         IReadOnlyList<DockFolder>? folders = null,
-        AppSettings? inMemorySettings = null)
+        AppSettings? inMemorySettings = null,
+        IReadOnlyList<DockItemEntry>? items = null)
     {
         var store = new SettingsStore(SettingsStore.DefaultPath);
         var current = store.Load();
@@ -182,9 +183,16 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             if (inMemorySettings is not null)
                 inMemorySettings.DockItems.Folders = [.. folders];
         }
+        // Ek öğeli düzende sıra iki kayıtta (PinnedOrder ve Items) durur; ikisi tek yazmada değişir, arada tutarsızlık kalmaz.
+        if (items is not null)
+            updated = updated with { DockItems = updated.DockItems with { Items = [.. items] } };
         store.Save(updated);
         if (inMemorySettings is not null)
+        {
             inMemorySettings.DockItems.PinnedOrder = [.. order];
+            if (items is not null)
+                inMemorySettings.DockItems.Items = [.. items];
+        }
     }
 
     /// <summary>

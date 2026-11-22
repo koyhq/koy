@@ -31,6 +31,10 @@ public abstract partial class DockEntryViewModel : ObservableObject
     [ObservableProperty]
     private bool _isTargetGlow;
 
+    /// <summary>Çizim sırası: sürüklenen simge komşuların üstünde kalır (şerit kapsayıcı stili bağlar).</summary>
+    [ObservableProperty]
+    private int _dragZ;
+
     protected Spring ScaleSpring { get; } = new(1.0) { Stiffness = 320, Damping = 26 };
 
     // Basma ilerlemesi (0 bırakılmış, 1 basılı): hover ölçeğinden ayrı yay. Hafif sönümlü: bırakınca küçük bir geri sıçrama.
