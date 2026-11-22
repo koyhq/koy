@@ -33,7 +33,7 @@ public static class DockSystemArea
     /// <param name="isVertical">Dock sol ya da sağ kenarda.</param>
     /// <param name="hasTray">Koy'un tepsi penceresi çalışıyor (Windows görev çubuğu gizli): ok ve görünür simgeler ona bağlı.</param>
     /// <param name="hasBattery">Makinede pil var (masaüstünde pil simgesi hiç çıkmaz).</param>
-    public static DockSystemAreaLayout Resolve(bool isFullWidth, bool isVertical, bool hasTray, bool hasBattery)
+    public static DockSystemAreaLayout Resolve(bool isFullWidth, bool isVertical, bool hasTray, bool hasBattery, bool showDesktopCorner = true)
     {
         if (!isFullWidth || isVertical)
             return default;
@@ -45,7 +45,7 @@ public static class DockSystemArea
             ShowBattery: hasBattery,
             ShowClock: true,
             ShowBell: true,
-            ShowDesktopStrip: true);
+            ShowDesktopStrip: showDesktopCorner);
     }
 
     /// <summary>
@@ -63,7 +63,14 @@ public static class DockSystemArea
 /// <summary>Sistem alanındaki saat ve tarih metinleri (Windows kültür biçimi: kısa saat, kısa tarih).</summary>
 public static class SystemClockText
 {
-    public static string Time(DateTime now, CultureInfo culture) => now.ToString("t", culture);
+    /// <summary>Kısa saat; saniyeler açıksa uzun saat ("T"). Windows "Saatte saniyeleri göster".</summary>
+    public static string Time(DateTime now, CultureInfo culture, bool showSeconds = false) => now.ToString(showSeconds ? "T" : "t", culture);
+
+    /// <summary>Bir sonraki güncellemeye kalan süre: saniyeler açıksa saniye başına, değilse dakika başına (tek zamanlayıcı).</summary>
+    public static TimeSpan DelayToNextTick(DateTime now, bool showSeconds) =>
+        showSeconds
+            ? TimeSpan.FromMilliseconds(1000 - now.Millisecond) + TimeSpan.FromMilliseconds(20)
+            : DockClockTick.DelayToNextMinute(now);
 
     public static string Date(DateTime now, CultureInfo culture) => now.ToString("d", culture);
 

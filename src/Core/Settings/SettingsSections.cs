@@ -2,6 +2,7 @@ using Koy.Core.Appearance;
 using Koy.Core.Clock;
 using Koy.Core.Display;
 using Koy.Core.Dock;
+using Koy.Core.Dock.SystemArea;
 using Koy.Core.Media;
 using Koy.Core.Notch;
 using Koy.Core.Search;
@@ -231,6 +232,26 @@ public sealed record DockSettings
     public DockLabelMode LabelMode { get; set; } = DockLabelMode.Never;
 
     /// <summary>Yeni bir tepsi simgesinin varsayılan yeri (uygulamanın kendi kaydı yoksa). Varsayılan taşma menüsü.</summary>
+    // ---- Windows 11 "Görev çubuğu davranışları/öğeleri" (yalnız tam genişlik; bkz. Core/Dock/DockSettingsMatrix) ----
+
+    /// <summary>Arama: Gizle / Yalnız arama simgesi / Arama simgesi ve etiketi / Arama kutusu (Windows 11 varsayılanı Arama kutusu).</summary>
+    public TaskbarSearchMode TaskbarSearch { get; set; } = TaskbarSearchMode.Box;
+
+    /// <summary>Görev görünümü düğmesi.</summary>
+    public bool TaskbarShowTaskView { get; set; } = true;
+
+    /// <summary>Pencere öğeleri (hava durumu) düğmesi.</summary>
+    public bool TaskbarShowWidgets { get; set; } = true;
+
+    /// <summary>Görev çubuğu uygulamalarında yanıp sönmeyi göster (dikkat bekleyen uygulama).</summary>
+    public bool TaskbarShowFlashing { get; set; } = true;
+
+    /// <summary>Sistem tepsisi saatinde saniyeleri göster.</summary>
+    public bool TaskbarClockSeconds { get; set; }
+
+    /// <summary>Masaüstünü göstermek için görev çubuğunun uzak köşesini seç.</summary>
+    public bool TaskbarShowDesktopCorner { get; set; } = true;
+
     public TrayIconVisibility NewTrayIconVisibility { get; set; } = TrayIconVisibilityPolicy.DefaultNewIcon;
 
     /// <summary>Uygulama başına tepsi simgesi yeri. Anahtar küçük harfli exe adı; kaydı olmayan simge <see cref="NewTrayIconVisibility"/>'i alır.</summary>

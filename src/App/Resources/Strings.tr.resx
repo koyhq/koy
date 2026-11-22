@@ -1938,6 +1938,60 @@
   <data name="DockTaskView" xml:space="preserve">
     <value>Görev görünümü</value>
   </data>
+  <data name="DockStyleCapsuleDesc" xml:space="preserve">
+    <value>Koy'un havada duran kendi dock'u. Pencere yaklaşınca nasıl davranacağını sen seçersin.</value>
+  </data>
+  <data name="DockStyleFullDesc" xml:space="preserve">
+    <value>Windows görev çubuğu gibi çalışır: ekran genişliğinde, Başlat, arama ve sistem alanıyla.</value>
+  </data>
+  <data name="DockPositionHeader" xml:space="preserve">
+    <value>Konum ve boyut</value>
+  </data>
+  <data name="DockTaskbarAlignmentTitle" xml:space="preserve">
+    <value>Görev çubuğu hizalaması</value>
+  </data>
+  <data name="DockTaskbarItemsHeader" xml:space="preserve">
+    <value>Görev çubuğu öğeleri</value>
+  </data>
+  <data name="DockTaskbarBehaviorsHeader" xml:space="preserve">
+    <value>Görev çubuğu davranışları</value>
+  </data>
+  <data name="DockTaskbarSearchTitle" xml:space="preserve">
+    <value>Arama</value>
+  </data>
+  <data name="DockSearchHide" xml:space="preserve">
+    <value>Gizle</value>
+  </data>
+  <data name="DockSearchIcon" xml:space="preserve">
+    <value>Yalnızca arama simgesi</value>
+  </data>
+  <data name="DockSearchIconLabel" xml:space="preserve">
+    <value>Arama simgesi ve etiketi</value>
+  </data>
+  <data name="DockSearchBoxOpt" xml:space="preserve">
+    <value>Arama kutusu</value>
+  </data>
+  <data name="DockTaskViewTitle" xml:space="preserve">
+    <value>Görev görünümü</value>
+  </data>
+  <data name="DockWidgetsTitle" xml:space="preserve">
+    <value>Pencere öğeleri</value>
+  </data>
+  <data name="DockTaskbarAutoHideTitle" xml:space="preserve">
+    <value>Görev çubuğunu otomatik olarak gizle</value>
+  </data>
+  <data name="DockTaskbarFlashingTitle" xml:space="preserve">
+    <value>Görev çubuğu uygulamalarında yanıp sönmeyi göster</value>
+  </data>
+  <data name="DockTaskbarSecondsTitle" xml:space="preserve">
+    <value>Sistem tepsisi saatinde saniyeleri göster</value>
+  </data>
+  <data name="DockTaskbarCornerTitle" xml:space="preserve">
+    <value>Masaüstünü göstermek için görev çubuğunun uzak köşesini seç</value>
+  </data>
+  <data name="DockFullscreenHeader" xml:space="preserve">
+    <value>Tam ekran ve kenar</value>
+  </data>
   <data name="DockKoyMenu" xml:space="preserve">
     <value>Koy menüsü</value>
   </data>

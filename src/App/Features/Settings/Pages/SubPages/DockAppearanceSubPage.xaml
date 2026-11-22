@@ -10,144 +10,158 @@
 
     <StackPanel>
         <!-- SİMGELER -->
-        <TextBlock Text="{Binding [DockSizeHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=IconSize}">
+            <TextBlock Text="{Binding [DockSizeHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [DockIconSizeTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="{Binding [SizeSmall], Source={x:Static res:Loc.Instance}}" GroupName="IconSize"
-                                     IsChecked="{Binding DockIconSize, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=24}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [SizeMedium], Source={x:Static res:Loc.Instance}}" GroupName="IconSize"
-                                     IsChecked="{Binding DockIconSize, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=28}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [SizeLarge], Source={x:Static res:Loc.Instance}}" GroupName="IconSize"
-                                     IsChecked="{Binding DockIconSize, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=34}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [HoverMagnifyTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [HoverMagnifyTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockHoverMagnify}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                          Style="{StaticResource ToggleSwitchStyle}" />
-            </Grid>
-        </Border>
-
-        <!-- Simge aralığı: 0..16 px -->
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [DockIconSpacingTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Slider Width="140" Minimum="0" Maximum="16" TickFrequency="1" IsSnapToTickEnabled="True"
-                            Value="{Binding DockIconSpacingDip}" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding DockIconSpacingDip, StringFormat='{}{0:0} px'}"
-                               Foreground="{DynamicResource KoyTextSecondary}"
-                               FontSize="{DynamicResource KoyFontCaption}"
-                               Width="44" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [IndicatorStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="{Binding [IndicatorDot], Source={x:Static res:Loc.Instance}}" GroupName="IndStyle"
-                                     IsChecked="{Binding DockIndicatorStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Dot}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [IndicatorLine], Source={x:Static res:Loc.Instance}}" GroupName="IndStyle"
-                                     IsChecked="{Binding DockIndicatorStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Line}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [IndicatorHighlight], Source={x:Static res:Loc.Instance}}" GroupName="IndStyle"
-                                     IsChecked="{Binding DockIndicatorStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Highlight}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
-
-        <!-- Gösterge rengi: vurgu / nötr / özel (#RRGGBB; geçersizse vurgu rengi kullanılır) -->
-        <Border Style="{StaticResource SettingRowStyle}">
-            <StackPanel>
+        </StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=IconSize}">
+            <Border Style="{StaticResource SettingRowStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                        <TextBlock Text="{Binding [IndicatorColorTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                        <TextBlock Text="{Binding [DockIconSizeTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     </StackPanel>
                     <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                         <StackPanel Orientation="Horizontal">
-                            <RadioButton Content="{Binding [ColorAccent], Source={x:Static res:Loc.Instance}}" GroupName="IndColor"
-                                         IsChecked="{Binding DockIndicatorColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Accent}"
+                            <RadioButton Content="{Binding [SizeSmall], Source={x:Static res:Loc.Instance}}" GroupName="IconSize"
+                                         IsChecked="{Binding DockIconSize, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=24}"
                                          Style="{StaticResource SegRadioStyle}" />
-                            <RadioButton Content="{Binding [ColorNeutral], Source={x:Static res:Loc.Instance}}" GroupName="IndColor"
-                                         IsChecked="{Binding DockIndicatorColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Neutral}"
+                            <RadioButton Content="{Binding [SizeMedium], Source={x:Static res:Loc.Instance}}" GroupName="IconSize"
+                                         IsChecked="{Binding DockIconSize, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=28}"
                                          Style="{StaticResource SegRadioStyle}" />
-                            <RadioButton Content="{Binding [ColorCustom], Source={x:Static res:Loc.Instance}}" GroupName="IndColor"
-                                         IsChecked="{Binding DockIndicatorColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Custom}"
+                            <RadioButton Content="{Binding [SizeLarge], Source={x:Static res:Loc.Instance}}" GroupName="IconSize"
+                                         IsChecked="{Binding DockIconSize, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=34}"
                                          Style="{StaticResource SegRadioStyle}" />
                         </StackPanel>
                     </Border>
                 </Grid>
-                <TextBox Margin="0,8,0,0" Style="{StaticResource SettingTextBoxStyle}" MaxLength="7"
-                         AutomationProperties.Name="{Binding [ColorCustomHint], Source={x:Static res:Loc.Instance}}"
-                         ToolTip="{Binding [ColorCustomHint], Source={x:Static res:Loc.Instance}}"
-                         Text="{Binding DockIndicatorCustomColor, UpdateSourceTrigger=PropertyChanged}">
-                    <TextBox.Visibility>
-                        <Binding Path="DockIndicatorColor" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="Custom" />
-                    </TextBox.Visibility>
-                </TextBox>
-            </StackPanel>
-        </Border>
+            </Border>
 
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [IndicatorOnePerWindowTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                    <TextBlock Text="{Binding [IndicatorOnePerWindowDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+        </StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=HoverMagnify}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [HoverMagnifyTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    </StackPanel>
+                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [HoverMagnifyTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockHoverMagnify}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                              Style="{StaticResource ToggleSwitchStyle}" />
+                </Grid>
+            </Border>
+
+        </StackPanel>
+        <!-- Simge aralığı: 0..16 px -->
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=IconSpacingDip}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [DockIconSpacingTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Slider Width="140" Minimum="0" Maximum="16" TickFrequency="1" IsSnapToTickEnabled="True"
+                                Value="{Binding DockIconSpacingDip}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding DockIconSpacingDip, StringFormat='{}{0:0} px'}"
+                                   Foreground="{DynamicResource KoyTextSecondary}"
+                                   FontSize="{DynamicResource KoyFontCaption}"
+                                   Width="44" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+        </StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=IndicatorStyle}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [IndicatorStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    </StackPanel>
+                    <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Content="{Binding [IndicatorDot], Source={x:Static res:Loc.Instance}}" GroupName="IndStyle"
+                                         IsChecked="{Binding DockIndicatorStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Dot}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [IndicatorLine], Source={x:Static res:Loc.Instance}}" GroupName="IndStyle"
+                                         IsChecked="{Binding DockIndicatorStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Line}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [IndicatorHighlight], Source={x:Static res:Loc.Instance}}" GroupName="IndStyle"
+                                         IsChecked="{Binding DockIndicatorStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Highlight}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+        </StackPanel>
+        <!-- Gösterge rengi: vurgu / nötr / özel (#RRGGBB; geçersizse vurgu rengi kullanılır) -->
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=IndicatorColor}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                            <TextBlock Text="{Binding [IndicatorColorTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton Content="{Binding [ColorAccent], Source={x:Static res:Loc.Instance}}" GroupName="IndColor"
+                                             IsChecked="{Binding DockIndicatorColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Accent}"
+                                             Style="{StaticResource SegRadioStyle}" />
+                                <RadioButton Content="{Binding [ColorNeutral], Source={x:Static res:Loc.Instance}}" GroupName="IndColor"
+                                             IsChecked="{Binding DockIndicatorColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Neutral}"
+                                             Style="{StaticResource SegRadioStyle}" />
+                                <RadioButton Content="{Binding [ColorCustom], Source={x:Static res:Loc.Instance}}" GroupName="IndColor"
+                                             IsChecked="{Binding DockIndicatorColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Custom}"
+                                             Style="{StaticResource SegRadioStyle}" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <TextBox Margin="0,8,0,0" Style="{StaticResource SettingTextBoxStyle}" MaxLength="7"
+                             AutomationProperties.Name="{Binding [ColorCustomHint], Source={x:Static res:Loc.Instance}}"
+                             ToolTip="{Binding [ColorCustomHint], Source={x:Static res:Loc.Instance}}"
+                             Text="{Binding DockIndicatorCustomColor, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBox.Visibility>
+                            <Binding Path="DockIndicatorColor" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="Custom" />
+                        </TextBox.Visibility>
+                    </TextBox>
                 </StackPanel>
-                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [IndicatorOnePerWindowTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockIndicatorOnePerWindow}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                          Style="{StaticResource ToggleSwitchStyle}" />
-            </Grid>
-        </Border>
+            </Border>
 
+        </StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=IndicatorOnePerWindow}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [IndicatorOnePerWindowTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                        <TextBlock Text="{Binding [IndicatorOnePerWindowDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                    </StackPanel>
+                    <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [IndicatorOnePerWindowTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding DockIndicatorOnePerWindow}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                              Style="{StaticResource ToggleSwitchStyle}" />
+                </Grid>
+            </Border>
+
+        </StackPanel>
         <!-- ROZETLER -->
         <TextBlock Text="{Binding [DockBadgesHeader], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SectionHeaderStyle}" />
 
@@ -165,98 +179,104 @@
             </Grid>
         </Border>
 
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Border.Visibility>
-                <Binding Path="DockShowBadges" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="True" />
-            </Border.Visibility>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [BadgeStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="{Binding [BadgeNumber], Source={x:Static res:Loc.Instance}}" GroupName="BadgeStyle"
-                                     IsChecked="{Binding DockBadgeStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Number}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [BadgeDotOnly], Source={x:Static res:Loc.Instance}}" GroupName="BadgeStyle"
-                                     IsChecked="{Binding DockBadgeStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=DotOnly}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Border.Visibility>
-                <Binding Path="DockShowBadges" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="True" />
-            </Border.Visibility>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="{Binding [BadgeCornerTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
-                </StackPanel>
-                <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="{Binding [CornerTopLeft], Source={x:Static res:Loc.Instance}}" GroupName="BadgeCorner"
-                                     IsChecked="{Binding DockBadgeCorner, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=TopLeft}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [CornerTopRight], Source={x:Static res:Loc.Instance}}" GroupName="BadgeCorner"
-                                     IsChecked="{Binding DockBadgeCorner, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=TopRight}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [CornerBottomLeft], Source={x:Static res:Loc.Instance}}" GroupName="BadgeCorner"
-                                     IsChecked="{Binding DockBadgeCorner, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=BottomLeft}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                        <RadioButton Content="{Binding [CornerBottomRight], Source={x:Static res:Loc.Instance}}" GroupName="BadgeCorner"
-                                     IsChecked="{Binding DockBadgeCorner, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=BottomRight}"
-                                     Style="{StaticResource SegRadioStyle}" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
-
-        <Border Style="{StaticResource SettingRowStyle}">
-            <Border.Visibility>
-                <Binding Path="DockShowBadges" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="True" />
-            </Border.Visibility>
-            <StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=BadgeStyle}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Border.Visibility>
+                    <Binding Path="DockShowBadges" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="True" />
+                </Border.Visibility>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                        <TextBlock Text="{Binding [BadgeColorTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                        <TextBlock Text="{Binding [BadgeStyleTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     </StackPanel>
                     <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
                         <StackPanel Orientation="Horizontal">
-                            <RadioButton Content="{Binding [ColorAccent], Source={x:Static res:Loc.Instance}}" GroupName="BadgeColor"
-                                         IsChecked="{Binding DockBadgeColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Accent}"
+                            <RadioButton Content="{Binding [BadgeNumber], Source={x:Static res:Loc.Instance}}" GroupName="BadgeStyle"
+                                         IsChecked="{Binding DockBadgeStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Number}"
                                          Style="{StaticResource SegRadioStyle}" />
-                            <RadioButton Content="{Binding [ColorNeutral], Source={x:Static res:Loc.Instance}}" GroupName="BadgeColor"
-                                         IsChecked="{Binding DockBadgeColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Neutral}"
-                                         Style="{StaticResource SegRadioStyle}" />
-                            <RadioButton Content="{Binding [ColorCustom], Source={x:Static res:Loc.Instance}}" GroupName="BadgeColor"
-                                         IsChecked="{Binding DockBadgeColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Custom}"
+                            <RadioButton Content="{Binding [BadgeDotOnly], Source={x:Static res:Loc.Instance}}" GroupName="BadgeStyle"
+                                         IsChecked="{Binding DockBadgeStyle, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=DotOnly}"
                                          Style="{StaticResource SegRadioStyle}" />
                         </StackPanel>
                     </Border>
                 </Grid>
-                <TextBox Margin="0,8,0,0" Style="{StaticResource SettingTextBoxStyle}" MaxLength="7"
-                         AutomationProperties.Name="{Binding [ColorCustomHint], Source={x:Static res:Loc.Instance}}"
-                         ToolTip="{Binding [ColorCustomHint], Source={x:Static res:Loc.Instance}}"
-                         Text="{Binding DockBadgeCustomColor, UpdateSourceTrigger=PropertyChanged}">
-                    <TextBox.Visibility>
-                        <Binding Path="DockBadgeColor" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="Custom" />
-                    </TextBox.Visibility>
-                </TextBox>
-            </StackPanel>
-        </Border>
+            </Border>
+
+        </StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=BadgeCorner}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Border.Visibility>
+                    <Binding Path="DockShowBadges" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="True" />
+                </Border.Visibility>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding [BadgeCornerTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    </StackPanel>
+                    <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Content="{Binding [CornerTopLeft], Source={x:Static res:Loc.Instance}}" GroupName="BadgeCorner"
+                                         IsChecked="{Binding DockBadgeCorner, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=TopLeft}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [CornerTopRight], Source={x:Static res:Loc.Instance}}" GroupName="BadgeCorner"
+                                         IsChecked="{Binding DockBadgeCorner, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=TopRight}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [CornerBottomLeft], Source={x:Static res:Loc.Instance}}" GroupName="BadgeCorner"
+                                         IsChecked="{Binding DockBadgeCorner, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=BottomLeft}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                            <RadioButton Content="{Binding [CornerBottomRight], Source={x:Static res:Loc.Instance}}" GroupName="BadgeCorner"
+                                         IsChecked="{Binding DockBadgeCorner, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=BottomRight}"
+                                         Style="{StaticResource SegRadioStyle}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+        </StackPanel>
+        <StackPanel Visibility="{Binding DockIsFullWidth, Converter={x:Static local:DockScopeVisibilityConverter.Instance}, ConverterParameter=BadgeColor}">
+            <Border Style="{StaticResource SettingRowStyle}">
+                <Border.Visibility>
+                    <Binding Path="DockShowBadges" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="True" />
+                </Border.Visibility>
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                            <TextBlock Text="{Binding [BadgeColorTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Style="{StaticResource SegmentContainerStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton Content="{Binding [ColorAccent], Source={x:Static res:Loc.Instance}}" GroupName="BadgeColor"
+                                             IsChecked="{Binding DockBadgeColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Accent}"
+                                             Style="{StaticResource SegRadioStyle}" />
+                                <RadioButton Content="{Binding [ColorNeutral], Source={x:Static res:Loc.Instance}}" GroupName="BadgeColor"
+                                             IsChecked="{Binding DockBadgeColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Neutral}"
+                                             Style="{StaticResource SegRadioStyle}" />
+                                <RadioButton Content="{Binding [ColorCustom], Source={x:Static res:Loc.Instance}}" GroupName="BadgeColor"
+                                             IsChecked="{Binding DockBadgeColor, Converter={x:Static local:ComparisonToBoolConverter.Instance}, ConverterParameter=Custom}"
+                                             Style="{StaticResource SegRadioStyle}" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <TextBox Margin="0,8,0,0" Style="{StaticResource SettingTextBoxStyle}" MaxLength="7"
+                             AutomationProperties.Name="{Binding [ColorCustomHint], Source={x:Static res:Loc.Instance}}"
+                             ToolTip="{Binding [ColorCustomHint], Source={x:Static res:Loc.Instance}}"
+                             Text="{Binding DockBadgeCustomColor, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBox.Visibility>
+                            <Binding Path="DockBadgeColor" Converter="{x:Static local:ComparisonToVisibilityConverter.Instance}" ConverterParameter="Custom" />
+                        </TextBox.Visibility>
+                    </TextBox>
+                </StackPanel>
+            </Border>
+        </StackPanel>
     </StackPanel>
 </UserControl>

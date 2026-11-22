@@ -214,7 +214,7 @@ public static class SettingsProfileCodec
                     || !Enum.IsDefined(s.Dock.BadgeCorner) || !Enum.IsDefined(s.Dock.BadgeStyle) || !Enum.IsDefined(s.Dock.RevealTrigger)
                     || !Enum.IsDefined(s.Dock.GroupingMode) || !Enum.IsDefined(s.Dock.WindowMonitorScope)
                     || !Enum.IsDefined(s.Dock.LeftClickAction) || !Enum.IsDefined(s.Dock.LabelMode)
-                    || !Enum.IsDefined(s.Dock.NewTrayIconVisibility),
+                    || !Enum.IsDefined(s.Dock.NewTrayIconVisibility) || !Enum.IsDefined(s.Dock.TaskbarSearch),
                 ProfileSection.Notch =>
                     !Enum.IsDefined(s.Notch.Visibility) || !Enum.IsDefined(s.Notch.Style) || !Enum.IsDefined(s.Notch.OpenBehavior)
                     || !Enum.IsDefined(s.Notch.IdleDisplay) || !Enum.IsDefined(s.Notch.WheelAction)

@@ -285,7 +285,7 @@ public sealed partial class DockItemViewModel : DockEntryViewModel
         IsRunning = model.IsRunning;
         IsActive = model.IsActive;
         IsFlashing = model.IsFlashing;
-        IsAttention = model.IsFlashing;
+        IsAttention = model.IsFlashing && Presentation.ShowAttention;
         BadgeCount = model.BadgeCount;
         HasBadge = model.BadgeCount > 0;
         var newWindows = model.Windows ?? [];

@@ -125,6 +125,7 @@
         <!-- 6. Masaüstünü göster: ince, tüm yükseklikte tıklanabilir şerit; solunda ince çizgi -->
         <Border Grid.Column="1" x:Name="DesktopStrip" Width="{Binding DesktopStripWidth}" Margin="4,0,0,0" Cursor="Hand" Background="Transparent"
                 BorderBrush="{DynamicResource KoyDockSeparator}" BorderThickness="1,0,0,0"
+                Visibility="{Binding SystemArea.ShowDesktopStrip, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}"
                 ToolTip="{Binding [DockShowDesktop], Source={x:Static res:Loc.Instance}}"
                 AutomationProperties.Name="{Binding [DockShowDesktop], Source={x:Static res:Loc.Instance}}"
                 MouseLeftButtonUp="OnDesktopStripClick">

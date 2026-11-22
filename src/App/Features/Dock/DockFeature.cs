@@ -641,7 +641,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         _dockAudio ??= new AudioService();
         _dockFocus ??= new FocusAssistService();
         return new DockStatusViewModel(services.AcquireNetworkService(), _dockAudio, services.AcquirePowerService(),
-            _shellActionService, _dockFocus, ReleaseStatusServices);
+            _shellActionService, _dockFocus, ReleaseStatusServices, clockSeconds: settings.Dock.TaskbarClockSeconds);
     }
 
     // Pencere öğeleri (hava durumu): yalnız tam genişlik ve yatay kenarda, tek hava servisi tüm monitörlerce paylaşılır.

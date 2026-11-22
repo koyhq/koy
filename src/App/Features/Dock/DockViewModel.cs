@@ -336,7 +336,8 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     /// <summary>Windows 11 görev çubuğu düzeni (sol, orta ve sağ uç); yalnız tam genişlik ve yatay kenarda (Core: TaskbarLayout).</summary>
     public TaskbarLayoutDecision Taskbar => TaskbarLayout.Resolve(
-        Status is not null && _settings.Dock.Style == DockStyleMode.FullWidth, IsVertical, _settings.Dock.IconAlignment, HasTray, Status?.HasBattery == true);
+        Status is not null && _settings.Dock.Style == DockStyleMode.FullWidth, IsVertical, _settings.Dock.IconAlignment, HasTray, Status?.HasBattery == true,
+        TaskbarOptions.From(_settings.Dock));
 
     /// <summary>Sistem alanı (sağ uç) parçaları.</summary>
     public DockSystemAreaLayout SystemArea => Taskbar.SystemArea;

@@ -1938,6 +1938,60 @@
   <data name="DockTaskView" xml:space="preserve">
     <value>Task view</value>
   </data>
+  <data name="DockStyleCapsuleDesc" xml:space="preserve">
+    <value>Koy's own floating dock. You choose how it behaves when a window comes close.</value>
+  </data>
+  <data name="DockStyleFullDesc" xml:space="preserve">
+    <value>Works like the Windows taskbar: full width with Start, search and the system area.</value>
+  </data>
+  <data name="DockPositionHeader" xml:space="preserve">
+    <value>Position and size</value>
+  </data>
+  <data name="DockTaskbarAlignmentTitle" xml:space="preserve">
+    <value>Taskbar alignment</value>
+  </data>
+  <data name="DockTaskbarItemsHeader" xml:space="preserve">
+    <value>Taskbar items</value>
+  </data>
+  <data name="DockTaskbarBehaviorsHeader" xml:space="preserve">
+    <value>Taskbar behaviors</value>
+  </data>
+  <data name="DockTaskbarSearchTitle" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="DockSearchHide" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="DockSearchIcon" xml:space="preserve">
+    <value>Search icon only</value>
+  </data>
+  <data name="DockSearchIconLabel" xml:space="preserve">
+    <value>Search icon and label</value>
+  </data>
+  <data name="DockSearchBoxOpt" xml:space="preserve">
+    <value>Search box</value>
+  </data>
+  <data name="DockTaskViewTitle" xml:space="preserve">
+    <value>Task view</value>
+  </data>
+  <data name="DockWidgetsTitle" xml:space="preserve">
+    <value>Widgets</value>
+  </data>
+  <data name="DockTaskbarAutoHideTitle" xml:space="preserve">
+    <value>Automatically hide the taskbar</value>
+  </data>
+  <data name="DockTaskbarFlashingTitle" xml:space="preserve">
+    <value>Show flashing on taskbar apps</value>
+  </data>
+  <data name="DockTaskbarSecondsTitle" xml:space="preserve">
+    <value>Show seconds in the system tray clock</value>
+  </data>
+  <data name="DockTaskbarCornerTitle" xml:space="preserve">
+    <value>Select the far corner of the taskbar to show the desktop</value>
+  </data>
+  <data name="DockFullscreenHeader" xml:space="preserve">
+    <value>Full screen and edge</value>
+  </data>
   <data name="DockKoyMenu" xml:space="preserve">
     <value>Koy menu</value>
   </data>

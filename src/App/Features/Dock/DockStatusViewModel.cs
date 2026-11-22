@@ -29,6 +29,7 @@ public sealed partial class DockStatusViewModel : ObservableObject, IDisposable
     private readonly Dispatcher _dispatcher;
     private readonly DispatcherTimer _clockTimer;
     private readonly Action? _release;
+    private readonly bool _clockSeconds;
     private bool _active;
     private bool _disposed;
 
@@ -88,8 +89,10 @@ public sealed partial class DockStatusViewModel : ObservableObject, IDisposable
         IShellActionService shell,
         IFocusAssistService? focus = null,
         Action? release = null,
-        Dispatcher? dispatcher = null)
+        Dispatcher? dispatcher = null,
+        bool clockSeconds = false)
     {
+        _clockSeconds = clockSeconds;
         _network = network;
         _audio = audio;
         _power = power;
@@ -157,14 +160,15 @@ public sealed partial class DockStatusViewModel : ObservableObject, IDisposable
     private void OnClockTick(object? sender, EventArgs e)
     {
         UpdateClock();
-        MinuteElapsed?.Invoke();
+        if (!_clockSeconds || DateTime.Now.Second == 0)
+            MinuteElapsed?.Invoke();
         ScheduleNextTick();
     }
 
     private void ScheduleNextTick()
     {
-        // Saniyede bir değil, bir sonraki dakika başında uyan.
-        _clockTimer.Interval = Koy.Core.Dock.Items.DockClockTick.DelayToNextMinute(DateTime.Now);
+        // Saniyeler kapalıyken bir sonraki dakika başında uyanır; Windows "saniyeleri göster" açıksa saniye başına (tek zamanlayıcı, yalnız dock görünürken).
+        _clockTimer.Interval = SystemClockText.DelayToNextTick(DateTime.Now, _clockSeconds);
         _clockTimer.Start();
     }
 
@@ -172,7 +176,7 @@ public sealed partial class DockStatusViewModel : ObservableObject, IDisposable
     {
         var now = DateTime.Now;
         var culture = CultureInfo.CurrentCulture;
-        TimeText = SystemClockText.Time(now, culture);
+        TimeText = SystemClockText.Time(now, culture, _clockSeconds);
         DateText = SystemClockText.Date(now, culture);
         ClockTooltip = SystemClockText.Tooltip(now, culture);
     }

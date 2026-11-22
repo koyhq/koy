@@ -6,6 +6,7 @@ using Koy.App.Features.Menu;
 using Koy.App.Features.Settings;
 using Koy.App.Features.Wizard;
 using Koy.App.Resources;
+using Koy.Core.Dock;
 using Koy.Core.Settings;
 
 namespace Koy.UiSnapshots;
@@ -136,6 +137,8 @@ public static class Program
                 DockBarSnapshots.RenderDrag(outDir, prefix, theme, RenderElement);
             else if (scene is "ana" or "home")
                 RenderHome(outDir, prefix, theme);
+            else if (scene is "ayar" or "settings")
+                RenderSettingsPages(outDir, prefix, theme);
             else if (scene is "taskbar" or "gorevcubugu")
                 DockBarSnapshots.RenderTaskbar(outDir, prefix, theme, RenderElement);
             else if (scene is "dock-sistem" or "docksystem")
@@ -766,6 +769,54 @@ public static class Program
         set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
         ShotNotch(set, name("ana-pil-sarj"), expanded: true);
         set.Vm.Dispose();
+    }
+
+    /// <summary>
+    /// Ayar sayfalarının tam boy görüntüleri: Dock (kapsül ve tam genişlik, üç alt sekme) ve Çentik (üç alt sekme). Ayarlar geçici dosyada;
+    /// sayfa kaydırması kapalı, pencere içeriğe göre uzar. Dosya adı: ayar-{sayfa}-{durum}-{alt sekme}. <c>--scene ayar</c>.
+    /// </summary>
+    private static void RenderSettingsPages(string outDir, string prefix, string theme)
+    {
+        foreach (var (label, style) in new[] { ("kapsul", DockStyleMode.FloatingCapsule), ("tam", DockStyleMode.FullWidth) })
+        {
+            var temp = Path.Combine(Path.GetTempPath(), "koy-uisnap-ayar-" + Guid.NewGuid().ToString("N") + ".json");
+            var store = new SettingsStore(temp);
+            store.Save(new AppSettings
+            {
+                General = new GeneralSettings { FirstRunCompleted = true },
+                Appearance = new AppearanceSettings { Material = Material },
+                Dock = new DockSettings { Style = style }
+            });
+            try
+            {
+                var vm = new KoyWindowViewModel(store);
+                var win = new KoyWindow(vm);
+                if (win.FindName("ContentScrollViewer") is System.Windows.Controls.ScrollViewer sv)
+                    sv.VerticalScrollBarVisibility = System.Windows.Controls.ScrollBarVisibility.Disabled;
+                ((FrameworkElement)win.Content).Measure(new Size(880, double.PositiveInfinity));
+
+                for (var sub = 0; sub < 3; sub++)
+                {
+                    vm.SelectPage(2);
+                    vm.DockSubTabIndex = sub;
+                    RenderElement((FrameworkElement)win.Content, 880, 1500, Path.Combine(outDir, $"{prefix}-{theme}-ayar-dock-{label}-{sub}.png"));
+                }
+
+                if (style == DockStyleMode.FloatingCapsule)
+                {
+                    for (var sub = 0; sub < 3; sub++)
+                    {
+                        vm.SelectPage(1);
+                        vm.NotchSubTabIndex = sub;
+                        RenderElement((FrameworkElement)win.Content, 880, 1500, Path.Combine(outDir, $"{prefix}-{theme}-ayar-centik-{sub}.png"));
+                    }
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch (IOException) { }
+            }
+        }
     }
 
     /// <summary>Pil durumları: simge levhası, dock ve çentik (klasik boşta, halka, açık Ana sayfa). <c>--scene pil</c>.</summary>

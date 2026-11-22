@@ -125,12 +125,13 @@
                             <Image Source="{Binding StartIcon}" Width="20" Height="20" RenderOptions.BitmapScalingMode="HighQuality"/>
                         </Button>
 
-                        <!-- Ara: Windows arama (Win+S); büyüteç ve yerelleştirilmiş "Ara" -->
+                        <!-- Ara: Windows arama (Win+S). Windows 11 "Arama" ayarı: Arama kutusu (büyüteç ve "Ara"), Arama simgesi ve etiketi,
+                             Yalnız arama simgesi; Gizle'de hiçbiri görünmez. -->
                         <Button Style="{StaticResource DockPillButtonStyle}" Width="128" Padding="4,0"
                                 Command="{Binding OpenSearchCommand}"
                                 ToolTip="{Binding [DockSearchBox], Source={x:Static res:Loc.Instance}}"
                                 AutomationProperties.Name="{Binding [DockSearchBox], Source={x:Static res:Loc.Instance}}"
-                                Visibility="{Binding Taskbar.ShowSearch, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                                Visibility="{Binding Taskbar.ShowSearchBox, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
                             <Border CornerRadius="16" Height="32" Width="116" Background="{DynamicResource KoyDockPill}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock Text="&#xE721;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="14"
@@ -139,6 +140,26 @@
                                                Foreground="{DynamicResource KoyDockClockText}" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Border>
+                        </Button>
+                        <Button Style="{StaticResource DockPillButtonStyle}" Width="80" Padding="0"
+                                Command="{Binding OpenSearchCommand}"
+                                ToolTip="{Binding [DockSearchBox], Source={x:Static res:Loc.Instance}}"
+                                AutomationProperties.Name="{Binding [DockSearchBox], Source={x:Static res:Loc.Instance}}"
+                                Visibility="{Binding Taskbar.ShowSearchLabel, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="&#xE721;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16"
+                                           Foreground="{DynamicResource KoyDockGlyph}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding [DockSearchBox], Source={x:Static res:Loc.Instance}}" FontSize="12.5" Margin="6,0,0,0"
+                                           Foreground="{DynamicResource KoyDockClockText}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource DockPillButtonStyle}" Width="40" Padding="0"
+                                Command="{Binding OpenSearchCommand}"
+                                ToolTip="{Binding [DockSearchBox], Source={x:Static res:Loc.Instance}}"
+                                AutomationProperties.Name="{Binding [DockSearchBox], Source={x:Static res:Loc.Instance}}"
+                                Visibility="{Binding Taskbar.ShowSearchIconOnly, Converter={x:Static local:DockConverters.BoolToVisibilityConverter}}">
+                            <TextBlock Text="&#xE721;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16"
+                                       Foreground="{DynamicResource KoyDockGlyph}"/>
                         </Button>
 
                         <!-- Görev görünümü: Win+Tab -->
