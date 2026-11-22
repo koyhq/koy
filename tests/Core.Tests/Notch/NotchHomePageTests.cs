@@ -6,13 +6,19 @@ namespace Koy.Core.Tests.Notch;
 public class NotchHomePageTests
 {
     [Theory]
-    [InlineData(NotchHomePage.Music, true, true, NotchHomePage.Music)]
-    [InlineData(NotchHomePage.Home, true, true, NotchHomePage.Home)]
-    [InlineData(NotchHomePage.Music, false, true, NotchHomePage.Home)]
-    [InlineData(NotchHomePage.Music, true, false, NotchHomePage.Home)]
-    [InlineData(NotchHomePage.Home, false, false, NotchHomePage.Home)]
-    public void OnOpen_preserves_selected_page_when_music_is_available(NotchHomePage current, bool hasTrack, bool musicEnabled, NotchHomePage expected) =>
-        Assert.Equal(expected, NotchHomePages.OnOpen(current, hasTrack, musicEnabled));
+    [InlineData(NotchHomePage.Music, true, NotchHomePage.Music)]
+    [InlineData(NotchHomePage.Home, true, NotchHomePage.Home)]
+    [InlineData(NotchHomePage.Music, false, NotchHomePage.Home)]
+    [InlineData(NotchHomePage.Home, false, NotchHomePage.Home)]
+    public void OnOpen_keeps_the_last_face_unless_music_is_unreachable(NotchHomePage current, bool reachable, NotchHomePage expected) =>
+        Assert.Equal(expected, NotchHomePages.OnOpen(current, reachable));
+
+    [Fact]
+    public void OnOpen_keeps_the_music_face_without_a_track_and_with_an_empty_home_card_list()
+    {
+        // Kullanıcı Müzik'e geçip kapattı; parça yok ve "Ana sayfa kartları" boş: yine Müzik (boş durumu) açılır.
+        Assert.Equal(NotchHomePage.Music, NotchHomePages.OnOpen(NotchHomePage.Music));
+    }
 }
 
 public class EventAgendaUpcomingTests
