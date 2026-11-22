@@ -7,6 +7,13 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.18](https://github.com/koyhq/koy/compare/v0.2.17...v0.2.18) (2026-11-22)
+
+
+### Fixed
+
+* **updates:** stop inheriting current install directory as CWD ([#210](https://github.com/koyhq/koy/issues/210)) ([fc09f8e](https://github.com/koyhq/koy/commit/fc09f8e02a4db94174e264fe2cceab4a0d60563d))
+
 ## [0.2.17](https://github.com/koyhq/koy/compare/v0.2.16...v0.2.17) (2026-11-22)
 
 
