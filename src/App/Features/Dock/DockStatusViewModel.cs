@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Koy.App.Features.Status;
 using Koy.App.Resources;
 using Koy.Core.Audio;
 using Koy.Core.Dock;
@@ -44,8 +45,9 @@ public sealed partial class DockStatusViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private bool _hasBattery;
 
+    /// <summary>Pil gösterim kararı (simge, dolum, renk); ipucu <see cref="BatteryTooltip"/>.</summary>
     [ObservableProperty]
-    private string _batteryGlyph = string.Empty;
+    private BatteryDisplay _battery = BatteryDisplay.None;
 
     [ObservableProperty]
     private string _batteryTooltip = string.Empty;
@@ -81,7 +83,7 @@ public sealed partial class DockStatusViewModel : ObservableObject, IDisposable
 
         ApplyNetwork(_network.Current);
         ApplyAudio(_audio.Volume, _audio.IsMuted);
-        ApplyPower(_power.HasBattery, _power.RemainingPercent, _power.IsCharging);
+        ApplyPower(_power.Display());
         SetActive(true);
     }
 
@@ -144,7 +146,7 @@ public sealed partial class DockStatusViewModel : ObservableObject, IDisposable
         _dispatcher.InvokeAsync(() => ApplyAudio(e.Volume, e.IsMuted));
 
     private void OnPowerChanged(object? sender, PowerChangedEventArgs e) =>
-        _dispatcher.InvokeAsync(() => ApplyPower(e.HasBattery, e.RemainingPercent, e.IsCharging));
+        _dispatcher.InvokeAsync(() => ApplyPower(e.Display()));
 
     private void ApplyNetwork(NetworkStatus status)
     {
@@ -168,11 +170,11 @@ public sealed partial class DockStatusViewModel : ObservableObject, IDisposable
             : string.Format(CultureInfo.CurrentCulture, Strings.VolumeLevel, (int)Math.Round(volume * 100));
     }
 
-    private void ApplyPower(bool hasBattery, int percent, bool charging)
+    private void ApplyPower(BatteryDisplay display)
     {
-        HasBattery = hasBattery;
-        BatteryGlyph = TrayGlyphs.Battery(percent, charging);
-        BatteryTooltip = string.Format(CultureInfo.CurrentCulture, charging ? Strings.BatteryCharging : Strings.BatteryLevel, percent);
+        HasBattery = display.HasBattery;
+        Battery = display;
+        BatteryTooltip = BatteryText.Tooltip(display);
     }
 
     public void Dispose()

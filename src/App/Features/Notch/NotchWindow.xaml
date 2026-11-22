@@ -32,15 +32,6 @@
 
   <Window.Resources>
     <BooleanToVisibilityConverter x:Key="BoolToVis" />
-    <!-- Pil çubuğunun dolgusu: varsayılan Tamam yeşili, ≤ %20 ve şarjda değilken kırmızı (renk tek başına taşımaz: şarjda şimşek de çıkar) -->
-    <Style x:Key="BatteryFillStyle" TargetType="Border">
-      <Setter Property="Background" Value="{DynamicResource KoyNotchBatteryOk}" />
-      <Style.Triggers>
-        <DataTrigger Binding="{Binding IsBatteryLow}" Value="True">
-          <Setter Property="Background" Value="{DynamicResource KoyNotchBatteryLow}" />
-        </DataTrigger>
-      </Style.Triggers>
-    </Style>
     <!-- Durum satırındaki yuvarlak simge düğmeleri (Bildirim Merkezi, çentiği açık tut) -->
     <Style x:Key="NotchStatusButtonStyle" TargetType="Button">
       <Setter Property="Width" Value="26" />
@@ -313,6 +304,7 @@
             <!-- Halka modu, sol: 18 px pil halkası (kalınlık 2,5; iz beyaz %28, dolu kısım pil rengi, ≤%20 ve şarjda değilken
                  #FB7185) ve yanında yüzde. Halka yalnız pil yüzdesi değişince yeniden kurulur; zamanlayıcı ve animasyon yok. -->
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center"
+                        ToolTip="{Binding BatteryTooltip}"
                         Visibility="{Binding ShowIdleRing, Converter={StaticResource BoolToVis}}">
               <Grid Width="18" Height="18">
                 <Ellipse Width="17" Height="17" Stroke="#47FFFFFF" StrokeThickness="2.5" />
@@ -321,9 +313,19 @@
               </Grid>
               <TextBlock Text="{Binding BatteryPercentText}" Foreground="{DynamicResource KoyNotchText}" FontSize="12" FontWeight="SemiBold"
                          Margin="6,0,0,0" VerticalAlignment="Center" />
-              <Path Data="M13 2L4 14h7l-1 8 9-12h-7z" Fill="{Binding BatteryRingBrush}" Width="11" Height="11" Stretch="Uniform"
-                    Margin="4,0,0,0" VerticalAlignment="Center"
-                    Visibility="{Binding IsCharging, Converter={StaticResource BoolToVis}}" />
+              <Path Data="{Binding BatteryMark}" Fill="{Binding BatteryRingBrush}" Width="11" Height="11" Stretch="Uniform"
+                    Margin="4,0,0,0" VerticalAlignment="Center">
+                <Path.Style>
+                  <Style TargetType="Path">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding BatteryMark}" Value="{x:Null}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </Path.Style>
+              </Path>
             </StackPanel>
 
             <!-- Halka modu, sağ: gün ve saat ("Sal 19:21"), Peek'te kısa tarih ("· 18 Kas"). Pil ve süre yoksa ortada. -->
@@ -351,18 +353,14 @@
                          Visibility="{Binding ShowIdlePeekDate, Converter={StaticResource BoolToVis}}" />
             </StackPanel>
 
-            <!-- Sağ: Pil Göstergesi (22x11 px dış gövde #F4F4F5, seviye #4ADE80, terminal uç 2x5).
+            <!-- Sağ: Pil göstergesi (Windows 11 tarzı BatteryIcon: gövde, dolum, şarj / fiş / pil tasarrufu işareti).
                  Masaüstü kasada pil yok; boş bir pil çizmek yanıltıcı olur (ShowIdleBattery HasBattery'yi de hesaba katar). -->
-            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
-                        Visibility="{Binding ShowIdleBattery, Converter={StaticResource BoolToVis}}">
-              <Path Data="M13 2L4 14h7l-1 8 9-12h-7z" Fill="{DynamicResource KoyNotchText}" Width="9" Height="9" Stretch="Uniform"
-                    Margin="0,0,3,0" VerticalAlignment="Center"
-                    Visibility="{Binding IsCharging, Converter={StaticResource BoolToVis}}" />
-              <Border Width="22" Height="11" BorderThickness="1.5" BorderBrush="{DynamicResource KoyNotchText}" CornerRadius="3" Padding="1" Background="Transparent">
-                <Border HorizontalAlignment="Left" Width="{Binding BatteryFillWidth}" Height="6" Style="{StaticResource BatteryFillStyle}" CornerRadius="1" />
-              </Border>
-              <Border Width="2" Height="5" Background="{DynamicResource KoyNotchText}" CornerRadius="1" Margin="2,0,0,0" VerticalAlignment="Center" />
-            </StackPanel>
+            <status:BatteryIcon Grid.Column="2" Display="{Binding Battery}" VerticalAlignment="Center" Width="22" Height="12"
+                                OutlineBrush="{DynamicResource KoyNotchText}"
+                                OkBrush="{DynamicResource KoyNotchBatteryOk}"
+                                CriticalBrush="{DynamicResource KoyNotchBatteryLow}"
+                                ToolTip="{Binding BatteryTooltip}"
+                                Visibility="{Binding ShowIdleBattery, Converter={StaticResource BoolToVis}}" />
           </Grid>
 
           <!-- 1b. Müzik Çalarken: Kapak ve 4 çubuklu dalga (30px yan marjinler kavisli kulaklardan ve alt köşelerden tam korur) -->
@@ -594,17 +592,16 @@
                 <TextBlock Text="{Binding [WeatherPickLocation], Source={x:Static res:Loc.Instance}}" FontSize="12" Foreground="{DynamicResource KoyNotchMuted}" />
               </Button>
 
-              <!-- Pil: yalnız pil varsa; küçük gövde ve yüzde -->
+              <!-- Pil: yalnız pil varsa; Windows 11 tarzı simge ve yüzde -->
               <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0"
+                          ToolTip="{Binding BatteryTooltip}"
                           Visibility="{Binding HasBattery, Converter={StaticResource BoolToVis}}">
-                <Border Width="20" Height="10" BorderThickness="1.5" BorderBrush="{DynamicResource KoyNotchMuted}" CornerRadius="3" Padding="1" VerticalAlignment="Center">
-                  <Border HorizontalAlignment="Left" Width="{Binding BatteryFillWidth}" MaxWidth="14" Style="{StaticResource BatteryFillStyle}" CornerRadius="1" />
-                </Border>
-                <TextBlock Text="{Binding BatteryPercent, Converter={x:Static res:PercentTextConverter.Instance}}" FontSize="12"
+                <status:BatteryIcon Display="{Binding Battery}" Width="22" Height="12" VerticalAlignment="Center"
+                                    OutlineBrush="{DynamicResource KoyNotchMuted}"
+                                    OkBrush="{DynamicResource KoyNotchBatteryOk}"
+                                    CriticalBrush="{DynamicResource KoyNotchBatteryLow}" />
+                <TextBlock Text="{Binding Battery.PercentText}" FontSize="12"
                            Foreground="{DynamicResource KoyNotchMuted}" Margin="5,0,0,0" VerticalAlignment="Center" />
-                <Path Data="M13 2L4 14h7l-1 8 9-12h-7z" Fill="{DynamicResource KoyNotchMuted}" Width="9" Height="9" Stretch="Uniform"
-                      Margin="3,0,0,0" VerticalAlignment="Center"
-                      Visibility="{Binding IsCharging, Converter={StaticResource BoolToVis}}" />
               </StackPanel>
             </StackPanel>
 

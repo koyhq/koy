@@ -11,6 +11,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Koy.App.Features.Dock.Tray;
 using Koy.App.Features.Settings;
+using Koy.App.Features.Status;
 using Koy.App.Resources;
 using Koy.Core.Animation;
 using Koy.Core.Appearance;
@@ -1917,15 +1918,13 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         if (_power is null || batteries.Count == 0 || _disposed || !IsVisible)
             return;
 
-        var percent = DockBatteryPolicy.Clamp(_power.RemainingPercent);
-        var charging = _power.IsCharging;
-        var format = charging ? Resources.Strings.Get("DockBatteryCharging") : Resources.Strings.BatteryLevel;
-        var tooltip = string.Format(System.Globalization.CultureInfo.CurrentCulture, format, percent);
+        var display = _power.Display();
+        var tooltip = BatteryText.Tooltip(display);
         foreach (var battery in batteries)
         {
-            battery.BatteryGlyph = TrayGlyphs.Battery(percent, charging);
-            battery.PercentText = DockBatteryPolicy.FormatPercent(percent);
-            battery.IsLowBattery = DockBatteryPolicy.IsLow(percent, charging);
+            battery.Battery = display;
+            battery.PercentText = display.PercentText;
+            battery.IsLowBattery = display.Tone != BatteryTone.Normal;
             battery.Title = tooltip;
         }
     }

@@ -125,6 +125,8 @@ public static class Program
                 DockBarSnapshots.RenderSite(outDir, prefix, theme, RenderElement);
             else if (scene is "dockbar" or "dockbars")
                 DockBarSnapshots.Render(outDir, prefix, theme, RenderElement);
+            else if (scene is "pil" or "battery")
+                RenderBattery(outDir, prefix, theme);
             else if (scene is "dockmat" or "dockmaterial")
                 DockBarSnapshots.RenderMaterials(outDir, prefix, theme, RenderElement);
             else if (scene is "dock" or "folder" or "folders")
@@ -746,6 +748,28 @@ public static class Program
         set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
         ShotNotch(set, name("ana-pil-sarj"), expanded: true);
         set.Vm.Dispose();
+    }
+
+    /// <summary>Pil durumları: simge levhası, dock ve çentik (klasik boşta, halka, açık Ana sayfa). <c>--scene pil</c>.</summary>
+    private static void RenderBattery(string outDir, string prefix, string theme)
+    {
+        BatterySnapshots.RenderSheet(outDir, prefix, theme, RenderElement);
+        DockBarSnapshots.RenderBattery(outDir, prefix, theme, RenderElement);
+
+        string Name(string n) => Path.Combine(outDir, $"{prefix}-{theme}-{n}.png");
+        var ring = Koy.Core.Notch.IdleDisplayMode.RingClockDay;
+        foreach (var (state, power) in BatterySnapshots.States)
+        {
+            var set = MakeNotch(music: false, power: power);
+            ShotNotch(set, Name("centikpil-" + state), expanded: false);
+            set.Vm.Controller.Expand(Koy.Core.Notch.NotchPanel.Home);
+            ShotNotch(set, Name("centikpil-ana-" + state), expanded: true);
+            set.Vm.Dispose();
+
+            set = MakeNotch(music: false, idleMode: ring, power: power);
+            ShotNotch(set, Name("centikpil-halka-" + state), expanded: false);
+            set.Vm.Dispose();
+        }
     }
 
     private static void RenderNotchScenes(Func<string, string> name)

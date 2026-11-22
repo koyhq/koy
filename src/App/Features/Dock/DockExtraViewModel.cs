@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Koy.Core.Dock.Items;
+using Koy.Core.Power;
 
 namespace Koy.App.Features.Dock;
 
@@ -68,13 +69,14 @@ public sealed partial class DockExtraViewModel : DockEntryViewModel
     [ObservableProperty]
     private string _dateText = string.Empty;
 
+    /// <summary>Pil gösterim kararı (<see cref="BatteryDisplayPolicy"/>): simge, dolum, renk.</summary>
     [ObservableProperty]
-    private string _batteryGlyph = string.Empty;
+    private BatteryDisplay _battery = BatteryDisplay.None;
 
     [ObservableProperty]
     private string _percentText = string.Empty;
 
-    /// <summary>Düşük pil (<see cref="DockBatteryPolicy.IsLow"/>): yüzde ve simge uyarı renginde.</summary>
+    /// <summary>Düşük ya da kritik pil: yüzde yazısı uyarı renginde.</summary>
     [ObservableProperty]
     private bool _isLowBattery;
 

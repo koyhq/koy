@@ -6,18 +6,6 @@ namespace Koy.Core.Tests;
 public class TrayGlyphsTests
 {
     [Theory]
-    [InlineData(0, false, "\uEBA0")]
-    [InlineData(54, false, "\uEBA5")]
-    [InlineData(100, false, "\uEBAA")]
-    [InlineData(0, true, "\uEBAB")]
-    [InlineData(100, true, "\uEBB5")]
-    [InlineData(150, false, "\uEBAA")]
-    public void Battery_MapsPercentToTenLevels(int percent, bool charging, string expected)
-    {
-        Assert.Equal(expected, TrayGlyphs.Battery(percent, charging));
-    }
-
-    [Theory]
     [InlineData(0.5f, true, "\uE74F")]
     [InlineData(0f, false, "\uE74F")]
     [InlineData(0.2f, false, "\uE993")]

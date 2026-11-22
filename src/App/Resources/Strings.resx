@@ -123,8 +123,32 @@
   <data name="VolumeMuted" xml:space="preserve">
     <value>Volume: muted</value>
   </data>
-  <data name="BatteryLevel" xml:space="preserve">
-    <value>Battery: {0}%</value>
+  <data name="BatteryTipFull" xml:space="preserve">
+    <value>Battery status: fully charged {0}</value>
+  </data>
+  <data name="BatteryTipCharging" xml:space="preserve">
+    <value>Battery status: charging {0}</value>
+  </data>
+  <data name="BatteryTipChargingTime" xml:space="preserve">
+    <value>Battery status: charging {0} ({1} until full)</value>
+  </data>
+  <data name="BatteryTipPlugged" xml:space="preserve">
+    <value>Battery status: plugged in, not charging {0}</value>
+  </data>
+  <data name="BatteryTipRemaining" xml:space="preserve">
+    <value>Battery status: {0} remaining</value>
+  </data>
+  <data name="BatteryTipRemainingTime" xml:space="preserve">
+    <value>Battery status: {0} remaining ({1} left)</value>
+  </data>
+  <data name="BatteryTipSaver" xml:space="preserve">
+    <value>{0}, battery saver on</value>
+  </data>
+  <data name="BatteryTimeHoursMinutes" xml:space="preserve">
+    <value>{0} h {1} min</value>
+  </data>
+  <data name="BatteryTimeMinutes" xml:space="preserve">
+    <value>{0} min</value>
   </data>
   <data name="BatteryCharging" xml:space="preserve">
     <value>Charging</value>
@@ -2399,9 +2423,6 @@
   </data>
   <data name="DockAddBattery" xml:space="preserve">
     <value>Battery</value>
-  </data>
-  <data name="DockBatteryCharging" xml:space="preserve">
-    <value>Charging: {0}%</value>
   </data>
   <data name="DockAddCustom" xml:space="preserve">
     <value>Custom button...</value>

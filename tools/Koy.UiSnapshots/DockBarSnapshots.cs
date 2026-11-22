@@ -35,16 +35,6 @@ internal static class DockBarSnapshots
         public void Dispose() { }
     }
 
-    private sealed class FakePower(int percent, bool charging) : IPowerService
-    {
-        public bool HasBattery => true;
-        public int RemainingPercent => percent;
-        public bool IsCharging => charging;
-        public BatteryStatus Status => charging ? BatteryStatus.Charging : BatteryStatus.Discharging;
-        public event EventHandler<PowerChangedEventArgs>? PowerChanged { add { } remove { } }
-        public void Dispose() { }
-    }
-
     private static readonly DisplayMonitor Monitor = new(
         "snap", "Snapshot", new WindowRect(0, 0, 1280, 720), new WindowRect(0, 0, 1280, 720), true);
 
@@ -105,6 +95,13 @@ internal static class DockBarSnapshots
         {
             Directory.Delete(dir, recursive: true);
         }
+    }
+
+    /// <summary>Pil durumları (sahte güç verisi): tam genişlik dock'ta her durum için bir kare. Dosya adı: dockpil-{durum}.</summary>
+    public static void RenderBattery(string outDir, string prefix, string theme, Action<FrameworkElement, double, double, string> renderElement)
+    {
+        foreach (var (name, power) in BatterySnapshots.States)
+            Shoot(outDir, prefix, theme, "dockpil-" + name, renderElement, fullWidth: true, smallTray: true, appCount: 8, battery: power);
     }
 
     /// <summary>
