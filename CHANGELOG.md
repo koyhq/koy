@@ -7,6 +7,34 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.17](https://github.com/koyhq/koy/compare/v0.2.16...v0.2.17) (2026-11-22)
+
+
+### Added
+
+* **dock:** add a Windows 11 style system area to the full width dock ([7a960ae](https://github.com/koyhq/koy/commit/7a960aea25ef0acd7fa6692deb9abc708ddac124))
+* **dock:** hide dock settings that do not apply and add the Windows taskbar settings ([acf7ae1](https://github.com/koyhq/koy/commit/acf7ae186c769c1b1ec925802f4985e99c994a75))
+* **dock:** let the full width dock follow the system light and dark theme ([4a68739](https://github.com/koyhq/koy/commit/4a68739ce509df50508a4097be72d03877f188f5))
+* **dock:** make the full width dock a Windows 11 taskbar and fix v0.2.16 test findings ([dcb9e5a](https://github.com/koyhq/koy/commit/dcb9e5ad8a32452029928db5faa98a54ffd76607))
+* **dock:** make the left and center of the full width dock follow Windows 11 ([eb4c614](https://github.com/koyhq/koy/commit/eb4c61409efb1c007431790f6122a571703bf99f))
+* **notch:** guide to settings when Home has no cards and drop the dead tab label option ([4808f74](https://github.com/koyhq/koy/commit/4808f7434117fe72373eed36f4adc6145f4d13ce))
+* **power:** show plugged-in, charging and energy saver states like Windows 11 ([684eaef](https://github.com/koyhq/koy/commit/684eaef8694d790f6c2f97eead18ec05655b03a7))
+* **settings:** clearer names, notch previews and a visible empty Home action ([6ca7848](https://github.com/koyhq/koy/commit/6ca784886fa8f1e4e93ae4a70881ff519f40a421))
+* **updates:** add opt-in automatic updates and speed up Stable update checks ([9870b17](https://github.com/koyhq/koy/commit/9870b171b51fe2494d3158eb92774825bbc8a9f4))
+* **updates:** opt-in automatic updates and faster Stable update checks ([921723e](https://github.com/koyhq/koy/commit/921723e3043a3f4bf02adb86e114eac15b3f34c3))
+
+
+### Fixed
+
+* **control:** no connected devices while Bluetooth is off, and soften the tiles and bars ([efccae2](https://github.com/koyhq/koy/commit/efccae29e58cf70eba3646ecfe97e7026451a610))
+* **dock:** allow drag reorder and folder creation with extra items ([30ae853](https://github.com/koyhq/koy/commit/30ae85350f7b70dc39404e7cb6cccf5d74ea6354))
+* **dock:** create and fill folders by shortcut name, reset slide offsets after a merge, and cap the folder cover at four apps ([9b3d0dd](https://github.com/koyhq/koy/commit/9b3d0ddf504df8d7652ff98cfd3976662a81cf15))
+* **dock:** force Windows to recompute the work area when the AppBar is reasserted ([4b3790f](https://github.com/koyhq/koy/commit/4b3790f97ea737e14270adf636fa1012dd05ddda))
+* **dock:** hide the dock length setting in every style ([736f42b](https://github.com/koyhq/koy/commit/736f42b27a785c01fc971dbaff29acd32a7b9bfe))
+* **dock:** reserve the work area from the monitor edge when the taskbar is about to hide ([b9fd4c9](https://github.com/koyhq/koy/commit/b9fd4c98b5188bfad4268e1553bd1a26b3484182))
+* **dock:** yield tray Shell_TrayWnd during SHAppBarMessage and remove full-width top gap ([a49d80e](https://github.com/koyhq/koy/commit/a49d80e0b15718fb41f334c6e3a6bf11022aeb31))
+* **notch:** keep the last Home face (Music or Home) when the notch reopens ([04004c0](https://github.com/koyhq/koy/commit/04004c0b0b71a1e5bbeebb5638cd39d63b30ef6b))
+
 ## [0.2.16](https://github.com/koyhq/koy/compare/v0.2.15...v0.2.16) (2026-11-22)
 Highlights:
 - **Safer taskbar:** if Koy is killed, even together with its process tree, the Windows taskbar comes back; it is also restored when you sign out, and a monitor without the dock keeps its own taskbar.
