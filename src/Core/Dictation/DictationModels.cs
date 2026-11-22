@@ -68,22 +68,22 @@ public sealed class SpeechApiException(string message, bool transient = false, E
 
 public interface IAudioRecorder
 {
-    /// <summary>Anlık tepe düzeyi (0..1), dalga formu için. Kayıt iş parçacığından çağrılır.</summary>
+    /// <summary>Anlık tepe düzeyi (0..1), dalga formu için. Kayıt iş parçacığından çağrılır; sürücü vermiyorsa hiç çağrılmaz.</summary>
     event Action<double>? LevelChanged;
 
     bool IsRecording { get; }
 
-    /// <summary>Kaydı başlatır; mikrofon açılamazsa <see cref="InvalidOperationException"/>.</summary>
-    void Start();
+    /// <summary>Kaydı başlatır; mikrofon açılamazsa (izin, cihaz yok) istisna fırlatır.</summary>
+    Task StartAsync();
 
     /// <summary>Kaydı bitirir ve sesi verir; kayıt yoksa null.</summary>
-    RecordedAudio? Stop();
+    Task<RecordedAudio?> StopAsync();
 
     /// <summary>Kaydı duraklatır ya da sürdürür (duraklatılan süre kayda girmez).</summary>
-    void SetPaused(bool paused);
+    Task SetPausedAsync(bool paused);
 
     /// <summary>Kaydı atar.</summary>
-    void Discard();
+    Task DiscardAsync();
 }
 
 public interface ISpeechToText

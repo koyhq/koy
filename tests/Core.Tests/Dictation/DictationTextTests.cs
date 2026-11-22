@@ -431,3 +431,153 @@ public class WavAudioTests
         Assert.Equal((0.0, 0.0), WavAudio.Levels([]));
     }
 }
+
+public class WavChunkLevelsTests
+{
+    private static byte[] Tone(int samples, short value)
+    {
+        var pcm = new byte[samples * 2];
+        for (var i = 0; i < samples; i++)
+            BitConverter.TryWriteBytes(pcm.AsSpan(i * 2), value);
+        return pcm;
+    }
+
+    [Fact]
+    public void Levels_and_duration_come_out_of_a_wav_file()
+    {
+        var wav = WavAudio.FromPcm16([.. Tone(16000, 3277), .. Tone(16000, 0)]);
+
+        var (seconds, levels) = WavAudio.ChunkLevels(wav, 0.064);
+
+        Assert.Equal(2.0, seconds, 3);
+        Assert.Equal(0.1, levels[0], 2);
+        Assert.Equal(0.0, levels[^1], 3);
+        Assert.InRange(levels.Count, 31, 32);
+    }
+
+    [Fact]
+    public void A_stream_written_header_with_zero_sizes_still_reads_to_the_end()
+    {
+        var wav = WavAudio.FromPcm16(Tone(1600, 3277));
+        BitConverter.TryWriteBytes(wav.AsSpan(40), 0); // data boyutu yazılmamış
+
+        var (seconds, levels) = WavAudio.ChunkLevels(wav, 0.064);
+
+        Assert.Equal(0.1, seconds, 3);
+        Assert.NotEmpty(levels);
+    }
+
+    [Fact]
+    public void Anything_that_is_not_a_wav_gives_nothing()
+    {
+        var (seconds, levels) = WavAudio.ChunkLevels(new byte[] { 1, 2, 3 }, 0.064);
+
+        Assert.Equal(0.0, seconds);
+        Assert.Empty(levels);
+    }
+
+    [Fact]
+    public void A_format_other_than_16_bit_pcm_has_a_duration_but_no_levels()
+    {
+        var wav = WavAudio.FromPcm16(Tone(1600, 100));
+        BitConverter.TryWriteBytes(wav.AsSpan(34), (short)8); // 8 bit
+
+        var (_, levels) = WavAudio.ChunkLevels(wav, 0.064);
+
+        Assert.Empty(levels);
+    }
+}
+
+public class OpenAiProtocolTests
+{
+    [Theory]
+    [InlineData("https://api.openai.com/v1", "audio/transcriptions", "https://api.openai.com/v1/audio/transcriptions")]
+    [InlineData("http://localhost:8080/v1/", "/chat/completions", "http://localhost:8080/v1/chat/completions")]
+    public void Endpoints_are_joined_with_one_slash(string baseUrl, string path, string expected)
+    {
+        Assert.Equal(expected, OpenAiProtocol.EndpointUrl(baseUrl, path));
+    }
+
+    [Theory]
+    [InlineData("whisper-1", true)]
+    [InlineData("whisper-large-v3-turbo", true)]
+    [InlineData("gpt-4o-transcribe", false)]
+    [InlineData("gpt-4o-mini-transcribe", false)]
+    public void Verbose_json_is_asked_only_of_whisper_models(string model, bool expected)
+    {
+        Assert.Equal(expected, OpenAiProtocol.WantsVerboseJson(model));
+    }
+
+    [Fact]
+    public void The_chat_request_escapes_text_and_orders_the_messages()
+    {
+        var json = OpenAiProtocol.BuildChatRequest("m", "sistem \"tırnaklı\"", "satır1\nsatır2");
+
+        using var document = System.Text.Json.JsonDocument.Parse(json);
+        var root = document.RootElement;
+        Assert.Equal("m", root.GetProperty("model").GetString());
+        Assert.Equal(0, root.GetProperty("temperature").GetInt32());
+        var messages = root.GetProperty("messages");
+        Assert.Equal("system", messages[0].GetProperty("role").GetString());
+        Assert.Equal("sistem \"tırnaklı\"", messages[0].GetProperty("content").GetString());
+        Assert.Equal("user", messages[1].GetProperty("role").GetString());
+        Assert.Equal("satır1\nsatır2", messages[1].GetProperty("content").GetString());
+    }
+
+    [Fact]
+    public void A_transcription_reply_gives_text_and_a_language_code()
+    {
+        var result = OpenAiProtocol.ParseTranscription("{\"text\": \" Merhaba dünya \", \"language\": \"turkish\"}");
+
+        Assert.Equal("Merhaba dünya", result.Text);
+        Assert.Equal("tr", result.DetectedLanguage);
+    }
+
+    [Fact]
+    public void A_plain_text_reply_is_the_text_itself()
+    {
+        Assert.Equal("düz metin", OpenAiProtocol.ParseTranscription("düz metin\n").Text);
+    }
+
+    [Fact]
+    public void A_chat_reply_is_read_from_a_string_or_from_parts()
+    {
+        Assert.Equal("Selam.", OpenAiProtocol.ParseChatReply("{\"choices\":[{\"message\":{\"content\":\"Selam.\"}}]}"));
+        Assert.Equal("ab", OpenAiProtocol.ParseChatReply("{\"choices\":[{\"message\":{\"content\":[{\"text\":\"a\"},{\"text\":\"b\"}]}}]}"));
+        Assert.Equal("", OpenAiProtocol.ParseChatReply("{\"choices\":[{\"message\":{\"content\":null}}]}"));
+        Assert.Equal("", OpenAiProtocol.ParseChatReply("{\"choices\":[]}"));
+        Assert.Equal("", OpenAiProtocol.ParseChatReply("<html>"));
+    }
+
+    [Fact]
+    public void Error_messages_use_the_server_text_when_there_is_one()
+    {
+        Assert.Equal("HTTP 401: Incorrect API key", OpenAiProtocol.ErrorMessage(401, "{\"error\":{\"message\":\"Incorrect API key\"}}"));
+        Assert.Equal("HTTP 400: bad", OpenAiProtocol.ErrorMessage(400, "{\"error\":\"bad\"}"));
+        Assert.Equal("HTTP 502", OpenAiProtocol.ErrorMessage(502, "<html>"));
+        Assert.Equal("HTTP 500", OpenAiProtocol.ErrorMessage(500, null));
+    }
+
+    [Theory]
+    [InlineData(429, true)]
+    [InlineData(408, true)]
+    [InlineData(500, true)]
+    [InlineData(503, true)]
+    [InlineData(400, false)]
+    [InlineData(401, false)]
+    [InlineData(404, false)]
+    public void Only_rate_limits_timeouts_and_server_errors_are_worth_waiting_for(int status, bool expected)
+    {
+        Assert.Equal(expected, OpenAiProtocol.IsTransient(status));
+    }
+
+    [Theory]
+    [InlineData("turkish", "tr")]
+    [InlineData("English", "en")]
+    [InlineData("tr", "tr")]
+    [InlineData("", "")]
+    public void Language_names_become_codes(string name, string expected)
+    {
+        Assert.Equal(expected, OpenAiProtocol.LanguageCode(name));
+    }
+}

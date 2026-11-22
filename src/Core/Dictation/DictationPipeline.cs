@@ -75,23 +75,20 @@ public sealed class DictationPipeline : IDisposable
     public event Action<double>? LevelChanged;
 
     /// <summary>Boştaysa kaydı başlatır, kayıt sürüyorsa bitirip işi başlatır.</summary>
-    public Task ToggleAsync()
+    public async Task ToggleAsync()
     {
         DictationState state;
         lock (_gate)
             state = State;
 
         if (state == DictationState.Idle)
-        {
-            Start();
-            return Task.CompletedTask;
-        }
-
-        return StopAsync();
+            await StartAsync().ConfigureAwait(false);
+        else
+            await StopAsync().ConfigureAwait(false);
     }
 
     /// <summary>Kaydı başlatır. Kapalıysa ya da mikrofon açılamazsa false (ikincisinde <see cref="Finished"/> hatayı bildirir).</summary>
-    public bool Start()
+    public async Task<bool> StartAsync()
     {
         var config = _config();
         lock (_gate)
@@ -101,14 +98,19 @@ public sealed class DictationPipeline : IDisposable
 
             // Profil kayıt başladığı an alınır: kuyruktaki iş sonradan değişen ayarlardan ve öne gelen pencereden etkilenmez.
             _choice = ChooseProfile(config);
+
+            // Yer önceden ayrılır: mikrofon açılırken ikinci bir başlatma araya giremesin.
+            State = DictationState.Recording;
         }
 
         try
         {
-            _recorder.Start();
+            await _recorder.StartAsync().ConfigureAwait(false);
         }
-        catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is not OperationCanceledException and not OutOfMemoryException)
         {
+            lock (_gate)
+                State = DictationState.Idle;
             Raise(Finished, new DictationOutcome(DictationOutcomeKind.Failed, Detail: ex.Message));
             return false;
         }
@@ -116,7 +118,6 @@ public sealed class DictationPipeline : IDisposable
         CancellationTokenSource limit;
         lock (_gate)
         {
-            State = DictationState.Recording;
             _limit?.Cancel();
             _limit?.Dispose();
             limit = _limit = new CancellationTokenSource();
@@ -128,31 +129,41 @@ public sealed class DictationPipeline : IDisposable
     }
 
     /// <summary>Kaydı bitirir ve işi başlatır; iş bitince tamamlanır. Kayıt yoksa hemen tamamlanır.</summary>
-    public Task StopAsync()
+    public async Task StopAsync()
     {
-        RecordedAudio? audio;
         ProfileChoice choice;
         lock (_gate)
         {
             if (State == DictationState.Idle)
-                return Task.CompletedTask;
+                return;
 
             State = DictationState.Idle;
             _limit?.Cancel();
             choice = _choice;
         }
 
-        audio = _recorder.Stop();
+        RecordedAudio? audio;
+        try
+        {
+            audio = await _recorder.StopAsync().ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException and not OutOfMemoryException)
+        {
+            Raise(StateChanged, DictationState.Idle);
+            Raise(Finished, new DictationOutcome(DictationOutcomeKind.Failed, Detail: ex.Message));
+            return;
+        }
+
         Raise(StateChanged, DictationState.Idle);
         if (audio is null)
-            return Task.CompletedTask;
+            return;
 
         Interlocked.Increment(ref _pending);
-        return RunJobAsync(audio.Wav, audio.Seconds, audio.RmsLevels, audio.ChunkSeconds, choice, retry: null);
+        await RunJobAsync(audio.Wav, audio.Seconds, audio.RmsLevels, audio.ChunkSeconds, choice, retry: null).ConfigureAwait(false);
     }
 
     /// <summary>Kaydı duraklatır (true) ya da sürdürür (false).</summary>
-    public void SetPaused(bool paused)
+    public async Task SetPausedAsync(bool paused)
     {
         lock (_gate)
         {
@@ -162,12 +173,21 @@ public sealed class DictationPipeline : IDisposable
             State = paused ? DictationState.Paused : DictationState.Recording;
         }
 
-        _recorder.SetPaused(paused);
+        try
+        {
+            await _recorder.SetPausedAsync(paused).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException and not OutOfMemoryException)
+        {
+            Raise(Finished, new DictationOutcome(DictationOutcomeKind.Failed, Detail: ex.Message));
+            return;
+        }
+
         Raise(StateChanged, paused ? DictationState.Paused : DictationState.Recording);
     }
 
     /// <summary>Kayıt sürüyorsa atar; değilse çalışan işi iptal eder (sıradakiler sürer).</summary>
-    public void Cancel()
+    public async Task CancelAsync()
     {
         bool wasRecording;
         lock (_gate)
@@ -182,7 +202,15 @@ public sealed class DictationPipeline : IDisposable
 
         if (wasRecording)
         {
-            _recorder.Discard();
+            try
+            {
+                await _recorder.DiscardAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException and not OutOfMemoryException)
+            {
+                Koy.Core.Diagnostics.CrashLog.Write("DictationPipeline.Discard", ex);
+            }
+
             Raise(StateChanged, DictationState.Idle);
             Raise(Finished, new DictationOutcome(DictationOutcomeKind.Cancelled));
             return;
@@ -246,7 +274,7 @@ public sealed class DictationPipeline : IDisposable
         _limit?.Cancel();
         _shutdown.Cancel();
         if (_recorder.IsRecording)
-            _recorder.Discard();
+            _ = DiscardQuietlyAsync();
         _limit?.Dispose();
         _shutdown.Dispose();
         _jobGate.Dispose();
@@ -267,6 +295,18 @@ public sealed class DictationPipeline : IDisposable
     }
 
     private void OnLevel(double level) => Raise(LevelChanged, level);
+
+    private async Task DiscardQuietlyAsync()
+    {
+        try
+        {
+            await _recorder.DiscardAsync().ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            Koy.Core.Diagnostics.CrashLog.Write("DictationPipeline.Dispose", ex);
+        }
+    }
 
     private async Task StopAfterLimitAsync(TimeSpan after, CancellationToken token)
     {
@@ -339,7 +379,7 @@ public sealed class DictationPipeline : IDisposable
         var clock = Stopwatch.StartNew();
 
         // Oda sesi: ne bir istek harca ne de uydurma bir cümleyi davet et. Yeniden denemede düzey yoktur; ses ilk seferde geçmişti.
-        if (config.SkipSilent && retry is null && levels is not null)
+        if (config.SkipSilent && retry is null && levels is { Count: > 0 })
         {
             var stats = SpeechGate.Analyse(levels, chunkSeconds, config.SpeechMarginDb);
             if (SpeechGate.IsSilent(stats, config.SilenceDb, config.MinVoicedSeconds))

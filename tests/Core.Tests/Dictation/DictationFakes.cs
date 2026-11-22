@@ -12,26 +12,32 @@ internal sealed class FakeRecorder : IAudioRecorder
 
     public event Action<double>? LevelChanged;
 
-    public void Start()
+    public Task StartAsync()
     {
         if (FailStart)
             throw new InvalidOperationException("no microphone");
         IsRecording = true;
         Discarded = false;
+        return Task.CompletedTask;
     }
 
-    public RecordedAudio? Stop()
+    public Task<RecordedAudio?> StopAsync()
     {
         IsRecording = false;
-        return Audio;
+        return Task.FromResult(Audio);
     }
 
-    public void SetPaused(bool paused) => Paused = paused;
+    public Task SetPausedAsync(bool paused)
+    {
+        Paused = paused;
+        return Task.CompletedTask;
+    }
 
-    public void Discard()
+    public Task DiscardAsync()
     {
         IsRecording = false;
         Discarded = true;
+        return Task.CompletedTask;
     }
 
     public void RaiseLevel(double level) => LevelChanged?.Invoke(level);

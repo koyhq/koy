@@ -57,4 +57,55 @@ public static class WavAudio
 
         return (Math.Min(1, peak / 32768.0), Math.Sqrt(sumSquares / count));
     }
+
+    /// <summary>
+    /// Bir WAV dosyasının süresi ve blok başına RMS düzeyleri. Yalnız 16 bit PCM'in düzeyleri çıkarılır; başka biçimde
+    /// düzey listesi boş döner (sessizlik denetimi atlanır), süre yine de verilir. Bozuk başlıkta (0, boş).
+    /// </summary>
+    public static (double Seconds, IReadOnlyList<double> RmsLevels) ChunkLevels(ReadOnlySpan<byte> wav, double chunkSeconds)
+    {
+        if (wav.Length < 12 || !wav[..4].SequenceEqual("RIFF"u8) || !wav.Slice(8, 4).SequenceEqual("WAVE"u8))
+            return (0, []);
+
+        int format = 0, channels = 0, rate = 0, bits = 0;
+        var position = 12;
+        while (position + 8 <= wav.Length)
+        {
+            var id = wav.Slice(position, 4);
+            var size = BinaryPrimitives.ReadUInt32LittleEndian(wav[(position + 4)..]);
+            var body = position + 8;
+
+            if (id.SequenceEqual("fmt "u8) && body + 16 <= wav.Length)
+            {
+                format = BinaryPrimitives.ReadUInt16LittleEndian(wav[body..]);
+                channels = BinaryPrimitives.ReadUInt16LittleEndian(wav[(body + 2)..]);
+                rate = (int)BinaryPrimitives.ReadUInt32LittleEndian(wav[(body + 4)..]);
+                bits = BinaryPrimitives.ReadUInt16LittleEndian(wav[(body + 14)..]);
+            }
+            else if (id.SequenceEqual("data"u8))
+            {
+                // Akışa yazılan dosyada boyut 0 ya da 0xFFFFFFFF olabilir: kalan baytların hepsi veridir.
+                var available = wav.Length - body;
+                var length = size == 0 || size > available ? available : (int)size;
+                if (rate <= 0 || channels <= 0 || bits <= 0)
+                    return (0, []);
+
+                var seconds = length / (double)(rate * channels * (bits / 8));
+                if (format != 1 || bits != 16)
+                    return (seconds, []);
+
+                var chunkBytes = Math.Max(2, (int)(rate * chunkSeconds)) * channels * 2;
+                var levels = new List<double>();
+                for (var offset = 0; offset < length; offset += chunkBytes)
+                    levels.Add(Levels(wav.Slice(body + offset, Math.Min(chunkBytes, length - offset))).Rms);
+
+                return (seconds, levels);
+            }
+
+            // Parçalar çift hizalıdır.
+            position = body + (int)Math.Min(size + (size & 1), int.MaxValue - body);
+        }
+
+        return (0, []);
+    }
 }

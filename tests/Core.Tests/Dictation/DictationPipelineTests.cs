@@ -46,7 +46,7 @@ public sealed class DictationPipelineTests : IDisposable
 
     private async Task<DictationOutcome> DictateAsync()
     {
-        Assert.True(_pipeline.Start());
+        Assert.True(await _pipeline.StartAsync());
         await _pipeline.StopAsync();
         return Assert.Single(_outcomes);
     }
@@ -84,20 +84,20 @@ public sealed class DictationPipelineTests : IDisposable
     }
 
     [Fact]
-    public void It_does_not_start_while_disabled()
+    public async Task It_does_not_start_while_disabled()
     {
         Config.Enabled = false;
 
-        Assert.False(_pipeline.Start());
+        Assert.False(await _pipeline.StartAsync());
         Assert.False(_recorder.IsRecording);
     }
 
     [Fact]
-    public void A_microphone_that_cannot_open_is_reported_as_a_failure()
+    public async Task A_microphone_that_cannot_open_is_reported_as_a_failure()
     {
         _recorder.FailStart = true;
 
-        Assert.False(_pipeline.Start());
+        Assert.False(await _pipeline.StartAsync());
 
         var outcome = Assert.Single(_outcomes);
         Assert.Equal(DictationOutcomeKind.Failed, outcome.Kind);
@@ -313,11 +313,11 @@ public sealed class DictationPipelineTests : IDisposable
     }
 
     [Fact]
-    public void Cancelling_while_recording_discards_the_audio()
+    public async Task Cancelling_while_recording_discards_the_audio()
     {
-        Assert.True(_pipeline.Start());
+        Assert.True(await _pipeline.StartAsync());
 
-        _pipeline.Cancel();
+        await _pipeline.CancelAsync();
 
         Assert.True(_recorder.Discarded);
         Assert.Equal(DictationState.Idle, _pipeline.State);
@@ -326,15 +326,15 @@ public sealed class DictationPipelineTests : IDisposable
     }
 
     [Fact]
-    public void Pausing_and_resuming_follows_the_recording()
+    public async Task Pausing_and_resuming_follows_the_recording()
     {
-        Assert.True(_pipeline.Start());
+        Assert.True(await _pipeline.StartAsync());
 
-        _pipeline.SetPaused(true);
+        await _pipeline.SetPausedAsync(true);
         Assert.Equal(DictationState.Paused, _pipeline.State);
         Assert.True(_recorder.Paused);
 
-        _pipeline.SetPaused(false);
+        await _pipeline.SetPausedAsync(false);
         Assert.Equal(DictationState.Recording, _pipeline.State);
         Assert.False(_recorder.Paused);
     }
@@ -372,7 +372,7 @@ public sealed class DictationPipelineTests : IDisposable
         _outcomes.Clear();
         _speech.Replies.Enqueue(new TranscriptionResult("ikinci"));
 
-        Assert.True(_pipeline.Start());
+        Assert.True(await _pipeline.StartAsync());
         await _pipeline.StopAsync();
 
         var row = Assert.Single(_history.Load());
