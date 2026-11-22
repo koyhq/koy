@@ -294,7 +294,7 @@ Tasarım ve kararlar: `docs/ARASTIRMA-SESLE-YAZMA.md`. Varsayılan kapalı (`dic
 | Platform | `src/Platform/Dictation/RecordingStore.cs`, `ForegroundProgramService.cs`, `PasteKeys.cs` | Saklanan ses (yalnız kendi klasörü), önde olan program, Ctrl+V |
 | App | `src/App/Features/Dictation/DictationService.cs` | Kısayolların gittiği tek yer; hat ilk kullanımda kurulur; durum çentikte kart olarak (`NotchFeature.ShowDictationCard`) |
 | App | `src/App/Features/Dictation/WpfPasteService.cs` | Pano yaz, Ctrl+V, eski panoyu geri koy (metin, resim, dosya listesi) |
-| App | `src/App/Features/Dictation/DictationSettingsView.xaml` + `DictationSettingsViewModel.cs` | Dikte sayfasındaki "Sesle yazma" bölümü; her değişiklik hemen `dictation.json`'a yazılır, anahtar ayrı |
+| App | `src/App/Features/Dictation/DictationSettingsView.xaml` + `DictationSettingsViewModel.cs` | Ayarlar'daki sesle ilgili sayfanın (`NavDictation`) "Sesle yazma" bölümü; her değişiklik hemen `dictation.json`'a yazılır, anahtar ayrı |
 | Çekirdek | `src/Core/Uninstall/UninstallPlan.cs` | Ayarları silerek kaldırınca `dictation*.json` ve `dictation.key` de silinir |
 
 Unutma: Yeni kullanıcı metni iki resx'e (`Dict*`, `Dictation*` anahtarları). Yerel sunucu Koy tarafından **başlatılmaz**, yalnız adresine bağlanılır (AGENTS #4). Çentik kapalıysa durum kartı yoktur; Windows'un mikrofon göstergesi yine yanar.
