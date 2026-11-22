@@ -51,7 +51,7 @@ public static class HallucinationFilter
     }
 
     /// <summary>Küçük harf, aksansız, noktalama yerine tek boşluk; Türkçe i/ı/İ aynı harf sayılır.</summary>
-    internal static string Fold(string text)
+    public static string Fold(string text)
     {
         var builder = new StringBuilder(text.Length);
         var lastWasSpace = true;
