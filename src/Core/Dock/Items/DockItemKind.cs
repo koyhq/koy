@@ -13,4 +13,5 @@ public enum DockItemKind
     Clock,
     Trash,
     Custom,
+    Battery,
 }

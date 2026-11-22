@@ -19,6 +19,7 @@ using Koy.Core.Dock;
 using Koy.Core.Dock.Items;
 using Koy.Core.JumpList;
 using Koy.Core.Media;
+using Koy.Core.Power;
 using Koy.Core.Settings;
 using Koy.Core.Shell;
 using Koy.Core.StartMenu;
@@ -42,6 +43,12 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     private IReadOnlyList<DockItemSpec> _layout = [];
     private IReadOnlyList<string> _effectiveOrder = [];
     private bool _hasExtras;
+
+    // Pil öğesi için güç servisi: yalnız şeritte pil öğesi varken alınır (tembel, sayaçlı paylaşım), bırakılınca serbest.
+    private readonly Func<IPowerService>? _acquirePower;
+    private readonly Action? _releasePower;
+    private IPowerService? _power;
+    private bool _batteryInStrip;
     private DispatcherTimer? _clockTimer;
     private readonly DockController _controller;
     private readonly IShellActionService _shellActionService;
@@ -608,8 +615,12 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         ITrayService? trayService = null,
         IRecentFilesService? recentFiles = null,
         IJumpListService? jumpLists = null,
-        StartMenuActions? startMenu = null)
+        StartMenuActions? startMenu = null,
+        Func<IPowerService>? acquirePower = null,
+        Action? releasePower = null)
     {
+        _acquirePower = acquirePower;
+        _releasePower = releasePower;
         _settings = settings;
         _appIcons = new DockAppIcons(settings);
         _recentFiles = recentFiles;
@@ -1176,6 +1187,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         IsEdgeLineVisible = decision.IsEdgeLineVisible;
         Status?.SetActive(shouldShow);
         SyncClockTimer();
+        SyncBatteryText();
 
         if (decision.NeedsEdgeWatch != NeedsEdgeWatch)
         {
@@ -1651,6 +1663,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             RecomputeFit();
             EvaluatePosition(_lastContentWidth);
             SyncClockTimer();
+            SyncBatteryText();
         });
     }
 
@@ -1667,11 +1680,13 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         if (!_hasExtras)
         {
             _layout = specs;
+            SetBatteryPower(false);
             return entries;
         }
 
         var layout = DockItemLayout.Merge(specs, _effectiveOrder);
         _layout = layout;
+        SetBatteryPower(layout.Any(i => i.Kind == DockItemKind.Battery));
 
         var pinned = new Dictionary<string, DockEntryViewModel>(StringComparer.OrdinalIgnoreCase);
         var running = new List<DockEntryViewModel>();
@@ -1696,6 +1711,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
                     result.Add(entry);
                 continue;
             }
+
+            // Pili olmayan makinede pil öğesi şeritte yer tutmaz (kayıtlı düzende kalır).
+            if (spec.Kind == DockItemKind.Battery && !(_power is { } power && DockBatteryPolicy.IsShown(power.HasBattery)))
+                continue;
 
             var id = spec.Kind switch
             {
@@ -1725,6 +1744,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     {
         DockItemKind.Clock => Resources.Strings.Get("DockItemClock"),
         DockItemKind.Trash => Resources.Strings.Get("DockItemTrash"),
+        DockItemKind.Battery => Resources.Strings.DockAddBattery,
         DockItemKind.Custom => DockCustomCommand.TryParse(spec.Command, out var launch)
             ? launch.Target
             : Resources.Strings.Get("DockItemCustom"),
@@ -1739,6 +1759,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         {
             case DockItemKind.Clock:
                 _shellActionService.OpenNotificationCenter();
+                break;
+            case DockItemKind.Battery:
+                _shellActionService.Launch("ms-settings:batterysaver");
                 break;
             case DockItemKind.Trash:
                 // Boşaltma bu sürümde yok: yalnız kutuyu açar. Doluluk durumu için yoklama gerekeceğinden simge sabittir.
@@ -1760,6 +1783,39 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
 
     [RelayCommand]
     private void AddClock() => AddExtra(new DockItemSpec(DockItemKind.Clock, nameof(DockItemKind.Clock), ""));
+
+    [RelayCommand]
+    private void AddBattery() => AddExtra(new DockItemSpec(DockItemKind.Battery, nameof(DockItemKind.Battery), ""));
+
+    /// <summary>"Öğe ekle > Pil" menü girişi açık mı (<see cref="DockBatteryPolicy.CanAdd"/>). Menü açılırken yenilenir.</summary>
+    [ObservableProperty]
+    private bool _canAddBattery;
+
+    /// <summary>Menü açılırken: pil var mı diye güç servisi kısa süre alınır (öğe yoksa kalıcı tutulmaz).</summary>
+    public void RefreshCanAddBattery()
+    {
+        var present = _layout.Any(i => i.Kind == DockItemKind.Battery);
+        var hasBattery = false;
+        if (_power is not null)
+            hasBattery = _power.HasBattery;
+        else if (_acquirePower is not null)
+        {
+            try
+            {
+                hasBattery = _acquirePower().HasBattery;
+            }
+            catch
+            {
+                hasBattery = false;
+            }
+            finally
+            {
+                _releasePower?.Invoke();
+            }
+        }
+
+        CanAddBattery = DockBatteryPolicy.CanAdd(hasBattery, present);
+    }
 
     [RelayCommand]
     private void AddTrash() => AddExtra(new DockItemSpec(DockItemKind.Trash, nameof(DockItemKind.Trash), ""));
@@ -1820,6 +1876,58 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
 
         OnClockTimerTick(null, EventArgs.Empty);
+    }
+
+    private void SetBatteryPower(bool needed)
+    {
+        if (needed && !_disposed && _power is null && _acquirePower is not null)
+        {
+            _power = _acquirePower();
+            _power.PowerChanged += OnBatteryPowerChanged;
+        }
+        else if ((!needed || _disposed) && _power is not null)
+        {
+            _power.PowerChanged -= OnBatteryPowerChanged;
+            _power = null;
+            _releasePower?.Invoke();
+        }
+    }
+
+    private void OnBatteryPowerChanged(object? sender, PowerChangedEventArgs e)
+    {
+        // WinRT güç olayları UI dışı thread'den gelir.
+        Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            if (_disposed || _power is null)
+                return;
+
+            // Pil var/yok durumu değiştiyse öğe şeride girer ya da çıkar; yoksa yalnız görünürken metin tazelenir (AGENTS #5).
+            if (_batteryInStrip != DockBatteryPolicy.IsShown(_power.HasBattery))
+                UpdateItems();
+            else
+                SyncBatteryText();
+        });
+    }
+
+    /// <summary>Pil öğesinin simge, yüzde ve ipucu metni. Dock gizliyken yazılmaz; görününce <see cref="EvaluatePosition"/> yeniler.</summary>
+    private void SyncBatteryText()
+    {
+        var batteries = Items.OfType<DockExtraViewModel>().Where(x => x.IsBattery).ToList();
+        _batteryInStrip = batteries.Count > 0;
+        if (_power is null || batteries.Count == 0 || _disposed || !IsVisible)
+            return;
+
+        var percent = DockBatteryPolicy.Clamp(_power.RemainingPercent);
+        var charging = _power.IsCharging;
+        var format = charging ? Resources.Strings.Get("DockBatteryCharging") : Resources.Strings.BatteryLevel;
+        var tooltip = string.Format(System.Globalization.CultureInfo.CurrentCulture, format, percent);
+        foreach (var battery in batteries)
+        {
+            battery.BatteryGlyph = TrayGlyphs.Battery(percent, charging);
+            battery.PercentText = DockBatteryPolicy.FormatPercent(percent);
+            battery.IsLowBattery = DockBatteryPolicy.IsLow(percent, charging);
+            battery.Title = tooltip;
+        }
     }
 
     private void OnClockTimerTick(object? sender, EventArgs e)
@@ -1927,6 +2035,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _previewCloseTimer.Stop();
         _dodgeHoverTimer.Stop();
         _snapTimer?.Stop();
+        SetBatteryPower(false);
         if (_clockTimer is not null)
         {
             _clockTimer.Stop();
