@@ -726,35 +726,30 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
     private void UpdateActivePanels()
     {
         UpdateLiveBackground();
-        // Arama açıkken sayfalar görünmez; servisleri de çalışmaz.
-        var isExpanded = State == NotchState.Expanded && !IsSearchOpen;
-        var shown = isExpanded && IsNotchVisible;
-        // Geri al şeridi ve süre zamanlayıcısı yalnız görünür açık çentikte; kapanınca kayıt bırakılır.
-        Undo.SetActive(shown);
-        // Ses çubukları "kapak ve dalga" ayarına bağlı; pil tasarrufu hareketi kısarken hiç yakalanmaz.
-        _music.SetSpectrumAllowed(Settings.Music.ShowWaveform && !ReduceMotion);
+        // Hangi servisin çalışacağı Core'da (NotchServicePolicy, AGENTS #5 tablosu); burada yalnız iletilir.
+        var d = NotchServicePolicy.Decide(new NotchServiceInput(
+            State, IsSearchOpen, IsNotchVisible, CurrentPanel,
+            Home.IsMusicPage, Home.IsHomePage, Home.ShowSystemCard,
+            Settings.Music.ShowWaveform, ReduceMotion, Osd.IsActive));
+
+        Undo.SetActive(d.UndoActive);
+        _music.SetSpectrumAllowed(d.SpectrumAllowed);
         _music.Lyrics.SetAllowed(Settings.Music.LyricsEnabled);
         _music.SetVinyl(Settings.Music.VinylMode);
-        var onHome = CurrentPanel == NotchPanel.Home;
-        _music.SetActive(shown && onHome && Home.IsMusicPage);
-        _music.SetCollapsedSpectrumActive(IsNotchVisible && State == NotchState.Collapsed && !Osd.IsActive);
-        // Saat, hava ve pil her sekmede üstteki durum satırında görünür.
-        _status.SetActive(isExpanded);
-        _controlCenter.SetActive(isExpanded && CurrentPanel == NotchPanel.ControlCenter);
-        // Zamanlayıcı süresi görünür çentikte (kapalıysa pil yerine, açıksa Ana satırında) ve Odak sayfasında tazelenir.
-        _focus.SetViewing(isExpanded && CurrentPanel == NotchPanel.Focus, IsNotchVisible);
+        _music.SetActive(d.MusicActive);
+        _music.SetCollapsedSpectrumActive(d.CollapsedSpectrumActive);
+        _status.SetActive(d.StatusActive);
+        _controlCenter.SetActive(d.ControlCenterActive);
+        _focus.SetViewing(d.FocusPageViewing, d.FocusTimerVisible);
 
-        // Her servis yalnız sayfası görünürken çalışır (boşta %0 CPU): sistem verisi Ana ve Sistem'de (kartlar orada),
-        // pano, görevler, takvim ve hızlı başlat kendi sayfalarında.
-        var homeFace = shown && onHome && Home.IsHomePage;
-        SystemStats.SetActive((homeFace && Home.ShowSystemCard) || (shown && CurrentPanel == NotchPanel.System));
-        Home.QuickLaunch.SetActive(homeFace);
-        Home.SetActive(homeFace);
+        SystemStats.SetActive(d.SystemStatsActive);
+        Home.QuickLaunch.SetActive(d.HomeFaceActive);
+        Home.SetActive(d.HomeFaceActive);
         // Kulaklık kartı yalnız Ana yüzü görünürken Bluetooth izleyicisini ister (Kontrol kendi "control" sahibiyle ister).
-        _controlCenter.BluetoothDevices.SetViewing("home", homeFace);
-        _focus.Tasks?.SetActive(shown && CurrentPanel == NotchPanel.Focus);
-        _calendar.SetActive(shown && CurrentPanel == NotchPanel.Calendar);
-        _clipboard?.SetActive(shown && CurrentPanel == NotchPanel.Clipboard);
+        _controlCenter.BluetoothDevices.SetViewing("home", d.HomeFaceActive);
+        _focus.Tasks?.SetActive(d.TasksActive);
+        _calendar.SetActive(d.CalendarActive);
+        _clipboard?.SetActive(d.ClipboardActive);
     }
 
     private void OnVisibilityChanged(object? sender, VisibilityResult result)
@@ -776,27 +771,11 @@ public sealed partial class NotchViewModel : ObservableObject, IDisposable
 
     public void UpdateTargetSize()
     {
-        if (Osd.IsActive)
-        {
-            var isCard = Osd.Type == OsdType.Card;
-            TargetWidth = isCard ? NotchLayout.CardWidth : 260;
-            TargetHeight = isCard ? NotchLayout.CardHeight : 40;
-            TargetCornerRadius = NotchStyle.CornerRadius(Settings.Notch.Style, isCard ? NotchSurface.Card : NotchSurface.Closed,
-                TargetHeight, isCard ? 28 : 20);
-        }
-        else
-        {
-            (TargetWidth, TargetHeight, TargetCornerRadius) = State switch
-            {
-                NotchState.Collapsed => (IsMusicPlaying ? 280 : 236, 34, 18),
-                NotchState.Peek => (300, 38, 20),
-                // Her sekmede aynı sabit gövde: sekme değişince çentik boyut değiştirmez (bkz. NotchLayout).
-                NotchState.Expanded => (NotchLayout.ExpandedWidth, NotchLayout.ExpandedHeight, 34),
-                _ => (236, 34, 18)
-            };
-            TargetCornerRadius = NotchStyle.CornerRadius(Settings.Notch.Style,
-                State == NotchState.Expanded ? NotchSurface.Expanded : NotchSurface.Closed, TargetHeight, TargetCornerRadius);
-        }
+        // Boyutlar Core'da (NotchSizePolicy); köşe yarıçapı biçime göre aynı yerden.
+        var size = NotchSizePolicy.Resolve(State, Osd.IsActive, Osd.Type == OsdType.Card, IsMusicPlaying);
+        TargetWidth = size.Width;
+        TargetHeight = size.Height;
+        TargetCornerRadius = NotchSizePolicy.CornerRadius(Settings.Notch.Style, size);
 
         UpdateSurface();
         TargetSizeChanged?.Invoke(TargetWidth, TargetHeight);
