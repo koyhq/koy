@@ -351,9 +351,6 @@
   <data name="NotchEdgeLineThicknessTitle" xml:space="preserve">
     <value>Çizgi kalınlığı</value>
   </data>
-  <data name="HideInFullscreenTitle" xml:space="preserve">
-    <value>Tam ekranda gizle</value>
-  </data>
   <data name="IdleDisplayTitle" xml:space="preserve">
     <value>Boştayken</value>
   </data>
@@ -1405,7 +1402,7 @@
     <value>Özel tarih biçimi</value>
   </data>
   <data name="ClockCustomDateDesc" xml:space="preserve">
-    <value>Halka modunda saatin yanındaki tarih, örn. dd.MM.yyyy. Boş bırakılırsa varsayılan.</value>
+    <value>Çentik boştayken saatin yanında görünen tarih, örn. dd.MM.yyyy. Boş bırakılırsa varsayılan.</value>
   </data>
   <data name="ClockCustomDateInvalid" xml:space="preserve">
     <value>Bu biçim geçerli değil, kaydedilmedi.</value>
@@ -1526,9 +1523,6 @@
   </data>
   <data name="TrayAppsEmpty" xml:space="preserve">
     <value>Dock tepsisini bir kez aç; tepsi simgesi olan uygulamalar burada listelenir.</value>
-  </data>
-  <data name="NotchFineTuneHeader" xml:space="preserve">
-    <value>İnce ayar</value>
   </data>
   <data name="NavAdvanced" xml:space="preserve">
     <value>Gelişmiş</value>
@@ -1991,6 +1985,24 @@
   </data>
   <data name="DockFullscreenHeader" xml:space="preserve">
     <value>Tam ekran ve kenar</value>
+  </data>
+  <data name="NotchHideInFullscreenTitle" xml:space="preserve">
+    <value>Tam ekranda çentiği gizle</value>
+  </data>
+  <data name="DockHideInFullscreenTitle" xml:space="preserve">
+    <value>Tam ekranda dock'u gizle</value>
+  </data>
+  <data name="NotchOpenCloseHeader" xml:space="preserve">
+    <value>Açılış ve kapanış</value>
+  </data>
+  <data name="NotchTabBarHeader" xml:space="preserve">
+    <value>Sekme çubuğu</value>
+  </data>
+  <data name="NotchTabOrderDesc" xml:space="preserve">
+    <value>Üstteki sekmelerin sırası. Taşımak için okları kullan.</value>
+  </data>
+  <data name="HomeCardSectionDesc" xml:space="preserve">
+    <value>Ana sayfada hangi kartların hangi sırada görüneceğini seç. Hiçbiri seçili değilse Ana sayfa boş kalır.</value>
   </data>
   <data name="DockKoyMenu" xml:space="preserve">
     <value>Koy menüsü</value>
@@ -3271,7 +3283,7 @@
     <value>Dosya</value>
   </data>
   <data name="LiveBgPresetTitle" xml:space="preserve">
-    <value>Ambiyans önayarı</value>
+    <value>Arka plan animasyonu</value>
   </data>
   <data name="LiveBgPresetAurora" xml:space="preserve">
     <value>Aurora</value>
@@ -3352,7 +3364,7 @@
     <value>Arka planlar ({0})|{0}</value>
   </data>
   <data name="LiveBgScrimTitle" xml:space="preserve">
-    <value>Koyu perde</value>
+    <value>Arka planı karart</value>
   </data>
   <data name="LiveBgErrorMissing" xml:space="preserve">
     <value>Dosya seçilmedi.</value>

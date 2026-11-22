@@ -16,11 +16,13 @@ namespace Koy.App.Features.Notch;
 public sealed class NotchLineWindow : Window
 {
     private readonly int _thickness;
+    private readonly double _topOffsetDip;
     private DisplayMonitor _monitor;
     private nint _hwnd;
 
-    public NotchLineWindow(DisplayMonitor monitor, NotchEdgeLineColor color, int thicknessDip)
+    public NotchLineWindow(DisplayMonitor monitor, NotchEdgeLineColor color, int thicknessDip, double topOffsetDip = 0)
     {
+        _topOffsetDip = topOffsetDip;
         _monitor = monitor;
         _thickness = NotchEdgeLine.ClampThickness(thicknessDip);
         WindowStyle = WindowStyle.None;
@@ -34,7 +36,7 @@ public sealed class NotchLineWindow : Window
         IsHitTestVisible = false;
         Title = "Koy";
         Left = monitor.LeftDip;
-        Top = monitor.TopDip;
+        Top = monitor.TopDip + topOffsetDip;
         Width = Math.Max(1, monitor.WidthDip);
         Height = _thickness;
 
@@ -70,7 +72,7 @@ public sealed class NotchLineWindow : Window
 
         // Pencere başka DPI'lı ekrandaysa önce yalnız taşınır; boyut DpiChanged'den sonra verilir (NotchWindow ile aynı).
         var sameDpi = Math.Abs(VisualTreeHelper.GetDpi(this).DpiScaleY - monitor.DpiScaleY) < 0.01;
-        WindowStyles.SetBounds(_hwnd, NotchEdgeLine.Bounds(monitor, _thickness), resize: sameDpi);
+        WindowStyles.SetBounds(_hwnd, NotchEdgeLine.Bounds(monitor, _thickness, _topOffsetDip), resize: sameDpi);
     }
 
     /// <summary>Çizgiyi yeniden en üst katmana alır; ardından çentik kendi üstüne çıkınca çizgi onun altında kalır.</summary>

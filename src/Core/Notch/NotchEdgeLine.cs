@@ -34,11 +34,16 @@ public static class NotchEdgeLine
     public static string ResourceKey(NotchEdgeLineColor color) =>
         color == NotchEdgeLineColor.Accent ? "KoyAccent" : "KoyNotchSurface";
 
-    /// <summary>Çizgi penceresinin piksel sınırı: monitörün tam genişliği, üst kenara yapışık, en az 1 px.</summary>
-    public static WindowRect Bounds(DisplayMonitor monitor, int thicknessDip)
+    /// <summary>
+    /// Çizgi penceresinin piksel sınırı: monitörün tam genişliği, en az 1 px. <paramref name="topOffsetDip"/> çentiğin üst boşluğudur
+    /// (<see cref="NotchStyle.TopOffsetDip"/>): Yüzen kipte çentik üst kenardan 9 DIP aşağıda durur, çizgi de onunla birlikte
+    /// aşağı iner (yoksa çentik ile çizgi arasında boşluk kalır ve çizgi çentikten kopuk görünür). Klasik kipte 0: kenara yapışık.
+    /// </summary>
+    public static WindowRect Bounds(DisplayMonitor monitor, int thicknessDip, double topOffsetDip = 0)
     {
         var height = Math.Max(1, (int)Math.Round(ClampThickness(thicknessDip) * monitor.DpiScaleY));
-        return new WindowRect(monitor.Bounds.Left, monitor.Bounds.Top, monitor.Bounds.Right, monitor.Bounds.Top + height);
+        var top = monitor.Bounds.Top + WindowPlacementMath.ToPixels(Math.Max(0.0, topOffsetDip), monitor.DpiScaleY);
+        return new WindowRect(monitor.Bounds.Left, top, monitor.Bounds.Right, top + height);
     }
 
     /// <summary>Çizgi görünsün mü: tam ekranda çentik gizleniyorsa çizgi de gizlenir.</summary>
