@@ -1683,6 +1683,23 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         DockFeature.SavePinnedOrder(order, folders, _settings, items);
     }
 
+    /// <summary>
+    /// Sürükleme bir klasöre bırakılarak bitti (birleştirme): sürükleme durumu kapanır ve bütün öğelerin kayması sıfırlanır.
+    /// Birleştirme sırasında araya giren öğeler kaymış olabilir; sıfırlanmazsa sürüklenen uygulamanın eski yerinde boşluk kalır.
+    /// </summary>
+    public void FinishMerge()
+    {
+        _isReordering = false;
+        foreach (var item in Items)
+        {
+            item.SnapOffset(0);
+            item.SetTargetOffset(0);
+        }
+
+        _isAnimating = true;
+        AnimationNeeded?.Invoke(this, EventArgs.Empty);
+    }
+
     /// <summary>Sürükleme yarıda kesildi (yakalama kaybı, Esc): her şey yerine döner.</summary>
     public void CancelReorder()
     {

@@ -176,6 +176,47 @@ internal static class DockBarSnapshots
         }
     }
 
+    /// <summary>
+    /// Tam genişlikte klasör kapakları (gerçek DockItemsStrip şablonu): 2, 3, 4 ve 6 uygulamalı klasör yan yana, her biri 2x2 kapakla;
+    /// ayrıca 6 uygulamalı klasörün açık paneli (açılır pencere görüntüsü, kapsülle aynı). Dosya adı: klasor-tam-serit, klasor-tam-panel.
+    /// </summary>
+    public static void RenderFolderFullWidth(string outDir, string prefix, string theme, Action<FrameworkElement, double, double, string> renderElement)
+    {
+        var palette = new[]
+        {
+            ("chrome", "Google Chrome", Color.FromRgb(0x42, 0x85, 0xF4), "C"),
+            ("firefox", "Mozilla Firefox", Color.FromRgb(0xFF, 0x71, 0x39), "F"),
+            ("edge", "Microsoft Edge", Color.FromRgb(0x00, 0x78, 0xD7), "E"),
+            ("brave", "Brave Browser", Color.FromRgb(0xFB, 0x54, 0x2B), "B"),
+            ("code", "Visual Studio Code", Color.FromRgb(0x00, 0x98, 0xFF), "V"),
+            ("terminal", "Windows Terminal", Color.FromRgb(0x30, 0x30, 0x30), "T"),
+        };
+
+        DockItemViewModel Vm(int i, bool running = false) =>
+            DockFolderSnapshots.CreateAppVm(palette[i].Item1, palette[i].Item2, palette[i].Item3, palette[i].Item4, running);
+
+        DockFolderViewModel Folder(string id, string name, int count) =>
+            new(new DockFolder(id, name, palette.Take(count).Select(p => p.Item1).ToList()), Enumerable.Range(0, count).Select(i => Vm(i)).ToList());
+
+        var entries = new List<DockEntryViewModel>
+        {
+            DockFolderSnapshots.CreateAppVm("explorer", "Dosya Gezgini", Color.FromRgb(0xF5, 0xB0, 0x2A), "E", isRunning: true),
+            Folder("f2", "İki", 2),
+            Folder("f3", "Üç", 3),
+            Folder("f4", "Dört", 4),
+            Folder("f6", "Altı", 6),
+            DockFolderSnapshots.CreateAppVm("spotify", "Spotify", Color.FromRgb(0x1D, 0xB9, 0x54), "S", isRunning: true)
+        };
+        Shoot(outDir, prefix, theme, "klasor-tam-serit", renderElement, fullWidth: true, smallTray: false, appCount: 0, entries: entries,
+            tray: new SnapshotTray(withIcon: true), width: 1920);
+
+        var six = Folder("f6", "Altı", 6);
+        var panel = new Koy.App.Features.Dock.Folder.FolderPanel { DataContext = six };
+        var body = panel.DetachBodyForSnapshot();
+        body.DataContext = six;
+        renderElement(body, 280, 0, Path.Combine(outDir, $"{prefix}-{theme}-klasor-tam-panel.png"));
+    }
+
     private sealed class NoWeather : Koy.Core.Weather.IWeatherService
     {
         public Koy.Core.Weather.WeatherInfo? CurrentWeather => null;

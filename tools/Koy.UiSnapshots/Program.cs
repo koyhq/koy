@@ -141,6 +141,8 @@ public static class Program
                 RenderHome(outDir, prefix, theme);
             else if (scene is "ayar" or "settings")
                 RenderSettingsPages(outDir, prefix, theme);
+            else if (scene is "klasor-tam" or "folder-fullwidth")
+                DockBarSnapshots.RenderFolderFullWidth(outDir, prefix, theme, RenderElement);
             else if (scene is "taskbar" or "gorevcubugu")
                 DockBarSnapshots.RenderTaskbar(outDir, prefix, theme, RenderElement);
             else if (scene is "dock-sistem" or "docksystem")

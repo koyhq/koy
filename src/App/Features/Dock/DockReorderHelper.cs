@@ -226,6 +226,7 @@ internal sealed class DockReorderHelper
                 targetSlot >= 0 && targetSlot < vm.Items.Count && targetSlot != _originalIndex)
             {
                 var targetEntry = vm.Items[targetSlot];
+                vm.FinishMerge();
                 if (targetEntry is DockFolderViewModel targetFolder)
                 {
                     vm.AddAppToFolder(draggedApp.Model.Id, targetFolder.Folder.Id);
