@@ -14,40 +14,8 @@
     <UserControl.Resources>
         <FontFamily x:Key="SystemIconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
 
-        <!-- Hover hapı: Windows gibi köşe 6; basılınca etkin karo. Tag="hover" görsel kanıt aracının zorla gösterdiği durumdur. -->
-        <Style x:Key="SystemPillStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Padding" Value="8,0"/>
-            <Setter Property="Height" Value="36"/>
-            <Setter Property="Margin" Value="1,0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="pill" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}"
-                                BorderBrush="Transparent" BorderThickness="0">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="pill" Property="Background" Value="{Binding DataContext.TileHoverFill, RelativeSource={RelativeSource AncestorType=local:DockSystemAreaControl}}"/>
-                                <Setter TargetName="pill" Property="BorderBrush" Value="{Binding DataContext.TileBorderBrush, RelativeSource={RelativeSource AncestorType=local:DockSystemAreaControl}}"/>
-                                <Setter TargetName="pill" Property="BorderThickness" Value="{Binding DataContext.TileBorderThickness, RelativeSource={RelativeSource AncestorType=local:DockSystemAreaControl}}"/>
-                            </Trigger>
-                            <Trigger Property="Tag" Value="hover">
-                                <Setter TargetName="pill" Property="Background" Value="{Binding DataContext.TileHoverFill, RelativeSource={RelativeSource AncestorType=local:DockSystemAreaControl}}"/>
-                                <Setter TargetName="pill" Property="BorderBrush" Value="{Binding DataContext.TileBorderBrush, RelativeSource={RelativeSource AncestorType=local:DockSystemAreaControl}}"/>
-                                <Setter TargetName="pill" Property="BorderThickness" Value="{Binding DataContext.TileBorderThickness, RelativeSource={RelativeSource AncestorType=local:DockSystemAreaControl}}"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="pill" Property="Background" Value="{Binding DataContext.TileActiveFill, RelativeSource={RelativeSource AncestorType=local:DockSystemAreaControl}}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <!-- Hover hapı: Styles.xaml'deki ortak cam hap düğmesi. -->
+        <Style x:Key="SystemPillStyle" TargetType="Button" BasedOn="{StaticResource DockPillButtonStyle}"/>
 
         <Style x:Key="SystemGlyphStyle" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="{StaticResource SystemIconFont}"/>

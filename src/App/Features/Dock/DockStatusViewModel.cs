@@ -151,9 +151,13 @@ public sealed partial class DockStatusViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void ShowDesktop() => _shell.ShowDesktop();
 
+    /// <summary>Dakika başında (saatle aynı tik) tetiklenir: hava durumu gibi önbellekli veriler yeni zamanlayıcı kurmadan buna bağlanır.</summary>
+    public event Action? MinuteElapsed;
+
     private void OnClockTick(object? sender, EventArgs e)
     {
         UpdateClock();
+        MinuteElapsed?.Invoke();
         ScheduleNextTick();
     }
 

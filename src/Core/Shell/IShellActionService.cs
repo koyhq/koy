@@ -33,6 +33,21 @@ public interface IShellActionService
     {
     }
 
+    /// <summary>Windows aramasını açar (Win+S). Tam genişlik dock'un "Ara" kutusu. Varsayılan gövde boştur.</summary>
+    void OpenSearch()
+    {
+    }
+
+    /// <summary>Windows görev görünümünü açar (Win+Tab). Varsayılan gövde boştur.</summary>
+    void OpenTaskView()
+    {
+    }
+
+    /// <summary>Windows pencere öğeleri panelini açar (Win+W). Varsayılan gövde boştur.</summary>
+    void OpenWidgets()
+    {
+    }
+
     /// <summary>
     /// Belirtilen dosya veya kısayolu çalıştırır.
     /// </summary>

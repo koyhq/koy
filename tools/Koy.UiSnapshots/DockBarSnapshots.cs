@@ -152,6 +152,39 @@ internal static class DockBarSnapshots
         }
     }
 
+    /// <summary>
+    /// Tam genişlik dock'un tamamı (Windows 11 görev çubuğu): 1920 DIP, ortada ve sol hizada; hava var ve konum yok. Referans:
+    /// Windows 11 görev çubuğu (5.png) ile yan yana karşılaştırılır. Dosya adı: taskbar-{orta|sol}-{hava|konumsuz}.
+    /// </summary>
+    public static void RenderTaskbar(string outDir, string prefix, string theme, Action<FrameworkElement, double, double, string> renderElement)
+    {
+        foreach (var (label, alignment) in new[] { ("orta", DockIconAlignment.Center), ("sol", DockIconAlignment.Left) })
+        foreach (var (state, hasLocation) in new[] { ("hava", true), ("konumsuz", false) })
+        {
+            var weatherSettings = new AppSettings
+            {
+                Weather = hasLocation
+                    ? new WeatherSettings { LocationSource = Koy.Core.Weather.WeatherLocationSource.City, City = "İstanbul", Latitude = 41.01, Longitude = 28.97 }
+                    : new WeatherSettings()
+            };
+            var weather = new DockWeatherViewModel(hasLocation ? new FakeWeather() : new NoWeather(), weatherSettings, new DockFolderSnapshots.FakeShellActionService());
+            var status = new DockStatusViewModel(new SnapshotNetwork(), new FakeAudio(), new FakePower(100, ac: true),
+                new DockFolderSnapshots.FakeShellActionService(), new SnapshotFocus(false));
+            Shoot(outDir, prefix, theme, $"taskbar-{label}-{state}", renderElement, fullWidth: true, smallTray: false, appCount: 8,
+                alignment: alignment, status: status, weather: weather, tray: new SnapshotTray(withIcon: true), width: 1920,
+                newTrayDefault: Koy.Core.Tray.TrayIconVisibility.Shown);
+        }
+    }
+
+    private sealed class NoWeather : Koy.Core.Weather.IWeatherService
+    {
+        public Koy.Core.Weather.WeatherInfo? CurrentWeather => null;
+        public event EventHandler<Koy.Core.Weather.WeatherInfo?>? WeatherChanged { add { } remove { } }
+        public Task<Koy.Core.Weather.WeatherInfo?> GetCurrentWeatherAsync(double latitude, double longitude, CancellationToken cancellationToken = default) => Task.FromResult<Koy.Core.Weather.WeatherInfo?>(null);
+        public Task RefreshAsync(double latitude, double longitude, CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public void Dispose() { }
+    }
+
     private static void ForceHover(DependencyObject root, string name)
     {
         var target = FindNamed(root, name);
@@ -373,7 +406,7 @@ internal static class DockBarSnapshots
         DockStartIcon startIcon = DockStartIcon.Koy, string startIconPath = "", IReadOnlyList<DockEntryViewModel>? entries = null, bool hug = false,
         Koy.Core.Appearance.MaterialLevel? material = null, DockEdge edge = DockEdge.Bottom, bool colorful = false, IPowerService? battery = null,
         Action<DockViewModel, Grid>? prepare = null, DockStatusViewModel? status = null, ITrayService? tray = null, double? width = null,
-        Koy.Core.Tray.TrayIconVisibility? newTrayDefault = null)
+        Koy.Core.Tray.TrayIconVisibility? newTrayDefault = null, DockWeatherViewModel? weather = null)
     {
         var settings = new AppSettings
         {
@@ -397,7 +430,7 @@ internal static class DockBarSnapshots
         };
 
         var vm = new DockViewModel(settings, DockFolderSnapshots.SharedController, new DockFolderSnapshots.FakeShellActionService(), status: status, trayService: tray ?? new FakeTray(),
-            acquirePower: battery is null ? null : () => battery, releasePower: () => { });
+            acquirePower: battery is null ? null : () => battery, releasePower: () => { }, weather: weather);
 
         // Kurucunun kuyruğa attığı ilk öğe eşitlemesi (boş denetleyici) çalışsın, sonra sahte öğeler eklensin.
         Pump();

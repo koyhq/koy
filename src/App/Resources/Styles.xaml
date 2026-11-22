@@ -73,6 +73,43 @@
         </Setter>
     </Style>
 
+    <!-- Dock hap düğmesi (Windows 11 tarzı tam genişlik: Başlat, Ara, Görev görünümü, pencere öğeleri, sistem alanı). Hover ve basma
+         Koy'un cam karo dilindedir (DockViewModel.TileHoverFill / TileBorderBrush / TileActiveFill; en yakın UserControl'ün DataContext'i
+         DockViewModel'dir). Tag="hover" görsel kanıt aracının zorladığı durumdur. -->
+    <Style x:Key="DockPillButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Padding" Value="8,0"/>
+        <Setter Property="Height" Value="36"/>
+        <Setter Property="Margin" Value="1,0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="pill" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}"
+                            BorderBrush="Transparent" BorderThickness="0">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="pill" Property="Background" Value="{Binding DataContext.TileHoverFill, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            <Setter TargetName="pill" Property="BorderBrush" Value="{Binding DataContext.TileBorderBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            <Setter TargetName="pill" Property="BorderThickness" Value="{Binding DataContext.TileBorderThickness, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        </Trigger>
+                        <Trigger Property="Tag" Value="hover">
+                            <Setter TargetName="pill" Property="Background" Value="{Binding DataContext.TileHoverFill, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            <Setter TargetName="pill" Property="BorderBrush" Value="{Binding DataContext.TileBorderBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            <Setter TargetName="pill" Property="BorderThickness" Value="{Binding DataContext.TileBorderThickness, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="pill" Property="Background" Value="{Binding DataContext.TileActiveFill, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- Klavye odağı: yalnız klavyeyle gezerken görünür, 2 px vurgu halkası -->
     <Style x:Key="KoyFocusVisual">
         <Setter Property="Control.Template">

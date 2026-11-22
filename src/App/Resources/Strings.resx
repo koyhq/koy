@@ -1932,6 +1932,12 @@
   <data name="DockTaskbarSettings" xml:space="preserve">
     <value>Taskbar settings</value>
   </data>
+  <data name="DockSearchBox" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="DockTaskView" xml:space="preserve">
+    <value>Task view</value>
+  </data>
   <data name="DockKoyMenu" xml:space="preserve">
     <value>Koy menu</value>
   </data>

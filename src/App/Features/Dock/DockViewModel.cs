@@ -334,9 +334,26 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
     /// </summary>
     public ObservableCollection<TrayIconViewModel> VisibleTrayIcons { get; } = [];
 
-    /// <summary>Sistem alanı (Windows 11 görev çubuğu sağ ucu) parçaları; yalnız tam genişlik ve yatay kenarda.</summary>
-    public DockSystemAreaLayout SystemArea => DockSystemArea.Resolve(
-        Status is not null && _settings.Dock.Style == DockStyleMode.FullWidth, IsVertical, HasTray, Status?.HasBattery == true);
+    /// <summary>Windows 11 görev çubuğu düzeni (sol, orta ve sağ uç); yalnız tam genişlik ve yatay kenarda (Core: TaskbarLayout).</summary>
+    public TaskbarLayoutDecision Taskbar => TaskbarLayout.Resolve(
+        Status is not null && _settings.Dock.Style == DockStyleMode.FullWidth, IsVertical, _settings.Dock.IconAlignment, HasTray, Status?.HasBattery == true);
+
+    /// <summary>Sistem alanı (sağ uç) parçaları.</summary>
+    public DockSystemAreaLayout SystemArea => Taskbar.SystemArea;
+
+    /// <summary>Windows düzeni çiziliyor: Başlat, Ara, Görev görünümü ve pencere öğeleri; eski sol bölüm (Başlat + çalan müzik) yerine.</summary>
+    public bool ShowTaskbar => Taskbar.IsActive;
+
+    /// <summary>Eski sol bölüm (kapsül, dikey kenar ve Windows düzeni yokken).</summary>
+    public bool ShowLegacyLeftSection => !Taskbar.IsActive;
+
+    /// <summary>Orta bölümdeki grubun (Başlat, Ara, Görev görünümü, uygulamalar) hizası: Windows düzeninde Orta/Sol, eskisinde ayardaki.</summary>
+    public HorizontalAlignment CenterGroupAlignment => Taskbar.IsActive
+        ? (Taskbar.Alignment == TaskbarAlignment.Left ? HorizontalAlignment.Left : HorizontalAlignment.Center)
+        : StripAlignment;
+
+    /// <summary>Çalan müzik hapı Windows düzeninde yoktur.</summary>
+    public bool ShowNowPlayingPill => HasNowPlaying && !Taskbar.IsActive;
 
     /// <summary>Sistem alanı çiziliyor: sağ bölümde eski düğmeler (İndirilenler, Son kullanılanlar, Koy menüsü) yerine o gelir.</summary>
     public bool ShowSystemArea => SystemArea.IsActive;
@@ -575,10 +592,19 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         (Application.Current as App)?.ReloadDock();
     }
 
+    /// <summary>
+    /// Tam genişlik ve yatay kenarda (sistem alanı olan) Windows 11 görev çubuğu ayarları; yoksa kullanıcının ayarı. Yalnız
+    /// <c>Dock</c> bölümü kopyalanır, öteki bölümler (sabit sırası, klasörler) aynı nesneyi paylaşır.
+    /// </summary>
+    private AppSettings EffectiveSettings(AppSettings settings) =>
+        Status is not null && settings.Dock.Style == DockStyleMode.FullWidth && settings.Dock.Edge is not (DockEdge.Left or DockEdge.Right)
+            ? settings with { Dock = TaskbarLayout.ApplyWindowsStyle(settings.Dock) }
+            : settings;
+
     /// <summary>Ayar nesnesini değiştirir (yerinde ayar uygulaması): sabit sırası/klasör yazımları ile okuyucular aynı nesneyi görür.</summary>
     public void AdoptSettings(AppSettings settings)
     {
-        _settings = settings;
+        _settings = EffectiveSettings(settings);
         OnPropertyChanged(nameof(Edge));
         OnPropertyChanged(nameof(IsVertical));
         OnPropertyChanged(nameof(StripOrientation));
@@ -628,6 +654,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             : _controller.Items;
     public DockStatusViewModel? Status { get; }
 
+    /// <summary>Pencere öğeleri (hava durumu) verisi; yalnız tam genişlik dock'ta vardır.</summary>
+    public DockWeatherViewModel? Weather { get; }
+
     public DockViewModel(
         AppSettings settings,
         DockController controller,
@@ -640,16 +669,22 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         IJumpListService? jumpLists = null,
         StartMenuActions? startMenu = null,
         Func<IPowerService>? acquirePower = null,
-        Action? releasePower = null)
+        Action? releasePower = null,
+        DockWeatherViewModel? weather = null)
     {
         _acquirePower = acquirePower;
         _releasePower = releasePower;
+        Weather = weather;
+        Status = status;
+        // Tam genişlikte (yatay) Windows 11 görev çubuğu: Windows'ta olmayan ya da farklı davranan ayarlar sabitlenir (TaskbarLayout).
+        settings = EffectiveSettings(settings);
         _settings = settings;
         _appIcons = new DockAppIcons(settings);
         _recentFiles = recentFiles;
         JumpLists = jumpLists;
         StartContextMenu = startMenu;
-        Status = status;
+        if (Status is not null && Weather is not null)
+            Status.MinuteElapsed += Weather.Request;
         _controller = controller;
         _shellActionService = shellActionService;
         _visibilityController = visibilityController;
@@ -744,6 +779,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         HasTrayIcons = false;
         VisibleTrayIcons.Clear();
         OnPropertyChanged(nameof(HasTray));
+        OnPropertyChanged(nameof(Taskbar));
         OnPropertyChanged(nameof(SystemArea));
         OnPropertyChanged(nameof(ShowSystemArea));
         OnPropertyChanged(nameof(ShowLegacyRightSection));
@@ -1000,6 +1036,14 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _shellActionService.SendWinKey();
     }
 
+    /// <summary>Tam genişlik "Ara" kutusu: Windows arama (Win+S).</summary>
+    [RelayCommand]
+    private void OpenSearch() => _shellActionService.OpenSearch();
+
+    /// <summary>Tam genişlik "Görev görünümü" düğmesi: Win+Tab.</summary>
+    [RelayCommand]
+    private void OpenTaskView() => _shellActionService.OpenTaskView();
+
     /// <summary>Sağ tık menüsü (tam genişlik): Windows görev çubuğundaki "Görev Yöneticisi".</summary>
     [RelayCommand]
     private void OpenTaskManager() => _shellActionService.Launch("taskmgr.exe");
@@ -1093,8 +1137,10 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
             if (_centerWidth <= 0)
                 return;
 
-            icon = DockFitMath.FitIconSize(_preferredIconSize, Items.Count, 0, _centerWidth, spacing);
-            maxWidth = _centerWidth;
+            // Windows düzeninde Başlat, Ara, Görev görünümü (ve sol hizada pencere öğeleri) orta sütundadır: şerit kalanı alır.
+            var leading = TaskbarLayout.LeadingWidthDip(Taskbar);
+            icon = DockFitMath.FitIconSize(_preferredIconSize, Items.Count, leading, _centerWidth, spacing);
+            maxWidth = DockFitMath.StripMaxWidth(_centerWidth, leading);
         }
         else
         {
@@ -1277,6 +1323,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         IsVisible = shouldShow;
         IsEdgeLineVisible = decision.IsEdgeLineVisible;
         Status?.SetActive(shouldShow);
+        Weather?.SetActive(shouldShow);
         SyncClockTimer();
         SyncBatteryText();
 
@@ -2154,6 +2201,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         if (info is null || !info.IsPlaying)
         {
             HasNowPlaying = false;
+            OnPropertyChanged(nameof(ShowNowPlayingPill));
             NowPlayingTitle = Strings.NoMediaPlaying;
             NowPlayingArtist = "Koy";
             NowPlayingCover = null;
@@ -2162,6 +2210,7 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         }
 
         HasNowPlaying = true;
+        OnPropertyChanged(nameof(ShowNowPlayingPill));
         NowPlayingTitle = !string.IsNullOrWhiteSpace(info.Title) ? info.Title : Strings.Get("UnknownTrack");
         NowPlayingArtist = !string.IsNullOrWhiteSpace(info.Artist) ? info.Artist : Strings.Get("UnknownArtist");
 
@@ -2229,6 +2278,9 @@ public sealed partial class DockViewModel : ObservableObject, IDisposable
         _dodgeHoverTimer.Stop();
         _snapTimer?.Stop();
         SetBatteryPower(false);
+        if (Status is not null && Weather is not null)
+            Status.MinuteElapsed -= Weather.Request;
+        Weather?.Dispose();
         Status?.Dispose();
         if (_clockTimer is not null)
         {

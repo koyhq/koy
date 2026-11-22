@@ -136,6 +136,8 @@ public static class Program
                 DockBarSnapshots.RenderDrag(outDir, prefix, theme, RenderElement);
             else if (scene is "ana" or "home")
                 RenderHome(outDir, prefix, theme);
+            else if (scene is "taskbar" or "gorevcubugu")
+                DockBarSnapshots.RenderTaskbar(outDir, prefix, theme, RenderElement);
             else if (scene is "dock-sistem" or "docksystem")
                 DockBarSnapshots.RenderSystemArea(outDir, prefix, theme, RenderElement);
             else if (scene is "dockmat" or "dockmaterial")

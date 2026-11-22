@@ -1932,6 +1932,12 @@
   <data name="DockTaskbarSettings" xml:space="preserve">
     <value>Görev çubuğu ayarları</value>
   </data>
+  <data name="DockSearchBox" xml:space="preserve">
+    <value>Ara</value>
+  </data>
+  <data name="DockTaskView" xml:space="preserve">
+    <value>Görev görünümü</value>
+  </data>
   <data name="DockKoyMenu" xml:space="preserve">
     <value>Koy menüsü</value>
   </data>

@@ -11,12 +11,14 @@ using Koy.Core.Shell;
 using Koy.Core.StartMenu;
 using Koy.Core.Tray;
 using Koy.Core.Visibility;
+using Koy.Core.Weather;
 using Koy.Platform.Audio;
 using Koy.Platform.Display;
 using Koy.Platform.JumpList;
 using Koy.Platform.Media;
 using Koy.Platform.Power;
 using Koy.Platform.Search;
+using Koy.Platform.Weather;
 using Koy.Platform.Shell;
 using Koy.Platform.StartMenu;
 
@@ -615,7 +617,8 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     {
         var viewModel = new DockViewModel(settings, _controller!, _shellActionService!, visibilityController, status: CreateStatus(),
             mediaService: _mediaService, trayService: _trayService, recentFiles: _recentFiles, jumpLists: _jumpLists,
-            startMenu: _startMenu, acquirePower: services.AcquirePowerService, releasePower: services.ReleasePowerService)
+            startMenu: _startMenu, acquirePower: services.AcquirePowerService, releasePower: services.ReleasePowerService,
+            weather: CreateWeather())
         {
             ReduceMotion = _reduceMotion
         };
@@ -639,6 +642,30 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         _dockFocus ??= new FocusAssistService();
         return new DockStatusViewModel(services.AcquireNetworkService(), _dockAudio, services.AcquirePowerService(),
             _shellActionService, _dockFocus, ReleaseStatusServices);
+    }
+
+    // Pencere öğeleri (hava durumu): yalnız tam genişlik ve yatay kenarda, tek hava servisi tüm monitörlerce paylaşılır.
+    private WeatherService? _dockWeather;
+    private int _weatherUsers;
+
+    private DockWeatherViewModel? CreateWeather()
+    {
+        if (settings.Dock.Style != DockStyleMode.FullWidth || settings.Dock.Edge is DockEdge.Left or DockEdge.Right || _shellActionService is null)
+            return null;
+
+        _weatherUsers++;
+        _dockWeather ??= new WeatherService(cacheDuration: WeatherRefreshPolicy.CacheDuration(settings.Weather.RefreshInterval));
+        return new DockWeatherViewModel(_dockWeather, settings, _shellActionService, ReleaseWeather);
+    }
+
+    private void ReleaseWeather()
+    {
+        if (--_weatherUsers > 0)
+            return;
+
+        _weatherUsers = 0;
+        _dockWeather?.Dispose();
+        _dockWeather = null;
     }
 
     private void ReleaseStatusServices()
