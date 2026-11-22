@@ -1,4 +1,5 @@
 using Koy.Core.Dictation;
+using Koy.Core.Voice;
 
 namespace Koy.Core.Tests.Dictation;
 
@@ -299,7 +300,7 @@ public sealed class DictationPipelineTests : IDisposable
 
         await DictateAsync();
 
-        Assert.Contains("formal", _cleaner.System, StringComparison.Ordinal);
+        Assert.Contains("formal", _cleaner.SystemPrompt, StringComparison.Ordinal);
         Assert.Equal("Work", Assert.Single(_history.Load()).Profile);
     }
 
@@ -311,7 +312,7 @@ public sealed class DictationPipelineTests : IDisposable
         await DictateAsync();
 
         Assert.Contains("Kubernetes", _speech.Requests[0].Prompt, StringComparison.Ordinal);
-        Assert.Contains("kuber netis -> Kubernetes", _cleaner.System, StringComparison.Ordinal);
+        Assert.Contains("kuber netis -> Kubernetes", _cleaner.SystemPrompt, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -1,4 +1,5 @@
 using Koy.Core.Settings;
+using Koy.Core.Voice;
 
 namespace Koy.Core.Dictation;
 

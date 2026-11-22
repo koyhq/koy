@@ -18,45 +18,45 @@ public sealed partial class ProfileRowViewModel : ObservableObject
     public ProfileRowViewModel(WritingProfile profile)
     {
         Id = profile.Id;
-        _name = profile.Name;
-        _translateTo = profile.TranslateTo;
-        _programs = string.Join(", ", profile.Programs);
-        _sites = string.Join(", ", profile.Sites);
-        _formality = profile.Style.Formality;
-        _sentenceLength = profile.Style.SentenceLength;
-        _punctuation = profile.Style.Punctuation;
-        _brevity = profile.Style.Brevity;
-        _custom = profile.Style.Custom;
+        Name = profile.Name;
+        TranslateTo = profile.TranslateTo;
+        Programs = string.Join(", ", profile.Programs);
+        Sites = string.Join(", ", profile.Sites);
+        Formality = profile.Style.Formality;
+        SentenceLength = profile.Style.SentenceLength;
+        Punctuation = profile.Style.Punctuation;
+        Brevity = profile.Style.Brevity;
+        Custom = profile.Style.Custom;
     }
 
     public string Id { get; }
 
     [ObservableProperty]
-    private string _name;
+    private string _name = "";
 
     [ObservableProperty]
-    private string _translateTo;
+    private string _translateTo = "";
 
     [ObservableProperty]
-    private string _programs;
+    private string _programs = "";
 
     [ObservableProperty]
-    private string _sites;
+    private string _sites = "";
 
     [ObservableProperty]
-    private string _formality;
+    private string _formality = "";
 
     [ObservableProperty]
-    private string _sentenceLength;
+    private string _sentenceLength = "";
 
     [ObservableProperty]
-    private string _punctuation;
+    private string _punctuation = "";
 
     [ObservableProperty]
-    private string _brevity;
+    private string _brevity = "";
 
     [ObservableProperty]
-    private string _custom;
+    private string _custom = "";
 
     public event Action? Changed;
 
@@ -84,7 +84,7 @@ public sealed partial class ProfileRowViewModel : ObservableObject
     };
 
     private static IEnumerable<string> Split(string text) =>
-        text.Split([',', ';', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        text.Split(new[] { ',', ';', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 }
 
 public sealed record ProfileChoiceItem(string Id, string Label);
@@ -125,27 +125,27 @@ public sealed partial class DictationSettingsViewModel : ObservableObject
     {
         _base = _service.ConfigStore.Load();
 
-        _enabled = _base.Enabled;
-        _baseUrl = _base.BaseUrl;
-        _transcribeModel = _base.TranscribeModel;
-        _backupModel = _base.BackupModel;
-        _language = _base.Language;
-        _cleanupEnabled = _base.CleanupEnabled;
-        _cleanupBaseUrl = _base.CleanupBaseUrl;
-        _cleanupModel = _base.CleanupModel;
-        _cleanupPrompt = _base.CleanupPrompt;
-        _autoPaste = _base.AutoPaste;
-        _restoreClipboard = _base.RestoreClipboard;
-        _audioCues = _base.AudioCues;
-        _maxSeconds = _base.MaxSeconds;
-        _historyLimit = _base.HistoryLimit;
-        _skipSilent = _base.SkipSilent;
-        _filterHallucinations = _base.FilterHallucinations;
-        _profileByApp = _base.ProfileByApp;
-        _translationEnabled = _base.TranslationEnabled;
-        _profileOverride = _base.ProfileOverride;
-        _dictionaryLearning = _base.DictionaryLearning;
-        _apiKey = DictationKeyStore.Load();
+        Enabled = _base.Enabled;
+        BaseUrl = _base.BaseUrl;
+        TranscribeModel = _base.TranscribeModel;
+        BackupModel = _base.BackupModel;
+        Language = _base.Language;
+        CleanupEnabled = _base.CleanupEnabled;
+        CleanupBaseUrl = _base.CleanupBaseUrl;
+        CleanupModel = _base.CleanupModel;
+        CleanupPrompt = _base.CleanupPrompt;
+        AutoPaste = _base.AutoPaste;
+        RestoreClipboard = _base.RestoreClipboard;
+        AudioCues = _base.AudioCues;
+        MaxSeconds = _base.MaxSeconds;
+        HistoryLimit = _base.HistoryLimit;
+        SkipSilent = _base.SkipSilent;
+        FilterHallucinations = _base.FilterHallucinations;
+        ProfileByApp = _base.ProfileByApp;
+        TranslationEnabled = _base.TranslationEnabled;
+        ProfileOverride = _base.ProfileOverride;
+        DictionaryLearning = _base.DictionaryLearning;
+        ApiKey = DictationKeyStore.Load();
 
         DefaultProfile = new ProfileRowViewModel(_base.DefaultProfile);
         DefaultProfile.Changed += Save;
@@ -163,31 +163,31 @@ public sealed partial class DictationSettingsViewModel : ObservableObject
     private bool _enabled;
 
     [ObservableProperty]
-    private string _baseUrl;
+    private string _baseUrl = "";
 
     [ObservableProperty]
-    private string _apiKey;
+    private string _apiKey = "";
 
     [ObservableProperty]
-    private string _transcribeModel;
+    private string _transcribeModel = "";
 
     [ObservableProperty]
-    private string _backupModel;
+    private string _backupModel = "";
 
     [ObservableProperty]
-    private string _language;
+    private string _language = "";
 
     [ObservableProperty]
     private bool _cleanupEnabled;
 
     [ObservableProperty]
-    private string _cleanupBaseUrl;
+    private string _cleanupBaseUrl = "";
 
     [ObservableProperty]
-    private string _cleanupModel;
+    private string _cleanupModel = "";
 
     [ObservableProperty]
-    private string _cleanupPrompt;
+    private string _cleanupPrompt = "";
 
     [ObservableProperty]
     private bool _autoPaste;
@@ -217,7 +217,7 @@ public sealed partial class DictationSettingsViewModel : ObservableObject
     private bool _translationEnabled;
 
     [ObservableProperty]
-    private string _profileOverride;
+    private string _profileOverride = "";
 
     [ObservableProperty]
     private bool _dictionaryLearning;

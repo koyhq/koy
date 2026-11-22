@@ -1,5 +1,6 @@
 using Koy.Core.Dictation;
 using Windows.Media.Capture;
+using Windows.Media.Devices;
 using Windows.Media.MediaProperties;
 using Windows.Storage.Streams;
 

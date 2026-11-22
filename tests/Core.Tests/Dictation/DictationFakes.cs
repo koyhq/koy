@@ -63,13 +63,13 @@ internal sealed class FakeCleaner : ITextCleaner
     public Exception? Throw { get; set; }
     public string? Reply { get; set; }
     public int Calls { get; private set; }
-    public string System { get; private set; } = "";
+    public string SystemPrompt { get; private set; } = "";
     public string User { get; private set; } = "";
 
     public Task<string> CompleteAsync(string systemPrompt, string userMessage, CancellationToken cancellationToken)
     {
         Calls++;
-        System = systemPrompt;
+        SystemPrompt = systemPrompt;
         User = userMessage;
         if (Throw is not null)
             throw Throw;

@@ -1,4 +1,5 @@
 using System.Text;
+using Koy.Core.Voice;
 
 namespace Koy.Core.Dictation;
 
@@ -24,7 +25,7 @@ public static class ProfileSelector
     public static string ProgramKey(string? program)
     {
         var name = (program ?? "").Trim().Trim('"');
-        var slash = name.LastIndexOfAny(['\\', '/']);
+        var slash = name.LastIndexOfAny(new[] { '\\', '/' });
         if (slash >= 0)
             name = name[(slash + 1)..];
         if (name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))

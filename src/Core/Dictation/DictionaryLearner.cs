@@ -1,4 +1,5 @@
 using Koy.Core.Settings;
+using Koy.Core.Voice;
 
 namespace Koy.Core.Dictation;
 
@@ -21,7 +22,7 @@ public static class DictionaryLearner
         var found = new List<string>();
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var atSentenceStart = true;
-        foreach (var raw in text.Split([' ', '\n', '\r', '\t'], StringSplitOptions.RemoveEmptyEntries))
+        foreach (var raw in text.Split(new[] { ' ', '\n', '\r', '\t' }, StringSplitOptions.RemoveEmptyEntries))
         {
             var word = raw.Trim('"', '\'', '(', ')', ',', ';', ':', '!', '?', '“', '”', '…').TrimEnd('.');
             var endsSentence = raw.EndsWith('.') || raw.EndsWith('!') || raw.EndsWith('?');
