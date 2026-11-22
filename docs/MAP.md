@@ -17,6 +17,7 @@ Dosyalar her başlıkta **Core → Platform → App** sırasıyla yazılıdır. 
 | Core | `src/Core/Notch/NotchPanel.cs` | `NotchPanel` ve `NotchPanels.Order` listesine değer |
 | App | `src/App/Features/Notch/NotchTabs.cs` | Yazı anahtarı, simge ve vurgu token'ıyla bir satır |
 | App | `src/App/Features/Notch/NotchViewModel.cs` | `CurrentPanelContent` içine bir satır |
+| Core | `src/Core/Notch/NotchServicePolicy.cs`, `src/Core/Notch/NotchSizePolicy.cs` | Hangi sayfa görünürken hangi servis çalışır (AGENTS #5 tablosu, `NotchViewModel.UpdateActivePanels` yalnız iletir) ve çentik hedef boyutları (kapalı, Peek, gösterge, kart, açık; `UpdateTargetSize`). Yeni sayfa/servis eklenince önce bu tabloya ve testine |
 | App | `src/App/Features/Notch/NotchWindow.xaml` | `BodyHost` içine sayfanın `DataTemplate`'i |
 | App | `src/App/Features/Notch/NotchFeature.cs` | Sayfanın ViewModel'ini kurar |
 | App | `src/App/Resources/IconsNotch.xaml`, `src/App/Resources/Tokens.xaml` | Simge ve vurgu rengi |
@@ -158,7 +159,8 @@ Unutma: Servis yalnız gerektiğinde çalışır, son bırakan zamanlayıcıyı 
 | Core | `src/Core/Dock/` | Konum, yakınlık, kenar ve hiza kararları (`DockPositionResolver`, `DockLayoutMath`, `DockFitMath`) |
 | Core | `src/Core/Shell/TaskbarStatePolicy.cs`, `TaskbarBarSelector.cs`, `TaskbarRunOncePolicy.cs`, `TaskbarShutdownGuard.cs`, `WatchdogPolicy.cs` | Görev çubuğu durumu, hangi çubuk gizlenir, RunOnce yedeği, oturum kapanışı ve gözcü kararları |
 | Platform | `src/Platform/Shell/TaskbarService.cs`, `TaskbarService.Watchdog.cs` (gözcüyü explorer ebeveynli başlatır), `TaskbarRunOnce.cs`, `ShellTrayLocator.cs` | Görev çubuğunu gizleme ve geri getirme |
-| Core | `src/Core/Dock/DockClickPolicy.cs`, `src/Core/Dock/DockMonitorFilter.cs`, `src/Core/Dock/DockWindowGrouping.cs` | Sol tık eylemi kararı, "yalnız bu monitörün pencereleri" süzgeci (pencere sınırlarının merkezi); gruplama kararı henüz bağlı değil |
+| Core | `src/Core/Dock/DockClickPolicy.cs`, `src/Core/Dock/DockMonitorFilter.cs`, `src/Core/Dock/DockWindowGrouping.cs` | Sol tık eylemi kararı, "yalnız bu monitörün pencereleri" süzgeci (pencere sınırlarının merkezi); `DockWindowGrouping.ShouldGroup` + `SlotLimit` (16): "yer kalmayınca grupla" eşiği, `DockController` kullanır |
+| Core | `src/Core/Dock/DockPresentationPolicy.cs`, `src/Core/Dock/DockEntryPlanner.cs` | `DockViewModel.EvaluatePosition` kararları (boşluk, köşe, görünürlük, gizlenirken kayma, kenar çizgisi, fare izleme: `DockPresentationPolicy`) ve `UpdateItems` kararları (hangi simge hangi sırada, klasör üyeleri, yedek model: `DockEntryPlanner`; şerit koleksiyonunu yerinde eşleme işlemleri: `DockListSync`). ViewModel yalnız bağlar |
 | App | `src/App/Features/Dock/DockFeature.cs` | Yaşam döngüsü |
 | App | `src/App/Features/Dock/DockViewModel.cs`, `src/App/Features/Dock/DockFullWidth.xaml`, `src/App/Features/Dock/DockCapsule.xaml`, `src/App/Features/Settings/Pages/DockPage.xaml` | Görünüm, kenar/uzunluk/boşluk bağlamaları ve ayar sayfası |
 | Core, App | `src/Core/Dock/DockPresentationMath.cs`, `src/App/Features/Dock/DockPresentationStyle.cs`, `src/App/Features/Dock/DockItemsStrip.xaml` | Simge göstergesi (nokta, çizgi, arka plan), rozet, kenar açma gecikmesi ve gizli dock çizgisi: karar Core'da, fırça ve köşe eşlemesi App'te |

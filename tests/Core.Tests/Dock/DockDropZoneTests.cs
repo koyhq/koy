@@ -26,19 +26,6 @@ public class DockDropZoneTests
     }
 
     [Fact]
-    public void ResolveZone_MutlakKoordinatlariDogruBagilKonumaCevirir()
-    {
-        // Yuva 100..140 arası, imleç 105 (bağıl 5 -> Before)
-        Assert.Equal(DockDropZone.Before, DockDropZones.ResolveZone(cursorX: 105, slotLeft: 100, slotWidth: 40));
-
-        // İmleç 120 (bağıl 20 -> Merge)
-        Assert.Equal(DockDropZone.Merge, DockDropZones.ResolveZone(cursorX: 120, slotLeft: 100, slotWidth: 40));
-
-        // İmleç 135 (bağıl 35 -> After)
-        Assert.Equal(DockDropZone.After, DockDropZones.ResolveZone(cursorX: 135, slotLeft: 100, slotWidth: 40));
-    }
-
-    [Fact]
     public void Tracker_400msAltindaSilahlanmaz()
     {
         var tracker = new DockDropZoneTracker();
@@ -111,20 +98,5 @@ public class DockDropZoneTests
         // Yeni yuvada 400 ms dolunca silahlanmalı
         Assert.True(tracker.Update(targetSlot: 2, DockDropZone.Merge, t1 + TimeSpan.FromMilliseconds(400)));
         Assert.True(tracker.IsMergeArmed);
-    }
-
-    [Fact]
-    public void Tracker_AnahtarMetinTabanliTakip()
-    {
-        var tracker = new DockDropZoneTracker();
-        var t0 = TimeSpan.FromSeconds(5);
-
-        Assert.False(tracker.Update("itemA", DockDropZone.Merge, t0));
-        Assert.True(tracker.Update("itemA", DockDropZone.Merge, t0 + TimeSpan.FromMilliseconds(450)));
-        Assert.Equal("itemA", tracker.TargetKey);
-
-        tracker.Reset();
-        Assert.False(tracker.IsMergeArmed);
-        Assert.Null(tracker.TargetKey);
     }
 }

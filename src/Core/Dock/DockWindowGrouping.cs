@@ -1,73 +1,24 @@
+using Koy.Core.Settings;
+
 namespace Koy.Core.Dock;
 
-// Pencere gruplama ve monitör süzgeci saf karar mantığıdır: Windows'tan gelen düz değerlerle çalışır, WinRT / Win32 tipi yoktur.
-// Pencere sayımı (EnumWindows, monitör ve sanal masaüstü bilgisi) Platform tarafının işidir ve bu dosyanın dışındadır.
-
-/// <summary>Bir pencerenin dock kararı için gereken gerçekler.</summary>
-public readonly record struct DockWindowFact(string ProcessName, int MonitorId, nint Handle);
-
-/// <summary>Tek dock simgesine karşılık gelen pencereler. Tutamaçlar girdi sırasındadır.</summary>
-public sealed record DockWindowGroup(string ProcessName, IReadOnlyList<nint> Handles);
-
+/// <summary>
+/// Pencere gruplama kararı (saf). Gruplama anahtarı (süreç yolu / pencere) ve sıra DockController'da kalır; burada yalnız
+/// "gruplansın mı" kararı ve "yer yetmeyince" eşiği vardır.
+/// </summary>
 public static class DockWindowGrouping
 {
-    /// <summary>Monitör süzgeci. <see cref="DockWindowMonitorScope.AllMonitors"/> listeyi olduğu gibi döndürür.</summary>
-    public static IReadOnlyList<DockWindowFact> FilterByMonitor(
-        IReadOnlyList<DockWindowFact> windows,
-        DockWindowMonitorScope scope,
-        int currentMonitorId)
+    /// <summary>"Yer kalmayınca grupla" kipinde dock'un sığdırdığı en çok simge sayısı (sabitliler + açık pencereler).</summary>
+    public const int SlotLimit = 16;
+
+    /// <param name="mode">Ayardaki gruplama kipi.</param>
+    /// <param name="totalEntryCount">Gruplanmazsa dock'ta görünecek simge sayısı (sabitli öğeler + sabitlenmemiş pencereler).</param>
+    public static bool ShouldGroup(DockGroupingMode mode, int totalEntryCount) => mode switch
     {
-        ArgumentNullException.ThrowIfNull(windows);
-        if (scope == DockWindowMonitorScope.AllMonitors)
-            return windows;
-
-        // Girdi sırası korunur: aynı girdi her zaman aynı çıktıyı verir.
-        return windows.Where(w => w.MonitorId == currentMonitorId).ToList();
-    }
-
-    /// <summary>
-    /// Pencereleri dock simgelerine böler. Sıra kararlıdır: gruplar ilk göründükleri sırayla, bir gruptaki tutamaçlar
-    /// girdi sırasıyla gelir. Süreç adı büyük/küçük harf duyarsız eşlenir.
-    /// </summary>
-    /// <param name="availableSlots">Dock'un bu pencereler için ayırabildiği simge sayısı (yalnız WhenSpaceRunsOut kullanır).</param>
-    public static IReadOnlyList<DockWindowGroup> Group(IReadOnlyList<DockWindowFact> windows, DockGroupingMode mode, int availableSlots)
-    {
-        ArgumentNullException.ThrowIfNull(windows);
-        ArgumentOutOfRangeException.ThrowIfNegative(availableSlots);
-
-        // Yer varken gruplamak pencereleri gereksiz yere saklar; WhenSpaceRunsOut bu yüzden yalnız sığmayınca birleştirir.
-        // Dosyadan gelen tanımsız sayı (örn. 7) bugünkü davranışa, yani gruplamasıza düşer.
-        var group = mode switch
-        {
-            DockGroupingMode.Always => true,
-            DockGroupingMode.WhenSpaceRunsOut => windows.Count > availableSlots,
-            _ => false
-        };
-
-        var groups = new List<DockWindowGroup>();
-        if (!group)
-        {
-            foreach (var w in windows)
-                groups.Add(new DockWindowGroup(w.ProcessName ?? "", [w.Handle]));
-            return groups;
-        }
-
-        var handlesByName = new Dictionary<string, List<nint>>(StringComparer.OrdinalIgnoreCase);
-        var names = new List<string>();
-        foreach (var w in windows)
-        {
-            var key = w.ProcessName ?? "";
-            if (!handlesByName.TryGetValue(key, out var handles))
-            {
-                handles = [];
-                handlesByName[key] = handles;
-                names.Add(key);
-            }
-            handles.Add(w.Handle);
-        }
-
-        foreach (var name in names)
-            groups.Add(new DockWindowGroup(name, handlesByName[name]));
-        return groups;
-    }
+        DockGroupingMode.Always => true,
+        // Yer varken gruplamak pencereleri gereksiz yere saklar; bu kip yalnız sığmayınca birleştirir.
+        DockGroupingMode.WhenSpaceRunsOut => totalEntryCount > SlotLimit,
+        // Dosyadan gelen tanımsız sayı (örn. 7) gruplamasıza düşer.
+        _ => false
+    };
 }
