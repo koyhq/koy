@@ -16,13 +16,15 @@ public static class DictionaryLearner
     /// <summary>Sayılan aday sayısı bu sayıyı aşarsa en eskiler atılır (dosya şişmesin).</summary>
     public const int MaxPending = 200;
 
+    private static readonly char[] Whitespace = [' ', '\n', '\r', '\t'];
+
     /// <summary>Metindeki ad benzeri sözcükler (tekrarsız, yazıldığı gibi).</summary>
     public static IReadOnlyList<string> Candidates(string text)
     {
         var found = new List<string>();
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var atSentenceStart = true;
-        foreach (var raw in text.Split(new[] { ' ', '\n', '\r', '\t' }, StringSplitOptions.RemoveEmptyEntries))
+        foreach (var raw in text.Split(Whitespace, StringSplitOptions.RemoveEmptyEntries))
         {
             var word = raw.Trim('"', '\'', '(', ')', ',', ';', ':', '!', '?', '“', '”', '…').TrimEnd('.');
             var endsSentence = raw.EndsWith('.') || raw.EndsWith('!') || raw.EndsWith('?');

@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Text;
 using Koy.Core.Voice;
 
@@ -16,6 +17,8 @@ public sealed record ProfileChoice(WritingProfile Profile, bool IsDefault)
 /// </summary>
 public static class ProfileSelector
 {
+    private static readonly SearchValues<char> PathSeparators = SearchValues.Create("\\/");
+
     private static readonly HashSet<string> Browsers = new(StringComparer.Ordinal)
     {
         "chrome", "msedge", "firefox", "brave", "opera", "vivaldi", "arc", "zen", "librewolf", "waterfox",
@@ -25,7 +28,7 @@ public static class ProfileSelector
     public static string ProgramKey(string? program)
     {
         var name = (program ?? "").Trim().Trim('"');
-        var slash = name.LastIndexOfAny(new[] { '\\', '/' });
+        var slash = name.AsSpan().LastIndexOfAny(PathSeparators);
         if (slash >= 0)
             name = name[(slash + 1)..];
         if (name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))

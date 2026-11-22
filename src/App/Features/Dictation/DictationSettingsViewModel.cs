@@ -83,8 +83,10 @@ public sealed partial class ProfileRowViewModel : ObservableObject
         },
     };
 
+    private static readonly char[] ListSeparators = [',', ';', '\n'];
+
     private static IEnumerable<string> Split(string text) =>
-        text.Split(new[] { ',', ';', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        text.Split(ListSeparators, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 }
 
 public sealed record ProfileChoiceItem(string Id, string Label);
