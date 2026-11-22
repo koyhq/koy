@@ -1,3 +1,4 @@
+using Koy.Core.Settings;
 using Koy.Core.Updates;
 
 namespace Koy.Core.Tests.Updates;
@@ -78,5 +79,21 @@ public class UpdateFlowPolicyTests
     {
         Assert.True(UpdateFlowPolicy.ShouldShowWhatsNew("0.3.0", "0.3.0-rc.2"));
         Assert.False(UpdateFlowPolicy.ShouldShowWhatsNew("0.3.0-rc.2", "0.3.0"));
+    }
+
+    [Theory]
+    [InlineData(UpdateChannel.Stable, true)]
+    [InlineData(UpdateChannel.Preview, false)]
+    public void UsesDirectLatestFeed_only_for_stable_channel(UpdateChannel channel, bool expected)
+    {
+        Assert.Equal(expected, UpdateFlowPolicy.UsesDirectLatestFeed(channel));
+    }
+
+    [Theory]
+    [InlineData("https://github.com/koyhq/koy", "https://github.com/koyhq/koy/releases/latest/download/")]
+    [InlineData("https://github.com/koyhq/koy/", "https://github.com/koyhq/koy/releases/latest/download/")]
+    public void LatestDownloadBaseUrl_normalizes_trailing_slash(string repoUrl, string expected)
+    {
+        Assert.Equal(expected, UpdateFlowPolicy.LatestDownloadBaseUrl(repoUrl));
     }
 }

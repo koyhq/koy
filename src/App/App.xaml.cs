@@ -626,6 +626,7 @@ public partial class App : Application, IDisposable
 
         TaskbarService.Restore();
         AppUninstaller.CleanAfterExit();
+        UpdateClient.ApplyPendingOnExit();
         base.OnExit(e);
     }
 

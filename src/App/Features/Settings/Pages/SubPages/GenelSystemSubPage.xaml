@@ -78,6 +78,21 @@
             </Grid>
         </Border>
 
+        <Border Style="{StaticResource SettingRowStyle}" IsEnabled="{Binding AutoCheckUpdates}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding [AutoInstallUpdatesTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
+                    <TextBlock Text="{Binding [AutoInstallUpdatesDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [AutoInstallUpdatesTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding AutoInstallUpdates}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+            </Grid>
+        </Border>
+
         <Border Style="{StaticResource SettingRowStyle}">
             <Grid>
                 <Grid.ColumnDefinitions>

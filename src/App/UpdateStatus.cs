@@ -21,6 +21,7 @@ public static class UpdateStatus
     public static DateTime? LastCheck { get; private set; }
     public static UpdateCheckResult LastResult { get; private set; }
     public static UpdateInfo? AvailableUpdate { get; private set; }
+    public static VelopackAsset? PendingRelease { get; private set; }
     public static string? AvailableVersion => AvailableUpdate?.TargetFullRelease?.Version?.ToString();
     public static bool HasAvailableUpdate => AvailableUpdate is not null && LastResult == UpdateCheckResult.UpdateAvailable;
 
@@ -35,13 +36,27 @@ public static class UpdateStatus
         {
             AvailableUpdate = null;
         }
+        if (result != UpdateCheckResult.UpdateReady)
+        {
+            PendingRelease = null;
+        }
         Changed?.Invoke();
     }
 
     public static void RecordAvailable(UpdateInfo update)
     {
         AvailableUpdate = update;
+        PendingRelease = null;
         LastResult = UpdateCheckResult.UpdateAvailable;
+        LastCheck = DateTime.Now;
+        Changed?.Invoke();
+    }
+
+    public static void RecordReady(VelopackAsset release)
+    {
+        PendingRelease = release;
+        AvailableUpdate = null;
+        LastResult = UpdateCheckResult.UpdateReady;
         LastCheck = DateTime.Now;
         Changed?.Invoke();
     }

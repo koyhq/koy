@@ -179,6 +179,7 @@ public static class AdvancedSettings
         ["DeveloperMode"] = ("Geliştirici modu", "Developer mode"),
         ["Language"] = ("Dil", "Language"),
         ["AutoCheckUpdates"] = ("Otomatik güncelleme denetimi", "Auto check updates"),
+        ["AutoInstallUpdates"] = ("Otomatik güncelleme kurulumu", "Auto install updates"),
         ["UpdateChannel"] = ("Güncelleme kanalı", "Update channel"),
         ["TemperatureUnit"] = ("Sıcaklık birimi", "Temperature unit"),
         ["WindSpeedUnit"] = ("Rüzgâr hızı birimi", "Wind speed unit"),

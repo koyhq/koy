@@ -33,6 +33,10 @@ public sealed record GeneralSettings
     public string LastSeenVersion { get; set; } = "";
 
     public bool AutoCheckUpdates { get; set; } = true;
+
+    /// <summary>Varsayılan kapalı: açıkken yeni sürüm arka planda sessizce indirilir ve Koy kapanınca kurulur.</summary>
+    public bool AutoInstallUpdates { get; set; }
+
     public UpdateChannel UpdateChannel { get; set; } = UpdateChannel.Stable;
 
     /// <summary>Sıcaklık birimi (hava durumu). Değer Core'da dönüştürülür, birim adı App'te yazılır (bkz. UnitConversion).</summary>

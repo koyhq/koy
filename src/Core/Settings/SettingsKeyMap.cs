@@ -30,7 +30,7 @@ public static class SettingsKeyMap
             }
         }
 
-        Add("General", "Language", "FirstRunCompleted", "LastSeenVersion", "AutoCheckUpdates", "UpdateChannel",
+        Add("General", "Language", "FirstRunCompleted", "LastSeenVersion", "AutoCheckUpdates", "AutoInstallUpdates", "UpdateChannel",
             "TemperatureUnit", "WindSpeedUnit", "NetworkSpeedUnit", "DeveloperMode");
         Add("Appearance", "Theme", "AccentColor", "UseWindowsAccent", "CornerRadius", "AnimationSpeed",
             "RespectReduceMotion", "BatterySaverReduceMotion", "Material", "MaterialReadabilityGuard");

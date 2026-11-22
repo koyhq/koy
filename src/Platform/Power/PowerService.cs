@@ -84,6 +84,19 @@ public sealed class PowerService : IPowerService
 
     private void OnChanged(object? sender, object e) => Refresh();
 
+    /// <summary>Sistem pil tasarrufu şu an açık mı (tek seferlik okuma; olay aboneliği kurmaz).</summary>
+    public static bool IsSystemEnergySaverOn()
+    {
+        try
+        {
+            return WinPower.EnergySaverStatus == WinEnergySaver.On;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public void Dispose()
     {
         lock (_gate)

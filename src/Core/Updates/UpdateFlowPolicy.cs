@@ -1,3 +1,5 @@
+using Koy.Core.Settings;
+
 namespace Koy.Core.Updates;
 
 /// <summary>
@@ -6,6 +8,12 @@ namespace Koy.Core.Updates;
 /// </summary>
 public static class UpdateFlowPolicy
 {
+    /// <summary>Kararlı kanalda GitHub Releases API yerine doğrudan en son sürüm indirme yolu kullanılır.</summary>
+    public static bool UsesDirectLatestFeed(UpdateChannel channel) => channel == UpdateChannel.Stable;
+
+    /// <summary>Kararlı kanalın doğrudan besleme taban adresi (<c>releases.win.json</c> ve paketler buradan okunur).</summary>
+    public static string LatestDownloadBaseUrl(string repoUrl) =>
+        $"{repoUrl.TrimEnd('/')}/releases/latest/download/";
     /// <summary>
     /// İki sürüm dizesini semantik olarak karşılaştırır.
     /// versionA > versionB ise pozitif, eşitse 0, küçükse negatif döner.

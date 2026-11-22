@@ -316,6 +316,9 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _autoCheckUpdates = true;
 
     [ObservableProperty]
+    private bool _autoInstallUpdates;
+
+    [ObservableProperty]
     private UpdateChannel _updateChannel = UpdateChannel.Stable;
 
     [ObservableProperty]
@@ -1262,6 +1265,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             HideWindowsTaskbar = s.Dock.HideWindowsTaskbar;
             Language = s.General.Language;
             AutoCheckUpdates = s.General.AutoCheckUpdates;
+            AutoInstallUpdates = s.General.AutoInstallUpdates;
             UpdateChannel = s.General.UpdateChannel;
             DeveloperMode = s.General.DeveloperMode;
 
@@ -1706,6 +1710,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
             {
                 Language = Language,
                 AutoCheckUpdates = AutoCheckUpdates,
+                AutoInstallUpdates = AutoInstallUpdates,
                 UpdateChannel = UpdateChannel,
                 TemperatureUnit = TemperatureUnit,
                 WindSpeedUnit = WindSpeedUnit,
