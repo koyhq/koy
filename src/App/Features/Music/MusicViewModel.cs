@@ -74,6 +74,17 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private string _positionText = "0:00";
 
+    // Sürükleyerek sarma: karar mantığı Core'daki ScrubState'te; sürüklerken Progress / PositionText önizlemeyi gösterir,
+    // oynatıcıdan gelen konum güncellemeleri onları değiştirmez (Position arkada akmaya devam eder).
+    private readonly ScrubState _scrub = new();
+
+    [ObservableProperty]
+    private bool _isScrubbing;
+
+    /// <summary>Sürükleme balonundaki hedef süre.</summary>
+    [ObservableProperty]
+    private string _scrubText = string.Empty;
+
     [ObservableProperty]
     private string _durationText = "0:00";
 
@@ -496,6 +507,69 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>Sürükleme başlar; süresi bilinmiyorsa (canlı) false döner.</summary>
+    public bool BeginScrub(double fraction)
+    {
+        if (!_scrub.Begin(Duration, fraction))
+            return false;
+
+        IsScrubbing = true;
+        ShowScrubPreview();
+        return true;
+    }
+
+    public void MoveScrub(double fraction)
+    {
+        if (!_scrub.IsActive)
+            return;
+
+        _scrub.Move(fraction);
+        ShowScrubPreview();
+    }
+
+    /// <summary>Bırakma: tek bir seek gönderilir.</summary>
+    public async Task EndScrub()
+    {
+        if (_scrub.End() is not { } target)
+            return;
+
+        IsScrubbing = false;
+        ScrubText = string.Empty;
+        Position = target;
+        Progress = ScrubState.FractionOf(target, Duration);
+        PositionText = FormatTime(target);
+        await _mediaService.SeekAsync(target);
+    }
+
+    /// <summary>Esc / yakalama kaybı: eski konuma dönülür, seek gönderilmez.</summary>
+    public void CancelScrub()
+    {
+        if (!_scrub.IsActive)
+            return;
+
+        _scrub.Cancel();
+        IsScrubbing = false;
+        ScrubText = string.Empty;
+        Progress = ScrubState.FractionOf(Position, Duration);
+        PositionText = FormatTime(Position);
+    }
+
+    /// <summary>Klavye: sol / sağ ok ±5 sn sarar.</summary>
+    public async Task StepSeek(int direction)
+    {
+        if (_scrub.IsActive || ScrubState.StepTarget(Position, Duration, ScrubState.KeyStep * direction) is not { } target)
+            return;
+
+        await Seek(ScrubState.FractionOf(target, Duration));
+    }
+
+    private void ShowScrubPreview()
+    {
+        Progress = _scrub.Fraction;
+        ScrubText = _scrub.Text;
+        PositionText = _scrub.Text;
+    }
+
     [RelayCommand]
     private async Task SelectSession(string sessionId) => await _mediaService.SelectSessionAsync(sessionId);
 
@@ -564,6 +638,7 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
     {
         if (timeline is null)
         {
+            CancelScrub();
             Position = TimeSpan.Zero;
             Duration = TimeSpan.Zero;
             Progress = 0;
@@ -574,6 +649,16 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
 
         Duration = PlaybackClock.Duration(timeline);
         Position = PlaybackClock.PositionAt(timeline, IsPlaying, DateTimeOffset.Now);
+        DurationText = FormatTime(Duration);
+        if (_scrub.IsActive)
+        {
+            // Parça değiştiyse sürükleme geçersiz; yoksa önizleme kazanır.
+            if (Duration <= TimeSpan.Zero)
+                CancelScrub();
+            else
+                return;
+        }
+
         Progress = Duration.TotalSeconds > 0 ? Math.Clamp(Position.TotalSeconds / Duration.TotalSeconds, 0.0, 1.0) : 0.0;
         PositionText = FormatTime(Position);
         DurationText = FormatTime(Duration);
@@ -589,16 +674,14 @@ public sealed partial class MusicViewModel : ObservableObject, IDisposable
             nextPos = Duration;
 
         Position = nextPos;
+        if (_scrub.IsActive)
+            return;
+
         Progress = Math.Clamp(Position.TotalSeconds / Duration.TotalSeconds, 0.0, 1.0);
         PositionText = FormatTime(Position);
     }
 
-    private static string FormatTime(TimeSpan time)
-    {
-        return time.TotalHours >= 1
-            ? $"{(int)time.TotalHours}:{time.Minutes:D2}:{time.Seconds:D2}"
-            : $"{time.Minutes}:{time.Seconds:D2}";
-    }
+    private static string FormatTime(TimeSpan time) => ScrubState.FormatTime(time);
 
     // Yatay kapakta arkadaki bulanık zemin: kapağın ~24 px'e küçültülmüş hâli, ekranda yumuşak büyütülür (sahte blur).
     partial void OnThumbnailChanged(ImageSource? value)
