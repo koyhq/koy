@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using Koy.Core.Shell;
 using Windows.Win32;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
@@ -85,6 +86,13 @@ public sealed class ShellActionService : IShellActionService
 
             if (!string.IsNullOrEmpty(arguments))
                 psi.Arguments = arguments;
+            var workingDir = WorkingDirectoryPolicy.ResolveLaunchWorkingDirectory(
+                path,
+                explicitWorkingDirectory: null,
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                Directory.Exists);
+            if (workingDir is not null)
+                psi.WorkingDirectory = workingDir;
 
             Process.Start(psi);
         }
