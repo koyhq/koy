@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using Koy.Core.JumpList;
+using Koy.Core.Shell;
 using Windows.Win32.UI.Shell;
 using Windows.Win32.UI.Shell.Common;
 
@@ -99,15 +100,21 @@ public sealed class JumpListService : IJumpListService
         try
         {
             var plan = JumpListLaunchPlan.For(entry.Launch, appExePath);
+            var fileName = Environment.ExpandEnvironmentVariables(plan.File);
             var psi = new ProcessStartInfo
             {
-                FileName = Environment.ExpandEnvironmentVariables(plan.File),
+                FileName = fileName,
                 UseShellExecute = true,
             };
             if (!string.IsNullOrEmpty(plan.Arguments))
                 psi.Arguments = plan.Arguments;
-            if (!string.IsNullOrEmpty(plan.WorkingDirectory) && Directory.Exists(plan.WorkingDirectory))
-                psi.WorkingDirectory = plan.WorkingDirectory;
+            var workingDir = WorkingDirectoryPolicy.ResolveLaunchWorkingDirectory(
+                fileName,
+                plan.WorkingDirectory,
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                Directory.Exists);
+            if (workingDir is not null)
+                psi.WorkingDirectory = workingDir;
 
             Process.Start(psi)?.Dispose();
         }

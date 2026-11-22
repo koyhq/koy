@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using Koy.Core.Diagnostics;
 using Koy.Core.Search;
+using Koy.Core.Shell;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 
@@ -80,6 +81,15 @@ public sealed class SearchShell(Action<string> copyText) : ISearchShell
 
     private static void Start(ProcessStartInfo info)
     {
+        if (string.IsNullOrWhiteSpace(info.WorkingDirectory))
+        {
+            info.WorkingDirectory = WorkingDirectoryPolicy.ResolveLaunchWorkingDirectory(
+                info.FileName,
+                explicitWorkingDirectory: null,
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                Directory.Exists) ?? "";
+        }
+
         try
         {
             Process.Start(info)?.Dispose();

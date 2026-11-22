@@ -47,11 +47,15 @@ public static class Program
         if (instance is null)
             return;
 
-        // Windows Run anahtarı çalışma dizinini System32 bırakır; göreli yollar ve dosya iletişim kutuları bozulmasın.
+        // Windows Run anahtarı çalışma dizinini System32 bırakır; AppContext.BaseDirectory ise Velopack'in
+        // current\ klasörüdür — orada kalırsa dock'tan açılan uygulamalar CWD'yi miras alıp güncellemeyi kilitler.
         try
         {
-            if (Directory.Exists(AppContext.BaseDirectory))
-                Environment.CurrentDirectory = AppContext.BaseDirectory;
+            var workingDir = WorkingDirectoryPolicy.ResolveAppWorkingDirectory(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                Directory.Exists);
+            if (workingDir is not null)
+                Environment.CurrentDirectory = workingDir;
         }
         catch
         {
