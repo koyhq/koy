@@ -360,7 +360,7 @@ public sealed class DictationPipelineTests : IDisposable
 
         _recorder.RaiseLevel(0.4);
 
-        Assert.Equal(new[] { 0.4 }, seen);
+        Assert.Equal(0.4, Assert.Single(seen));
     }
 
     [Fact]

@@ -49,7 +49,8 @@ public class DictationTextTests
     {
         var found = DictionaryLearner.Candidates("Today I met Alice and Bob at Node.js meetup. Maria wrote it down.");
 
-        Assert.Equal(new[] { "Alice", "Bob", "Node.js" }, found);
+        List<string> expected = ["Alice", "Bob", "Node.js"];
+        Assert.Equal(expected, found);
     }
 
     [Fact]
@@ -65,7 +66,7 @@ public class DictationTextTests
 
         var added = DictionaryLearner.Learn(file, "Bugün Grafana açtım.");
 
-        Assert.Equal(new[] { "Grafana" }, added);
+        Assert.Equal("Grafana", Assert.Single(added));
         var entry = Assert.Single(file.Entries);
         Assert.True(entry.Auto);
         Assert.Empty(file.Pending);
@@ -240,7 +241,7 @@ public class CleanupPromptTests
     }
 }
 
-public class DictationHistoryTests : IDisposable
+public sealed class DictationHistoryTests : IDisposable
 {
     private readonly string _dir = Path.Combine(Path.GetTempPath(), "koy-dictation-history-" + Guid.NewGuid().ToString("N"));
     private readonly DictationHistory _history;
@@ -264,7 +265,7 @@ public class DictationHistoryTests : IDisposable
 
         var dropped = _history.Add(Row("3"), 2);
 
-        Assert.Equal(new[] { "2", "3" }, _history.Load().Select(r => r.Id));
+        Assert.Collection(_history.Load(), r => Assert.Equal("2", r.Id), r => Assert.Equal("3", r.Id));
         Assert.Equal("1", Assert.Single(dropped).Id);
     }
 
@@ -310,7 +311,7 @@ public class DictationHistoryTests : IDisposable
     }
 }
 
-public class DictationConfigStoreTests : IDisposable
+public sealed class DictationConfigStoreTests : IDisposable
 {
     private readonly string _dir = Path.Combine(Path.GetTempPath(), "koy-dictation-config-" + Guid.NewGuid().ToString("N"));
 
@@ -349,7 +350,7 @@ public class DictationConfigStoreTests : IDisposable
         Assert.Equal("tr", loaded.Language);
         var profile = Assert.Single(loaded.Profiles);
         Assert.Equal("formal", profile.Style.Formality);
-        Assert.Equal(new[] { "slack" }, profile.Programs);
+        Assert.Equal("slack", Assert.Single(profile.Programs));
     }
 
     [Fact]

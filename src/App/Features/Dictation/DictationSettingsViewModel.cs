@@ -85,7 +85,7 @@ public sealed partial class ProfileRowViewModel : ObservableObject
 
     private static readonly char[] ListSeparators = [',', ';', '\n'];
 
-    private static IEnumerable<string> Split(string text) =>
+    private static string[] Split(string text) =>
         text.Split(ListSeparators, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 }
 
@@ -356,7 +356,7 @@ public sealed partial class DictationSettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void CopyHistory(HistoryRowViewModel? row)
+    private static void CopyHistory(HistoryRowViewModel? row)
     {
         if (row is null || row.Text.Length == 0)
             return;

@@ -659,6 +659,7 @@ public partial class App : Application, IDisposable
         _trayIconManager = null;
 
         Koy.App.Features.Rules.ContextRuleService.Instance.Stop();
+        DictationService.Instance.Dispose();
 
         foreach (var feature in _features)
             feature.Stop();

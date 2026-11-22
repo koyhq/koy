@@ -15,7 +15,7 @@ namespace Koy.App.Features.Dictation;
 /// özellik kapalıyken ya da hiç kullanılmadıysa mikrofon, HTTP istemcisi ve dinleyici yoktur (AGENTS #5, #12).
 /// Durum çentikte kısa bir kartla gösterilir (çentik kapalıysa kart yok; Windows'un mikrofon göstergesi yine yanar).
 /// </summary>
-public sealed class DictationService
+public sealed class DictationService : IDisposable
 {
     private static readonly TimeSpan RecordingCard = TimeSpan.FromMinutes(10);
     private static readonly TimeSpan StageCard = TimeSpan.FromMinutes(2);
@@ -48,6 +48,23 @@ public sealed class DictationService
             lock (_gate)
                 return _config ??= ConfigStore.Load();
         }
+    }
+
+    /// <summary>Uygulama kapanırken: kayıt sürüyorsa atılır, mikrofon bırakılır.</summary>
+    public void Dispose()
+    {
+        DictationPipeline? pipeline;
+        MediaCaptureRecorder? recorder;
+        lock (_gate)
+        {
+            pipeline = _pipeline;
+            recorder = _recorder;
+            _pipeline = null;
+            _recorder = null;
+        }
+
+        pipeline?.Dispose();
+        recorder?.Dispose();
     }
 
     /// <summary>Ayar dosyası değişti (ayarlar penceresi yazdı); hat bir sonraki yazıda yenisini okur.</summary>
