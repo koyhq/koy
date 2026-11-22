@@ -23,9 +23,10 @@ public partial class DockWindow : Window
     public double ActualThickness => IsVertical ? ActualWidth : ActualHeight;
 
     /// <summary>
-    /// Çalışma alanından ayrılacak yükseklik:
-    /// Yüzen dock için 60 px + 10 px alt boşluk; Tam genişlik için FullWidthHeightDip (48); Yer ayır için 46 px.
-    /// DIP olarak döner; piksele çevirme tek kuralla (WindowPlacementMath.ToPixels) AppBar'da yapılır.
+    /// Çalışma alanından ayrılacak kalınlık (kenar boşluğu hariç): Tam genişlik için FullWidthHeightDip (48), Yer ayır
+    /// kapsülü için SnappedHeightDip (46); diğer kiplerde pencerenin kendi ölçüsü.
+    /// DIP olarak döner; kenar boşluğu (EdgeOffsetDip) ve piksele çevirme tek kuralla AppBarMath.ReservedPixels'te toplanır
+    /// (pencere yerleşimiyle aynı yuvarlama).
     /// </summary>
     public double ReservedHeight
     {

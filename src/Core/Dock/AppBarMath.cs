@@ -1,3 +1,4 @@
+using Koy.Core.Display;
 using Koy.Core.Shell;
 
 namespace Koy.Core.Dock;
@@ -9,22 +10,42 @@ namespace Koy.Core.Dock;
 /// </summary>
 public static class AppBarMath
 {
+    /// <summary>
+    /// AppBar'ın ayıracağı kalınlık (piksel): dock penceresinin kalınlığı ile kenar boşluğu, pencerenin yerleşiminde
+    /// (<see cref="WindowPlacementMath.EdgeBar"/>, <see cref="WindowPlacementMath.EdgeCapsule"/>) kullanılan AYNI kuralla
+    /// ayrı ayrı piksele çevrilip toplanır. Böylece büyütülmüş pencerenin altı dock'un üst kenarına tam dayanır:
+    /// dock boşluk bırakmaz, pencereyi de ezmez (%125, %175 gibi kesirli ölçekte toplamı yuvarlamak 1 px fark üretirdi).
+    /// </summary>
+    /// <param name="thicknessDip">Dock'un kenara dik kalınlığı (DIP).</param>
+    /// <param name="edgeOffsetDip">Dock ile ekran kenarı arasındaki boşluk (DIP).</param>
+    /// <param name="dpiScale">Ekranın ölçeği (1,25 = %125).</param>
+    public static int ReservedPixels(double thicknessDip, double edgeOffsetDip, double dpiScale) =>
+        WindowPlacementMath.ToPixels(thicknessDip, dpiScale)
+        + WindowPlacementMath.ToPixels(DockLayoutLimits.ClampEdgeOffsetDip(edgeOffsetDip), dpiScale);
+
     /// <param name="edge">Dock'un oturduğu ekran kenarı.</param>
     /// <param name="monitor">Monitörün tam sınırları (piksel).</param>
     /// <param name="thicknessPx">AppBar kalınlığı (piksel; yatayda yükseklik, dikeyde genişlik).</param>
     /// <param name="queried">ABM_QUERYPOS'un döndürdüğü alan.</param>
-    /// <param name="ownsBottomEdge">Windows görev çubuğu gizli: alt kenar Koy'un, Gezgin'in itmesi yok sayılır.</param>
+    /// <param name="ownsBottomEdge">
+    /// Windows görev çubuğu gizli (ya da gizlenecek): Gezgin'in çubuğu hiç sayılmaz, alan her kenarda monitörün kendi
+    /// kenarından hesaplanır. Aksi halde (görev çubuğu görünür) alan Windows'un önerdiği sınırın üstüne yığılır.
+    /// </param>
     public static WindowRect FinalRect(DockEdge edge, WindowRect monitor, int thicknessPx, WindowRect queried, bool ownsBottomEdge)
     {
         if (!Enum.IsDefined(edge)) edge = DockEdge.Bottom;
 
-        if (edge == DockEdge.Bottom)
+        // Görev çubuğu bizdeyken ABM_QUERYPOS'un önerisi (Gezgin'in 48 DIP'lik çubuğu yüzünden yukarı itilmiş alt sınır,
+        // ya da dikey kenarlarda kısalmış yükseklik) yok sayılır: yoksa pay çalışma alanında boşluk bırakır.
+        if (ownsBottomEdge)
         {
-            if (ownsBottomEdge)
-                return new WindowRect(monitor.Left, monitor.Bottom - thicknessPx, monitor.Right, monitor.Bottom);
-
-            // Görev çubuğu görünürken: Windows'un önerdiği alt sınırın hemen üstüne yığılır.
-            return new WindowRect(queried.Left, queried.Bottom - thicknessPx, queried.Right, queried.Bottom);
+            return edge switch
+            {
+                DockEdge.Top => new WindowRect(monitor.Left, monitor.Top, monitor.Right, monitor.Top + thicknessPx),
+                DockEdge.Left => new WindowRect(monitor.Left, monitor.Top, monitor.Left + thicknessPx, monitor.Bottom),
+                DockEdge.Right => new WindowRect(monitor.Right - thicknessPx, monitor.Top, monitor.Right, monitor.Bottom),
+                _ => new WindowRect(monitor.Left, monitor.Bottom - thicknessPx, monitor.Right, monitor.Bottom)
+            };
         }
 
         return edge switch
@@ -32,7 +53,8 @@ public static class AppBarMath
             DockEdge.Top => new WindowRect(queried.Left, queried.Top, queried.Right, queried.Top + thicknessPx),
             DockEdge.Left => new WindowRect(queried.Left, queried.Top, queried.Left + thicknessPx, queried.Bottom),
             DockEdge.Right => new WindowRect(queried.Right - thicknessPx, queried.Top, queried.Right, queried.Bottom),
-            _ => FinalRect(DockEdge.Bottom, monitor, thicknessPx, queried, ownsBottomEdge)
+            // Görev çubuğu görünürken: Windows'un önerdiği alt sınırın hemen üstüne yığılır.
+            _ => new WindowRect(queried.Left, queried.Bottom - thicknessPx, queried.Right, queried.Bottom)
         };
     }
 

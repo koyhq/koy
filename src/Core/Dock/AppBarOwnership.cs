@@ -15,6 +15,16 @@ public static class AppBarOwnership
         hideTaskbarSetting && taskbarHidden && !restoredManually;
 
     /// <summary>
+    /// AppBar'ın İLK kaydı için sahiplik: dock pencereleri kurulurken Windows görev çubuğu henüz görünürdür, ama hemen ardından
+    /// gizlenecekse (ayar açık, Gezgin'in çubuğu hazır, kullanıcı elle geri getirmedi) alt kenar baştan Koy'undur.
+    /// Aksi halde ilk SETPOS Gezgin'in çubuğunun ÜSTÜNE (60 + 58 px) yığılır ve çubuk gizlenip Gezgin çalışma alanını
+    /// yeniden hesaplayana kadar büyütülmüş pencereler dock'tan çok yukarıda kalırdı. Gizleme başarısız olursa
+    /// <see cref="OwnsBottomEdge"/> yanlış döner, sahiplik düşer ve alan yeniden yığılır (güvenli yön).
+    /// </summary>
+    public static bool OwnsBottomEdgeAtStart(bool hideTaskbarSetting, bool explorerTaskbarReady, bool restoredManually) =>
+        hideTaskbarSetting && explorerTaskbarReady && !restoredManually;
+
+    /// <summary>
     /// Monitörün çalışma alanı AppBar'ın istediği payla uyuşmuyorsa true. Alt kenar Koy'undayken pay TAM olmalıdır:
     /// eksik ayrılmış (Gezgin sıfırlamış) da fazla ayrılmış (kayıt anında Gezgin'in 48 px'i de sayılmış, 94 px) da düzeltilir.
     /// Alt kenar Koy'un değilken (görev çubuğu görünür, başka çubuklar yığılır) yalnız eksik pay düzeltilir.
