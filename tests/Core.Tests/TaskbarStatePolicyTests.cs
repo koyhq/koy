@@ -110,4 +110,14 @@ public class TaskbarStatePolicyTests
         var saved = hasRecord ? new TaskbarSavedState(Hidden: false, PreviousState: 2) : (TaskbarSavedState?)null;
         Assert.True(TaskbarStatePolicy.ShouldWriteState(saved, force: true));
     }
+
+    [Theory]
+    [InlineData(TaskbarStatePolicy.AutoHide, 1, true)]
+    [InlineData(TaskbarStatePolicy.AutoHide, 3, true)]
+    [InlineData(TaskbarStatePolicy.AlwaysOnTop, 0, true)]   // Windows 11 her zaman üstte bayrağını yok sayar
+    [InlineData(TaskbarStatePolicy.AlwaysOnTop, 2, true)]
+    [InlineData(TaskbarStatePolicy.AlwaysOnTop, 1, false)]  // otomatik gizleme kapanmadı: dosya silinmemeli
+    [InlineData(TaskbarStatePolicy.AutoHide, 0, false)]
+    public void IsAutoHideApplied_YalnizOtomatikGizlemeBitiniKarsilastirir(int desired, int actual, bool expected)
+        => Assert.Equal(expected, TaskbarStatePolicy.IsAutoHideApplied(desired, actual));
 }

@@ -66,6 +66,7 @@ public static partial class TaskbarService
     {
         lock (Gate)
         {
+            using var stateLock = EnterStateLock();
             if (ShutdownGuard.IsSuppressed(Environment.TickCount64))
                 return false;
 
@@ -116,10 +117,21 @@ public static partial class TaskbarService
     /// </summary>
     /// <param name="alsoSkipProcessId">Gözcü için: ölen Koy sürecinin tepsi penceresini atla.</param>
     /// <param name="force">Kurtarma amaçlı: kayıtlı durum olmasa bile ABM_SETSTATE gönder.</param>
-    public static unsafe void Restore(uint alsoSkipProcessId = 0, bool force = false)
+    /// <param name="keepPending">
+    /// Oturum kapanışı: çubuk geri getirilir ama durum dosyası, gözcü ve RunOnce yedeği kalır. Kapanmakta olan Gezgin
+    /// ABM_SETSTATE'i kalıcı yazmayabilir; dosya kalırsa sonraki oturum (RunOnce ya da Koy'un açılışı) yeniden geri yükler.
+    /// Kapatma iptal edilirse dock yeniden gizlerken kayıtlı önceki durumu kullanır.
+    /// </param>
+    /// <returns>Görev çubuğunun durumu doğrulanarak geri geldi mi (false: dosya kaldı, sonraki fırsatta yeniden denenir).</returns>
+    public static unsafe bool Restore(uint alsoSkipProcessId = 0, bool force = false, bool keepPending = false)
     {
         lock (Gate)
         {
+            using var stateLock = EnterStateLock();
+
+            // Oturum kapanışı sürerken (SessionEnding'den sonra OnExit, çökme işleyicileri) de dosya korunur.
+            keepPending |= ShutdownGuard.IsSuppressed(Environment.TickCount64);
+
             var read = ReadStateFile();
 
             SetAllBarsVisible();
@@ -130,8 +142,12 @@ public static partial class TaskbarService
             {
                 // Explorer yok: bekleyen kayıt varsa dosya ve yedekler kalır; yoksa temizlik.
                 if (!force && !TaskbarStatePolicy.HasPendingRestore(read))
+                {
                     Finish();
-                return;
+                    return true;
+                }
+
+                return false;
             }
 
             var data = new APPBARDATA
@@ -141,14 +157,43 @@ public static partial class TaskbarService
             };
             var current = (int)SendAppBarMessage(ABM_GETSTATE, ref data);
             var decision = TaskbarStatePolicy.DecideRestore(read, current, force);
-            if (decision.SendState)
+            var applied = !decision.SendState || SetStateVerified(ref data, decision.State);
+
+            if (keepPending)
+                return applied;
+
+            // Gezgin ABM_SETSTATE'i uygulamadıysa (oturum açılışında henüz hazır değil, yanıtsız) dosya silinmez: silinirse
+            // kalan AUTOHIDE bir sonraki gizlemede "kullanıcının tercihi" sanılır ve tik kalıcı açık kalırdı.
+            if (!applied)
             {
-                data.lParam = new LPARAM((nint)decision.State);
-                SendAppBarMessage(ABM_SETSTATE, ref data);
+                CrashLog.Write($"Görev çubuğu otomatik gizleme durumu geri yüklenemedi (istenen={decision.State}); durum dosyası korunuyor", null);
+                return false;
             }
 
             Finish();
+            return true;
         }
+    }
+
+    /// <summary>
+    /// ABM_SETSTATE gönderir ve ABM_GETSTATE ile otomatik gizleme bitinin gerçekten değiştiğini doğrular; tutmazsa kısa
+    /// aralıklarla birkaç kez yeniden dener. Windows 11 her zaman üstte bayrağını yok saydığından yalnız AUTOHIDE karşılaştırılır.
+    /// </summary>
+    private static bool SetStateVerified(ref APPBARDATA data, int desired)
+    {
+        for (var attempt = 0; attempt < TaskbarStatePolicy.SetStateAttempts; attempt++)
+        {
+            if (attempt > 0)
+                Thread.Sleep(TaskbarStatePolicy.SetStateRetryDelayMs);
+
+            data.lParam = new LPARAM((nint)desired);
+            SendAppBarMessage(ABM_SETSTATE, ref data);
+            var actual = (int)SendAppBarMessage(ABM_GETSTATE, ref data);
+            if (TaskbarStatePolicy.IsAutoHideApplied(desired, actual))
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -172,6 +217,37 @@ public static partial class TaskbarService
         }
 
         return anyVisible && Hide(dockMonitors);
+    }
+
+    /// <summary>
+    /// Koy ile gözcü (ve RunOnce'tan açılan geri yükleme kipi) aynı durum dosyasına ve aynı Gezgin durumuna dokunur. Süreçler
+    /// arası kilit olmadan yarış şuydu: Koy dosyayı "gizli, önceki=kapalı" okuyup yeniden yazmayı atlar, gözcü aynı anda geri
+    /// yükleyip dosyayı siler, Koy ardından AUTOHIDE koyar; dosyasız kalan AUTOHIDE sonraki gizlemede kullanıcının tercihi
+    /// sanılır ve Windows'taki "otomatik gizle" tiki kalıcı açık kalırdı. Kilit alınamazsa (zaman aşımı) yine de devam edilir:
+    /// görev çubuğunu geri getirmek hiçbir koşulda engellenmez.
+    /// </summary>
+    private static readonly Mutex StateMutex = new(false, TaskbarStatePolicy.StateMutexName);
+
+    private static StateLock EnterStateLock()
+    {
+        try
+        {
+            return new StateLock(StateMutex.WaitOne(TaskbarStatePolicy.StateLockTimeoutMs));
+        }
+        catch (AbandonedMutexException)
+        {
+            // Öteki süreç kilit elindeyken öldü: kilit artık bizde.
+            return new StateLock(true);
+        }
+    }
+
+    private readonly struct StateLock(bool acquired) : IDisposable
+    {
+        public void Dispose()
+        {
+            if (acquired)
+                StateMutex.ReleaseMutex();
+        }
     }
 
     // Koy'da gözcüyü başlatır/RunOnce yazar ve durdurur/siler; gözcü projesinde gövde yoktur (derleyici çağrıyı siler).

@@ -140,6 +140,8 @@ public partial class App : Application, IDisposable
         SessionEnding += (_, _) =>
         {
             TaskbarService.BeginShutdown();
+            // Durum dosyası korunur (BeginShutdown'dan sonra Restore bunu kendisi yapar): kapanan Gezgin AUTOHIDE'ı
+            // kalıcı yazmazsa sonraki oturumun geri yüklemesi yine bilir.
             SafeRestoreTaskbar();
             SafeCloseTrayHost();
         };
