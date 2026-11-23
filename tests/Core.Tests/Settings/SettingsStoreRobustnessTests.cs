@@ -120,7 +120,7 @@ public class SettingsStoreRobustnessTests : IDisposable
     public void No_backup_is_written_for_a_current_version_file()
     {
         var path = PathFor();
-        File.WriteAllText(path, """{ "Version": 4 }""");
+        File.WriteAllText(path, "{ \"Version\": " + AppSettings.CurrentVersion + " }");
 
         new SettingsStore(path).Load();
 
@@ -142,13 +142,13 @@ public class SettingsStoreRobustnessTests : IDisposable
     }
 
     [Fact]
-    public void Saved_file_is_version_4_with_nested_sections()
+    public void Saved_file_is_current_version_with_nested_sections()
     {
         var path = PathFor();
         new SettingsStore(path).Save(SettingsFile.Load(SettingsFile.FixtureV3));
 
         var text = File.ReadAllText(path);
-        Assert.Contains("\"Version\": 4", text);
+        Assert.Contains("\"Version\": " + AppSettings.CurrentVersion, text);
         Assert.Contains("\"Dock\": {", text);
         Assert.False(System.Text.Json.Nodes.JsonNode.Parse(text)!.AsObject().ContainsKey("DockEnabled"));
     }

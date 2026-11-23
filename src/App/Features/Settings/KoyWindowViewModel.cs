@@ -363,7 +363,7 @@ public sealed partial class KoyWindowViewModel : ObservableObject
     private bool _notchHideInFullscreen = true;
 
     [ObservableProperty]
-    private bool _notchEdgeLine = true;
+    private bool _notchEdgeLine;
 
     [ObservableProperty]
     private NotchEdgeLineColor _notchEdgeLineColor = NotchEdgeLineColor.NotchSurface;

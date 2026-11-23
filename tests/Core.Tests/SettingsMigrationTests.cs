@@ -48,7 +48,7 @@ public class SettingsMigrationTests
     [Fact]
     public void Current_version_is_untouched()
     {
-        var root = JsonNode.Parse("""{ "Version": 4, "MonitorTarget": "Elle", "NewScreenDefault": "NotchOnly" }""")!.AsObject();
+        var root = JsonNode.Parse("""{ "Version": 5, "MonitorTarget": "Elle", "NewScreenDefault": "NotchOnly" }""")!.AsObject();
 
         var original = SettingsMigration.Migrate(root);
 
@@ -56,6 +56,45 @@ public class SettingsMigrationTests
         Assert.Equal("Elle", (string?)root["MonitorTarget"]);
         Assert.Equal("NotchOnly", (string?)root["NewScreenDefault"]);
         Assert.Null(root["Monitors"]);
+    }
+
+    [Fact]
+    public void Version4_edge_line_is_turned_off_once()
+    {
+        var migrated = SettingsFile.Load("""{ "Version": 4, "Notch": { "EdgeLine": true, "EdgeLineThickness": 6 } }""");
+
+        Assert.False(migrated.Notch.EdgeLine);
+        Assert.Equal(6, migrated.Notch.EdgeLineThickness);
+    }
+
+    [Fact]
+    public void Current_version_keeps_an_edge_line_the_user_turned_on()
+    {
+        var loaded = SettingsFile.Load("""{ "Version": 5, "Notch": { "EdgeLine": true } }""");
+
+        Assert.True(loaded.Notch.EdgeLine);
+    }
+
+    [Fact]
+    public void Edge_line_is_off_by_default()
+        => Assert.False(new AppSettings().Notch.EdgeLine);
+
+    [Fact]
+    public void Version4_wizard_leftover_hide_taskbar_false_is_repaired_while_dock_is_off()
+    {
+        // "Yalnız çentik" sihirbazı false yazıyordu; dock sonradan açılınca Windows görev çubuğu görünür kalıyordu.
+        var migrated = SettingsFile.Load("""{ "Version": 4, "Dock": { "Enabled": false, "HideWindowsTaskbar": false } }""");
+
+        Assert.True(migrated.Dock.HideWindowsTaskbar);
+        Assert.False(migrated.Dock.Enabled);
+    }
+
+    [Fact]
+    public void Version4_hide_taskbar_false_with_dock_on_is_kept_as_a_deliberate_choice()
+    {
+        var migrated = SettingsFile.Load("""{ "Version": 4, "Dock": { "Enabled": true, "HideWindowsTaskbar": false } }""");
+
+        Assert.False(migrated.Dock.HideWindowsTaskbar);
     }
 
     [Fact]

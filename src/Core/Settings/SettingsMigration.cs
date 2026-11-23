@@ -39,6 +39,8 @@ public static class SettingsMigration
             MigrateV2ToV3(root);
         if (original < 4)
             MigrateV3ToV4(root);
+        if (original < 5)
+            MigrateV4ToV5(root);
 
         root["Version"] = AppSettings.CurrentVersion;
         return original;
@@ -84,6 +86,29 @@ public static class SettingsMigration
         foreach (var (name, section) in sections)
             root[name] = section;
     }
+
+    /// <summary>
+    /// Sürüm 4 → 5:
+    /// <list type="bullet">
+    /// <item>Üst kenar çizgisi (<c>Notch.EdgeLine</c>) varsayılanı açıktan kapalıya döndü. Eski dosyadaki <c>true</c> çoğunlukla
+    /// eski varsayılandır (bütün ayar yazıldığı için dosyada durur), bu yüzden bir kez kapatılır; isteyen yeniden açar.</item>
+    /// <item>Kurulum sihirbazı "Yalnız çentik" seçiminde <c>Dock.HideWindowsTaskbar</c>'ı false yazıyordu; dock sonradan açılınca
+    /// Windows görev çubuğu dock'un altında kalıyordu. Dock kapalıyken bu değerin etkisi yoktur (AGENTS #12), dolayısıyla
+    /// dock kapalı dosyada false varsayılana (true) döner. Dock açıkken false bilinçli seçim sayılır, dokunulmaz.</item>
+    /// </list>
+    /// </summary>
+    private static void MigrateV4ToV5(JsonObject root)
+    {
+        if (root["Notch"] is JsonObject notch && IsTrue(notch["EdgeLine"]))
+            notch["EdgeLine"] = false;
+
+        if (root["Dock"] is JsonObject dock && IsFalse(dock["HideWindowsTaskbar"]) && IsFalse(dock["Enabled"]))
+            dock["HideWindowsTaskbar"] = true;
+    }
+
+    private static bool IsTrue(JsonNode? node) => node is JsonValue v && v.TryGetValue<bool>(out var b) && b;
+
+    private static bool IsFalse(JsonNode? node) => node is JsonValue v && v.TryGetValue<bool>(out var b) && !b;
 
     /// <summary>
     /// "Notch.TabBarStyle": "IconAndLabel" kaldırıldı (etiketler çıkarıldığında seçenek hiçbir şey yapmıyordu ve ayar
