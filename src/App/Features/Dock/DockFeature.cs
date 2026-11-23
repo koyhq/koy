@@ -118,7 +118,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             _appBarService = new AppBarService
             {
                 OwnsBottomEdge = AppBarOwnership.OwnsBottomEdgeAtStart(
-                    settings.Dock.HideWindowsTaskbar, TaskbarService.IsExplorerTaskbarReady, _trayReleasedByUser)
+                    HidesWindowsTaskbar, TaskbarService.IsExplorerTaskbarReady, _trayReleasedByUser)
             };
         }
 
@@ -246,7 +246,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
         ApplyTrayPolicy();
 
-        if (settings.Dock.HideWindowsTaskbar)
+        if (HidesWindowsTaskbar)
         {
             ApplyTaskbarPolicy();
             // Yeni Gezgin kendi tepsisini oluşturdu: Koy'unki yeniden öne alınır, uygulamalar simgelerini yeniden kaydeder.
@@ -303,7 +303,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         if (_appBarService is null)
             return false;
 
-        var owns = AppBarOwnership.OwnsBottomEdge(settings.Dock.HideWindowsTaskbar, _taskbarHidden, _trayReleasedByUser);
+        var owns = AppBarOwnership.OwnsBottomEdge(HidesWindowsTaskbar, _taskbarHidden, _trayReleasedByUser);
         if (_appBarService.OwnsBottomEdge == owns)
             return false;
 
@@ -351,6 +351,9 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
 
     private static readonly int[] AppBarSettleDelaysMs = [1500, 3000, 5000];
 
+    /// <summary>Windows görev çubuğu gizlenecek mi: ayar ya da tam genişlik stili (bkz. WindowsTaskbarPolicy).</summary>
+    private bool HidesWindowsTaskbar => WindowsTaskbarPolicy.ShouldHide(settings.Dock);
+
     /// <summary>Stile göre geçerli yakınlık modu (tam genişlikte Aşağı yapış/Çekil sadeleşir; bkz. DockProximityMapping).</summary>
     private DockProximityMode EffectiveProximity => DockProximityMapping.Effective(settings.Dock.Style, settings.Dock.Proximity);
 
@@ -363,7 +366,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         if (_stopping)
             return;
 
-        if (settings.Dock.HideWindowsTaskbar && _windowStates.Count > 0)
+        if (HidesWindowsTaskbar && _windowStates.Count > 0)
         {
             // Görev çubuğu yeniden göründüyse gizlendi: tepsi sahipliği (elle geri getirmede bırakılmıştı) geri alınır.
             if (TaskbarService.EnsureHidden(DockMonitorHandles()) && _trayReleasedByUser)
@@ -405,7 +408,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
     /// </summary>
     private void ApplyTaskbarPolicy()
     {
-        if (!settings.Dock.HideWindowsTaskbar)
+        if (!HidesWindowsTaskbar)
             return;
 
         if (_windowStates.Count > 0)
@@ -454,7 +457,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
             return;
 
         var shouldHost = !_trayReleasedByUser
-            && TrayHostPolicy.ShouldHost(settings.Dock.HideWindowsTaskbar, settings.Dock.ShowTray, _windowStates.Count);
+            && TrayHostPolicy.ShouldHost(HidesWindowsTaskbar, settings.Dock.ShowTray, _windowStates.Count);
 
         var now = DateTime.UtcNow;
         var action = _trayRecovery.Decide(shouldHost, _trayService is not null, _trayService is { IsRunning: true }, now);
@@ -740,7 +743,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         {
             // Görev çubuğu geri getirilmeden önce Koy'un tepsi penceresi bırakılır; gizlenirken önce tepsi kurulur.
             ApplyTrayPolicy();
-            if (settings.Dock.HideWindowsTaskbar)
+            if (HidesWindowsTaskbar)
             {
                 ApplyTaskbarPolicy();
             }
@@ -785,7 +788,7 @@ public sealed class DockFeature(AppSettings settings, SharedServices services) :
         {
             _appBarService ??= new AppBarService
             {
-                OwnsBottomEdge = AppBarOwnership.OwnsBottomEdge(settings.Dock.HideWindowsTaskbar, _taskbarHidden, _trayReleasedByUser)
+                OwnsBottomEdge = AppBarOwnership.OwnsBottomEdge(HidesWindowsTaskbar, _taskbarHidden, _trayReleasedByUser)
             };
             UpdateAppBarOwnership();
             foreach (var state in _windowStates.Values)

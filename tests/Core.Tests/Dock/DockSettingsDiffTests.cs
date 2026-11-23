@@ -224,4 +224,33 @@ public class DockSettingsDiffTests
         Assert.True(d.ReconcileAppBar);
         Assert.True(d.RebuildViewModels);
     }
+
+    [Theory]
+    [InlineData(DockStyleMode.FullWidth, false, true)]
+    [InlineData(DockStyleMode.FullWidth, true, true)]
+    [InlineData(DockStyleMode.FloatingCapsule, true, true)]
+    [InlineData(DockStyleMode.FloatingCapsule, false, false)]
+    public void Full_width_dock_always_hides_the_windows_taskbar(DockStyleMode style, bool setting, bool expected)
+        => Assert.Equal(expected, WindowsTaskbarPolicy.ShouldHide(new DockSettings { Style = style, HideWindowsTaskbar = setting }));
+
+    [Fact]
+    public void Switching_to_full_width_with_hiding_off_reconciles_the_taskbar()
+    {
+        var d = DockSettingsDiff.Compare(
+            new AppSettings { Dock = new DockSettings { Style = DockStyleMode.FloatingCapsule, HideWindowsTaskbar = false } },
+            new AppSettings { Dock = new DockSettings { Style = DockStyleMode.FullWidth, HideWindowsTaskbar = false } });
+
+        Assert.True(d.ReconcileTaskbar);
+        Assert.True(d.ReconcileTray);
+    }
+
+    [Fact]
+    public void Toggling_the_hide_setting_in_full_width_does_not_touch_the_taskbar()
+    {
+        var d = DockSettingsDiff.Compare(
+            new AppSettings { Dock = new DockSettings { Style = DockStyleMode.FullWidth, HideWindowsTaskbar = true } },
+            new AppSettings { Dock = new DockSettings { Style = DockStyleMode.FullWidth, HideWindowsTaskbar = false } });
+
+        Assert.False(d.ReconcileTaskbar);
+    }
 }

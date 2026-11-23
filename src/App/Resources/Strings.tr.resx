@@ -288,6 +288,9 @@
   <data name="HideWindowsTaskbarTitle" xml:space="preserve">
     <value>Windows görev çubuğunu gizle</value>
   </data>
+  <data name="HideWindowsTaskbarFullWidthNote" xml:space="preserve">
+    <value>Tam genişlik dock'ta Windows görev çubuğu her zaman gizlenir</value>
+  </data>
   <data name="HideWindowsTaskbarDesc" xml:space="preserve">
     <value>Dock açıkken ekranda tek çubuk olur</value>
   </data>

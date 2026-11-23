@@ -288,6 +288,9 @@
   <data name="HideWindowsTaskbarTitle" xml:space="preserve">
     <value>Hide Windows taskbar</value>
   </data>
+  <data name="HideWindowsTaskbarFullWidthNote" xml:space="preserve">
+    <value>The full width dock always hides the Windows taskbar</value>
+  </data>
   <data name="HideWindowsTaskbarDesc" xml:space="preserve">
     <value>Single dock bar on screen when the dock is active</value>
   </data>
