@@ -8,6 +8,10 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 ---
 
 ## [0.2.19](https://github.com/koyhq/koy/compare/v0.2.18...v0.2.19) (2026-11-24)
+Highlights:
+- **Reliable taskbar hiding:** the full width dock always hides the Windows taskbar, and enabling the dock after a notch-only setup hides it cleanly instead of leaving both bars stacked.
+- **No leftover auto-hide setting:** Koy verifies `ABM_SETSTATE` with `ABM_GETSTATE`, preserves the state file across session end, and synchronizes Koy and the watchdog with a cross-process lock so Windows' "Automatically hide the taskbar" setting returns to its previous value.
+- **Cleaner default notch:** the notch edge line is now off by default.
 
 
 ### Fixed
