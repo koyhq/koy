@@ -11,6 +11,7 @@ namespace Koy.Platform.Media;
 /// </summary>
 public sealed class MediaService : IMediaService
 {
+    private readonly object _sessionLock = new();
     private GlobalSystemMediaTransportControlsSessionManager? _manager;
     private GlobalSystemMediaTransportControlsSession? _currentSession;
     private string? _selectedSessionId;
@@ -112,21 +113,52 @@ public sealed class MediaService : IMediaService
 
     private async void OnSessionManagerCurrentSessionChanged(GlobalSystemMediaTransportControlsSessionManager sender, CurrentSessionChangedEventArgs args)
     {
-        if (_selectedSessionId is null)
+        if (_disposed)
+            return;
+
+        try
         {
-            await BindToSessionAsync(sender.GetCurrentSession());
-            await RefreshSessionListAsync();
+            if (_selectedSessionId is null)
+            {
+                await BindToSessionAsync(sender.GetCurrentSession());
+                await RefreshSessionListAsync();
+            }
+        }
+        catch
+        {
+            // Oturum değişimi sırasında WinRT nesnesi düşebilir; süreç çökmemeli.
         }
     }
 
     private async void OnSessionManagerSessionsChanged(GlobalSystemMediaTransportControlsSessionManager sender, SessionsChangedEventArgs args)
     {
-        await RefreshSessionListAsync();
+        if (_disposed)
+            return;
+
+        try
+        {
+            await RefreshSessionListAsync();
+        }
+        catch
+        {
+            // Oturum listesi okunamazsa süreç çökmemeli.
+        }
     }
 
     private async Task RefreshSessionListAsync()
     {
-        if (_manager is null)
+        GlobalSystemMediaTransportControlsSessionManager? manager;
+        GlobalSystemMediaTransportControlsSession? currentSession;
+        lock (_sessionLock)
+        {
+            if (_disposed)
+                return;
+
+            manager = _manager;
+            currentSession = _currentSession;
+        }
+
+        if (manager is null)
         {
             Sessions = [];
             SessionsChanged?.Invoke(this, Sessions);
@@ -135,14 +167,14 @@ public sealed class MediaService : IMediaService
 
         try
         {
-            var rawSessions = _manager.GetSessions();
+            var rawSessions = manager.GetSessions();
             var list = new List<MediaSessionInfo>();
             var hasSelected = false;
 
             foreach (var s in rawSessions)
             {
                 var appId = s.SourceAppUserModelId ?? string.Empty;
-                var isCurrent = _currentSession is not null && _currentSession.SourceAppUserModelId == appId;
+                var isCurrent = currentSession is not null && currentSession.SourceAppUserModelId == appId;
                 var title = CleanSessionTitle(appId);
                 list.Add(new MediaSessionInfo(appId, appId, title, isCurrent));
 
@@ -154,7 +186,7 @@ public sealed class MediaService : IMediaService
             if (_selectedSessionId is not null && !hasSelected)
             {
                 _selectedSessionId = null;
-                await BindToSessionAsync(_manager.GetCurrentSession());
+                await BindToSessionAsync(manager.GetCurrentSession());
             }
 
             Sessions = list;
@@ -190,23 +222,33 @@ public sealed class MediaService : IMediaService
 
     private async Task BindToSessionAsync(GlobalSystemMediaTransportControlsSession? session)
     {
-        if (_currentSession is not null)
+        bool sameSession;
+        lock (_sessionLock)
         {
-            _currentSession.MediaPropertiesChanged -= OnMediaPropertiesChanged;
-            _currentSession.PlaybackInfoChanged -= OnPlaybackInfoChanged;
-            _currentSession.TimelinePropertiesChanged -= OnTimelinePropertiesChanged;
+            if (_disposed)
+                return;
+
+            sameSession = ReferenceEquals(_currentSession, session);
+            if (!sameSession)
+            {
+                if (_currentSession is not null)
+                    DetachSessionEvents(_currentSession);
+
+                _currentSession = session;
+
+                if (session is not null && !TryAttachSessionEvents(session))
+                {
+                    _currentSession = null;
+                    return;
+                }
+            }
         }
 
-        _currentSession = session;
-
-        if (_currentSession is not null)
+        if (session is not null)
         {
-            _currentSession.MediaPropertiesChanged += OnMediaPropertiesChanged;
-            _currentSession.PlaybackInfoChanged += OnPlaybackInfoChanged;
-            _currentSession.TimelinePropertiesChanged += OnTimelinePropertiesChanged;
             await UpdateAllAsync();
         }
-        else
+        else if (!sameSession)
         {
             Current = null;
             Timeline = null;
@@ -215,18 +257,64 @@ public sealed class MediaService : IMediaService
         }
     }
 
+    private void DetachSessionEvents(GlobalSystemMediaTransportControlsSession session)
+    {
+        try
+        {
+            session.MediaPropertiesChanged -= OnMediaPropertiesChanged;
+            session.PlaybackInfoChanged -= OnPlaybackInfoChanged;
+            session.TimelinePropertiesChanged -= OnTimelinePropertiesChanged;
+        }
+        catch
+        {
+            // Oturum zaten kapanmış olabilir.
+        }
+    }
+
+    private bool TryAttachSessionEvents(GlobalSystemMediaTransportControlsSession session)
+    {
+        try
+        {
+            session.MediaPropertiesChanged += OnMediaPropertiesChanged;
+            session.PlaybackInfoChanged += OnPlaybackInfoChanged;
+            session.TimelinePropertiesChanged += OnTimelinePropertiesChanged;
+            return true;
+        }
+        catch
+        {
+            DetachSessionEvents(session);
+            return false;
+        }
+    }
+
     private async void OnMediaPropertiesChanged(GlobalSystemMediaTransportControlsSession sender, MediaPropertiesChangedEventArgs args)
     {
-        await UpdateMediaPropertiesAsync();
+        if (_disposed)
+            return;
+
+        try
+        {
+            await UpdateMediaPropertiesAsync();
+        }
+        catch
+        {
+            // Medya özellikleri alınırken oturum kapanabilir; süreç çökmemeli.
+        }
     }
 
     private void OnPlaybackInfoChanged(GlobalSystemMediaTransportControlsSession sender, PlaybackInfoChangedEventArgs args)
     {
+        if (_disposed)
+            return;
+
         UpdatePlaybackInfo();
     }
 
     private void OnTimelinePropertiesChanged(GlobalSystemMediaTransportControlsSession sender, TimelinePropertiesChangedEventArgs args)
     {
+        if (_disposed)
+            return;
+
         UpdateTimelineInfo();
     }
 
@@ -239,7 +327,16 @@ public sealed class MediaService : IMediaService
 
     private async Task UpdateMediaPropertiesAsync()
     {
-        if (_currentSession is null)
+        GlobalSystemMediaTransportControlsSession? session;
+        lock (_sessionLock)
+        {
+            if (_disposed)
+                return;
+
+            session = _currentSession;
+        }
+
+        if (session is null)
         {
             Current = null;
             Changed?.Invoke(this, null);
@@ -248,8 +345,8 @@ public sealed class MediaService : IMediaService
 
         try
         {
-            var props = await _currentSession.TryGetMediaPropertiesAsync();
-            var playback = _currentSession.GetPlaybackInfo();
+            var props = await session.TryGetMediaPropertiesAsync();
+            var playback = session.GetPlaybackInfo();
             var isPlaying = playback?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
 
             byte[]? thumb = null;
@@ -278,7 +375,7 @@ public sealed class MediaService : IMediaService
             Current = new MediaInfo(
                 props?.Title ?? string.Empty,
                 props?.Artist ?? string.Empty,
-                _currentSession.SourceAppUserModelId ?? string.Empty,
+                session.SourceAppUserModelId ?? string.Empty,
                 isPlaying,
                 thumb);
 
@@ -292,12 +389,21 @@ public sealed class MediaService : IMediaService
 
     private void UpdatePlaybackInfo()
     {
-        if (_currentSession is null || Current is null)
+        GlobalSystemMediaTransportControlsSession? session;
+        lock (_sessionLock)
+        {
+            if (_disposed)
+                return;
+
+            session = _currentSession;
+        }
+
+        if (session is null || Current is null)
             return;
 
         try
         {
-            var playback = _currentSession.GetPlaybackInfo();
+            var playback = session.GetPlaybackInfo();
             var isPlaying = playback?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
             if (Current.IsPlaying != isPlaying)
             {
@@ -313,7 +419,16 @@ public sealed class MediaService : IMediaService
 
     private void UpdateTimelineInfo()
     {
-        if (_currentSession is null)
+        GlobalSystemMediaTransportControlsSession? session;
+        lock (_sessionLock)
+        {
+            if (_disposed)
+                return;
+
+            session = _currentSession;
+        }
+
+        if (session is null)
         {
             Timeline = null;
             TimelineChanged?.Invoke(this, null);
@@ -322,7 +437,7 @@ public sealed class MediaService : IMediaService
 
         try
         {
-            var timeline = _currentSession.GetTimelineProperties();
+            var timeline = session.GetTimelineProperties();
             if (timeline is not null)
             {
                 Timeline = new PlaybackTimeline(
@@ -341,24 +456,34 @@ public sealed class MediaService : IMediaService
 
     public void Dispose()
     {
-        if (_disposed)
-            return;
-
-        _disposed = true;
-
-        if (_currentSession is not null)
+        GlobalSystemMediaTransportControlsSession? session;
+        GlobalSystemMediaTransportControlsSessionManager? manager;
+        lock (_sessionLock)
         {
-            _currentSession.MediaPropertiesChanged -= OnMediaPropertiesChanged;
-            _currentSession.PlaybackInfoChanged -= OnPlaybackInfoChanged;
-            _currentSession.TimelinePropertiesChanged -= OnTimelinePropertiesChanged;
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            session = _currentSession;
             _currentSession = null;
+            manager = _manager;
+            _manager = null;
         }
 
-        if (_manager is not null)
+        if (session is not null)
+            DetachSessionEvents(session);
+
+        if (manager is not null)
         {
-            _manager.CurrentSessionChanged -= OnSessionManagerCurrentSessionChanged;
-            _manager.SessionsChanged -= OnSessionManagerSessionsChanged;
-            _manager = null;
+            try
+            {
+                manager.CurrentSessionChanged -= OnSessionManagerCurrentSessionChanged;
+                manager.SessionsChanged -= OnSessionManagerSessionsChanged;
+            }
+            catch
+            {
+                // Yönetici kapanmış olabilir.
+            }
         }
     }
 }
