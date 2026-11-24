@@ -7,6 +7,13 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.19](https://github.com/koyhq/koy/compare/v0.2.18...v0.2.19) (2026-11-24)
+
+
+### Fixed
+
+* **dock:** hide the Windows taskbar reliably and stop leaving auto-hide on ([#212](https://github.com/koyhq/koy/issues/212)) ([29fb72c](https://github.com/koyhq/koy/commit/29fb72c6aa480eda55e430c95bd692c1d7a3e3af))
+
 ## [0.2.18](https://github.com/koyhq/koy/compare/v0.2.17...v0.2.18) (2026-11-22)
 Highlights:
 - **Update folder lock fix (v0.2.17 update bug):** in v0.2.17 and earlier, apps launched from Koy's dock, search, or jump list inherited the `current` install folder as their working directory, causing updates to fail with a Windows file-in-use lock (error 32). Koy and all apps it launches now use a safe working directory; when updating from v0.2.17 or earlier, close any apps launched from Koy once (or restart Windows), and starting with v0.2.18 this lock will no longer happen.
