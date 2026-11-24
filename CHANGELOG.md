@@ -8,6 +8,8 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 ---
 
 ## [0.2.20](https://github.com/koyhq/koy/compare/v0.2.19...v0.2.20) (2026-11-24)
+Highlights:
+- **Media session crash fix (affects v0.2.19 and earlier):** fixed a `NullReferenceException` race in `MediaService.BindToSessionAsync` and unhandled `async void` WinRT media event callbacks that could crash Koy when media sessions changed or closed. Users on v0.2.19 should update to v0.2.20.
 
 
 ### Fixed

@@ -5,6 +5,14 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.20](https://github.com/koyhq/koy/compare/v0.2.19...v0.2.20) (2026-11-24)
+Öne çıkanlar:
+- **Medya oturumu çökme düzeltmesi (v0.2.19 ve öncesinde bulunan hata):** Medya oturumları değişirken veya kapanırken `MediaService.BindToSessionAsync` içinde oluşabilen `NullReferenceException` yarış durumu ve yakalanmayan WinRT olay istisnaları giderildi. v0.2.19 sürümünde de bulunan bu çökme hatası nedeniyle v0.2.20'ye güncellemeni öneririz.
+
+### Düzeltmeler
+
+* **media:** medya oturumu değişimi ve `Dispose` sırasında `MediaService.BindToSessionAsync` içinde oluşan yarış durumu ve yakalanmayan WinRT olay istisnalarından kaynaklanan çökme giderildi (v0.2.19 ve öncesini etkileyen hata) ([#214](https://github.com/koyhq/koy/pull/214)) ([0abae54](https://github.com/koyhq/koy/commit/0abae5498d165cdbb993e5c56479daa0e0d0e72c))
+
 ## [0.2.19](https://github.com/koyhq/koy/compare/v0.2.18...v0.2.19) (2026-11-24)
 Öne çıkanlar:
 - **Güvenilir görev çubuğu gizleme:** Tam genişlik dock artık Windows görev çubuğunu her zaman gizliyor; yalnız çentikle kurulum yapıp dock'u sonradan açtığında da görev çubuğu altta görünür kalmıyor.
