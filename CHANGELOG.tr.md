@@ -5,6 +5,16 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) standardına day
 
 ---
 
+## [0.2.19](https://github.com/koyhq/koy/compare/v0.2.18...v0.2.19) (2026-11-24)
+Öne çıkanlar:
+- **Güvenilir görev çubuğu gizleme:** Tam genişlik dock artık Windows görev çubuğunu her zaman gizliyor; yalnız çentikle kurulum yapıp dock'u sonradan açtığında da görev çubuğu altta görünür kalmıyor.
+- **Otomatik gizleme ayarı takılı kalmıyor:** Geri yükleme `ABM_GETSTATE` ile doğrulanıyor, oturum kapanışında durum dosyası korunuyor ve Koy ile gözcü süreçler arası kilitle (`Local\Koy.TaskbarState`) eşzamanlanıyor.
+- **Daha sade varsayılan çentik:** Çentik kenar çizgisi artık varsayılan olarak kapalı.
+
+### Düzeltmeler
+
+* **dock:** tam genişlik dock'ta ve çentik sonrası kurulumda Windows görev çubuğu güvenilir biçimde gizlenir, otomatik gizleme ayarı kapanış/oturum sonu/güncelleme sonrası açık kalmaz ve çentik kenar çizgisi varsayılan olarak kapatıldı ([#212](https://github.com/koyhq/koy/pull/212)) ([29fb72c](https://github.com/koyhq/koy/commit/29fb72c6aa480eda55e430c95bd692c1d7a3e3af))
+
 ## [0.2.18](https://github.com/koyhq/koy/compare/v0.2.17...v0.2.18) (2026-11-22)
 Öne çıkanlar:
 - **Güncelleme kilidi düzeltildi (v0.2.17 güncelleme hatası):** v0.2.17 ve önceki sürümlerde dock, arama veya atlama listesinden açılan uygulamalar `current` kurulum klasörünü çalışma dizini olarak miras aldığı için güncelleme sırasında Windows dosya kilidi (hata 32) oluşabiliyor ve yeni sürüm uygulanamıyordu. Koy ve başlattığı tüm uygulamalar artık güvenli çalışma diziniyle açılır; v0.2.17 veya öncesinden geçerken dock'tan açılmış uygulamaları bir kez kapatman gerekir, v0.2.18 sonrasında bu kilit bir daha yaşanmaz.
