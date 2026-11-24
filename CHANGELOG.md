@@ -7,6 +7,13 @@ Entries up to 0.2.2 are English summaries. The full history of those releases is
 
 ---
 
+## [0.2.20](https://github.com/koyhq/koy/compare/v0.2.19...v0.2.20) (2026-11-24)
+
+
+### Fixed
+
+* **media:** guard session binding against races and unhandled WinRT event exceptions ([#214](https://github.com/koyhq/koy/issues/214)) ([0abae54](https://github.com/koyhq/koy/commit/0abae5498d165cdbb993e5c56479daa0e0d0e72c))
+
 ## [0.2.19](https://github.com/koyhq/koy/compare/v0.2.18...v0.2.19) (2026-11-24)
 Highlights:
 - **Reliable taskbar hiding:** the full width dock always hides the Windows taskbar, and enabling the dock after a notch-only setup hides it cleanly instead of leaving both bars stacked.
