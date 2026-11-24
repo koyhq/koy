@@ -40,7 +40,9 @@ internal static class Program
             return 0;
 
         var result = Wait(koyPid);
-        if (WatchdogPolicy.Decide(result) == WatchdogAction.RestoreTaskbar)
+        // Koy ölüp hemen yeniden açıldıysa (güncelleme, elle yeniden başlatma) durumu yeni örnek yönetir: geri yükleme onun
+        // gizlemesiyle yarışıp AUTOHIDE'ı kayıtsız bırakabilirdi.
+        if (WatchdogPolicy.Decide(result) == WatchdogAction.RestoreTaskbar && !KoyIsRunning())
         {
             try
             {

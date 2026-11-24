@@ -5,8 +5,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:Koy.App.Features.Settings"
              xmlns:res="clr-namespace:Koy.App.Resources"
+             xmlns:cc="clr-namespace:Koy.App.Features.ControlCenter"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:KoyWindowViewModel}">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
 
     <StackPanel>
         <!-- BAŞLANGIÇ -->
@@ -35,8 +40,12 @@
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="{Binding [HideWindowsTaskbarTitle], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingTitleStyle}" />
                     <TextBlock Text="{Binding [HideWindowsTaskbarDesc], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}" />
+                    <!-- Tam genişlik dock Windows görev çubuğunun yerini alır: çubuk ayardan bağımsız gizlenir (Core: WindowsTaskbarPolicy). -->
+                    <TextBlock Text="{Binding [HideWindowsTaskbarFullWidthNote], Source={x:Static res:Loc.Instance}}" Style="{StaticResource SettingDescStyle}"
+                               Visibility="{Binding DockIsFullWidth, Converter={StaticResource BoolToVis}}" />
                 </StackPanel>
                 <CheckBox Grid.Column="1" AutomationProperties.Name="{Binding [HideWindowsTaskbarTitle], Source={x:Static res:Loc.Instance}}" IsChecked="{Binding HideWindowsTaskbar}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                          IsEnabled="{Binding DockIsFullWidth, Converter={x:Static cc:InverseBoolConverter.Instance}}"
                           Style="{StaticResource ToggleSwitchStyle}" />
             </Grid>
         </Border>

@@ -16,8 +16,9 @@ public sealed record AppSettings
     /// <summary>
     /// Şema sürümü. 3: monitör başına ayar, eski MonitorTarget göçle taşınır. 4: bölümlere ayrılmış kayıtlar,
     /// sayı ve dile bağlı metin değerleri enum adı olarak yazılır (v3 düz dosyası <see cref="SettingsMigration"/> ile taşınır).
+    /// 5: üst kenar çizgisi varsayılanı kapalı; sihirbazdan kalma "görev çubuğunu gizleme" değeri onarılır.
     /// </summary>
-    public const int CurrentVersion = 4;
+    public const int CurrentVersion = 5;
 
     public int Version { get; set; } = CurrentVersion;
     public GeneralSettings General { get; set; } = new();

@@ -121,10 +121,11 @@ public sealed partial class SetupWizardViewModel : ObservableObject
             {
                 Enabled = notchEnabled
             },
+            // HideWindowsTaskbar burada yazılmaz: dock kapalıyken zaten etkisizdir (AGENTS #12). "Yalnız çentik" seçimi onu
+            // false yazınca, dock sonradan açıldığında Windows görev çubuğu dock'un altında görünür kalıyordu.
             Dock = settings.Dock with
             {
-                Enabled = dockEnabled,
-                HideWindowsTaskbar = dockEnabled
+                Enabled = dockEnabled
             },
             Weather = settings.Weather with
             {

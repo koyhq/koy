@@ -52,7 +52,8 @@ public class GoldenV3ToV4Tests
     public void Dock_section()
     {
         Assert.False(S.Dock.Enabled);
-        Assert.False(S.Dock.HideWindowsTaskbar);
+        // v3'teki false, v4'e taşınır; dock kapalı olduğundan v5 göçü varsayılana (true) döndürür.
+        Assert.True(S.Dock.HideWindowsTaskbar);
         Assert.Equal(VisibilityMode.Smart, S.Dock.Visibility);
         Assert.Equal(DockStyleMode.FullWidth, S.Dock.Style);
         Assert.Equal(DockIconAlignment.Right, S.Dock.IconAlignment);

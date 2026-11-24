@@ -32,6 +32,25 @@ public static class TaskbarStatePolicy
     public const int AutoHide = 0x1;
     public const int AlwaysOnTop = 0x2;
 
+    /// <summary>Koy ile gözcünün durum dosyası ve ABM_SETSTATE üstündeki süreçler arası kilidi (oturuma özel).</summary>
+    public const string StateMutexName = @"Local\Koy.TaskbarState";
+
+    /// <summary>Kilit için en uzun bekleme (ms); dolarsa kilitsiz devam edilir (geri getirme engellenmez).</summary>
+    public const int StateLockTimeoutMs = 2000;
+
+    /// <summary>Geri yüklemede ABM_SETSTATE en çok kaç kez denenir (doğrulama tutmazsa).</summary>
+    public const int SetStateAttempts = 3;
+
+    /// <summary>Denemeler arası bekleme (ms). Toplam bekleme 200 ms'yi geçmez: arayüz iş parçacığında da çağrılır.</summary>
+    public const int SetStateRetryDelayMs = 100;
+
+    /// <summary>
+    /// ABM_SETSTATE uygulandı mı: yalnız otomatik gizleme biti karşılaştırılır. Windows 11 her zaman üstte bayrağını
+    /// yok sayar ve GETSTATE'te kendi değerini döner; o bit farkı başarısızlık sayılmaz.
+    /// </summary>
+    public static bool IsAutoHideApplied(int desiredState, int actualState)
+        => (desiredState & AutoHide) == (actualState & AutoHide);
+
     /// <summary>
     /// Gizlemeden önceki durumu seçer. Zaten gizliyken (durum dosyası "hidden") görev çubuğunun
     /// o anki durumu bizim koyduğumuz AUTOHIDE'dır; onu "önceki durum" sayma, kayıtlıyı koru.

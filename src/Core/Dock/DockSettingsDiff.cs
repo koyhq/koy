@@ -25,12 +25,13 @@ public readonly record struct DockSettingsDiff(
         var appBar = DockProximityMapping.Effective(before.Dock.Style, before.Dock.Proximity) == DockProximityMode.ReserveSpace
                      != (DockProximityMapping.Effective(after.Dock.Style, after.Dock.Proximity) == DockProximityMode.ReserveSpace)
                      || before.Dock.Style != after.Dock.Style
-                     || before.Dock.HideWindowsTaskbar != after.Dock.HideWindowsTaskbar
+                     || WindowsTaskbarPolicy.ShouldHide(before.Dock) != WindowsTaskbarPolicy.ShouldHide(after.Dock)
                      || before.Dock.Edge != after.Dock.Edge
                      || before.Dock.LengthPercent != after.Dock.LengthPercent
                      || before.Dock.EdgeOffsetDip != after.Dock.EdgeOffsetDip;
 
-        var taskbar = before.Dock.HideWindowsTaskbar != after.Dock.HideWindowsTaskbar;
+        // Tam genişlik stili görev çubuğunu ayardan bağımsız gizler: stil değişimi de görev çubuğunu uzlaştırır.
+        var taskbar = WindowsTaskbarPolicy.ShouldHide(before.Dock) != WindowsTaskbarPolicy.ShouldHide(after.Dock);
         var tray = before.Dock.ShowTray != after.Dock.ShowTray || taskbar;
         var power = before.Appearance.BatterySaverReduceMotion != after.Appearance.BatterySaverReduceMotion;
 
