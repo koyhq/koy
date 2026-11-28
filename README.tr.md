@@ -109,7 +109,7 @@ Windows görev çubuğunun sıradan bir kopyası değildir; saat, pil ve ağ gö
 - **İkincil Görev Çubukları:** Çoklu ekranda hem ana (`Shell_TrayWnd`) hem de ikincil (`Shell_SecondaryTrayWnd`) Windows görev çubukları senkron yönetilir.
 
 ### 4. Koy Penceresi, Sağ Alt Menü & İlk Kurulum Sihirbazı
-- **880 px Koy Penceresi:** Sekiz modüler ayar sayfası (*Genel, Çentik, Dock, Ekranlar, Görünüm, Kısayollar, Performans, Hakkında*). Pencereyi kapatmak Koy'u sonlandırmaz; yalnızca ayar görünümünü gizler.
+- **880 px Koy Penceresi:** On modüler ayar sayfası (*Genel, Çentik, Dock, Ekranlar, Görünüm, Eklentiler, Kısayollar, Dikte, Performans, Hakkında*; *Gelişmiş* sayfası yalnız geliştirici kipinde görünür). Pencereyi kapatmak Koy'u sonlandırmaz; yalnızca ayar görünümünü gizler.
 - **Acil Durum Görev Çubuğu Kurtarma:** *Dock* ve *Hakkında* sayfalarında Windows görev çubuğunu tek tıkla geri getiren acil durum düğmesi.
 - **Sağ Alt Sistem Menüsü (320 px):** Çentik ve Dock'u anında açıp kapatma, Koy penceresini açma, **1 saat duraklatma** (çentik ve dock durur, görev çubuğu geri gelir; bir saat sonra ya da tekrar basınca devam eder) ve uygulamadan tam çıkış. Çıkış yalnız bu menüde ve Koy penceresindeki "Koy'dan çık" düğmesinde vardır.
 - **Genel Kısayollar:** `RegisterHotKey` ile gerçek kayıt; çentik, raf, dock, Koy menüsü ve oynat/duraklat için varsayılanlar `Ctrl+Alt+N/R/D/K/Space` (Windows'un kendi `Win+harf` kısayollarıyla çakışmaz). Kısayollar sayfasından tuş yakalayarak değiştirilir; Windows'un ayırdığı ya da başka uygulamanın tuttuğu kombinasyonlar kullanıcıya bildirilir.
@@ -121,7 +121,7 @@ Windows görev çubuğunun sıradan bir kopyası değildir; saat, pil ve ağ gö
 Dürüst durum: aşağıdakiler henüz yok ya da doğrulanmadı.
 - **Bellek:** boşta hedefimiz 100–150 MB private (çok ekran ya da açık panellerle 200 MB'a kadar kabul). Son ölçüm (2026-11-06, tek monitör, çentik + dock + tepsi açık) 63,9 MB private; dock/tepsi paketi (gözcü süreç, son kullanılanlar, sabitli sıra, kenardan açma) sonrası yeniden ölçülmedi. Ayrıntılar [`docs/MEMORY.md`](docs/MEMORY.md) içinde.
 - **Dock klasörleri:** 0.2.0 ile geldi, elle sınaması sürüyor.
-- **Windows'un UWP sabitlemeleri** (Spotify, WhatsApp gibi) dock'ta henüz gösterilmiyor.
+- **Windows'un UWP sabitlemeleri** (Spotify, WhatsApp gibi) Store uygulaması sabitleme işiyle (#147) dock'ta gösteriliyor; elle sınama dock doğrulama issue'sunda izleniyor.
 - **Çoklu ekran:** karışık DPI'lı donanımda ve ikincil görev çubuğu AppBar'ında elle denenmedi.
 - **İmzalama:** Sürüm imzalama altyapısı iş akışına ve `scripts/pack.ps1` betiğine eklendi; depo gizli anahtarlarında sertifika veya SignPath tanımlanana kadar genel sürümler imzasız üretilir. Açık işler [GitHub issue'larında](https://github.com/koyhq/koy/issues).
 - **Doğrulanmadı:** hareket (animasyon) akıcılığı, yarı saydam malzemenin gerçek cihazda görünümü, sistem teması değişince canlı güncelleme, uygulama içi kaldırma akışının gerçek bir kurulumda uçtan uca denenmesi.

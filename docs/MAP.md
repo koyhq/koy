@@ -281,3 +281,12 @@ Tasarım ve dosya biçimleri: `docs/EXTENSION-STORE.md`. Yalnız veri paketi (te
 | Depo | `store/palettes/`, `scripts/make-theme.py` | Yeni tema: 20 temel renkten bütün anahtarları türetir, karşıtlığı denetler, kart önizlemesini çizer (`store/README.md`) |
 
 Unutma: Kurulum uygulama demek değildir. Kaldırmadan önce `RevertOnUninstall` uygulanır. Yeni hata enum değeri eklenirse `Strings*.resx` içine `ExtInstallError<Ad>`, `ExtIndexError<Ad>`, `ExtApplyError<Ad>` anahtarı da eklenir. Sayfa dizini en sona eklendi (Gelişmiş 9, Eklentiler 10); `SettingsPageIndex.PageNameKeys` buna bağlı.
+
+## Sesle yazma (kayıt → yazıya çevirme → yapıştırma)
+Tasarım ve kararlar: `docs/ARASTIRMA-SESLE-YAZMA.md`. Şimdilik yalnız saf Core parçaları var; kayıt, tanıma ve yapıştırma henüz yok (Win+H ile sesli komut ayrı: `Core/Voice/VoiceSessionController.cs`).
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Voice/SpeechGate.cs` | Kayıtta konuşma var mı: kaydın kendi gürültü tabanına göre eşik, mutlak taban, en az sesli süre. Boş kayıt modele gitmez |
+| Core | `src/Core/Voice/HallucinationFilter.cs` | Kısa kayıttan dönen kalıp "uydurma" cümleleri (altyazı kredisi, "izlediğiniz için teşekkürler") atar; yalnız tam eşleşme, tek sözcük listede yok |
+| Core | `src/Core/Voice/RetryLadder.cs` | Geçici hatada bekleme merdiveni (10/30/60/120 sn, en çok 5 deneme) |
+| Test | `tests/Core.Tests/SpeechGateTests.cs`, `HallucinationFilterTests.cs`, `RetryLadderTests.cs` | Yukarıdakilerin testleri |
