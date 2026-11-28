@@ -109,7 +109,7 @@ Not an ordinary copy of the Windows taskbar: it hands the clock, battery and net
 - **Secondary Taskbars:** With multiple displays, both the main (`Shell_TrayWnd`) and secondary (`Shell_SecondaryTrayWnd`) Windows taskbars are managed in sync.
 
 ### 4. Koy Window, Bottom-Right Menu & Setup Wizard
-- **880 px Koy Window:** Eight modular settings pages (*General, Notch, Dock, Displays, Appearance, Shortcuts, Performance, About*). Closing the window does not quit Koy; it only hides the settings view.
+- **880 px Koy Window:** Ten modular settings pages (*General, Notch, Dock, Displays, Appearance, Extensions, Shortcuts, Dictation, Performance, About*; an *Advanced* page appears only in developer mode). Closing the window does not quit Koy; it only hides the settings view.
 - **Emergency Taskbar Recovery:** The *Dock* and *About* pages have an emergency button that restores the Windows taskbar with one click.
 - **Bottom-Right System Menu (320 px):** Toggle the Notch and Dock instantly, open the Koy window, **pause for 1 hour** (the notch and dock stop and the taskbar comes back; resumes after an hour or when pressed again) and quit the app. Quit exists only in this menu and in the "Quit Koy" button in the Koy window.
 - **Global Shortcuts:** Real registration via `RegisterHotKey`; defaults for the notch, shelf, dock, Koy menu and play/pause are `Ctrl+Alt+N/R/D/K/Space` (no conflict with the `Win+letter` shortcuts of Windows). Change them by capturing keys on the Shortcuts page; combinations reserved by Windows or held by another app are reported to the user.
@@ -121,7 +121,7 @@ Not an ordinary copy of the Windows taskbar: it hands the clock, battery and net
 To be honest about the current state, the following do not exist yet or have not been verified.
 - **Memory:** Our idle target is 100–150 MB private (up to 200 MB accepted with multiple displays or open panels). The last measurement (2026-11-06, single monitor, notch + dock + tray enabled) was 63.9 MB private; it has not been measured again since the dock/tray bundle (watchdog process, recents, pinned order, edge opening). Details are in [`docs/MEMORY.md`](docs/MEMORY.md).
 - **Dock folders:** Shipped in 0.2.0; manual testing is ongoing.
-- **UWP pins from Windows** (such as Spotify and WhatsApp) are not shown on the dock yet.
+- **UWP pins from Windows** (such as Spotify and WhatsApp) are shown on the dock since the Store-app pin work (#147); manual testing is tracked in the dock verification issue.
 - **Multi-monitor:** Not manually tested on mixed-DPI hardware or with the secondary taskbar AppBar.
 - **Signing:** Release signing support is wired into the pipeline and `scripts/pack.ps1`; public releases remain unsigned until a certificate or SignPath setup is configured in repository secrets. Open work is tracked in [GitHub issues](https://github.com/koyhq/koy/issues).
 - **Not verified:** Animation smoothness, how the translucent material looks on real devices, live update when the system theme changes, an end-to-end run of the in-app uninstall flow on a real installation.

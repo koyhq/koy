@@ -15,6 +15,7 @@ using Koy.App.Features.Music;
 using Koy.App.Features.Shelf;
 using Koy.App.Features.Status;
 using Koy.App.Features.SystemInfo;
+using Koy.App.Features.Dictation;
 using Koy.App.Features.Notch.OSD;
 using Koy.App.Resources;
 using Koy.Core.Bluetooth;
@@ -125,6 +126,9 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     {
         if (_windows.Count > 0)
             return;
+
+        DictationService.Instance.ShowCard = ShowDictationCard;
+        DictationService.Instance.HideCard = HideDictationCard;
 
         // Platform servisleri başlatılır (paylaşılan tekil servisler)
         _mediaService = services.AcquireMediaService();
@@ -917,6 +921,23 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
         _voiceTypingCts = null;
     }
 
+    /// <summary>Sesle yazma durumu: çentikte kısa bir kart. Çentik açıksa kart gösterilmez; yazma yine de sürer.</summary>
+    private void ShowDictationCard(string title, string subtitle, TimeSpan lifetime)
+    {
+        if (_stopped)
+            return;
+
+        PickStateForShortcut()?.ViewModel.Osd.ShowCard(
+            new NotchCard(NotchCardKind.Notification, title, subtitle, Header: Strings.Get("DictationCardHeader")), lifetime);
+    }
+
+    private void HideDictationCard()
+    {
+        if (PickStateForShortcut()?.ViewModel.Osd is { Type: OsdType.Card, Card.Header: { } header } osd
+            && header == Strings.Get("DictationCardHeader"))
+            osd.Dismiss();
+    }
+
     private NotchWindowState? PickStateForShortcut()
     {
         if (_windowStates.Count == 0)
@@ -1282,6 +1303,8 @@ public sealed class NotchFeature(AppSettings settings, SharedServices services) 
     public void Stop()
     {
         _stopped = true;
+        DictationService.Instance.ShowCard = null;
+        DictationService.Instance.HideCard = null;
         UpdateStatus.Changed -= OnUpdateStatusChanged;
         StopWaitingForCollapse();
         DetachCardOsd();

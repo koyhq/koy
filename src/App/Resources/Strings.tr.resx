@@ -4035,5 +4035,323 @@
   <data name="TabSelected" xml:space="preserve">
     <value>Seçili</value>
   </data>
+  <data name="ShortcutDictate" xml:space="preserve">
+    <value>Sesle yazma</value>
+  </data>
+  <data name="ShortcutDictateCancel" xml:space="preserve">
+    <value>Sesle yazma: iptal</value>
+  </data>
+  <data name="ShortcutDictatePause" xml:space="preserve">
+    <value>Sesle yazma: duraklat / sürdür</value>
+  </data>
+  <data name="DictationCardHeader" xml:space="preserve">
+    <value>Sesle yazma</value>
+  </data>
+  <data name="DictationListening" xml:space="preserve">
+    <value>Dinliyor…</value>
+  </data>
+  <data name="DictationListeningHint" xml:space="preserve">
+    <value>Bitirmek için tekrar {0} tuşlarına bas</value>
+  </data>
+  <data name="DictationShortcutUnset" xml:space="preserve">
+    <value>kısayola</value>
+  </data>
+  <data name="DictationPaused" xml:space="preserve">
+    <value>Duraklatıldı</value>
+  </data>
+  <data name="DictationTranscribing" xml:space="preserve">
+    <value>Yazıya çevriliyor…</value>
+  </data>
+  <data name="DictationRetrying" xml:space="preserve">
+    <value>Hizmet meşgul, yeniden deneniyor…</value>
+  </data>
+  <data name="DictationCleaning" xml:space="preserve">
+    <value>Metin temizleniyor…</value>
+  </data>
+  <data name="DictationPasting" xml:space="preserve">
+    <value>Yazılıyor…</value>
+  </data>
+  <data name="DictationDone" xml:space="preserve">
+    <value>Yazıldı</value>
+  </data>
+  <data name="DictationDoneWarning" xml:space="preserve">
+    <value>Temizlenmeden yazıldı</value>
+  </data>
+  <data name="DictationCleanupFailed" xml:space="preserve">
+    <value>Temizleme olmadı, ham metin yazıldı: {0}</value>
+  </data>
+  <data name="DictationCopiedOnly" xml:space="preserve">
+    <value>Panoya kopyalandı, yazılmadı</value>
+  </data>
+  <data name="DictationTooShort" xml:space="preserve">
+    <value>Kayıt çok kısa</value>
+  </data>
+  <data name="DictationNoSpeech" xml:space="preserve">
+    <value>Konuşma duyulmadı</value>
+  </data>
+  <data name="DictationNoSpeechLevel" xml:space="preserve">
+    <value>Düzey {0} dB</value>
+  </data>
+  <data name="DictationInvented" xml:space="preserve">
+    <value>Uydurma cümle atıldı</value>
+  </data>
+  <data name="DictationFailed" xml:space="preserve">
+    <value>Sesle yazma başarısız</value>
+  </data>
+  <data name="DictSecGeneral" xml:space="preserve">
+    <value>Sesle yazma</value>
+  </data>
+  <data name="DictEnabledTitle" xml:space="preserve">
+    <value>Sesle yazma</value>
+  </data>
+  <data name="DictEnabledDesc" xml:space="preserve">
+    <value>Kısayolla kaydet, yazıya çevir ve imlecin olduğu yere yaz. Ses aşağıdaki hizmete gider (kendi bilgisayarındaki bir sunucu da olabilir).</value>
+  </data>
+  <data name="DictBaseUrlTitle" xml:space="preserve">
+    <value>Sunucu adresi</value>
+  </data>
+  <data name="DictBaseUrlDesc" xml:space="preserve">
+    <value>OpenAI uyumlu bir adres; örneğin https://api.openai.com/v1 ya da bu bilgisayardaki bir sunucu için http://localhost:8080/v1.</value>
+  </data>
+  <data name="DictApiKeyTitle" xml:space="preserve">
+    <value>API anahtarı</value>
+  </data>
+  <data name="DictApiKeyDesc" xml:space="preserve">
+    <value>Bu cihazda şifreli saklanır (Windows DPAPI). Yerel sunucu için boş bırak.</value>
+  </data>
+  <data name="DictModelTitle" xml:space="preserve">
+    <value>Konuşma modeli</value>
+  </data>
+  <data name="DictModelDesc" xml:space="preserve">
+    <value>Sesi yazıya çeviren model.</value>
+  </data>
+  <data name="DictBackupModelTitle" xml:space="preserve">
+    <value>Yedek model</value>
+  </data>
+  <data name="DictBackupModelDesc" xml:space="preserve">
+    <value>Hizmet ana modeli hız sınırına alırsa önce bu denenir. Boş bırakırsan yedek yok.</value>
+  </data>
+  <data name="DictLanguageTitle" xml:space="preserve">
+    <value>Dil</value>
+  </data>
+  <data name="DictLanguageDesc" xml:space="preserve">
+    <value>auto dili kendisi algılar; ya da tr, en gibi bir kod yaz.</value>
+  </data>
+  <data name="DictSecCleanup" xml:space="preserve">
+    <value>Temizleme</value>
+  </data>
+  <data name="DictCleanupTitle" xml:space="preserve">
+    <value>Metni temizle</value>
+  </data>
+  <data name="DictCleanupDesc" xml:space="preserve">
+    <value>Dolgu sözcüklerini ve yarım kalan başlangıçları atar, noktalamayı ve yanlış duyulan adları düzeltir. Bir istek daha harcar.</value>
+  </data>
+  <data name="DictCleanupModelTitle" xml:space="preserve">
+    <value>Temizleme modeli</value>
+  </data>
+  <data name="DictCleanupModelDesc" xml:space="preserve">
+    <value>Küçük bir sohbet modeli yeter.</value>
+  </data>
+  <data name="DictCleanupUrlTitle" xml:space="preserve">
+    <value>Temizleme sunucusu adresi</value>
+  </data>
+  <data name="DictCleanupUrlDesc" xml:space="preserve">
+    <value>Boşsa yukarıdaki adres kullanılır.</value>
+  </data>
+  <data name="DictCleanupPromptTitle" xml:space="preserve">
+    <value>Temizleme yönergesi</value>
+  </data>
+  <data name="DictCleanupPromptDesc" xml:space="preserve">
+    <value>Boşsa algılanan dile göre yerleşik yönerge kullanılır.</value>
+  </data>
+  <data name="DictSecTyping" xml:space="preserve">
+    <value>Yazma</value>
+  </data>
+  <data name="DictAutoPasteTitle" xml:space="preserve">
+    <value>Pencereye yaz</value>
+  </data>
+  <data name="DictAutoPasteDesc" xml:space="preserve">
+    <value>Sonucu Ctrl+V ile yapıştırır. Kapalıysa yalnız panoya kopyalanır.</value>
+  </data>
+  <data name="DictRestoreTitle" xml:space="preserve">
+    <value>Panoyu geri yükle</value>
+  </data>
+  <data name="DictRestoreDesc" xml:space="preserve">
+    <value>Yapıştırdıktan sonra panodaki önceki içeriği (metin, resim ya da dosyalar) geri koyar. Başka biçimler geri getirilemez.</value>
+  </data>
+  <data name="DictCuesTitle" xml:space="preserve">
+    <value>Sesler</value>
+  </data>
+  <data name="DictCuesDesc" xml:space="preserve">
+    <value>Kayıt başlayınca, bitince ya da hata olunca kısa sesler.</value>
+  </data>
+  <data name="DictMaxSecondsTitle" xml:space="preserve">
+    <value>En uzun kayıt (saniye)</value>
+  </data>
+  <data name="DictMaxSecondsDesc" xml:space="preserve">
+    <value>Kayıt bu süre sonunda kendiliğinden biter.</value>
+  </data>
+  <data name="DictHistoryLimitTitle" xml:space="preserve">
+    <value>Geçmiş boyutu</value>
+  </data>
+  <data name="DictHistoryLimitDesc" xml:space="preserve">
+    <value>Kaç yazı tutulsun. 0 geçmişi kapatır.</value>
+  </data>
+  <data name="DictSecSilence" xml:space="preserve">
+    <value>Sessizlik</value>
+  </data>
+  <data name="DictSkipSilentTitle" xml:space="preserve">
+    <value>Sessiz kayıtları atla</value>
+  </data>
+  <data name="DictSkipSilentDesc" xml:space="preserve">
+    <value>Konuşma duyulmazsa hiçbir şey gönderilmez; model bir cümle uyduramaz.</value>
+  </data>
+  <data name="DictHallucinationTitle" xml:space="preserve">
+    <value>Uydurma cümleleri at</value>
+  </data>
+  <data name="DictHallucinationDesc" xml:space="preserve">
+    <value>Modellerin kısa kayıtlar için uydurduğu "izlediğiniz için teşekkürler" gibi kalıp cümleleri atar.</value>
+  </data>
+  <data name="DictSecProfiles" xml:space="preserve">
+    <value>Yazım profilleri</value>
+  </data>
+  <data name="DictProfileByAppTitle" xml:space="preserve">
+    <value>Profili programa göre seç</value>
+  </data>
+  <data name="DictProfileByAppDesc" xml:space="preserve">
+    <value>Kayıt başlarken önde olan programı (ya da web sitesini) listeleyen profil kullanılır.</value>
+  </data>
+  <data name="DictTranslationTitle" xml:space="preserve">
+    <value>Çeviriye izin ver</value>
+  </data>
+  <data name="DictTranslationDesc" xml:space="preserve">
+    <value>Bir dil belirten profiller metni o dile çevirir.</value>
+  </data>
+  <data name="DictProfileOverrideTitle" xml:space="preserve">
+    <value>Hep bunu kullan</value>
+  </data>
+  <data name="DictProfileOverrideDesc" xml:space="preserve">
+    <value>Her şey için tek profil. Otomatik, programa göre seçer.</value>
+  </data>
+  <data name="DictProfileAutomatic" xml:space="preserve">
+    <value>Otomatik</value>
+  </data>
+  <data name="DictDefaultProfile" xml:space="preserve">
+    <value>Varsayılan profil</value>
+  </data>
+  <data name="DictProfileSelect" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="DictProfileAdd" xml:space="preserve">
+    <value>Profil ekle</value>
+  </data>
+  <data name="DictProfileRemove" xml:space="preserve">
+    <value>Profili sil</value>
+  </data>
+  <data name="DictNewProfileName" xml:space="preserve">
+    <value>Yeni profil</value>
+  </data>
+  <data name="DictProfileName" xml:space="preserve">
+    <value>Ad</value>
+  </data>
+  <data name="DictProfilePrograms" xml:space="preserve">
+    <value>Programlar (virgülle, örneğin slack, code)</value>
+  </data>
+  <data name="DictProfileSites" xml:space="preserve">
+    <value>Web siteleri (sekme başlığındaki sözcükler, virgülle)</value>
+  </data>
+  <data name="DictProfileTranslate" xml:space="preserve">
+    <value>Şu dile çevir (örneğin Türkçe)</value>
+  </data>
+  <data name="DictProfileFormality" xml:space="preserve">
+    <value>Üslup</value>
+  </data>
+  <data name="DictProfileSentence" xml:space="preserve">
+    <value>Cümleler</value>
+  </data>
+  <data name="DictProfilePunctuation" xml:space="preserve">
+    <value>Noktalama</value>
+  </data>
+  <data name="DictProfileBrevity" xml:space="preserve">
+    <value>Uzunluk</value>
+  </data>
+  <data name="DictProfileCustom" xml:space="preserve">
+    <value>Kendi yönergen</value>
+  </data>
+  <data name="DictOptAny" xml:space="preserve">
+    <value>Belirtilmedi</value>
+  </data>
+  <data name="DictOptFormal" xml:space="preserve">
+    <value>Resmî</value>
+  </data>
+  <data name="DictOptCasual" xml:space="preserve">
+    <value>Gündelik</value>
+  </data>
+  <data name="DictOptShort" xml:space="preserve">
+    <value>Kısa</value>
+  </data>
+  <data name="DictOptLong" xml:space="preserve">
+    <value>Uzun</value>
+  </data>
+  <data name="DictOptMinimal" xml:space="preserve">
+    <value>Az</value>
+  </data>
+  <data name="DictOptFull" xml:space="preserve">
+    <value>Tam</value>
+  </data>
+  <data name="DictOptBrief" xml:space="preserve">
+    <value>Öz</value>
+  </data>
+  <data name="DictOptDetailed" xml:space="preserve">
+    <value>Ayrıntılı</value>
+  </data>
+  <data name="DictSecDictionary" xml:space="preserve">
+    <value>Sözlük</value>
+  </data>
+  <data name="DictLearningTitle" xml:space="preserve">
+    <value>Adları öğren</value>
+  </data>
+  <data name="DictLearningDesc" xml:space="preserve">
+    <value>Yazılarında sık geçen adlar sözlüğe kendiliğinden eklenir.</value>
+  </data>
+  <data name="DictTermPlaceholder" xml:space="preserve">
+    <value>Ad ya da terim</value>
+  </data>
+  <data name="DictHeardPlaceholder" xml:space="preserve">
+    <value>Şöyle duyuluyor (isteğe bağlı)</value>
+  </data>
+  <data name="DictAdd" xml:space="preserve">
+    <value>Ekle</value>
+  </data>
+  <data name="DictRemove" xml:space="preserve">
+    <value>Sil</value>
+  </data>
+  <data name="DictAutoTag" xml:space="preserve">
+    <value>öğrenildi</value>
+  </data>
+  <data name="DictForgetLearned" xml:space="preserve">
+    <value>Öğrenilenleri sil</value>
+  </data>
+  <data name="DictNoTerms" xml:space="preserve">
+    <value>Sözlük boş.</value>
+  </data>
+  <data name="DictSecHistory" xml:space="preserve">
+    <value>Geçmiş</value>
+  </data>
+  <data name="DictNoHistory" xml:space="preserve">
+    <value>Henüz bir şey yok.</value>
+  </data>
+  <data name="DictCopy" xml:space="preserve">
+    <value>Kopyala</value>
+  </data>
+  <data name="DictRetry" xml:space="preserve">
+    <value>Yeniden dene</value>
+  </data>
+  <data name="DictDelete" xml:space="preserve">
+    <value>Sil</value>
+  </data>
+  <data name="DictClearHistory" xml:space="preserve">
+    <value>Geçmişi temizle</value>
+  </data>
 </root>
 

@@ -281,3 +281,26 @@ Tasarım ve dosya biçimleri: `docs/EXTENSION-STORE.md`. Yalnız veri paketi (te
 | Depo | `store/palettes/`, `scripts/make-theme.py` | Yeni tema: 20 temel renkten bütün anahtarları türetir, karşıtlığı denetler, kart önizlemesini çizer (`store/README.md`) |
 
 Unutma: Kurulum uygulama demek değildir. Kaldırmadan önce `RevertOnUninstall` uygulanır. Yeni hata enum değeri eklenirse `Strings*.resx` içine `ExtInstallError<Ad>`, `ExtIndexError<Ad>`, `ExtApplyError<Ad>` anahtarı da eklenir. Sayfa dizini en sona eklendi (Gelişmiş 9, Eklentiler 10); `SettingsPageIndex.PageNameKeys` buna bağlı.
+
+## Sesle yazma (kayıt → yazıya çevirme → temizleme → yapıştırma)
+Tasarım ve kararlar: `docs/ARASTIRMA-SESLE-YAZMA.md`. Varsayılan kapalı (`dictation.json` → `Enabled`); açılana kadar mikrofon, HTTP istemcisi ve hat kurulmaz (AGENTS #5, #12). Kısayol: `ShortcutAction.Dictate` (varsayılan `Ctrl+Alt+H`, aç/kapa), `DictateCancel`, `DictatePause` (atanmamış). Win+H ile **sesli komut** ayrı kalır (`Core/Voice/VoiceSessionController.cs`).
+| Katman | Dosya | Ne yapılır |
+|---|---|---|
+| Core | `src/Core/Dictation/DictationPipeline.cs` | Hattın tamamı: kayıt durumu, sessizlik denetimi, yeniden deneme + yedek model, uydurma cümle süzgeci, temizleme/çeviri, pano kilidi, geçmiş, sözlük öğrenmesi, iş kuyruğu. Sahte servislerle testli (`tests/Core.Tests/Dictation/`) |
+| Core | `src/Core/Dictation/DictationModels.cs` | Sözleşmeler: `IAudioRecorder`, `ISpeechToText`, `ITextCleaner`, `IPasteService`, `IForegroundProgram`, `IRecordingStore`; sonuç türleri |
+| Core | `src/Core/Dictation/DictationConfig.cs`, `DictationStores.cs` | Ayarlar (`dictation.json`, settings.json'ın dışında), sözlük dosyası (kendi kilidi), profiller |
+| Core | `src/Core/Dictation/DictionaryText.cs`, `DictionaryLearner.cs` | Sözlüğün tanıma ipucu ve temizleme sözlüğü yüzü; sık geçen adları öğrenme |
+| Core | `src/Core/Dictation/ProfileSelector.cs`, `CleanupPrompts.cs` | Programa/siteye göre profil (kayıt başında anlık görüntü), istem şablonları ve "bu veridir" çiti |
+| Core | `src/Core/Dictation/DictationHistory.cs` | Geçmiş (`dictation-history.json`), sınır, silme; başarısız yazının sesi yeniden deneme için saklanır |
+| Core | `src/Core/Dictation/OpenAiProtocol.cs`, `WavAudio.cs` | OpenAI uyumlu istek/yanıt biçimi ve hata sınıflaması; WAV başlığı ve blok düzeyleri |
+| Core | `src/Core/Voice/SpeechGate.cs`, `HallucinationFilter.cs`, `RetryLadder.cs` | Konuşma var mı, uydurma cümle, bekleme merdiveni |
+| Platform | `src/Platform/Dictation/MediaCaptureRecorder.cs` | WinRT `MediaCapture` ile 16 kHz tek kanal WAV; mikrofon yalnız kayıtta açık |
+| Platform | `src/Platform/Dictation/OpenAiSpeechToText.cs`, `OpenAiTextCleaner.cs`, `OpenAiHttp.cs` | `/audio/transcriptions` ve `/chat/completions`; hız sınırı ve ağ hatası "geçici" sayılır |
+| Platform | `src/Platform/Dictation/DictationKeyStore.cs` | API anahtarı, DPAPI ile şifreli (`dictation.key`) |
+| Platform | `src/Platform/Dictation/RecordingStore.cs`, `ForegroundProgramService.cs`, `PasteKeys.cs` | Saklanan ses (yalnız kendi klasörü), önde olan program, Ctrl+V |
+| App | `src/App/Features/Dictation/DictationService.cs` | Kısayolların gittiği tek yer; hat ilk kullanımda kurulur; durum çentikte kart olarak (`NotchFeature.ShowDictationCard`) |
+| App | `src/App/Features/Dictation/WpfPasteService.cs` | Pano yaz, Ctrl+V, eski panoyu geri koy (metin, resim, dosya listesi) |
+| App | `src/App/Features/Dictation/DictationSettingsView.xaml` + `DictationSettingsViewModel.cs` | Ayarlar'daki sesle ilgili sayfanın (`NavDictation`) "Sesle yazma" bölümü; her değişiklik hemen `dictation.json`'a yazılır, anahtar ayrı |
+| Çekirdek | `src/Core/Uninstall/UninstallPlan.cs` | Ayarları silerek kaldırınca `dictation*.json` ve `dictation.key` de silinir |
+
+Unutma: Yeni kullanıcı metni iki resx'e (`Dict*`, `Dictation*` anahtarları). Yerel sunucu Koy tarafından **başlatılmaz**, yalnız adresine bağlanılır (AGENTS #4). Çentik kapalıysa durum kartı yoktur; Windows'un mikrofon göstergesi yine yanar.

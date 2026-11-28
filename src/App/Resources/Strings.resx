@@ -4035,5 +4035,323 @@
   <data name="TabSelected" xml:space="preserve">
     <value>Selected</value>
   </data>
+  <data name="ShortcutDictate" xml:space="preserve">
+    <value>Voice typing</value>
+  </data>
+  <data name="ShortcutDictateCancel" xml:space="preserve">
+    <value>Voice typing: cancel</value>
+  </data>
+  <data name="ShortcutDictatePause" xml:space="preserve">
+    <value>Voice typing: pause or resume</value>
+  </data>
+  <data name="DictationCardHeader" xml:space="preserve">
+    <value>Voice typing</value>
+  </data>
+  <data name="DictationListening" xml:space="preserve">
+    <value>Listening…</value>
+  </data>
+  <data name="DictationListeningHint" xml:space="preserve">
+    <value>Press {0} again to finish</value>
+  </data>
+  <data name="DictationShortcutUnset" xml:space="preserve">
+    <value>the shortcut</value>
+  </data>
+  <data name="DictationPaused" xml:space="preserve">
+    <value>Paused</value>
+  </data>
+  <data name="DictationTranscribing" xml:space="preserve">
+    <value>Turning speech into text…</value>
+  </data>
+  <data name="DictationRetrying" xml:space="preserve">
+    <value>Service is busy, trying again…</value>
+  </data>
+  <data name="DictationCleaning" xml:space="preserve">
+    <value>Cleaning up the text…</value>
+  </data>
+  <data name="DictationPasting" xml:space="preserve">
+    <value>Typing…</value>
+  </data>
+  <data name="DictationDone" xml:space="preserve">
+    <value>Typed</value>
+  </data>
+  <data name="DictationDoneWarning" xml:space="preserve">
+    <value>Typed without cleanup</value>
+  </data>
+  <data name="DictationCleanupFailed" xml:space="preserve">
+    <value>Cleanup failed, raw text used: {0}</value>
+  </data>
+  <data name="DictationCopiedOnly" xml:space="preserve">
+    <value>Copied, not typed</value>
+  </data>
+  <data name="DictationTooShort" xml:space="preserve">
+    <value>Recording too short</value>
+  </data>
+  <data name="DictationNoSpeech" xml:space="preserve">
+    <value>No speech heard</value>
+  </data>
+  <data name="DictationNoSpeechLevel" xml:space="preserve">
+    <value>Level {0} dB</value>
+  </data>
+  <data name="DictationInvented" xml:space="preserve">
+    <value>Dropped an invented phrase</value>
+  </data>
+  <data name="DictationFailed" xml:space="preserve">
+    <value>Voice typing failed</value>
+  </data>
+  <data name="DictSecGeneral" xml:space="preserve">
+    <value>Voice typing</value>
+  </data>
+  <data name="DictEnabledTitle" xml:space="preserve">
+    <value>Voice typing</value>
+  </data>
+  <data name="DictEnabledDesc" xml:space="preserve">
+    <value>Record with a shortcut, turn it into text and type it where the cursor is. Audio goes to the service below (it can be a server on your own computer).</value>
+  </data>
+  <data name="DictBaseUrlTitle" xml:space="preserve">
+    <value>Server address</value>
+  </data>
+  <data name="DictBaseUrlDesc" xml:space="preserve">
+    <value>An OpenAI-compatible address, for example https://api.openai.com/v1, or http://localhost:8080/v1 for a server on this computer.</value>
+  </data>
+  <data name="DictApiKeyTitle" xml:space="preserve">
+    <value>API key</value>
+  </data>
+  <data name="DictApiKeyDesc" xml:space="preserve">
+    <value>Stored encrypted on this device (Windows DPAPI). Leave empty for a local server.</value>
+  </data>
+  <data name="DictModelTitle" xml:space="preserve">
+    <value>Speech model</value>
+  </data>
+  <data name="DictModelDesc" xml:space="preserve">
+    <value>The model that turns speech into text.</value>
+  </data>
+  <data name="DictBackupModelTitle" xml:space="preserve">
+    <value>Backup model</value>
+  </data>
+  <data name="DictBackupModelDesc" xml:space="preserve">
+    <value>Tried first when the service rate-limits the main model. Empty means none.</value>
+  </data>
+  <data name="DictLanguageTitle" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="DictLanguageDesc" xml:space="preserve">
+    <value>auto detects the language, or enter a code such as tr or en.</value>
+  </data>
+  <data name="DictSecCleanup" xml:space="preserve">
+    <value>Clean-up</value>
+  </data>
+  <data name="DictCleanupTitle" xml:space="preserve">
+    <value>Clean up the text</value>
+  </data>
+  <data name="DictCleanupDesc" xml:space="preserve">
+    <value>Removes filler words and false starts, fixes punctuation and misheard names. Costs one more request.</value>
+  </data>
+  <data name="DictCleanupModelTitle" xml:space="preserve">
+    <value>Clean-up model</value>
+  </data>
+  <data name="DictCleanupModelDesc" xml:space="preserve">
+    <value>A small chat model is enough.</value>
+  </data>
+  <data name="DictCleanupUrlTitle" xml:space="preserve">
+    <value>Clean-up server address</value>
+  </data>
+  <data name="DictCleanupUrlDesc" xml:space="preserve">
+    <value>Empty means the same address as above.</value>
+  </data>
+  <data name="DictCleanupPromptTitle" xml:space="preserve">
+    <value>Clean-up instruction</value>
+  </data>
+  <data name="DictCleanupPromptDesc" xml:space="preserve">
+    <value>Empty uses the built-in instruction for the detected language.</value>
+  </data>
+  <data name="DictSecTyping" xml:space="preserve">
+    <value>Typing</value>
+  </data>
+  <data name="DictAutoPasteTitle" xml:space="preserve">
+    <value>Type into the window</value>
+  </data>
+  <data name="DictAutoPasteDesc" xml:space="preserve">
+    <value>Pastes the result with Ctrl+V. When off, it is only copied to the clipboard.</value>
+  </data>
+  <data name="DictRestoreTitle" xml:space="preserve">
+    <value>Restore the clipboard</value>
+  </data>
+  <data name="DictRestoreDesc" xml:space="preserve">
+    <value>Puts back what was on the clipboard (text, an image or files) after pasting. Other formats cannot be restored.</value>
+  </data>
+  <data name="DictCuesTitle" xml:space="preserve">
+    <value>Sounds</value>
+  </data>
+  <data name="DictCuesDesc" xml:space="preserve">
+    <value>Short sounds when recording starts, ends or fails.</value>
+  </data>
+  <data name="DictMaxSecondsTitle" xml:space="preserve">
+    <value>Longest recording (seconds)</value>
+  </data>
+  <data name="DictMaxSecondsDesc" xml:space="preserve">
+    <value>Recording stops by itself after this long.</value>
+  </data>
+  <data name="DictHistoryLimitTitle" xml:space="preserve">
+    <value>History size</value>
+  </data>
+  <data name="DictHistoryLimitDesc" xml:space="preserve">
+    <value>How many dictations to keep. 0 turns history off.</value>
+  </data>
+  <data name="DictSecSilence" xml:space="preserve">
+    <value>Silence</value>
+  </data>
+  <data name="DictSkipSilentTitle" xml:space="preserve">
+    <value>Skip silent recordings</value>
+  </data>
+  <data name="DictSkipSilentDesc" xml:space="preserve">
+    <value>Nothing is sent when no speech is heard, so the model cannot invent a sentence.</value>
+  </data>
+  <data name="DictHallucinationTitle" xml:space="preserve">
+    <value>Drop invented phrases</value>
+  </data>
+  <data name="DictHallucinationDesc" xml:space="preserve">
+    <value>Throws away stock phrases such as "thanks for watching" that models make up for short clips.</value>
+  </data>
+  <data name="DictSecProfiles" xml:space="preserve">
+    <value>Writing profiles</value>
+  </data>
+  <data name="DictProfileByAppTitle" xml:space="preserve">
+    <value>Pick the profile by program</value>
+  </data>
+  <data name="DictProfileByAppDesc" xml:space="preserve">
+    <value>Uses the profile that lists the program (or website) in front when recording starts.</value>
+  </data>
+  <data name="DictTranslationTitle" xml:space="preserve">
+    <value>Allow translation</value>
+  </data>
+  <data name="DictTranslationDesc" xml:space="preserve">
+    <value>Profiles that name a language translate the text into it.</value>
+  </data>
+  <data name="DictProfileOverrideTitle" xml:space="preserve">
+    <value>Always use</value>
+  </data>
+  <data name="DictProfileOverrideDesc" xml:space="preserve">
+    <value>One profile for everything. Automatic picks by program.</value>
+  </data>
+  <data name="DictProfileAutomatic" xml:space="preserve">
+    <value>Automatic</value>
+  </data>
+  <data name="DictDefaultProfile" xml:space="preserve">
+    <value>Default profile</value>
+  </data>
+  <data name="DictProfileSelect" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="DictProfileAdd" xml:space="preserve">
+    <value>Add profile</value>
+  </data>
+  <data name="DictProfileRemove" xml:space="preserve">
+    <value>Remove profile</value>
+  </data>
+  <data name="DictNewProfileName" xml:space="preserve">
+    <value>New profile</value>
+  </data>
+  <data name="DictProfileName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="DictProfilePrograms" xml:space="preserve">
+    <value>Programs (comma separated, for example slack, code)</value>
+  </data>
+  <data name="DictProfileSites" xml:space="preserve">
+    <value>Websites (words in the tab title, comma separated)</value>
+  </data>
+  <data name="DictProfileTranslate" xml:space="preserve">
+    <value>Translate into (for example English)</value>
+  </data>
+  <data name="DictProfileFormality" xml:space="preserve">
+    <value>Tone</value>
+  </data>
+  <data name="DictProfileSentence" xml:space="preserve">
+    <value>Sentences</value>
+  </data>
+  <data name="DictProfilePunctuation" xml:space="preserve">
+    <value>Punctuation</value>
+  </data>
+  <data name="DictProfileBrevity" xml:space="preserve">
+    <value>Length</value>
+  </data>
+  <data name="DictProfileCustom" xml:space="preserve">
+    <value>Your own instruction</value>
+  </data>
+  <data name="DictOptAny" xml:space="preserve">
+    <value>Not set</value>
+  </data>
+  <data name="DictOptFormal" xml:space="preserve">
+    <value>Formal</value>
+  </data>
+  <data name="DictOptCasual" xml:space="preserve">
+    <value>Casual</value>
+  </data>
+  <data name="DictOptShort" xml:space="preserve">
+    <value>Short</value>
+  </data>
+  <data name="DictOptLong" xml:space="preserve">
+    <value>Long</value>
+  </data>
+  <data name="DictOptMinimal" xml:space="preserve">
+    <value>Minimal</value>
+  </data>
+  <data name="DictOptFull" xml:space="preserve">
+    <value>Full</value>
+  </data>
+  <data name="DictOptBrief" xml:space="preserve">
+    <value>Brief</value>
+  </data>
+  <data name="DictOptDetailed" xml:space="preserve">
+    <value>Detailed</value>
+  </data>
+  <data name="DictSecDictionary" xml:space="preserve">
+    <value>Dictionary</value>
+  </data>
+  <data name="DictLearningTitle" xml:space="preserve">
+    <value>Learn names</value>
+  </data>
+  <data name="DictLearningDesc" xml:space="preserve">
+    <value>Names that keep appearing in your dictations are added to the dictionary by themselves.</value>
+  </data>
+  <data name="DictTermPlaceholder" xml:space="preserve">
+    <value>Name or term</value>
+  </data>
+  <data name="DictHeardPlaceholder" xml:space="preserve">
+    <value>Misheard as (optional)</value>
+  </data>
+  <data name="DictAdd" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="DictRemove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="DictAutoTag" xml:space="preserve">
+    <value>learned</value>
+  </data>
+  <data name="DictForgetLearned" xml:space="preserve">
+    <value>Forget learned names</value>
+  </data>
+  <data name="DictNoTerms" xml:space="preserve">
+    <value>The dictionary is empty.</value>
+  </data>
+  <data name="DictSecHistory" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="DictNoHistory" xml:space="preserve">
+    <value>Nothing yet.</value>
+  </data>
+  <data name="DictCopy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="DictRetry" xml:space="preserve">
+    <value>Try again</value>
+  </data>
+  <data name="DictDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DictClearHistory" xml:space="preserve">
+    <value>Clear history</value>
+  </data>
 </root>
 
